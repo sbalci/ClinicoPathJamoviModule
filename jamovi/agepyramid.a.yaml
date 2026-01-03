@@ -19,7 +19,7 @@ options:
       title: Age
       type: Variable
       suggested: [ continuous ]
-      permitted: [ numeric, factor, id ]
+      permitted: [ numeric ]
       description:
           R: >
             a string naming the variable from `data` that contains the
@@ -65,6 +65,27 @@ options:
             a string naming the level from `gender` that contains the
             level male
 
+    - name: age_groups
+      title: Age Group Presets
+      type: List
+      options:
+        - name: custom
+          title: Custom (use bin width)
+        - name: pediatric
+          title: Pediatric (<18)
+        - name: reproductive
+          title: Reproductive (15-50)
+        - name: geriatric
+          title: Geriatric (65+)
+        - name: lifecourse
+          title: Life Course
+      default: custom
+      description:
+          R: >
+            Predefined age group categories. Choose 'custom' to use bin_width, or select a preset.
+          jamovi: >
+            Predefined age group categories.
+
     - name: bin_width
       title: Bin Width (Years)
       type: Number
@@ -74,6 +95,17 @@ options:
             The width of the age bins in years. Adjust this to change the granularity of the age groups.
           jamovi: >
             The width of the age bins in years.
+
+    - name: custom_breaks
+      title: Custom Age Breaks
+      type: String
+      default: ""
+      description:
+          R: >
+            Comma-separated age break points (e.g., "0,18,25,50,65,100").
+            Only used when age_groups is set to 'custom'. Leave empty to use bin_width.
+          jamovi: >
+            Comma-separated age break points (e.g., 0,18,25,50,65,100).
 
     - name: plot_title
       title: Plot Title
@@ -85,77 +117,45 @@ options:
           jamovi: >
             The title displayed on the age pyramid plot.
 
-    - name: color1
-      title: First Color
-      type: String
-      default: "#1F77B4"
-      description:
-          R: >
-            First color for the pyramid chart bars.
-          jamovi: >
-            First color for the pyramid chart bars.
-
-    - name: color2
-      title: Second Color
-      type: String
-      default: "#FF7F0E"
-      description:
-          R: >
-            Second color for the pyramid chart bars.
-          jamovi: >
-            Second color for the pyramid chart bars.
-
     - name: color_palette
       title: Color Palette
       type: List
       options:
-        - title: Standard (Gender Traditional)
-          name: standard
-        - title: Accessible (Colorblind Friendly)
-          name: accessible
-        - title: Custom (User Defined)
-          name: custom
+        - name: standard
+          title: Standard (Pink/Blue)
+        - name: colorblind
+          title: Colorblind-Friendly
+        - name: grayscale
+          title: Grayscale
+        - name: custom
+          title: Custom Colors
       default: standard
       description:
           R: >
-            Choose color palette type. Standard uses traditional gender colors, Accessible is colorblind-friendly, Custom allows user-defined colors.
+            Color palette for gender visualization. Choose 'custom' to specify your own colors.
           jamovi: >
-            Choose the color scheme for the age pyramid.
+            Color palette for gender visualization.
 
-    - name: age_groups
-      title: Age Group Preset
-      type: List
-      options:
-        - title: Custom Bins
-          name: custom
-        - title: Pediatric (0-18)
-          name: pediatric
-        - title: Adult Reproductive (15-50)
-          name: reproductive
-        - title: Geriatric (65+)
-          name: geriatric
-        - title: Life Course (All Ages)
-          name: lifecourse
-      default: custom
+    - name: female_color
+      title: Female Color
+      type: String
+      default: "#E91E63"
       description:
           R: >
-            Preset age groupings for common clinical contexts. Custom uses bin_width setting.
+            Custom color for female bars (hex code). Only used when color_palette is 'custom'.
           jamovi: >
-            Choose preset age groupings for clinical research.
+            Custom color for female bars (hex code).
 
-    - name: plot_engine
-      title: Plot Engine
-      type: List
-      options:
-        - title: ggplot2 (manual construction)
-          name: ggplot2
-        - title: ggcharts (pyramid_chart)
-          name: ggcharts
-      default: ggcharts
+    - name: male_color
+      title: Male Color
+      type: String
+      default: "#2196F3"
       description:
           R: >
-            Choose the plotting engine. ggcharts provides better pyramid styling, ggplot2 offers more customization.
+            Custom color for male bars (hex code). Only used when color_palette is 'custom'.
           jamovi: >
-            Choose the plotting engine for creating the age pyramid.
+            Custom color for male bars (hex code).
+
+
 
 ...

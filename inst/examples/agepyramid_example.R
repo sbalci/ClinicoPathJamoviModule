@@ -64,8 +64,7 @@ agepyramid(
   gender = "gender",
   female = "Female",
   male = "Male",
-  plot_title = "Cancer Patient Age Distribution",
-  color_palette = "accessible"  # Colorblind-friendly
+  plot_title = "Cancer Patient Age Distribution"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -97,8 +96,7 @@ agepyramid(
   female = "Female",
   male = "Male",
   age_groups = "geriatric",
-  plot_title = "Geriatric Patient Age Distribution",
-  bin_width = 5
+  plot_title = "Geriatric Patient Age Distribution"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -118,65 +116,7 @@ agepyramid(
 )
 
 # ═══════════════════════════════════════════════════════════
-# Example 7: Custom Colors
-# ═══════════════════════════════════════════════════════════
-
-# Use custom colors for gender
-agepyramid(
-  data = agepyramid_test,
-  age = "age",
-  gender = "gender",
-  female = "Female",
-  male = "Male",
-  color_palette = "custom",
-  color1 = "#E69F00",  # Orange for first gender
-  color2 = "#56B4E9",  # Blue for second gender
-  plot_title = "Custom Color Age Pyramid"
-)
-
-# ═══════════════════════════════════════════════════════════
-# Example 8: Different Plot Engines
-# ═══════════════════════════════════════════════════════════
-
-# Using ggcharts (default, better pyramid styling)
-agepyramid(
-  data = agepyramid_test,
-  age = "age",
-  gender = "gender",
-  female = "Female",
-  male = "Male",
-  plot_engine = "ggcharts",
-  plot_title = "Age Pyramid (ggcharts)"
-)
-
-# Using ggplot2 (more customization options)
-agepyramid(
-  data = agepyramid_test,
-  age = "age",
-  gender = "gender",
-  female = "Female",
-  male = "Male",
-  plot_engine = "ggplot2",
-  plot_title = "Age Pyramid (ggplot2)"
-)
-
-# ═══════════════════════════════════════════════════════════
-# Example 9: Colorblind-Friendly Palette
-# ═══════════════════════════════════════════════════════════
-
-# Use accessible color palette for colorblind viewers
-agepyramid(
-  data = agepyramid_test,
-  age = "age",
-  gender = "gender",
-  female = "Female",
-  male = "Male",
-  color_palette = "accessible",
-  plot_title = "Colorblind-Friendly Age Pyramid"
-)
-
-# ═══════════════════════════════════════════════════════════
-# Example 10: Unbalanced Gender Distribution
+# Example 7: Unbalanced Gender Distribution
 # ═══════════════════════════════════════════════════════════
 
 # Example: Breast cancer cohort (predominantly female)
@@ -188,12 +128,11 @@ agepyramid(
   gender = "gender",
   female = "Female",
   male = "Male",
-  plot_title = "Breast Cancer Patient Age Distribution",
-  color_palette = "standard"
+  plot_title = "Breast Cancer Patient Age Distribution"
 )
 
 # ═══════════════════════════════════════════════════════════
-# Example 11: Life Course Analysis
+# Example 8: Life Course Analysis
 # ═══════════════════════════════════════════════════════════
 
 # Use life course preset for comprehensive age analysis
@@ -208,7 +147,7 @@ agepyramid(
 )
 
 # ═══════════════════════════════════════════════════════════
-# Example 12: Creating Your Own Data
+# Example 9: Creating Your Own Data
 # ═══════════════════════════════════════════════════════════
 
 # Create sample data
@@ -230,7 +169,71 @@ agepyramid(
 )
 
 # ═══════════════════════════════════════════════════════════
-# Example 13: Complete Customization
+# Example 10: Custom Age Breaks
+# ═══════════════════════════════════════════════════════════
+
+# Define your own age boundaries
+agepyramid(
+  data = agepyramid_test,
+  age = "age",
+  gender = "gender",
+  female = "Female",
+  male = "Male",
+  age_groups = "custom",
+  custom_breaks = "0,18,25,50,65,100",
+  plot_title = "Custom Age Boundaries"
+)
+
+# ═══════════════════════════════════════════════════════════
+# Example 11: Colorblind-Friendly Palette
+# ═══════════════════════════════════════════════════════════
+
+# Use colorblind-friendly colors (orange/blue)
+agepyramid(
+  data = agepyramid_test,
+  age = "age",
+  gender = "gender",
+  female = "Female",
+  male = "Male",
+  color_palette = "colorblind",
+  plot_title = "Colorblind-Friendly Age Pyramid"
+)
+
+# ═══════════════════════════════════════════════════════════
+# Example 12: Grayscale for Print Publications
+# ═══════════════════════════════════════════════════════════
+
+# Use grayscale palette for print publications
+agepyramid(
+  data = agepyramid_cancer,
+  age = "age",
+  gender = "gender",
+  female = "Female",
+  male = "Male",
+  age_groups = "geriatric",
+  color_palette = "grayscale",
+  plot_title = "Geriatric Population (Grayscale)"
+)
+
+# ═══════════════════════════════════════════════════════════
+# Example 13: Custom Colors
+# ═══════════════════════════════════════════════════════════
+
+# Use custom brand colors
+agepyramid(
+  data = agepyramid_test,
+  age = "age",
+  gender = "gender",
+  female = "Female",
+  male = "Male",
+  color_palette = "custom",
+  female_color = "#9C27B0",  # Purple
+  male_color = "#4CAF50",    # Green
+  plot_title = "Custom Brand Colors"
+)
+
+# ═══════════════════════════════════════════════════════════
+# Example 14: Complete Customization
 # ═══════════════════════════════════════════════════════════
 
 # Use all customization options together
@@ -240,13 +243,12 @@ agepyramid(
   gender = "gender",
   female = "Female",
   male = "Male",
-  bin_width = 5,
-  plot_title = "Comprehensive Age Analysis",
-  color_palette = "custom",
-  color1 = "#D55E00",  # Vermillion
-  color2 = "#0072B2",  # Blue
   age_groups = "custom",
-  plot_engine = "ggcharts"
+  custom_breaks = "0,55,65,75,85,100",
+  color_palette = "custom",
+  female_color = "#D55E00",  # Vermillion
+  male_color = "#0072B2",    # Blue
+  plot_title = "Comprehensive Custom Age Analysis"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -279,22 +281,48 @@ agepyramid(
 # Tips for Effective Age Pyramids
 # ═══════════════════════════════════════════════════════════
 
-# Choosing bin width:
-# - Small populations: 5-10 years
-# - Large populations: 1-5 years
-# - Pediatric: 1-3 years
-# - Geriatric: 5-10 years
-
-# Choosing colors:
-# - Standard: Traditional gender colors (familiar to audience)
-# - Accessible: Colorblind-friendly (better for publications)
-# - Custom: Match institutional branding or publication theme
-
 # Age group presets:
-# - Custom: Maximum flexibility with bin_width
-# - Pediatric: Optimized for ages 0-18
-# - Reproductive: Focus on ages 15-50
-# - Geriatric: Optimized for ages 65+
-# - Life Course: Comprehensive all-age analysis
+# - Custom: Maximum flexibility with bin_width (default: 5 years)
+#   * Small populations: use 5-10 year bins
+#   * Large populations: use 1-5 year bins
+# - Pediatric: Optimized for ages 0-18 with developmental milestones
+#   * Breaks: 0, 1, 2, 5, 10, 15, 18, Inf
+# - Reproductive: Focus on reproductive ages 15-50 with 5-year intervals
+#   * Breaks: 0, 15, 20, 25, 30, 35, 40, 45, 50, Inf
+# - Geriatric: Optimized for ages 65+ with 5-year intervals
+#   * Breaks: 0, 65, 70, 75, 80, 85, 90, 95, Inf
+# - Life Course: Comprehensive all-age analysis with key life stages
+#   * Breaks: 0, 5, 15, 25, 45, 65, 75, 85, Inf
+
+# Custom age breaks:
+# - Define exact boundaries: "0,18,25,50,65,100"
+# - Automatically adds Inf at the end
+# - Useful for specific clinical classifications
+# - Falls back to bin_width if parsing fails
+
+# Color palettes:
+# - Standard: Traditional pink (#E91E63) and blue (#2196F3)
+#   * Familiar to most audiences
+# - Colorblind-friendly: Orange (#E69F00) and blue (#0072B2)
+#   * Recommended for publications and presentations
+#   * Accessible to ~8% of males with color vision deficiency
+# - Grayscale: Dark (#666666) and light (#CCCCCC) gray
+#   * Perfect for print publications
+#   * Professional appearance in black and white
+# - Custom: Specify your own hex colors
+#   * Match institutional branding
+#   * Create unique visual identity
+
+# Gender level selection:
+# - Female and Male level selectors allow flexible data structures
+# - Smart defaults: automatically uses first two levels if not specified
+# - Single-gender cohorts: set only Female or Male level
+# - The analysis will automatically detect and handle single-gender data
+
+# Plot customization:
+# - Use descriptive plot titles to communicate the population being analyzed
+# - Age groups are displayed with readable labels (e.g., "1-5", "6-10", "86+")
+# - Tables include both counts (n) and percentages (%) for each age-gender group
+# - Colors update instantly without recomputing data
 
 # ═══════════════════════════════════════════════════════════

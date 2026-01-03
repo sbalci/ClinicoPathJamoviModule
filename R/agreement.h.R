@@ -10,6 +10,12 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             baConfidenceLevel = 0.95,
             proportionalBias = FALSE,
             blandAltmanPlot = FALSE,
+            agreementHeatmap = FALSE,
+            heatmapColorScheme = "bluered",
+            heatmapShowPercentages = TRUE,
+            heatmapShowCounts = TRUE,
+            heatmapAnnotationSize = 3.5,
+            showAgreementHeatmapGuide = FALSE,
             sft = FALSE,
             wght = "unweighted",
             exct = FALSE,
@@ -21,6 +27,14 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             gwetWeights = "unweighted",
             icc = FALSE,
             iccType = "icc21",
+            meanPearson = FALSE,
+            showMeanPearsonGuide = FALSE,
+            linCCC = FALSE,
+            showLinCCCGuide = FALSE,
+            tdi = FALSE,
+            tdiCoverage = 90,
+            tdiLimit = 10,
+            showTDIGuide = FALSE,
             iota = FALSE,
             iotaStandardize = TRUE,
             finn = FALSE,
@@ -28,7 +42,18 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             finnModel = "oneway",
             lightKappa = FALSE,
             kendallW = FALSE,
+            robinsonA = FALSE,
+            showRobinsonAGuide = FALSE,
+            meanSpearman = FALSE,
+            showMeanSpearmanGuide = FALSE,
             raterBias = FALSE,
+            bhapkar = FALSE,
+            stuartMaxwell = FALSE,
+            maxwellRE = FALSE,
+            showMaxwellREGuide = FALSE,
+            interIntraRater = FALSE,
+            interIntraSeparator = "_",
+            showInterIntraRaterGuide = FALSE,
             pairwiseKappa = FALSE,
             referenceRater = NULL,
             rankRaters = FALSE,
@@ -40,6 +65,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             shrinkageEstimates = FALSE,
             testClusterHomogeneity = TRUE,
             clusterRankings = FALSE,
+            specificAgreement = FALSE,
+            specificPositiveCategory = "",
+            specificAllCategories = TRUE,
+            specificConfidenceIntervals = TRUE,
+            showSpecificAgreementGuide = FALSE,
             showSummary = FALSE,
             showAbout = FALSE,
             consensusName = "consensus_rating",
@@ -76,6 +106,37 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..blandAltmanPlot <- jmvcore::OptionBool$new(
                 "blandAltmanPlot",
                 blandAltmanPlot,
+                default=FALSE)
+            private$..agreementHeatmap <- jmvcore::OptionBool$new(
+                "agreementHeatmap",
+                agreementHeatmap,
+                default=FALSE)
+            private$..heatmapColorScheme <- jmvcore::OptionList$new(
+                "heatmapColorScheme",
+                heatmapColorScheme,
+                options=list(
+                    "bluered",
+                    "traffic",
+                    "viridis",
+                    "grayscale"),
+                default="bluered")
+            private$..heatmapShowPercentages <- jmvcore::OptionBool$new(
+                "heatmapShowPercentages",
+                heatmapShowPercentages,
+                default=TRUE)
+            private$..heatmapShowCounts <- jmvcore::OptionBool$new(
+                "heatmapShowCounts",
+                heatmapShowCounts,
+                default=TRUE)
+            private$..heatmapAnnotationSize <- jmvcore::OptionNumber$new(
+                "heatmapAnnotationSize",
+                heatmapAnnotationSize,
+                default=3.5,
+                min=2,
+                max=6)
+            private$..showAgreementHeatmapGuide <- jmvcore::OptionBool$new(
+                "showAgreementHeatmapGuide",
+                showAgreementHeatmapGuide,
                 default=FALSE)
             private$..sft <- jmvcore::OptionBool$new(
                 "sft",
@@ -141,6 +202,42 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "icc2k",
                     "icc3k"),
                 default="icc21")
+            private$..meanPearson <- jmvcore::OptionBool$new(
+                "meanPearson",
+                meanPearson,
+                default=FALSE)
+            private$..showMeanPearsonGuide <- jmvcore::OptionBool$new(
+                "showMeanPearsonGuide",
+                showMeanPearsonGuide,
+                default=FALSE)
+            private$..linCCC <- jmvcore::OptionBool$new(
+                "linCCC",
+                linCCC,
+                default=FALSE)
+            private$..showLinCCCGuide <- jmvcore::OptionBool$new(
+                "showLinCCCGuide",
+                showLinCCCGuide,
+                default=FALSE)
+            private$..tdi <- jmvcore::OptionBool$new(
+                "tdi",
+                tdi,
+                default=FALSE)
+            private$..tdiCoverage <- jmvcore::OptionNumber$new(
+                "tdiCoverage",
+                tdiCoverage,
+                default=90,
+                min=50,
+                max=99)
+            private$..tdiLimit <- jmvcore::OptionNumber$new(
+                "tdiLimit",
+                tdiLimit,
+                default=10,
+                min=0.1,
+                max=1000)
+            private$..showTDIGuide <- jmvcore::OptionBool$new(
+                "showTDIGuide",
+                showTDIGuide,
+                default=FALSE)
             private$..iota <- jmvcore::OptionBool$new(
                 "iota",
                 iota,
@@ -174,9 +271,53 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "kendallW",
                 kendallW,
                 default=FALSE)
+            private$..robinsonA <- jmvcore::OptionBool$new(
+                "robinsonA",
+                robinsonA,
+                default=FALSE)
+            private$..showRobinsonAGuide <- jmvcore::OptionBool$new(
+                "showRobinsonAGuide",
+                showRobinsonAGuide,
+                default=FALSE)
+            private$..meanSpearman <- jmvcore::OptionBool$new(
+                "meanSpearman",
+                meanSpearman,
+                default=FALSE)
+            private$..showMeanSpearmanGuide <- jmvcore::OptionBool$new(
+                "showMeanSpearmanGuide",
+                showMeanSpearmanGuide,
+                default=FALSE)
             private$..raterBias <- jmvcore::OptionBool$new(
                 "raterBias",
                 raterBias,
+                default=FALSE)
+            private$..bhapkar <- jmvcore::OptionBool$new(
+                "bhapkar",
+                bhapkar,
+                default=FALSE)
+            private$..stuartMaxwell <- jmvcore::OptionBool$new(
+                "stuartMaxwell",
+                stuartMaxwell,
+                default=FALSE)
+            private$..maxwellRE <- jmvcore::OptionBool$new(
+                "maxwellRE",
+                maxwellRE,
+                default=FALSE)
+            private$..showMaxwellREGuide <- jmvcore::OptionBool$new(
+                "showMaxwellREGuide",
+                showMaxwellREGuide,
+                default=FALSE)
+            private$..interIntraRater <- jmvcore::OptionBool$new(
+                "interIntraRater",
+                interIntraRater,
+                default=FALSE)
+            private$..interIntraSeparator <- jmvcore::OptionString$new(
+                "interIntraSeparator",
+                interIntraSeparator,
+                default="_")
+            private$..showInterIntraRaterGuide <- jmvcore::OptionBool$new(
+                "showInterIntraRaterGuide",
+                showInterIntraRaterGuide,
                 default=FALSE)
             private$..pairwiseKappa <- jmvcore::OptionBool$new(
                 "pairwiseKappa",
@@ -231,6 +372,26 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..clusterRankings <- jmvcore::OptionBool$new(
                 "clusterRankings",
                 clusterRankings,
+                default=FALSE)
+            private$..specificAgreement <- jmvcore::OptionBool$new(
+                "specificAgreement",
+                specificAgreement,
+                default=FALSE)
+            private$..specificPositiveCategory <- jmvcore::OptionString$new(
+                "specificPositiveCategory",
+                specificPositiveCategory,
+                default="")
+            private$..specificAllCategories <- jmvcore::OptionBool$new(
+                "specificAllCategories",
+                specificAllCategories,
+                default=TRUE)
+            private$..specificConfidenceIntervals <- jmvcore::OptionBool$new(
+                "specificConfidenceIntervals",
+                specificConfidenceIntervals,
+                default=TRUE)
+            private$..showSpecificAgreementGuide <- jmvcore::OptionBool$new(
+                "showSpecificAgreementGuide",
+                showSpecificAgreementGuide,
                 default=FALSE)
             private$..showSummary <- jmvcore::OptionBool$new(
                 "showSummary",
@@ -313,6 +474,12 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..baConfidenceLevel)
             self$.addOption(private$..proportionalBias)
             self$.addOption(private$..blandAltmanPlot)
+            self$.addOption(private$..agreementHeatmap)
+            self$.addOption(private$..heatmapColorScheme)
+            self$.addOption(private$..heatmapShowPercentages)
+            self$.addOption(private$..heatmapShowCounts)
+            self$.addOption(private$..heatmapAnnotationSize)
+            self$.addOption(private$..showAgreementHeatmapGuide)
             self$.addOption(private$..sft)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
@@ -324,6 +491,14 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..gwetWeights)
             self$.addOption(private$..icc)
             self$.addOption(private$..iccType)
+            self$.addOption(private$..meanPearson)
+            self$.addOption(private$..showMeanPearsonGuide)
+            self$.addOption(private$..linCCC)
+            self$.addOption(private$..showLinCCCGuide)
+            self$.addOption(private$..tdi)
+            self$.addOption(private$..tdiCoverage)
+            self$.addOption(private$..tdiLimit)
+            self$.addOption(private$..showTDIGuide)
             self$.addOption(private$..iota)
             self$.addOption(private$..iotaStandardize)
             self$.addOption(private$..finn)
@@ -331,7 +506,18 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..finnModel)
             self$.addOption(private$..lightKappa)
             self$.addOption(private$..kendallW)
+            self$.addOption(private$..robinsonA)
+            self$.addOption(private$..showRobinsonAGuide)
+            self$.addOption(private$..meanSpearman)
+            self$.addOption(private$..showMeanSpearmanGuide)
             self$.addOption(private$..raterBias)
+            self$.addOption(private$..bhapkar)
+            self$.addOption(private$..stuartMaxwell)
+            self$.addOption(private$..maxwellRE)
+            self$.addOption(private$..showMaxwellREGuide)
+            self$.addOption(private$..interIntraRater)
+            self$.addOption(private$..interIntraSeparator)
+            self$.addOption(private$..showInterIntraRaterGuide)
             self$.addOption(private$..pairwiseKappa)
             self$.addOption(private$..referenceRater)
             self$.addOption(private$..rankRaters)
@@ -343,6 +529,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..shrinkageEstimates)
             self$.addOption(private$..testClusterHomogeneity)
             self$.addOption(private$..clusterRankings)
+            self$.addOption(private$..specificAgreement)
+            self$.addOption(private$..specificPositiveCategory)
+            self$.addOption(private$..specificAllCategories)
+            self$.addOption(private$..specificConfidenceIntervals)
+            self$.addOption(private$..showSpecificAgreementGuide)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showAbout)
             self$.addOption(private$..consensusName)
@@ -363,6 +554,12 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         baConfidenceLevel = function() private$..baConfidenceLevel$value,
         proportionalBias = function() private$..proportionalBias$value,
         blandAltmanPlot = function() private$..blandAltmanPlot$value,
+        agreementHeatmap = function() private$..agreementHeatmap$value,
+        heatmapColorScheme = function() private$..heatmapColorScheme$value,
+        heatmapShowPercentages = function() private$..heatmapShowPercentages$value,
+        heatmapShowCounts = function() private$..heatmapShowCounts$value,
+        heatmapAnnotationSize = function() private$..heatmapAnnotationSize$value,
+        showAgreementHeatmapGuide = function() private$..showAgreementHeatmapGuide$value,
         sft = function() private$..sft$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
@@ -374,6 +571,14 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         gwetWeights = function() private$..gwetWeights$value,
         icc = function() private$..icc$value,
         iccType = function() private$..iccType$value,
+        meanPearson = function() private$..meanPearson$value,
+        showMeanPearsonGuide = function() private$..showMeanPearsonGuide$value,
+        linCCC = function() private$..linCCC$value,
+        showLinCCCGuide = function() private$..showLinCCCGuide$value,
+        tdi = function() private$..tdi$value,
+        tdiCoverage = function() private$..tdiCoverage$value,
+        tdiLimit = function() private$..tdiLimit$value,
+        showTDIGuide = function() private$..showTDIGuide$value,
         iota = function() private$..iota$value,
         iotaStandardize = function() private$..iotaStandardize$value,
         finn = function() private$..finn$value,
@@ -381,7 +586,18 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         finnModel = function() private$..finnModel$value,
         lightKappa = function() private$..lightKappa$value,
         kendallW = function() private$..kendallW$value,
+        robinsonA = function() private$..robinsonA$value,
+        showRobinsonAGuide = function() private$..showRobinsonAGuide$value,
+        meanSpearman = function() private$..meanSpearman$value,
+        showMeanSpearmanGuide = function() private$..showMeanSpearmanGuide$value,
         raterBias = function() private$..raterBias$value,
+        bhapkar = function() private$..bhapkar$value,
+        stuartMaxwell = function() private$..stuartMaxwell$value,
+        maxwellRE = function() private$..maxwellRE$value,
+        showMaxwellREGuide = function() private$..showMaxwellREGuide$value,
+        interIntraRater = function() private$..interIntraRater$value,
+        interIntraSeparator = function() private$..interIntraSeparator$value,
+        showInterIntraRaterGuide = function() private$..showInterIntraRaterGuide$value,
         pairwiseKappa = function() private$..pairwiseKappa$value,
         referenceRater = function() private$..referenceRater$value,
         rankRaters = function() private$..rankRaters$value,
@@ -393,6 +609,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         shrinkageEstimates = function() private$..shrinkageEstimates$value,
         testClusterHomogeneity = function() private$..testClusterHomogeneity$value,
         clusterRankings = function() private$..clusterRankings$value,
+        specificAgreement = function() private$..specificAgreement$value,
+        specificPositiveCategory = function() private$..specificPositiveCategory$value,
+        specificAllCategories = function() private$..specificAllCategories$value,
+        specificConfidenceIntervals = function() private$..specificConfidenceIntervals$value,
+        showSpecificAgreementGuide = function() private$..showSpecificAgreementGuide$value,
         showSummary = function() private$..showSummary$value,
         showAbout = function() private$..showAbout$value,
         consensusName = function() private$..consensusName$value,
@@ -412,6 +633,12 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..baConfidenceLevel = NA,
         ..proportionalBias = NA,
         ..blandAltmanPlot = NA,
+        ..agreementHeatmap = NA,
+        ..heatmapColorScheme = NA,
+        ..heatmapShowPercentages = NA,
+        ..heatmapShowCounts = NA,
+        ..heatmapAnnotationSize = NA,
+        ..showAgreementHeatmapGuide = NA,
         ..sft = NA,
         ..wght = NA,
         ..exct = NA,
@@ -423,6 +650,14 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..gwetWeights = NA,
         ..icc = NA,
         ..iccType = NA,
+        ..meanPearson = NA,
+        ..showMeanPearsonGuide = NA,
+        ..linCCC = NA,
+        ..showLinCCCGuide = NA,
+        ..tdi = NA,
+        ..tdiCoverage = NA,
+        ..tdiLimit = NA,
+        ..showTDIGuide = NA,
         ..iota = NA,
         ..iotaStandardize = NA,
         ..finn = NA,
@@ -430,7 +665,18 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..finnModel = NA,
         ..lightKappa = NA,
         ..kendallW = NA,
+        ..robinsonA = NA,
+        ..showRobinsonAGuide = NA,
+        ..meanSpearman = NA,
+        ..showMeanSpearmanGuide = NA,
         ..raterBias = NA,
+        ..bhapkar = NA,
+        ..stuartMaxwell = NA,
+        ..maxwellRE = NA,
+        ..showMaxwellREGuide = NA,
+        ..interIntraRater = NA,
+        ..interIntraSeparator = NA,
+        ..showInterIntraRaterGuide = NA,
         ..pairwiseKappa = NA,
         ..referenceRater = NA,
         ..rankRaters = NA,
@@ -442,6 +688,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..shrinkageEstimates = NA,
         ..testClusterHomogeneity = NA,
         ..clusterRankings = NA,
+        ..specificAgreement = NA,
+        ..specificPositiveCategory = NA,
+        ..specificAllCategories = NA,
+        ..specificConfidenceIntervals = NA,
+        ..showSpecificAgreementGuide = NA,
         ..showSummary = NA,
         ..showAbout = NA,
         ..consensusName = NA,
@@ -467,6 +718,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         contingencyTable = function() private$.items[["contingencyTable"]],
         ratingCombinationsTable = function() private$.items[["ratingCombinationsTable"]],
         blandAltman = function() private$.items[["blandAltman"]],
+        agreementHeatmapPlot = function() private$.items[["agreementHeatmapPlot"]],
+        agreementHeatmapExplanation = function() private$.items[["agreementHeatmapExplanation"]],
         blandAltmanStats = function() private$.items[["blandAltmanStats"]],
         krippTable = function() private$.items[["krippTable"]],
         lightKappaTable = function() private$.items[["lightKappaTable"]],
@@ -475,8 +728,16 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         finnExplanation = function() private$.items[["finnExplanation"]],
         kendallWTable = function() private$.items[["kendallWTable"]],
         kendallWExplanation = function() private$.items[["kendallWExplanation"]],
+        robinsonATable = function() private$.items[["robinsonATable"]],
+        robinsonAExplanation = function() private$.items[["robinsonAExplanation"]],
+        meanSpearmanTable = function() private$.items[["meanSpearmanTable"]],
+        meanSpearmanExplanation = function() private$.items[["meanSpearmanExplanation"]],
         raterBiasTable = function() private$.items[["raterBiasTable"]],
         raterBiasExplanation = function() private$.items[["raterBiasExplanation"]],
+        bhapkarTable = function() private$.items[["bhapkarTable"]],
+        bhapkarExplanation = function() private$.items[["bhapkarExplanation"]],
+        stuartMaxwellTable = function() private$.items[["stuartMaxwellTable"]],
+        stuartMaxwellExplanation = function() private$.items[["stuartMaxwellExplanation"]],
         pairwiseKappaTable = function() private$.items[["pairwiseKappaTable"]],
         pairwiseKappaExplanation = function() private$.items[["pairwiseKappaExplanation"]],
         hierarchicalOverallTable = function() private$.items[["hierarchicalOverallTable"]],
@@ -489,9 +750,22 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         gwetExplanation = function() private$.items[["gwetExplanation"]],
         iccTable = function() private$.items[["iccTable"]],
         iccExplanation = function() private$.items[["iccExplanation"]],
+        meanPearsonTable = function() private$.items[["meanPearsonTable"]],
+        meanPearsonExplanation = function() private$.items[["meanPearsonExplanation"]],
+        linCCCTable = function() private$.items[["linCCCTable"]],
+        linCCCExplanation = function() private$.items[["linCCCExplanation"]],
+        tdiTable = function() private$.items[["tdiTable"]],
+        tdiExplanation = function() private$.items[["tdiExplanation"]],
+        maxwellRETable = function() private$.items[["maxwellRETable"]],
+        maxwellREExplanation = function() private$.items[["maxwellREExplanation"]],
+        interIntraRaterIntraTable = function() private$.items[["interIntraRaterIntraTable"]],
+        interIntraRaterInterTable = function() private$.items[["interIntraRaterInterTable"]],
+        interIntraRaterExplanation = function() private$.items[["interIntraRaterExplanation"]],
         iotaTable = function() private$.items[["iotaTable"]],
         iotaExplanation = function() private$.items[["iotaExplanation"]],
         weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
+        specificAgreementTable = function() private$.items[["specificAgreementTable"]],
+        specificAgreementExplanation = function() private$.items[["specificAgreementExplanation"]],
         levelInfoTable = function() private$.items[["levelInfoTable"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
@@ -590,6 +864,25 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "baConfidenceLevel")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="agreementHeatmapPlot",
+                title="Agreement Heatmap (Confusion Matrix)",
+                width=600,
+                height=500,
+                visible="(agreementHeatmap)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "heatmapColorScheme",
+                    "heatmapShowPercentages",
+                    "heatmapShowCounts",
+                    "heatmapAnnotationSize")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="agreementHeatmapExplanation",
+                title="About Agreement Heatmap",
+                visible="((agreementHeatmap || showAgreementHeatmapGuide) && showAbout)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="blandAltmanStats",
@@ -793,6 +1086,95 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(kendallW && showAbout)"))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="robinsonATable",
+                title="Robinson's A (Ordinal Agreement Index) Results",
+                visible="(robinsonA)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="robinsonA", 
+                        `title`="A", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="z", 
+                        `title`="z-value", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="robinsonAExplanation",
+                title="About Robinson's A",
+                visible="((robinsonA || showRobinsonAGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="meanSpearmanTable",
+                title="Mean Spearman Rho (Average Rank Correlation) Results",
+                visible="(meanSpearman)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="meanRho", 
+                        `title`="Mean \u03C1", 
+                        `type`="number"),
+                    list(
+                        `name`="minRho", 
+                        `title`="Min \u03C1", 
+                        `type`="number"),
+                    list(
+                        `name`="maxRho", 
+                        `title`="Max \u03C1", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="meanSpearmanExplanation",
+                title="About Mean Spearman Rho",
+                visible="((meanSpearman || showMeanSpearmanGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="raterBiasTable",
                 title="Rater Bias Test Results",
                 visible="(raterBias)",
@@ -822,6 +1204,92 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="raterBiasExplanation",
                 title="About Rater Bias Test",
                 visible="(raterBias && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="bhapkarTable",
+                title="Bhapkar Test for Marginal Homogeneity",
+                visible="(bhapkar)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="bhapkarExplanation",
+                title="About Bhapkar Test",
+                visible="(bhapkar && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stuartMaxwellTable",
+                title="Stuart-Maxwell Test for Marginal Homogeneity",
+                visible="(stuartMaxwell)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="stuartMaxwellExplanation",
+                title="About Stuart-Maxwell Test",
+                visible="(stuartMaxwell && showAbout)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="pairwiseKappaTable",
@@ -1149,6 +1617,302 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(icc && showAbout)"))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="meanPearsonTable",
+                title="Mean Pearson Correlation (Linear Association) Results",
+                visible="(meanPearson)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="meanR", 
+                        `title`="Mean r", 
+                        `type`="number"),
+                    list(
+                        `name`="minR", 
+                        `title`="Min r", 
+                        `type`="number"),
+                    list(
+                        `name`="maxR", 
+                        `title`="Max r", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="meanPearsonExplanation",
+                title="About Mean Pearson Correlation",
+                visible="((meanPearson || showMeanPearsonGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="linCCCTable",
+                title="Lin's Concordance Correlation Coefficient (CCC)",
+                visible="(linCCC)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="ccc", 
+                        `title`="CCC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="pearson_r", 
+                        `title`="Precision (r)", 
+                        `type`="number"),
+                    list(
+                        `name`="bias_factor", 
+                        `title`="Accuracy (Cb)", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="linCCCExplanation",
+                title="About Lin's Concordance Correlation Coefficient",
+                visible="((linCCC || showLinCCCGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="tdiTable",
+                title="Total Deviation Index (TDI) - Acceptable Agreement Limits",
+                visible="(tdi)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="tdi_estimate", 
+                        `title`="TDI Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="coverage_prob", 
+                        `title`="Coverage %", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="acceptable_limit", 
+                        `title`="Acceptable Limit", 
+                        `type`="number"),
+                    list(
+                        `name`="meets_criteria", 
+                        `title`="Acceptable?", 
+                        `type`="text"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "tdiCoverage",
+                    "tdiLimit")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tdiExplanation",
+                title="About Total Deviation Index (TDI)",
+                visible="((tdi || showTDIGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="maxwellRETable",
+                title="Maxwell's Random Error (RE) Index - Error Decomposition",
+                visible="(maxwellRE)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters/Methods", 
+                        `type`="integer"),
+                    list(
+                        `name`="re_value", 
+                        `title`="RE Index", 
+                        `type`="number"),
+                    list(
+                        `name`="systematic_prop", 
+                        `title`="Systematic %", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="random_prop", 
+                        `title`="Random %", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="total_variance", 
+                        `title`="Total Variance", 
+                        `type`="number"),
+                    list(
+                        `name`="systematic_var", 
+                        `title`="Systematic Variance", 
+                        `type`="number"),
+                    list(
+                        `name`="random_var", 
+                        `title`="Random Variance", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="maxwellREExplanation",
+                title="About Maxwell's Random Error Index",
+                visible="((maxwellRE || showMaxwellREGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="interIntraRaterIntraTable",
+                title="Intra-Rater Reliability (Test-Retest Consistency)",
+                visible="(interIntraRater)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="rater", 
+                        `title`="Rater", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_timepoints", 
+                        `title`="Time Points", 
+                        `type`="integer"),
+                    list(
+                        `name`="statistic_name", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "interIntraSeparator")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="interIntraRaterInterTable",
+                title="Inter-Rater Reliability (Between Raters)",
+                visible="(interIntraRater)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_raters", 
+                        `title`="N Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="statistic_name", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "interIntraSeparator")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interIntraRaterExplanation",
+                title="About Inter/Intra-Rater Reliability",
+                visible="((interIntraRater || showInterIntraRaterGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="iotaTable",
                 title="Iota Coefficient Results (Multivariate Agreement)",
                 visible="(iota)",
@@ -1190,6 +1954,54 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="weightedKappaGuide",
                 title="Weighted Kappa Interpretation Guide",
                 visible="(showAbout && (wght:unweighted == FALSE))"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="specificAgreementTable",
+                title="Specific Agreement Indices (Category-Focused Agreement)",
+                visible="(specificAgreement)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="rater_pair", 
+                        `title`="Rater Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="n_both_positive", 
+                        `title`="Both Positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_total_positive", 
+                        `title`="Total Positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="specific_agreement", 
+                        `title`="Specific Agreement", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "specificPositiveCategory",
+                    "specificAllCategories")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="specificAgreementExplanation",
+                title="About Specific Agreement Indices",
+                visible="((specificAgreement || showSpecificAgreementGuide) && showAbout)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="levelInfoTable",
@@ -1400,6 +2212,31 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis. Displays mean difference and limits of agreement between the
 #'   first two raters. Only applicable when raters provide continuous
 #'   measurements (e.g., tumor size in mm).
+#' @param agreementHeatmap Generate heatmap visualization of agreement
+#'   patterns for categorical data. Creates confusion matrices showing how each
+#'   rater pair's classifications correspond. Color-coded cells reveal agreement
+#'   (diagonal) and specific disagreement patterns (off-diagonal). Essential for
+#'   identifying systematic biases, problematic categories, and training needs.
+#'   Shows where raters agree strongly, where they consistently disagree, and
+#'   which category confusions are most common. Particularly valuable for
+#'   multi-category classifications with complex disagreement patterns.
+#' @param heatmapColorScheme Color palette for heatmap visualization. Blue-Red
+#'   highlights diagonal agreement with strong contrast. Traffic light uses
+#'   intuitive color coding. Viridis is perceptually uniform and
+#'   colorblind-safe. Grayscale for black-and-white printing.
+#' @param heatmapShowPercentages Display percentage values within heatmap
+#'   cells (percentage of total cases). Helps interpret relative frequency of
+#'   each rater combination. Essential when comparing heatmaps with different
+#'   sample sizes.
+#' @param heatmapShowCounts Display absolute counts within heatmap cells
+#'   (number of cases). Shows actual sample sizes for each cell. Useful for
+#'   identifying cells with insufficient data and assessing statistical
+#'   reliability.
+#' @param heatmapAnnotationSize Text size for cell annotations (counts and
+#'   percentages). Adjust for readability with different numbers of categories.
+#'   Larger for few categories, smaller for many categories.
+#' @param showAgreementHeatmapGuide Show educational guide and clinical use
+#'   cases for Agreement Heatmap before running analysis.
 #' @param sft Display frequency tables showing the distribution of ratings for
 #'   each rater. Useful for understanding rating patterns and identifying
 #'   potential biases.
@@ -1435,6 +2272,49 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   different raters. Two-way: all subjects rated by same raters. Random:
 #'   raters are random sample. Mixed: raters are fixed. Single: reliability of
 #'   individual rater. Average (k): reliability of mean rating.
+#' @param meanPearson Mean Pearson Correlation calculates the average linear
+#'   correlation coefficient across all rater pairs for continuous measurements.
+#'   Pearson's r measures linear association between variables, ranging from -1
+#'   (perfect negative) to +1 (perfect positive correlation). For interrater
+#'   agreement, high positive correlations indicate raters' measurements vary
+#'   together linearly. Particularly useful for continuous scales (tumor size,
+#'   biomarker levels, quantitative scores), assumes linear relationship and
+#'   normality. Complements ICC by focusing on correlation rather than absolute
+#'   agreement. Simple, interpretable measure for assessing whether raters rank
+#'   and scale measurements similarly.
+#' @param showMeanPearsonGuide Show educational guide and clinical use cases
+#'   for Mean Pearson Correlation before running analysis.
+#' @param linCCC Lin's Concordance Correlation Coefficient (CCC) measures both
+#'   precision and accuracy for continuous data, making it superior to Pearson's
+#'   r for method comparison and agreement studies. CCC ranges from -1 to +1
+#'   (perfect concordance) and equals the product of Pearson's r (precision) and
+#'   a bias correction factor (accuracy). Unlike Pearson's r which only measures
+#'   linear association, CCC penalizes systematic bias. Essential for method
+#'   comparison (manual vs. automated), instrument validation, and assessing
+#'   measurement agreement. Requires 2 raters/methods for pairwise comparison;
+#'   calculates all pairwise CCCs for 3+ raters.
+#' @param showLinCCCGuide Show educational guide and clinical use cases for
+#'   Lin's Concordance Correlation Coefficient before running analysis.
+#' @param tdi Total Deviation Index (TDI) quantifies the limits within which a
+#'   specified proportion of differences between two measurement methods will
+#'   fall. Unlike Bland-Altman which assumes constant variability, TDI accounts
+#'   for heteroscedastic errors (variance increasing with magnitude). Provides a
+#'   single index for acceptable agreement based on predefined clinically
+#'   acceptable limits. Essential for medical device validation, laboratory
+#'   method comparison, and biomarker assay validation where regulatory agencies
+#'   require demonstration that a specified percentage of measurements fall
+#'   within acceptable limits. Requires 2 raters/methods. Particularly useful
+#'   when establishing equivalence between manual and automated measurements or
+#'   between different measurement platforms.
+#' @param tdiCoverage The proportion of differences that should fall within
+#'   TDI limits (default: 90\%). Common values: 90\% for general agreement, 95\%
+#'   for stringent requirements. This defines what percentage of future
+#'   measurements must fall within acceptable limits.
+#' @param tdiLimit Maximum acceptable difference between methods in original
+#'   units. Example: For tumor size, 5mm might be clinically acceptable. TDI
+#'   should be smaller than this limit for methods to be considered equivalent.
+#' @param showTDIGuide Show educational guide and clinical use cases for Total
+#'   Deviation Index before running analysis.
 #' @param iota Iota coefficient for multivariate interrater agreement.
 #'   Measures agreement when raters assess multiple variables simultaneously
 #'   (e.g., tumor size + grade + mitotic count). Unlike ICC which analyzes one
@@ -1467,11 +2347,71 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   agreement) to 1 (perfect agreement). Particularly useful for ranked data,
 #'   severity scores, and ordinal grading systems where you want to know if
 #'   raters rank cases in similar order.
+#' @param robinsonA Robinson's A is an agreement coefficient for ordinal data
+#'   based on the proportion of concordant pairs. It ranges from -1 (complete
+#'   disagreement) to 1 (perfect agreement), with 0 indicating agreement no
+#'   better than chance. Alternative to weighted kappa that directly measures
+#'   the degree of ordinal association between raters. Particularly useful when
+#'   ordinal categories have meaningful rank order (e.g., disease severity
+#'   stages, tumor grades). Less affected by marginal distribution imbalances
+#'   than kappa-based measures.
+#' @param showRobinsonAGuide Show educational guide and clinical use cases for
+#'   Robinson's A before running analysis.
+#' @param meanSpearman Mean Spearman Rho calculates the average rank
+#'   correlation across all rater pairs. Spearman's rho is a nonparametric
+#'   measure of monotonic association for ordinal data. It ranges from -1
+#'   (perfect negative association) to +1 (perfect positive association), with 0
+#'   indicating no association. When used for interrater agreement, high
+#'   positive values indicate raters rank cases similarly. Particularly useful
+#'   for ordinal scales, rankings, and severity ratings. Robust to outliers and
+#'   does not assume linear relationship. Complements other ordinal measures
+#'   (Robinson's A, Kendall's W) by focusing on rank-order correlation rather
+#'   than exact concordance.
+#' @param showMeanSpearmanGuide Show educational guide and clinical use cases
+#'   for Mean Spearman Rho before running analysis.
 #' @param raterBias Tests whether raters have systematically different rating
 #'   patterns (e.g., one rater is more lenient/strict than others). Uses
 #'   chi-square test to detect if marginal frequencies differ significantly
 #'   across raters. Essential quality control tool to identify raters who
 #'   consistently over-diagnose or under-diagnose compared to their peers.
+#' @param bhapkar Bhapkar test for marginal homogeneity between two raters
+#'   with multiple categories. More powerful alternative to Stuart-Maxwell test.
+#'   Like McNemar's test but for >2 categories. Tests if two raters use rating
+#'   categories with equal frequency. Essential for paired comparisons (e.g.,
+#'   pre-post training, novice vs. expert, pathologist vs. AI algorithm) to
+#'   detect systematic differences in category usage.
+#' @param stuartMaxwell Stuart-Maxwell test for marginal homogeneity between
+#'   two raters with multiple categories. Classic test for matched data
+#'   analysis. Like McNemar's test but for >2 categories. Tests if two raters
+#'   use rating categories with equal frequency. Note: Bhapkar test is more
+#'   powerful for large samples, but Stuart-Maxwell is the traditional choice.
+#'   Use for paired/matched comparisons to detect systematic category usage
+#'   differences.
+#' @param maxwellRE Maxwell's Random Error (RE) index decomposes total
+#'   measurement variance into systematic and random error components. RE
+#'   represents the proportion of total disagreement attributable to random
+#'   measurement error rather than systematic differences between raters or
+#'   methods. Values range from 0 (all error is systematic) to 1 (all error is
+#'   random). Essential for understanding error sources in method comparison
+#'   studies, diagnostic test validation, and measurement reliability
+#'   assessment. Typically used with continuous or ordinal data requiring 2+
+#'   raters/methods.
+#' @param showMaxwellREGuide Show educational guide and clinical use cases for
+#'   Maxwell's RE before running analysis.
+#' @param interIntraRater Simultaneous assessment of inter-rater and
+#'   intra-rater reliability for test-retest studies. Calculates intra-rater
+#'   reliability (same rater consistency across time) and inter-rater
+#'   reliability (agreement between different raters). Requires paired columns
+#'   representing the same rater at different time points (e.g., Rater1_Time1,
+#'   Rater1_Time2). Essential for training evaluation, fatigue studies, and
+#'   long-term reliability assessment. Reports both within-rater consistency and
+#'   between-rater agreement.
+#' @param interIntraSeparator Character separating rater ID from time point in
+#'   column names (default: underscore). Example: With separator "_", columns
+#'   named "Rater1_T1" and "Rater1_T2" are recognized as the same rater at two
+#'   time points. Common patterns: underscore (_), dot (.), dash (-).
+#' @param showInterIntraRaterGuide Show educational guide and clinical use
+#'   cases for Inter/Intra-Rater Reliability before running analysis.
 #' @param pairwiseKappa Compare each rater individually against a reference
 #'   rater (e.g., gold standard, consensus score, senior pathologist). Produces
 #'   individual kappa values for each rater-vs-reference comparison. Essential
@@ -1514,6 +2454,31 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   with confidence intervals. Identifies best and worst performing sites. Use
 #'   cautiously to avoid unfair comparisons when cluster sizes differ
 #'   substantially.
+#' @param specificAgreement Calculate category-specific agreement indices for
+#'   binary or multi-category data. For binary data: Positive Specific Agreement
+#'   (PSA) and Negative Specific Agreement (NSA). For multi-category data:
+#'   Agreement indices for each category separately. Essential when some
+#'   categories are more clinically important than others (e.g., cancer
+#'   diagnosis, adverse events, critical findings). Unlike overall kappa which
+#'   treats all disagreements equally, specific agreement focuses on agreement
+#'   within each category, revealing which categories have reliable agreement
+#'   and which need attention.
+#' @param specificPositiveCategory For binary specific agreement: Specify
+#'   which category should be treated as "positive" (e.g., "Cancer",
+#'   "Malignant", "Present", "Yes", "1"). Leave blank to calculate specific
+#'   agreement for all categories. Required for PSA/NSA interpretation. Example:
+#'   If categories are "Benign" and "Malignant", enter "Malignant".
+#' @param specificAllCategories Calculate specific agreement for each category
+#'   separately (recommended). When enabled, provides agreement indices for
+#'   every category in your data, identifying which specific
+#'   diagnoses/classifications have strong agreement and which may need improved
+#'   training or criteria clarification.
+#' @param specificConfidenceIntervals Calculate 95\% confidence intervals for
+#'   specific agreement indices using Wilson score method. Recommended for
+#'   publication and when sample sizes vary across categories. Helps distinguish
+#'   true differences in category-specific agreement from random variation.
+#' @param showSpecificAgreementGuide Show educational guide and clinical use
+#'   cases for Specific Agreement Indices before running analysis.
 #' @param showSummary Display a natural-language interpretation of results
 #'   with color-coded agreement levels and clinical guidance. Recommended for
 #'   reports and presentations.
@@ -1563,6 +2528,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$agreementHeatmapPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$agreementHeatmapExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
@@ -1571,8 +2538,16 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$finnExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$kendallWTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$robinsonATable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$robinsonAExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$meanSpearmanTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$meanSpearmanExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$bhapkarTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bhapkarExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$stuartMaxwellTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
@@ -1585,9 +2560,22 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$meanPearsonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$meanPearsonExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$linCCCTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$linCCCExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$tdiTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$tdiExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$maxwellRETable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$maxwellREExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interIntraRaterIntraTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interIntraRaterInterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$interIntraRaterExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$iotaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$iotaExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$specificAgreementTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$specificAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$levelInfoTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -1613,6 +2601,12 @@ agreement <- function(
     baConfidenceLevel = 0.95,
     proportionalBias = FALSE,
     blandAltmanPlot = FALSE,
+    agreementHeatmap = FALSE,
+    heatmapColorScheme = "bluered",
+    heatmapShowPercentages = TRUE,
+    heatmapShowCounts = TRUE,
+    heatmapAnnotationSize = 3.5,
+    showAgreementHeatmapGuide = FALSE,
     sft = FALSE,
     wght = "unweighted",
     exct = FALSE,
@@ -1624,6 +2618,14 @@ agreement <- function(
     gwetWeights = "unweighted",
     icc = FALSE,
     iccType = "icc21",
+    meanPearson = FALSE,
+    showMeanPearsonGuide = FALSE,
+    linCCC = FALSE,
+    showLinCCCGuide = FALSE,
+    tdi = FALSE,
+    tdiCoverage = 90,
+    tdiLimit = 10,
+    showTDIGuide = FALSE,
     iota = FALSE,
     iotaStandardize = TRUE,
     finn = FALSE,
@@ -1631,7 +2633,18 @@ agreement <- function(
     finnModel = "oneway",
     lightKappa = FALSE,
     kendallW = FALSE,
+    robinsonA = FALSE,
+    showRobinsonAGuide = FALSE,
+    meanSpearman = FALSE,
+    showMeanSpearmanGuide = FALSE,
     raterBias = FALSE,
+    bhapkar = FALSE,
+    stuartMaxwell = FALSE,
+    maxwellRE = FALSE,
+    showMaxwellREGuide = FALSE,
+    interIntraRater = FALSE,
+    interIntraSeparator = "_",
+    showInterIntraRaterGuide = FALSE,
     pairwiseKappa = FALSE,
     referenceRater,
     rankRaters = FALSE,
@@ -1643,6 +2656,11 @@ agreement <- function(
     shrinkageEstimates = FALSE,
     testClusterHomogeneity = TRUE,
     clusterRankings = FALSE,
+    specificAgreement = FALSE,
+    specificPositiveCategory = "",
+    specificAllCategories = TRUE,
+    specificConfidenceIntervals = TRUE,
+    showSpecificAgreementGuide = FALSE,
     showSummary = FALSE,
     showAbout = FALSE,
     consensusName = "consensus_rating",
@@ -1676,6 +2694,12 @@ agreement <- function(
         baConfidenceLevel = baConfidenceLevel,
         proportionalBias = proportionalBias,
         blandAltmanPlot = blandAltmanPlot,
+        agreementHeatmap = agreementHeatmap,
+        heatmapColorScheme = heatmapColorScheme,
+        heatmapShowPercentages = heatmapShowPercentages,
+        heatmapShowCounts = heatmapShowCounts,
+        heatmapAnnotationSize = heatmapAnnotationSize,
+        showAgreementHeatmapGuide = showAgreementHeatmapGuide,
         sft = sft,
         wght = wght,
         exct = exct,
@@ -1687,6 +2711,14 @@ agreement <- function(
         gwetWeights = gwetWeights,
         icc = icc,
         iccType = iccType,
+        meanPearson = meanPearson,
+        showMeanPearsonGuide = showMeanPearsonGuide,
+        linCCC = linCCC,
+        showLinCCCGuide = showLinCCCGuide,
+        tdi = tdi,
+        tdiCoverage = tdiCoverage,
+        tdiLimit = tdiLimit,
+        showTDIGuide = showTDIGuide,
         iota = iota,
         iotaStandardize = iotaStandardize,
         finn = finn,
@@ -1694,7 +2726,18 @@ agreement <- function(
         finnModel = finnModel,
         lightKappa = lightKappa,
         kendallW = kendallW,
+        robinsonA = robinsonA,
+        showRobinsonAGuide = showRobinsonAGuide,
+        meanSpearman = meanSpearman,
+        showMeanSpearmanGuide = showMeanSpearmanGuide,
         raterBias = raterBias,
+        bhapkar = bhapkar,
+        stuartMaxwell = stuartMaxwell,
+        maxwellRE = maxwellRE,
+        showMaxwellREGuide = showMaxwellREGuide,
+        interIntraRater = interIntraRater,
+        interIntraSeparator = interIntraSeparator,
+        showInterIntraRaterGuide = showInterIntraRaterGuide,
         pairwiseKappa = pairwiseKappa,
         referenceRater = referenceRater,
         rankRaters = rankRaters,
@@ -1706,6 +2749,11 @@ agreement <- function(
         shrinkageEstimates = shrinkageEstimates,
         testClusterHomogeneity = testClusterHomogeneity,
         clusterRankings = clusterRankings,
+        specificAgreement = specificAgreement,
+        specificPositiveCategory = specificPositiveCategory,
+        specificAllCategories = specificAllCategories,
+        specificConfidenceIntervals = specificConfidenceIntervals,
+        showSpecificAgreementGuide = showSpecificAgreementGuide,
         showSummary = showSummary,
         showAbout = showAbout,
         consensusName = consensusName,

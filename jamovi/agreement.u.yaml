@@ -103,6 +103,30 @@ children:
           - type: CheckBox
             name: kendallW
 
+  - type: CollapseBox
+    label: Robinson's A [Ordinal] (Agreement Index)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: robinsonA
+          - type: CheckBox
+            name: showRobinsonAGuide
+
+  - type: CollapseBox
+    label: Mean Spearman Rho [Ordinal] (Average Rank Correlation)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: meanSpearman
+          - type: CheckBox
+            name: showMeanSpearmanGuide
+
   # ============================================================
   # CONTINUOUS DATA
   # ============================================================
@@ -119,6 +143,50 @@ children:
           - type: ComboBox
             name: iccType
             enable: (icc)
+
+  - type: CollapseBox
+    label: Mean Pearson Correlation [Continuous] (Linear Association)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: meanPearson
+          - type: CheckBox
+            name: showMeanPearsonGuide
+
+  - type: CollapseBox
+    label: Lin's CCC [Continuous] (Concordance - Method Comparison)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: linCCC
+          - type: CheckBox
+            name: showLinCCCGuide
+
+  - type: CollapseBox
+    label: Total Deviation Index (TDI) [Continuous] (Acceptable Limits)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: tdi
+          - type: TextBox
+            name: tdiCoverage
+            format: number
+            enable: (tdi)
+          - type: TextBox
+            name: tdiLimit
+            format: number
+            enable: (tdi)
+          - type: CheckBox
+            name: showTDIGuide
 
   - type: CollapseBox
     label: Iota Coefficient [Continuous or Categorical] (Multivariate)
@@ -149,6 +217,43 @@ children:
           - type: CheckBox
             name: proportionalBias
             enable: (blandAltmanPlot)
+
+  - type: CollapseBox
+    label: Agreement Heatmap [Categorical] (Confusion Matrix Visualization)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: agreementHeatmap
+          - type: ComboBox
+            name: heatmapColorScheme
+            enable: (agreementHeatmap)
+          - type: CheckBox
+            name: heatmapShowPercentages
+            enable: (agreementHeatmap)
+          - type: CheckBox
+            name: heatmapShowCounts
+            enable: (agreementHeatmap)
+          - type: TextBox
+            name: heatmapAnnotationSize
+            format: number
+            enable: (agreementHeatmap)
+          - type: CheckBox
+            name: showAgreementHeatmapGuide
+
+  - type: CollapseBox
+    label: Maxwell's RE [Continuous/Ordinal] (Random Error Decomposition)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: maxwellRE
+          - type: CheckBox
+            name: showMaxwellREGuide
 
   # ============================================================
   # ADVANCED/SPECIALIZED ANALYSES
@@ -232,6 +337,42 @@ children:
           - type: CheckBox
             name: raterBias
 
+  - type: CollapseBox
+    label: Bhapkar Test [Categorical] (Marginal Homogeneity, 2 Raters)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bhapkar
+
+  - type: CollapseBox
+    label: Stuart-Maxwell Test [Categorical] (Marginal Homogeneity, 2 Raters)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: stuartMaxwell
+
+  - type: CollapseBox
+    label: Inter/Intra-Rater Reliability [Any Data Type] (Test-Retest Studies)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: interIntraRater
+          - type: TextBox
+            name: interIntraSeparator
+            format: string
+            enable: (interIntraRater)
+          - type: CheckBox
+            name: showInterIntraRaterGuide
+
   # ============================================================
   # COMPUTED VARIABLES & FEATURES
   # ============================================================
@@ -288,6 +429,28 @@ children:
           - type: CheckBox
             name: showLoaTable
             enable: (loaVariable)
+
+  - type: CollapseBox
+    label: Specific Agreement Indices [Categorical] (Category-Focused)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: specificAgreement
+          - type: TextBox
+            name: specificPositiveCategory
+            format: string
+            enable: (specificAgreement)
+          - type: CheckBox
+            name: specificAllCategories
+            enable: (specificAgreement)
+          - type: CheckBox
+            name: specificConfidenceIntervals
+            enable: (specificAgreement)
+          - type: CheckBox
+            name: showSpecificAgreementGuide
 
   # ============================================================
   # DISPLAY OPTIONS

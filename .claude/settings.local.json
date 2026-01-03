@@ -209,7 +209,8 @@
       "Bash(git log:*)",
       "Skill(generate-test-data)",
       "Skill(generate-test-data:*)",
-      "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" /Applications/jamovi.app/Contents/Resources/app/bin/jamovi-compiler:*)"
+      "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" /Applications/jamovi.app/Contents/Resources/app/bin/jamovi-compiler:*)",
+      "Bash(git diff:*)"
     ],
     "deny": [],
     "ask": [],

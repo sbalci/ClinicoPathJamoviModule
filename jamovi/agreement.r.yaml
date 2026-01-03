@@ -125,6 +125,25 @@ items:
           - vars
           - baConfidenceLevel
 
+    - name: agreementHeatmapPlot
+      title: 'Agreement Heatmap (Confusion Matrix)'
+      type: Image
+      width: 600
+      height: 500
+      visible: (agreementHeatmap)
+      requiresData: true
+      clearWith:
+          - vars
+          - heatmapColorScheme
+          - heatmapShowPercentages
+          - heatmapShowCounts
+          - heatmapAnnotationSize
+
+    - name: agreementHeatmapExplanation
+      title: "About Agreement Heatmap"
+      type: Html
+      visible: ((agreementHeatmap || showAgreementHeatmapGuide) && showAbout)
+
     - name: blandAltmanStats
       title: 'Bland-Altman Statistics'
       type: Table
@@ -311,6 +330,80 @@ items:
       type: Html
       visible: (kendallW && showAbout)
 
+    - name: robinsonATable
+      title: "Robinson's A (Ordinal Agreement Index) Results"
+      type: Table
+      visible: (robinsonA)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: robinsonA
+          title: "A"
+          type: number
+        - name: se
+          title: 'SE'
+          type: number
+        - name: z
+          title: 'z-value'
+          type: number
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: robinsonAExplanation
+      title: "About Robinson's A"
+      type: Html
+      visible: ((robinsonA || showRobinsonAGuide) && showAbout)
+
+    - name: meanSpearmanTable
+      title: "Mean Spearman Rho (Average Rank Correlation) Results"
+      type: Table
+      visible: (meanSpearman)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: meanRho
+          title: "Mean ρ"
+          type: number
+        - name: minRho
+          title: 'Min ρ'
+          type: number
+        - name: maxRho
+          title: 'Max ρ'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: meanSpearmanExplanation
+      title: "About Mean Spearman Rho"
+      type: Html
+      visible: ((meanSpearman || showMeanSpearmanGuide) && showAbout)
+
     - name: raterBiasTable
       title: "Rater Bias Test Results"
       type: Table
@@ -337,6 +430,78 @@ items:
       title: "About Rater Bias Test"
       type: Html
       visible: (raterBias && showAbout)
+
+    - name: bhapkarTable
+      title: "Bhapkar Test for Marginal Homogeneity"
+      type: Table
+      visible: (bhapkar)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Test'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: chisq
+          title: 'Chi-square'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: bhapkarExplanation
+      title: "About Bhapkar Test"
+      type: Html
+      visible: (bhapkar && showAbout)
+
+    - name: stuartMaxwellTable
+      title: "Stuart-Maxwell Test for Marginal Homogeneity"
+      type: Table
+      visible: (stuartMaxwell)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Test'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: chisq
+          title: 'Chi-square'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: stuartMaxwellExplanation
+      title: "About Stuart-Maxwell Test"
+      type: Html
+      visible: (stuartMaxwell && showAbout)
 
     - name: pairwiseKappaTable
       title: "Pairwise Kappa (Each Rater vs Reference)"
@@ -609,6 +774,250 @@ items:
       type: Html
       visible: (icc && showAbout)
 
+    - name: meanPearsonTable
+      title: "Mean Pearson Correlation (Linear Association) Results"
+      type: Table
+      visible: (meanPearson)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: meanR
+          title: "Mean r"
+          type: number
+        - name: minR
+          title: 'Min r'
+          type: number
+        - name: maxR
+          title: 'Max r'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: meanPearsonExplanation
+      title: "About Mean Pearson Correlation"
+      type: Html
+      visible: ((meanPearson || showMeanPearsonGuide) && showAbout)
+
+    - name: linCCCTable
+      title: "Lin's Concordance Correlation Coefficient (CCC)"
+      type: Table
+      visible: (linCCC)
+      rows: 0
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: ccc
+          title: 'CCC'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: pearson_r
+          title: 'Precision (r)'
+          type: number
+        - name: bias_factor
+          title: 'Accuracy (Cb)'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: linCCCExplanation
+      title: "About Lin's Concordance Correlation Coefficient"
+      type: Html
+      visible: ((linCCC || showLinCCCGuide) && showAbout)
+
+    - name: tdiTable
+      title: "Total Deviation Index (TDI) - Acceptable Agreement Limits"
+      type: Table
+      visible: (tdi)
+      rows: 0
+      columns:
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: tdi_estimate
+          title: 'TDI Estimate'
+          type: number
+        - name: coverage_prob
+          title: 'Coverage %'
+          type: number
+          format: pc
+        - name: acceptable_limit
+          title: 'Acceptable Limit'
+          type: number
+        - name: meets_criteria
+          title: 'Acceptable?'
+          type: text
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - tdiCoverage
+          - tdiLimit
+
+    - name: tdiExplanation
+      title: "About Total Deviation Index (TDI)"
+      type: Html
+      visible: ((tdi || showTDIGuide) && showAbout)
+
+    - name: maxwellRETable
+      title: "Maxwell's Random Error (RE) Index - Error Decomposition"
+      type: Table
+      visible: (maxwellRE)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters/Methods'
+          type: integer
+        - name: re_value
+          title: 'RE Index'
+          type: number
+        - name: systematic_prop
+          title: 'Systematic %'
+          type: number
+          format: pc
+        - name: random_prop
+          title: 'Random %'
+          type: number
+          format: pc
+        - name: total_variance
+          title: 'Total Variance'
+          type: number
+        - name: systematic_var
+          title: 'Systematic Variance'
+          type: number
+        - name: random_var
+          title: 'Random Variance'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: maxwellREExplanation
+      title: "About Maxwell's Random Error Index"
+      type: Html
+      visible: ((maxwellRE || showMaxwellREGuide) && showAbout)
+
+    - name: interIntraRaterIntraTable
+      title: "Intra-Rater Reliability (Test-Retest Consistency)"
+      type: Table
+      visible: (interIntraRater)
+      rows: 0
+      columns:
+        - name: rater
+          title: 'Rater'
+          type: text
+        - name: n_cases
+          title: 'N Cases'
+          type: integer
+        - name: n_timepoints
+          title: 'Time Points'
+          type: integer
+        - name: statistic_name
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - interIntraSeparator
+
+    - name: interIntraRaterInterTable
+      title: "Inter-Rater Reliability (Between Raters)"
+      type: Table
+      visible: (interIntraRater)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: n_cases
+          title: 'N Cases'
+          type: integer
+        - name: n_raters
+          title: 'N Raters'
+          type: integer
+        - name: statistic_name
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - interIntraSeparator
+
+    - name: interIntraRaterExplanation
+      title: "About Inter/Intra-Rater Reliability"
+      type: Html
+      visible: ((interIntraRater || showInterIntraRaterGuide) && showAbout)
+
     - name: iotaTable
       title: "Iota Coefficient Results (Multivariate Agreement)"
       type: Table
@@ -645,6 +1054,46 @@ items:
       title: "Weighted Kappa Interpretation Guide"
       type: Html
       visible: (showAbout && (wght:unweighted == FALSE))
+
+    - name: specificAgreementTable
+      title: "Specific Agreement Indices (Category-Focused Agreement)"
+      type: Table
+      visible: (specificAgreement)
+      rows: 0
+      columns:
+        - name: category
+          title: 'Category'
+          type: text
+        - name: rater_pair
+          title: 'Rater Pair'
+          type: text
+        - name: n_both_positive
+          title: 'Both Positive'
+          type: integer
+        - name: n_total_positive
+          title: 'Total Positive'
+          type: integer
+        - name: specific_agreement
+          title: 'Specific Agreement'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - specificPositiveCategory
+          - specificAllCategories
+
+    - name: specificAgreementExplanation
+      title: "About Specific Agreement Indices"
+      type: Html
+      visible: ((specificAgreement || showSpecificAgreementGuide) && showAbout)
 
     - name: levelInfoTable
       title: "Level Ordering Information"

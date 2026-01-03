@@ -8,43 +8,42 @@ items:
     - name: welcome
       title: 'Getting Started'
       type: Html
+      visible: (!age || !gender)
 
     - name: dataInfo
-      title: 'Data Summary & Quality Information'
+      title: 'Data Summary'
       type: Html
-      visible: true
 
     - name:  pyramidTable
       title: 'Population Data'
       type: Table
       rows: 0
       columns:
-      # columns: &idcols
         - name: Pop
           title: "Age Group"
           type: text
         - name: Female
           title: "Female (n)"
           type: number
-        - name: Female_Pct
-          title: "Female (%)"
-          type: number
-          format: 'zto;dp:1'
         - name: Male
           title: "Male (n)"
+          type: number
+        - name: Female_Pct
+          title: "Female (%)"
           type: number
         - name: Male_Pct
           title: "Male (%)"
           type: number
-          format: 'zto;dp:1'
       clearWith:
-          # Only data-affecting options that require recomputing aggregations
           - age
           - gender
           - female
           - male
-          - bin_width
           - age_groups
+          - bin_width
+          - custom_breaks
+
+
 
     - name: plot
       title: 'Age Pyramid'
@@ -58,15 +57,15 @@ items:
           - gender
           - female
           - male
-          - bin_width
           - age_groups
+          - bin_width
+          - custom_breaks
           - plot_title
-          - color1
-          - color2
           - color_palette
-          - plot_engine
+          - female_color
+          - male_color
 
 refs:
     - ClinicoPathJamoviModule
-    - ggcharts
+
 ...

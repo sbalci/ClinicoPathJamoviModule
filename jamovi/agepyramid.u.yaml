@@ -28,56 +28,39 @@ children:
           - type: LevelSelector
             name: male
             enable: (gender)
-  - type: CollapseBox
-    label: Plot Configuration
-    collapsed: false
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Age Grouping
         children:
-          - type: TextBox
-            name: bin_width
-            format: number
-            enable: "(age_groups == 'custom')"
-            events:
-              change: ./agepyramid.events::onChange_binWidth
-      - type: LayoutBox
-        margin: large
+          - type: ComboBox
+            name: age_groups
+      - type: TextBox
+        name: bin_width
+        format: number
+        enable: (age_groups:custom)
+      - type: TextBox
+        name: custom_breaks
+        format: string
+        enable: (age_groups:custom)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
+        label: Plot Options
         children:
           - type: TextBox
             name: plot_title
             format: string
             width: large
-      - type: LayoutBox
-        margin: large
-        children:
           - type: ComboBox
             name: color_palette
-            label: "Color Palette"
-            events:
-              change: ./agepyramid.events::onChange_colorPalette
-          - type: ComboBox
-            name: age_groups
-            label: "Age Group Preset"
-          - type: ComboBox
-            name: plot_engine
-            label: "Plot Engine"
-            events:
-              change: ./agepyramid.events::onChange_plotEngine
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: color1
-            format: string
-            label: "First Color (Female)"
-            enable: "(color_palette == 'custom')"
-            events:
-              change: ./agepyramid.events::onChange_color1
-          - type: TextBox
-            name: color2
-            format: string
-            label: "Second Color (Male)"
-            enable: "(color_palette == 'custom')"
-            events:
-              change: ./agepyramid.events::onChange_color2
+      - type: TextBox
+        name: female_color
+        format: string
+        enable: (color_palette:custom)
+      - type: TextBox
+        name: male_color
+        format: string
+        enable: (color_palette:custom)

@@ -62,6 +62,79 @@ options:
             Displays mean difference and limits of agreement between the first two raters.
             Only applicable when raters provide continuous measurements (e.g., tumor size in mm).
 
+    - name: agreementHeatmap
+      title: 'Agreement Heatmap (Confusion Matrix)'
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate heatmap visualization of agreement patterns for categorical data.
+            Creates confusion matrices showing how each rater pair's classifications correspond.
+            Color-coded cells reveal agreement (diagonal) and specific disagreement patterns
+            (off-diagonal). Essential for identifying systematic biases, problematic categories,
+            and training needs. Shows where raters agree strongly, where they consistently disagree,
+            and which category confusions are most common. Particularly valuable for multi-category
+            classifications with complex disagreement patterns.
+
+    - name: heatmapColorScheme
+      title: "Heatmap Color Scheme"
+      type: List
+      options:
+        - title: 'Blue-Red Diverging (Agreement Focus)'
+          name: bluered
+        - title: 'Green-Yellow-Red (Traffic Light)'
+          name: traffic
+        - title: 'Viridis (Colorblind-Friendly)'
+          name: viridis
+        - title: 'Gray Scale (Print-Friendly)'
+          name: grayscale
+      default: bluered
+      description:
+          R: >
+            Color palette for heatmap visualization. Blue-Red highlights diagonal agreement
+            with strong contrast. Traffic light uses intuitive color coding. Viridis is
+            perceptually uniform and colorblind-safe. Grayscale for black-and-white printing.
+
+    - name: heatmapShowPercentages
+      title: "Show Percentages in Cells"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display percentage values within heatmap cells (percentage of total cases).
+            Helps interpret relative frequency of each rater combination. Essential
+            when comparing heatmaps with different sample sizes.
+
+    - name: heatmapShowCounts
+      title: "Show Counts in Cells"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display absolute counts within heatmap cells (number of cases).
+            Shows actual sample sizes for each cell. Useful for identifying
+            cells with insufficient data and assessing statistical reliability.
+
+    - name: heatmapAnnotationSize
+      title: "Cell Annotation Size"
+      type: Number
+      default: 3.5
+      min: 2
+      max: 6
+      description:
+          R: >
+            Text size for cell annotations (counts and percentages).
+            Adjust for readability with different numbers of categories.
+            Larger for few categories, smaller for many categories.
+
+    - name: showAgreementHeatmapGuide
+      title: "When to use Agreement Heatmap"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Agreement Heatmap before running analysis.
+
 
 
     - name: sft
@@ -204,6 +277,98 @@ options:
             Two-way: all subjects rated by same raters. Random: raters are random sample.
             Mixed: raters are fixed. Single: reliability of individual rater. Average (k): reliability of mean rating.
 
+    - name: meanPearson
+      title: "Calculate Mean Pearson Correlation (Linear Association)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Mean Pearson Correlation calculates the average linear correlation coefficient across all
+            rater pairs for continuous measurements. Pearson's r measures linear association between
+            variables, ranging from -1 (perfect negative) to +1 (perfect positive correlation).
+            For interrater agreement, high positive correlations indicate raters' measurements vary
+            together linearly. Particularly useful for continuous scales (tumor size, biomarker levels,
+            quantitative scores), assumes linear relationship and normality. Complements ICC by
+            focusing on correlation rather than absolute agreement. Simple, interpretable measure
+            for assessing whether raters rank and scale measurements similarly.
+
+    - name: showMeanPearsonGuide
+      title: "When to use Mean Pearson Correlation"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Mean Pearson Correlation before running analysis.
+
+    - name: linCCC
+      title: "Lin's Concordance Correlation Coefficient (CCC)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Lin's Concordance Correlation Coefficient (CCC) measures both precision and accuracy for continuous
+            data, making it superior to Pearson's r for method comparison and agreement studies. CCC ranges from
+            -1 to +1 (perfect concordance) and equals the product of Pearson's r (precision) and a bias correction
+            factor (accuracy). Unlike Pearson's r which only measures linear association, CCC penalizes systematic
+            bias. Essential for method comparison (manual vs. automated), instrument validation, and assessing
+            measurement agreement. Requires 2 raters/methods for pairwise comparison; calculates all pairwise CCCs
+            for 3+ raters.
+
+    - name: showLinCCCGuide
+      title: "When to use Lin's CCC"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Lin's Concordance Correlation Coefficient before running analysis.
+
+    - name: tdi
+      title: "Total Deviation Index (TDI)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Total Deviation Index (TDI) quantifies the limits within which a specified proportion of differences
+            between two measurement methods will fall. Unlike Bland-Altman which assumes constant variability,
+            TDI accounts for heteroscedastic errors (variance increasing with magnitude). Provides a single index
+            for acceptable agreement based on predefined clinically acceptable limits. Essential for medical device
+            validation, laboratory method comparison, and biomarker assay validation where regulatory agencies
+            require demonstration that a specified percentage of measurements fall within acceptable limits.
+            Requires 2 raters/methods. Particularly useful when establishing equivalence between manual and
+            automated measurements or between different measurement platforms.
+
+    - name: tdiCoverage
+      title: "Coverage Probability (%)"
+      type: Number
+      default: 90
+      min: 50
+      max: 99
+      description:
+          R: >
+            The proportion of differences that should fall within TDI limits (default: 90%).
+            Common values: 90% for general agreement, 95% for stringent requirements.
+            This defines what percentage of future measurements must fall within acceptable limits.
+
+    - name: tdiLimit
+      title: "Acceptable Limit"
+      type: Number
+      default: 10
+      min: 0.1
+      max: 1000
+      description:
+          R: >
+            Maximum acceptable difference between methods in original units.
+            Example: For tumor size, 5mm might be clinically acceptable.
+            TDI should be smaller than this limit for methods to be considered equivalent.
+
+    - name: showTDIGuide
+      title: "When to use TDI"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Total Deviation Index before running analysis.
+
     - name: iota
       title: "Calculate Iota Coefficient (Multivariate Agreement)"
       type: Bool
@@ -283,6 +448,50 @@ options:
             useful for ranked data, severity scores, and ordinal grading systems where you want to know
             if raters rank cases in similar order.
 
+    - name: robinsonA
+      title: "Calculate Robinson's A (Ordinal Agreement Index)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Robinson's A is an agreement coefficient for ordinal data based on the proportion of
+            concordant pairs. It ranges from -1 (complete disagreement) to 1 (perfect agreement),
+            with 0 indicating agreement no better than chance. Alternative to weighted kappa that
+            directly measures the degree of ordinal association between raters. Particularly useful
+            when ordinal categories have meaningful rank order (e.g., disease severity stages, tumor
+            grades). Less affected by marginal distribution imbalances than kappa-based measures.
+
+    - name: showRobinsonAGuide
+      title: "When to use Robinson's A"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Robinson's A before running analysis.
+
+    - name: meanSpearman
+      title: "Calculate Mean Spearman Rho (Average Rank Correlation)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Mean Spearman Rho calculates the average rank correlation across all rater pairs.
+            Spearman's rho is a nonparametric measure of monotonic association for ordinal data.
+            It ranges from -1 (perfect negative association) to +1 (perfect positive association),
+            with 0 indicating no association. When used for interrater agreement, high positive
+            values indicate raters rank cases similarly. Particularly useful for ordinal scales,
+            rankings, and severity ratings. Robust to outliers and does not assume linear
+            relationship. Complements other ordinal measures (Robinson's A, Kendall's W) by
+            focusing on rank-order correlation rather than exact concordance.
+
+    - name: showMeanSpearmanGuide
+      title: "When to use Mean Spearman Rho"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Mean Spearman Rho before running analysis.
+
     - name: raterBias
       title: "Test for Rater Bias (Systematic Differences)"
       type: Bool
@@ -293,6 +502,81 @@ options:
             lenient/strict than others). Uses chi-square test to detect if marginal frequencies differ
             significantly across raters. Essential quality control tool to identify raters who consistently
             over-diagnose or under-diagnose compared to their peers.
+
+    - name: bhapkar
+      title: "Bhapkar Test (Marginal Homogeneity for 2 Raters)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Bhapkar test for marginal homogeneity between two raters with multiple categories. More powerful
+            alternative to Stuart-Maxwell test. Like McNemar's test but for >2 categories. Tests if two raters
+            use rating categories with equal frequency. Essential for paired comparisons (e.g., pre-post training,
+            novice vs. expert, pathologist vs. AI algorithm) to detect systematic differences in category usage.
+
+    - name: stuartMaxwell
+      title: "Stuart-Maxwell Test (Marginal Homogeneity for 2 Raters)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Stuart-Maxwell test for marginal homogeneity between two raters with multiple categories. Classic test
+            for matched data analysis. Like McNemar's test but for >2 categories. Tests if two raters use rating
+            categories with equal frequency. Note: Bhapkar test is more powerful for large samples, but Stuart-Maxwell
+            is the traditional choice. Use for paired/matched comparisons to detect systematic category usage differences.
+
+    - name: maxwellRE
+      title: "Maxwell's RE (Random Error Index)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Maxwell's Random Error (RE) index decomposes total measurement variance into systematic
+            and random error components. RE represents the proportion of total disagreement attributable
+            to random measurement error rather than systematic differences between raters or methods.
+            Values range from 0 (all error is systematic) to 1 (all error is random). Essential for
+            understanding error sources in method comparison studies, diagnostic test validation, and
+            measurement reliability assessment. Typically used with continuous or ordinal data requiring
+            2+ raters/methods.
+
+    - name: showMaxwellREGuide
+      title: "When to use Maxwell's RE"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Maxwell's RE before running analysis.
+
+    - name: interIntraRater
+      title: "Inter/Intra-Rater Reliability (Test-Retest)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Simultaneous assessment of inter-rater and intra-rater reliability for test-retest studies.
+            Calculates intra-rater reliability (same rater consistency across time) and inter-rater
+            reliability (agreement between different raters). Requires paired columns representing
+            the same rater at different time points (e.g., Rater1_Time1, Rater1_Time2). Essential
+            for training evaluation, fatigue studies, and long-term reliability assessment. Reports
+            both within-rater consistency and between-rater agreement.
+
+    - name: interIntraSeparator
+      title: "Column Name Separator (Inter/Intra)"
+      type: String
+      default: "_"
+      description:
+          R: >
+            Character separating rater ID from time point in column names (default: underscore).
+            Example: With separator "_", columns named "Rater1_T1" and "Rater1_T2" are recognized
+            as the same rater at two time points. Common patterns: underscore (_), dot (.), dash (-).
+
+    - name: showInterIntraRaterGuide
+      title: "When to use Inter/Intra-Rater Reliability"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Inter/Intra-Rater Reliability before running analysis.
 
     - name: pairwiseKappa
       title: "Calculate Pairwise Kappa (vs Reference)"
@@ -410,6 +694,61 @@ options:
 
 
 
+
+    - name: specificAgreement
+      title: "Specific Agreement Indices (Category-Focused)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate category-specific agreement indices for binary or multi-category data.
+            For binary data: Positive Specific Agreement (PSA) and Negative Specific Agreement (NSA).
+            For multi-category data: Agreement indices for each category separately.
+            Essential when some categories are more clinically important than others (e.g., cancer
+            diagnosis, adverse events, critical findings). Unlike overall kappa which treats all
+            disagreements equally, specific agreement focuses on agreement within each category,
+            revealing which categories have reliable agreement and which need attention.
+
+    - name: specificPositiveCategory
+      title: "Positive Category (Binary Analysis)"
+      type: String
+      default: ""
+      description:
+          R: >
+            For binary specific agreement: Specify which category should be treated as "positive"
+            (e.g., "Cancer", "Malignant", "Present", "Yes", "1"). Leave blank to calculate
+            specific agreement for all categories. Required for PSA/NSA interpretation.
+            Example: If categories are "Benign" and "Malignant", enter "Malignant".
+
+    - name: specificAllCategories
+      title: "Calculate for All Categories"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate specific agreement for each category separately (recommended).
+            When enabled, provides agreement indices for every category in your data,
+            identifying which specific diagnoses/classifications have strong agreement
+            and which may need improved training or criteria clarification.
+
+    - name: specificConfidenceIntervals
+      title: "Include Confidence Intervals"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Calculate 95% confidence intervals for specific agreement indices using
+            Wilson score method. Recommended for publication and when sample sizes vary
+            across categories. Helps distinguish true differences in category-specific
+            agreement from random variation.
+
+    - name: showSpecificAgreementGuide
+      title: "When to use Specific Agreement Indices"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide and clinical use cases for Specific Agreement Indices before running analysis.
 
     - name: showSummary
       title: "Show Plain-Language Summary"
@@ -586,72 +925,9 @@ options:
 ...
 
 
-# Systematic Bias Detection
-# Rater Bias Test (rater.bias) 
-# Detect systematic over/under-diagnosis
-# Chi-square test for marginal frequencies
-# Use case: Identify lenient/strict raters
 
-# Bhapkar Test
-# Marginal homogeneity for >2 categories
-# Like McNemar but for multiple categories
-# Use case: Test if raters use categories equally
-
-# Stuart-Maxwell-MH Test
-# Tests marginal homogeneity
-# Use case: Matched data analysis
-
-# Ordinal/Ranked Data
-# Kendall's W (kendall) ⭐
-# Coefficient of concordance for rankings
-# Use case: Pathology grading, severity rankings
-
-# Robinson's A
-# Agreement index for ordinal scales
-# Use case: Alternative to weighted kappa
-# Mean Spearman Rho (meanrho)
-# Average rank correlation
-# Use case: Ordinal agreement
-
-# Correlation-Based
-# Mean Pearson Correlation (meancor)
-# Average correlation among raters
-# Use case: Continuous data, simple measure
-
-# Advanced Designs
-# Inter/Intra-Rater Reliability (relInterIntra)
-# When same raters rate same cases twice
-# Simultaneous inter- and intra-rater assessment
-# Effort: Medium-High (3-4 hours)
-# Use case: Test-retest reliability studies
-
-# Maxwell's RE
-# Random error index
-# Use case: Decompose error sources
-# Additional Useful Features (Not in irr)
-# Clinical Utility
-
-# Lin's Concordance Correlation (CCC)
-# Better than Pearson's r for agreement
-# Package: epiR or DescTools
-# Use case: Method comparison
-
-# Total Deviation Index (TDI)
-# Probability-based agreement
-# Package: MethComp
-# Use case: Acceptable limits
-
-# Specific Agreement Indices
-# Positive/negative specific agreement
-# Category-specific measures
-# Use case: Focus on critical categories
-
-
-# Agreement Heatmap
-# Confusion matrix visualization
-# Color-coded patterns
-# Effort: Low (1 hour)
-
+# consider adding:
+# consider adding:
 # Rater Profile Plots
 # Distribution comparison
 # Box plots per rater
@@ -659,3 +935,11 @@ options:
 # Stratified analysis
 # Forest plot of kappas
 # Use case: Compare agreement across tumor types
+
+
+# consider adding:
+# Clustering of raters
+
+# consider adding:
+# Clustering of cases
+

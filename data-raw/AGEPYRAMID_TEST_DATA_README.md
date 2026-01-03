@@ -110,9 +110,9 @@ agepyramid(
   gender = "gender",
   female = "Female",
   male = "Male",
+  age_groups = "custom",
   bin_width = 10,
-  plot_title = "Population Age Distribution",
-  color_palette = "accessible"
+  plot_title = "Population Age Distribution"
 )
 ```
 
@@ -207,12 +207,12 @@ source("inst/examples/agepyramid_example.R")
 
 ### Argument Combinations (8 tests)
 ✅ Respects all bin width options
-✅ Respects all color palette options
-✅ Works with all age group presets
-✅ Works with both plot engines
+✅ Works with all age group presets (pediatric, reproductive, geriatric, lifecourse, custom)
 ✅ Respects custom plot titles
 ✅ Handles factor vs character gender
 ✅ Works with different population structures
+✅ Handles gender level selection (female and male)
+✅ Handles single-gender cohorts
 ✅ Handles all argument combinations
 
 ### Edge Cases (16 tests)
@@ -315,23 +315,29 @@ Age pyramids are valuable for:
 
 ## Best Practices
 
-### Choosing Bin Width
-- Small populations: 5-10 years
-- Large populations: 1-5 years
-- Pediatric: 1-3 years
-- Geriatric: 5-10 years
-
-### Choosing Colors
-- **Standard:** Traditional gender colors
-- **Accessible:** Colorblind-friendly (recommended for publications)
-- **Custom:** Institutional branding or specific themes
-
 ### Age Group Presets
-- **Custom:** Maximum flexibility
-- **Pediatric:** Optimized for 0-18 years
-- **Reproductive:** Focus on 15-50 years
-- **Geriatric:** Optimized for 65+ years
-- **Life Course:** Comprehensive all-age analysis
+- **Custom:** Maximum flexibility with bin_width (default: 5 years)
+  - Small populations: use 5-10 year bins
+  - Large populations: use 1-5 year bins
+- **Pediatric:** Optimized for ages 0-18 with developmental milestones
+  - Breaks: 0, 1, 2, 5, 10, 15, 18, Inf
+- **Reproductive:** Focus on reproductive ages 15-50 with 5-year intervals
+  - Breaks: 0, 15, 20, 25, 30, 35, 40, 45, 50, Inf
+- **Geriatric:** Optimized for ages 65+ with 5-year intervals
+  - Breaks: 0, 65, 70, 75, 80, 85, 90, 95, Inf
+- **Life Course:** Comprehensive all-age analysis with key life stages
+  - Breaks: 0, 5, 15, 25, 45, 65, 75, 85, Inf
+
+### Gender Level Selection
+- Female and Male level selectors allow flexible data structures
+- Smart defaults: automatically uses first two levels if not specified
+- Single-gender cohorts: set only Female or Male level
+- The analysis will automatically detect and handle single-gender data
+
+### Plot Customization
+- Use descriptive plot titles to communicate the population being analyzed
+- Age groups are displayed with readable labels (e.g., "1-5", "6-10", "86+")
+- Tables include both counts (n) and percentages (%) for each age-gender group
 
 ## Validation
 

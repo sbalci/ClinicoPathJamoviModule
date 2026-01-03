@@ -1,13 +1,13 @@
 #' @title Age Pyramid
 #' @description Generates an age pyramid plot from the provided data.
-#' The function allows customization of bin width (age group granularity), plot title,
-#' and colors. It creates a visually appealing plot showing the
-#' distribution of age by gender using ggplot2.
+#' The function allows customization of bin width (age group granularity) and plot title.
+#' It creates a visually appealing plot showing the distribution of age by gender.
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
 #' @import dplyr
 #' @import tidyr
+#' @import tibble
 #'
 #' @param age The name of the column containing age data.
 #'
@@ -16,13 +16,8 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agepyramidClass",
     inherit = agepyramidBase,
     private = list(
-        .data_info_messages = list(),
-
         .run = function() {
-            # Initialize
-            private$.data_info_messages <- list()
-
-            # Check required options
+            # Check if required options (age and gender) are provided
             if (is.null(self$options$age) || is.null(self$options$gender)) {
                 self$results$welcome$setContent(
                     "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196F3;'>
@@ -33,8 +28,18 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <li><strong>Age:</strong> Continuous numeric variable (e.g., patient age in years)</li>
                         <li><strong>Gender:</strong> Categorical variable (typically binary: Male/Female)</li>
                     </ol>
+                    <h4 style='color: #1976d2; margin-bottom: 8px;'>Features:</h4>
+                    <ul style='font-size: 14px; line-height: 1.6;'>
+                        <li><strong>Age group presets:</strong> Pediatric (<18), Reproductive (15-50), Geriatric (65+), Life Course, or Custom</li>
+                        <li><strong>Custom age breaks:</strong> Define your own age boundaries (e.g., 0,18,25,50,65,100)</li>
+                        <li><strong>Customizable bin width</strong> for automatic age grouping</li>
+                        <li><strong>Color palettes:</strong> Standard, Colorblind-friendly, Grayscale, or Custom colors</li>
+                        <li><strong>Readable age group labels</strong> (e.g., 1-5, 6-10, 86+)</li>
+                        <li><strong>Table with counts and percentages</strong></li>
+                        <li><strong>Gender level selection</strong> for flexible data structures</li>
+                    </ul>
                     <p style='font-size: 13px; color: #666; margin-bottom: 0; font-style: italic;'>
-                    Select your Age and Gender variables in the left panel to begin.
+                    Select your Age and Gender variables to begin.
                     </p>
                     </div>"
                 )
@@ -42,49 +47,45 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (nrow(self$data) == 0)
-                stop(.("Data contains no (complete) rows"))
+                stop("Data contains no (complete) rows")
 
-            # Prepare data ----
+            # Read and prepare data ----
             mydata <- self$data
-            age_var <- self$options$age
-            gender_var <- self$options$gender
 
-            # Select columns and remove NAs
-            mydata <- jmvcore::select(mydata, c(age_var, gender_var))
+            age <- self$options$age
+            gender <- self$options$gender
+
+            # Select and clean the required columns
+            mydata <- jmvcore::select(mydata, c(age, gender))
             mydata <- jmvcore::naOmit(mydata)
 
-            # Convert types
-            age_numeric <- as.numeric(as.character(mydata[[age_var]]))
-            mydata$Age <- age_numeric
-            mydata$Gender <- as.factor(mydata[[gender_var]])
+            # Convert age to numeric and gender to factor
+            mydata[["Age"]] <- jmvcore::toNumeric(mydata[[age]])
+            mydata[["Gender"]] <- as.factor(mydata[[gender]])
 
-            # Remove invalid ages
-            n_before <- nrow(mydata)
-            mydata <- mydata %>% dplyr::filter(!is.na(Age))
-            n_after <- nrow(mydata)
-
-            if (n_after == 0) {
-                stop(.("No valid age data available"))
-            }
-
-            # Get gender levels ----
+            # Determine gender levels with smart defaults ----
+            n_initial <- nrow(self$data)  # Track for data summary
             female_level <- self$options$female
             male_level <- self$options$male
-            gender_levels <- levels(mydata$Gender)
+            gender_levels <- levels(mydata[["Gender"]])
 
-            # Apply smart defaults if needed
+            # Apply smart defaults if levels not selected
             if (is.null(female_level) && is.null(male_level)) {
+                # Neither selected - use first two levels
                 if (length(gender_levels) >= 2) {
                     female_level <- gender_levels[1]
                     male_level <- gender_levels[2]
                 } else if (length(gender_levels) == 1) {
+                    # Single level - treat as female
                     female_level <- gender_levels[1]
                     male_level <- NULL
                 }
             } else if (is.null(female_level)) {
+                # Only male selected - use first non-male level as female
                 remaining <- gender_levels[gender_levels != male_level]
                 female_level <- if(length(remaining) > 0) remaining[1] else NULL
             } else if (is.null(male_level)) {
+                # Only female selected - use first non-female level as male
                 remaining <- gender_levels[gender_levels != female_level]
                 male_level <- if(length(remaining) > 0) remaining[1] else NULL
             }
@@ -93,147 +94,133 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             is_single_gender <- is.null(male_level) || is.null(female_level)
             single_gender_label <- if(!is.null(female_level)) female_level else male_level
 
-            # Create standardized Gender2 variable ----
-            if (is_single_gender) {
-                mydata <- mydata %>%
-                    dplyr::mutate(
-                        Gender2 = ifelse(Gender == single_gender_label, "Cohort", NA_character_)
+            # Create standardized gender variable
+            mydata <- mydata %>%
+                dplyr::mutate(
+                    Gender2 = dplyr::case_when(
+                        Gender == female_level ~ "Female",
+                        Gender == male_level ~ "Male",
+                        TRUE ~ NA_character_  # Other values become NA
                     )
+                ) %>%
+                dplyr::filter(!is.na(Gender2))  # Remove unrecognized genders
+
+            n_final <- nrow(mydata)  # Track for data summary
+
+            # Determine age group breaks based on preset or custom bin width ----
+            age_groups <- if (!is.null(self$options$age_groups)) self$options$age_groups else 'custom'
+            max_age <- max(mydata[["Age"]], na.rm = TRUE)
+
+            # Select breaks based on age_groups option
+            if (age_groups == 'pediatric') {
+                # Pediatric: Birth to 18 years with developmental milestones
+                breaks_seq <- c(0, 1, 2, 5, 10, 15, 18, Inf)
+            } else if (age_groups == 'reproductive') {
+                # Reproductive age: 15-50 with 5-year intervals
+                breaks_seq <- c(0, 15, 20, 25, 30, 35, 40, 45, 50, Inf)
+            } else if (age_groups == 'geriatric') {
+                # Geriatric: 65+ with 5-year intervals
+                breaks_seq <- c(0, 65, 70, 75, 80, 85, 90, 95, Inf)
+            } else if (age_groups == 'lifecourse') {
+                # Life course: Key developmental stages
+                breaks_seq <- c(0, 5, 15, 25, 45, 65, 75, 85, Inf)
             } else {
-                mydata <- mydata %>%
-                    dplyr::mutate(
-                        Gender2 = dplyr::case_when(
-                            Gender == female_level ~ "Female",
-                            Gender == male_level ~ "Male",
-                            TRUE ~ NA_character_
-                        )
-                    )
-            }
-
-            # Filter to valid genders
-            mydata <- mydata %>% dplyr::filter(!is.na(Gender2))
-
-            if (nrow(mydata) == 0) {
-                stop(.("No valid data after gender filtering"))
-            }
-
-            # Create age bins ----
-            age_groups_preset <- self$options$age_groups %||% "custom"
-            bin_width <- self$options$bin_width %||% 5
-            bin_width <- max(1, min(50, bin_width))
-
-            if (age_groups_preset == "custom") {
-                max_age <- max(mydata$Age, na.rm = TRUE)
-                breaks_seq <- seq(from = 0, to = ceiling(max_age), by = bin_width)
-                if (max_age > tail(breaks_seq, 1)) {
-                    breaks_seq <- c(breaks_seq, ceiling(max_age))
+                # Custom: Check for custom_breaks first, then use bin_width
+                custom_breaks <- self$options$custom_breaks
+                if (!is.null(custom_breaks) && nchar(trimws(custom_breaks)) > 0) {
+                    # Parse comma-separated values
+                    breaks_seq <- tryCatch({
+                        breaks_str <- trimws(strsplit(custom_breaks, ",")[[1]])
+                        breaks_num <- as.numeric(breaks_str)
+                        # Remove NA values and sort
+                        breaks_num <- sort(unique(breaks_num[!is.na(breaks_num)]))
+                        # Add Inf at the end if not present
+                        if (tail(breaks_num, 1) != Inf) {
+                            breaks_num <- c(breaks_num, Inf)
+                        }
+                        breaks_num
+                    }, error = function(e) {
+                        # Fall back to bin_width if parsing fails
+                        bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
+                        breaks <- seq(from = 0, to = max_age, by = bin_width)
+                        if (max_age > tail(breaks, n = 1)) {
+                            breaks <- c(breaks, max_age)
+                        }
+                        breaks
+                    })
+                } else {
+                    # Use bin_width
+                    bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
+                    breaks_seq <- seq(from = 0, to = max_age, by = bin_width)
+                    if (max_age > tail(breaks_seq, n = 1)) {
+                        breaks_seq <- c(breaks_seq, max_age)
+                    }
                 }
-            } else {
-                breaks_seq <- switch(age_groups_preset,
-                    "pediatric" = c(0, 1, 2, 5, 10, 15, 18, Inf),
-                    "reproductive" = c(0, 15, 20, 25, 30, 35, 40, 45, 50, Inf),
-                    "geriatric" = c(0, 65, 70, 75, 80, 85, 90, 95, Inf),
-                    "lifecourse" = c(0, 5, 15, 25, 45, 65, 75, 85, Inf),
-                    seq(from = 0, to = ceiling(max(mydata$Age)), by = bin_width)
-                )
             }
 
-            # Create labels
+            # Create readable age group labels
             labels <- private$.create_age_labels(breaks_seq)
 
-            # Bin the ages
-            mydata$AgeGroup <- cut(mydata$Age,
-                                   breaks = breaks_seq,
-                                   labels = labels,
+            mydata[["Pop"]] <- cut(mydata[["Age"]],
                                    include.lowest = TRUE,
                                    right = TRUE,
+                                   breaks = breaks_seq,
+                                   labels = labels,
                                    ordered_result = FALSE)
 
-            # Aggregate data for plotting ----
+            # Prepare data for plotting and table output ----
             plotData <- mydata %>%
-                dplyr::group_by(Gender2, AgeGroup) %>%
+                dplyr::select(Gender = Gender2, Pop) %>%
+                dplyr::group_by(Gender, Pop) %>%
                 dplyr::count() %>%
-                dplyr::ungroup() %>%
+                dplyr::ungroup()
+
+            # Save state for plot rendering; ensures plot gets updated when bin_width changes
+            image <- self$results$plot
+            image$setState(plotData)
+
+            # Pivot data for table output ----
+            plotData2 <- plotData %>%
+                tidyr::pivot_wider(names_from = Gender,
+                                   values_from = n,
+                                   values_fill = list(n = 0)) %>%  # Fill missing counts with 0
+                dplyr::arrange(dplyr::desc(Pop)) %>%
+                dplyr::filter(!is.na(Pop)) %>%
+                dplyr::mutate(Pop = as.character(Pop)) %>%
                 as.data.frame()
 
-            # Store state for plot ----
-            # Include all visual options to trigger re-render on changes
-            plotState <- list(
-                data = plotData,
-                is_single_gender = is_single_gender,
-                single_gender_label = single_gender_label,
-                # Visual options for reactive updates
-                plot_title = self$options$plot_title,
-                color_palette = self$options$color_palette,
-                color1 = self$options$color1,
-                color2 = self$options$color2
-            )
-            self$results$plot$setState(plotState)
+            # Calculate totals and add percentages ----
+            total_female <- sum(plotData2$Female, na.rm = TRUE)
+            total_male <- sum(plotData2$Male, na.rm = TRUE)
 
-            # Populate table ----
-            tableData <- plotData %>%
-                tidyr::pivot_wider(
-                    names_from = Gender2,
-                    values_from = n,
-                    values_fill = 0
-                ) %>%
-                as.data.frame()
+            # Add percentage columns (safe division)
+            plotData2$Female_Pct <- ifelse(total_female > 0,
+                round(plotData2$Female / total_female * 100, 1), 0)
+            plotData2$Male_Pct <- ifelse(total_male > 0,
+                round(plotData2$Male / total_male * 100, 1), 0)
 
-            # Handle single-gender vs binary-gender column naming
-            if (is_single_gender) {
-                # Single-gender: rename Cohort to appropriate column
-                if ("Cohort" %in% names(tableData)) {
-                    if (!is.null(female_level) && is.null(male_level)) {
-                        tableData$Female <- tableData$Cohort
-                        tableData$Male <- 0
-                    } else {
-                        tableData$Male <- tableData$Cohort
-                        tableData$Female <- 0
-                    }
-                    tableData$Cohort <- NULL
-                }
-            } else {
-                # Binary-gender: ensure both columns exist
-                if (!"Female" %in% names(tableData)) tableData$Female <- 0
-                if (!"Male" %in% names(tableData)) tableData$Male <- 0
-            }
-
-            # Remove any Cohort column if it still exists
-            if ("Cohort" %in% names(tableData)) {
-                tableData$Cohort <- NULL
-            }
-
-            # Calculate percentages
-            total_female <- sum(tableData$Female, na.rm = TRUE)
-            total_male <- sum(tableData$Male, na.rm = TRUE)
-
-            tableData$Female_Pct <- ifelse(total_female > 0,
-                round(tableData$Female / total_female * 100, 1), 0)
-            tableData$Male_Pct <- ifelse(total_male > 0,
-                round(tableData$Male / total_male * 100, 1), 0)
-
-            # Add total row
+            # Add summary row
             summary_row <- data.frame(
-                AgeGroup = "Total",
+                Pop = "Total",
                 Female = total_female,
                 Male = total_male,
-                Female_Pct = ifelse(total_female > 0, 100, 0),
-                Male_Pct = ifelse(total_male > 0, 100, 0),
+                Female_Pct = ifelse(total_female > 0, 100.0, 0),
+                Male_Pct = ifelse(total_male > 0, 100.0, 0),
                 stringsAsFactors = FALSE
             )
 
-            tableData <- rbind(tableData, summary_row)
+            plotData2 <- rbind(plotData2, summary_row)
 
-            # Populate results table
+            # Populate the results table ----
             pyramidTable <- self$results$pyramidTable
-            for (i in seq_len(nrow(tableData))) {
-                pyramidTable$addRow(rowKey = i, values = tableData[i, ])
+            for(i in seq_len(nrow(plotData2))) {
+                pyramidTable$addRow(rowKey = i, values = plotData2[i,])
             }
 
-            # Build data info HTML ----
-            info_html <- private$.build_data_info_html(
-                n_initial = nrow(self$data),
-                n_final = nrow(mydata),
+            # Build data summary HTML ----
+            info_html <- private$.build_data_summary_html(
+                n_initial = n_initial,
+                n_final = n_final,
                 is_single_gender = is_single_gender,
                 female_level = female_level,
                 male_level = male_level,
@@ -243,149 +230,120 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .plot = function(image, ggtheme, theme, ...) {
-            # Check if plot state exists
-            plotState <- image$state
-            if (is.null(plotState) || is.null(plotState$data)) {
-                return(FALSE)
-            }
+            # Check if required options (age and gender) are provided
+            if (is.null(self$options$age) || is.null(self$options$gender))
+                return()
 
-            # Extract data and metadata
-            plotData <- as.data.frame(plotState$data)
-            is_single_gender <- plotState$is_single_gender %||% FALSE
-            single_gender_label <- plotState$single_gender_label %||% "Unknown"
+            if (nrow(self$data) == 0)
+                stop("Data contains no (complete) rows")
 
-            # Get visual options from state (these trigger re-render on change)
-            plot_title <- plotState$plot_title
-            color_palette <- plotState$color_palette %||% "standard"
-            color1 <- plotState$color1
-            color2 <- plotState$color2
+            # Retrieve the prepared plot data
+            plotData <- image$state
 
-            # Validate data
-            if (nrow(plotData) == 0) {
-                return(FALSE)
-            }
+            # Ensure that the age bins (Pop) reflect the latest bin width:
+            # Convert 'Pop' to character then back to factor with the order of appearance.
+            plotData$Pop <- factor(as.character(plotData$Pop), levels = unique(as.character(plotData$Pop)))
 
-            # Ensure proper column types
-            plotData$Gender2 <- as.character(plotData$Gender2)
-            plotData$AgeGroup <- as.factor(plotData$AgeGroup)
-            plotData$n <- as.numeric(plotData$n)
+            # Set plot title (using user option if provided)
+            plot_title <- if (!is.null(self$options$plot_title)) self$options$plot_title else "Age Pyramid"
 
-            # Determine colors ----
-            if (color_palette == "standard") {
-                female_color <- "#FF69B4"  # Hot pink
-                male_color <- "#4169E1"    # Royal blue
-            } else if (color_palette == "accessible") {
-                female_color <- "#E69F00"  # Orange
-                male_color <- "#56B4E9"    # Sky blue
+            # Determine color palette ----
+            color_palette <- if (!is.null(self$options$color_palette)) self$options$color_palette else 'standard'
+
+            if (color_palette == 'colorblind') {
+                # Orange/Blue palette (colorblind-friendly)
+                color_female <- "#E69F00"  # Orange
+                color_male <- "#0072B2"    # Blue
+            } else if (color_palette == 'grayscale') {
+                # Grayscale palette
+                color_female <- "#666666"  # Dark gray
+                color_male <- "#CCCCCC"    # Light gray
+            } else if (color_palette == 'custom') {
+                # Custom colors from user
+                color_female <- if (!is.null(self$options$female_color)) self$options$female_color else "#E91E63"
+                color_male <- if (!is.null(self$options$male_color)) self$options$male_color else "#2196F3"
             } else {
-                female_color <- color1 %||% "#FF69B4"
-                male_color <- color2 %||% "#4169E1"
+                # Standard palette (default pink/blue)
+                color_female <- "#E91E63"  # Pink
+                color_male <- "#2196F3"    # Blue
             }
 
-            # Create plot ----
-            if (is_single_gender) {
-                # Single-gender bar chart
-                cohort_color <- if(!is.null(color1)) color1 else female_color
-
-                if (is.null(plot_title) || plot_title == "") {
-                    plot_title <- sprintf(.("Age Distribution - %s"), single_gender_label)
-                }
-
-                plot <- ggplot2::ggplot(plotData, ggplot2::aes(x = AgeGroup, y = n))
-                plot <- plot + ggplot2::geom_col(fill = cohort_color, color = "black", width = 0.7)
-                plot <- plot + ggplot2::coord_flip()
-                plot <- plot + ggplot2::labs(
-                    x = .("Age Group"),
-                    y = .("Count"),
-                    title = plot_title
-                )
-                plot <- plot + ggplot2::theme_minimal()
-                plot <- plot + ggplot2::theme(
-                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
-                    axis.text = ggplot2::element_text(size = 10),
-                    axis.title = ggplot2::element_text(size = 12)
-                )
-
-            } else {
-                # Binary-gender pyramid
-                if (is.null(plot_title) || plot_title == "") {
-                    plot_title <- .("Age Pyramid")
-                }
-
-                bar_colors <- c("Female" = female_color, "Male" = male_color)
-
-                plot <- ggplot2::ggplot(plotData,
-                    ggplot2::aes(
-                        x = AgeGroup,
-                        y = ifelse(Gender2 == "Female", -n, n),
-                        fill = Gender2
-                    ))
-                plot <- plot + ggplot2::geom_col(width = 0.7, color = "black")
-                plot <- plot + ggplot2::coord_flip()
-                plot <- plot + ggplot2::scale_y_continuous(
-                    labels = abs,
-                    limits = c(-max(plotData$n), max(plotData$n))
-                )
-                plot <- plot + ggplot2::scale_fill_manual(values = bar_colors, name = .("Gender"))
-                plot <- plot + ggplot2::labs(
-                    x = .("Age Group"),
-                    y = .("Population Count"),
-                    title = plot_title
-                )
-                plot <- plot + ggplot2::theme_minimal()
-                plot <- plot + ggplot2::theme(
+            # Create a visually appealing age pyramid plot ----
+            plot <- ggplot2::ggplot(data = plotData,
+                                    mapping = ggplot2::aes(
+                                        x = Pop,
+                                        y = ifelse(Gender == "Female", -n, n),
+                                        fill = Gender
+                                    )) +
+                ggplot2::geom_col(width = 0.7, color = "black", show.legend = TRUE) +  # Added border for clarity
+                ggplot2::coord_flip() +
+                ggplot2::scale_y_continuous(labels = abs,
+                                            limits = c(-max(plotData$n, na.rm = TRUE), max(plotData$n, na.rm = TRUE))
+                ) +
+                ggplot2::scale_fill_manual(values = c("Female" = color_female, "Male" = color_male)) +
+                ggplot2::labs(x = "Age Group",
+                              y = "Population Count",
+                              title = plot_title,
+                              fill = "Gender") +
+                ggplot2::theme_minimal() +  # Clean minimal theme for improved visuals
+                ggplot2::theme(
                     plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
                     axis.text = ggplot2::element_text(size = 10),
                     axis.title = ggplot2::element_text(size = 12),
                     legend.position = "bottom"
                 )
-            }
 
-            # Apply jamovi theme
+            # Apply any additional theme modifications passed via ggtheme
             plot <- plot + ggtheme
 
-            # Render
             print(plot)
             return(TRUE)
         },
 
         .create_age_labels = function(breaks) {
+            # Create readable labels from age breaks
+            # With right=TRUE in cut(), intervals are (lower, upper]
+            # So we label as "lower+1 to upper" for clinical interpretation
             if (length(breaks) < 2) return(c())
+
             labels <- c()
             for (i in seq_len(length(breaks) - 1)) {
                 lower <- breaks[i]
                 upper <- breaks[i + 1]
                 if (is.infinite(upper)) {
+                    # Open-ended final category: "86+" for (85, Inf]
                     labels[i] <- paste0(lower + 1, "+")
                 } else {
+                    # Closed intervals: "1-5" for (0,5], "6-10" for (5,10]
                     labels[i] <- paste(lower + 1, upper, sep = "-")
                 }
             }
             return(labels)
         },
 
-        .build_data_info_html = function(n_initial, n_final, is_single_gender,
-                                        female_level, male_level, single_gender_label) {
+        .build_data_summary_html = function(n_initial, n_final, is_single_gender,
+                                           female_level, male_level, single_gender_label) {
+            # Build informative HTML showing data quality and gender level info
             n_excluded <- n_initial - n_final
 
             html <- "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;'>"
-            html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #1976d2;'>📊 ", .("Data Summary"), "</h4>")
+            html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #1976d2;'>📊 Data Summary</h4>")
             html <- paste0(html, "<table style='width: 100%; font-size: 14px;'>")
-            html <- paste0(html, "<tr><td><strong>", .("Initial observations:"), "</strong></td><td>", n_initial, "</td></tr>")
-            html <- paste0(html, "<tr><td><strong>", .("Final observations:"), "</strong></td><td>", n_final, "</td></tr>")
+            html <- paste0(html, "<tr><td><strong>Initial observations:</strong></td><td>", n_initial, "</td></tr>")
+            html <- paste0(html, "<tr><td><strong>Final observations:</strong></td><td>", n_final, "</td></tr>")
 
             if (n_excluded > 0) {
                 pct_excluded <- round(n_excluded / n_initial * 100, 1)
-                html <- paste0(html, "<tr><td><strong>", .("Excluded:"), "</strong></td><td style='color: #d32f2f;'>",
+                html <- paste0(html, "<tr><td><strong>Excluded:</strong></td><td style='color: #d32f2f;'>",
                     n_excluded, " (", pct_excluded, "%)</td></tr>")
             }
 
             if (is_single_gender) {
-                html <- paste0(html, "<tr><td><strong>", .("Cohort type:"), "</strong></td><td style='color: #f57c00;'>",
-                    .("Single-gender"), " (", single_gender_label, ")</td></tr>")
+                html <- paste0(html, "<tr><td><strong>Cohort type:</strong></td><td style='color: #f57c00;'>",
+                    "Single-gender (", single_gender_label, ")</td></tr>")
             } else {
-                html <- paste0(html, "<tr><td><strong>", .("Female level:"), "</strong></td><td>", female_level, "</td></tr>")
-                html <- paste0(html, "<tr><td><strong>", .("Male level:"), "</strong></td><td>", male_level, "</td></tr>")
+                html <- paste0(html, "<tr><td><strong>Female level:</strong></td><td>", female_level, "</td></tr>")
+                html <- paste0(html, "<tr><td><strong>Male level:</strong></td><td>", male_level, "</td></tr>")
             }
 
             html <- paste0(html, "</table></div>")
