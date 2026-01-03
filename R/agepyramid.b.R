@@ -60,7 +60,8 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- jmvcore::naOmit(mydata)
 
             # Convert age to numeric and gender to factor
-            mydata[["Age"]] <- jmvcore::toNumeric(mydata[[age]])
+            # Use as.character before as.numeric to handle factors correctly
+            mydata[["Age"]] <- as.numeric(as.character(mydata[[age]]))
             mydata[["Gender"]] <- as.factor(mydata[[gender]])
 
             # Determine gender levels with smart defaults ----
@@ -90,16 +91,47 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 male_level <- if(length(remaining) > 0) remaining[1] else NULL
             }
 
+            # Validate that female and male levels are different
+            if (!is.null(female_level) && !is.null(male_level) && female_level == male_level) {
+                error_html <- paste0(
+                    "<div style='background-color: #ffebee; padding: 20px; border-radius: 8px; border-left: 4px solid #f44336;'>",
+                    "<h3 style='color: #c62828; margin-top: 0;'>⚠️ Configuration Error</h3>",
+                    "<p style='font-size: 15px;'><strong>Female and Male gender levels cannot be the same.</strong></p>",
+                    "<p style='font-size: 14px;'>You have selected '<strong>", female_level, "</strong>' for both Female and Male.</p>",
+                    "<h4 style='color: #c62828; margin-bottom: 8px;'>To fix this:</h4>",
+                    "<ol style='font-size: 14px; line-height: 1.6;'>",
+                    "    <li>Select different levels for Female and Male, OR</li>",
+                    "    <li>Leave one or both unselected to use auto-detection</li>",
+                    "</ol>",
+                    "<p style='font-size: 13px; color: #666; margin-bottom: 0; font-style: italic;'>",
+                    "The age pyramid requires two distinct gender categories for comparison.",
+                    "</p>",
+                    "</div>"
+                )
+                self$results$dataInfo$setContent(error_html)
+                return()
+            }
+
             # Detect single-gender cohort
             is_single_gender <- is.null(male_level) || is.null(female_level)
             single_gender_label <- if(!is.null(female_level)) female_level else male_level
 
             # Create standardized gender variable
+            is_female <- if (!is.null(female_level)) {
+                mydata[["Gender"]] == female_level
+            } else {
+                FALSE
+            }
+            is_male <- if (!is.null(male_level)) {
+                mydata[["Gender"]] == male_level
+            } else {
+                FALSE
+            }
             mydata <- mydata %>%
                 dplyr::mutate(
                     Gender2 = dplyr::case_when(
-                        Gender == female_level ~ "Female",
-                        Gender == male_level ~ "Male",
+                        is_female ~ "Female",
+                        is_male ~ "Male",
                         TRUE ~ NA_character_  # Other values become NA
                     )
                 ) %>%
@@ -158,6 +190,12 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
+            # Safeguard: ensure we have at least two unique breaks for cut()
+            if (length(unique(breaks_seq)) < 2) {
+                # Fallback to a single bin [0, max_age+1] if data is restricted
+                breaks_seq <- c(0, max_age + 1)
+            }
+
             # Create readable age group labels
             labels <- private$.create_age_labels(breaks_seq)
 
@@ -173,11 +211,19 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::select(Gender = Gender2, Pop) %>%
                 dplyr::group_by(Gender, Pop) %>%
                 dplyr::count() %>%
-                dplyr::ungroup()
+                dplyr::ungroup() %>%
+                dplyr::arrange(Pop) %>%
+                as.data.frame()
 
             # Save state for plot rendering; ensures plot gets updated when bin_width changes
             image <- self$results$plot
             image$setState(plotData)
+
+            # Also save state for ggcharts plot (if enabled)
+            if (self$options$enableGGCharts) {
+                imageGGCharts <- self$results$plotGGCharts
+                imageGGCharts$setState(plotData)
+            }
 
             # Pivot data for table output ----
             plotData2 <- plotData %>%
@@ -190,6 +236,12 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 as.data.frame()
 
             # Calculate totals and add percentages ----
+            if (!("Female" %in% names(plotData2))) {
+                plotData2$Female <- 0
+            }
+            if (!("Male" %in% names(plotData2))) {
+                plotData2$Male <- 0
+            }
             total_female <- sum(plotData2$Female, na.rm = TRUE)
             total_male <- sum(plotData2$Male, na.rm = TRUE)
 
@@ -239,6 +291,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Retrieve the prepared plot data
             plotData <- image$state
+
+            # Return early if no plot data available (e.g., validation errors in .run())
+            if (is.null(plotData))
+                return(FALSE)
 
             # Ensure that the age bins (Pop) reflect the latest bin width:
             # Convert 'Pop' to character then back to factor with the order of appearance.
@@ -295,20 +351,131 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ggplot2::labs(x = "Age Group",
                               y = "Population Count",
                               title = plot_title,
-                              fill = "Gender") +
-                ggplot2::theme_minimal() +  # Clean minimal theme for improved visuals
-                ggplot2::theme(
-                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
-                    axis.text = ggplot2::element_text(size = 10),
-                    axis.title = ggplot2::element_text(size = 12),
-                    legend.position = "bottom"
-                )
+                              fill = "Gender")
 
-            # Apply any additional theme modifications passed via ggtheme
-            plot <- plot + ggtheme
+            # Apply theme based on user preference
+            if (!self$options$originaltheme) {
+                # Use jamovi's theme
+                plot <- plot + ggtheme
+            } else {
+                # Use original code's custom theme
+                plot <- plot +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                        axis.text = ggplot2::element_text(size = 10),
+                        axis.title = ggplot2::element_text(size = 12),
+                        legend.position = "bottom"
+                    )
+            }
 
             print(plot)
             return(TRUE)
+        },
+
+        .plotGGCharts = function(image, ggtheme, theme, ...) {
+            # Check if ggcharts plot is enabled
+            if (!self$options$enableGGCharts)
+                return(FALSE)
+
+            # Check if required options (age and gender) are provided
+            if (is.null(self$options$age) || is.null(self$options$gender))
+                return(FALSE)
+
+            if (nrow(self$data) == 0)
+                return(FALSE)
+
+            # Retrieve the prepared plot data from .run()
+            # We'll use the same data preparation that was done for the main plot
+            plotData <- image$state
+
+            # Return early if no plot data available
+            if (is.null(plotData))
+                return(FALSE)
+
+            # ggcharts pyramid_chart requires long-format data with:
+            # - x: age groups (categorical)
+            # - y: population counts (numeric)
+            # - group: gender categories (exactly 2 unique values)
+
+            # The plotData from .run() is already in the correct format:
+            # columns: Gender, Pop, n
+
+            # Determine bar colors based on color palette selection
+            color_scheme <- self$options$ggcharts_colors
+            if (is.null(color_scheme) || length(color_scheme) == 0) {
+                color_scheme <- 'default'
+            }
+
+            # Set colors based on palette selection
+            if (color_scheme == 'default') {
+                # ggcharts default: Blue and Orange
+                bar_colors <- c("#1F77B4", "#FF7F0E")
+            } else if (color_scheme == 'standard') {
+                # Standard: Pink and Blue (matching main plot)
+                bar_colors <- c("#E91E63", "#2196F3")
+            } else if (color_scheme == 'colorblind') {
+                # Colorblind-friendly: Orange and Blue
+                bar_colors <- c("#E69F00", "#0072B2")
+            } else if (color_scheme == 'grayscale') {
+                # Grayscale
+                bar_colors <- c("#666666", "#CCCCCC")
+            } else if (color_scheme == 'custom') {
+                # Custom colors from user
+                color1 <- self$options$ggcharts_color1
+                color2 <- self$options$ggcharts_color2
+                # Fallback to defaults if colors are empty
+                if (is.null(color1) || nchar(trimws(color1)) == 0) {
+                    color1 <- "#1F77B4"
+                }
+                if (is.null(color2) || nchar(trimws(color2)) == 0) {
+                    color2 <- "#FF7F0E"
+                }
+                bar_colors <- c(color1, color2)
+            } else {
+                # Default fallback
+                bar_colors <- c("#1F77B4", "#FF7F0E")
+            }
+
+            # Get other options
+            sort_option <- if (!is.null(self$options$ggcharts_sort)) {
+                self$options$ggcharts_sort
+            } else {
+                "no"
+            }
+
+            plot_title <- if (!is.null(self$options$ggcharts_title)) {
+                self$options$ggcharts_title
+            } else {
+                "Age Pyramid (ggcharts)"
+            }
+
+            xlab_text <- if (!is.null(self$options$ggcharts_xlab)) {
+                self$options$ggcharts_xlab
+            } else {
+                "Population"
+            }
+
+            # Create the ggcharts pyramid
+            tryCatch({
+                plot <- ggcharts::pyramid_chart(
+                    data = plotData,
+                    x = Pop,
+                    y = n,
+                    group = Gender,
+                    bar_colors = bar_colors,
+                    sort = sort_option,
+                    xlab = xlab_text,
+                    title = plot_title
+                )
+
+                print(plot)
+                return(TRUE)
+            }, error = function(e) {
+                # If ggcharts fails, show informative message
+                warning("ggcharts pyramid failed: ", e$message)
+                return(FALSE)
+            })
         },
 
         .create_age_labels = function(breaks) {

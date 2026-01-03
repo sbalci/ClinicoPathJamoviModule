@@ -16,7 +16,15 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plot_title = "Age Pyramid",
             color_palette = "standard",
             female_color = "#E91E63",
-            male_color = "#2196F3", ...) {
+            male_color = "#2196F3",
+            originaltheme = FALSE,
+            enableGGCharts = FALSE,
+            ggcharts_sort = "no",
+            ggcharts_colors = "default",
+            ggcharts_color1 = "#1F77B4",
+            ggcharts_color2 = "#FF7F0E",
+            ggcharts_title = "Age Pyramid (ggcharts)",
+            ggcharts_xlab = "Population", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -86,6 +94,48 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "male_color",
                 male_color,
                 default="#2196F3")
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
+            private$..enableGGCharts <- jmvcore::OptionBool$new(
+                "enableGGCharts",
+                enableGGCharts,
+                default=FALSE)
+            private$..ggcharts_sort <- jmvcore::OptionList$new(
+                "ggcharts_sort",
+                ggcharts_sort,
+                options=list(
+                    "no",
+                    "ascending",
+                    "descending"),
+                default="no")
+            private$..ggcharts_colors <- jmvcore::OptionList$new(
+                "ggcharts_colors",
+                ggcharts_colors,
+                options=list(
+                    "default",
+                    "standard",
+                    "colorblind",
+                    "grayscale",
+                    "custom"),
+                default="default")
+            private$..ggcharts_color1 <- jmvcore::OptionString$new(
+                "ggcharts_color1",
+                ggcharts_color1,
+                default="#1F77B4")
+            private$..ggcharts_color2 <- jmvcore::OptionString$new(
+                "ggcharts_color2",
+                ggcharts_color2,
+                default="#FF7F0E")
+            private$..ggcharts_title <- jmvcore::OptionString$new(
+                "ggcharts_title",
+                ggcharts_title,
+                default="Age Pyramid (ggcharts)")
+            private$..ggcharts_xlab <- jmvcore::OptionString$new(
+                "ggcharts_xlab",
+                ggcharts_xlab,
+                default="Population")
 
             self$.addOption(private$..age)
             self$.addOption(private$..gender)
@@ -98,6 +148,14 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..color_palette)
             self$.addOption(private$..female_color)
             self$.addOption(private$..male_color)
+            self$.addOption(private$..originaltheme)
+            self$.addOption(private$..enableGGCharts)
+            self$.addOption(private$..ggcharts_sort)
+            self$.addOption(private$..ggcharts_colors)
+            self$.addOption(private$..ggcharts_color1)
+            self$.addOption(private$..ggcharts_color2)
+            self$.addOption(private$..ggcharts_title)
+            self$.addOption(private$..ggcharts_xlab)
         }),
     active = list(
         age = function() private$..age$value,
@@ -110,7 +168,15 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot_title = function() private$..plot_title$value,
         color_palette = function() private$..color_palette$value,
         female_color = function() private$..female_color$value,
-        male_color = function() private$..male_color$value),
+        male_color = function() private$..male_color$value,
+        originaltheme = function() private$..originaltheme$value,
+        enableGGCharts = function() private$..enableGGCharts$value,
+        ggcharts_sort = function() private$..ggcharts_sort$value,
+        ggcharts_colors = function() private$..ggcharts_colors$value,
+        ggcharts_color1 = function() private$..ggcharts_color1$value,
+        ggcharts_color2 = function() private$..ggcharts_color2$value,
+        ggcharts_title = function() private$..ggcharts_title$value,
+        ggcharts_xlab = function() private$..ggcharts_xlab$value),
     private = list(
         ..age = NA,
         ..gender = NA,
@@ -122,7 +188,15 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plot_title = NA,
         ..color_palette = NA,
         ..female_color = NA,
-        ..male_color = NA)
+        ..male_color = NA,
+        ..originaltheme = NA,
+        ..enableGGCharts = NA,
+        ..ggcharts_sort = NA,
+        ..ggcharts_colors = NA,
+        ..ggcharts_color1 = NA,
+        ..ggcharts_color2 = NA,
+        ..ggcharts_title = NA,
+        ..ggcharts_xlab = NA)
 )
 
 agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -132,7 +206,8 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         welcome = function() private$.items[["welcome"]],
         dataInfo = function() private$.items[["dataInfo"]],
         pyramidTable = function() private$.items[["pyramidTable"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        plotGGCharts = function() private$.items[["plotGGCharts"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -204,7 +279,31 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "plot_title",
                     "color_palette",
                     "female_color",
-                    "male_color")))}))
+                    "male_color",
+                    "originaltheme")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotGGCharts",
+                title="Age Pyramid (ggcharts)",
+                width=700,
+                height=500,
+                renderFun=".plotGGCharts",
+                visible="(enableGGCharts)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "age",
+                    "gender",
+                    "female",
+                    "male",
+                    "age_groups",
+                    "bin_width",
+                    "custom_breaks",
+                    "ggcharts_sort",
+                    "ggcharts_colors",
+                    "ggcharts_color1",
+                    "ggcharts_color2",
+                    "ggcharts_title",
+                    "ggcharts_xlab")))}))
 
 agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agepyramidBase",
@@ -253,12 +352,29 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   color_palette is 'custom'.
 #' @param male_color Custom color for male bars (hex code). Only used when
 #'   color_palette is 'custom'.
+#' @param originaltheme Whether to apply the original custom theme
+#'   (theme_minimal with custom tweaks) instead of jamovi's default theme.
+#' @param enableGGCharts Enable the ggcharts pyramid_chart() visualization as
+#'   a second plot. This provides an alternative visualization style using the
+#'   ggcharts package.
+#' @param ggcharts_sort Sort bars by population count. Options: 'no' (default
+#'   order), 'ascending' (smallest to largest), 'descending' (largest to
+#'   smallest).
+#' @param ggcharts_colors Color scheme for ggcharts pyramid. 'default' uses
+#'   ggcharts defaults, or select from preset palettes or custom colors.
+#' @param ggcharts_color1 Custom color for first group (hex code). Used when
+#'   ggcharts_colors is 'custom'.
+#' @param ggcharts_color2 Custom color for second group (hex code). Used when
+#'   ggcharts_colors is 'custom'.
+#' @param ggcharts_title Title for the ggcharts pyramid plot.
+#' @param ggcharts_xlab X-axis label for ggcharts pyramid.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pyramidTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotGGCharts} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -280,7 +396,15 @@ agepyramid <- function(
     plot_title = "Age Pyramid",
     color_palette = "standard",
     female_color = "#E91E63",
-    male_color = "#2196F3") {
+    male_color = "#2196F3",
+    originaltheme = FALSE,
+    enableGGCharts = FALSE,
+    ggcharts_sort = "no",
+    ggcharts_colors = "default",
+    ggcharts_color1 = "#1F77B4",
+    ggcharts_color2 = "#FF7F0E",
+    ggcharts_title = "Age Pyramid (ggcharts)",
+    ggcharts_xlab = "Population") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agepyramid requires jmvcore to be installed (restart may be required)")
@@ -306,7 +430,15 @@ agepyramid <- function(
         plot_title = plot_title,
         color_palette = color_palette,
         female_color = female_color,
-        male_color = male_color)
+        male_color = male_color,
+        originaltheme = originaltheme,
+        enableGGCharts = enableGGCharts,
+        ggcharts_sort = ggcharts_sort,
+        ggcharts_colors = ggcharts_colors,
+        ggcharts_color1 = ggcharts_color1,
+        ggcharts_color2 = ggcharts_color2,
+        ggcharts_title = ggcharts_title,
+        ggcharts_xlab = ggcharts_xlab)
 
     analysis <- agepyramidClass$new(
         options = options,

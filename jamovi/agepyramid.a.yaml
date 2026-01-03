@@ -156,6 +156,110 @@ options:
           jamovi: >
             Custom color for male bars (hex code).
 
+    - name: originaltheme
+      title: Use Original Custom Theme
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether to apply the original custom theme (theme_minimal with custom tweaks)
+            instead of jamovi's default theme.
+          jamovi: >
+            Use original custom theme instead of jamovi's default theme.
+
+    # ---- GGCharts Pyramid Options ----
+
+    - name: enableGGCharts
+      title: Enable GGCharts Pyramid
+      type: Bool
+      default: false
+      description:
+          R: >
+            Enable the ggcharts pyramid_chart() visualization as a second plot.
+            This provides an alternative visualization style using the ggcharts package.
+          jamovi: >
+            Show ggcharts pyramid as a second plot option.
+
+    - name: ggcharts_sort
+      title: Sort Bars
+      type: List
+      options:
+        - name: no
+          title: No Sorting
+        - name: ascending
+          title: Ascending
+        - name: descending
+          title: Descending
+      default: no
+      description:
+          R: >
+            Sort bars by population count. Options: 'no' (default order),
+            'ascending' (smallest to largest), 'descending' (largest to smallest).
+          jamovi: >
+            Sort bars by population count.
+
+    - name: ggcharts_colors
+      title: Bar Colors
+      type: List
+      options:
+        - name: default
+          title: Default (Blue/Orange)
+        - name: standard
+          title: Standard (Pink/Blue)
+        - name: colorblind
+          title: Colorblind-Friendly
+        - name: grayscale
+          title: Grayscale
+        - name: custom
+          title: Custom Colors
+      default: default
+      description:
+          R: >
+            Color scheme for ggcharts pyramid. 'default' uses ggcharts defaults,
+            or select from preset palettes or custom colors.
+          jamovi: >
+            Color scheme for the ggcharts pyramid.
+
+    - name: ggcharts_color1
+      title: First Group Color
+      type: String
+      default: "#1F77B4"
+      description:
+          R: >
+            Custom color for first group (hex code). Used when ggcharts_colors is 'custom'.
+          jamovi: >
+            Custom color for first group (hex code).
+
+    - name: ggcharts_color2
+      title: Second Group Color
+      type: String
+      default: "#FF7F0E"
+      description:
+          R: >
+            Custom color for second group (hex code). Used when ggcharts_colors is 'custom'.
+          jamovi: >
+            Custom color for second group (hex code).
+
+    - name: ggcharts_title
+      title: GGCharts Plot Title
+      type: String
+      default: "Age Pyramid (ggcharts)"
+      description:
+          R: >
+            Title for the ggcharts pyramid plot.
+          jamovi: >
+            Title for the ggcharts pyramid plot.
+
+    - name: ggcharts_xlab
+      title: X-Axis Label
+      type: String
+      default: "Population"
+      description:
+          R: >
+            X-axis label for ggcharts pyramid.
+          jamovi: >
+            X-axis label for ggcharts pyramid.
+
 
 
 ...

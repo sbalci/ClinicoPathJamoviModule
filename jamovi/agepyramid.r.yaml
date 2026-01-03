@@ -64,6 +64,30 @@ items:
           - color_palette
           - female_color
           - male_color
+          - originaltheme
+
+    - name: plotGGCharts
+      title: 'Age Pyramid (ggcharts)'
+      type: Image
+      width:  700
+      height: 500
+      renderFun: .plotGGCharts
+      visible: (enableGGCharts)
+      requiresData: true
+      clearWith:
+          - age
+          - gender
+          - female
+          - male
+          - age_groups
+          - bin_width
+          - custom_breaks
+          - ggcharts_sort
+          - ggcharts_colors
+          - ggcharts_color1
+          - ggcharts_color2
+          - ggcharts_title
+          - ggcharts_xlab
 
 refs:
     - ClinicoPathJamoviModule

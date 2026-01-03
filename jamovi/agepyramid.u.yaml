@@ -44,6 +44,7 @@ children:
             name: custom_breaks
             format: string
             enable: (age_groups:custom)
+            width: largest
   - type: LayoutBox
     margin: large
     children:
@@ -53,14 +54,53 @@ children:
           - type: TextBox
             name: plot_title
             format: string
-            width: large
+            width: largest
           - type: ComboBox
             name: color_palette
           - type: TextBox
             name: female_color
             format: string
             enable: (color_palette:custom)
+            width: largest
           - type: TextBox
             name: male_color
             format: string
             enable: (color_palette:custom)
+            width: largest
+          - type: CheckBox
+            name: originaltheme
+  - type: CollapseBox
+    label: GGCharts Pyramid Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: enableGGCharts
+          - type: ComboBox
+            name: ggcharts_sort
+            enable: (enableGGCharts)
+          - type: ComboBox
+            name: ggcharts_colors
+            enable: (enableGGCharts)
+          - type: TextBox
+            name: ggcharts_color1
+            format: string
+            enable: (enableGGCharts && ggcharts_colors:custom)
+            width: largest
+          - type: TextBox
+            name: ggcharts_color2
+            format: string
+            enable: (enableGGCharts && ggcharts_colors:custom)
+            width: largest
+          - type: TextBox
+            name: ggcharts_title
+            format: string
+            enable: (enableGGCharts)
+            width: largest
+          - type: TextBox
+            name: ggcharts_xlab
+            format: string
+            enable: (enableGGCharts)
+            width: largest
