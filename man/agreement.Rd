@@ -10,6 +10,12 @@ agreement(
   baConfidenceLevel = 0.95,
   proportionalBias = FALSE,
   blandAltmanPlot = FALSE,
+  agreementHeatmap = FALSE,
+  heatmapColorScheme = "bluered",
+  heatmapShowPercentages = TRUE,
+  heatmapShowCounts = TRUE,
+  heatmapAnnotationSize = 3.5,
+  showAgreementHeatmapGuide = FALSE,
   sft = FALSE,
   wght = "unweighted",
   exct = FALSE,
@@ -21,9 +27,33 @@ agreement(
   gwetWeights = "unweighted",
   icc = FALSE,
   iccType = "icc21",
+  meanPearson = FALSE,
+  showMeanPearsonGuide = FALSE,
+  linCCC = FALSE,
+  showLinCCCGuide = FALSE,
+  tdi = FALSE,
+  tdiCoverage = 90,
+  tdiLimit = 10,
+  showTDIGuide = FALSE,
+  iota = FALSE,
+  iotaStandardize = TRUE,
+  finn = FALSE,
+  finnLevels = 3,
+  finnModel = "oneway",
   lightKappa = FALSE,
   kendallW = FALSE,
+  robinsonA = FALSE,
+  showRobinsonAGuide = FALSE,
+  meanSpearman = FALSE,
+  showMeanSpearmanGuide = FALSE,
   raterBias = FALSE,
+  bhapkar = FALSE,
+  stuartMaxwell = FALSE,
+  maxwellRE = FALSE,
+  showMaxwellREGuide = FALSE,
+  interIntraRater = FALSE,
+  interIntraSeparator = "_",
+  showInterIntraRaterGuide = FALSE,
   pairwiseKappa = FALSE,
   referenceRater,
   rankRaters = FALSE,
@@ -35,6 +65,11 @@ agreement(
   shrinkageEstimates = FALSE,
   testClusterHomogeneity = TRUE,
   clusterRankings = FALSE,
+  specificAgreement = FALSE,
+  specificPositiveCategory = "",
+  specificAllCategories = TRUE,
+  specificConfidenceIntervals = TRUE,
+  showSpecificAgreementGuide = FALSE,
   showSummary = FALSE,
   showAbout = FALSE,
   consensusName = "consensus_rating",
@@ -47,7 +82,24 @@ agreement(
   loaHighThreshold = 75,
   loaLowThreshold = 56,
   loaVariableName = "agreement_level",
-  showLoaTable = TRUE
+  showLoaTable = TRUE,
+  raterProfiles = FALSE,
+  raterProfileType = "boxplot",
+  raterProfileShowPoints = FALSE,
+  showRaterProfileGuide = FALSE,
+  agreementBySubgroup = FALSE,
+  subgroupVariable,
+  subgroupForestPlot = TRUE,
+  subgroupMinCases = 10,
+  showSubgroupGuide = FALSE,
+  raterClustering = FALSE,
+  clusterMethod = "hierarchical",
+  clusterDistance = "correlation",
+  clusterLinkage = "average",
+  nClusters = 3,
+  showDendrogram = TRUE,
+  showClusterHeatmap = TRUE,
+  showRaterClusterGuide = FALSE
 )
 }
 \arguments{
@@ -68,6 +120,37 @@ linear regression of difference vs. mean.}
 analysis. Displays mean difference and limits of agreement between the
 first two raters. Only applicable when raters provide continuous
 measurements (e.g., tumor size in mm).}
+
+\item{agreementHeatmap}{Generate heatmap visualization of agreement
+patterns for categorical data. Creates confusion matrices showing how each
+rater pair's classifications correspond. Color-coded cells reveal agreement
+(diagonal) and specific disagreement patterns (off-diagonal). Essential for
+identifying systematic biases, problematic categories, and training needs.
+Shows where raters agree strongly, where they consistently disagree, and
+which category confusions are most common. Particularly valuable for
+multi-category classifications with complex disagreement patterns.}
+
+\item{heatmapColorScheme}{Color palette for heatmap visualization. Blue-Red
+highlights diagonal agreement with strong contrast. Traffic light uses
+intuitive color coding. Viridis is perceptually uniform and
+colorblind-safe. Grayscale for black-and-white printing.}
+
+\item{heatmapShowPercentages}{Display percentage values within heatmap
+cells (percentage of total cases). Helps interpret relative frequency of
+each rater combination. Essential when comparing heatmaps with different
+sample sizes.}
+
+\item{heatmapShowCounts}{Display absolute counts within heatmap cells
+(number of cases). Shows actual sample sizes for each cell. Useful for
+identifying cells with insufficient data and assessing statistical
+reliability.}
+
+\item{heatmapAnnotationSize}{Text size for cell annotations (counts and
+percentages). Adjust for readability with different numbers of categories.
+Larger for few categories, smaller for many categories.}
+
+\item{showAgreementHeatmapGuide}{Show educational guide and clinical use
+cases for Agreement Heatmap before running analysis.}
 
 \item{sft}{Display frequency tables showing the distribution of ratings for
 each rater. Useful for understanding rating patterns and identifying
@@ -115,6 +198,85 @@ different raters. Two-way: all subjects rated by same raters. Random:
 raters are random sample. Mixed: raters are fixed. Single: reliability of
 individual rater. Average (k): reliability of mean rating.}
 
+\item{meanPearson}{Mean Pearson Correlation calculates the average linear
+correlation coefficient across all rater pairs for continuous measurements.
+Pearson's r measures linear association between variables, ranging from -1
+(perfect negative) to +1 (perfect positive correlation). For interrater
+agreement, high positive correlations indicate raters' measurements vary
+together linearly. Particularly useful for continuous scales (tumor size,
+biomarker levels, quantitative scores), assumes linear relationship and
+normality. Complements ICC by focusing on correlation rather than absolute
+agreement. Simple, interpretable measure for assessing whether raters rank
+and scale measurements similarly.}
+
+\item{showMeanPearsonGuide}{Show educational guide and clinical use cases
+for Mean Pearson Correlation before running analysis.}
+
+\item{linCCC}{Lin's Concordance Correlation Coefficient (CCC) measures both
+precision and accuracy for continuous data, making it superior to Pearson's
+r for method comparison and agreement studies. CCC ranges from -1 to +1
+(perfect concordance) and equals the product of Pearson's r (precision) and
+a bias correction factor (accuracy). Unlike Pearson's r which only measures
+linear association, CCC penalizes systematic bias. Essential for method
+comparison (manual vs. automated), instrument validation, and assessing
+measurement agreement. Requires 2 raters/methods for pairwise comparison;
+calculates all pairwise CCCs for 3+ raters.}
+
+\item{showLinCCCGuide}{Show educational guide and clinical use cases for
+Lin's Concordance Correlation Coefficient before running analysis.}
+
+\item{tdi}{Total Deviation Index (TDI) quantifies the limits within which a
+specified proportion of differences between two measurement methods will
+fall. Unlike Bland-Altman which assumes constant variability, TDI accounts
+for heteroscedastic errors (variance increasing with magnitude). Provides a
+single index for acceptable agreement based on predefined clinically
+acceptable limits. Essential for medical device validation, laboratory
+method comparison, and biomarker assay validation where regulatory agencies
+require demonstration that a specified percentage of measurements fall
+within acceptable limits. Requires 2 raters/methods. Particularly useful
+when establishing equivalence between manual and automated measurements or
+between different measurement platforms.}
+
+\item{tdiCoverage}{The proportion of differences that should fall within
+TDI limits (default: 90\\%). Common values: 90\\% for general agreement, 95\\%
+for stringent requirements. This defines what percentage of future
+measurements must fall within acceptable limits.}
+
+\item{tdiLimit}{Maximum acceptable difference between methods in original
+units. Example: For tumor size, 5mm might be clinically acceptable. TDI
+should be smaller than this limit for methods to be considered equivalent.}
+
+\item{showTDIGuide}{Show educational guide and clinical use cases for Total
+Deviation Index before running analysis.}
+
+\item{iota}{Iota coefficient for multivariate interrater agreement.
+Measures agreement when raters assess multiple variables simultaneously
+(e.g., tumor size + grade + mitotic count). Unlike ICC which analyzes one
+variable at a time, Iota provides a single chance-corrected agreement index
+across all variables. Supports both quantitative (continuous) and nominal
+(categorical) data. Reduces to Fleiss' kappa for single categorical
+variable.}
+
+\item{iotaStandardize}{Z-standardize quantitative variables before
+computing Iota. Recommended when variables are on different scales (e.g.,
+tumor size in mm vs. Ki-67 percentage). Ensures each variable contributes
+equally to the overall agreement measure.}
+
+\item{finn}{Finn coefficient for interrater reliability of categorical
+data. Variance-based agreement measure especially useful when variance
+between raters is low (i.e., agreement is high). Alternative to traditional
+kappa-based measures. Works with ordered categorical ratings.}
+
+\item{finnLevels}{The number of different rating categories for Finn
+coefficient calculation (e.g., 3 for low/medium/high, 5 for 5-point Likert
+scale). Must specify the total number of distinct categories in your rating
+scale.}
+
+\item{finnModel}{Model specification for Finn coefficient. One-way: only
+subjects are random effects (each subject may be rated by different
+raters). Two-way: both subjects and raters are random (subjects and raters
+randomly chosen from larger populations).}
+
 \item{lightKappa}{Alternative agreement measure for 3 or more raters.
 Calculates the average of all pairwise kappas between raters. More robust
 than Fleiss' kappa when raters have different marginal distributions or
@@ -126,11 +288,82 @@ agreement) to 1 (perfect agreement). Particularly useful for ranked data,
 severity scores, and ordinal grading systems where you want to know if
 raters rank cases in similar order.}
 
+\item{robinsonA}{Robinson's A is an agreement coefficient for ordinal data
+based on the proportion of concordant pairs. It ranges from -1 (complete
+disagreement) to 1 (perfect agreement), with 0 indicating agreement no
+better than chance. Alternative to weighted kappa that directly measures
+the degree of ordinal association between raters. Particularly useful when
+ordinal categories have meaningful rank order (e.g., disease severity
+stages, tumor grades). Less affected by marginal distribution imbalances
+than kappa-based measures.}
+
+\item{showRobinsonAGuide}{Show educational guide and clinical use cases for
+Robinson's A before running analysis.}
+
+\item{meanSpearman}{Mean Spearman Rho calculates the average rank
+correlation across all rater pairs. Spearman's rho is a nonparametric
+measure of monotonic association for ordinal data. It ranges from -1
+(perfect negative association) to +1 (perfect positive association), with 0
+indicating no association. When used for interrater agreement, high
+positive values indicate raters rank cases similarly. Particularly useful
+for ordinal scales, rankings, and severity ratings. Robust to outliers and
+does not assume linear relationship. Complements other ordinal measures
+(Robinson's A, Kendall's W) by focusing on rank-order correlation rather
+than exact concordance.}
+
+\item{showMeanSpearmanGuide}{Show educational guide and clinical use cases
+for Mean Spearman Rho before running analysis.}
+
 \item{raterBias}{Tests whether raters have systematically different rating
 patterns (e.g., one rater is more lenient/strict than others). Uses
 chi-square test to detect if marginal frequencies differ significantly
 across raters. Essential quality control tool to identify raters who
 consistently over-diagnose or under-diagnose compared to their peers.}
+
+\item{bhapkar}{Bhapkar test for marginal homogeneity between two raters
+with multiple categories. More powerful alternative to Stuart-Maxwell test.
+Like McNemar's test but for >2 categories. Tests if two raters use rating
+categories with equal frequency. Essential for paired comparisons (e.g.,
+pre-post training, novice vs. expert, pathologist vs. AI algorithm) to
+detect systematic differences in category usage.}
+
+\item{stuartMaxwell}{Stuart-Maxwell test for marginal homogeneity between
+two raters with multiple categories. Classic test for matched data
+analysis. Like McNemar's test but for >2 categories. Tests if two raters
+use rating categories with equal frequency. Note: Bhapkar test is more
+powerful for large samples, but Stuart-Maxwell is the traditional choice.
+Use for paired/matched comparisons to detect systematic category usage
+differences.}
+
+\item{maxwellRE}{Maxwell's Random Error (RE) index decomposes total
+measurement variance into systematic and random error components. RE
+represents the proportion of total disagreement attributable to random
+measurement error rather than systematic differences between raters or
+methods. Values range from 0 (all error is systematic) to 1 (all error is
+random). Essential for understanding error sources in method comparison
+studies, diagnostic test validation, and measurement reliability
+assessment. Typically used with continuous or ordinal data requiring 2+
+raters/methods.}
+
+\item{showMaxwellREGuide}{Show educational guide and clinical use cases for
+Maxwell's RE before running analysis.}
+
+\item{interIntraRater}{Simultaneous assessment of inter-rater and
+intra-rater reliability for test-retest studies. Calculates intra-rater
+reliability (same rater consistency across time) and inter-rater
+reliability (agreement between different raters). Requires paired columns
+representing the same rater at different time points (e.g., Rater1_Time1,
+Rater1_Time2). Essential for training evaluation, fatigue studies, and
+long-term reliability assessment. Reports both within-rater consistency and
+between-rater agreement.}
+
+\item{interIntraSeparator}{Character separating rater ID from time point in
+column names (default: underscore). Example: With separator "\emph{", columns
+named "Rater1_T1" and "Rater1_T2" are recognized as the same rater at two
+time points. Common patterns: underscore (}), dot (.), dash (-).}
+
+\item{showInterIntraRaterGuide}{Show educational guide and clinical use
+cases for Inter/Intra-Rater Reliability before running analysis.}
 
 \item{pairwiseKappa}{Compare each rater individually against a reference
 rater (e.g., gold standard, consensus score, senior pathologist). Produces
@@ -184,6 +417,36 @@ result indicates heterogeneity requiring investigation.}
 with confidence intervals. Identifies best and worst performing sites. Use
 cautiously to avoid unfair comparisons when cluster sizes differ
 substantially.}
+
+\item{specificAgreement}{Calculate category-specific agreement indices for
+binary or multi-category data. For binary data: Positive Specific Agreement
+(PSA) and Negative Specific Agreement (NSA). For multi-category data:
+Agreement indices for each category separately. Essential when some
+categories are more clinically important than others (e.g., cancer
+diagnosis, adverse events, critical findings). Unlike overall kappa which
+treats all disagreements equally, specific agreement focuses on agreement
+within each category, revealing which categories have reliable agreement
+and which need attention.}
+
+\item{specificPositiveCategory}{For binary specific agreement: Specify
+which category should be treated as "positive" (e.g., "Cancer",
+"Malignant", "Present", "Yes", "1"). Leave blank to calculate specific
+agreement for all categories. Required for PSA/NSA interpretation. Example:
+If categories are "Benign" and "Malignant", enter "Malignant".}
+
+\item{specificAllCategories}{Calculate specific agreement for each category
+separately (recommended). When enabled, provides agreement indices for
+every category in your data, identifying which specific
+diagnoses/classifications have strong agreement and which may need improved
+training or criteria clarification.}
+
+\item{specificConfidenceIntervals}{Calculate 95\\% confidence intervals for
+specific agreement indices using Wilson score method. Recommended for
+publication and when sample sizes vary across categories. Helps distinguish
+true differences in category-specific agreement from random variation.}
+
+\item{showSpecificAgreementGuide}{Show educational guide and clinical use
+cases for Specific Agreement Indices before running analysis.}
 
 \item{showSummary}{Display a natural-language interpretation of results
 with color-coded agreement levels and clinical guidance. Recommended for
@@ -239,6 +502,107 @@ like 'Absolute', 'High', 'Moderate', 'Low', 'Poor'.}
 \item{showLoaTable}{Display summary table showing distribution of cases
 across LoA categories with counts and percentages. Useful for quality
 control reporting.}
+
+\item{raterProfiles}{Generate box plots or violin plots showing the
+distribution of ratings for each rater. For categorical data: bar plots
+showing category distribution per rater. For continuous data: box
+plots/violin plots showing rating distribution per rater. Essential for
+identifying raters with systematically different rating patterns (e.g.,
+consistently higher/lower scores, restricted range use, bimodal
+distributions). Reveals rating style differences, scale use patterns, and
+potential training needs. Particularly valuable when agreement is low -
+helps determine if disagreement stems from systematic differences in rating
+distributions or random variation.}
+
+\item{raterProfileType}{For continuous data: Choose between box plots
+(shows median, quartiles, outliers) or violin plots (shows full
+distribution shape including multimodality). For categorical data:
+Automatically uses bar plots showing category frequencies.}
+
+\item{raterProfileShowPoints}{Overlay individual rating observations on
+box/violin plots. Useful for smaller datasets (N < 100) to show actual data
+distribution. Not recommended for large datasets due to overplotting.}
+
+\item{showRaterProfileGuide}{.}
+
+\item{agreementBySubgroup}{Calculate agreement statistics separately for
+each level of a subgroup variable (e.g., tumor type, disease stage,
+specimen type, difficulty level). Generates forest plot showing kappa/ICC
+values with confidence intervals across subgroups. Essential for
+determining whether agreement is consistent across different contexts or
+varies by case characteristics. Common use cases: comparing agreement for
+benign vs. malignant cases, early vs. advanced stage, different anatomical
+sites, or easy vs. difficult cases. Reveals whether rater training is
+adequate for all case types or whether specific subgroups need targeted
+attention.}
+
+\item{subgroupVariable}{Categorical variable defining subgroups for
+stratified analysis. Examples: tumor_type, disease_stage, specimen_site,
+difficulty_level. Agreement will be calculated separately for each level of
+this variable.}
+
+\item{subgroupForestPlot}{Create forest plot showing agreement estimates
+(kappa/ICC) with confidence intervals for each subgroup. Facilitates visual
+comparison of agreement across subgroups.}
+
+\item{subgroupMinCases}{Minimum number of cases required in a subgroup to
+calculate agreement statistics. Subgroups with fewer cases will be excluded
+with a warning message. Default: 10 cases (reasonable for kappa
+estimation).}
+
+\item{showSubgroupGuide}{.}
+
+\item{raterClustering}{Cluster raters based on their rating patterns to
+identify groups of raters with similar rating behavior. For continuous
+data: clustering based on correlation or Euclidean distance of ratings. For
+categorical data: clustering based on agreement patterns or confusion
+matrices. Essential for identifying subgroups of raters who rate similarly,
+detecting outlier raters, understanding rater training backgrounds, and
+optimizing panel composition. Reveals whether raters form natural groups
+(e.g., experienced vs. novice, different training backgrounds) or rate
+independently. Useful for targeted training interventions and understanding
+sources of disagreement.}
+
+\item{clusterMethod}{Hierarchical clustering: Creates dendrogram showing
+nested rater groupings at all similarity levels. Best for exploring natural
+groupings without pre-specifying number of clusters. K-means: Partitions
+raters into K distinct clusters. Requires specifying number of clusters.
+Best when number of groups is known a priori (e.g., 2 training cohorts, 3
+experience levels).}
+
+\item{clusterDistance}{For continuous data: - Correlation: Groups raters
+with similar relative rating patterns (recommended for most cases) -
+Euclidean: Groups raters with similar absolute rating values - Manhattan:
+Like Euclidean but less sensitive to outliers For categorical data: -
+Agreement-based: Distance = 1 - pairwise agreement proportion Correlation
+is recommended for most applications as it captures rating pattern
+similarity regardless of systematic shifts (one rater consistently 10\\%
+higher).}
+
+\item{clusterLinkage}{How to measure distance between clusters: - Average:
+Distance between cluster means (balanced, recommended for most cases) -
+Complete: Maximum distance between any two points (compact clusters) -
+Single: Minimum distance between any two points (can create chain-like
+clusters) - Ward: Minimizes within-cluster variance (tends to create
+equal-sized clusters)}
+
+\item{nClusters}{Number of clusters to create for k-means clustering.
+Consider: number of training cohorts, experience levels, or institutions.
+For hierarchical clustering, this is ignored but dendrogram can be cut at
+any height.}
+
+\item{showDendrogram}{Display hierarchical clustering dendrogram showing
+rater groupings at all similarity levels. Height of joins indicates
+dissimilarity. Raters joined at lower heights are more similar. Useful for
+identifying natural number of clusters and understanding rater
+relationships.}
+
+\item{showClusterHeatmap}{Display heatmap of pairwise rater similarities
+with cluster memberships annotated. Helps visualize which raters are most
+similar and validates cluster assignments. For continuous data: correlation
+matrix. For categorical data: agreement matrix.}
+
+\item{showRaterClusterGuide}{.}
 }
 \value{
 A results object containing:
@@ -248,14 +612,26 @@ A results object containing:
 \code{results$contingencyTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
+\code{results$agreementHeatmapPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$agreementHeatmapExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$lightKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$finnTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$finnExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$kendallWTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$robinsonATable} \tab \tab \tab \tab \tab a table \cr
+\code{results$robinsonAExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$meanSpearmanTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$meanSpearmanExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$bhapkarTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bhapkarExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$stuartMaxwellTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
@@ -268,7 +644,22 @@ A results object containing:
 \code{results$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$meanPearsonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$meanPearsonExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$linCCCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$linCCCExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$tdiTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$tdiExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$maxwellRETable} \tab \tab \tab \tab \tab a table \cr
+\code{results$maxwellREExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$interIntraRaterIntraTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$interIntraRaterInterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$interIntraRaterExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$iotaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iotaExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$specificAgreementTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$specificAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$levelInfoTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -279,6 +670,15 @@ A results object containing:
 \code{results$computedVariablesInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
 \code{results$loaOutput} \tab \tab \tab \tab \tab an output \cr
+\code{results$raterProfilePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterProfileExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$subgroupAgreementTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$subgroupForestPlotImage} \tab \tab \tab \tab \tab an image \cr
+\code{results$subgroupExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$raterClusterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterDendrogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterClusterExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -1320,6 +1320,105 @@ items:
       type: Html
       visible: ((agreementBySubgroup || showSubgroupGuide) && showAbout)
 
+    # ---- Rater Clustering ----
+
+    - name: raterClusterTable
+      title: "Rater Cluster Assignments"
+      type: Table
+      visible: (raterClustering)
+      rows: 0
+      columns:
+        - name: rater
+          title: 'Rater'
+          type: text
+        - name: cluster
+          title: 'Cluster'
+          type: integer
+        - name: cluster_size
+          title: 'Cluster Size'
+          type: integer
+        - name: avg_similarity
+          title: 'Avg Within-Cluster Similarity'
+          type: number
+      clearWith:
+          - vars
+          - clusterMethod
+          - clusterDistance
+          - clusterLinkage
+          - nClusters
+
+    - name: raterDendrogram
+      title: 'Rater Clustering Dendrogram'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .raterDendrogram
+      visible: (raterClustering && clusterMethod:hierarchical && showDendrogram)
+      requiresData: true
+      clearWith:
+          - vars
+          - clusterDistance
+          - clusterLinkage
+
+    - name: raterClusterHeatmap
+      title: 'Rater Similarity Heatmap with Clusters'
+      type: Image
+      width: 600
+      height: 550
+      renderFun: .raterClusterHeatmap
+      visible: (raterClustering && showClusterHeatmap)
+      requiresData: true
+      clearWith:
+          - vars
+          - clusterMethod
+          - clusterDistance
+          - clusterLinkage
+          - nClusters
+
+    - name: raterClusterExplanation
+      title: "About Rater Clustering"
+      type: Html
+      visible: ((raterClustering || showRaterClusterGuide) && showAbout)
+
+    - name: caseClusterTable
+      title: "Case Cluster Assignments"
+      type: Table
+      visible: (caseClustering)
+      rows: 0
+      columns:
+        - name: case_id
+          title: 'Case ID'
+          type: text
+        - name: cluster
+          title: 'Cluster'
+          type: integer
+        - name: avg_similarity
+          title: 'Avg Within-Cluster Similarity'
+          type: number
+
+    - name: caseDendrogram
+      title: 'Case Clustering Dendrogram'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .caseDendrogram
+      visible: (caseClustering && caseClusterMethod:hierarchical && showCaseDendrogram)
+      requiresData: true
+
+    - name: caseClusterHeatmap
+      title: 'Case Similarity Heatmap with Clusters'
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .caseClusterHeatmap
+      visible: (caseClustering && showCaseClusterHeatmap)
+      requiresData: true
+
+    - name: caseClusterExplanation
+      title: "About Case Clustering"
+      type: Html
+      visible: ((caseClustering || showCaseClusterGuide) && showAbout)
+
 refs:
     - irr
     - PathologyKappa

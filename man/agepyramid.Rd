@@ -10,13 +10,13 @@ agepyramid(
   gender,
   female,
   male,
-  bin_width = 5,
-  plot_title = "Age Pyramid",
-  color1 = "#1F77B4",
-  color2 = "#FF7F0E",
-  color_palette = "standard",
   age_groups = "custom",
-  plot_engine = "ggcharts"
+  bin_width = 5,
+  custom_breaks = "",
+  plot_title = "Age Pyramid",
+  color_palette = "standard",
+  female_color = "#E91E63",
+  male_color = "#2196F3"
 )
 }
 \arguments{
@@ -34,24 +34,26 @@ the level female}
 \item{male}{a string naming the level from \code{gender} that contains the
 level male}
 
+\item{age_groups}{Predefined age group categories. Choose 'custom' to use
+bin_width, or select a preset.}
+
 \item{bin_width}{The width of the age bins in years. Adjust this to change
 the granularity of the age groups.}
 
+\item{custom_breaks}{Comma-separated age break points (e.g.,
+"0,18,25,50,65,100"). Only used when age_groups is set to 'custom'. Leave
+empty to use bin_width.}
+
 \item{plot_title}{The title displayed on the age pyramid plot.}
 
-\item{color1}{First color for the pyramid chart bars.}
+\item{color_palette}{Color palette for gender visualization. Choose
+'custom' to specify your own colors.}
 
-\item{color2}{Second color for the pyramid chart bars.}
+\item{female_color}{Custom color for female bars (hex code). Only used when
+color_palette is 'custom'.}
 
-\item{color_palette}{Choose color palette type. Standard uses traditional
-gender colors, Accessible is colorblind-friendly, Custom allows
-user-defined colors.}
-
-\item{age_groups}{Preset age groupings for common clinical contexts. Custom
-uses bin_width setting.}
-
-\item{plot_engine}{Choose the plotting engine. ggcharts provides better
-pyramid styling, ggplot2 offers more customization.}
+\item{male_color}{Custom color for male bars (hex code). Only used when
+color_palette is 'custom'.}
 }
 \value{
 A results object containing:

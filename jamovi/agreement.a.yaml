@@ -1024,18 +1024,219 @@ options:
       type: Bool
       default: false
 
+    # ---- Rater Clustering ----
+
+    - name: raterClustering
+      title: "Rater Clustering (Identify Rating Pattern Groups)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Cluster raters based on their rating patterns to identify groups of raters with similar
+            rating behavior. For continuous data: clustering based on correlation or Euclidean distance
+            of ratings. For categorical data: clustering based on agreement patterns or confusion matrices.
+            Essential for identifying subgroups of raters who rate similarly, detecting outlier raters,
+            understanding rater training backgrounds, and optimizing panel composition. Reveals whether
+            raters form natural groups (e.g., experienced vs. novice, different training backgrounds)
+            or rate independently. Useful for targeted training interventions and understanding sources
+            of disagreement.
+
+    - name: clusterMethod
+      title: "Clustering Method"
+      type: List
+      options:
+        - title: 'Hierarchical (Dendrogram)'
+          name: hierarchical
+        - title: 'K-means (Requires K)'
+          name: kmeans
+      default: hierarchical
+      description:
+          R: >
+            Hierarchical clustering: Creates dendrogram showing nested rater groupings at all similarity levels.
+            Best for exploring natural groupings without pre-specifying number of clusters.
+            K-means: Partitions raters into K distinct clusters. Requires specifying number of clusters.
+            Best when number of groups is known a priori (e.g., 2 training cohorts, 3 experience levels).
+
+    - name: clusterDistance
+      title: "Distance Metric"
+      type: List
+      options:
+        - title: 'Correlation (1 - r)'
+          name: correlation
+        - title: 'Euclidean Distance'
+          name: euclidean
+        - title: 'Manhattan Distance'
+          name: manhattan
+        - title: 'Agreement-Based (Categorical)'
+          name: agreement
+      default: correlation
+      description:
+          R: >
+            For continuous data:
+            - Correlation: Groups raters with similar relative rating patterns (recommended for most cases)
+            - Euclidean: Groups raters with similar absolute rating values
+            - Manhattan: Like Euclidean but less sensitive to outliers
+            For categorical data:
+            - Agreement-based: Distance = 1 - pairwise agreement proportion
+            Correlation is recommended for most applications as it captures rating pattern similarity
+            regardless of systematic shifts (one rater consistently 10% higher).
+
+    - name: clusterLinkage
+      title: "Linkage Method (Hierarchical)"
+      type: List
+      options:
+        - title: 'Average Linkage (UPGMA)'
+          name: average
+        - title: 'Complete Linkage (Furthest Neighbor)'
+          name: complete
+        - title: 'Single Linkage (Nearest Neighbor)'
+          name: single
+        - title: 'Ward Linkage (Minimum Variance)'
+          name: ward
+      default: average
+      description:
+          R: >
+            How to measure distance between clusters:
+            - Average: Distance between cluster means (balanced, recommended for most cases)
+            - Complete: Maximum distance between any two points (compact clusters)
+            - Single: Minimum distance between any two points (can create chain-like clusters)
+            - Ward: Minimizes within-cluster variance (tends to create equal-sized clusters)
+
+    - name: nClusters
+      title: "Number of Clusters (K-means)"
+      type: Number
+      default: 3
+      min: 2
+      max: 10
+      description:
+          R: >
+            Number of clusters to create for k-means clustering.
+            Consider: number of training cohorts, experience levels, or institutions.
+            For hierarchical clustering, this is ignored but dendrogram can be cut at any height.
+
+    - name: showDendrogram
+      title: "Show Dendrogram"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display hierarchical clustering dendrogram showing rater groupings at all similarity levels.
+            Height of joins indicates dissimilarity. Raters joined at lower heights are more similar.
+            Useful for identifying natural number of clusters and understanding rater relationships.
+
+    - name: showClusterHeatmap
+      title: "Show Cluster Heatmap"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display heatmap of pairwise rater similarities with cluster memberships annotated.
+            Helps visualize which raters are most similar and validates cluster assignments.
+            For continuous data: correlation matrix. For categorical data: agreement matrix.
+
+    - name: showRaterClusterGuide
+      title: "When to use Rater Clustering"
+      type: Bool
+      default: false
+
+    # ---- Case Clustering ----
+
+    - name: caseClustering
+      title: "Case Clustering (Identify Rating Pattern Groups)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform clustering of cases based on rating patterns across raters.
+            Identifies groups of cases that received similar ratings.
+
+    - name: caseClusterMethod
+      title: "Clustering Method"
+      type: List
+      options:
+        - title: 'Hierarchical (Dendrogram)'
+          name: hierarchical
+        - title: 'K-means (Requires K)'
+          name: kmeans
+      default: hierarchical
+      description:
+          R: >
+            Hierarchical: Creates a dendrogram showing nested groupings at all similarity levels.
+            K-means: Partitions cases into K distinct clusters (continuous data only).
+
+    - name: caseClusterDistance
+      title: "Distance Metric"
+      type: List
+      options:
+        - title: 'Correlation (1 - r)'
+          name: correlation
+        - title: 'Euclidean Distance'
+          name: euclidean
+        - title: 'Manhattan Distance'
+          name: manhattan
+        - title: 'Agreement-Based (Categorical)'
+          name: agreement
+      default: correlation
+      description:
+          R: >
+            Correlation (1 - r): Based on correlation between rating vectors (continuous).
+            Euclidean: Straight-line distance in rating space.
+            Manhattan: City-block distance (sum of absolute differences).
+            Agreement-Based: Proportion of disagreeing raters (categorical).
+
+    - name: caseClusterLinkage
+      title: "Linkage Method (Hierarchical)"
+      type: List
+      options:
+        - title: 'Average Linkage (UPGMA)'
+          name: average
+        - title: 'Complete Linkage (Furthest Neighbor)'
+          name: complete
+        - title: 'Single Linkage (Nearest Neighbor)'
+          name: single
+        - title: 'Ward Linkage (Minimum Variance)'
+          name: ward
+      default: average
+      description:
+          R: >
+            Average: Uses average distance between all pairs.
+            Complete: Uses maximum distance between pairs.
+            Single: Uses minimum distance between pairs.
+            Ward: Minimizes within-cluster variance.
+
+    - name: nCaseClusters
+      title: "Number of Clusters (K-means)"
+      type: Number
+      default: 3
+      min: 2
+      max: 20
+      description:
+          R: Number of clusters to create for k-means clustering.
+
+    - name: showCaseDendrogram
+      title: "Show Dendrogram"
+      type: Bool
+      default: true
+      description:
+          R: Display hierarchical clustering dendrogram for cases.
+
+    - name: showCaseClusterHeatmap
+      title: "Show Cluster Heatmap"
+      type: Bool
+      default: true
+      description:
+          R: Display similarity matrix heatmap with cluster boundaries.
+
+    - name: showCaseClusterGuide
+      title: "When to use Case Clustering"
+      type: Bool
+      default: false
+      description:
+          R: Show educational guide about case clustering analysis.
+
 
 
 
 
 ...
-
-
-
-
-# consider adding:
-# Clustering of raters
-
-# consider adding:
-# Clustering of cases
 

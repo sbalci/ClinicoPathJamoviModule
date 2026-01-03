@@ -4054,6 +4054,484 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             })
         },
 
+        # ============================================================
+        # RATER CLUSTERING
+        # ============================================================
+
+        .populateRaterClusterExplanation = function() {
+            html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>Rater Clustering</h3>
+                    <p style='margin: 0; color: #333;'>Identifies groups of raters with similar rating patterns using hierarchical or k-means clustering.</p>
+                </div>
+                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Use Cases</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li>Identify subgroups of similarly-trained raters</li>
+                        <li>Detect outlier raters with unique rating patterns</li>
+                        <li>Understand sources of disagreement (within vs. between groups)</li>
+                        <li>Optimize panel composition for maximum diversity or homogeneity</li>
+                        <li>Target training to specific rater clusters</li>
+                    </ul>
+                    <h4 style='margin: 10px 0 10px 0; color: #F57C00;'>Interpretation</h4>
+                    <p style='margin: 0;'><strong>Dendrogram height:</strong> Lower = more similar. High first split = distinct rater groups.</p>
+                    <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Dark diagonal blocks = tight clusters. Off-diagonal = between-cluster differences.</p>
+                </div></div>"
+            self$results$raterClusterExplanation$setContent(jmvcore::format(html))
+        },
+
+        .raterDendrogram = function(image, ...) {
+            plotState <- image$state
+            if (is.null(plotState)) return(FALSE)
+
+            hc <- plotState$hclust_obj
+            cluster_labels <- plotState$cluster_labels
+
+            # Set up plot
+            par(mar = c(7, 4, 4, 2))
+
+            # Plot dendrogram
+            plot(hc, main = "Rater Clustering Dendrogram",
+                 xlab = "", ylab = "Distance", sub = "", hang = -1)
+
+            # Add cluster labels if available
+            if (!is.null(cluster_labels)) {
+                # Color branches by cluster
+                rect.hclust(hc, k = length(unique(cluster_labels)), border = 2:6)
+            }
+
+            return(TRUE)
+        },
+
+        .raterClusterHeatmap = function(image, ...) {
+            plotState <- image$state
+            if (is.null(plotState)) return(FALSE)
+
+            sim_matrix <- plotState$similarity_matrix
+            cluster_assign <- plotState$cluster_assignments
+            rater_names <- plotState$rater_names
+
+            # Reorder by cluster
+            if (!is.null(cluster_assign)) {
+                ord <- order(cluster_assign)
+                sim_matrix <- sim_matrix[ord, ord]
+                rater_names <- rater_names[ord]
+                cluster_assign <- cluster_assign[ord]
+            }
+
+            # Create heatmap using base graphics
+            n_raters <- nrow(sim_matrix)
+            colors <- grDevices::colorRampPalette(c("#2166AC", "#F7F7F7", "#B2182B"))(100)
+
+            par(mar = c(8, 8, 4, 2))
+            image(1:n_raters, 1:n_raters, sim_matrix,
+                  col = colors,
+                  xlab = "", ylab = "",
+                  main = "Rater Similarity Matrix (Clustered)",
+                  axes = FALSE)
+
+            axis(1, at = 1:n_raters, labels = rater_names, las = 2, cex.axis = 0.8)
+            axis(2, at = 1:n_raters, labels = rater_names, las = 1, cex.axis = 0.8)
+
+            # Add cluster boundaries
+            if (!is.null(cluster_assign)) {
+                cluster_bounds <- which(diff(cluster_assign) != 0)
+                for (b in cluster_bounds) {
+                    abline(h = b + 0.5, col = "black", lwd = 2)
+                    abline(v = b + 0.5, col = "black", lwd = 2)
+                }
+            }
+
+            return(TRUE)
+        },
+
+        .performRaterClustering = function(ratings) {
+            tryCatch({
+                method <- self$options$clusterMethod
+                distance_metric <- self$options$clusterDistance
+                linkage <- self$options$clusterLinkage
+                k <- self$options$nClusters
+
+                # Check if data is categorical
+                is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+
+                n_raters <- ncol(ratings)
+                rater_names <- names(ratings)
+
+                if (n_raters < 3) {
+                    self$results$raterClusterTable$setNote("error", "Clustering requires at least 3 raters")
+                    return()
+                }
+
+                # Compute distance matrix
+                if (is_categorical || distance_metric == "agreement") {
+                    # For categorical: use agreement-based distance
+                    dist_matrix <- matrix(0, n_raters, n_raters)
+                    for (i in 1:(n_raters-1)) {
+                        for (j in (i+1):n_raters) {
+                            # Calculate pairwise agreement
+                            pairs <- complete.cases(ratings[, c(i, j)])
+                            if (sum(pairs) > 0) {
+                                agreement <- sum(ratings[pairs, i] == ratings[pairs, j]) / sum(pairs)
+                                dist_matrix[i, j] <- dist_matrix[j, i] <- 1 - agreement
+                            } else {
+                                dist_matrix[i, j] <- dist_matrix[j, i] <- 1
+                            }
+                        }
+                    }
+                    dist_obj <- as.dist(dist_matrix)
+                } else {
+                    # For continuous: use correlation or Euclidean
+                    if (distance_metric == "correlation") {
+                        cor_matrix <- cor(ratings, use = "pairwise.complete.obs")
+                        dist_matrix <- 1 - cor_matrix
+                        dist_obj <- as.dist(dist_matrix)
+                    } else if (distance_metric == "euclidean") {
+                        dist_obj <- dist(t(ratings), method = "euclidean")
+                        dist_matrix <- as.matrix(dist_obj)
+                    } else {  # manhattan
+                        dist_obj <- dist(t(ratings), method = "manhattan")
+                        dist_matrix <- as.matrix(dist_obj)
+                    }
+                }
+
+                # Perform clustering
+                if (method == "hierarchical") {
+                    # Hierarchical clustering
+                    linkage_method <- switch(linkage,
+                                           "average" = "average",
+                                           "complete" = "complete",
+                                           "single" = "single",
+                                           "ward" = "ward.D2")
+                    hc <- hclust(dist_obj, method = linkage_method)
+
+                    # Cut tree to get cluster assignments
+                    cluster_assign <- cutree(hc, k = k)
+
+                    # Store dendrogram state
+                    if (self$options$showDendrogram) {
+                        dendro <- self$results$raterDendrogram
+                        dendro$setState(list(
+                            hclust_obj = hc,
+                            cluster_labels = cluster_assign
+                        ))
+                    }
+                } else {
+                    # K-means clustering (for continuous data only)
+                    if (is_categorical) {
+                        self$results$raterClusterTable$setNote("error", "K-means clustering requires continuous data")
+                        return()
+                    }
+
+                    # Transpose: raters as rows, cases as columns
+                    km <- kmeans(t(ratings), centers = k, nstart = 25)
+                    cluster_assign <- km$cluster
+                }
+
+                # Calculate within-cluster similarities
+                similarity_matrix <- 1 - dist_matrix
+                cluster_similarities <- numeric(n_raters)
+
+                for (i in 1:n_raters) {
+                    # Mean similarity to other members of same cluster
+                    same_cluster <- which(cluster_assign == cluster_assign[i] & 1:n_raters != i)
+                    if (length(same_cluster) > 0) {
+                        cluster_similarities[i] <- mean(similarity_matrix[i, same_cluster])
+                    } else {
+                        cluster_similarities[i] <- NA
+                    }
+                }
+
+                # Populate table
+                table <- self$results$raterClusterTable
+                cluster_sizes <- table(cluster_assign)
+
+                for (i in 1:n_raters) {
+                    table$addRow(rowKey = rater_names[i], values = list(
+                        rater = rater_names[i],
+                        cluster = cluster_assign[i],
+                        cluster_size = cluster_sizes[cluster_assign[i]],
+                        avg_similarity = cluster_similarities[i]
+                    ))
+                }
+
+                # Store heatmap state
+                if (self$options$showClusterHeatmap) {
+                    heatmap <- self$results$raterClusterHeatmap
+                    heatmap$setState(list(
+                        similarity_matrix = similarity_matrix,
+                        cluster_assignments = cluster_assign,
+                        rater_names = rater_names
+                    ))
+                }
+
+            }, error = function(e) {
+                self$results$raterClusterTable$setNote("error", sprintf("Error in rater clustering: %s", e$message))
+            })
+        },
+
+        .populateCaseClusterExplanation = function() {
+            html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>Case Clustering</h3>
+                    <p style='margin: 0; color: #333;'>Identifies groups of cases with similar rating patterns across raters using hierarchical or k-means clustering.</p>
+                </div>
+                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Use Cases</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li>Identify subgroups of cases with consistent rating patterns</li>
+                        <li>Detect controversial or difficult-to-classify cases</li>
+                        <li>Understand sources of disagreement (easy vs. hard cases)</li>
+                        <li>Stratify analysis by case difficulty</li>
+                        <li>Identify cases requiring expert review or consensus discussion</li>
+                    </ul>
+                    <h4 style='margin: 10px 0 10px 0; color: #F57C00;'>Clinical Examples</h4>
+                    <p style='margin: 0;'><strong>Tumor grading:</strong> Cluster cases by grade agreement. Low-agreement clusters may contain borderline cases needing expert review.</p>
+                    <p style='margin: 5px 0 0 0;'><strong>Diagnostic categorization:</strong> Identify groups of cases with consistent vs. variable diagnoses across pathologists.</p>
+                    <h4 style='margin: 10px 0 10px 0; color: #F57C00;'>Interpretation</h4>
+                    <p style='margin: 0;'><strong>Dendrogram height:</strong> Lower = more similar rating patterns. High first split = distinct case groups.</p>
+                    <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Dark diagonal blocks = tight clusters (similar cases). Off-diagonal = between-cluster differences.</p>
+                    <p style='margin: 5px 0 0 0;'><strong>Low within-cluster similarity:</strong> Cases in cluster are difficult/controversial - low agreement among raters.</p>
+                </div></div>"
+            self$results$caseClusterExplanation$setContent(jmvcore::format(html))
+        },
+
+        .caseDendrogram = function(image, ...) {
+            plotState <- image$state
+            if (is.null(plotState)) return(FALSE)
+
+            hc <- plotState$hclust_obj
+            cluster_labels <- plotState$cluster_labels
+
+            # Set up plot
+            par(mar = c(7, 4, 4, 2))
+
+            # Plot dendrogram
+            plot(hc, main = "Case Clustering Dendrogram",
+                 xlab = "", ylab = "Distance", sub = "", hang = -1)
+
+            # Add cluster labels if available
+            if (!is.null(cluster_labels)) {
+                # Color branches by cluster
+                rect.hclust(hc, k = length(unique(cluster_labels)), border = 2:6)
+            }
+
+            return(TRUE)
+        },
+
+        .caseClusterHeatmap = function(image, ...) {
+            plotState <- image$state
+            if (is.null(plotState)) return(FALSE)
+
+            sim_matrix <- plotState$similarity_matrix
+            cluster_assign <- plotState$cluster_assignments
+            case_ids <- plotState$case_ids
+
+            # Reorder by cluster
+            if (!is.null(cluster_assign)) {
+                ord <- order(cluster_assign)
+                sim_matrix <- sim_matrix[ord, ord]
+                case_ids <- case_ids[ord]
+                cluster_assign <- cluster_assign[ord]
+            }
+
+            # Create heatmap using base graphics
+            n_cases <- nrow(sim_matrix)
+            colors <- grDevices::colorRampPalette(c("#2166AC", "#F7F7F7", "#B2182B"))(100)
+
+            par(mar = c(8, 8, 4, 2))
+
+            # For large datasets, show only a subset of labels
+            show_labels <- n_cases <= 50
+
+            image(1:n_cases, 1:n_cases, sim_matrix,
+                  col = colors,
+                  xlab = "", ylab = "",
+                  main = "Case Similarity Matrix (Clustered)",
+                  axes = FALSE)
+
+            if (show_labels) {
+                axis(1, at = 1:n_cases, labels = case_ids, las = 2, cex.axis = 0.6)
+                axis(2, at = 1:n_cases, labels = case_ids, las = 1, cex.axis = 0.6)
+            } else {
+                # Show only cluster boundaries for large datasets
+                axis(1, at = seq(1, n_cases, by = max(1, floor(n_cases/20))),
+                     labels = seq(1, n_cases, by = max(1, floor(n_cases/20))), las = 2)
+                axis(2, at = seq(1, n_cases, by = max(1, floor(n_cases/20))),
+                     labels = seq(1, n_cases, by = max(1, floor(n_cases/20))), las = 1)
+            }
+
+            # Add cluster boundaries
+            if (!is.null(cluster_assign)) {
+                cluster_bounds <- which(diff(cluster_assign) != 0)
+                for (b in cluster_bounds) {
+                    abline(h = b + 0.5, col = "black", lwd = 2)
+                    abline(v = b + 0.5, col = "black", lwd = 2)
+                }
+            }
+
+            return(TRUE)
+        },
+
+        .performCaseClustering = function(ratings) {
+            tryCatch({
+                method <- self$options$caseClusterMethod
+                distance_metric <- self$options$caseClusterDistance
+                linkage <- self$options$caseClusterLinkage
+                k <- self$options$nCaseClusters
+
+                # Check if data is categorical
+                is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+
+                n_cases <- nrow(ratings)
+                n_raters <- ncol(ratings)
+                case_ids <- rownames(ratings)
+                if (is.null(case_ids)) {
+                    case_ids <- paste0("Case_", 1:n_cases)
+                }
+
+                if (n_cases < 3) {
+                    self$results$caseClusterTable$setNote("error", "Clustering requires at least 3 cases")
+                    return()
+                }
+
+                # Compute distance matrix between cases
+                if (is_categorical || distance_metric == "agreement") {
+                    # For categorical: use agreement-based distance
+                    dist_matrix <- matrix(0, n_cases, n_cases)
+                    for (i in 1:(n_cases-1)) {
+                        for (j in (i+1):n_cases) {
+                            # Calculate proportion of raters that agree on this case pair
+                            # This measures similarity of rating patterns
+                            case_i <- as.character(unlist(ratings[i, ]))
+                            case_j <- as.character(unlist(ratings[j, ]))
+                            valid_pairs <- !is.na(case_i) & !is.na(case_j)
+
+                            if (sum(valid_pairs) > 0) {
+                                # Agreement: proportion of raters giving same rating to both cases
+                                agreement <- sum(case_i[valid_pairs] == case_j[valid_pairs]) / sum(valid_pairs)
+                                dist_matrix[i, j] <- dist_matrix[j, i] <- 1 - agreement
+                            } else {
+                                dist_matrix[i, j] <- dist_matrix[j, i] <- 1
+                            }
+                        }
+                    }
+                    dist_obj <- as.dist(dist_matrix)
+                } else {
+                    # For continuous: use correlation or Euclidean
+                    if (distance_metric == "correlation") {
+                        # Correlation between rating vectors across raters
+                        cor_matrix <- cor(t(ratings), use = "pairwise.complete.obs")
+                        dist_matrix <- 1 - cor_matrix
+                        dist_obj <- as.dist(dist_matrix)
+                    } else if (distance_metric == "euclidean") {
+                        dist_obj <- dist(ratings, method = "euclidean")
+                        dist_matrix <- as.matrix(dist_obj)
+                    } else {  # manhattan
+                        dist_obj <- dist(ratings, method = "manhattan")
+                        dist_matrix <- as.matrix(dist_obj)
+                    }
+                }
+
+                # Perform clustering
+                if (method == "hierarchical") {
+                    # Hierarchical clustering
+                    linkage_method <- switch(linkage,
+                                           "average" = "average",
+                                           "complete" = "complete",
+                                           "single" = "single",
+                                           "ward" = "ward.D2")
+                    hc <- hclust(dist_obj, method = linkage_method)
+
+                    # Cut tree to get cluster assignments
+                    cluster_assign <- cutree(hc, k = k)
+
+                    # Store dendrogram state
+                    if (self$options$showCaseDendrogram) {
+                        dendro <- self$results$caseDendrogram
+                        dendro$setState(list(
+                            hclust_obj = hc,
+                            cluster_labels = cluster_assign
+                        ))
+                    }
+                } else {
+                    # K-means clustering (for continuous data only)
+                    if (is_categorical) {
+                        self$results$caseClusterTable$setNote("error", "K-means clustering requires continuous data")
+                        return()
+                    }
+
+                    # Cases as rows, raters as columns (already in correct orientation)
+                    km <- kmeans(ratings, centers = k, nstart = 25)
+                    cluster_assign <- km$cluster
+                }
+
+                # Calculate within-cluster similarities
+                similarity_matrix <- 1 - dist_matrix
+                cluster_similarities <- numeric(n_cases)
+
+                for (i in 1:n_cases) {
+                    # Mean similarity to other members of same cluster
+                    same_cluster <- which(cluster_assign == cluster_assign[i] & 1:n_cases != i)
+                    if (length(same_cluster) > 0) {
+                        cluster_similarities[i] <- mean(similarity_matrix[i, same_cluster])
+                    } else {
+                        cluster_similarities[i] <- NA
+                    }
+                }
+
+                # Populate table (limit to first 1000 rows for performance)
+                table <- self$results$caseClusterTable
+                cluster_sizes <- table(cluster_assign)
+
+                max_rows <- min(n_cases, 1000)
+                if (n_cases > 1000) {
+                    table$setNote("info", sprintf("Showing first 1000 of %d cases", n_cases))
+                }
+
+                for (i in 1:max_rows) {
+                    table$addRow(rowKey = i, values = list(
+                        case_id = case_ids[i],
+                        cluster = cluster_assign[i],
+                        avg_similarity = cluster_similarities[i]
+                    ))
+                }
+
+                # Store heatmap state
+                if (self$options$showCaseClusterHeatmap) {
+                    heatmap <- self$results$caseClusterHeatmap
+
+                    # For large datasets, subsample for heatmap
+                    if (n_cases > 200) {
+                        # Sample up to 200 cases, stratified by cluster
+                        sample_idx <- c()
+                        for (cl in unique(cluster_assign)) {
+                            cl_idx <- which(cluster_assign == cl)
+                            n_sample <- min(length(cl_idx), ceiling(200 * length(cl_idx) / n_cases))
+                            sample_idx <- c(sample_idx, sample(cl_idx, n_sample))
+                        }
+
+                        heatmap$setState(list(
+                            similarity_matrix = similarity_matrix[sample_idx, sample_idx],
+                            cluster_assignments = cluster_assign[sample_idx],
+                            case_ids = case_ids[sample_idx]
+                        ))
+                        heatmap$setNote("info", sprintf("Showing %d of %d cases (stratified sample)",
+                                                       length(sample_idx), n_cases))
+                    } else {
+                        heatmap$setState(list(
+                            similarity_matrix = similarity_matrix,
+                            cluster_assignments = cluster_assign,
+                            case_ids = case_ids
+                        ))
+                    }
+                }
+
+            }, error = function(e) {
+                self$results$caseClusterTable$setNote("error", sprintf("Error in case clustering: %s", e$message))
+            })
+        },
+
         .populateMaxwellREExplanation = function() {
             # Provide educational content about Maxwell's Random Error Index
 
@@ -7799,6 +8277,22 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         }
         if (self$options$agreementBySubgroup) {
             private$.calculateAgreementBySubgroup(ratings)
+        }
+
+        # Rater Clustering (if requested) ----
+        if (self$options$raterClustering || self$options$showRaterClusterGuide) {
+            private$.populateRaterClusterExplanation()
+        }
+        if (self$options$raterClustering) {
+            private$.performRaterClustering(ratings)
+        }
+
+        # Case Clustering (if requested) ----
+        if (self$options$caseClustering || self$options$showCaseClusterGuide) {
+            private$.populateCaseClusterExplanation()
+        }
+        if (self$options$caseClustering) {
+            private$.performCaseClustering(ratings)
         }
 
         # Maxwell's Random Error Index (if requested) ----

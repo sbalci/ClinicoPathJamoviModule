@@ -91,7 +91,23 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             subgroupVariable = NULL,
             subgroupForestPlot = TRUE,
             subgroupMinCases = 10,
-            showSubgroupGuide = FALSE, ...) {
+            showSubgroupGuide = FALSE,
+            raterClustering = FALSE,
+            clusterMethod = "hierarchical",
+            clusterDistance = "correlation",
+            clusterLinkage = "average",
+            nClusters = 3,
+            showDendrogram = TRUE,
+            showClusterHeatmap = TRUE,
+            showRaterClusterGuide = FALSE,
+            caseClustering = FALSE,
+            caseClusterMethod = "hierarchical",
+            caseClusterDistance = "correlation",
+            caseClusterLinkage = "average",
+            nCaseClusters = 3,
+            showCaseDendrogram = TRUE,
+            showCaseClusterHeatmap = TRUE,
+            showCaseClusterGuide = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -524,6 +540,100 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showSubgroupGuide",
                 showSubgroupGuide,
                 default=FALSE)
+            private$..raterClustering <- jmvcore::OptionBool$new(
+                "raterClustering",
+                raterClustering,
+                default=FALSE)
+            private$..clusterMethod <- jmvcore::OptionList$new(
+                "clusterMethod",
+                clusterMethod,
+                options=list(
+                    "hierarchical",
+                    "kmeans"),
+                default="hierarchical")
+            private$..clusterDistance <- jmvcore::OptionList$new(
+                "clusterDistance",
+                clusterDistance,
+                options=list(
+                    "correlation",
+                    "euclidean",
+                    "manhattan",
+                    "agreement"),
+                default="correlation")
+            private$..clusterLinkage <- jmvcore::OptionList$new(
+                "clusterLinkage",
+                clusterLinkage,
+                options=list(
+                    "average",
+                    "complete",
+                    "single",
+                    "ward"),
+                default="average")
+            private$..nClusters <- jmvcore::OptionNumber$new(
+                "nClusters",
+                nClusters,
+                default=3,
+                min=2,
+                max=10)
+            private$..showDendrogram <- jmvcore::OptionBool$new(
+                "showDendrogram",
+                showDendrogram,
+                default=TRUE)
+            private$..showClusterHeatmap <- jmvcore::OptionBool$new(
+                "showClusterHeatmap",
+                showClusterHeatmap,
+                default=TRUE)
+            private$..showRaterClusterGuide <- jmvcore::OptionBool$new(
+                "showRaterClusterGuide",
+                showRaterClusterGuide,
+                default=FALSE)
+            private$..caseClustering <- jmvcore::OptionBool$new(
+                "caseClustering",
+                caseClustering,
+                default=FALSE)
+            private$..caseClusterMethod <- jmvcore::OptionList$new(
+                "caseClusterMethod",
+                caseClusterMethod,
+                options=list(
+                    "hierarchical",
+                    "kmeans"),
+                default="hierarchical")
+            private$..caseClusterDistance <- jmvcore::OptionList$new(
+                "caseClusterDistance",
+                caseClusterDistance,
+                options=list(
+                    "correlation",
+                    "euclidean",
+                    "manhattan",
+                    "agreement"),
+                default="correlation")
+            private$..caseClusterLinkage <- jmvcore::OptionList$new(
+                "caseClusterLinkage",
+                caseClusterLinkage,
+                options=list(
+                    "average",
+                    "complete",
+                    "single",
+                    "ward"),
+                default="average")
+            private$..nCaseClusters <- jmvcore::OptionNumber$new(
+                "nCaseClusters",
+                nCaseClusters,
+                default=3,
+                min=2,
+                max=20)
+            private$..showCaseDendrogram <- jmvcore::OptionBool$new(
+                "showCaseDendrogram",
+                showCaseDendrogram,
+                default=TRUE)
+            private$..showCaseClusterHeatmap <- jmvcore::OptionBool$new(
+                "showCaseClusterHeatmap",
+                showCaseClusterHeatmap,
+                default=TRUE)
+            private$..showCaseClusterGuide <- jmvcore::OptionBool$new(
+                "showCaseClusterGuide",
+                showCaseClusterGuide,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
@@ -612,6 +722,22 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..subgroupForestPlot)
             self$.addOption(private$..subgroupMinCases)
             self$.addOption(private$..showSubgroupGuide)
+            self$.addOption(private$..raterClustering)
+            self$.addOption(private$..clusterMethod)
+            self$.addOption(private$..clusterDistance)
+            self$.addOption(private$..clusterLinkage)
+            self$.addOption(private$..nClusters)
+            self$.addOption(private$..showDendrogram)
+            self$.addOption(private$..showClusterHeatmap)
+            self$.addOption(private$..showRaterClusterGuide)
+            self$.addOption(private$..caseClustering)
+            self$.addOption(private$..caseClusterMethod)
+            self$.addOption(private$..caseClusterDistance)
+            self$.addOption(private$..caseClusterLinkage)
+            self$.addOption(private$..nCaseClusters)
+            self$.addOption(private$..showCaseDendrogram)
+            self$.addOption(private$..showCaseClusterHeatmap)
+            self$.addOption(private$..showCaseClusterGuide)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -700,7 +826,23 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         subgroupVariable = function() private$..subgroupVariable$value,
         subgroupForestPlot = function() private$..subgroupForestPlot$value,
         subgroupMinCases = function() private$..subgroupMinCases$value,
-        showSubgroupGuide = function() private$..showSubgroupGuide$value),
+        showSubgroupGuide = function() private$..showSubgroupGuide$value,
+        raterClustering = function() private$..raterClustering$value,
+        clusterMethod = function() private$..clusterMethod$value,
+        clusterDistance = function() private$..clusterDistance$value,
+        clusterLinkage = function() private$..clusterLinkage$value,
+        nClusters = function() private$..nClusters$value,
+        showDendrogram = function() private$..showDendrogram$value,
+        showClusterHeatmap = function() private$..showClusterHeatmap$value,
+        showRaterClusterGuide = function() private$..showRaterClusterGuide$value,
+        caseClustering = function() private$..caseClustering$value,
+        caseClusterMethod = function() private$..caseClusterMethod$value,
+        caseClusterDistance = function() private$..caseClusterDistance$value,
+        caseClusterLinkage = function() private$..caseClusterLinkage$value,
+        nCaseClusters = function() private$..nCaseClusters$value,
+        showCaseDendrogram = function() private$..showCaseDendrogram$value,
+        showCaseClusterHeatmap = function() private$..showCaseClusterHeatmap$value,
+        showCaseClusterGuide = function() private$..showCaseClusterGuide$value),
     private = list(
         ..vars = NA,
         ..baConfidenceLevel = NA,
@@ -788,7 +930,23 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..subgroupVariable = NA,
         ..subgroupForestPlot = NA,
         ..subgroupMinCases = NA,
-        ..showSubgroupGuide = NA)
+        ..showSubgroupGuide = NA,
+        ..raterClustering = NA,
+        ..clusterMethod = NA,
+        ..clusterDistance = NA,
+        ..clusterLinkage = NA,
+        ..nClusters = NA,
+        ..showDendrogram = NA,
+        ..showClusterHeatmap = NA,
+        ..showRaterClusterGuide = NA,
+        ..caseClustering = NA,
+        ..caseClusterMethod = NA,
+        ..caseClusterDistance = NA,
+        ..caseClusterLinkage = NA,
+        ..nCaseClusters = NA,
+        ..showCaseDendrogram = NA,
+        ..showCaseClusterHeatmap = NA,
+        ..showCaseClusterGuide = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -862,7 +1020,15 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         raterProfileExplanation = function() private$.items[["raterProfileExplanation"]],
         subgroupAgreementTable = function() private$.items[["subgroupAgreementTable"]],
         subgroupForestPlotImage = function() private$.items[["subgroupForestPlotImage"]],
-        subgroupExplanation = function() private$.items[["subgroupExplanation"]]),
+        subgroupExplanation = function() private$.items[["subgroupExplanation"]],
+        raterClusterTable = function() private$.items[["raterClusterTable"]],
+        raterDendrogram = function() private$.items[["raterDendrogram"]],
+        raterClusterHeatmap = function() private$.items[["raterClusterHeatmap"]],
+        raterClusterExplanation = function() private$.items[["raterClusterExplanation"]],
+        caseClusterTable = function() private$.items[["caseClusterTable"]],
+        caseDendrogram = function() private$.items[["caseDendrogram"]],
+        caseClusterHeatmap = function() private$.items[["caseClusterHeatmap"]],
+        caseClusterExplanation = function() private$.items[["caseClusterExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -2334,7 +2500,111 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="subgroupExplanation",
                 title="About Agreement by Subgroup",
-                visible="((agreementBySubgroup || showSubgroupGuide) && showAbout)"))}))
+                visible="((agreementBySubgroup || showSubgroupGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="raterClusterTable",
+                title="Rater Cluster Assignments",
+                visible="(raterClustering)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="rater", 
+                        `title`="Rater", 
+                        `type`="text"),
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster", 
+                        `type`="integer"),
+                    list(
+                        `name`="cluster_size", 
+                        `title`="Cluster Size", 
+                        `type`="integer"),
+                    list(
+                        `name`="avg_similarity", 
+                        `title`="Avg Within-Cluster Similarity", 
+                        `type`="number")),
+                clearWith=list(
+                    "vars",
+                    "clusterMethod",
+                    "clusterDistance",
+                    "clusterLinkage",
+                    "nClusters")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="raterDendrogram",
+                title="Rater Clustering Dendrogram",
+                width=700,
+                height=500,
+                renderFun=".raterDendrogram",
+                visible="(raterClustering && clusterMethod:hierarchical && showDendrogram)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "clusterDistance",
+                    "clusterLinkage")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="raterClusterHeatmap",
+                title="Rater Similarity Heatmap with Clusters",
+                width=600,
+                height=550,
+                renderFun=".raterClusterHeatmap",
+                visible="(raterClustering && showClusterHeatmap)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "clusterMethod",
+                    "clusterDistance",
+                    "clusterLinkage",
+                    "nClusters")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="raterClusterExplanation",
+                title="About Rater Clustering",
+                visible="((raterClustering || showRaterClusterGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="caseClusterTable",
+                title="Case Cluster Assignments",
+                visible="(caseClustering)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case ID", 
+                        `type`="text"),
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster", 
+                        `type`="integer"),
+                    list(
+                        `name`="avg_similarity", 
+                        `title`="Avg Within-Cluster Similarity", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="caseDendrogram",
+                title="Case Clustering Dendrogram",
+                width=700,
+                height=500,
+                renderFun=".caseDendrogram",
+                visible="(caseClustering && caseClusterMethod:hierarchical && showCaseDendrogram)",
+                requiresData=TRUE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="caseClusterHeatmap",
+                title="Case Similarity Heatmap with Clusters",
+                width=700,
+                height=600,
+                renderFun=".caseClusterHeatmap",
+                visible="(caseClustering && showCaseClusterHeatmap)",
+                requiresData=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="caseClusterExplanation",
+                title="About Case Clustering",
+                visible="((caseClustering || showCaseClusterGuide) && showAbout)"))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -2727,6 +2997,69 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   with a warning message. Default: 10 cases (reasonable for kappa
 #'   estimation).
 #' @param showSubgroupGuide .
+#' @param raterClustering Cluster raters based on their rating patterns to
+#'   identify groups of raters with similar rating behavior. For continuous
+#'   data: clustering based on correlation or Euclidean distance of ratings. For
+#'   categorical data: clustering based on agreement patterns or confusion
+#'   matrices. Essential for identifying subgroups of raters who rate similarly,
+#'   detecting outlier raters, understanding rater training backgrounds, and
+#'   optimizing panel composition. Reveals whether raters form natural groups
+#'   (e.g., experienced vs. novice, different training backgrounds) or rate
+#'   independently. Useful for targeted training interventions and understanding
+#'   sources of disagreement.
+#' @param clusterMethod Hierarchical clustering: Creates dendrogram showing
+#'   nested rater groupings at all similarity levels. Best for exploring natural
+#'   groupings without pre-specifying number of clusters. K-means: Partitions
+#'   raters into K distinct clusters. Requires specifying number of clusters.
+#'   Best when number of groups is known a priori (e.g., 2 training cohorts, 3
+#'   experience levels).
+#' @param clusterDistance For continuous data: - Correlation: Groups raters
+#'   with similar relative rating patterns (recommended for most cases) -
+#'   Euclidean: Groups raters with similar absolute rating values - Manhattan:
+#'   Like Euclidean but less sensitive to outliers For categorical data: -
+#'   Agreement-based: Distance = 1 - pairwise agreement proportion Correlation
+#'   is recommended for most applications as it captures rating pattern
+#'   similarity regardless of systematic shifts (one rater consistently 10\%
+#'   higher).
+#' @param clusterLinkage How to measure distance between clusters: - Average:
+#'   Distance between cluster means (balanced, recommended for most cases) -
+#'   Complete: Maximum distance between any two points (compact clusters) -
+#'   Single: Minimum distance between any two points (can create chain-like
+#'   clusters) - Ward: Minimizes within-cluster variance (tends to create
+#'   equal-sized clusters)
+#' @param nClusters Number of clusters to create for k-means clustering.
+#'   Consider: number of training cohorts, experience levels, or institutions.
+#'   For hierarchical clustering, this is ignored but dendrogram can be cut at
+#'   any height.
+#' @param showDendrogram Display hierarchical clustering dendrogram showing
+#'   rater groupings at all similarity levels. Height of joins indicates
+#'   dissimilarity. Raters joined at lower heights are more similar. Useful for
+#'   identifying natural number of clusters and understanding rater
+#'   relationships.
+#' @param showClusterHeatmap Display heatmap of pairwise rater similarities
+#'   with cluster memberships annotated. Helps visualize which raters are most
+#'   similar and validates cluster assignments. For continuous data: correlation
+#'   matrix. For categorical data: agreement matrix.
+#' @param showRaterClusterGuide .
+#' @param caseClustering Perform clustering of cases based on rating patterns
+#'   across raters. Identifies groups of cases that received similar ratings.
+#' @param caseClusterMethod Hierarchical: Creates a dendrogram showing nested
+#'   groupings at all similarity levels. K-means: Partitions cases into K
+#'   distinct clusters (continuous data only).
+#' @param caseClusterDistance Correlation (1 - r): Based on correlation
+#'   between rating vectors (continuous). Euclidean: Straight-line distance in
+#'   rating space. Manhattan: City-block distance (sum of absolute differences).
+#'   Agreement-Based: Proportion of disagreeing raters (categorical).
+#' @param caseClusterLinkage Average: Uses average distance between all pairs.
+#'   Complete: Uses maximum distance between pairs. Single: Uses minimum
+#'   distance between pairs. Ward: Minimizes within-cluster variance.
+#' @param nCaseClusters Number of clusters to create for k-means clustering.
+#' @param showCaseDendrogram Display hierarchical clustering dendrogram for
+#'   cases.
+#' @param showCaseClusterHeatmap Display similarity matrix heatmap with
+#'   cluster boundaries.
+#' @param showCaseClusterGuide Show educational guide about case clustering
+#'   analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -2797,6 +3130,14 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$subgroupAgreementTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$subgroupForestPlotImage} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$subgroupExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$raterClusterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterDendrogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterClusterExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$caseClusterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$caseDendrogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$caseClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$caseClusterExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -2893,7 +3234,23 @@ agreement <- function(
     subgroupVariable,
     subgroupForestPlot = TRUE,
     subgroupMinCases = 10,
-    showSubgroupGuide = FALSE) {
+    showSubgroupGuide = FALSE,
+    raterClustering = FALSE,
+    clusterMethod = "hierarchical",
+    clusterDistance = "correlation",
+    clusterLinkage = "average",
+    nClusters = 3,
+    showDendrogram = TRUE,
+    showClusterHeatmap = TRUE,
+    showRaterClusterGuide = FALSE,
+    caseClustering = FALSE,
+    caseClusterMethod = "hierarchical",
+    caseClusterDistance = "correlation",
+    caseClusterLinkage = "average",
+    nCaseClusters = 3,
+    showCaseDendrogram = TRUE,
+    showCaseClusterHeatmap = TRUE,
+    showCaseClusterGuide = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -2998,7 +3355,23 @@ agreement <- function(
         subgroupVariable = subgroupVariable,
         subgroupForestPlot = subgroupForestPlot,
         subgroupMinCases = subgroupMinCases,
-        showSubgroupGuide = showSubgroupGuide)
+        showSubgroupGuide = showSubgroupGuide,
+        raterClustering = raterClustering,
+        clusterMethod = clusterMethod,
+        clusterDistance = clusterDistance,
+        clusterLinkage = clusterLinkage,
+        nClusters = nClusters,
+        showDendrogram = showDendrogram,
+        showClusterHeatmap = showClusterHeatmap,
+        showRaterClusterGuide = showRaterClusterGuide,
+        caseClustering = caseClustering,
+        caseClusterMethod = caseClusterMethod,
+        caseClusterDistance = caseClusterDistance,
+        caseClusterLinkage = caseClusterLinkage,
+        nCaseClusters = nCaseClusters,
+        showCaseDendrogram = showCaseDendrogram,
+        showCaseClusterHeatmap = showCaseClusterHeatmap,
+        showCaseClusterGuide = showCaseClusterGuide)
 
     analysis <- agreementClass$new(
         options = options,

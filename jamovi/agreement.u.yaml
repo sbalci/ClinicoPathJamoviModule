@@ -501,6 +501,68 @@ children:
           - type: CheckBox
             name: showSubgroupGuide
 
+  - type: CollapseBox
+    label: Rater Clustering (Identify Rating Pattern Groups)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: raterClustering
+          - type: ComboBox
+            name: clusterMethod
+            enable: (raterClustering)
+          - type: ComboBox
+            name: clusterDistance
+            enable: (raterClustering)
+          - type: ComboBox
+            name: clusterLinkage
+            enable: (raterClustering && clusterMethod:hierarchical)
+          - type: TextBox
+            name: nClusters
+            format: number
+            enable: (raterClustering && clusterMethod:kmeans)
+          - type: CheckBox
+            name: showDendrogram
+            enable: (raterClustering && clusterMethod:hierarchical)
+          - type: CheckBox
+            name: showClusterHeatmap
+            enable: (raterClustering)
+          - type: CheckBox
+            name: showRaterClusterGuide
+
+  - type: CollapseBox
+    label: Case Clustering (Identify Rating Pattern Groups)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: caseClustering
+          - type: ComboBox
+            name: caseClusterMethod
+            enable: (caseClustering)
+          - type: ComboBox
+            name: caseClusterDistance
+            enable: (caseClustering)
+          - type: ComboBox
+            name: caseClusterLinkage
+            enable: (caseClustering && caseClusterMethod:hierarchical)
+          - type: TextBox
+            name: nCaseClusters
+            format: number
+            enable: (caseClustering && caseClusterMethod:kmeans)
+          - type: CheckBox
+            name: showCaseDendrogram
+            enable: (caseClustering && caseClusterMethod:hierarchical)
+          - type: CheckBox
+            name: showCaseClusterHeatmap
+            enable: (caseClustering)
+          - type: CheckBox
+            name: showCaseClusterGuide
+
   # ============================================================
   # DISPLAY OPTIONS
   # ============================================================
