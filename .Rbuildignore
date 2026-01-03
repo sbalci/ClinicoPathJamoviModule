@@ -178,3 +178,4 @@ temp2
 temp3
 test_backups
 jamovi_modules
+^.*\.Rd2pdf.*$

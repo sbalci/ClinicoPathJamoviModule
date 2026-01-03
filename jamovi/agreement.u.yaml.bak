@@ -14,13 +14,8 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
-
-  # ============================================================
-  # CATEGORICAL/NOMINAL DATA
-  # ============================================================
-
   - type: CollapseBox
-    label: Weighted Kappa [Ordinal]
+    label: Weighted Kappa (Ordinal Data)
     collapsed: false
     children:
       - type: LayoutBox
@@ -32,9 +27,8 @@ children:
             name: exct
           - type: CheckBox
             name: showLevelInfo
-
   - type: CollapseBox
-    label: Krippendorff's Alpha [Any Data Type]
+    label: Krippendorff's Alpha
     collapsed: true
     children:
       - type: LayoutBox
@@ -48,9 +42,8 @@ children:
           - type: CheckBox
             name: bootstrap
             enable: (kripp)
-
   - type: CollapseBox
-    label: Light's Kappa [Categorical] (3+ Raters)
+    label: Light's Kappa (3+ Raters)
     collapsed: true
     children:
       - type: LayoutBox
@@ -58,43 +51,8 @@ children:
         children:
           - type: CheckBox
             name: lightKappa
-
   - type: CollapseBox
-    label: Gwet's AC1/AC2 [Categorical/Ordinal]
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: gwet
-          - type: ComboBox
-            name: gwetWeights
-            enable: (gwet)
-
-  - type: CollapseBox
-    label: Finn Coefficient [Categorical] (Variance-Based)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: finn
-          - type: TextBox
-            name: finnLevels
-            format: number
-            enable: (finn)
-          - type: ComboBox
-            name: finnModel
-            enable: (finn)
-
-  # ============================================================
-  # ORDINAL/RANKED DATA
-  # ============================================================
-
-  - type: CollapseBox
-    label: Kendall's W [Ordinal] (Concordance for Rankings)
+    label: Kendall's W (Concordance for Rankings)
     collapsed: true
     children:
       - type: LayoutBox
@@ -102,60 +60,42 @@ children:
         children:
           - type: CheckBox
             name: kendallW
-
-  # ============================================================
-  # CONTINUOUS DATA
-  # ============================================================
-
   - type: CollapseBox
-    label: ICC [Continuous] (Intraclass Correlation)
+    label: Rater Bias Test (Quality Control)
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: icc
-          - type: ComboBox
-            name: iccType
-            enable: (icc)
-
+            name: raterBias
   - type: CollapseBox
-    label: Iota Coefficient [Continuous or Categorical] (Multivariate)
+    label: Pairwise Kappa (vs Reference Rater)
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: iota
+            name: pairwiseKappa
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: Reference Rater
+                children:
+                  - type: VariablesListBox
+                    name: referenceRater
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (pairwiseKappa)
           - type: CheckBox
-            name: iotaStandardize
-            enable: (iota)
+            name: rankRaters
+            enable: (pairwiseKappa)
 
   - type: CollapseBox
-    label: Bland-Altman Analysis [Continuous] (Limits of Agreement)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: blandAltmanPlot
-          - type: TextBox
-            name: baConfidenceLevel
-            format: number
-            enable: (blandAltmanPlot)
-          - type: CheckBox
-            name: proportionalBias
-            enable: (blandAltmanPlot)
-
-  # ============================================================
-  # ADVANCED/SPECIALIZED ANALYSES
-  # ============================================================
-
-  - type: CollapseBox
-    label: Hierarchical/Multilevel Kappa [Categorical] (Multi-Center Studies)
+    label: "Hierarchical/Multilevel Kappa (Multi-Center Studies)"
     collapsed: true
     children:
       - type: LayoutBox
@@ -198,46 +138,70 @@ children:
             enable: (hierarchicalKappa)
 
   - type: CollapseBox
-    label: Pairwise Kappa [Categorical] (vs Reference Rater)
+    label: Gwet's AC1/AC2
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: pairwiseKappa
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
-            children:
-              - type: TargetLayoutBox
-                label: Reference Rater
-                children:
-                  - type: VariablesListBox
-                    name: referenceRater
-                    maxItemCount: 1
-                    isTarget: true
-                    enable: (pairwiseKappa)
-          - type: CheckBox
-            name: rankRaters
-            enable: (pairwiseKappa)
-
+            name: gwet
+          - type: ComboBox
+            name: gwetWeights
+            enable: (gwet)
   - type: CollapseBox
-    label: Rater Bias Test [Categorical] (Quality Control)
+    label: ICC (Continuous Data Agreement)
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
-            name: raterBias
-
-  # ============================================================
-  # COMPUTED VARIABLES & FEATURES
-  # ============================================================
-
+            name: icc
+          - type: ComboBox
+            name: iccType
+            enable: (icc)
   - type: CollapseBox
-    label: Create Consensus Variable [Any Data Type]
+    label: Bland-Altman Analysis (Continuous Data)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: blandAltmanPlot
+          - type: TextBox
+            name: baConfidenceLevel
+            format: number
+            enable: (blandAltmanPlot)
+          - type: CheckBox
+            name: proportionalBias
+            enable: (blandAltmanPlot)
+  - type: CollapseBox
+    label: Agreement Status Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: agreementStatus
+          - type: TextBox
+            name: agreementThreshold
+            format: number
+            enable: (agreementStatus)
+          - type: CheckBox
+            name: showAgreementTable
+            enable: (agreementStatus)
+          - type: TextBox
+            name: agreementStatusName
+            format: string
+            enable: (agreementStatus)
+          - type: Output
+            name: addAgreementStatus
+            enable: (agreementStatus)
+  - type: CollapseBox
+    label: Create Consensus Variable
     collapsed: true
     children:
       - type: LayoutBox
@@ -246,16 +210,14 @@ children:
           - type: TextBox
             name: consensusName
             format: string
-            width: largest
           - type: ComboBox
             name: consensusRule
           - type: ComboBox
             name: tieBreaker
           - type: Output
             name: consensusVar
-
   - type: CollapseBox
-    label: Case Agreement Categorization [Any Data Type]
+    label: Level of Agreement Variable
     collapsed: true
     children:
       - type: LayoutBox
@@ -264,23 +226,16 @@ children:
           - type: CheckBox
             name: loaVariable
           - type: ComboBox
-            name: detailLevel
-            enable: (loaVariable)
-          - type: TextBox
-            name: simpleThreshold
-            format: number
-            enable: (loaVariable && detailLevel:simple)
-          - type: ComboBox
             name: loaThresholds
-            enable: (loaVariable && detailLevel:detailed)
+            enable: (loaVariable)
           - type: TextBox
             name: loaHighThreshold
             format: number
-            enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
+            enable: (loaVariable && loaThresholds:custom)
           - type: TextBox
             name: loaLowThreshold
             format: number
-            enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
+            enable: (loaVariable && loaThresholds:custom)
           - type: TextBox
             name: loaVariableName
             format: string
@@ -288,11 +243,6 @@ children:
           - type: CheckBox
             name: showLoaTable
             enable: (loaVariable)
-
-  # ============================================================
-  # DISPLAY OPTIONS
-  # ============================================================
-
   - type: CollapseBox
     label: Display Options
     collapsed: true

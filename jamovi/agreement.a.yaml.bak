@@ -204,64 +204,6 @@ options:
             Two-way: all subjects rated by same raters. Random: raters are random sample.
             Mixed: raters are fixed. Single: reliability of individual rater. Average (k): reliability of mean rating.
 
-    - name: iota
-      title: "Calculate Iota Coefficient (Multivariate Agreement)"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Iota coefficient for multivariate interrater agreement. Measures agreement when raters assess
-            multiple variables simultaneously (e.g., tumor size + grade + mitotic count). Unlike ICC which
-            analyzes one variable at a time, Iota provides a single chance-corrected agreement index across
-            all variables. Supports both quantitative (continuous) and nominal (categorical) data. Reduces
-            to Fleiss' kappa for single categorical variable.
-
-    - name: iotaStandardize
-      title: "Standardize Variables (Iota)"
-      type: Bool
-      default: true
-      description:
-          R: >
-            Z-standardize quantitative variables before computing Iota. Recommended when variables are on
-            different scales (e.g., tumor size in mm vs. Ki-67 percentage). Ensures each variable contributes
-            equally to the overall agreement measure.
-
-    - name: finn
-      title: "Calculate Finn Coefficient (Variance-Based Agreement)"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Finn coefficient for interrater reliability of categorical data. Variance-based agreement measure
-            especially useful when variance between raters is low (i.e., agreement is high). Alternative to
-            traditional kappa-based measures. Works with ordered categorical ratings.
-
-    - name: finnLevels
-      title: "Number of Rating Categories (Finn)"
-      type: Integer
-      min: 2
-      max: 20
-      default: 3
-      description:
-          R: >
-            The number of different rating categories for Finn coefficient calculation (e.g., 3 for low/medium/high,
-            5 for 5-point Likert scale). Must specify the total number of distinct categories in your rating scale.
-
-    - name: finnModel
-      title: "Finn Model Type"
-      type: List
-      options:
-        - title: 'One-way (subjects random)'
-          name: oneway
-        - title: 'Two-way (subjects and raters random)'
-          name: twoway
-      default: oneway
-      description:
-          R: >
-            Model specification for Finn coefficient. One-way: only subjects are random effects (each subject
-            may be rated by different raters). Two-way: both subjects and raters are random (subjects and raters
-            randomly chosen from larger populations).
-
     - name: lightKappa
       title: "Calculate Light's Kappa (3+ Raters)"
       type: Bool
@@ -324,6 +266,16 @@ options:
             Rank raters from highest to lowest kappa (relative to reference). Shows best and worst
             performing raters for quality control and training needs. Useful for identifying raters
             who need additional training or those ready for certification.
+
+#     - name: showLevelInfo
+#       title: "Show Level Ordering Information"
+#       type: Bool
+#       default: false
+#       description:
+#           R: >
+#             Display information about how categorical levels are currently ordered in your variables.
+#             Essential for weighted kappa analysis to ensure ordinal levels are properly ordered
+#             (e.g., G1 → G2 → G3 for tumor grades).
 
     # Hierarchical/Multilevel Agreement Analysis
     - name: hierarchicalKappa
@@ -428,6 +380,9 @@ options:
           R: >
             Display an explanatory panel describing what this analysis does, when to use it, and how to interpret results.
 
+    # REMOVED: Agreement Status - Consolidated into Level of Agreement Variable
+    # (see loaVariable below for unified case agreement categorization)
+
     - name: consensusName
       title: "Consensus Variable Name"
       type: String
@@ -483,46 +438,114 @@ options:
             (e.g., 2-2 split with 4 raters). Exclude = set consensus to NA for tied cases.
             First = use first category that appears. Lowest/Highest = use min/max of tied categories.
 
+    - name: agreementStatusName
+      title: "Agreement Status Variable Name"
+      type: String
+      default: "agreement_status"
+      description:
+          R: >
+            Name of the new computed variable containing agreement status categories.
 
-    # Case Agreement Categorization (Consolidated Feature)
+    # Add Agreement Status to Data
+    - name: addAgreementStatus
+      title: "Add Agreement Status to Dataset"
+      type: Output
+      description:
+          R: >
+            Add agreement status variable to dataset (All Agreed, Majority Agreed, No Agreement).
+            Creates new computed column showing level of agreement for each case.
+            Useful for filtering difficult cases or quality control.
+
+
+
+#     # Consensus Score Derivation
+#     - name: consensusVar
+#       title: "Create Consensus Variable"
+#       type: Bool
+#       default: false
+#       description:
+#           R: >
+#             Calculate consensus (modal) score across raters and add as new computed column.
+#             Essential for multi-rater studies requiring a reference standard.
+
+#     - name: consensusRule
+#       title: "Consensus Rule"
+#       type: List
+#       options:
+#         - title: Simple Majority (>50%)
+#           name: majority
+#         - title: Supermajority (≥75%)
+#           name: supermajority
+#         - title: Unanimous (100%)
+#           name: unanimous
+#       default: majority
+#       description:
+#           R: >
+#             Rule for defining consensus. Simple majority = modal category with >50% of votes.
+#             Supermajority requires ≥75% agreement. Unanimous requires 100% agreement.
+
+#     - name: tieBreaker
+#       title: "Tie Handling"
+#       type: List
+#       options:
+#         - title: Exclude case (set to NA)
+#           name: exclude
+#         - title: Use first occurring mode
+#           name: first
+#         - title: Use lowest category
+#           name: lowest
+#         - title: Use highest category
+#           name: highest
+#       default: exclude
+#       description:
+#           R: >
+#             How to handle ties (e.g., 50-50 split). Exclude = set consensus to NA for tied cases.
+#             First = use first category that appears. Lowest/Highest = use min/max of tied categories.
+
+#     - name: consensusName
+#       title: "Consensus Variable Name"
+#       type: String
+#       default: "consensus_score"
+#       description:
+#           R: >
+#             Name of the new computed variable to be added to the dataset.
+
+#     # Pairwise Kappa Analysis
+#     - name: referenceRater
+#       title: "Reference Rater"
+#       type: Variable
+#       default: null
+#       suggested: [ordinal, nominal]
+#       permitted: [factor]
+#       description:
+#           R: >
+#             Select a reference rater (e.g., consensus score, gold standard, senior pathologist).
+#             Each selected rater will be compared pairwise with this reference, producing individual kappas.
+#             Essential for training assessment, rater certification, and performance monitoring.
+
+#     - name: rankRaters
+#       title: "Rank Raters by Kappa"
+#       type: Bool
+#       default: false
+#       description:
+#           R: >
+#             Rank raters from highest to lowest kappa (relative to reference).
+#             Shows best and worst performing raters for quality control and training needs.
+
+
+    # Level of Agreement Variable
     - name: loaVariable
-      title: "Create Case Agreement Categorization"
+      title: "Create Level of Agreement Variable"
       type: Bool
       default: false
       description:
           R: >
-            Calculate agreement level for each case and add as new computed column.
-            Choose between Simple (3 categories) or Detailed (5 categories) classification.
-            Useful for identifying difficult cases and quality control.
-
-    - name: detailLevel
-      title: "Detail Level"
-      type: List
-      options:
-        - title: Simple (3 categories)
-          name: simple
-        - title: Detailed (5 categories)
-          name: detailed
-      default: detailed
-      description:
-          R: >
-            Simple mode: All Agreed (100%), Majority Agreed (≥threshold%), No Agreement (<threshold%).
-            Detailed mode: Absolute (100%), High, Moderate, Low, Poor (based on custom/data-driven thresholds).
-            Simple mode replicates the former "Agreement Status" feature.
-
-    - name: simpleThreshold
-      title: "Majority Threshold (%) - Simple Mode"
-      type: Number
-      default: 50
-      min: 50
-      max: 100
-      description:
-          R: >
-            For Simple mode only: Minimum % for "Majority Agreed" status.
-            50% = simple majority, 75% = supermajority, 100% = unanimous.
+            Calculate level of agreement (LoA) for each case and add as new computed column.
+            Categorizes cases as Absolute/High/Moderate/Low/Poor agreement based on proportion
+            of raters agreeing. Useful for identifying difficult cases and quality control.
 
     - name: loaThresholds
-      title: "Categorization Method - Detailed Mode"
+      title: "LoA Categorization Method"
       type: List
       options:
         - title: Custom Thresholds
@@ -534,32 +557,30 @@ options:
       default: custom
       description:
           R: >
-            For Detailed mode only: How to define 5 LoA categories.
-            Custom = user-defined cutpoints. Quartiles/Tertiles = data-driven splits.
+            How to define LoA categories. Custom = user-defined cutpoints.
+            Quartiles/Tertiles = automatic data-driven splits based on agreement distribution.
 
     - name: loaHighThreshold
-      title: "High Threshold (%) - Detailed Mode"
+      title: "High LoA Threshold (%)"
       type: Number
       default: 75
       min: 50
       max: 99
       description:
           R: >
-            For Detailed mode with Custom thresholds only:
-            Minimum % for "High" classification (e.g., 75% = ≥12/16 raters).
-            Cases ≥ this threshold are "High Agreement".
+            Minimum % agreement for "High" LoA classification (e.g., 75% = ≥12/16 raters agree for N=16).
+            Cases with agreement ≥ this threshold are classified as "High Agreement".
 
     - name: loaLowThreshold
-      title: "Low Threshold (%) - Detailed Mode"
+      title: "Low LoA Threshold (%)"
       type: Number
       default: 56
       min: 30
       max: 75
       description:
           R: >
-            For Detailed mode with Custom thresholds only:
-            Minimum % for "Low" classification (e.g., 56% = ≥9/16 raters).
-            Below = "Poor", between Low and High = "Moderate".
+            Minimum % agreement for "Low" LoA classification (e.g., 56% = ≥9/16 raters for N=16).
+            Cases below this threshold are "Poor Agreement", above but below High are "Moderate Agreement".
 
     - name: loaVariableName
       title: "Variable Name for LoA"
@@ -585,6 +606,31 @@ options:
 
 ...
 
+
+
+# Priority A: Continuous Data Agreement
+# ICC - Intraclass Correlation 
+# 6 models: ICC(1,1), ICC(2,1), ICC(3,1), ICC(1,k), ICC(2,k), ICC(3,k)
+# Oneway/twoway, random/mixed effects
+# Effort: Medium (2-3 hours)
+# Use case: Tumor size, biomarker quantification
+# Complements: Bland-Altman (already implemented)
+
+# Iota Coefficient
+# Chance-corrected agreement for quantitative data
+# Alternative to ICC
+# Use case: Continuous measurements
+
+
+# Light's Kappa (kappam.light)
+# For 3+ raters
+# Alternative to Fleiss' kappa
+# Average of all pairwise kappas
+# Use case: When Fleiss' assumptions questionable
+
+# Finn Coefficient
+# Variance-based agreement
+# Use case: Alternative categorical agreement measure
 
 # Systematic Bias Detection
 # Rater Bias Test (rater.bias) 

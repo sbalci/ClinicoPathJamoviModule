@@ -6,8 +6,8 @@
 \description{
 Generates an age pyramid plot from the provided data.
 The function allows customization of bin width (age group granularity), plot title,
-colors, and plotting engine. It creates a visually appealing plot showing the
-distribution of age by gender using either ggplot2 or ggcharts.
+and colors. It creates a visually appealing plot showing the
+distribution of age by gender using ggplot2.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::agepyramidBase} -> \code{agepyramidClass}

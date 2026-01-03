@@ -17,13 +17,13 @@ quick: false
 # meddecide: false
 jjstatsplot: false
 jsurvival: false
-ClinicoPathDescriptives: false
+# ClinicoPathDescriptives: false
 OncoPath: false
 TEST: false
 meddecide: true
 # jjstatsplot: true
 # jsurvival: true
-# ClinicoPathDescriptives: true
+ClinicoPathDescriptives: true
 # OncoPath: true
 
 

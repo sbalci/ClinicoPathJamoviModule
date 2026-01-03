@@ -834,255 +834,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             })
         },
 
-        .populateFinnExplanation = function() {
-            # Provide educational content about Finn Coefficient
-
-            html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is the Finn Coefficient?</h3>
-                    <p style='margin: 0; color: #333;'>
-                        The Finn coefficient is a <strong>variance-based agreement measure</strong> for categorical data.
-                        Unlike kappa-based measures that focus on exact agreement, Finn's approach uses analysis of variance
-                        to quantify interrater reliability. It is <strong>especially useful when variance between raters
-                        is low</strong> (i.e., when agreement is already high).
-                    </p>
-                </div>
-
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Finn Coefficient</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>High agreement scenarios</strong> - When raters already agree well, kappa may be paradoxically low</li>
-                        <li><strong>Ordered categorical data</strong> - Tumor grades (G1/G2/G3), severity scales, ordinal ratings</li>
-                        <li><strong>Alternative to kappa</strong> - When kappa assumptions are violated or kappa values are unstable</li>
-                        <li><strong>Low variance situations</strong> - When between-rater variance is minimal</li>
-                        <li><strong>Educational/research settings</strong> - Comparing trained raters with similar rating patterns</li>
-                    </ul>
-                </div>
-
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Finn Coefficient vs Kappa</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Feature</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Finn Coefficient</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Cohen's/Fleiss' Kappa</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Approach</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Variance-based (ANOVA)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Chance-corrected agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Best when</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Low between-rater variance</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate agreement levels</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Paradox issue</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Less susceptible</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Can be paradoxically low</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Models</strong></td>
-                            <td style='padding: 8px;'>One-way or two-way random effects</td>
-                            <td style='padding: 8px;'>Depends on kappa variant</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Example</h4>
-                    <p style='margin: 0; font-style: italic;'>
-                        Four well-trained pathologists grade dysplasia in Barrett's esophagus biopsies
-                        (categories: none, low-grade, high-grade). All pathologists agree >90% of the time.
-                        Cohen's kappa might be paradoxically low due to skewed category distributions.
-                        The Finn coefficient, using variance components, provides a more stable reliability
-                        estimate in this high-agreement scenario.
-                    </p>
-                </div>
-
-                <div style='background: #fff8e1; border-left: 4px solid #FFA000; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Model Types</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>One-way model (subjects random):</strong></p>
-                    <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                        <li>Each subject may be rated by different raters</li>
-                        <li>Raters are considered fixed effects</li>
-                        <li>Use when rater assignment is not random</li>
-                    </ul>
-                    <p style='margin: 0 0 10px 0;'><strong>Two-way model (subjects and raters random):</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Subjects and raters both randomly sampled from populations</li>
-                        <li>All subjects rated by all raters</li>
-                        <li>Generalizes to broader population of raters</li>
-                    </ul>
-                </div>
-
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Interpretation</h4>
-                    <p style='margin: 0 0 5px 0;'>The Finn coefficient ranges from 0 to 1:</p>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>< 0.40</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Poor agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 – 0.60</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Fair agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 – 0.75</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Good agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 – 0.90</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Excellent agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>0.90 – 1.00</td>
-                            <td style='padding: 5px;'>Outstanding agreement</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Statistical test:</strong> F-test evaluates if agreement is significantly better than chance.
-                        Significant p-value (< 0.05) indicates reliable agreement beyond random variation.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
-                    <p style='margin: 0; font-size: 12px; color: #666;'>
-                        <strong>Reference:</strong> Finn, R. H. (1970). A note on estimating the reliability of categorical data.
-                        <em>Educational and Psychological Measurement</em>, 30, 71-76.
-                    </p>
-                </div>
-            </div>
-            "
-
-            self$results$finnExplanation$setContent(html_content)
-        },
-
-        .calculateFinn = function(ratings) {
-            # Calculate Finn coefficient for categorical agreement
-
-            # Get number of rating categories from user option
-            n_levels <- self$options$finnLevels
-
-            # Get model type
-            model_type <- self$options$finnModel
-
-            # Validate minimum number of raters (need at least 2)
-            if (ncol(ratings) < 2) {
-                self$results$finnTable$setNote(
-                    "error",
-                    "Finn coefficient requires at least 2 raters."
-                )
-                return()
-            }
-
-            # Validate data is categorical or can be treated as categorical
-            # Convert factors to numeric for finn() function
-            ratings_numeric <- as.data.frame(lapply(ratings, function(x) {
-                if (is.factor(x)) {
-                    as.numeric(x)
-                } else if (is.numeric(x)) {
-                    x
-                } else {
-                    as.numeric(as.factor(x))
-                }
-            }))
-
-            # Remove rows with missing data
-            complete_idx <- complete.cases(ratings_numeric)
-            ratings_clean <- ratings_numeric[complete_idx, , drop = FALSE]
-
-            if (nrow(ratings_clean) < 2) {
-                self$results$finnTable$setNote(
-                    "error",
-                    "Insufficient complete cases for Finn coefficient calculation. At least 2 cases required."
-                )
-                return()
-            }
-
-            # Check if specified levels match data range
-            actual_max <- max(ratings_clean, na.rm = TRUE)
-            actual_min <- min(ratings_clean, na.rm = TRUE)
-
-            if (actual_max > n_levels || actual_min < 1) {
-                self$results$finnTable$setNote(
-                    "warning",
-                    sprintf("Data range (%d to %d) may not match specified number of categories (%d).
-                            Ensure your rating categories are coded as 1 to %d.",
-                            round(actual_min), round(actual_max), n_levels, n_levels)
-                )
-            }
-
-            # Calculate Finn coefficient
-            tryCatch({
-                finn_result <- irr::finn(
-                    ratings = ratings_clean,
-                    s.levels = n_levels,
-                    model = model_type
-                )
-
-                # Get model description
-                model_desc <- if (model_type == "oneway") {
-                    "One-way (subjects random)"
-                } else {
-                    "Two-way (subjects and raters random)"
-                }
-
-                # Interpret the coefficient value
-                finn_val <- finn_result$value
-                if (is.na(finn_val)) {
-                    interp <- "Cannot interpret"
-                } else if (finn_val < 0.40) {
-                    interp <- "Poor agreement"
-                } else if (finn_val < 0.60) {
-                    interp <- "Fair agreement"
-                } else if (finn_val < 0.75) {
-                    interp <- "Good agreement"
-                } else if (finn_val < 0.90) {
-                    interp <- "Excellent agreement"
-                } else {
-                    interp <- "Outstanding agreement"
-                }
-
-                # Populate table
-                self$results$finnTable$setRow(rowNo = 1, values = list(
-                    method = sprintf("Finn Coefficient (%s)", model_desc),
-                    subjects = finn_result$subjects,
-                    raters = finn_result$raters,
-                    levels = n_levels,
-                    finn_value = finn_result$value,
-                    f_statistic = finn_result$statistic,
-                    df = finn_result$stat.name,
-                    p = finn_result$p.value,
-                    interpretation = interp
-                ))
-
-                # Add interpretation note
-                sig_text <- if (finn_result$p.value < 0.05) {
-                    "statistically significant (p < 0.05)"
-                } else {
-                    "not statistically significant (p ≥ 0.05)"
-                }
-
-                self$results$finnTable$setNote(
-                    "interpretation",
-                    sprintf("%s. Agreement is %s. The variance-based approach is especially useful when rater variance is low.",
-                            interp, sig_text)
-                )
-
-            }, error = function(e) {
-                self$results$finnTable$setNote(
-                    "error",
-                    sprintf("Error calculating Finn coefficient: %s. Ensure data are categorical and properly coded (1 to %d).",
-                            e$message, n_levels)
-                )
-            })
-        },
-
         .populateKendallWExplanation = function() {
             # Provide educational content about Kendall's W
 
@@ -1830,56 +1581,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff8e1; border-left: 4px solid #FFA000; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Technical Reference: irr::icc() Parameters</h4>
-                    <p style='margin: 0 0 10px 0; font-size: 13px; color: #555;'>
-                        This table shows the exact parameters passed to the <code>irr::icc()</code> function for each model.
-                        Useful for understanding implementation details and replicating results in R.
-                    </p>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 12px; font-family: monospace;'>
-                        <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #FFA000;'>Model</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #FFA000;'>irr::icc Parameters</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #FFA000;'>Use Case</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model="oneway", type="consistency", unit="single"</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Each case rated by different raters</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model="twoway", type="agreement", unit="single"</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>All cases by same raters (random sample)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(3,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model="twoway", type="consistency", unit="single"</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>All cases by same raters (fixed panel)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,k)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model="oneway", type="consistency", unit="average"</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Average of k different raters</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,k)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model="twoway", type="agreement", unit="average"</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Average rating (random raters)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>ICC(3,k)</strong></td>
-                            <td style='padding: 8px;'>model="twoway", type="consistency", unit="average"</td>
-                            <td style='padding: 8px;'>Average rating (fixed panel)</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 11px; color: #666;'>
-                        <strong>Note:</strong> <em>model</em> = "oneway" or "twoway" |
-                        <em>type</em> = "consistency" or "agreement" |
-                        <em>unit</em> = "single" or "average"
-                    </p>
-                </div>
-
                 <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
                     <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Interpreting ICC Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
@@ -1939,26 +1640,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             icc_type <- self$options$iccType
 
             # Map user-friendly names to irr package format
-            # irr::icc(ratings, model, type, unit, conf.level)
-            # model: "oneway" or "twoway"
-            # type: "consistency" or "agreement"
-            # unit: "single" or "average"
-
-            model_mapping <- list(
-                icc11 = "oneway",
-                icc21 = "twoway",
-                icc31 = "twoway",
-                icc1k = "oneway",
-                icc2k = "twoway",
-                icc3k = "twoway"
-            )
-
             type_mapping <- list(
-                icc11 = "consistency",
+                icc11 = "oneway",
                 icc21 = "agreement",
                 icc31 = "consistency",
-                icc1k = "consistency",
-                icc2k = "agreement",
+                icc1k = "oneway",
+                icc21 = "agreement",
                 icc3k = "consistency"
             )
 
@@ -1971,8 +1658,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 icc3k = "average"
             )
 
-            # Get ICC parameters
-            model_param <- model_mapping[[icc_type]]
+            # Get ICC type and unit parameters
             type_param <- type_mapping[[icc_type]]
             unit_param <- unit_mapping[[icc_type]]
 
@@ -1992,9 +1678,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             tryCatch({
                 icc_result <- irr::icc(
                     ratings_clean,
-                    model = model_param,
-                    type = type_param,
-                    unit = unit_param,
+                    model = type_param,
+                    type = unit_param,
+                    unit = "single",
                     conf.level = 0.95
                 )
 
@@ -2045,153 +1731,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     sprintf("Error calculating ICC: %s", e$message)
                 )
             })
-        },
-
-        .calculateIota = function(ratings) {
-            # Calculate Iota coefficient for multivariate interrater agreement
-            # Iota measures agreement across multiple variables/dimensions simultaneously
-
-            n_vars <- ncol(ratings)
-            n_cases <- nrow(ratings)
-
-            # Iota requires at least 2 variables (dimensions) to be meaningful
-            if (n_vars < 2) {
-                self$results$iotaTable$setNote(
-                    "error",
-                    "Iota coefficient requires multiple variables (raters) for multivariate analysis. Select at least 2 rater columns. For single-variable agreement, use ICC or Kappa instead."
-                )
-                return()
-            }
-
-            # Prepare data for irr::iota
-            # irr::iota expects a list of matrices, one per variable
-            # In our simplified implementation, we treat each column as one dimension
-
-            # Check data type
-            has_numeric <- any(sapply(ratings, is.numeric))
-            has_factor <- any(sapply(ratings, is.factor)) || any(sapply(ratings, is.character))
-
-            # Determine scale data type
-            if (all(sapply(ratings, is.numeric))) {
-                scale_data <- "quantitative"
-                data_desc <- "quantitative (continuous)"
-            } else if (all(sapply(ratings, is.factor)) || all(sapply(ratings, function(x) is.factor(x) || is.character(x)))) {
-                scale_data <- "nominal"
-                data_desc <- "nominal (categorical)"
-                # Convert character columns to factors
-                for (i in seq_along(ratings)) {
-                    if (is.character(ratings[[i]])) {
-                        ratings[[i]] <- as.factor(ratings[[i]])
-                    }
-                }
-            } else {
-                self$results$iotaTable$setNote(
-                    "error",
-                    "Iota requires all variables to be the same type (all numeric OR all categorical). Your data contains mixed types."
-                )
-                return()
-            }
-
-            # For Iota, create list of matrices - simplified implementation
-            ratings_list <- list(as.matrix(ratings))
-
-            # Calculate Iota
-            tryCatch({
-                iota_result <- irr::iota(
-                    ratings_list,
-                    scaledata = scale_data,
-                    standardize = self$options$iotaStandardize && scale_data == "quantitative"
-                )
-
-                # Populate table
-                method_text <- sprintf("Iota (%s data)", data_desc)
-                if (self$options$iotaStandardize && scale_data == "quantitative") {
-                    method_text <- paste0(method_text, " - standardized")
-                }
-
-                # Interpret Iota value
-                iota_val <- iota_result$value
-                if (iota_val < 0.40) {
-                    interp <- "Poor agreement"
-                } else if (iota_val < 0.60) {
-                    interp <- "Fair agreement"
-                } else if (iota_val < 0.75) {
-                    interp <- "Good agreement"
-                } else if (iota_val < 0.90) {
-                    interp <- "Very good agreement"
-                } else {
-                    interp <- "Excellent agreement"
-                }
-
-                self$results$iotaTable$setRow(rowNo = 1, values = list(
-                    method = method_text,
-                    subjects = iota_result$subjects,
-                    raters = iota_result$raters,
-                    variables = length(ratings_list),
-                    iota_value = iota_val,
-                    interpretation = interp
-                ))
-
-                # Add informational note
-                note_text <- sprintf(
-                    "Iota coefficient: %.3f (%s). Iota is chance-corrected and ranges from 0 (no agreement) to 1 (perfect agreement).",
-                    iota_val, interp
-                )
-
-                if (scale_data == "quantitative" && self$options$iotaStandardize) {
-                    note_text <- paste0(note_text, " Variables were z-standardized before analysis.")
-                }
-
-                self$results$iotaTable$setNote("info", note_text)
-
-            }, error = function(e) {
-                self$results$iotaTable$setNote(
-                    "error",
-                    sprintf("Error calculating Iota: %s", e$message)
-                )
-            })
-        },
-
-        .populateIotaExplanation = function() {
-            # Generate comprehensive explanation of Iota coefficient
-
-            html_content <- "
-                <div style='font-family: Arial, sans-serif; max-width: 900px; padding: 20px;'>
-                    <h3 style='color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;'>
-                        Iota Coefficient for Multivariate Interrater Agreement
-                    </h3>
-
-                    <div style='background: #E8F5E9; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;'>
-                        <h4 style='margin: 0 0 10px 0; color: #2E7D32;'>What is Iota?</h4>
-                        <p style='margin: 0; line-height: 1.6;'>
-                            Iota (ι) is a <strong>chance-corrected agreement index</strong> for multivariate observations. Unlike ICC which
-                            analyzes one variable at a time, Iota assesses <strong>overall agreement across multiple variables simultaneously</strong>.
-                        </p>
-                    </div>
-
-                    <div style='background: #FFF3E0; padding: 15px; border-left: 4px solid #FF9800; margin: 20px 0;'>
-                        <h4 style='margin: 0 0 10px 0; color: #E65100;'>Clinical Pathology Use Cases</h4>
-                        <p style='margin: 0 0 10px 0; font-weight: bold;'>Comprehensive Tumor Assessment:</p>
-                        <ul style='margin: 0 0 15px 0; padding-left: 20px;'>
-                            <li>Variables: Tumor size, grade, mitotic count, necrosis percentage</li>
-                            <li>Result: Single Iota value for overall diagnostic agreement</li>
-                        </ul>
-
-                        <p style='margin: 0 0 10px 0; font-weight: bold;'>IHC Scoring Panels:</p>
-                        <ul style='margin: 0; padding-left: 20px;'>
-                            <li>Variables: ER, PR, HER2, Ki-67 scores</li>
-                            <li>Advantage: Accounts for correlation between biomarkers</li>
-                        </ul>
-                    </div>
-
-                    <div style='background: white; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                        <h4 style='margin: 0 0 10px 0;'>Interpretation</h4>
-                        <p><strong>< 0.40:</strong> Poor | <strong>0.40-0.60:</strong> Fair | <strong>0.60-0.75:</strong> Good | <strong>0.75-0.90:</strong> Very good | <strong>> 0.90:</strong> Excellent</p>
-                    </div>
-                </div>
-            "
-
-            self$results$iotaExplanation$setContent(html_content)
         },
 
         .calculateGwetAC = function(ratings) {
@@ -2453,10 +1992,113 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             ))
         },
 
-        # REMOVED: .calculateAgreementStatus() - consolidated into .calculateLevelOfAgreement()
-        # This method was replaced by adding "simple" mode to Level of Agreement feature
-        # The simple mode provides the same 3-category classification (All Agreed, Majority Agreed, No Agreement)
-        # that this method used to provide, but within the more flexible LoA framework
+        .calculateAgreementStatus = function(ratings) {
+            # Calculate agreement status for each case
+            # Categorizes as: All Agreed, Majority Agreed, No Agreement
+
+            threshold <- self$options$agreementThreshold
+            n_raters <- ncol(ratings)
+            n_cases <- nrow(ratings)
+
+            # Initialize results storage
+            agreement_results <- data.frame(
+                case_id = 1:n_cases,
+                agreement_status = character(n_cases),
+                agreement_percent = numeric(n_cases),
+                modal_category = character(n_cases),
+                n_agreeing = integer(n_cases),
+                stringsAsFactors = FALSE
+            )
+
+            # Calculate for each case
+            for (i in 1:n_cases) {
+                row_ratings <- unlist(ratings[i, ])
+                row_ratings <- row_ratings[!is.na(row_ratings)]
+
+                if (length(row_ratings) == 0) {
+                    agreement_results$agreement_status[i] <- "Missing Data"
+                    agreement_results$agreement_percent[i] <- NA
+                    agreement_results$modal_category[i] <- NA
+                    agreement_results$n_agreeing[i] <- 0
+                    next
+                }
+
+                # Find mode (most common rating)
+                freq_table <- table(row_ratings)
+                max_freq <- max(freq_table)
+                modal_value <- names(freq_table)[which.max(freq_table)]
+
+                # Calculate agreement percentage
+                agree_pct <- (max_freq / length(row_ratings)) * 100
+
+                # Categorize agreement status
+                if (max_freq == length(row_ratings)) {
+                    status <- "All Agreed"
+                } else if (agree_pct >= threshold) {
+                    status <- "Majority Agreed"
+                } else {
+                    status <- "No Agreement"
+                }
+
+                # Store results
+                agreement_results$agreement_status[i] <- status
+                agreement_results$agreement_percent[i] <- agree_pct / 100  # Convert to proportion for format: pc
+                agreement_results$modal_category[i] <- modal_value
+                agreement_results$n_agreeing[i] <- max_freq
+            }
+
+            # Populate case-level detail table
+            detail_table <- self$results$agreementStatusDetail
+            for (i in 1:n_cases) {
+                detail_table$addRow(rowKey = i, values = list(
+                    case_id = agreement_results$case_id[i],
+                    agreement_status = agreement_results$agreement_status[i],
+                    agreement_percent = agreement_results$agreement_percent[i],
+                    modal_category = agreement_results$modal_category[i],
+                    n_agreeing = agreement_results$n_agreeing[i]
+                ))
+            }
+
+            # Calculate distribution summary (if requested)
+            if (self$options$showAgreementTable) {
+                status_counts <- table(agreement_results$agreement_status)
+                status_table <- self$results$agreementStatusTable
+
+                status_order <- c("All Agreed", "Majority Agreed", "No Agreement", "Missing Data")
+                for (status in status_order) {
+                    if (status %in% names(status_counts)) {
+                        count <- as.integer(status_counts[status])
+                        pct <- count / n_cases
+
+                        # Interpretation text
+                        interpretation <- switch(status,
+                            "All Agreed" = "Complete consensus across all raters",
+                            "Majority Agreed" = sprintf("≥%.0f%% of raters agree", threshold),
+                            "No Agreement" = sprintf("<%.0f%% agreement - review recommended", threshold),
+                            "Missing Data" = "Insufficient data for classification"
+                        )
+
+                        status_table$addRow(rowKey = status, values = list(
+                            status = status,
+                            count = count,
+                            percentage = pct,
+                            interpretation = interpretation
+                        ))
+                    }
+                }
+            }
+
+            # Add agreement status variable to dataset (if requested)
+            if (self$options$addAgreementStatus) {
+                self$results$addAgreementStatus$setRowNums(1:n_cases)
+                self$results$addAgreementStatus$setValues(agreement_results$agreement_status)
+            }
+
+            # Update computed variables info
+            if (self$options$consensusVar || self$options$addAgreementStatus) {
+                private$.updateComputedVariablesInfo()
+            }
+        },
 
         .createConsensusVariable = function(ratings) {
             # Create consensus (modal) rating variable based on selected rule
@@ -2569,7 +2211,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }
 
             # Update computed variables info
-            if (self$options$consensusVar) {
+            if (self$options$consensusVar || self$options$addAgreementStatus) {
                 private$.updateComputedVariablesInfo()
             }
         },
@@ -2591,23 +2233,22 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     "<li><strong>", var_name, "</strong>: Consensus rating (", rule_text, ")</li>")
             }
 
+            if (self$options$addAgreementStatus) {
+                var_name <- self$options$agreementStatusName
+                threshold <- self$options$agreementThreshold
+                info_html <- paste0(info_html,
+                    "<li><strong>", var_name, "</strong>: Agreement status (threshold: ", threshold, "%)</li>")
+            }
+
             if (self$options$loaVariable) {
                 var_name <- self$options$loaVariableName
-                detail_mode <- self$options$detailLevel
-
-                if (detail_mode == "simple") {
-                    threshold <- self$options$simpleThreshold
-                    info_html <- paste0(info_html,
-                        "<li><strong>", var_name, "</strong>: Case Agreement (Simple mode - threshold: ", threshold, "%)</li>")
-                } else {
-                    method_text <- switch(self$options$loaThresholds,
-                        "custom" = paste0("Custom (High: ", self$options$loaHighThreshold, "%, Low: ", self$options$loaLowThreshold, "%)"),
-                        "quartiles" = "Quartile-based (data-driven)",
-                        "tertiles" = "Tertile-based (data-driven)"
-                    )
-                    info_html <- paste0(info_html,
-                        "<li><strong>", var_name, "</strong>: Case Agreement (Detailed mode - ", method_text, ")</li>")
-                }
+                method_text <- switch(self$options$loaThresholds,
+                    "custom" = paste0("Custom (High: ", self$options$loaHighThreshold, "%, Low: ", self$options$loaLowThreshold, "%)"),
+                    "quartiles" = "Quartile-based (data-driven)",
+                    "tertiles" = "Tertile-based (data-driven)"
+                )
+                info_html <- paste0(info_html,
+                    "<li><strong>", var_name, "</strong>: Level of Agreement (", method_text, ")</li>")
             }
 
             info_html <- paste0(info_html, "</ul>")
@@ -2620,16 +2261,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         },
 
         .calculateLevelOfAgreement = function(ratings) {
-            # Calculate case agreement categorization
-            # Supports two modes:
-            #   - Simple: 3 categories (All Agreed, Majority Agreed, No Agreement)
-            #   - Detailed: 5 categories (Absolute, High, Moderate, Low, Poor)
+            # Calculate level of agreement (LoA) for each case
+            # Categorizes cases as Absolute/High/Moderate/Low/Poor based on agreement proportion
 
             n_cases <- nrow(ratings)
             n_raters <- ncol(ratings)
-            detail_mode <- self$options$detailLevel
 
-            # Initialize result vectors
+            # Get thresholds
+            method <- self$options$loaThresholds
+
+            # Initialize LoA categories vector
             loa_categories <- character(n_cases)
             agreement_pcts <- numeric(n_cases)
             modal_ratings <- character(n_cases)
@@ -2660,125 +2301,77 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 modal_ratings[i] <- modes[1]  # Use first mode if tie
             }
 
-            # Categorize based on detail mode
-            if (detail_mode == "simple") {
-                # Simple mode: 3 categories (replaces old Agreement Status feature)
-                threshold <- self$options$simpleThreshold / 100
+            # Determine thresholds based on method
+            if (method == "custom") {
+                high_threshold <- self$options$loaHighThreshold / 100
+                low_threshold <- self$options$loaLowThreshold / 100
+                moderate_threshold <- (high_threshold + low_threshold) / 2
+            } else if (method == "quartiles") {
+                # Data-driven quartile approach
+                valid_pcts <- agreement_pcts[!is.na(agreement_pcts)]
+                quartiles <- quantile(valid_pcts, probs = c(0.25, 0.50, 0.75), na.rm = TRUE)
+                low_threshold <- quartiles[1]
+                moderate_threshold <- quartiles[2]
+                high_threshold <- quartiles[3]
+            } else if (method == "tertiles") {
+                # Data-driven tertile approach
+                valid_pcts <- agreement_pcts[!is.na(agreement_pcts)]
+                tertiles <- quantile(valid_pcts, probs = c(1/3, 2/3), na.rm = TRUE)
+                low_threshold <- tertiles[1]
+                moderate_threshold <- tertiles[1]  # Same as low for tertiles
+                high_threshold <- tertiles[2]
+            }
 
-                for (i in 1:n_cases) {
-                    if (is.na(agreement_pcts[i])) {
-                        loa_categories[i] <- NA
-                    } else if (agreement_pcts[i] == 1.0) {
-                        loa_categories[i] <- "All Agreed"
-                    } else if (agreement_pcts[i] >= threshold) {
-                        loa_categories[i] <- "Majority Agreed"
-                    } else {
-                        loa_categories[i] <- "No Agreement"
-                    }
+            # Categorize each case
+            for (i in 1:n_cases) {
+                if (is.na(agreement_pcts[i])) {
+                    loa_categories[i] <- NA
+                } else if (agreement_pcts[i] == 1.0) {
+                    loa_categories[i] <- "Absolute"
+                } else if (agreement_pcts[i] >= high_threshold) {
+                    loa_categories[i] <- "High"
+                } else if (agreement_pcts[i] >= moderate_threshold) {
+                    loa_categories[i] <- "Moderate"
+                } else if (agreement_pcts[i] >= low_threshold) {
+                    loa_categories[i] <- "Low"
+                } else {
+                    loa_categories[i] <- "Poor"
                 }
+            }
 
-                # Populate distribution table with simple categories
-                if (self$options$showLoaTable) {
-                    loa_table <- self$results$loaTable
-                    category_counts <- table(loa_categories, useNA = "no")
-                    category_order <- c("All Agreed", "Majority Agreed", "No Agreement")
+            # Populate LoA distribution table (if requested)
+            if (self$options$showLoaTable) {
+                loa_table <- self$results$loaTable
 
-                    for (category in category_order) {
-                        if (category %in% names(category_counts)) {
-                            count <- as.integer(category_counts[category])
-                            pct <- count / n_cases
+                # Count cases in each category
+                category_counts <- table(loa_categories, useNA = "no")
+                category_order <- c("Absolute", "High", "Moderate", "Low", "Poor")
 
-                            # Interpretation text for simple mode
-                            interpretation <- switch(category,
-                                "All Agreed" = "Complete consensus (100%) across all raters",
-                                "Majority Agreed" = sprintf("≥%.0f%% of raters agree on the same rating", self$options$simpleThreshold),
-                                "No Agreement" = sprintf("<%.0f%% agreement - review recommended", self$options$simpleThreshold)
-                            )
+                for (category in category_order) {
+                    if (category %in% names(category_counts)) {
+                        count <- as.integer(category_counts[category])
+                        pct <- count / n_cases
 
-                            loa_table$addRow(rowKey = category, values = list(
-                                loa_category = category,
-                                count = count,
-                                percentage = pct,
-                                interpretation = interpretation
-                            ))
-                        }
-                    }
-                }
+                        # Interpretation text
+                        interpretation <- switch(category,
+                            "Absolute" = "Perfect agreement (100%) - all raters concur",
+                            "High" = "Strong agreement - most raters concur, minimal disagreement",
+                            "Moderate" = "Moderate agreement - majority concur, some disagreement",
+                            "Low" = "Weak agreement - considerable disagreement present",
+                            "Poor" = "Poor agreement - substantial disagreement, difficult case"
+                        )
 
-            } else {
-                # Detailed mode: 5 categories (original LoA implementation)
-                method <- self$options$loaThresholds
-
-                # Determine thresholds based on method
-                if (method == "custom") {
-                    high_threshold <- self$options$loaHighThreshold / 100
-                    low_threshold <- self$options$loaLowThreshold / 100
-                    moderate_threshold <- (high_threshold + low_threshold) / 2
-                } else if (method == "quartiles") {
-                    # Data-driven quartile approach
-                    valid_pcts <- agreement_pcts[!is.na(agreement_pcts)]
-                    quartiles <- quantile(valid_pcts, probs = c(0.25, 0.50, 0.75), na.rm = TRUE)
-                    low_threshold <- quartiles[1]
-                    moderate_threshold <- quartiles[2]
-                    high_threshold <- quartiles[3]
-                } else if (method == "tertiles") {
-                    # Data-driven tertile approach
-                    valid_pcts <- agreement_pcts[!is.na(agreement_pcts)]
-                    tertiles <- quantile(valid_pcts, probs = c(1/3, 2/3), na.rm = TRUE)
-                    low_threshold <- tertiles[1]
-                    moderate_threshold <- tertiles[1]  # Same as low for tertiles
-                    high_threshold <- tertiles[2]
-                }
-
-                # Categorize each case with detailed thresholds
-                for (i in 1:n_cases) {
-                    if (is.na(agreement_pcts[i])) {
-                        loa_categories[i] <- NA
-                    } else if (agreement_pcts[i] == 1.0) {
-                        loa_categories[i] <- "Absolute"
-                    } else if (agreement_pcts[i] >= high_threshold) {
-                        loa_categories[i] <- "High"
-                    } else if (agreement_pcts[i] >= moderate_threshold) {
-                        loa_categories[i] <- "Moderate"
-                    } else if (agreement_pcts[i] >= low_threshold) {
-                        loa_categories[i] <- "Low"
-                    } else {
-                        loa_categories[i] <- "Poor"
-                    }
-                }
-
-                # Populate distribution table with detailed categories
-                if (self$options$showLoaTable) {
-                    loa_table <- self$results$loaTable
-                    category_counts <- table(loa_categories, useNA = "no")
-                    category_order <- c("Absolute", "High", "Moderate", "Low", "Poor")
-
-                    for (category in category_order) {
-                        if (category %in% names(category_counts)) {
-                            count <- as.integer(category_counts[category])
-                            pct <- count / n_cases
-
-                            # Interpretation text for detailed mode
-                            interpretation <- switch(category,
-                                "Absolute" = "Perfect agreement (100%) - all raters concur",
-                                "High" = "Strong agreement - most raters concur, minimal disagreement",
-                                "Moderate" = "Moderate agreement - majority concur, some disagreement",
-                                "Low" = "Weak agreement - considerable disagreement present",
-                                "Poor" = "Poor agreement - substantial disagreement, difficult case"
-                            )
-
-                            loa_table$addRow(rowKey = category, values = list(
-                                loa_category = category,
-                                count = count,
-                                percentage = pct,
-                                interpretation = interpretation
-                            ))
-                        }
+                        loa_table$addRow(rowKey = category, values = list(
+                            loa_category = category,
+                            count = count,
+                            percentage = pct,
+                            interpretation = interpretation
+                        ))
                     }
                 }
             }
 
-            # Populate case-level detail table (same for both modes)
+            # Populate case-level detail table
             detail_table <- self$results$loaDetailTable
             for (i in 1:n_cases) {
                 detail_table$addRow(rowKey = i, values = list(
@@ -2790,14 +2383,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 ))
             }
 
-            # Add LoA variable to dataset
+            # Add LoA variable to dataset (if requested)
             if (self$options$loaVariable) {
                 self$results$loaOutput$setRowNums(1:n_cases)
                 self$results$loaOutput$setValues(loa_categories)
             }
 
             # Update computed variables info
-            if (self$options$consensusVar || self$options$loaVariable) {
+            if (self$options$consensusVar || self$options$addAgreementStatus || self$options$loaVariable) {
                 private$.updateComputedVariablesInfo()
             }
         },
@@ -3292,12 +2885,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             private$.calculateLightKappa(ratings)
         }
 
-        # Finn Coefficient (if requested) ----
-        if (self$options$finn) {
-            private$.populateFinnExplanation()
-            private$.calculateFinn(ratings)
-        }
-
         # Kendall's W (if requested) ----
         if (self$options$kendallW) {
             private$.populateKendallWExplanation()
@@ -3338,10 +2925,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             private$.calculateICC(ratings)
         }
 
-        # Iota Coefficient (if requested) ----
-        if (self$options$iota) {
-            private$.populateIotaExplanation()
-            private$.calculateIota(ratings)
+        # Agreement Status Calculation (if requested) ----
+        if (self$options$agreementStatus) {
+            private$.calculateAgreementStatus(ratings)
         }
 
         # Consensus Variable Calculation (if requested) ----
@@ -3392,74 +2978,74 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         #         return('')
         #     }
 
-        #             # Escape variable names that need backticks
-        #             vars_escaped <- sapply(vars, function(v) {
-        #                 private$.escapeVariableName(v)
-        #             })
-        # 
-        #             # Build vars argument for function call
-        #             # Each variable name is quoted, with backticks if needed
-        #             vars_arg <- paste0('vars = c(',
-        #                              paste(sapply(vars_escaped, function(v) {
-        #                                  # If already has backticks, preserve them in quotes
-        #                                  if (grepl("^`.*`$", v)) {
-        #                                      paste0('"', v, '"')
-        #                                  } else {
-        #                                      paste0('"', v, '"')
-        #                                  }
-        #                              }), collapse = ', '),
-        #                              ')')
-        # 
-        #             # Build other arguments
-        #             args_list <- c(vars_arg)
-        # 
-        #             # Add weighted kappa option if not default
-        #             if (self$options$wght != "unweighted") {
-        #                 wght_arg <- paste0('wght = "', self$options$wght, '"')
-        #                 args_list <- c(args_list, wght_arg)
-        #             }
-        # 
-        #             # Add exact kappa option if enabled
-        #             if (self$options$exct) {
-        #                 args_list <- c(args_list, 'exct = TRUE')
-        #             }
-        # 
-        #             # Add Krippendorff's alpha options if enabled
-        #             if (self$options$kripp) {
-        #                 args_list <- c(args_list, 'kripp = TRUE')
-        # 
-        #                 if (self$options$krippMethod != "nominal") {
-        #                     args_list <- c(args_list, paste0('krippMethod = "', self$options$krippMethod, '"'))
-        #                 }
-        # 
-        #                 if (self$options$bootstrap) {
-        #                     args_list <- c(args_list, 'bootstrap = TRUE')
-        #                 }
-        #             }
-        # 
-        #             # Add display options if enabled
-        #             if (self$options$sft) {
-        #                 args_list <- c(args_list, 'sft = TRUE')
-        #             }
-        # 
-        #             if (self$options$showSummary) {
-        #                 args_list <- c(args_list, 'showSummary = TRUE')
-        #             }
-        # 
-        #             # Build final R code
-        #             code <- paste0(
-        #                 '# Interrater Reliability Analysis\n',
-        #                 '# Generated by ClinicoPath jamovi module\n\n',
-        #                 'library(ClinicoPath)\n\n',
-        #                 '# Load your data\n',
-        #                 '# data <- read.csv("your_data.csv")\n\n',
-        #                 'agreement(\n',
-        #                 '    data = data,\n',
-        #                 '    ', paste(args_list, collapse = ',\n    '),
-        #                 '\n)'
-        #             )
-        #
-        #     return(code)
-        # }
+            # Escape variable names that need backticks
+            vars_escaped <- sapply(vars, function(v) {
+                private$.escapeVariableName(v)
+            })
+
+            # Build vars argument for function call
+            # Each variable name is quoted, with backticks if needed
+            vars_arg <- paste0('vars = c(',
+                             paste(sapply(vars_escaped, function(v) {
+                                 # If already has backticks, preserve them in quotes
+                                 if (grepl("^`.*`$", v)) {
+                                     paste0('"', v, '"')
+                                 } else {
+                                     paste0('"', v, '"')
+                                 }
+                             }), collapse = ', '),
+                             ')')
+
+            # Build other arguments
+            args_list <- c(vars_arg)
+
+            # Add weighted kappa option if not default
+            if (self$options$wght != "unweighted") {
+                wght_arg <- paste0('wght = "', self$options$wght, '"')
+                args_list <- c(args_list, wght_arg)
+            }
+
+            # Add exact kappa option if enabled
+            if (self$options$exct) {
+                args_list <- c(args_list, 'exct = TRUE')
+            }
+
+            # Add Krippendorff's alpha options if enabled
+            if (self$options$kripp) {
+                args_list <- c(args_list, 'kripp = TRUE')
+
+                if (self$options$krippMethod != "nominal") {
+                    args_list <- c(args_list, paste0('krippMethod = "', self$options$krippMethod, '"'))
+                }
+
+                if (self$options$bootstrap) {
+                    args_list <- c(args_list, 'bootstrap = TRUE')
+                }
+            }
+
+            # Add display options if enabled
+            if (self$options$sft) {
+                args_list <- c(args_list, 'sft = TRUE')
+            }
+
+            if (self$options$showSummary) {
+                args_list <- c(args_list, 'showSummary = TRUE')
+            }
+
+            # Build final R code
+            code <- paste0(
+                '# Interrater Reliability Analysis\n',
+                '# Generated by ClinicoPath jamovi module\n\n',
+                'library(ClinicoPath)\n\n',
+                '# Load your data\n',
+                '# data <- read.csv("your_data.csv")\n\n',
+                'agreement(\n',
+                '    data = data,\n',
+                '    ', paste(args_list, collapse = ',\n    '),
+                '\n)'
+            )
+
+            return(code)
+        }
     )  # End of public list
     )

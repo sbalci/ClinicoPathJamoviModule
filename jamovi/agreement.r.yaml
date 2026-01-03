@@ -201,10 +201,474 @@ items:
           - krippMethod
           - bootstrap
 
+    - name: lightKappaTable
+      title: "Light's Kappa Results"
+      type: Table
+      visible: (lightKappa)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: kappa
+          title: "Kappa"
+          type: number
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+
+    - name: lightKappaExplanation
+      title: "About Light's Kappa"
+      type: Html
+      visible: (lightKappa && showAbout)
+
+    - name: finnTable
+      title: "Finn Coefficient Results (Variance-Based Agreement)"
+      type: Table
+      visible: (finn)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: levels
+          title: 'Categories'
+          type: integer
+        - name: finn_value
+          title: 'Finn Coefficient'
+          type: number
+        - name: f_statistic
+          title: 'F-statistic'
+          type: number
+        - name: df
+          title: 'df'
+          type: text
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - finnLevels
+          - finnModel
+
+    - name: finnExplanation
+      title: "About Finn Coefficient"
+      type: Html
+      visible: (finn && showAbout)
+
+    - name: kendallWTable
+      title: "Kendall's Coefficient of Concordance (W) Results"
+      type: Table
+      visible: (kendallW)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: w
+          title: "W"
+          type: number
+        - name: chisq
+          title: 'Chi-square'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+
+    - name: kendallWExplanation
+      title: "About Kendall's W"
+      type: Html
+      visible: (kendallW && showAbout)
+
+    - name: raterBiasTable
+      title: "Rater Bias Test Results"
+      type: Table
+      visible: (raterBias)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Test'
+          type: text
+        - name: chisq
+          title: 'Chi-square'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+
+    - name: raterBiasExplanation
+      title: "About Rater Bias Test"
+      type: Html
+      visible: (raterBias && showAbout)
+
+    - name: pairwiseKappaTable
+      title: "Pairwise Kappa (Each Rater vs Reference)"
+      type: Table
+      visible: (pairwiseKappa)
+      rows: 0
+      columns:
+        - name: rater
+          title: 'Rater'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: kappa
+          title: 'Kappa'
+          type: number
+        - name: z
+          title: 'z'
+          type: number
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: rank
+          title: 'Rank'
+          type: integer
+          visible: (rankRaters)
+      clearWith:
+          - vars
+          - referenceRater
+          - rankRaters
+
+    - name: pairwiseKappaExplanation
+      title: "About Pairwise Kappa Analysis"
+      type: Html
+      visible: (pairwiseKappa && showAbout)
+
+    - name: hierarchicalOverallTable
+      title: "Hierarchical Kappa - Overall Agreement"
+      type: Table
+      visible: (hierarchicalKappa)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: cases
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: clusters
+          title: 'Clusters'
+          type: integer
+        - name: overall_kappa
+          title: 'Overall Kappa'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+      clearWith:
+          - vars
+          - clusterVariable
+
+    - name: clusterSpecificTable
+      title: "Cluster-Specific Kappa Estimates"
+      type: Table
+      visible: (hierarchicalKappa && clusterSpecificKappa)
+      rows: 0
+      columns:
+        - name: cluster
+          title: 'Cluster/Institution'
+          type: text
+        - name: n_cases
+          title: 'N Cases'
+          type: integer
+        - name: n_raters
+          title: 'N Raters'
+          type: integer
+        - name: kappa
+          title: 'Kappa'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: shrinkage_kappa
+          title: 'Shrinkage Kappa'
+          type: number
+          visible: (shrinkageEstimates)
+        - name: rank
+          title: 'Rank'
+          type: integer
+          visible: (clusterRankings)
+      clearWith:
+          - vars
+          - clusterVariable
+
+    - name: varianceDecompositionTable
+      title: "Variance Component Decomposition"
+      type: Table
+      visible: (hierarchicalKappa && varianceDecomposition)
+      rows: 0
+      columns:
+        - name: component
+          title: 'Variance Component'
+          type: text
+        - name: variance
+          title: 'Variance'
+          type: number
+        - name: sd
+          title: 'SD'
+          type: number
+        - name: proportion
+          title: 'Proportion of Total'
+          type: number
+          format: pc
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - clusterVariable
+
+    - name: hierarchicalICCTable
+      title: "Hierarchical ICC Decomposition"
+      type: Table
+      visible: (hierarchicalKappa && iccHierarchical)
+      rows: 0
+      columns:
+        - name: icc_type
+          title: 'ICC Type'
+          type: text
+        - name: icc_value
+          title: 'ICC'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - clusterVariable
+
+    - name: homogeneityTestTable
+      title: "Cluster Homogeneity Test Results"
+      type: Table
+      visible: (hierarchicalKappa && testClusterHomogeneity)
+      rows: 1
+      columns:
+        - name: test_name
+          title: 'Test'
+          type: text
+        - name: statistic
+          title: 'Test Statistic'
+          type: number
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+      clearWith:
+          - vars
+          - clusterVariable
+
+    - name: hierarchicalExplanation
+      title: "About Hierarchical/Multilevel Kappa"
+      type: Html
+      visible: (hierarchicalKappa && showAbout)
+
+    - name: gwetTable
+      title: "Gwet's AC1/AC2 Results"
+      type: Table
+      visible: (gwet)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: coefficient
+          title: 'Coefficient'
+          type: number
+        - name: se
+          title: 'Std. Error'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+          - gwetWeights
+
+    - name: gwetExplanation
+      title: "About Gwet's AC Coefficient"
+      type: Html
+      visible: (gwet && showAbout)
+
+    - name: iccTable
+      title: "Intraclass Correlation Coefficient (ICC) Results"
+      type: Table
+      visible: (icc)
+      rows: 1
+      columns:
+        - name: model
+          title: 'ICC Model'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: icc_value
+          title: 'ICC'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: f_value
+          title: 'F'
+          type: number
+        - name: df1
+          title: 'df1'
+          type: integer
+        - name: df2
+          title: 'df2'
+          type: integer
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+          - iccType
+
+    - name: iccExplanation
+      title: "About Intraclass Correlation Coefficient (ICC)"
+      type: Html
+      visible: (icc && showAbout)
+
+    - name: iotaTable
+      title: "Iota Coefficient Results (Multivariate Agreement)"
+      type: Table
+      visible: (iota)
+      rows: 1
+      columns:
+        - name: method
+          title: 'Method'
+          type: text
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: raters
+          title: 'Raters'
+          type: integer
+        - name: variables
+          title: 'Variables'
+          type: integer
+        - name: iota_value
+          title: 'Iota'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+
+    - name: iotaExplanation
+      title: "About Iota Coefficient"
+      type: Html
+      visible: (iota && showAbout)
+
     - name: weightedKappaGuide
       title: "Weighted Kappa Interpretation Guide"
       type: Html
       visible: (showAbout && (wght:unweighted == FALSE))
+
+    - name: levelInfoTable
+      title: "Level Ordering Information"
+      type: Table
+      visible: (showLevelInfo)
+      rows: 0
+      columns:
+        - name: variable
+          title: 'Variable'
+          type: text
+        - name: levels
+          title: 'Levels (in order)'
+          type: text
+        - name: n_levels
+          title: 'N Levels'
+          type: integer
+        - name: data_type
+          title: 'Type'
+          type: text
+        - name: note
+          title: 'Note'
+          type: text
+      clearWith:
+          - vars
 
     - name: summary
       title: "Summary"
@@ -216,55 +680,10 @@ items:
       type: Html
       visible: (showAbout)
 
-    # Agreement Status Results
-    - name: agreementStatusTable
-      title: "Agreement Status Distribution"
-      type: Table
-      visible: (agreementStatus && showAgreementTable)
-      rows: 0
-      columns:
-        - name: status
-          title: 'Agreement Status'
-          type: text
-        - name: count
-          title: 'N Cases'
-          type: integer
-        - name: percentage
-          title: 'Percentage'
-          type: number
-          format: pc
-        - name: interpretation
-          title: 'Interpretation'
-          type: text
-      clearWith:
-          - vars
-          - agreementThreshold
-
-    - name: agreementStatusDetail
-      title: "Case-Level Agreement Details"
-      type: Table
-      visible: (agreementStatus)
-      rows: 0
-      columns:
-        - name: case_id
-          title: 'Case'
-          type: integer
-        - name: agreement_status
-          title: 'Status'
-          type: text
-        - name: agreement_percent
-          title: 'Agreement %'
-          type: number
-          format: pc
-        - name: modal_category
-          title: 'Most Common Rating'
-          type: text
-        - name: n_agreeing
-          title: 'N Agreeing'
-          type: integer
-      clearWith:
-          - vars
-          - agreementThreshold
+    - name: clinicalUseCases
+      title: "Clinical Use Cases & Method Selection Guide"
+      type: Html
+      visible: (showAbout)
 
     - name: consensusTable
       title: "Consensus Variable Summary"
@@ -291,10 +710,63 @@ items:
           - consensusRule
           - tieBreaker
 
+    - name: loaTable
+      title: "Level of Agreement Distribution"
+      type: Table
+      visible: (loaVariable && showLoaTable)
+      rows: 0
+      columns:
+        - name: loa_category
+          title: 'LoA Category'
+          type: text
+        - name: count
+          title: 'N Cases'
+          type: integer
+        - name: percentage
+          title: 'Percentage'
+          type: number
+          format: pc
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - loaThresholds
+          - loaHighThreshold
+          - loaLowThreshold
+
+    - name: loaDetailTable
+      title: "Case-Level Agreement Details"
+      type: Table
+      visible: (loaVariable)
+      rows: 0
+      columns:
+        - name: case_id
+          title: 'Case'
+          type: integer
+        - name: loa_category
+          title: 'LoA Category'
+          type: text
+        - name: agreement_pct
+          title: 'Agreement %'
+          type: number
+          format: pc
+        - name: modal_rating
+          title: 'Modal Rating'
+          type: text
+        - name: n_agreeing
+          title: 'N Agreeing'
+          type: integer
+      clearWith:
+          - vars
+          - loaThresholds
+          - loaHighThreshold
+          - loaLowThreshold
+
     - name: computedVariablesInfo
       title: "Computed Variables Added to Dataset"
       type: Html
-      visible: (consensusVar || addAgreementStatus)
+      visible: (consensusVar || loaVariable)
 
     # Output Variables (Computed Columns Added to Dataset)
     - name: consensusVar
@@ -309,16 +781,20 @@ items:
           - tieBreaker
           - consensusName
 
-    - name: addAgreementStatus
-      title: Add Agreement Status to Data
+    - name: loaOutput
+      title: Add Case Agreement Categorization to Data
       type: Output
-      varTitle: '`{agreementStatusName}`'
-      varDescription: 'Agreement status categorization (All Agreed, Majority Agreed, No Agreement)'
+      varTitle: '`{loaVariableName}`'
+      varDescription: 'Case agreement categorization. Simple mode: All Agreed (100%), Majority Agreed (≥threshold%), No Agreement. Detailed mode: Absolute (100%), High, Moderate, Low, Poor based on agreement thresholds.'
       measureType: nominal
       clearWith:
           - vars
-          - agreementThreshold
-          - agreementStatusName
+          - detailLevel
+          - simpleThreshold
+          - loaThresholds
+          - loaHighThreshold
+          - loaLowThreshold
+          - loaVariableName
 
 refs:
     - irr

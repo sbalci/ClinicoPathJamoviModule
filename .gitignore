@@ -44,6 +44,7 @@ pdfs
 temp*
 temp2
 temp3
+*.Rd2pdf*
 _tododata
 # ^docs$
 inst/doc
@@ -58,6 +59,7 @@ backups/
 # /.claude_prompts
 _updateModules_config.yaml
 jamovi_modules
+^.*\.Rd2pdf.*$
 README.html
 .tmp/
 temp-books/

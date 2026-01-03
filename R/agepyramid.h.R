@@ -30,7 +30,9 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric",
+                    "factor",
+                    "id"))
             private$..gender <- jmvcore::OptionVariable$new(
                 "gender",
                 gender,
@@ -148,8 +150,7 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
-                title="Getting Started",
-                visible="(!age || !gender)"))
+                title="Getting Started"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataInfo",

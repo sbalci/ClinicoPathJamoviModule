@@ -206,7 +206,10 @@
       "Bash(do yamllint \"$f\")",
       "Bash(__NEW_LINE__ echo \"\")",
       "Bash(head -1 echo \"\" echo \"2. Bland-Altman Plot \\(.populateBlandAltmanPlot\\)\" grep -n \"\\\\.populateBlandAltmanPlot = function\" R/agreement.b.R)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Skill(generate-test-data)",
+      "Skill(generate-test-data:*)",
+      "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" /Applications/jamovi.app/Contents/Resources/app/bin/jamovi-compiler:*)"
     ],
     "deny": [],
     "ask": [],

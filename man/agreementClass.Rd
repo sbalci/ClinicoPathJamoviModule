@@ -4,33 +4,13 @@
 \alias{agreementClass}
 \title{Interrater Reliability Analysis}
 \value{
-jamovi results object containing kappa statistics, tables, and optional outputs
+Table
 }
 \description{
-Calculate interrater reliability for multiple raters using kappa statistics,
-Krippendorff's alpha, and Gwet's AC. Supports weighted kappa for ordinal data,
-hierarchical/multilevel analysis, and consensus score derivation.
+This function calculates interrater reliability for ordinal or categorical data.
 }
 \details{
 The function calculates Cohen's kappa for two raters and Fleiss' kappa for three or more raters.
-Weighted kappa accounts for degree of disagreement in ordinal data. Krippendorff's alpha
-handles missing data. Gwet's AC corrects for paradoxical kappa behavior with high agreement rates.
-}
-\references{
-Cohen, J. (1960). A coefficient of agreement for nominal scales.
-\emph{Educational and Psychological Measurement}, 20(1), 37-46.
-
-Cohen, J. (1968). Weighted kappa: Nominal scale agreement with provision
-for scaled disagreement or partial credit. \emph{Psychological Bulletin}, 70(4), 213-220.
-
-Fleiss, J. L. (1971). Measuring nominal scale agreement among many raters.
-\emph{Psychological Bulletin}, 76(5), 378-382.
-
-Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for
-categorical data. \emph{Biometrics}, 33(1), 159-174.
-
-Conger, A. J. (1980). Integration and generalization of kappas for multiple raters.
-\emph{Psychological Bulletin}, 88(2), 322-328.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::agreementBase} -> \code{agreementClass}

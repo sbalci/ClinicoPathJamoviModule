@@ -13,18 +13,46 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sft = FALSE,
             wght = "unweighted",
             exct = FALSE,
+            showLevelInfo = FALSE,
             kripp = FALSE,
             krippMethod = "nominal",
             bootstrap = FALSE,
+            gwet = FALSE,
+            gwetWeights = "unweighted",
+            icc = FALSE,
+            iccType = "icc21",
+            iota = FALSE,
+            iotaStandardize = TRUE,
+            finn = FALSE,
+            finnLevels = 3,
+            finnModel = "oneway",
+            lightKappa = FALSE,
+            kendallW = FALSE,
+            raterBias = FALSE,
+            pairwiseKappa = FALSE,
+            referenceRater = NULL,
+            rankRaters = FALSE,
+            hierarchicalKappa = FALSE,
+            clusterVariable = NULL,
+            iccHierarchical = FALSE,
+            clusterSpecificKappa = TRUE,
+            varianceDecomposition = TRUE,
+            shrinkageEstimates = FALSE,
+            testClusterHomogeneity = TRUE,
+            clusterRankings = FALSE,
             showSummary = FALSE,
             showAbout = FALSE,
-            agreementStatus = FALSE,
-            agreementThreshold = 50,
-            showAgreementTable = FALSE,
             consensusName = "consensus_rating",
             consensusRule = "majority",
             tieBreaker = "exclude",
-            agreementStatusName = "agreement_status", ...) {
+            loaVariable = FALSE,
+            detailLevel = "detailed",
+            simpleThreshold = 50,
+            loaThresholds = "custom",
+            loaHighThreshold = 75,
+            loaLowThreshold = 56,
+            loaVariableName = "agreement_level",
+            showLoaTable = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -65,6 +93,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "exct",
                 exct,
                 default=FALSE)
+            private$..showLevelInfo <- jmvcore::OptionBool$new(
+                "showLevelInfo",
+                showLevelInfo,
+                default=FALSE)
             private$..kripp <- jmvcore::OptionBool$new(
                 "kripp",
                 kripp,
@@ -82,6 +114,124 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "bootstrap",
                 bootstrap,
                 default=FALSE)
+            private$..gwet <- jmvcore::OptionBool$new(
+                "gwet",
+                gwet,
+                default=FALSE)
+            private$..gwetWeights <- jmvcore::OptionList$new(
+                "gwetWeights",
+                gwetWeights,
+                options=list(
+                    "unweighted",
+                    "linear",
+                    "quadratic"),
+                default="unweighted")
+            private$..icc <- jmvcore::OptionBool$new(
+                "icc",
+                icc,
+                default=FALSE)
+            private$..iccType <- jmvcore::OptionList$new(
+                "iccType",
+                iccType,
+                options=list(
+                    "icc11",
+                    "icc21",
+                    "icc31",
+                    "icc1k",
+                    "icc2k",
+                    "icc3k"),
+                default="icc21")
+            private$..iota <- jmvcore::OptionBool$new(
+                "iota",
+                iota,
+                default=FALSE)
+            private$..iotaStandardize <- jmvcore::OptionBool$new(
+                "iotaStandardize",
+                iotaStandardize,
+                default=TRUE)
+            private$..finn <- jmvcore::OptionBool$new(
+                "finn",
+                finn,
+                default=FALSE)
+            private$..finnLevels <- jmvcore::OptionInteger$new(
+                "finnLevels",
+                finnLevels,
+                min=2,
+                max=20,
+                default=3)
+            private$..finnModel <- jmvcore::OptionList$new(
+                "finnModel",
+                finnModel,
+                options=list(
+                    "oneway",
+                    "twoway"),
+                default="oneway")
+            private$..lightKappa <- jmvcore::OptionBool$new(
+                "lightKappa",
+                lightKappa,
+                default=FALSE)
+            private$..kendallW <- jmvcore::OptionBool$new(
+                "kendallW",
+                kendallW,
+                default=FALSE)
+            private$..raterBias <- jmvcore::OptionBool$new(
+                "raterBias",
+                raterBias,
+                default=FALSE)
+            private$..pairwiseKappa <- jmvcore::OptionBool$new(
+                "pairwiseKappa",
+                pairwiseKappa,
+                default=FALSE)
+            private$..referenceRater <- jmvcore::OptionVariable$new(
+                "referenceRater",
+                referenceRater,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..rankRaters <- jmvcore::OptionBool$new(
+                "rankRaters",
+                rankRaters,
+                default=FALSE)
+            private$..hierarchicalKappa <- jmvcore::OptionBool$new(
+                "hierarchicalKappa",
+                hierarchicalKappa,
+                default=FALSE)
+            private$..clusterVariable <- jmvcore::OptionVariable$new(
+                "clusterVariable",
+                clusterVariable,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..iccHierarchical <- jmvcore::OptionBool$new(
+                "iccHierarchical",
+                iccHierarchical,
+                default=FALSE)
+            private$..clusterSpecificKappa <- jmvcore::OptionBool$new(
+                "clusterSpecificKappa",
+                clusterSpecificKappa,
+                default=TRUE)
+            private$..varianceDecomposition <- jmvcore::OptionBool$new(
+                "varianceDecomposition",
+                varianceDecomposition,
+                default=TRUE)
+            private$..shrinkageEstimates <- jmvcore::OptionBool$new(
+                "shrinkageEstimates",
+                shrinkageEstimates,
+                default=FALSE)
+            private$..testClusterHomogeneity <- jmvcore::OptionBool$new(
+                "testClusterHomogeneity",
+                testClusterHomogeneity,
+                default=TRUE)
+            private$..clusterRankings <- jmvcore::OptionBool$new(
+                "clusterRankings",
+                clusterRankings,
+                default=FALSE)
             private$..showSummary <- jmvcore::OptionBool$new(
                 "showSummary",
                 showSummary,
@@ -89,20 +239,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showAbout <- jmvcore::OptionBool$new(
                 "showAbout",
                 showAbout,
-                default=FALSE)
-            private$..agreementStatus <- jmvcore::OptionBool$new(
-                "agreementStatus",
-                agreementStatus,
-                default=FALSE)
-            private$..agreementThreshold <- jmvcore::OptionNumber$new(
-                "agreementThreshold",
-                agreementThreshold,
-                default=50,
-                min=50,
-                max=100)
-            private$..showAgreementTable <- jmvcore::OptionBool$new(
-                "showAgreementTable",
-                showAgreementTable,
                 default=FALSE)
             private$..consensusName <- jmvcore::OptionString$new(
                 "consensusName",
@@ -127,12 +263,51 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "lowest",
                     "highest"),
                 default="exclude")
-            private$..agreementStatusName <- jmvcore::OptionString$new(
-                "agreementStatusName",
-                agreementStatusName,
-                default="agreement_status")
-            private$..addAgreementStatus <- jmvcore::OptionOutput$new(
-                "addAgreementStatus")
+            private$..loaVariable <- jmvcore::OptionBool$new(
+                "loaVariable",
+                loaVariable,
+                default=FALSE)
+            private$..detailLevel <- jmvcore::OptionList$new(
+                "detailLevel",
+                detailLevel,
+                options=list(
+                    "simple",
+                    "detailed"),
+                default="detailed")
+            private$..simpleThreshold <- jmvcore::OptionNumber$new(
+                "simpleThreshold",
+                simpleThreshold,
+                default=50,
+                min=50,
+                max=100)
+            private$..loaThresholds <- jmvcore::OptionList$new(
+                "loaThresholds",
+                loaThresholds,
+                options=list(
+                    "custom",
+                    "quartiles",
+                    "tertiles"),
+                default="custom")
+            private$..loaHighThreshold <- jmvcore::OptionNumber$new(
+                "loaHighThreshold",
+                loaHighThreshold,
+                default=75,
+                min=50,
+                max=99)
+            private$..loaLowThreshold <- jmvcore::OptionNumber$new(
+                "loaLowThreshold",
+                loaLowThreshold,
+                default=56,
+                min=30,
+                max=75)
+            private$..loaVariableName <- jmvcore::OptionString$new(
+                "loaVariableName",
+                loaVariableName,
+                default="agreement_level")
+            private$..showLoaTable <- jmvcore::OptionBool$new(
+                "showLoaTable",
+                showLoaTable,
+                default=TRUE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
@@ -141,20 +316,47 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sft)
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
+            self$.addOption(private$..showLevelInfo)
             self$.addOption(private$..kripp)
             self$.addOption(private$..krippMethod)
             self$.addOption(private$..bootstrap)
+            self$.addOption(private$..gwet)
+            self$.addOption(private$..gwetWeights)
+            self$.addOption(private$..icc)
+            self$.addOption(private$..iccType)
+            self$.addOption(private$..iota)
+            self$.addOption(private$..iotaStandardize)
+            self$.addOption(private$..finn)
+            self$.addOption(private$..finnLevels)
+            self$.addOption(private$..finnModel)
+            self$.addOption(private$..lightKappa)
+            self$.addOption(private$..kendallW)
+            self$.addOption(private$..raterBias)
+            self$.addOption(private$..pairwiseKappa)
+            self$.addOption(private$..referenceRater)
+            self$.addOption(private$..rankRaters)
+            self$.addOption(private$..hierarchicalKappa)
+            self$.addOption(private$..clusterVariable)
+            self$.addOption(private$..iccHierarchical)
+            self$.addOption(private$..clusterSpecificKappa)
+            self$.addOption(private$..varianceDecomposition)
+            self$.addOption(private$..shrinkageEstimates)
+            self$.addOption(private$..testClusterHomogeneity)
+            self$.addOption(private$..clusterRankings)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showAbout)
-            self$.addOption(private$..agreementStatus)
-            self$.addOption(private$..agreementThreshold)
-            self$.addOption(private$..showAgreementTable)
             self$.addOption(private$..consensusName)
             self$.addOption(private$..consensusVar)
             self$.addOption(private$..consensusRule)
             self$.addOption(private$..tieBreaker)
-            self$.addOption(private$..agreementStatusName)
-            self$.addOption(private$..addAgreementStatus)
+            self$.addOption(private$..loaVariable)
+            self$.addOption(private$..detailLevel)
+            self$.addOption(private$..simpleThreshold)
+            self$.addOption(private$..loaThresholds)
+            self$.addOption(private$..loaHighThreshold)
+            self$.addOption(private$..loaLowThreshold)
+            self$.addOption(private$..loaVariableName)
+            self$.addOption(private$..showLoaTable)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -164,20 +366,47 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sft = function() private$..sft$value,
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
+        showLevelInfo = function() private$..showLevelInfo$value,
         kripp = function() private$..kripp$value,
         krippMethod = function() private$..krippMethod$value,
         bootstrap = function() private$..bootstrap$value,
+        gwet = function() private$..gwet$value,
+        gwetWeights = function() private$..gwetWeights$value,
+        icc = function() private$..icc$value,
+        iccType = function() private$..iccType$value,
+        iota = function() private$..iota$value,
+        iotaStandardize = function() private$..iotaStandardize$value,
+        finn = function() private$..finn$value,
+        finnLevels = function() private$..finnLevels$value,
+        finnModel = function() private$..finnModel$value,
+        lightKappa = function() private$..lightKappa$value,
+        kendallW = function() private$..kendallW$value,
+        raterBias = function() private$..raterBias$value,
+        pairwiseKappa = function() private$..pairwiseKappa$value,
+        referenceRater = function() private$..referenceRater$value,
+        rankRaters = function() private$..rankRaters$value,
+        hierarchicalKappa = function() private$..hierarchicalKappa$value,
+        clusterVariable = function() private$..clusterVariable$value,
+        iccHierarchical = function() private$..iccHierarchical$value,
+        clusterSpecificKappa = function() private$..clusterSpecificKappa$value,
+        varianceDecomposition = function() private$..varianceDecomposition$value,
+        shrinkageEstimates = function() private$..shrinkageEstimates$value,
+        testClusterHomogeneity = function() private$..testClusterHomogeneity$value,
+        clusterRankings = function() private$..clusterRankings$value,
         showSummary = function() private$..showSummary$value,
         showAbout = function() private$..showAbout$value,
-        agreementStatus = function() private$..agreementStatus$value,
-        agreementThreshold = function() private$..agreementThreshold$value,
-        showAgreementTable = function() private$..showAgreementTable$value,
         consensusName = function() private$..consensusName$value,
         consensusVar = function() private$..consensusVar$value,
         consensusRule = function() private$..consensusRule$value,
         tieBreaker = function() private$..tieBreaker$value,
-        agreementStatusName = function() private$..agreementStatusName$value,
-        addAgreementStatus = function() private$..addAgreementStatus$value),
+        loaVariable = function() private$..loaVariable$value,
+        detailLevel = function() private$..detailLevel$value,
+        simpleThreshold = function() private$..simpleThreshold$value,
+        loaThresholds = function() private$..loaThresholds$value,
+        loaHighThreshold = function() private$..loaHighThreshold$value,
+        loaLowThreshold = function() private$..loaLowThreshold$value,
+        loaVariableName = function() private$..loaVariableName$value,
+        showLoaTable = function() private$..showLoaTable$value),
     private = list(
         ..vars = NA,
         ..baConfidenceLevel = NA,
@@ -186,20 +415,47 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sft = NA,
         ..wght = NA,
         ..exct = NA,
+        ..showLevelInfo = NA,
         ..kripp = NA,
         ..krippMethod = NA,
         ..bootstrap = NA,
+        ..gwet = NA,
+        ..gwetWeights = NA,
+        ..icc = NA,
+        ..iccType = NA,
+        ..iota = NA,
+        ..iotaStandardize = NA,
+        ..finn = NA,
+        ..finnLevels = NA,
+        ..finnModel = NA,
+        ..lightKappa = NA,
+        ..kendallW = NA,
+        ..raterBias = NA,
+        ..pairwiseKappa = NA,
+        ..referenceRater = NA,
+        ..rankRaters = NA,
+        ..hierarchicalKappa = NA,
+        ..clusterVariable = NA,
+        ..iccHierarchical = NA,
+        ..clusterSpecificKappa = NA,
+        ..varianceDecomposition = NA,
+        ..shrinkageEstimates = NA,
+        ..testClusterHomogeneity = NA,
+        ..clusterRankings = NA,
         ..showSummary = NA,
         ..showAbout = NA,
-        ..agreementStatus = NA,
-        ..agreementThreshold = NA,
-        ..showAgreementTable = NA,
         ..consensusName = NA,
         ..consensusVar = NA,
         ..consensusRule = NA,
         ..tieBreaker = NA,
-        ..agreementStatusName = NA,
-        ..addAgreementStatus = NA)
+        ..loaVariable = NA,
+        ..detailLevel = NA,
+        ..simpleThreshold = NA,
+        ..loaThresholds = NA,
+        ..loaHighThreshold = NA,
+        ..loaLowThreshold = NA,
+        ..loaVariableName = NA,
+        ..showLoaTable = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -213,15 +469,39 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         blandAltman = function() private$.items[["blandAltman"]],
         blandAltmanStats = function() private$.items[["blandAltmanStats"]],
         krippTable = function() private$.items[["krippTable"]],
+        lightKappaTable = function() private$.items[["lightKappaTable"]],
+        lightKappaExplanation = function() private$.items[["lightKappaExplanation"]],
+        finnTable = function() private$.items[["finnTable"]],
+        finnExplanation = function() private$.items[["finnExplanation"]],
+        kendallWTable = function() private$.items[["kendallWTable"]],
+        kendallWExplanation = function() private$.items[["kendallWExplanation"]],
+        raterBiasTable = function() private$.items[["raterBiasTable"]],
+        raterBiasExplanation = function() private$.items[["raterBiasExplanation"]],
+        pairwiseKappaTable = function() private$.items[["pairwiseKappaTable"]],
+        pairwiseKappaExplanation = function() private$.items[["pairwiseKappaExplanation"]],
+        hierarchicalOverallTable = function() private$.items[["hierarchicalOverallTable"]],
+        clusterSpecificTable = function() private$.items[["clusterSpecificTable"]],
+        varianceDecompositionTable = function() private$.items[["varianceDecompositionTable"]],
+        hierarchicalICCTable = function() private$.items[["hierarchicalICCTable"]],
+        homogeneityTestTable = function() private$.items[["homogeneityTestTable"]],
+        hierarchicalExplanation = function() private$.items[["hierarchicalExplanation"]],
+        gwetTable = function() private$.items[["gwetTable"]],
+        gwetExplanation = function() private$.items[["gwetExplanation"]],
+        iccTable = function() private$.items[["iccTable"]],
+        iccExplanation = function() private$.items[["iccExplanation"]],
+        iotaTable = function() private$.items[["iotaTable"]],
+        iotaExplanation = function() private$.items[["iotaExplanation"]],
         weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
+        levelInfoTable = function() private$.items[["levelInfoTable"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
-        agreementStatusTable = function() private$.items[["agreementStatusTable"]],
-        agreementStatusDetail = function() private$.items[["agreementStatusDetail"]],
+        clinicalUseCases = function() private$.items[["clinicalUseCases"]],
         consensusTable = function() private$.items[["consensusTable"]],
+        loaTable = function() private$.items[["loaTable"]],
+        loaDetailTable = function() private$.items[["loaDetailTable"]],
         computedVariablesInfo = function() private$.items[["computedVariablesInfo"]],
         consensusVar = function() private$.items[["consensusVar"]],
-        addAgreementStatus = function() private$.items[["addAgreementStatus"]]),
+        loaOutput = function() private$.items[["loaOutput"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -380,11 +660,565 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "krippMethod",
                     "bootstrap")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="lightKappaTable",
+                title="Light's Kappa Results",
+                visible="(lightKappa)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="lightKappaExplanation",
+                title="About Light's Kappa",
+                visible="(lightKappa && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="finnTable",
+                title="Finn Coefficient Results (Variance-Based Agreement)",
+                visible="(finn)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="levels", 
+                        `title`="Categories", 
+                        `type`="integer"),
+                    list(
+                        `name`="finn_value", 
+                        `title`="Finn Coefficient", 
+                        `type`="number"),
+                    list(
+                        `name`="f_statistic", 
+                        `title`="F-statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="text"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "finnLevels",
+                    "finnModel")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="finnExplanation",
+                title="About Finn Coefficient",
+                visible="(finn && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="kendallWTable",
+                title="Kendall's Coefficient of Concordance (W) Results",
+                visible="(kendallW)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="w", 
+                        `title`="W", 
+                        `type`="number"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="kendallWExplanation",
+                title="About Kendall's W",
+                visible="(kendallW && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="raterBiasTable",
+                title="Rater Bias Test Results",
+                visible="(raterBias)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="raterBiasExplanation",
+                title="About Rater Bias Test",
+                visible="(raterBias && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pairwiseKappaTable",
+                title="Pairwise Kappa (Each Rater vs Reference)",
+                visible="(pairwiseKappa)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="rater", 
+                        `title`="Rater", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="z", 
+                        `title`="z", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer", 
+                        `visible`="(rankRaters)")),
+                clearWith=list(
+                    "vars",
+                    "referenceRater",
+                    "rankRaters")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="pairwiseKappaExplanation",
+                title="About Pairwise Kappa Analysis",
+                visible="(pairwiseKappa && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="hierarchicalOverallTable",
+                title="Hierarchical Kappa - Overall Agreement",
+                visible="(hierarchicalKappa)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="cases", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="clusters", 
+                        `title`="Clusters", 
+                        `type`="integer"),
+                    list(
+                        `name`="overall_kappa", 
+                        `title`="Overall Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number")),
+                clearWith=list(
+                    "vars",
+                    "clusterVariable")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clusterSpecificTable",
+                title="Cluster-Specific Kappa Estimates",
+                visible="(hierarchicalKappa && clusterSpecificKappa)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster/Institution", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_raters", 
+                        `title`="N Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="shrinkage_kappa", 
+                        `title`="Shrinkage Kappa", 
+                        `type`="number", 
+                        `visible`="(shrinkageEstimates)"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer", 
+                        `visible`="(clusterRankings)")),
+                clearWith=list(
+                    "vars",
+                    "clusterVariable")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="varianceDecompositionTable",
+                title="Variance Component Decomposition",
+                visible="(hierarchicalKappa && varianceDecomposition)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="component", 
+                        `title`="Variance Component", 
+                        `type`="text"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance", 
+                        `type`="number"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number"),
+                    list(
+                        `name`="proportion", 
+                        `title`="Proportion of Total", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "clusterVariable")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="hierarchicalICCTable",
+                title="Hierarchical ICC Decomposition",
+                visible="(hierarchicalKappa && iccHierarchical)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="icc_type", 
+                        `title`="ICC Type", 
+                        `type`="text"),
+                    list(
+                        `name`="icc_value", 
+                        `title`="ICC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "clusterVariable")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="homogeneityTestTable",
+                title="Cluster Homogeneity Test Results",
+                visible="(hierarchicalKappa && testClusterHomogeneity)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="test_name", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Test Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="conclusion", 
+                        `title`="Conclusion", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "clusterVariable")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="hierarchicalExplanation",
+                title="About Hierarchical/Multilevel Kappa",
+                visible="(hierarchicalKappa && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="gwetTable",
+                title="Gwet's AC1/AC2 Results",
+                visible="(gwet)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="coefficient", 
+                        `title`="Coefficient", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="Std. Error", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "vars",
+                    "gwetWeights")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="gwetExplanation",
+                title="About Gwet's AC Coefficient",
+                visible="(gwet && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="iccTable",
+                title="Intraclass Correlation Coefficient (ICC) Results",
+                visible="(icc)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="ICC Model", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="icc_value", 
+                        `title`="ICC", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="f_value", 
+                        `title`="F", 
+                        `type`="number"),
+                    list(
+                        `name`="df1", 
+                        `title`="df1", 
+                        `type`="integer"),
+                    list(
+                        `name`="df2", 
+                        `title`="df2", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "vars",
+                    "iccType")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="iccExplanation",
+                title="About Intraclass Correlation Coefficient (ICC)",
+                visible="(icc && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="iotaTable",
+                title="Iota Coefficient Results (Multivariate Agreement)",
+                visible="(iota)",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"),
+                    list(
+                        `name`="subjects", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="raters", 
+                        `title`="Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="variables", 
+                        `title`="Variables", 
+                        `type`="integer"),
+                    list(
+                        `name`="iota_value", 
+                        `title`="Iota", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="iotaExplanation",
+                title="About Iota Coefficient",
+                visible="(iota && showAbout)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="weightedKappaGuide",
                 title="Weighted Kappa Interpretation Guide",
                 visible="(showAbout && (wght:unweighted == FALSE))"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="levelInfoTable",
+                title="Level Ordering Information",
+                visible="(showLevelInfo)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels (in order)", 
+                        `type`="text"),
+                    list(
+                        `name`="n_levels", 
+                        `title`="N Levels", 
+                        `type`="integer"),
+                    list(
+                        `name`="data_type", 
+                        `title`="Type", 
+                        `type`="text"),
+                    list(
+                        `name`="note", 
+                        `title`="Note", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -395,64 +1229,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="about",
                 title="About This Analysis",
                 visible="(showAbout)"))
-            self$add(jmvcore::Table$new(
+            self$add(jmvcore::Html$new(
                 options=options,
-                name="agreementStatusTable",
-                title="Agreement Status Distribution",
-                visible="(agreementStatus && showAgreementTable)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="status", 
-                        `title`="Agreement Status", 
-                        `type`="text"),
-                    list(
-                        `name`="count", 
-                        `title`="N Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="percentage", 
-                        `title`="Percentage", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "agreementThreshold")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="agreementStatusDetail",
-                title="Case-Level Agreement Details",
-                visible="(agreementStatus)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="case_id", 
-                        `title`="Case", 
-                        `type`="integer"),
-                    list(
-                        `name`="agreement_status", 
-                        `title`="Status", 
-                        `type`="text"),
-                    list(
-                        `name`="agreement_percent", 
-                        `title`="Agreement %", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="modal_category", 
-                        `title`="Most Common Rating", 
-                        `type`="text"),
-                    list(
-                        `name`="n_agreeing", 
-                        `title`="N Agreeing", 
-                        `type`="integer")),
-                clearWith=list(
-                    "vars",
-                    "agreementThreshold")))
+                name="clinicalUseCases",
+                title="Clinical Use Cases & Method Selection Guide",
+                visible="(showAbout)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="consensusTable",
@@ -482,11 +1263,73 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "consensusRule",
                     "tieBreaker")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="loaTable",
+                title="Level of Agreement Distribution",
+                visible="(loaVariable && showLoaTable)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="loa_category", 
+                        `title`="LoA Category", 
+                        `type`="text"),
+                    list(
+                        `name`="count", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="percentage", 
+                        `title`="Percentage", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "loaThresholds",
+                    "loaHighThreshold",
+                    "loaLowThreshold")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="loaDetailTable",
+                title="Case-Level Agreement Details",
+                visible="(loaVariable)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="case_id", 
+                        `title`="Case", 
+                        `type`="integer"),
+                    list(
+                        `name`="loa_category", 
+                        `title`="LoA Category", 
+                        `type`="text"),
+                    list(
+                        `name`="agreement_pct", 
+                        `title`="Agreement %", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="modal_rating", 
+                        `title`="Modal Rating", 
+                        `type`="text"),
+                    list(
+                        `name`="n_agreeing", 
+                        `title`="N Agreeing", 
+                        `type`="integer")),
+                clearWith=list(
+                    "vars",
+                    "loaThresholds",
+                    "loaHighThreshold",
+                    "loaLowThreshold")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="computedVariablesInfo",
                 title="Computed Variables Added to Dataset",
-                visible="(consensusVar || addAgreementStatus)"))
+                visible="(consensusVar || loaVariable)"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="consensusVar",
@@ -501,15 +1344,19 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "consensusName")))
             self$add(jmvcore::Output$new(
                 options=options,
-                name="addAgreementStatus",
-                title="Add Agreement Status to Data",
-                varTitle="`{agreementStatusName}`",
-                varDescription="Agreement status categorization (All Agreed, Majority Agreed, No Agreement)",
+                name="loaOutput",
+                title="Add Case Agreement Categorization to Data",
+                varTitle="`{loaVariableName}`",
+                varDescription="Case agreement categorization. Simple mode: All Agreed (100%), Majority Agreed (\u2265threshold%), No Agreement. Detailed mode: Absolute (100%), High, Moderate, Low, Poor based on agreement thresholds.",
                 measureType="nominal",
                 clearWith=list(
                     "vars",
-                    "agreementThreshold",
-                    "agreementStatusName")))}))
+                    "detailLevel",
+                    "simpleThreshold",
+                    "loaThresholds",
+                    "loaHighThreshold",
+                    "loaLowThreshold",
+                    "loaVariableName")))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -543,7 +1390,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame. The data should be in long format,
 #'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the
-#'   diagnosis given by the observer, variable can be categorical or ordinal.
+#'   diagnosis given by the observer.
 #' @param baConfidenceLevel Confidence level for Bland-Altman limits of
 #'   agreement (LoA). Typically 0.95 for 95\% confidence intervals.
 #' @param proportionalBias Test whether the difference between raters changes
@@ -564,6 +1411,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param exct Use exact p-value calculation instead of normal approximation.
 #'   Recommended for small sample sizes (< 30 cases) with 3 or more raters.
 #'   Note: Not applicable for 2-rater analysis (use Cohen's kappa).
+#' @param showLevelInfo Display information about how categorical levels are
+#'   currently ordered in your variables. Essential for weighted kappa analysis
+#'   to ensure ordinal levels are properly ordered (e.g., G1 → G2 → G3 for tumor
+#'   grades).
 #' @param kripp Alternative reliability measure that handles missing data and
 #'   supports various data types. Useful when raters didn't rate all cases or
 #'   when comparing different measurement levels.
@@ -571,20 +1422,103 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   calculation.
 #' @param bootstrap Calculate bootstrap confidence intervals for
 #'   Krippendorff's alpha.
+#' @param gwet Alternative agreement coefficient that is more stable than
+#'   Cohen's kappa when dealing with high agreement rates or unbalanced marginal
+#'   distributions (e.g., rare tumor subtypes). Gwet's AC corrects for the
+#'   paradoxical behavior of kappa in extreme cases.
+#' @param gwetWeights Unweighted (AC1) for nominal categories. Linear or
+#'   Quadratic weights (AC2) for ordinal data.
+#' @param icc Intraclass Correlation Coefficient for continuous measurements
+#'   (e.g., tumor size in mm, biomarker concentrations). Standard measure for
+#'   assessing agreement with numeric data. Complements Bland-Altman analysis.
+#' @param iccType ICC model selection. One-way: each subject rated by
+#'   different raters. Two-way: all subjects rated by same raters. Random:
+#'   raters are random sample. Mixed: raters are fixed. Single: reliability of
+#'   individual rater. Average (k): reliability of mean rating.
+#' @param iota Iota coefficient for multivariate interrater agreement.
+#'   Measures agreement when raters assess multiple variables simultaneously
+#'   (e.g., tumor size + grade + mitotic count). Unlike ICC which analyzes one
+#'   variable at a time, Iota provides a single chance-corrected agreement index
+#'   across all variables. Supports both quantitative (continuous) and nominal
+#'   (categorical) data. Reduces to Fleiss' kappa for single categorical
+#'   variable.
+#' @param iotaStandardize Z-standardize quantitative variables before
+#'   computing Iota. Recommended when variables are on different scales (e.g.,
+#'   tumor size in mm vs. Ki-67 percentage). Ensures each variable contributes
+#'   equally to the overall agreement measure.
+#' @param finn Finn coefficient for interrater reliability of categorical
+#'   data. Variance-based agreement measure especially useful when variance
+#'   between raters is low (i.e., agreement is high). Alternative to traditional
+#'   kappa-based measures. Works with ordered categorical ratings.
+#' @param finnLevels The number of different rating categories for Finn
+#'   coefficient calculation (e.g., 3 for low/medium/high, 5 for 5-point Likert
+#'   scale). Must specify the total number of distinct categories in your rating
+#'   scale.
+#' @param finnModel Model specification for Finn coefficient. One-way: only
+#'   subjects are random effects (each subject may be rated by different
+#'   raters). Two-way: both subjects and raters are random (subjects and raters
+#'   randomly chosen from larger populations).
+#' @param lightKappa Alternative agreement measure for 3 or more raters.
+#'   Calculates the average of all pairwise kappas between raters. More robust
+#'   than Fleiss' kappa when raters have different marginal distributions or
+#'   when assumptions of Fleiss' kappa are questionable.
+#' @param kendallW Kendall's coefficient of concordance (W) measures agreement
+#'   among raters when rating or ranking ordinal data. W ranges from 0 (no
+#'   agreement) to 1 (perfect agreement). Particularly useful for ranked data,
+#'   severity scores, and ordinal grading systems where you want to know if
+#'   raters rank cases in similar order.
+#' @param raterBias Tests whether raters have systematically different rating
+#'   patterns (e.g., one rater is more lenient/strict than others). Uses
+#'   chi-square test to detect if marginal frequencies differ significantly
+#'   across raters. Essential quality control tool to identify raters who
+#'   consistently over-diagnose or under-diagnose compared to their peers.
+#' @param pairwiseKappa Compare each rater individually against a reference
+#'   rater (e.g., gold standard, consensus score, senior pathologist). Produces
+#'   individual kappa values for each rater-vs-reference comparison. Essential
+#'   for training assessment, rater certification, and performance monitoring.
+#' @param referenceRater Select the reference rater variable (e.g., consensus
+#'   score, gold standard diagnosis, senior pathologist ratings). Each rater in
+#'   the main variable list will be compared pairwise with this reference using
+#'   Cohen's kappa.
+#' @param rankRaters Rank raters from highest to lowest kappa (relative to
+#'   reference). Shows best and worst performing raters for quality control and
+#'   training needs. Useful for identifying raters who need additional training
+#'   or those ready for certification.
+#' @param hierarchicalKappa Enable hierarchical (multilevel) kappa analysis
+#'   for nested data structures (e.g., pathologists nested within institutions,
+#'   readers nested within centers). Accounts for clustering effects and
+#'   provides institution/cluster-specific agreement estimates. Essential for
+#'   multi-center reliability studies.
+#' @param clusterVariable Variable defining clusters/institutions/centers. For
+#'   example, hospital ID, institution name, or scanner ID. Raters are nested
+#'   within these clusters.
+#' @param iccHierarchical Calculate intraclass correlation coefficients for
+#'   hierarchical data. ICC(1): between-cluster agreement, ICC(2): reliability
+#'   of cluster means, ICC(3): within-cluster agreement. Decomposes variance
+#'   into cluster-level and rater-level components.
+#' @param clusterSpecificKappa Calculate kappa separately for each
+#'   cluster/institution to identify sites with poor agreement. Useful for
+#'   quality control in multi-center studies.
+#' @param varianceDecomposition Decompose total variance into between-cluster
+#'   and within-cluster components. Large between-cluster variance indicates
+#'   institutional heterogeneity. Comparison informs whether issues are local or
+#'   systematic.
+#' @param shrinkageEstimates Calculate shrinkage estimates for
+#'   cluster-specific kappas. Shrinks extreme estimates toward overall mean,
+#'   providing more stable estimates for small clusters. Recommended when
+#'   cluster sizes vary substantially.
+#' @param testClusterHomogeneity Test whether agreement is homogeneous across
+#'   clusters (null hypothesis: all clusters have equal kappa). Significant
+#'   result indicates heterogeneity requiring investigation.
+#' @param clusterRankings Rank clusters/institutions by agreement performance
+#'   with confidence intervals. Identifies best and worst performing sites. Use
+#'   cautiously to avoid unfair comparisons when cluster sizes differ
+#'   substantially.
 #' @param showSummary Display a natural-language interpretation of results
 #'   with color-coded agreement levels and clinical guidance. Recommended for
 #'   reports and presentations.
 #' @param showAbout Display an explanatory panel describing what this analysis
 #'   does, when to use it, and how to interpret results.
-#' @param agreementStatus Calculate case-by-case agreement status and display
-#'   distribution. Categorizes each case as: All Agreed, Majority Agreed, or No
-#'   Agreement. Useful for identifying difficult/controversial cases requiring
-#'   review.
-#' @param agreementThreshold Minimum percentage of raters needed for "Majority
-#'   Agreed" status. 50\% = simple majority, 75\% = supermajority, 100\% =
-#'   unanimous. Example: With 4 raters, 50\% requires ≥3 raters agreeing.
-#' @param showAgreementTable Display table showing how many cases fall into
-#'   each agreement category (All Agreed, Majority Agreed, No Agreement).
 #' @param consensusName Name of the new computed variable containing consensus
 #'   ratings. Will be added to the dataset and available for downstream
 #'   analyses.
@@ -596,8 +1530,32 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   consensus threshold (e.g., 2-2 split with 4 raters). Exclude = set
 #'   consensus to NA for tied cases. First = use first category that appears.
 #'   Lowest/Highest = use min/max of tied categories.
-#' @param agreementStatusName Name of the new computed variable containing
-#'   agreement status categories.
+#' @param loaVariable Calculate agreement level for each case and add as new
+#'   computed column. Choose between Simple (3 categories) or Detailed (5
+#'   categories) classification. Useful for identifying difficult cases and
+#'   quality control.
+#' @param detailLevel Simple mode: All Agreed (100\%), Majority Agreed
+#'   (≥threshold\%), No Agreement (<threshold\%). Detailed mode: Absolute
+#'   (100\%), High, Moderate, Low, Poor (based on custom/data-driven
+#'   thresholds). Simple mode replicates the former "Agreement Status" feature.
+#' @param simpleThreshold For Simple mode only: Minimum \% for "Majority
+#'   Agreed" status. 50\% = simple majority, 75\% = supermajority, 100\% =
+#'   unanimous.
+#' @param loaThresholds For Detailed mode only: How to define 5 LoA
+#'   categories. Custom = user-defined cutpoints. Quartiles/Tertiles =
+#'   data-driven splits.
+#' @param loaHighThreshold For Detailed mode with Custom thresholds only:
+#'   Minimum \% for "High" classification (e.g., 75\% = ≥12/16 raters). Cases ≥
+#'   this threshold are "High Agreement".
+#' @param loaLowThreshold For Detailed mode with Custom thresholds only:
+#'   Minimum \% for "Low" classification (e.g., 56\% = ≥9/16 raters). Below =
+#'   "Poor", between Low and High = "Moderate".
+#' @param loaVariableName Name for the computed Level of Agreement variable
+#'   added to the dataset. Default: 'agreement_level'. Will contain categories
+#'   like 'Absolute', 'High', 'Moderate', 'Low', 'Poor'.
+#' @param showLoaTable Display summary table showing distribution of cases
+#'   across LoA categories with counts and percentages. Useful for quality
+#'   control reporting.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -607,15 +1565,39 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$lightKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$finnTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$finnExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$kendallWTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$varianceDecompositionTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$homogeneityTestTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$iotaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$iotaExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$levelInfoTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$agreementStatusTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$agreementStatusDetail} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUseCases} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$loaDetailTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$computedVariablesInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$addAgreementStatus} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$loaOutput} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -634,27 +1616,59 @@ agreement <- function(
     sft = FALSE,
     wght = "unweighted",
     exct = FALSE,
+    showLevelInfo = FALSE,
     kripp = FALSE,
     krippMethod = "nominal",
     bootstrap = FALSE,
+    gwet = FALSE,
+    gwetWeights = "unweighted",
+    icc = FALSE,
+    iccType = "icc21",
+    iota = FALSE,
+    iotaStandardize = TRUE,
+    finn = FALSE,
+    finnLevels = 3,
+    finnModel = "oneway",
+    lightKappa = FALSE,
+    kendallW = FALSE,
+    raterBias = FALSE,
+    pairwiseKappa = FALSE,
+    referenceRater,
+    rankRaters = FALSE,
+    hierarchicalKappa = FALSE,
+    clusterVariable,
+    iccHierarchical = FALSE,
+    clusterSpecificKappa = TRUE,
+    varianceDecomposition = TRUE,
+    shrinkageEstimates = FALSE,
+    testClusterHomogeneity = TRUE,
+    clusterRankings = FALSE,
     showSummary = FALSE,
     showAbout = FALSE,
-    agreementStatus = FALSE,
-    agreementThreshold = 50,
-    showAgreementTable = FALSE,
     consensusName = "consensus_rating",
     consensusRule = "majority",
     tieBreaker = "exclude",
-    agreementStatusName = "agreement_status") {
+    loaVariable = FALSE,
+    detailLevel = "detailed",
+    simpleThreshold = 50,
+    loaThresholds = "custom",
+    loaHighThreshold = 75,
+    loaLowThreshold = 56,
+    loaVariableName = "agreement_level",
+    showLoaTable = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if ( ! missing(referenceRater)) referenceRater <- jmvcore::resolveQuo(jmvcore::enquo(referenceRater))
+    if ( ! missing(clusterVariable)) clusterVariable <- jmvcore::resolveQuo(jmvcore::enquo(clusterVariable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(vars), vars, NULL))
+            `if`( ! missing(vars), vars, NULL),
+            `if`( ! missing(referenceRater), referenceRater, NULL),
+            `if`( ! missing(clusterVariable), clusterVariable, NULL))
 
 
     options <- agreementOptions$new(
@@ -665,18 +1679,46 @@ agreement <- function(
         sft = sft,
         wght = wght,
         exct = exct,
+        showLevelInfo = showLevelInfo,
         kripp = kripp,
         krippMethod = krippMethod,
         bootstrap = bootstrap,
+        gwet = gwet,
+        gwetWeights = gwetWeights,
+        icc = icc,
+        iccType = iccType,
+        iota = iota,
+        iotaStandardize = iotaStandardize,
+        finn = finn,
+        finnLevels = finnLevels,
+        finnModel = finnModel,
+        lightKappa = lightKappa,
+        kendallW = kendallW,
+        raterBias = raterBias,
+        pairwiseKappa = pairwiseKappa,
+        referenceRater = referenceRater,
+        rankRaters = rankRaters,
+        hierarchicalKappa = hierarchicalKappa,
+        clusterVariable = clusterVariable,
+        iccHierarchical = iccHierarchical,
+        clusterSpecificKappa = clusterSpecificKappa,
+        varianceDecomposition = varianceDecomposition,
+        shrinkageEstimates = shrinkageEstimates,
+        testClusterHomogeneity = testClusterHomogeneity,
+        clusterRankings = clusterRankings,
         showSummary = showSummary,
         showAbout = showAbout,
-        agreementStatus = agreementStatus,
-        agreementThreshold = agreementThreshold,
-        showAgreementTable = showAgreementTable,
         consensusName = consensusName,
         consensusRule = consensusRule,
         tieBreaker = tieBreaker,
-        agreementStatusName = agreementStatusName)
+        loaVariable = loaVariable,
+        detailLevel = detailLevel,
+        simpleThreshold = simpleThreshold,
+        loaThresholds = loaThresholds,
+        loaHighThreshold = loaHighThreshold,
+        loaLowThreshold = loaLowThreshold,
+        loaVariableName = loaVariableName,
+        showLoaTable = showLoaTable)
 
     analysis <- agreementClass$new(
         options = options,

@@ -11,36 +11,43 @@ agreement(
   proportionalBias = FALSE,
   blandAltmanPlot = FALSE,
   sft = FALSE,
-  showText = FALSE,
   wght = "unweighted",
   exct = FALSE,
+  showLevelInfo = FALSE,
   kripp = FALSE,
   krippMethod = "nominal",
   bootstrap = FALSE,
   gwet = FALSE,
   gwetWeights = "unweighted",
-  showLevelInfo = FALSE,
+  icc = FALSE,
+  iccType = "icc21",
+  lightKappa = FALSE,
+  kendallW = FALSE,
+  raterBias = FALSE,
+  pairwiseKappa = FALSE,
+  referenceRater,
+  rankRaters = FALSE,
   hierarchicalKappa = FALSE,
-  clusterVariable = NULL,
+  clusterVariable,
   iccHierarchical = FALSE,
-  clusterSpecificKappa = FALSE,
-  betweenClusterVariance = FALSE,
-  withinClusterVariance = FALSE,
+  clusterSpecificKappa = TRUE,
+  varianceDecomposition = TRUE,
   shrinkageEstimates = FALSE,
-  testClusterHomogeneity = FALSE,
+  testClusterHomogeneity = TRUE,
   clusterRankings = FALSE,
   showSummary = FALSE,
   showAbout = FALSE,
-  consensusVar = FALSE,
+  consensusName = "consensus_rating",
   consensusRule = "majority",
   tieBreaker = "exclude",
-  consensusName = "consensus_score",
-  referenceRater = NULL,
-  rankRaters = FALSE,
   loaVariable = FALSE,
+  detailLevel = "detailed",
+  simpleThreshold = 50,
   loaThresholds = "custom",
   loaHighThreshold = 75,
-  loaLowThreshold = 56
+  loaLowThreshold = 56,
+  loaVariableName = "agreement_level",
+  showLoaTable = TRUE
 )
 }
 \arguments{
@@ -48,11 +55,14 @@ agreement(
 where each row is a unique observation.}
 
 \item{vars}{A string naming the variable from \code{data} that contains the
-diagnosis given by the observer, variable can be categorical or ordinal.}
+diagnosis given by the observer.}
 
-\item{baConfidenceLevel}{.}
+\item{baConfidenceLevel}{Confidence level for Bland-Altman limits of
+agreement (LoA). Typically 0.95 for 95\\% confidence intervals.}
 
-\item{proportionalBias}{.}
+\item{proportionalBias}{Test whether the difference between raters changes
+systematically with the magnitude of measurement (proportional bias). Uses
+linear regression of difference vs. mean.}
 
 \item{blandAltmanPlot}{Generate Bland-Altman plot for continuous agreement
 analysis. Displays mean difference and limits of agreement between the
@@ -63,9 +73,6 @@ measurements (e.g., tumor size in mm).}
 each rater. Useful for understanding rating patterns and identifying
 potential biases.}
 
-\item{showText}{Display simple preformatted text version of frequency
-tables. Provides a plain-text alternative to the HTML formatted tables.}
-
 \item{wght}{For ordinal variables (e.g., tumor grade G1/G2/G3), weighted
 kappa accounts for degree of disagreement. Linear weights: Adjacent
 disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
@@ -75,6 +82,11 @@ nominal categories with no inherent order.}
 \item{exct}{Use exact p-value calculation instead of normal approximation.
 Recommended for small sample sizes (< 30 cases) with 3 or more raters.
 Note: Not applicable for 2-rater analysis (use Cohen's kappa).}
+
+\item{showLevelInfo}{Display information about how categorical levels are
+currently ordered in your variables. Essential for weighted kappa analysis
+to ensure ordinal levels are properly ordered (e.g., G1 → G2 → G3 for tumor
+grades).}
 
 \item{kripp}{Alternative reliability measure that handles missing data and
 supports various data types. Useful when raters didn't rate all cases or
@@ -94,10 +106,46 @@ paradoxical behavior of kappa in extreme cases.}
 \item{gwetWeights}{Unweighted (AC1) for nominal categories. Linear or
 Quadratic weights (AC2) for ordinal data.}
 
-\item{showLevelInfo}{Display information about how categorical levels are
-currently ordered in your variables. Essential for weighted kappa analysis
-to ensure ordinal levels are properly ordered (e.g., G1 → G2 → G3 for tumor
-grades).}
+\item{icc}{Intraclass Correlation Coefficient for continuous measurements
+(e.g., tumor size in mm, biomarker concentrations). Standard measure for
+assessing agreement with numeric data. Complements Bland-Altman analysis.}
+
+\item{iccType}{ICC model selection. One-way: each subject rated by
+different raters. Two-way: all subjects rated by same raters. Random:
+raters are random sample. Mixed: raters are fixed. Single: reliability of
+individual rater. Average (k): reliability of mean rating.}
+
+\item{lightKappa}{Alternative agreement measure for 3 or more raters.
+Calculates the average of all pairwise kappas between raters. More robust
+than Fleiss' kappa when raters have different marginal distributions or
+when assumptions of Fleiss' kappa are questionable.}
+
+\item{kendallW}{Kendall's coefficient of concordance (W) measures agreement
+among raters when rating or ranking ordinal data. W ranges from 0 (no
+agreement) to 1 (perfect agreement). Particularly useful for ranked data,
+severity scores, and ordinal grading systems where you want to know if
+raters rank cases in similar order.}
+
+\item{raterBias}{Tests whether raters have systematically different rating
+patterns (e.g., one rater is more lenient/strict than others). Uses
+chi-square test to detect if marginal frequencies differ significantly
+across raters. Essential quality control tool to identify raters who
+consistently over-diagnose or under-diagnose compared to their peers.}
+
+\item{pairwiseKappa}{Compare each rater individually against a reference
+rater (e.g., gold standard, consensus score, senior pathologist). Produces
+individual kappa values for each rater-vs-reference comparison. Essential
+for training assessment, rater certification, and performance monitoring.}
+
+\item{referenceRater}{Select the reference rater variable (e.g., consensus
+score, gold standard diagnosis, senior pathologist ratings). Each rater in
+the main variable list will be compared pairwise with this reference using
+Cohen's kappa.}
+
+\item{rankRaters}{Rank raters from highest to lowest kappa (relative to
+reference). Shows best and worst performing raters for quality control and
+training needs. Useful for identifying raters who need additional training
+or those ready for certification.}
 
 \item{hierarchicalKappa}{Enable hierarchical (multilevel) kappa analysis
 for nested data structures (e.g., pathologists nested within institutions,
@@ -118,19 +166,15 @@ into cluster-level and rater-level components.}
 cluster/institution to identify sites with poor agreement. Useful for
 quality control in multi-center studies.}
 
-\item{betweenClusterVariance}{Estimate variance component for
-between-cluster differences in agreement. Large between-cluster variance
-indicates institutional heterogeneity requiring investigation (different
-protocols, training, etc.).}
-
-\item{withinClusterVariance}{Estimate variance component for within-cluster
-rater disagreement. Comparison of within vs between variance informs
-whether issues are local (within institutions) or systematic (between
-institutions).}
+\item{varianceDecomposition}{Decompose total variance into between-cluster
+and within-cluster components. Large between-cluster variance indicates
+institutional heterogeneity. Comparison informs whether issues are local or
+systematic.}
 
 \item{shrinkageEstimates}{Calculate shrinkage estimates for
 cluster-specific kappas. Shrinks extreme estimates toward overall mean,
-providing more stable estimates for small clusters.}
+providing more stable estimates for small clusters. Recommended when
+cluster sizes vary substantially.}
 
 \item{testClusterHomogeneity}{Test whether agreement is homogeneous across
 clusters (null hypothesis: all clusters have equal kappa). Significant
@@ -148,74 +192,93 @@ reports and presentations.}
 \item{showAbout}{Display an explanatory panel describing what this analysis
 does, when to use it, and how to interpret results.}
 
-\item{consensusVar}{Calculate consensus (modal) score across raters and add
-as new computed column. Essential for multi-rater studies requiring a
-reference standard.}
+\item{consensusName}{Name of the new computed variable containing consensus
+ratings. Will be added to the dataset and available for downstream
+analyses.}
 
 \item{consensusRule}{Rule for defining consensus. Simple majority = modal
 category with >50\\% of votes. Supermajority requires ≥75\\% agreement.
-Unanimous requires 100\\% agreement.}
+Unanimous requires 100\\% agreement. Cases not meeting threshold are set to
+NA in consensus variable.}
 
-\item{tieBreaker}{How to handle ties (e.g., 50-50 split). Exclude = set
+\item{tieBreaker}{How to handle ties when no single category meets the
+consensus threshold (e.g., 2-2 split with 4 raters). Exclude = set
 consensus to NA for tied cases. First = use first category that appears.
 Lowest/Highest = use min/max of tied categories.}
 
-\item{consensusName}{Name of the new computed variable to be added to the
-dataset.}
+\item{loaVariable}{Calculate agreement level for each case and add as new
+computed column. Choose between Simple (3 categories) or Detailed (5
+categories) classification. Useful for identifying difficult cases and
+quality control.}
 
-\item{referenceRater}{Select a reference rater (e.g., consensus score, gold
-standard, senior pathologist). Each selected rater will be compared
-pairwise with this reference, producing individual kappas. Essential for
-training assessment, rater certification, and performance monitoring.}
+\item{detailLevel}{Simple mode: All Agreed (100\\%), Majority Agreed
+(≥threshold\\%), No Agreement (<threshold\\%). Detailed mode: Absolute
+(100\\%), High, Moderate, Low, Poor (based on custom/data-driven
+thresholds). Simple mode replicates the former "Agreement Status" feature.}
 
-\item{rankRaters}{Rank raters from highest to lowest kappa (relative to
-reference). Shows best and worst performing raters for quality control and
-training needs.}
+\item{simpleThreshold}{For Simple mode only: Minimum \\% for "Majority
+Agreed" status. 50\\% = simple majority, 75\\% = supermajority, 100\\% =
+unanimous.}
 
-\item{loaVariable}{Calculate level of agreement (LoA) for each case and add
-as new computed column. Categorizes cases as
-Absolute/High/Moderate/Low/Poor agreement based on proportion of raters
-agreeing. Useful for identifying difficult cases and quality control.}
+\item{loaThresholds}{For Detailed mode only: How to define 5 LoA
+categories. Custom = user-defined cutpoints. Quartiles/Tertiles =
+data-driven splits.}
 
-\item{loaThresholds}{How to define LoA categories. Custom = user-defined
-cutpoints. Quartiles/Tertiles = data-driven splits.}
+\item{loaHighThreshold}{For Detailed mode with Custom thresholds only:
+Minimum \\% for "High" classification (e.g., 75\\% = ≥12/16 raters). Cases ≥
+this threshold are "High Agreement".}
 
-\item{loaHighThreshold}{Minimum \\% agreement for "High" LoA (e.g., 75\\% =
-≥12/16 raters for N=16).}
+\item{loaLowThreshold}{For Detailed mode with Custom thresholds only:
+Minimum \\% for "Low" classification (e.g., 56\\% = ≥9/16 raters). Below =
+"Poor", between Low and High = "Moderate".}
 
-\item{loaLowThreshold}{Minimum \\% agreement for "Low" LoA (e.g., 56\\% =
-≥9/16 raters for N=16).}
+\item{loaVariableName}{Name for the computed Level of Agreement variable
+added to the dataset. Default: 'agreement_level'. Will contain categories
+like 'Absolute', 'High', 'Moderate', 'Low', 'Poor'.}
+
+\item{showLoaTable}{Display summary table showing distribution of cases
+across LoA categories with counts and percentages. Useful for quality
+control reporting.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-\code{results$headingIRR} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
-\code{results$text2} \tab \tab \tab \tab \tab a html \cr
-\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$headingKripp} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$contingencyTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
+\code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$headingGwet} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$levelInfo} \tab \tab \tab \tab \tab a html \cr
-\code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$varianceComponents} \tab \tab \tab \tab \tab a table \cr
-\code{results$clusterSpecificKappaTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$clusterHomogeneityTest} \tab \tab \tab \tab \tab a table \cr
-\code{results$clusterRankingsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
-\code{results$headingPairwise} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$lightKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$kendallWTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$headingLoA} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$loaVar} \tab \tab \tab \tab \tab an output \cr
+\code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$varianceDecompositionTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$homogeneityTestTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$levelInfoTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
-\code{results$reportText} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
-\code{results$blandAltmanPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$clinicalUseCases} \tab \tab \tab \tab \tab a html \cr
+\code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$loaDetailTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$computedVariablesInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
+\code{results$loaOutput} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

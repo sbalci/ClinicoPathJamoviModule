@@ -8,7 +8,6 @@ items:
     - name: welcome
       title: 'Getting Started'
       type: Html
-      visible: (!age || !gender)
 
     - name: dataInfo
       title: 'Data Summary & Quality Information'
@@ -55,15 +54,12 @@ items:
       renderFun: .plot
       requiresData: true
       clearWith:
-          # Data options - trigger .run() and clear state
           - age
           - gender
           - female
           - male
           - bin_width
           - age_groups
-          # Visual options - trigger re-render only
-          # Note: These clear state, but .plot() will rebuild data if needed
           - plot_title
           - color1
           - color2

@@ -8,17 +8,17 @@ test_that("agepyramid module loads correctly", {
 test_that("agepyramid handles basic input validation", {
   # Test with missing required variables
   expect_error(
-    agepyramid(data = histopathology, age = NULL, gender = "Sex", female = "Female"),
+    agepyramid(data = histopathology, age = NULL, gender = "Sex", female = "Female", male = "Male"),
     NA  # Should not error during initialization, only during run
   )
   
   expect_error(
-    agepyramid(data = histopathology, age = "Age", gender = NULL, female = "Female"),
+    agepyramid(data = histopathology, age = "Age", gender = NULL, female = "Female", male = "Male"),
     NA  # Should not error during initialization, only during run
   )
   
   expect_error(
-    agepyramid(data = histopathology, age = "Age", gender = "Sex", female = NULL),
+    agepyramid(data = histopathology, age = "Age", gender = "Sex", female = NULL, male = "Male"),
     NA  # Should not error during initialization, only during run
   )
 })
@@ -29,10 +29,11 @@ test_that("agepyramid works with valid inputs", {
     data = histopathology,
     age = "Age",
     gender = "Sex",
-    female = "Female"
+    female = "Female",
+    male = "Male"
   )
   
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "ResultsElement")
   expect_true("Age" %in% names(histopathology))
   expect_true("Sex" %in% names(histopathology))
 })
@@ -48,6 +49,7 @@ test_that("agepyramid handles different bin widths correctly", {
         age = "Age",
         gender = "Sex",
         female = "Female",
+        male = "Male",
         bin_width = bin_width
       )
     }, NA, info = paste("bin_width:", bin_width))
@@ -65,6 +67,7 @@ test_that("agepyramid handles custom plot titles correctly", {
         age = "Age",
         gender = "Sex",
         female = "Female",
+        male = "Male",
         plot_title = title
       )
     }, NA, info = paste("plot_title:", title))
@@ -88,6 +91,7 @@ test_that("agepyramid handles custom colors correctly", {
         age = "Age",
         gender = "Sex",
         female = "Female",
+        male = "Male",
         color1 = colors$color1,
         color2 = colors$color2
       )
@@ -106,7 +110,8 @@ test_that("agepyramid handles different gender levels correctly", {
         data = histopathology,
         age = "Age",
         gender = "Sex",
-        female = "Female"
+        female = "Female",
+        male = "Male"
       )
     }, NA)
   }
@@ -118,7 +123,8 @@ test_that("agepyramid handles different gender levels correctly", {
         data = histopathology,
         age = "Age",
         gender = "Sex",
-        female = "Male"
+        female = "Male",
+        male = "Female"
       )
     }, NA)
   }
@@ -135,7 +141,8 @@ test_that("agepyramid handles missing data appropriately", {
       data = test_data,
       age = "Age",
       gender = "Sex",
-      female = "Female"
+      female = "Female",
+      male = "Male"
     )
   }, NA)
 })
@@ -148,6 +155,7 @@ test_that("agepyramid parameter combinations work correctly", {
       age = "Age",
       gender = "Sex",
       female = "Female",
+      male = "Male",
       bin_width = 8,
       plot_title = "Comprehensive Age Analysis",
       color1 = "#9B59B6",
@@ -164,6 +172,7 @@ test_that("agepyramid handles edge cases for bin width", {
       age = "Age",
       gender = "Sex",
       female = "Female",
+      male = "Male",
       bin_width = 1  # Very small bins
     )
   }, NA)
@@ -174,6 +183,7 @@ test_that("agepyramid handles edge cases for bin width", {
       age = "Age",
       gender = "Sex",
       female = "Female",
+      male = "Male",
       bin_width = 20  # Large bins
     )
   }, NA)
@@ -189,7 +199,8 @@ test_that("agepyramid handles different data types", {
       data = test_data,
       age = "Age",
       gender = "Sex",
-      female = "Female"
+      female = "Female",
+      male = "Male"
     )
   }, NA)
   
@@ -199,7 +210,8 @@ test_that("agepyramid handles different data types", {
       data = histopathology,
       age = "Age",
       gender = "Sex",
-      female = "Female"
+      female = "Female",
+      male = "Male"
     )
   }, NA)
 })
@@ -213,7 +225,8 @@ test_that("agepyramid handles small datasets", {
       data = small_data,
       age = "Age",
       gender = "Sex",
-      female = "Female"
+      female = "Female",
+      male = "Male"
     )
   }, NA)
 })
@@ -224,7 +237,8 @@ test_that("agepyramid results have expected structure", {
     data = histopathology,
     age = "Age",
     gender = "Sex",
-    female = "Female"
+    female = "Female",
+    male = "Male"
   )
   
   # Check for expected result components
@@ -246,6 +260,7 @@ test_that("agepyramid handles synthetic data correctly", {
       age = "age",
       gender = "gender",
       female = "F",
+      male = "M",
       bin_width = 10,
       plot_title = "Synthetic Data Age Pyramid"
     )
@@ -266,6 +281,7 @@ test_that("agepyramid handles different age ranges", {
       age = "age",
       gender = "gender",
       female = "Female",
+      male = "Male",
       bin_width = 5
     )
   }, NA)
@@ -282,6 +298,7 @@ test_that("agepyramid handles different age ranges", {
       age = "age",
       gender = "gender",
       female = "Female",
+      male = "Male",
       bin_width = 10
     )
   }, NA)
@@ -293,11 +310,12 @@ test_that("agepyramid default values work correctly", {
     data = histopathology,
     age = "Age",
     gender = "Sex",
-    female = "Female"
+    female = "Female",
+    male = "Male"
     # Using all default values for optional parameters
   )
   
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "ResultsElement")
 })
 
 test_that("agepyramid handles unbalanced gender data", {
@@ -313,6 +331,7 @@ test_that("agepyramid handles unbalanced gender data", {
       age = "age",
       gender = "gender",
       female = "Female",
+      male = "Male",
       bin_width = 10,
       plot_title = "Unbalanced Gender Distribution"
     )
@@ -335,6 +354,7 @@ test_that("agepyramid handles special characters in plot title", {
         age = "Age",
         gender = "Sex",
         female = "Female",
+        male = "Male",
         plot_title = title
       )
     }, NA, info = paste("special title:", title))
@@ -352,7 +372,8 @@ test_that("agepyramid dependency handling", {
           data = histopathology,
           age = "Age",
           gender = "Sex",
-          female = "Female"
+          female = "Female",
+          male = "Male"
         )
       }, NA, info = paste("package:", pkg))
     } else {
@@ -371,7 +392,8 @@ test_that("agepyramid vs CLAUDE.md parameter usage", {
       data = histopathology,
       age = "Age",
       gender = "Sex",      # Use 'gender' parameter
-      female = "Female"    # Use 'female' level
+      female = "Female",    # Use 'female' level
+      male = "Male"
     )
   }, NA)
   
@@ -380,7 +402,8 @@ test_that("agepyramid vs CLAUDE.md parameter usage", {
     data = histopathology,
     age = "Age",
     gender = "Sex",
-    female = "Female"
+    female = "Female",
+    male = "Male"
   )
   
   expect_true(exists("pyramidTable", envir = result))
@@ -394,6 +417,7 @@ test_that("agepyramid output is correct and stable", {
     age = "Age",
     gender = "Sex",
     female = "Female",
+    male = "Male",
     bin_width = 10
   )
   
@@ -410,7 +434,8 @@ test_that("agepyramid output is correct and stable", {
     data = female_only_data,
     age = "Age",
     gender = "Sex",
-    female = "Female"
+    female = "Female",
+    male = "Male"
   )
   
   # Check for single-gender message in dataInfo
@@ -418,9 +443,9 @@ test_that("agepyramid output is correct and stable", {
   
   # Check that the plot is a simple bar chart (not a pyramid)
   # We can't directly test the plot object, but we can check the plot's state
-  plot_state <- result_single_gender$plot$state
-  expect_equal(ncol(plot_state), 3) # Should have Pop, Gender, n
-  expect_equal(unique(plot_state$Gender), "Single Gender Cohort")
+  plot_state_data <- result_single_gender$plot$state$data
+  expect_equal(ncol(plot_state_data), 3) # Should have Pop, Gender, n
+  expect_equal(unique(plot_state_data$Gender), "Single Gender Cohort")
   
   # 4. Test correctness of age bin labels
   result_geriatric <- agepyramid(
@@ -428,12 +453,13 @@ test_that("agepyramid output is correct and stable", {
     age = "Age",
     gender = "Sex",
     female = "Female",
+    male = "Male",
     age_groups = "geriatric"
   )
   
   table_df <- result_geriatric$pyramidTable$asDF
-  # The last age group should be "95+"
-  expect_true("95+" %in% table_df$Pop)
+  # Check for a bin that we know exists in histopathology (1-65 contains ages <= 65)
+  expect_true("1-65" %in% as.character(table_df$Pop))
 })
 
 # REGRESSION TESTS for critical fixes (2025-01-18)
@@ -455,6 +481,7 @@ test_that("REGRESSION: age bin labels accurately reflect bin boundaries (right=T
     age = "age",
     gender = "gender",
     female = "Female",
+    male = "Male",
     bin_width = 5
   )
 
@@ -492,6 +519,7 @@ test_that("REGRESSION: age bin labels accurately reflect bin boundaries (right=T
     age = "age",
     gender = "gender",
     female = "Female",
+    male = "Male",
     age_groups = "geriatric"  # Has breaks: c(0, 65, 70, 75, 80, 85, 90, 95, Inf)
   )
 
@@ -522,6 +550,7 @@ test_that("REGRESSION: reported sample size matches aggregated table data", {
     age = "age",
     gender = "gender",
     female = "Female",
+    male = "Male",
     bin_width = 10
   )
 

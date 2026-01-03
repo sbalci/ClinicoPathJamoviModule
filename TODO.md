@@ -1,13 +1,13 @@
 ## Project review - potential improvement areas (2026-01-03)
 
 ### 🧹 Project Hygiene & Cleanup
-- [ ] **Remove Redundant Backups**: Systematically remove `*.bak`, `*.backup`, `*.bak2`, and timestamped backup files from `jamovi/` and `R/`. Canonical versions should be kept, and a dedicated `backups/` folder (git-ignored) should be used if necessary.
-- [ ] **Clean Temp Artifacts**: Purge tracked temp/output artifacts from repo root (`temp*`, `Rplots.pdf`, `*_output*.txt`).
+- [ ] **Remove Redundant Backups**: Systematically remove `*.bak`, `*.backup`, `*.bak2`, and timestamped backup files from `jamovi/` and `R/` (e.g., `alluvial.r.yaml.backup_fix_20251122_211650`, `survival.b.R.backup`). Canonical versions should be kept.
+- [ ] **Cleanup Build Artifacts**: Add specific patterns to `.Rbuildignore` or `.gitignore` for `.Rd2pdf*` and other transient build files. *Note: Keep `temp*` folders as they are used for active work.*
 - [ ] **Scripted Consistency Check**: Implement a script to detect orphaned analysis files (e.g., `.a.yaml` without matching `.b.R` or `.h.R`) and mismatched option names between YAML and R code.
 
 ### 📦 Dependency & Infrastructure Optimization
 - [ ] **Audit DESCRIPTION Imports**: Review the ~250 dependencies. Identify packages that can be moved to `Suggests` to reduce initial installation burden.
-- [ ] **Fix Redundant Dependencies**: Remove duplicate entries for `tidyr` and `stringr` in `DESCRIPTION`.
+- [ ] **Fix Redundant Dependencies**: Remove duplicate entries in `DESCRIPTION`, specifically: `PMCMRplus`, `boot`, `glmmTMB`, `icenReg`, `maxstat`, `quarto`, and `vcd`.
 - [ ] **Resolve Architecture Mismatch**: Debug and fix the `arm64` vs `x86_64` error encountered during module installation in jamovi. Ensure build environment consistency.
 - [ ] **Namespace Synchronization**: Ensure `NAMESPACE` and `DESCRIPTION` are perfectly synced, potentially using the `sync_namespace_description` mode in `_updateModules.R`.
 
