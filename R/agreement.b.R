@@ -23,13 +23,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
     inherit = agreementBase, private = list(
 
         .init = function() {
-            # Initialize plot render functions
-            if (self$options$blandAltmanPlot) {
-                self$results$blandAltman$setRenderFun(private$.blandAltman)
-            }
-            if (self$options$agreementHeatmap) {
-                self$results$agreementHeatmapPlot$setRenderFun(private$.agreementHeatmap)
-            }
+            # Initialization logic
+            # Plot render functions are specified in .r.yaml via renderFun parameter
         },
 
         # Helper function to escape variable names for R code generation
@@ -3560,6 +3555,502 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             }, error = function(e) {
                 self$results$agreementHeatmapPlot$setError(sprintf("Error generating heatmap: %s", e$message))
+            })
+        },
+
+        # ============================================================
+        # RATER PROFILE PLOTS
+        # ============================================================
+
+        .populateRaterProfileExplanation = function() {
+            # Provide educational content about Rater Profile Plots
+
+            html_content <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What are Rater Profile Plots?</h3>
+                    <p style='margin: 0; color: #333;'>
+                        Rater Profile Plots visualize the <strong>distribution of ratings</strong> for each individual rater.
+                        Unlike agreement statistics that focus on concordance between raters, profile plots reveal
+                        <strong>rating patterns and systematic differences</strong> in how raters use the rating scale.
+                    </p>
+                </div>
+
+                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Rater Profile Plots</h4>
+                    <p style='margin: 0 0 10px 0;'><strong>Essential when:</strong></p>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li><strong>Agreement is low</strong> – Determine if disagreement stems from systematic rating differences vs. random variation</li>
+                        <li><strong>Training evaluation</strong> – Identify raters with restricted range use or systematic over/under-grading</li>
+                        <li><strong>Quality control</strong> – Detect raters who need recalibration or additional training</li>
+                        <li><strong>Method validation</strong> – Ensure all raters are using the full scale appropriately</li>
+                        <li><strong>Identifying outlier raters</strong> – Find raters whose distributions differ markedly from the group</li>
+                    </ul>
+                </div>
+
+                <h4 style='color: #1976D2;'>Plot Types and When to Use Them</h4>
+                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
+                    <tr style='background: #f5f5f5;'>
+                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Plot Type</th>
+                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Best For</th>
+                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Shows</th>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'><strong>Box Plot</strong></td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Continuous data, comparing medians</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Median, IQR, outliers, range</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'><strong>Violin Plot</strong></td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Continuous data, full distribution shape</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Distribution density, bimodality, skewness</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'><strong>Bar Plot</strong></td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Categorical/ordinal data</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Category frequencies, scale use patterns</td>
+                    </tr>
+                </table>
+
+                <h4 style='color: #1976D2;'>Clinical Use Cases in Pathology</h4>
+
+                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #2196F3;'>
+                    <h5 style='margin: 0 0 10px 0; color: #333;'>1. Tumor Grade Assessment (Ordinal Data)</h5>
+                    <p style='margin: 0 0 10px 0; color: #666;'>
+                        <strong>Scenario:</strong> Five pathologists grade 100 breast tumors as G1/G2/G3.
+                    </p>
+                    <p style='margin: 0 0 10px 0; color: #666;'>
+                        <strong>Bar Plot Reveals:</strong>
+                    </p>
+                    <ul style='margin: 0; padding-left: 20px; color: #666;'>
+                        <li>Path A: 40% G1, 50% G2, 10% G3 (under-grades G3)</li>
+                        <li>Path B: 15% G1, 40% G2, 45% G3 (over-grades G3)</li>
+                        <li>Path C: 25% G1, 50% G2, 25% G3 (balanced distribution)</li>
+                        <li>Path D: 10% G1, 80% G2, 10% G3 (restricted range - G2 overused)</li>
+                        <li>Path E: 30% G1, 40% G2, 30% G3 (balanced)</li>
+                    </ul>
+                    <p style='margin: 10px 0 0 0; color: #666;'>
+                        <strong>Interpretation:</strong> Path A and B show opposite systematic biases.
+                        Path D shows central tendency bias (avoiding extreme grades). Targeted training
+                        can address these specific patterns.
+                    </p>
+                </div>
+
+                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #2196F3;'>
+                    <h5 style='margin: 0 0 10px 0; color: #333;'>2. Ki-67 Proliferation Index (Continuous Data)</h5>
+                    <p style='margin: 0 0 10px 0; color: #666;'>
+                        <strong>Scenario:</strong> Four pathologists score Ki-67 (0-100%) on 80 breast cancers.
+                    </p>
+                    <p style='margin: 0 0 10px 0; color: #666;'>
+                        <strong>Box Plot Reveals:</strong>
+                    </p>
+                    <ul style='margin: 0; padding-left: 20px; color: #666;'>
+                        <li>Scorer 1: Median 25%, IQR 15-40%, range 5-75%</li>
+                        <li>Scorer 2: Median 35%, IQR 25-50%, range 10-85% (systematically higher by ~10%)</li>
+                        <li>Scorer 3: Median 30%, IQR 20-45%, range 15-60% (restricted range, no extremes)</li>
+                        <li>Scorer 4: Median 28%, IQR 18-42%, range 2-95% (full range use)</li>
+                    </ul>
+                    <p style='margin: 10px 0 0 0; color: #666;'>
+                        <strong>Interpretation:</strong> Scorer 2 systematically over-estimates by ~10% (needs recalibration).
+                        Scorer 3 avoids extreme values (central tendency bias). Violin plots would additionally show
+                        if distributions are unimodal or have multiple peaks.
+                    </p>
+                </div>
+
+                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #2196F3;'>
+                    <h5 style='margin: 0 0 10px 0; color: #333;'>3. Mitotic Count (Continuous with Outliers)</h5>
+                    <p style='margin: 0 0 10px 0; color: #666;'>
+                        <strong>Scenario:</strong> Six pathologists count mitoses per 10 HPF in 60 sarcomas.
+                    </p>
+                    <p style='margin: 0 0 10px 0; color: #666;'>
+                        <strong>Violin Plot Reveals:</strong>
+                    </p>
+                    <ul style='margin: 0; padding-left: 20px; color: #666;'>
+                        <li>Path A-E: Unimodal distributions, median ~8 mitoses, similar spread</li>
+                        <li>Path F: <strong>Bimodal distribution</strong> with peaks at 5 and 15 mitoses</li>
+                    </ul>
+                    <p style='margin: 10px 0 0 0; color: #666;'>
+                        <strong>Interpretation:</strong> Path F's bimodal distribution suggests inconsistent counting
+                        methodology (perhaps using different field sizes or magnifications for different cases).
+                        Requires investigation and retraining.
+                    </p>
+                </div>
+
+                <div style='background: #ffe5e5; border-left: 4px solid #d32f2f; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #c62828;'>⚠️ Important Interpretation Notes</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li><strong>Distribution differences ≠ poor agreement:</strong> Raters can have different distributions
+                            but still agree well on relative rankings</li>
+                        <li><strong>Context matters:</strong> Some distribution differences may reflect genuine expertise
+                            (expert vs. trainee) rather than error</li>
+                        <li><strong>Sample size:</strong> Need ≥30 cases per rater for reliable distribution estimates</li>
+                        <li><strong>Outliers:</strong> Investigate outliers individually - may represent genuine biological extremes
+                            or measurement errors</li>
+                        <li><strong>Central tendency bias:</strong> Restricted range (avoiding extremes) is common in trainees
+                            and reduces diagnostic discrimination</li>
+                    </ul>
+                </div>
+
+                <h4 style='color: #1976D2;'>What to Do Based on Profile Patterns</h4>
+                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
+                    <tr style='background: #f5f5f5;'>
+                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Pattern</th>
+                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Interpretation</th>
+                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Action</th>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Systematic shift (higher/lower median)</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Over/under-grading bias</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Recalibration with reference standards</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Restricted range (narrow IQR)</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Central tendency bias, avoiding extremes</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Training on diagnostic thresholds</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Bimodal distribution</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Inconsistent methodology</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Standardize measurement protocol</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Excessive outliers</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Measurement errors or misclassifications</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Review outlier cases individually</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Similar distributions across all raters</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>Good scale use calibration</td>
+                        <td style='padding: 8px; border: 1px solid #ccc;'>No action needed (assess agreement separately)</td>
+                    </tr>
+                </table>
+
+                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #2E7D32;'>✓ Best Practices</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li>Use alongside agreement statistics (kappa/ICC) - not a replacement</li>
+                        <li>Violin plots better than box plots for detecting bimodality and distribution shape</li>
+                        <li>Show individual points for small datasets (N < 50 per rater)</li>
+                        <li>Compare profile plots before and after training to assess improvement</li>
+                        <li>For categorical data, look for overuse of middle categories (central tendency)</li>
+                    </ul>
+                </div>
+            </div>
+            "
+
+            html <- jmvcore::format(html_content)
+            self$results$raterProfileExplanation$setContent(html)
+        },
+
+        .raterProfilePlot = function(image, ...) {
+            # Render rater profile plot from stored state
+
+            plotState <- image$state
+
+            if (is.null(plotState)) {
+                return(FALSE)
+            }
+
+            # Extract data from state
+            plot_data <- plotState$plot_data
+            plot_type <- plotState$plot_type
+            is_categorical <- plotState$is_categorical
+            show_points <- plotState$show_points
+
+            # Create plot based on type
+            if (is_categorical || plot_type == "barplot") {
+                # Bar plot for categorical data
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Rater, fill = Category)) +
+                    ggplot2::geom_bar(position = "fill", stat = "count") +
+                    ggplot2::scale_y_continuous(labels = scales::percent) +
+                    ggplot2::labs(
+                        title = "Rater Profile: Category Distribution",
+                        subtitle = "Proportion of each category assigned by each rater",
+                        x = "Rater",
+                        y = "Percentage",
+                        fill = "Category"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5),
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+                    )
+            } else if (plot_type == "violin") {
+                # Violin plot for continuous data
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Rater, y = Rating)) +
+                    ggplot2::geom_violin(fill = "#2196F3", alpha = 0.6) +
+                    ggplot2::geom_boxplot(width = 0.1, outlier.shape = NA) +
+                    ggplot2::labs(
+                        title = "Rater Profile: Rating Distribution",
+                        subtitle = "Violin plots showing full distribution shape for each rater",
+                        x = "Rater",
+                        y = "Rating"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5),
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+                    )
+
+                if (show_points) {
+                    p <- p + ggplot2::geom_jitter(alpha = 0.3, width = 0.2, size = 0.5)
+                }
+            } else {
+                # Box plot for continuous data (default)
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Rater, y = Rating)) +
+                    ggplot2::geom_boxplot(fill = "#2196F3", alpha = 0.6) +
+                    ggplot2::labs(
+                        title = "Rater Profile: Rating Distribution",
+                        subtitle = "Box plots showing median, IQR, and outliers for each rater",
+                        x = "Rater",
+                        y = "Rating"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5),
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+                    )
+
+                if (show_points) {
+                    p <- p + ggplot2::geom_jitter(alpha = 0.3, width = 0.2, size = 0.5)
+                }
+            }
+
+            print(p)
+            return(TRUE)
+        },
+
+        .populateRaterProfiles = function(ratings) {
+            # Prepare data for rater profile plots
+
+            tryCatch({
+                # Get user options
+                plot_type <- self$options$raterProfileType
+                show_points <- self$options$raterProfileShowPoints
+
+                # Check if data is categorical
+                is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+
+                # Prepare data in long format
+                rater_names <- names(ratings)
+                n_raters <- length(rater_names)
+                n_cases <- nrow(ratings)
+
+                if (is_categorical) {
+                    # For categorical data, create long format with counts
+                    plot_data <- data.frame()
+                    for (i in 1:n_raters) {
+                        rater_data <- data.frame(
+                            Rater = rater_names[i],
+                            Category = as.character(ratings[[i]]),
+                            stringsAsFactors = FALSE
+                        )
+                        plot_data <- rbind(plot_data, rater_data)
+                    }
+                    plot_data$Rater <- factor(plot_data$Rater, levels = rater_names)
+                } else {
+                    # For continuous data, create long format
+                    plot_data <- data.frame()
+                    for (i in 1:n_raters) {
+                        rater_data <- data.frame(
+                            Rater = rater_names[i],
+                            Rating = as.numeric(ratings[[i]]),
+                            stringsAsFactors = FALSE
+                        )
+                        plot_data <- rbind(plot_data, rater_data)
+                    }
+                    plot_data$Rater <- factor(plot_data$Rater, levels = rater_names)
+                    plot_data <- plot_data[!is.na(plot_data$Rating), ]
+                }
+
+                # Store state for rendering
+                plot <- self$results$raterProfilePlot
+                plot$setState(list(
+                    plot_data = plot_data,
+                    plot_type = plot_type,
+                    is_categorical = is_categorical,
+                    show_points = show_points
+                ))
+
+            }, error = function(e) {
+                self$results$raterProfilePlot$setError(sprintf("Error generating rater profile plot: %s", e$message))
+            })
+        },
+
+        # ============================================================
+        # AGREEMENT BY SUBGROUP
+        # ============================================================
+
+        .populateSubgroupExplanation = function() {
+            html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>Agreement by Subgroup (Stratified Analysis)</h3>
+                    <p style='margin: 0; color: #333;'>Calculate agreement separately for each subgroup to identify which case types show reliable agreement.</p>
+                </div>
+                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Use Cases</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li>Compare agreement across tumor types (benign vs. malignant)</li>
+                        <li>Assess agreement by disease stage or grade</li>
+                        <li>Identify case difficulty (easy vs. hard cases)</li>
+                        <li>Evaluate agreement across anatomical sites</li>
+                    </ul>
+                </div></div>"
+            self$results$subgroupExplanation$setContent(jmvcore::format(html))
+        },
+
+        .subgroupForestPlot = function(image, ...) {
+            plotState <- image$state
+            if (is.null(plotState)) return(FALSE)
+
+            forest_data <- plotState$forest_data
+
+            # Create forest plot
+            p <- ggplot2::ggplot(forest_data, ggplot2::aes(x = agreement, y = subgroup)) +
+                ggplot2::geom_point(size = 3) +
+                ggplot2::geom_errorbarh(ggplot2::aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+                ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+                ggplot2::labs(title = "Agreement by Subgroup (Forest Plot)",
+                             subtitle = "Point estimates with 95% confidence intervals",
+                             x = "Agreement Statistic",
+                             y = "Subgroup") +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                              plot.subtitle = ggplot2::element_text(hjust = 0.5))
+            print(p)
+            return(TRUE)
+        },
+
+        .calculateAgreementBySubgroup = function(ratings) {
+            tryCatch({
+                subgroup_var <- self$options$subgroupVariable
+                min_cases <- self$options$subgroupMinCases
+
+                if (is.null(subgroup_var) || subgroup_var == "") {
+                    return()
+                }
+
+                # Get subgroup variable from data
+                subgroup <- self$data[[subgroup_var]]
+                if (is.null(subgroup)) {
+                    self$results$subgroupAgreementTable$setNote("error", sprintf("Subgroup variable '%s' not found", subgroup_var))
+                    return()
+                }
+
+                # Determine if data is categorical
+                is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+
+                # Calculate agreement for each subgroup
+                subgroup_levels <- unique(subgroup[!is.na(subgroup)])
+                result_rows <- list()
+                forest_data <- data.frame()
+
+                for (level in subgroup_levels) {
+                    # Subset data for this subgroup
+                    idx <- which(subgroup == level & complete.cases(ratings))
+
+                    if (length(idx) < min_cases) {
+                        next  # Skip subgroups with insufficient cases
+                    }
+
+                    sub_ratings <- ratings[idx, , drop = FALSE]
+                    n_cases <- nrow(sub_ratings)
+                    n_raters <- ncol(sub_ratings)
+
+                    # Calculate appropriate agreement statistic
+                    if (is_categorical) {
+                        # Use Fleiss' kappa for categorical data
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            kappa_result <- tryCatch(irr::kappam.fleiss(sub_ratings), error = function(e) NULL)
+                            if (!is.null(kappa_result)) {
+                                agreement_stat <- kappa_result$value
+                                stat_type <- "Fleiss' Kappa"
+                                # Approximate CI using standard error
+                                se <- sqrt(kappa_result$statistic / n_cases)
+                                ci_lower <- agreement_stat - 1.96 * se
+                                ci_upper <- agreement_stat + 1.96 * se
+                            } else {
+                                agreement_stat <- NA
+                                stat_type <- "Kappa (error)"
+                                ci_lower <- NA
+                                ci_upper <- NA
+                            }
+                        }
+                    } else {
+                        # Use ICC for continuous data
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            icc_result <- tryCatch(irr::icc(sub_ratings, model = "twoway", type = "agreement"), error = function(e) NULL)
+                            if (!is.null(icc_result)) {
+                                agreement_stat <- icc_result$value
+                                stat_type <- "ICC(2,1)"
+                                ci_lower <- icc_result$lbound
+                                ci_upper <- icc_result$ubound
+                            } else {
+                                agreement_stat <- NA
+                                stat_type <- "ICC (error)"
+                                ci_lower <- NA
+                                ci_upper <- NA
+                            }
+                        }
+                    }
+
+                    # Interpret agreement
+                    interpretation <- if (is.na(agreement_stat)) {
+                        "Error calculating agreement"
+                    } else if (agreement_stat < 0.40) {
+                        "Poor"
+                    } else if (agreement_stat < 0.60) {
+                        "Fair"
+                    } else if (agreement_stat < 0.75) {
+                        "Good"
+                    } else if (agreement_stat < 0.90) {
+                        "Excellent"
+                    } else {
+                        "Outstanding"
+                    }
+
+                    # Add row to table
+                    result_rows[[length(result_rows) + 1]] <- list(
+                        subgroup = as.character(level),
+                        n_cases = n_cases,
+                        n_raters = n_raters,
+                        agreement_stat = agreement_stat,
+                        stat_type = stat_type,
+                        ci_lower = ci_lower,
+                        ci_upper = ci_upper,
+                        interpretation = interpretation
+                    )
+
+                    # Add to forest plot data
+                    if (!is.na(agreement_stat)) {
+                        forest_data <- rbind(forest_data, data.frame(
+                            subgroup = as.character(level),
+                            agreement = agreement_stat,
+                            ci_lower = ci_lower,
+                            ci_upper = ci_upper,
+                            stringsAsFactors = FALSE
+                        ))
+                    }
+                }
+
+                # Populate table
+                table <- self$results$subgroupAgreementTable
+                for (row in result_rows) {
+                    table$addRow(rowKey = row$subgroup, values = row)
+                }
+
+                # Store forest plot state
+                if (self$options$subgroupForestPlot && nrow(forest_data) > 0) {
+                    forest_data$subgroup <- factor(forest_data$subgroup, levels = rev(forest_data$subgroup))
+                    plot <- self$results$subgroupForestPlotImage
+                    plot$setState(list(forest_data = forest_data))
+                }
+
+            }, error = function(e) {
+                self$results$subgroupAgreementTable$setNote("error", sprintf("Error in subgroup analysis: %s", e$message))
             })
         },
 
@@ -7292,6 +7783,22 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         }
         if (self$options$agreementHeatmap) {
             private$.populateAgreementHeatmap(ratings)
+        }
+
+        # Rater Profile Plots (if requested) ----
+        if (self$options$raterProfiles || self$options$showRaterProfileGuide) {
+            private$.populateRaterProfileExplanation()
+        }
+        if (self$options$raterProfiles) {
+            private$.populateRaterProfiles(ratings)
+        }
+
+        # Agreement by Subgroup (if requested) ----
+        if (self$options$agreementBySubgroup || self$options$showSubgroupGuide) {
+            private$.populateSubgroupExplanation()
+        }
+        if (self$options$agreementBySubgroup) {
+            private$.calculateAgreementBySubgroup(ratings)
         }
 
         # Maxwell's Random Error Index (if requested) ----

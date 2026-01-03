@@ -248,8 +248,12 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot_title <- if (!is.null(self$options$plot_title)) self$options$plot_title else "Age Pyramid"
 
             # Determine color palette ----
-            color_palette <- if (!is.null(self$options$color_palette)) self$options$color_palette else 'standard'
+            color_palette <- self$options$color_palette
+            if (is.null(color_palette) || length(color_palette) == 0) {
+                color_palette <- 'standard'
+            }
 
+            # Set colors based on palette selection
             if (color_palette == 'colorblind') {
                 # Orange/Blue palette (colorblind-friendly)
                 color_female <- "#E69F00"  # Orange
@@ -260,8 +264,15 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 color_male <- "#CCCCCC"    # Light gray
             } else if (color_palette == 'custom') {
                 # Custom colors from user
-                color_female <- if (!is.null(self$options$female_color)) self$options$female_color else "#E91E63"
-                color_male <- if (!is.null(self$options$male_color)) self$options$male_color else "#2196F3"
+                color_female <- self$options$female_color
+                color_male <- self$options$male_color
+                # Fallback to defaults if colors are empty
+                if (is.null(color_female) || nchar(trimws(color_female)) == 0) {
+                    color_female <- "#E91E63"
+                }
+                if (is.null(color_male) || nchar(trimws(color_male)) == 0) {
+                    color_male <- "#2196F3"
+                }
             } else {
                 # Standard palette (default pink/blue)
                 color_female <- "#E91E63"  # Pink

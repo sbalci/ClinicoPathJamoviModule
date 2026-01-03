@@ -918,6 +918,112 @@ options:
             Display summary table showing distribution of cases across LoA categories
             with counts and percentages. Useful for quality control reporting.
 
+    # ---- Rater Profile Plots ----
+
+    - name: raterProfiles
+      title: "Rater Profile Plots (Distribution Comparison)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Generate box plots or violin plots showing the distribution of ratings for each rater.
+            For categorical data: bar plots showing category distribution per rater.
+            For continuous data: box plots/violin plots showing rating distribution per rater.
+            Essential for identifying raters with systematically different rating patterns (e.g.,
+            consistently higher/lower scores, restricted range use, bimodal distributions).
+            Reveals rating style differences, scale use patterns, and potential training needs.
+            Particularly valuable when agreement is low - helps determine if disagreement stems
+            from systematic differences in rating distributions or random variation.
+
+    - name: raterProfileType
+      title: "Profile Plot Type"
+      type: List
+      options:
+        - title: 'Box Plot (Median + IQR)'
+          name: boxplot
+        - title: 'Violin Plot (Full Distribution)'
+          name: violin
+        - title: 'Bar Plot (Category Frequencies)'
+          name: barplot
+      default: boxplot
+      description:
+          R: >
+            For continuous data: Choose between box plots (shows median, quartiles, outliers)
+            or violin plots (shows full distribution shape including multimodality).
+            For categorical data: Automatically uses bar plots showing category frequencies.
+
+    - name: raterProfileShowPoints
+      title: "Show Individual Data Points"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Overlay individual rating observations on box/violin plots.
+            Useful for smaller datasets (N < 100) to show actual data distribution.
+            Not recommended for large datasets due to overplotting.
+
+    - name: showRaterProfileGuide
+      title: "When to use Rater Profile Plots"
+      type: Bool
+      default: false
+
+    # ---- Agreement by Subgroup ----
+
+    - name: agreementBySubgroup
+      title: "Agreement by Subgroup (Stratified Analysis)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate agreement statistics separately for each level of a subgroup variable
+            (e.g., tumor type, disease stage, specimen type, difficulty level).
+            Generates forest plot showing kappa/ICC values with confidence intervals across subgroups.
+            Essential for determining whether agreement is consistent across different contexts or
+            varies by case characteristics. Common use cases: comparing agreement for benign vs.
+            malignant cases, early vs. advanced stage, different anatomical sites, or
+            easy vs. difficult cases. Reveals whether rater training is adequate for all case types
+            or whether specific subgroups need targeted attention.
+
+    - name: subgroupVariable
+      title: "Subgroup Variable"
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            Categorical variable defining subgroups for stratified analysis.
+            Examples: tumor_type, disease_stage, specimen_site, difficulty_level.
+            Agreement will be calculated separately for each level of this variable.
+
+    - name: subgroupForestPlot
+      title: "Generate Forest Plot"
+      type: Bool
+      default: true
+      description:
+          R: >
+            Create forest plot showing agreement estimates (kappa/ICC) with confidence intervals
+            for each subgroup. Facilitates visual comparison of agreement across subgroups.
+
+    - name: subgroupMinCases
+      title: "Minimum Cases per Subgroup"
+      type: Number
+      default: 10
+      min: 5
+      max: 100
+      description:
+          R: >
+            Minimum number of cases required in a subgroup to calculate agreement statistics.
+            Subgroups with fewer cases will be excluded with a warning message.
+            Default: 10 cases (reasonable for kappa estimation).
+
+    - name: showSubgroupGuide
+      title: "When to use Agreement by Subgroup"
+      type: Bool
+      default: false
+
 
 
 
@@ -925,16 +1031,6 @@ options:
 ...
 
 
-
-# consider adding:
-# consider adding:
-# Rater Profile Plots
-# Distribution comparison
-# Box plots per rater
-# Agreement by Subgroup
-# Stratified analysis
-# Forest plot of kappas
-# Use case: Compare agreement across tumor types
 
 
 # consider adding:

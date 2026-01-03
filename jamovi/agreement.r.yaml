@@ -119,6 +119,7 @@ items:
       type: Image
       width: 500
       height: 400
+      renderFun: .blandAltman
       visible: (blandAltmanPlot)
       requiresData: true
       clearWith:
@@ -130,6 +131,7 @@ items:
       type: Image
       width: 600
       height: 500
+      renderFun: .agreementHeatmap
       visible: (agreementHeatmap)
       requiresData: true
       clearWith:
@@ -1244,6 +1246,79 @@ items:
           - loaHighThreshold
           - loaLowThreshold
           - loaVariableName
+
+    # ---- Rater Profile Plots ----
+
+    - name: raterProfilePlot
+      title: 'Rater Profile Plots (Rating Distribution by Rater)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .raterProfilePlot
+      visible: (raterProfiles)
+      requiresData: true
+      clearWith:
+          - vars
+          - raterProfileType
+          - raterProfileShowPoints
+
+    - name: raterProfileExplanation
+      title: "About Rater Profile Plots"
+      type: Html
+      visible: ((raterProfiles || showRaterProfileGuide) && showAbout)
+
+    # ---- Agreement by Subgroup ----
+
+    - name: subgroupAgreementTable
+      title: "Agreement by Subgroup (Stratified Analysis)"
+      type: Table
+      visible: (agreementBySubgroup)
+      rows: 0
+      columns:
+        - name: subgroup
+          title: 'Subgroup'
+          type: text
+        - name: n_cases
+          title: 'N Cases'
+          type: integer
+        - name: n_raters
+          title: 'N Raters'
+          type: integer
+        - name: agreement_stat
+          title: 'Agreement'
+          type: number
+        - name: stat_type
+          title: 'Statistic'
+          type: text
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - subgroupVariable
+
+    - name: subgroupForestPlotImage
+      title: 'Forest Plot of Agreement by Subgroup'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .subgroupForestPlot
+      visible: (agreementBySubgroup && subgroupForestPlot)
+      requiresData: true
+      clearWith:
+          - vars
+          - subgroupVariable
+
+    - name: subgroupExplanation
+      title: "About Agreement by Subgroup"
+      type: Html
+      visible: ((agreementBySubgroup || showSubgroupGuide) && showAbout)
 
 refs:
     - irr

@@ -36,14 +36,14 @@ children:
         children:
           - type: ComboBox
             name: age_groups
-      - type: TextBox
-        name: bin_width
-        format: number
-        enable: (age_groups:custom)
-      - type: TextBox
-        name: custom_breaks
-        format: string
-        enable: (age_groups:custom)
+          - type: TextBox
+            name: bin_width
+            format: number
+            enable: (age_groups:custom)
+          - type: TextBox
+            name: custom_breaks
+            format: string
+            enable: (age_groups:custom)
   - type: LayoutBox
     margin: large
     children:
@@ -56,11 +56,11 @@ children:
             width: large
           - type: ComboBox
             name: color_palette
-      - type: TextBox
-        name: female_color
-        format: string
-        enable: (color_palette:custom)
-      - type: TextBox
-        name: male_color
-        format: string
-        enable: (color_palette:custom)
+          - type: TextBox
+            name: female_color
+            format: string
+            enable: (color_palette:custom)
+          - type: TextBox
+            name: male_color
+            format: string
+            enable: (color_palette:custom)

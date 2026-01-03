@@ -452,6 +452,55 @@ children:
           - type: CheckBox
             name: showSpecificAgreementGuide
 
+  - type: CollapseBox
+    label: Rater Profile Plots (Distribution Comparison)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: raterProfiles
+          - type: ComboBox
+            name: raterProfileType
+            enable: (raterProfiles)
+          - type: CheckBox
+            name: raterProfileShowPoints
+            enable: (raterProfiles)
+          - type: CheckBox
+            name: showRaterProfileGuide
+
+  - type: CollapseBox
+    label: Agreement by Subgroup (Stratified Analysis)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: agreementBySubgroup
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: Subgroup Variable
+                children:
+                  - type: VariablesListBox
+                    name: subgroupVariable
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (agreementBySubgroup)
+          - type: CheckBox
+            name: subgroupForestPlot
+            enable: (agreementBySubgroup)
+          - type: TextBox
+            name: subgroupMinCases
+            format: number
+            enable: (agreementBySubgroup)
+          - type: CheckBox
+            name: showSubgroupGuide
+
   # ============================================================
   # DISPLAY OPTIONS
   # ============================================================

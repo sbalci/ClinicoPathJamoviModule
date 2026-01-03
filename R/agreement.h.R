@@ -82,7 +82,16 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             loaHighThreshold = 75,
             loaLowThreshold = 56,
             loaVariableName = "agreement_level",
-            showLoaTable = TRUE, ...) {
+            showLoaTable = TRUE,
+            raterProfiles = FALSE,
+            raterProfileType = "boxplot",
+            raterProfileShowPoints = FALSE,
+            showRaterProfileGuide = FALSE,
+            agreementBySubgroup = FALSE,
+            subgroupVariable = NULL,
+            subgroupForestPlot = TRUE,
+            subgroupMinCases = 10,
+            showSubgroupGuide = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -469,6 +478,52 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showLoaTable",
                 showLoaTable,
                 default=TRUE)
+            private$..raterProfiles <- jmvcore::OptionBool$new(
+                "raterProfiles",
+                raterProfiles,
+                default=FALSE)
+            private$..raterProfileType <- jmvcore::OptionList$new(
+                "raterProfileType",
+                raterProfileType,
+                options=list(
+                    "boxplot",
+                    "violin",
+                    "barplot"),
+                default="boxplot")
+            private$..raterProfileShowPoints <- jmvcore::OptionBool$new(
+                "raterProfileShowPoints",
+                raterProfileShowPoints,
+                default=FALSE)
+            private$..showRaterProfileGuide <- jmvcore::OptionBool$new(
+                "showRaterProfileGuide",
+                showRaterProfileGuide,
+                default=FALSE)
+            private$..agreementBySubgroup <- jmvcore::OptionBool$new(
+                "agreementBySubgroup",
+                agreementBySubgroup,
+                default=FALSE)
+            private$..subgroupVariable <- jmvcore::OptionVariable$new(
+                "subgroupVariable",
+                subgroupVariable,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"))
+            private$..subgroupForestPlot <- jmvcore::OptionBool$new(
+                "subgroupForestPlot",
+                subgroupForestPlot,
+                default=TRUE)
+            private$..subgroupMinCases <- jmvcore::OptionNumber$new(
+                "subgroupMinCases",
+                subgroupMinCases,
+                default=10,
+                min=5,
+                max=100)
+            private$..showSubgroupGuide <- jmvcore::OptionBool$new(
+                "showSubgroupGuide",
+                showSubgroupGuide,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
@@ -548,6 +603,15 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..loaLowThreshold)
             self$.addOption(private$..loaVariableName)
             self$.addOption(private$..showLoaTable)
+            self$.addOption(private$..raterProfiles)
+            self$.addOption(private$..raterProfileType)
+            self$.addOption(private$..raterProfileShowPoints)
+            self$.addOption(private$..showRaterProfileGuide)
+            self$.addOption(private$..agreementBySubgroup)
+            self$.addOption(private$..subgroupVariable)
+            self$.addOption(private$..subgroupForestPlot)
+            self$.addOption(private$..subgroupMinCases)
+            self$.addOption(private$..showSubgroupGuide)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -627,7 +691,16 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         loaHighThreshold = function() private$..loaHighThreshold$value,
         loaLowThreshold = function() private$..loaLowThreshold$value,
         loaVariableName = function() private$..loaVariableName$value,
-        showLoaTable = function() private$..showLoaTable$value),
+        showLoaTable = function() private$..showLoaTable$value,
+        raterProfiles = function() private$..raterProfiles$value,
+        raterProfileType = function() private$..raterProfileType$value,
+        raterProfileShowPoints = function() private$..raterProfileShowPoints$value,
+        showRaterProfileGuide = function() private$..showRaterProfileGuide$value,
+        agreementBySubgroup = function() private$..agreementBySubgroup$value,
+        subgroupVariable = function() private$..subgroupVariable$value,
+        subgroupForestPlot = function() private$..subgroupForestPlot$value,
+        subgroupMinCases = function() private$..subgroupMinCases$value,
+        showSubgroupGuide = function() private$..showSubgroupGuide$value),
     private = list(
         ..vars = NA,
         ..baConfidenceLevel = NA,
@@ -706,7 +779,16 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..loaHighThreshold = NA,
         ..loaLowThreshold = NA,
         ..loaVariableName = NA,
-        ..showLoaTable = NA)
+        ..showLoaTable = NA,
+        ..raterProfiles = NA,
+        ..raterProfileType = NA,
+        ..raterProfileShowPoints = NA,
+        ..showRaterProfileGuide = NA,
+        ..agreementBySubgroup = NA,
+        ..subgroupVariable = NA,
+        ..subgroupForestPlot = NA,
+        ..subgroupMinCases = NA,
+        ..showSubgroupGuide = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -775,7 +857,12 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         loaDetailTable = function() private$.items[["loaDetailTable"]],
         computedVariablesInfo = function() private$.items[["computedVariablesInfo"]],
         consensusVar = function() private$.items[["consensusVar"]],
-        loaOutput = function() private$.items[["loaOutput"]]),
+        loaOutput = function() private$.items[["loaOutput"]],
+        raterProfilePlot = function() private$.items[["raterProfilePlot"]],
+        raterProfileExplanation = function() private$.items[["raterProfileExplanation"]],
+        subgroupAgreementTable = function() private$.items[["subgroupAgreementTable"]],
+        subgroupForestPlotImage = function() private$.items[["subgroupForestPlotImage"]],
+        subgroupExplanation = function() private$.items[["subgroupExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -859,6 +946,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Bland-Altman Plot",
                 width=500,
                 height=400,
+                renderFun=".blandAltman",
                 visible="(blandAltmanPlot)",
                 requiresData=TRUE,
                 clearWith=list(
@@ -870,6 +958,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Agreement Heatmap (Confusion Matrix)",
                 width=600,
                 height=500,
+                renderFun=".agreementHeatmap",
                 visible="(agreementHeatmap)",
                 requiresData=TRUE,
                 clearWith=list(
@@ -2168,7 +2257,84 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "loaThresholds",
                     "loaHighThreshold",
                     "loaLowThreshold",
-                    "loaVariableName")))}))
+                    "loaVariableName")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="raterProfilePlot",
+                title="Rater Profile Plots (Rating Distribution by Rater)",
+                width=600,
+                height=450,
+                renderFun=".raterProfilePlot",
+                visible="(raterProfiles)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "raterProfileType",
+                    "raterProfileShowPoints")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="raterProfileExplanation",
+                title="About Rater Profile Plots",
+                visible="((raterProfiles || showRaterProfileGuide) && showAbout)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="subgroupAgreementTable",
+                title="Agreement by Subgroup (Stratified Analysis)",
+                visible="(agreementBySubgroup)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="subgroup", 
+                        `title`="Subgroup", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_raters", 
+                        `title`="N Raters", 
+                        `type`="integer"),
+                    list(
+                        `name`="agreement_stat", 
+                        `title`="Agreement", 
+                        `type`="number"),
+                    list(
+                        `name`="stat_type", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "subgroupVariable")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="subgroupForestPlotImage",
+                title="Forest Plot of Agreement by Subgroup",
+                width=600,
+                height=450,
+                renderFun=".subgroupForestPlot",
+                visible="(agreementBySubgroup && subgroupForestPlot)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "vars",
+                    "subgroupVariable")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="subgroupExplanation",
+                title="About Agreement by Subgroup",
+                visible="((agreementBySubgroup || showSubgroupGuide) && showAbout)"))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -2521,6 +2687,46 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showLoaTable Display summary table showing distribution of cases
 #'   across LoA categories with counts and percentages. Useful for quality
 #'   control reporting.
+#' @param raterProfiles Generate box plots or violin plots showing the
+#'   distribution of ratings for each rater. For categorical data: bar plots
+#'   showing category distribution per rater. For continuous data: box
+#'   plots/violin plots showing rating distribution per rater. Essential for
+#'   identifying raters with systematically different rating patterns (e.g.,
+#'   consistently higher/lower scores, restricted range use, bimodal
+#'   distributions). Reveals rating style differences, scale use patterns, and
+#'   potential training needs. Particularly valuable when agreement is low -
+#'   helps determine if disagreement stems from systematic differences in rating
+#'   distributions or random variation.
+#' @param raterProfileType For continuous data: Choose between box plots
+#'   (shows median, quartiles, outliers) or violin plots (shows full
+#'   distribution shape including multimodality). For categorical data:
+#'   Automatically uses bar plots showing category frequencies.
+#' @param raterProfileShowPoints Overlay individual rating observations on
+#'   box/violin plots. Useful for smaller datasets (N < 100) to show actual data
+#'   distribution. Not recommended for large datasets due to overplotting.
+#' @param showRaterProfileGuide .
+#' @param agreementBySubgroup Calculate agreement statistics separately for
+#'   each level of a subgroup variable (e.g., tumor type, disease stage,
+#'   specimen type, difficulty level). Generates forest plot showing kappa/ICC
+#'   values with confidence intervals across subgroups. Essential for
+#'   determining whether agreement is consistent across different contexts or
+#'   varies by case characteristics. Common use cases: comparing agreement for
+#'   benign vs. malignant cases, early vs. advanced stage, different anatomical
+#'   sites, or easy vs. difficult cases. Reveals whether rater training is
+#'   adequate for all case types or whether specific subgroups need targeted
+#'   attention.
+#' @param subgroupVariable Categorical variable defining subgroups for
+#'   stratified analysis. Examples: tumor_type, disease_stage, specimen_site,
+#'   difficulty_level. Agreement will be calculated separately for each level of
+#'   this variable.
+#' @param subgroupForestPlot Create forest plot showing agreement estimates
+#'   (kappa/ICC) with confidence intervals for each subgroup. Facilitates visual
+#'   comparison of agreement across subgroups.
+#' @param subgroupMinCases Minimum number of cases required in a subgroup to
+#'   calculate agreement statistics. Subgroups with fewer cases will be excluded
+#'   with a warning message. Default: 10 cases (reasonable for kappa
+#'   estimation).
+#' @param showSubgroupGuide .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -2586,6 +2792,11 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$computedVariablesInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$consensusVar} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$loaOutput} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$raterProfilePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterProfileExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$subgroupAgreementTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$subgroupForestPlotImage} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$subgroupExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -2673,7 +2884,16 @@ agreement <- function(
     loaHighThreshold = 75,
     loaLowThreshold = 56,
     loaVariableName = "agreement_level",
-    showLoaTable = TRUE) {
+    showLoaTable = TRUE,
+    raterProfiles = FALSE,
+    raterProfileType = "boxplot",
+    raterProfileShowPoints = FALSE,
+    showRaterProfileGuide = FALSE,
+    agreementBySubgroup = FALSE,
+    subgroupVariable,
+    subgroupForestPlot = TRUE,
+    subgroupMinCases = 10,
+    showSubgroupGuide = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -2681,13 +2901,16 @@ agreement <- function(
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(referenceRater)) referenceRater <- jmvcore::resolveQuo(jmvcore::enquo(referenceRater))
     if ( ! missing(clusterVariable)) clusterVariable <- jmvcore::resolveQuo(jmvcore::enquo(clusterVariable))
+    if ( ! missing(subgroupVariable)) subgroupVariable <- jmvcore::resolveQuo(jmvcore::enquo(subgroupVariable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(referenceRater), referenceRater, NULL),
-            `if`( ! missing(clusterVariable), clusterVariable, NULL))
+            `if`( ! missing(clusterVariable), clusterVariable, NULL),
+            `if`( ! missing(subgroupVariable), subgroupVariable, NULL))
 
+    for (v in subgroupVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- agreementOptions$new(
         vars = vars,
@@ -2766,7 +2989,16 @@ agreement <- function(
         loaHighThreshold = loaHighThreshold,
         loaLowThreshold = loaLowThreshold,
         loaVariableName = loaVariableName,
-        showLoaTable = showLoaTable)
+        showLoaTable = showLoaTable,
+        raterProfiles = raterProfiles,
+        raterProfileType = raterProfileType,
+        raterProfileShowPoints = raterProfileShowPoints,
+        showRaterProfileGuide = showRaterProfileGuide,
+        agreementBySubgroup = agreementBySubgroup,
+        subgroupVariable = subgroupVariable,
+        subgroupForestPlot = subgroupForestPlot,
+        subgroupMinCases = subgroupMinCases,
+        showSubgroupGuide = showSubgroupGuide)
 
     analysis <- agreementClass$new(
         options = options,
