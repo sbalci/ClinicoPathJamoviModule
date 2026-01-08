@@ -1,0 +1,16 @@
+"scenario_id","scenario_name","strategy","test1_sens","test1_spec","test1_cost","test2_sens","test2_spec","test2_cost","prevalence","population_size"
+1,"Screening","serial_positive",0.9,0.85,50,0.85,0.95,300,0.05,10000
+1,"Screening","serial_negative",0.9,0.85,50,0.85,0.95,300,0.05,10000
+1,"Screening","parallel",0.9,0.85,50,0.85,0.95,300,0.05,10000
+2,"Diagnosis","serial_positive",0.85,0.88,100,0.9,0.95,400,0.3,10000
+2,"Diagnosis","serial_negative",0.85,0.88,100,0.9,0.95,400,0.3,10000
+2,"Diagnosis","parallel",0.85,0.88,100,0.9,0.95,400,0.3,10000
+3,"Emergency","serial_positive",0.95,0.8,75,0.88,0.92,200,0.15,10000
+3,"Emergency","serial_negative",0.95,0.8,75,0.88,0.92,200,0.15,10000
+3,"Emergency","parallel",0.95,0.8,75,0.88,0.92,200,0.15,10000
+4,"Rare disease","serial_positive",0.92,0.9,30,0.85,0.98,500,0.01,10000
+4,"Rare disease","serial_negative",0.92,0.9,30,0.85,0.98,500,0.01,10000
+4,"Rare disease","parallel",0.92,0.9,30,0.85,0.98,500,0.01,10000
+5,"Common disease","serial_positive",0.88,0.85,80,0.9,0.95,350,0.6,10000
+5,"Common disease","serial_negative",0.88,0.85,80,0.9,0.95,350,0.6,10000
+5,"Common disease","parallel",0.88,0.85,80,0.9,0.95,350,0.6,10000

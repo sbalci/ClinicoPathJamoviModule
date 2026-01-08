@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.01</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,12 +17,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="dev/index.html"><span class="fa fa-cogs"></span></a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/developer_guide.html">jamovi Module Development Guide</a></li>
-    <li><a class="dropdown-item" href="articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
-    <li><a class="dropdown-item" href="articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
-    <li><a class="dropdown-item" href="articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-test-data" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fa-database"></span> Test Data</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-test-data"><li><a class="dropdown-item" href="articles/test-data-catalog.html">Test Data Catalog</a></li>
+    <li><a class="dropdown-item" href="articles/test-data-complete-catalog.html">Complete Catalog (945 files)</a></li>
+    <li><a class="dropdown-item" href="articles/function-reference.html">Function Reference</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci"><span class="fa fab fa-twitter fa-lg"></span></a></li>
@@ -40,6 +40,15 @@
     </div>
 
 
+<ul class="task-list"><li><p><label><input type="checkbox"><strong>Resolve Architecture Mismatch</strong>: Debug and fix the <code>arm64</code> vs <code>x86_64</code> error encountered during module installation in jamovi. Ensure build environment consistency.</label></p></li>
+<li><p><label><input type="checkbox"><strong>Namespace Synchronization</strong>: Ensure <code>NAMESPACE</code> and <code>DESCRIPTION</code> are perfectly synced, potentially using the <code>sync_namespace_description</code> mode in <code>_updateModules.R</code>.</label></p></li>
+<li><p><label><input type="checkbox"><strong>Build pkgdown Site</strong>: Successfully build and deploy the <code>pkgdown</code> site, ensuring all vignettes are correctly included and examples are functional.</label></p></li>
+</ul><div class="section level3">
+<h3 id="test_tube-stabilization--testing">🧪 Stabilization &amp; Testing<a class="anchor" aria-label="anchor" href="#test_tube-stabilization--testing"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox"><strong>Promote ‘To be Tested’ Functions</strong>: Prioritize unit testing for functions in the “To be Tested” category (e.g., <code>decisioncurve</code>, <code>stagemigration</code>) to move them to “Stable”.</label></li>
+<li><label><input type="checkbox"><strong>Smoke Test Suite</strong>: Create a minimal CI smoke suite that runs a basic analysis for each “Stable” function to prevent regressions during the massive dependency updates.</label></li>
+<li><label><input type="checkbox"><strong>Data Reproducibility</strong>: Verify <code>data-raw</code> regen scripts for all <code>.rda</code> files in <code>data/</code> to ensure datasets are reproducible.</label></li>
+</ul></div>
 <div class="section level2">
 <h2 id="check-articles">check articles<a class="anchor" aria-label="anchor" href="#check-articles"></a></h2>
 <p>source .venv/bin/activate</p>
@@ -58,7 +67,13 @@
 <blockquote>
 <p>marker_single /path/to/file.pdf –output_dir marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf –output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/ <a href="https://github.com/datalab-to/marker" class="external-link uri">https://github.com/datalab-to/marker</a></p>
 </blockquote>
-<blockquote>
+</div>
+<div class="section level2">
+<h2 id="oncoplot-follow-ups">Oncoplot follow-ups<a class="anchor" aria-label="anchor" href="#oncoplot-follow-ups"></a></h2>
+<ul><li>Draft: expose a dedicated per-sample mutation burden result if users need TMB-like summaries outside the marginal plot.</li>
+<li>Draft: add UI gating so <code>log10TransformTMB</code> is only available/active when <code>showTMB</code> is enabled.</li>
+<li>Draft: penalized/Firth logistic fallback and manual positive-predictor level control for oddsratio LRs/nomogram</li>
+</ul><blockquote>
 <p>/review-article-stats ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md’ ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.html’ ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.pdf’ ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.md’</p>
 </blockquote>
 <p>claude –no-mcp –no-tools “/review-article-stats Deep-Learning-Based-Prediction”<br>
@@ -71,13 +86,19 @@
 <h2 id="check-and-update-each-function">check and update each function<a class="anchor" aria-label="anchor" href="#check-and-update-each-function"></a></h2>
 <p>echo “/document-function” | claude claude “/document-function”</p>
 <p>echo “/check-function FUNC_NAME” | claude echo “/checkpoint FUNC_NAME” | claude echo “/prepare-translation FUNC_NAME” | claude echo “/review-function FUNC_NAME” | claude echo “/fix-function FUNC_NAME” | claude echo “/document-function FUNC_NAME” | claude</p>
+<p>^menuGroup:+(?&lt;![TD2])$ ^menuGroup:+([T])$</p>
+<p>(menuGroup:.*)T2$ $1D</p>
+<p>(menuGroup:.*?)(T3|T2|T1|T)$</p>
+<p>gemini: /chat share log.json gemini: ctrl+s copy mode</p>
+<p>use gemini to make Readiness for Clinicians and Pathologists assessment and Use Case Example Generation for each function.</p>
+<p>You are an expert R-package and jamovi developer. You are an expert in biostatistics working with pathologists and clinicians. Critically evaluate multisurvival function. Is it mathematically and statistically accurate? Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options. Is it ready to be used by clinicians and pathologists? Is it ready for release? Do not focus just on testing. Focus on functionality and accuracy. After you are satisfied with function then update and use tests. Suggest improvements. Do not remove functionality.</p>
 <blockquote>
 <p>fix issues and implement recommendations. favor functionality over explanations and guidence parts.</p>
 </blockquote>
 <blockquote>
-<p>how does FUNC_NAME handle varibale with empty spaces and characters in them. is it necessary to implement escapeVariableNames logic from modelbuilder to FUNC_NAME. In tables and plots I see the modified names that is why I am asking can we apply labelled logic as in oddsratio</p>
+<p>how does FUNC_NAME handle varibale with empty spaces and characters in them. Is it necessary to implement escapeVariableNames logic from modelbuilder to FUNC_NAME. In tables and plots I see the modified names that is why I am asking Can we apply labelled logic as in oddsratio</p>
 </blockquote>
-<p>check this javascript usage <a href="https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js" class="external-link uri">https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js</a> and <a href="https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39" class="external-link uri">https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39</a> to implement it for clinical presets <a href="https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R" class="external-link uri">https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R</a></p>
+<p>Check this javascript usage <a href="https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js" class="external-link uri">https://github.com/yurismol/jYS/blob/master/jamovi/js/mout.events.js</a> and <a href="https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39" class="external-link uri">https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/jamovi/mout.u.yaml#L39</a> to implement it for clinical presets <a href="https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R" class="external-link uri">https://github.com/yurismol/jYS/blob/74d32adc0114df6288f38fea7534afc7385a9a1a/R/mout.b.R</a></p>
 <p>jmvtools::prepare();devtools::document();devtools::load_all();data &lt;- readr::read_csv(“~/Desktop/survival_pancreas_T2_to_T3_upstage_10072025.csv”);stagemigration(data = data, oldStage = T_AJCC8_gr, newStage = T_modified_gr, survivalTime = OverallTime, event = Outcome, eventLevel = “DEAD”)</p>
 <p>jmvtools::prepare();devtools::document();devtools::load_all();data &lt;- readr::read_csv(“/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/diagnostic_meta_test.csv”);diagnosticmeta( data = data, study = study_name, true_positives = true_positives, false_positives = false_positives, false_negatives = false_negatives, true_negatives = true_negatives, covariate = NULL, hsroc_analysis = TRUE, meta_regression = TRUE, heterogeneity_analysis = TRUE)</p>
 <p>jmvtools::prepare();devtools::document();devtools::load_all();data &lt;- readr::read_csv(“/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/data/ihc_breast_cancer.csv”);ihccluster( data = data, catVars = vars(ER_Status, PR_Status), caseId = NULL, clinicalVars = vars())</p>
@@ -86,18 +107,2147 @@
 <p>remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders.</p>
 <p>prepare comprehensive test data generator under data-raw and prepare the data as csv under data folder</p>
 <p>To lower the computation make all default checkboxes to be false in .a.yaml</p>
-<p>implement welcome/introductory message styling of decisionpanel. Key Styling Elements (matching decisionpanel):</p>
-<ul><li>Font: Arial, sans-serif</li>
-<li>Line height: 1.4</li>
-<li>Headers: #333 (dark gray) with 2px solid borders</li>
-<li>Body text: 14px, #333</li>
-<li>Backgrounds: #f5f5f5 and #f9f9f9</li>
-<li>Accent text: #666</li>
-<li>No bright colors or emoji</li>
-<li>Consistent font sizes (14px body, 16-18px headers, 13px secondary)</li>
-</ul><p>! Rscript -e “jmvtools::prepare()” ! Rscript -e “devtools::document()” ! Rscript -e “devtools::load_all()” ! Rscript -e “pkgdown::build_site()” ! Rscript -e “pkgdown::build_site(examples = FALSE, lazy = TRUE, preview = FALSE)”</p>
+<p>! Rscript -e “jmvtools::prepare()” ! Rscript -e “devtools::document()” ! Rscript -e “devtools::load_all()”</p>
+<p>Rscript _updateModules.R</p>
+<p>Always use available ‘skills’ when possible. Keep the output organized. Use these skills to update text and analysis in the project: pubmed-database biopython biorxiv-database openalex-database citation-management scholar-evaluation clinical-decision-support clinical-reports exploratory-data-analysis hypogenic hypothesis-generation literature-review peer-review scientific-brainstorming scientific-critical-thinking scientific-visualization scientific-schematics generate-image scientific-slides scientific-writing research-grants statistical-analysis statsmodels paper-2-web matplotlib scikit-learn scikit-survival plotly seaborn aeon docx xlsx pptx latex-posters pdf markitdown histolab pathml shap omero-integration pydicom pytorch-lightning</p>
+<p>update DECSRIPTION, NEWS, README, and function Roxygen documentations.</p>
+<p>! Rscript -e “pkgdown::build_site()” ! Rscript -e “pkgdown::build_site(examples = FALSE, lazy = TRUE, preview = FALSE)”</p>
 <p>run jmvtools::prepare() to see if there are any errors run devtools::document() to see if there are any errors</p>
 <p>prepare a realistic data to test the features in detail move csv files under data folder. move data generation files under data-raw folder. move documentation files under module specific vignettes folder.</p>
+<p>read this study, evaluate it. update omentum study results and pathsampling implementation accordingly.</p>
+<p>│ │ - GEE (Generalized Estimating Equations) - Major undertaking │ │ │ │ - Mixed Model ANOVA - Major undertaking │ │ │ │ - Comprehensive Diagnostic Accuracy Module - Separate module needed │ │ │ │ - Multiple Testing Corrections Suite - Separate module needed</p>
+<p>Routinely we have following: BiopsyNumber, Total Number of Blocks, How many of these blocks have tumor, If there is a tumor what is the first block number, if there is a tumor in which blocks is it present. We have these information. We cannot know if there were tumor if we submitted whole omentum. We do not know if surgeon has sent correct tissue that is beyond us. In macroscopy we take samples/blocks from submitted tissue. 5-10 blocks per case. there will be theoretical false negative due to gross sampling or false negative due to microscopic sampling (small tumors may be lost with trimming). we cannot be certain for this. we are trying to identify the number of minimum sections taken to get the highest correct answer for the patient. Some tumors (serous) tend to metastasise more than others (endometrioid). So it may be informative to add negative cases to understand the tumor biology, the probability of metastasising in that tumor. To continue this session, run codex resume 0199d3a9-6a19-7f91-8124-a9d493708b4a.</p>
+<hr><hr></div>
+<div class="section level2">
+<h2 id="clipboard-overview">📋 <strong>Overview</strong>
+<a class="anchor" aria-label="anchor" href="#clipboard-overview"></a></h2>
+<p>This roadmap outlines planned enhancements for the ClinicoPath jamovi module ecosystem, designed specifically to work within <strong>jamovi’s tabular data structure</strong>. All features are adapted to work with:</p>
+<ul><li>
+<strong>Rectangular data frames</strong> (rows = observations, columns = variables)</li>
+<li>
+<strong>Variable types</strong>: Continuous (numeric), Nominal (factor), Ordinal (ordered factor)</li>
+<li>
+<strong>Case-by-case data</strong> (no longitudinal/nested structures without reshaping)</li>
+<li>
+<strong>Single dataset per analysis</strong> (no multi-table joins in UI)</li>
+</ul><hr><div class="section level3">
+<h3 id="phase-3-health-economics-sprints-5-6"><strong>Phase 3: Health Economics (Sprints 5-6)</strong><a class="anchor" aria-label="anchor" href="#phase-3-health-economics-sprints-5-6"></a></h3>
+<div class="section level4">
+<h4 id="m-cost-effectiveness-analysis"><strong>[M] Cost-Effectiveness Analysis</strong><a class="anchor" aria-label="anchor" href="#m-cost-effectiveness-analysis"></a></h4>
+<p><em>Economic evaluation with ICERs and CEACs</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">strategy</span><span class="kw">:</span><span class="at"> Nominal factor (intervention arms)</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">patient_id</span><span class="kw">:</span><span class="at"> Unique identifier</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">total_cost</span><span class="kw">:</span><span class="at"> Continuous (currency)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">total_qaly</span><span class="kw">:</span><span class="at"> Continuous (quality-adjusted life years)</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">psa_iteration</span><span class="kw">:</span><span class="at"> Numeric (for probabilistic sensitivity analysis)</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">subgroup</span><span class="kw">:</span><span class="at"> Nominal factor</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">Expected Data Format (one row per patient per strategy)</span><span class="kw">:</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="at">| patient_id | strategy    | total_cost | total_qaly | psa_iteration |</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="at">|------------|-------------|------------|------------|---------------|</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="at">| 001        | Treatment   | 15000      | 8.5        | 1             |</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="at">| 001        | Control     | 5000       | 7.2        | 1             |</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="at">| 002        | Treatment   | 18000      | 9.1        | 1             |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>ICER calculation with confidence intervals</li>
+<li>Cost-effectiveness plane scatter plots</li>
+<li>Cost-effectiveness acceptability curves (CEAC)</li>
+<li>Net monetary benefit at various willingness-to-pay thresholds</li>
+<li>One-way and two-way sensitivity analysis</li>
+<li>R packages: <code>heemod</code>, <code>dampack</code>, <code>BCEA</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>ICER table with incremental costs/QALYs</li>
+<li>CE plane (scatter plot of cost vs effect)</li>
+<li>CEAC curve (probability cost-effective vs WTP threshold)</li>
+<li>Tornado diagram for sensitivity analysis</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-4-advanced-features-sprint-7"><strong>Phase 4: Advanced Features (Sprint 7+)</strong><a class="anchor" aria-label="anchor" href="#phase-4-advanced-features-sprint-7"></a></h3>
+<hr><hr><div class="section level4">
+<h4 id="l-automated-reporting"><strong>[L] Automated Reporting</strong><a class="anchor" aria-label="anchor" href="#l-automated-reporting"></a></h4>
+<p><em>Manuscript-ready outputs</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>STARD/TRIPOD compliance templates</li>
+<li>Natural language summaries of diagnostic performance</li>
+<li>Journal-formatted tables (NEJM, Lancet, JAMA)</li>
+<li>Export to DOCX with embedded tables/figures</li>
+<li>R packages: <code>reporter</code>, <code>officer</code>, <code>flextable</code>
+</li>
+</ul><hr></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="hospital-2-jsurvival-module-enhancements">🏥 <strong>2. jSurvival Module Enhancements</strong>
+<a class="anchor" aria-label="anchor" href="#hospital-2-jsurvival-module-enhancements"></a></h2>
+<div class="section level3">
+<h3 id="phase-1-competing-risks-sprints-1-2"><strong>Phase 1: Competing Risks (Sprints 1-2)</strong><a class="anchor" aria-label="anchor" href="#phase-1-competing-risks-sprints-1-2"></a></h3>
+<hr></div>
+<div class="section level3">
+<h3 id="phase-2-model-validation-sprints-3-4"><strong>Phase 2: Model Validation (Sprints 3-4)</strong><a class="anchor" aria-label="anchor" href="#phase-2-model-validation-sprints-3-4"></a></h3>
+<hr></div>
+<div class="section level3">
+<h3 id="phase-3-advanced-models-sprints-5-6"><strong>Phase 3: Advanced Models (Sprints 5-6)</strong><a class="anchor" aria-label="anchor" href="#phase-3-advanced-models-sprints-5-6"></a></h3>
+<div class="section level4">
+<h4 id="m-parametric-survival-models"><strong>[M] Parametric Survival Models</strong><a class="anchor" aria-label="anchor" href="#m-parametric-survival-models"></a></h4>
+<p><em>AFT and flexible parametric models</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">time</span><span class="kw">:</span><span class="at"> Continuous (time to event or censoring)</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">event</span><span class="kw">:</span><span class="at"> Binary (0=censored, 1=event)</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">covariates</span><span class="kw">:</span><span class="at"> Multiple continuous or categorical predictors</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">Expected Data Format (one row per patient)</span><span class="kw">:</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="at">| patient_id | time | event | age | treatment | biomarker |</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="at">|------------|------|-------|-----|-----------|-----------|</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="at">| 001        | 24.5 | 1     | 65  | chemo     | 12.5      |</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="at">| 002        | 18.3 | 0     | 72  | surgery   | 8.3       |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Accelerated failure time (AFT) models
+<ul><li>Distributions: Weibull, Log-normal, Log-logistic, Gamma</li>
+</ul></li>
+<li>Royston-Parmar flexible parametric models (splines on log-hazard)</li>
+<li>Model comparison via AIC/BIC</li>
+<li>Survival, hazard, and hazard ratio curves</li>
+<li>Time-varying effects (interaction with time)</li>
+<li>R packages: <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survival::survreg</a></code>, <code>flexsurv</code>, <code>rstpm2</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Coefficient table with acceleration factors (AFT)</li>
+<li>Survival curves from parametric models</li>
+<li>Hazard curves (smooth, not step functions)</li>
+<li>Model fit comparison table</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="m-frailty--clustered-data"><strong>[M] Frailty &amp; Clustered Data</strong><a class="anchor" aria-label="anchor" href="#m-frailty--clustered-data"></a></h4>
+<p><em>Multi-level survival analysis</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">time</span><span class="kw">:</span><span class="at"> Continuous</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">event</span><span class="kw">:</span><span class="at"> Binary</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">cluster_id</span><span class="kw">:</span><span class="at"> Nominal factor (e.g., hospital, surgeon, family)</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">covariates</span><span class="kw">:</span><span class="at"> Multiple predictors</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">cluster_level_var</span><span class="kw">:</span><span class="at"> Continuous (e.g., hospital volume)</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="fu">Expected Data Format (one row per patient, clustered by hospital)</span><span class="kw">:</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="at">| patient_id | hospital_id | time | event | age | treatment |</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="at">|------------|-------------|------|-------|-----|-----------|</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="at">| 001        | Hospital_A  | 24.5 | 1     | 65  | chemo     |</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="at">| 002        | Hospital_A  | 18.3 | 0     | 72  | surgery   |</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="at">| 003        | Hospital_B  | 36.0 | 1     | 58  | chemo     |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Shared frailty models (random effects at cluster level)</li>
+<li>Individual frailty models (unobserved heterogeneity)</li>
+<li>Frailty distributions: Gamma, Log-normal</li>
+<li>Variance partition coefficients (cluster-level variance)</li>
+<li>Robust standard errors (cluster sandwich estimators)</li>
+<li>R packages: <code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">survival::coxph</a></code> with <code><a href="https://rdrr.io/pkg/survival/man/frailty.html" class="external-link">frailty()</a></code>, <code>frailtypack</code>, <code>coxme</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>HR table with cluster-adjusted SEs</li>
+<li>Frailty variance estimate</li>
+<li>Intra-cluster correlation (ICC)</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-4-recurrent-events--multi-state-sprint-7"><strong>Phase 4: Recurrent Events &amp; Multi-State (Sprint 7+)</strong><a class="anchor" aria-label="anchor" href="#phase-4-recurrent-events--multi-state-sprint-7"></a></h3>
+<div class="section level4">
+<h4 id="m-recurrent-event-models"><strong>[M] Recurrent Event Models</strong><a class="anchor" aria-label="anchor" href="#m-recurrent-event-models"></a></h4>
+<p><em>Multiple events per patient</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Long format: one row per event</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">patient_id</span><span class="kw">:</span><span class="at"> Identifier (multiple rows per patient)</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">event_number</span><span class="kw">:</span><span class="at"> Numeric (1st, 2nd, 3rd event...)</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">time_to_event</span><span class="kw">:</span><span class="at"> Continuous (time from baseline or previous event)</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">event_occurred</span><span class="kw">:</span><span class="at"> Binary</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">covariates</span><span class="kw">:</span><span class="at"> Patient-level or time-varying</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">time_origin</span><span class="kw">:</span><span class="at"> Continuous (for gap-time vs calendar-time)</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="fu">Expected Data Format (long format, multiple rows per patient)</span><span class="kw">:</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="at">| patient_id | event_num | time_to_event | event | age | treatment |</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="at">|------------|-----------|---------------|-------|-----|-----------|</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="at">| 001        | 1         | 5.2           | 1     | 65  | chemo     |</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="at">| 001        | 2         | 3.8           | 1     | 65  | chemo     |</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="at">| 001        | 3         | 7.1           | 0     | 65  | chemo     |</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="at">| 002        | 1         | 12.5          | 1     | 58  | surgery   |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Andersen-Gill (AG) model: treats events as independent</li>
+<li>Prentice-Williams-Peterson (PWP) models: stratified by event number</li>
+<li>Gap-time vs calendar-time approaches</li>
+<li>Marginal vs conditional models</li>
+<li>Cumulative mean function plots</li>
+<li>R packages: <code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">survival::coxph</a></code> with <code><a href="https://rdrr.io/pkg/survival/man/cluster.html" class="external-link">cluster()</a></code>, <code>reReg</code>, <code>reda</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>HR table for recurrent event rate</li>
+<li>Cumulative mean function plot (expected number of events over time)</li>
+<li>Event-specific HRs (PWP models)</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-multi-state-models"><strong>[L] Multi-State Models</strong><a class="anchor" aria-label="anchor" href="#l-multi-state-models"></a></h4>
+<p><em>State transition modeling (PFS → OS)</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Long format: one row per transition</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">patient_id</span><span class="kw">:</span><span class="at"> Identifier</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">from_state</span><span class="kw">:</span><span class="at"> Nominal factor (state at transition start)</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">to_state</span><span class="kw">:</span><span class="at"> Nominal factor (state at transition end)</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">transition_time</span><span class="kw">:</span><span class="at"> Continuous</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">covariates</span><span class="kw">:</span><span class="at"> Patient-level predictors</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">Expected Data Format (one row per transition per patient)</span><span class="kw">:</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="at">| patient_id | from_state  | to_state    | trans_time | age | treatment |</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="at">|------------|-------------|-------------|------------|-----|-----------|</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="at">| 001        | Progression-Free | Progression | 12.5    | 65  | chemo     |</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="at">| 001        | Progression | Death       | 24.8       | 65  | chemo     |</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="at">| 002        | Progression-Free | Death   | 18.3       | 58  | surgery   |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>State transition diagrams (illness-death models)</li>
+<li>Transition-specific hazard ratios</li>
+<li>Transition probability matrices</li>
+<li>State occupation probabilities over time</li>
+<li>Path-specific effects (e.g., PFS → progression → death)</li>
+<li>R packages: <code>mstate</code>, <code>msm</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Transition hazard ratio tables</li>
+<li>State occupation plot (stacked areas)</li>
+<li>Transition probability curves</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-cure-models"><strong>[L] Cure Models</strong><a class="anchor" aria-label="anchor" href="#l-cure-models"></a></h4>
+<p><em>Long-term survivor modeling</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">time</span><span class="kw">:</span><span class="at"> Continuous (follow-up time)</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">event</span><span class="kw">:</span><span class="at"> Binary</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">covariates</span><span class="kw">:</span><span class="at"> Predictors of cure and survival</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">Expected Data Format (one row per patient)</span><span class="kw">:</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="at">| patient_id | time | event | age | stage | treatment |</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="at">|------------|------|-------|-----|-------|-----------|</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="at">| 001        | 120  | 0     | 45  | I     | chemo     |</span><span class="co"> # Potential cure</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="at">| 002        | 24   | 1     | 72  | IV    | palliate  |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Mixture cure models (cured fraction + survival of uncured)</li>
+<li>Non-mixture cure models (promotion time models)</li>
+<li>Cure fraction estimation with CI</li>
+<li>Cure probability by covariates</li>
+<li>R packages: <code>flexsurvcure</code>, <code>smcure</code>, <code>cuRe</code>
+</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-5-non-ph-handling-sprint-8"><strong>Phase 5: Non-PH Handling (Sprint 8)</strong><a class="anchor" aria-label="anchor" href="#phase-5-non-ph-handling-sprint-8"></a></h3>
+<hr><hr></div>
+</div>
+<div class="section level2">
+<h2 id="chart_with_upwards_trend-3-jjstatsplot-module-enhancements">📈 <strong>3. JJStatsPlot Module Enhancements</strong>
+<a class="anchor" aria-label="anchor" href="#chart_with_upwards_trend-3-jjstatsplot-module-enhancements"></a></h2>
+<div class="section level3">
+<h3 id="phase-1-bug-fixes--polish-sprint-1"><strong>Phase 1: Bug Fixes &amp; Polish (Sprint 1)</strong><a class="anchor" aria-label="anchor" href="#phase-1-bug-fixes--polish-sprint-1"></a></h3>
+<hr><hr></div>
+<div class="section level3">
+<h3 id="phase-2-feature-parity-sprints-2-3"><strong>Phase 2: Feature Parity (Sprints 2-3)</strong><a class="anchor" aria-label="anchor" href="#phase-2-feature-parity-sprints-2-3"></a></h3>
+<hr><hr><div class="section level4">
+<h4 id="m-enhanced-customization"><strong>[M] Enhanced Customization</strong><a class="anchor" aria-label="anchor" href="#m-enhanced-customization"></a></h4>
+<p><em>User-controlled plot aesthetics</em></p>
+<p><strong>⏳ Enhancement Opportunities (Future):</strong> - ⏳ P-value symbol conversion (asterisks vs numeric) - ⏳ Font size controls (axis, title, annotation sliders) - ⏳ Font family selector (Arial, Times, Helvetica) - ⏳ Legend position controls (top, bottom, left, right, none) - ⏳ Centralized appearance configuration</p>
+<p><strong>Jamovi Data Structure</strong>: No changes (applies to all existing plots)</p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>P-value symbol conversion
+<ul><li>Checkbox: “Use symbols instead of p-values”</li>
+<li>Options: asterisks (<em>, <strong>, </strong></em>), daggers (†, ‡), NS notation</li>
+</ul></li>
+<li>Custom color palettes
+<ul><li>Preset palettes: viridis, ColorBrewer, ggplot2 default</li>
+<li>Manual color picker for key elements</li>
+</ul></li>
+<li>Theme presets
+<ul><li>Journal styles: NEJM, Lancet, JAMA, Nature</li>
+<li>Publication-ready: theme_classic(), theme_bw()</li>
+</ul></li>
+<li>Font controls
+<ul><li>Font size sliders (axis, title, annotation)</li>
+<li>Font family selector (Arial, Times, Helvetica)</li>
+</ul></li>
+<li>Legend customization
+<ul><li>Position: top, bottom, left, right, none</li>
+<li>Title customization</li>
+</ul></li>
+</ul><p><strong>UI additions</strong> (in all JJStatsPlot <code>.u.yaml</code> files):</p>
+<ul><li>“Appearance” section with nested options</li>
+<li>Color palette dropdown</li>
+<li>Symbol notation checkbox</li>
+<li>Theme preset dropdown</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-3-advanced-plots-sprint-4"><strong>Phase 3: Advanced Plots (Sprint 4)</strong><a class="anchor" aria-label="anchor" href="#phase-3-advanced-plots-sprint-4"></a></h3>
+<div class="section level4">
+<h4 id="l-plot-combining--layout"><strong>[L] Plot Combining &amp; Layout</strong><a class="anchor" aria-label="anchor" href="#l-plot-combining--layout"></a></h4>
+<p><em>Multi-panel publication figures</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># User creates multiple plots, then combines</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">Option</span><span class="kw">:</span><span class="at"> Select existing plots to combine</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">plot1</span><span class="kw">:</span><span class="at"> Dropdown (select from current plots)</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">plot2</span><span class="kw">:</span><span class="at"> Dropdown</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">layout</span><span class="kw">:</span><span class="at"> Grid layout (1x2, 2x1, 2x2, etc.)</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Patchwork/cowplot integration for multi-panel layouts</li>
+<li>Aligned axes across panels</li>
+<li>Shared legends</li>
+<li>Panel labeling (A, B, C, etc.)</li>
+<li>R packages: <code>patchwork</code>, <code>cowplot</code>
+</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-extended-plot-types"><strong>[L] Extended Plot Types</strong><a class="anchor" aria-label="anchor" href="#l-extended-plot-types"></a></h4>
+<p><em>Additional ggstatsplot visualizations</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Raincloud plots</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">continuous_var</span><span class="kw">:</span><span class="at"> Continuous</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">group_var</span><span class="kw">:</span><span class="at"> Nominal factor</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># Enhanced correlation matrices</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">variables</span><span class="kw">:</span><span class="at"> Multiple continuous variables</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Raincloud plots (violin + box + raw data points)</li>
+<li>Enhanced correlation matrices with hierarchical clustering</li>
+<li>Grouped correlation plots (by third variable)</li>
+<li>Bayesian correlation with BF</li>
+<li>R packages: <code>ggstatsplot</code>, <code>ggdist</code>, <code>ggrain</code>
+</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-4-workflow-sprint-5"><strong>Phase 4: Workflow (Sprint 5)</strong><a class="anchor" aria-label="anchor" href="#phase-4-workflow-sprint-5"></a></h3>
+<div class="section level4">
+<h4 id="l-export--reproducibility"><strong>[L] Export &amp; Reproducibility</strong><a class="anchor" aria-label="anchor" href="#l-export--reproducibility"></a></h4>
+<p><em>High-quality outputs</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>High-resolution export
+<ul><li>Format options: PDF (vector), SVG (vector), PNG/TIFF (raster)</li>
+<li>DPI control: 72 (screen), 300 (print), 600 (high-res)</li>
+<li>Size presets: Journal column width, full page</li>
+</ul></li>
+<li>R code export
+<ul><li>“Export R code” button: saves script to reproduce plot</li>
+<li>Includes all parameters and data filtering</li>
+</ul></li>
+<li>Batch plot generation
+<ul><li>Create multiple plots with varying parameters</li>
+<li>Export all at once</li>
+</ul></li>
+</ul><hr></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="clipboard-4-clinicopathdescriptives-module-enhancements">📋 <strong>4. ClinicoPathDescriptives Module Enhancements</strong>
+<a class="anchor" aria-label="anchor" href="#clipboard-4-clinicopathdescriptives-module-enhancements"></a></h2>
+<div class="section level3">
+<h3 id="phase-1-effect-sizes--statistical-rigor-sprints-1-2"><strong>Phase 1: Effect Sizes &amp; Statistical Rigor (Sprints 1-2)</strong><a class="anchor" aria-label="anchor" href="#phase-1-effect-sizes--statistical-rigor-sprints-1-2"></a></h3>
+<hr></div>
+<div class="section level3">
+<h3 id="phase-2-advanced-data-structures-sprints-3-4"><strong>Phase 2: Advanced Data Structures (Sprints 3-4)</strong><a class="anchor" aria-label="anchor" href="#phase-2-advanced-data-structures-sprints-3-4"></a></h3>
+<div class="section level4">
+<h4 id="m-multiple-imputation-support"><strong>[M] Multiple Imputation Support</strong><a class="anchor" aria-label="anchor" href="#m-multiple-imputation-support"></a></h4>
+<p><em>MI-aware descriptive statistics</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Imputed datasets must be stacked in long format</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">.imp</span><span class="kw">:</span><span class="at"> Numeric (imputation number: 0=original, 1=imp1, 2=imp2, etc.)</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">.id</span><span class="kw">:</span><span class="at"> Patient identifier</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> all other variables as usual</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="fu">Expected Data Format (long format, m=5 imputations)</span><span class="kw">:</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="at">| .imp | .id | age | biomarker | outcome |</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="at">|------|-----|-----|-----------|---------|</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="at">| 0    | 001 | 45  | NA        | disease |</span><span class="co"> # Original data</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="at">| 1    | 001 | 45  | 12.5      | disease |</span><span class="co"> # Imputation 1</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="at">| 2    | 001 | 45  | 13.1      | disease |</span><span class="co"> # Imputation 2</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="at">| ...  | ... | ... | ...       | ...     |</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="at">| 5    | 001 | 45  | 12.8      | disease |</span><span class="co"> # Imputation 5</span></span></code></pre></div>
+<p><strong>Alternative approach</strong>: Upload separate imputed datasets</p>
+<ul><li>User provides m imputed datasets via file selector</li>
+<li>Module internally stacks and processes</li>
+</ul><p><strong>Implementation</strong>:</p>
+<ul><li>Detect <code>.imp</code> variable automatically</li>
+<li>Pool estimates across imputations (Rubin’s rules)</li>
+<li>“Table 1” with MI pooling:
+<ul><li>Means/proportions pooled across imputations</li>
+<li>Variance incorporating within and between-imputation variance</li>
+<li>Chi-square tests pooled via D1/D2 statistics</li>
+</ul></li>
+<li>Cross-tabs with MI:
+<ul><li>Pooled chi-square p-values</li>
+<li>Pooled odds ratios/risk ratios</li>
+</ul></li>
+<li>R packages: <code>mice</code>, <code>mitools</code>, <code>miceadds</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Standard Table 1 layout with pooled estimates</li>
+<li>Footnote: “Estimates pooled across 5 imputations using Rubin’s rules”</li>
+<li>Fraction of missing information (FMI) column (optional)</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="m-surveyweighted-data"><strong>[M] Survey/Weighted Data</strong><a class="anchor" aria-label="anchor" href="#m-surveyweighted-data"></a></h4>
+<p><em>Complex survey design support</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">weight</span><span class="kw">:</span><span class="at"> Continuous (sampling weights)</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">stratum</span><span class="kw">:</span><span class="at"> Nominal factor (stratification variable)</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">cluster</span><span class="kw">:</span><span class="at"> Nominal factor (primary sampling unit)</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">fpc</span><span class="kw">:</span><span class="at"> Continuous (finite population correction)</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="fu">Expected Data Format (one row per sampled patient)</span><span class="kw">:</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="at">| patient_id | weight | stratum | cluster | age | outcome |</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="at">|------------|--------|---------|---------|-----|---------|</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="at">| 001        | 1.5    | urban   | PSU_01  | 45  | disease |</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="at">| 002        | 2.3    | rural   | PSU_02  | 52  | healthy |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Design-based estimation
+<ul><li>Weighted means, proportions with design-adjusted SEs</li>
+<li>Rao-Scott chi-square tests for contingency tables</li>
+<li>Taylor linearization for variance</li>
+</ul></li>
+<li>Survey-specific “Table 1”
+<ul><li>Weighted estimates</li>
+<li>Design effects (DEFF)</li>
+<li>Effective sample sizes</li>
+</ul></li>
+<li>Subpopulation analysis (domain estimation)</li>
+<li>R packages: <code>survey</code>, <code>srvyr</code>, <code>srvTable</code>
+</li>
+</ul><p><strong>UI elements</strong>:</p>
+<ul><li>Survey design specification section:
+<ul><li>Weight variable selector</li>
+<li>Stratification variable</li>
+<li>Cluster variable</li>
+<li>FPC (checkbox + variable)</li>
+</ul></li>
+<li>Output options:
+<ul><li>Checkbox: “Show design effects”</li>
+<li>Checkbox: “Show effective sample sizes”</li>
+</ul></li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-3-enhanced-outputs-sprint-5"><strong>Phase 3: Enhanced Outputs (Sprint 5)</strong><a class="anchor" aria-label="anchor" href="#phase-3-enhanced-outputs-sprint-5"></a></h3>
+<div class="section level4">
+<h4 id="h-one-click-export-pipelines"><strong>[H] One-Click Export Pipelines</strong><a class="anchor" aria-label="anchor" href="#h-one-click-export-pipelines"></a></h4>
+<p><em>Journal-ready table export</em></p>
+<p><strong>Jamovi Data Structure</strong>: No changes (export formatting only)</p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Export formats:
+<ul><li>DOCX: Editable Word tables via <code>officer</code> + <code>flextable</code>
+</li>
+<li>RTF: Universal rich text format</li>
+<li>LaTeX: For manuscript integration</li>
+<li>HTML: Web-friendly tables</li>
+<li>Excel: XLSX with formatting</li>
+</ul></li>
+<li>Journal presets:
+<ul><li>
+<strong>NEJM</strong>: Minimal borders, specific font sizes</li>
+<li>
+<strong>Lancet</strong>: Horizontal rules, footnote style</li>
+<li>
+<strong>JAMA</strong>: AMA style guidelines</li>
+<li>
+<strong>BMJ</strong>: House style compliance</li>
+<li>
+<strong>Nature</strong>: High-density compact tables</li>
+</ul></li>
+<li>Embedded footnotes:
+<ul><li>Test types used (e.g., “Chi-square test for categorical, t-test for continuous”)</li>
+<li>Effect size definitions</li>
+<li>Missing data handling</li>
+<li>Abbreviations</li>
+</ul></li>
+<li>Automatic table numbering and captions
+<ul><li>“Table 1. Baseline Characteristics by Treatment Arm”</li>
+</ul></li>
+<li>R packages: <code>flextable</code>, <code>officer</code>, <code>gt</code>, <code>gtsummary</code>, <code>huxtable</code>
+</li>
+</ul><p><strong>UI elements</strong>:</p>
+<ul><li>“Export” button with format dropdown</li>
+<li>“Journal style” dropdown (affects formatting)</li>
+<li>“Caption” text input</li>
+<li>“Footnotes” text area (multi-line)</li>
+</ul><p><strong>Example workflow</strong>:</p>
+<ol style="list-style-type: decimal"><li>User creates Table 1 with crosstable/summary functions</li>
+<li>Clicks “Export” → “DOCX (NEJM style)”</li>
+<li>Downloads ready-to-paste table for manuscript</li>
+</ol><hr></div>
+<div class="section level4">
+<h4 id="m-biomarker-panel-dashboard"><strong>[M] Biomarker Panel Dashboard</strong><a class="anchor" aria-label="anchor" href="#m-biomarker-panel-dashboard"></a></h4>
+<p><em>Consolidated IHC/biomarker summary</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">biomarker_vars</span><span class="kw">:</span><span class="at"> Multiple continuous or binary variables (e.g., Ki67, ER, PR, HER2)</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">outcome</span><span class="kw">:</span><span class="at"> Binary (for ROC analysis)</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">cutpoint</span><span class="kw">:</span><span class="at"> Continuous (pre-defined cutpoints for positivity)</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">strata</span><span class="kw">:</span><span class="at"> Nominal factor (for stratified analysis)</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="fu">Expected Data Format (one row per patient)</span><span class="kw">:</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="at">| patient_id | Ki67 | ER_percent | PR_percent | HER2_status | outcome |</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="at">|------------|------|------------|------------|-------------|---------|</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="at">| 001        | 25   | 80         | 70         | positive    | recurrence |</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="at">| 002        | 10   | 90         | 85         | negative    | no_recurrence |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Summary panel:
+<ul><li>Positivity rates (using cutpoints: ER≥1%, PR≥1%, HER2+ per ASCO/CAP)</li>
+<li>Distribution plots (histogram + density) per biomarker</li>
+<li>Missing data heatmap</li>
+</ul></li>
+<li>Co-expression analysis:
+<ul><li>Co-occurrence heatmap (e.g., ER+/PR+ overlap)</li>
+<li>UpSet plot for multi-marker combinations</li>
+</ul></li>
+<li>ROC-aware summaries:
+<ul><li>Per-biomarker ROC curve if outcome provided</li>
+<li>Optimal cutpoint detection (Youden index)</li>
+</ul></li>
+<li>Stratified prevalence:
+<ul><li>Biomarker positivity by subgroup (e.g., by tumor stage)</li>
+</ul></li>
+<li>R packages: <code>ggplot2</code>, <code>ComplexHeatmap</code>, <code>UpSetR</code>, <code>pROC</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Multi-panel dashboard</li>
+<li>Biomarker correlation matrix</li>
+<li>Co-occurrence table</li>
+<li>ROC curves (if outcome provided)</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-4-visualization-enhancements-sprint-6"><strong>Phase 4: Visualization Enhancements (Sprint 6)</strong><a class="anchor" aria-label="anchor" href="#phase-4-visualization-enhancements-sprint-6"></a></h3>
+<div class="section level4">
+<h4 id="m-advanced-categorical-plots"><strong>[M] Advanced Categorical Plots</strong><a class="anchor" aria-label="anchor" href="#m-advanced-categorical-plots"></a></h4>
+<p><em>Publication-quality contingency table visualizations</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Marimekko/Mosaic plots</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">row_var</span><span class="kw">:</span><span class="at"> Nominal factor</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">col_var</span><span class="kw">:</span><span class="at"> Nominal factor</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co"># Risk-difference plots</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">exposure</span><span class="kw">:</span><span class="at"> Binary factor</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">outcome</span><span class="kw">:</span><span class="at"> Binary factor</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">strata</span><span class="kw">:</span><span class="at"> Nominal factor (for stratified RD)</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>
+<strong>Marimekko/Mosaic plots</strong>:
+<ul><li>Tile size proportional to cell count</li>
+<li>Residual shading (blue=more than expected, red=fewer)</li>
+<li>Significance highlighting</li>
+<li>R packages: <code>ggmosaic</code>, <code>vcd</code>
+</li>
+</ul></li>
+<li>
+<strong>Stacked 100% bars with CI ribbons</strong>:
+<ul><li>Proportions with bootstrap CIs</li>
+<li>Grouped or stacked layout</li>
+</ul></li>
+<li>
+<strong>Risk-difference dot plots</strong>:
+<ul><li>Forest plot style</li>
+<li>RD with 95% CI per stratum</li>
+<li>Meta-analytic pooling across strata</li>
+</ul></li>
+<li>
+<strong>Enhanced alluvial diagrams</strong>:
+<ul><li>Multi-stage patient flow</li>
+<li>Highlighting specific pathways</li>
+<li>R packages: <code>ggalluvial</code>, <code>networkD3</code>
+</li>
+</ul></li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-5-workflow-integration-sprint-7"><strong>Phase 5: Workflow Integration (Sprint 7)</strong><a class="anchor" aria-label="anchor" href="#phase-5-workflow-integration-sprint-7"></a></h3>
+<div class="section level4">
+<h4 id="l-inter-module-handoffs"><strong>[L] Inter-Module Handoffs</strong><a class="anchor" aria-label="anchor" href="#l-inter-module-handoffs"></a></h4>
+<p><em>Seamless data transfer between modules</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>“Send to jSurvival” button:
+<ul><li>Transfers selected variables to jSurvival for KM analysis</li>
+<li>Pre-fills time/event variables if detected</li>
+</ul></li>
+<li>“Send to jjstatsplot” button:
+<ul><li>Opens jjstatsplot with variables pre-selected</li>
+</ul></li>
+<li>“Send to meddecide” button:
+<ul><li>For diagnostic test variables → DTA analysis</li>
+</ul></li>
+<li>Internal data passing via jamovi session</li>
+<li>No file export/import needed</li>
+</ul><p><strong>UI elements</strong>:</p>
+<ul><li>“Actions” menu in each analysis</li>
+<li>Dropdown: “Send variables to…”</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-audit-trail--reproducibility"><strong>[L] Audit Trail &amp; Reproducibility</strong><a class="anchor" aria-label="anchor" href="#l-audit-trail--reproducibility"></a></h4>
+<p><em>Analysis provenance tracking</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Auto-attach R code to exports:
+<ul><li>Each exported table/figure includes R code to reproduce</li>
+<li>Embedded in DOCX as comment or separate file</li>
+</ul></li>
+<li>Session info embedding:
+<ul><li>Package versions, jamovi version, OS, date/time</li>
+<li>Appended to exports as footnote or metadata</li>
+</ul></li>
+<li>Analysis provenance:
+<ul><li>Track variable transformations</li>
+<li>Record filtering/exclusions</li>
+<li>Log all parameter choices</li>
+</ul></li>
+<li>R packages: <code>sessioninfo</code>, <code>codebook</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>“Reproducibility Report” section in exports</li>
+<li>Copy-pasteable R code</li>
+<li>sessionInfo() output</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-performance-optimization"><strong>[L] Performance Optimization</strong><a class="anchor" aria-label="anchor" href="#l-performance-optimization"></a></h4>
+<p><em>Handle large datasets (100k+ rows)</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Chunked summaries:
+<ul><li>Process data in batches for memory efficiency</li>
+<li>Use <code>data.table</code> for fast aggregation</li>
+</ul></li>
+<li>Lazy evaluation:
+<ul><li>Only compute statistics when user requests output</li>
+<li>Cache intermediate results</li>
+</ul></li>
+<li>Progress indicators:
+<ul><li>Progress bar for operations &gt;5 seconds</li>
+<li>“Cancel” button for long operations</li>
+</ul></li>
+<li>Efficient algorithms:
+<ul><li>Use compiled C++ code where possible (via Rcpp)</li>
+<li>Parallel processing for bootstrap/permutation tests</li>
+</ul></li>
+<li>R packages: <code>data.table</code>, <code>dtplyr</code>, <code>progressr</code>, <code>future</code>
+</li>
+</ul><p><strong>UI elements</strong>:</p>
+<ul><li>Progress bar during computation</li>
+<li>Estimated time remaining</li>
+<li>“Cancel analysis” button</li>
+</ul><hr></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="microscope-5-oncopath-module-enhancements">🔬 <strong>5. OncoPath Module Enhancements</strong>
+<a class="anchor" aria-label="anchor" href="#microscope-5-oncopath-module-enhancements"></a></h2>
+<div class="section level3">
+<h3 id="phase-1-response-evaluation-sprints-1-2"><strong>Phase 1: Response Evaluation (Sprints 1-2)</strong><a class="anchor" aria-label="anchor" href="#phase-1-response-evaluation-sprints-1-2"></a></h3>
+<hr><hr><hr><hr></div>
+<div class="section level3">
+<h3 id="phase-2-timeline-integration-sprint-3"><strong>Phase 2: Timeline Integration (Sprint 3)</strong><a class="anchor" aria-label="anchor" href="#phase-2-timeline-integration-sprint-3"></a></h3>
+<hr><hr><div class="section level4">
+<h4 id="m-cohort-summary-statistics"><strong>[M] Cohort Summary Statistics</strong><a class="anchor" aria-label="anchor" href="#m-cohort-summary-statistics"></a></h4>
+<p><em>Descriptive metrics from response data</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Same as swimmer/waterfall data</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co"># Summaries computed automatically</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Median time on treatment (with IQR, range)</li>
+<li>Treatment discontinuation reasons (proportion table)</li>
+<li>Dose reduction statistics:
+<ul><li>Percentage with any dose reduction</li>
+<li>Number of dose reductions per patient</li>
+<li>Reasons for dose reduction</li>
+</ul></li>
+<li>Landmark/milestone analyses:
+<ul><li>% alive at 6, 12, 24 months</li>
+<li>% progression-free at 6, 12, 24 months</li>
+</ul></li>
+<li>Duration of response:
+<ul><li>Among responders (CR + PR), median DOR</li>
+</ul></li>
+<li>R packages: Standard R summarization</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Summary statistics table</li>
+<li>Milestone survival table</li>
+<li>DOR forest plot (by subgroup)</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-3-biomarker-heterogeneity-sprint-4"><strong>Phase 3: Biomarker Heterogeneity (Sprint 4)</strong><a class="anchor" aria-label="anchor" href="#phase-3-biomarker-heterogeneity-sprint-4"></a></h3>
+<div class="section level4">
+<h4 id="m-spatial-heterogeneity-metrics"><strong>[M] Spatial Heterogeneity Metrics</strong><a class="anchor" aria-label="anchor" href="#m-spatial-heterogeneity-metrics"></a></h4>
+<p><em>Intratumoral IHC variation</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Long format: multiple regions per patient</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">patient_id</span><span class="kw">:</span><span class="at"> Identifier</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">region_id</span><span class="kw">:</span><span class="at"> Identifier (e.g., core1, core2, periphery)</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">biomarker_score</span><span class="kw">:</span><span class="at"> Continuous (e.g., H-score, % positivity)</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">x_coord</span><span class="kw">:</span><span class="at"> Continuous (spatial x coordinate)</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">y_coord</span><span class="kw">:</span><span class="at"> Continuous (spatial y coordinate)</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">region_type</span><span class="kw">:</span><span class="at"> Nominal factor (core, periphery, invasive front)</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="fu">Expected Data Format (one row per region per patient)</span><span class="kw">:</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="at">| patient_id | region_id | x_coord | y_coord | Ki67_score | ER_score |</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="at">|------------|-----------|---------|---------|------------|----------|</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="at">| 001        | core_1    | 10      | 20      | 25         | 80       |</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="at">| 001        | core_2    | 45      | 30      | 30         | 85       |</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="at">| 001        | periphery | 80      | 50      | 15         | 90       |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Spatial autocorrelation:
+<ul><li>
+<strong>Moran’s I</strong>: Global spatial autocorrelation (positive/negative/random)</li>
+<li>
+<strong>Geary’s C</strong>: Local spatial autocorrelation</li>
+<li>Requires x/y coordinates</li>
+</ul></li>
+<li>Intratumoral heterogeneity indices:
+<ul><li>Coefficient of variation (CV) across regions</li>
+<li>Range (max - min)</li>
+<li>Shannon entropy</li>
+</ul></li>
+<li>H-score variance analysis:
+<ul><li>Between-patient vs within-patient variance</li>
+<li>ICC for region-level scores</li>
+</ul></li>
+<li>Visualization:
+<ul><li>Spatial heatmap (if coordinates available)</li>
+<li>Region-level boxplots per patient</li>
+</ul></li>
+<li>R packages: <code>spdep</code>, <code>spatstat</code>, custom functions</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Heterogeneity metrics table (per patient)</li>
+<li>Moran’s I statistic with p-value</li>
+<li>Spatial heatmap</li>
+<li>Variance components table</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="m-ihc-qc-panels"><strong>[M] IHC QC Panels</strong><a class="anchor" aria-label="anchor" href="#m-ihc-qc-panels"></a></h4>
+<p><em>Quality control for IHC scoring</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Inter-rater reliability</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">specimen_id</span><span class="kw">:</span><span class="at"> Identifier</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">rater1_score</span><span class="kw">:</span><span class="at"> Continuous (scorer 1)</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">rater2_score</span><span class="kw">:</span><span class="at"> Continuous (scorer 2)</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co"># Batch effects</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">specimen_id</span><span class="kw">:</span><span class="at"> Identifier</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">batch</span><span class="kw">:</span><span class="at"> Nominal factor (staining batch or date)</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">biomarker_score</span><span class="kw">:</span><span class="at"> Continuous</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co"># Control tissue performance</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">run_date</span><span class="kw">:</span><span class="at"> Date or nominal factor</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">control_type</span><span class="kw">:</span><span class="at"> Nominal factor (positive, negative)</span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> Nominal factor (positive, negative)</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">observed_result</span><span class="kw">:</span><span class="at"> Nominal factor (positive, negative)</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">intensity_score</span><span class="kw">:</span><span class="at"> Continuous (optional)</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="fu">Expected Data Format (inter-rater)</span><span class="kw">:</span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="at">| specimen_id | rater1_Ki67 | rater2_Ki67 | rater1_ER | rater2_ER |</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="at">|-------------|-------------|-------------|-----------|-----------|</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="at">| S001        | 25          | 28          | 80        | 85        |</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="at">| S002        | 10          | 12          | 90        | 88        |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>
+<strong>Bland-Altman plots</strong>:
+<ul><li>Difference vs mean plots for scorer agreement</li>
+<li>Limits of agreement (±1.96 SD)</li>
+<li>Bias detection (systematic over/underscoring)</li>
+</ul></li>
+<li>
+<strong>Intraclass correlation coefficient (ICC)</strong>:
+<ul><li>ICC(2,1) for absolute agreement</li>
+<li>ICC(3,1) for consistency</li>
+<li>95% confidence intervals</li>
+</ul></li>
+<li>
+<strong>Batch effect visualization</strong>:
+<ul><li>Boxplot of scores by batch</li>
+<li>Linear regression: score ~ batch</li>
+<li>Levene’s test for variance homogeneity</li>
+</ul></li>
+<li>
+<strong>Control tissue QC</strong>:
+<ul><li>Run chart of control performance over time</li>
+<li>Failure rate (expected vs observed mismatch)</li>
+<li>Alert when control fails</li>
+</ul></li>
+<li>R packages: <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC()</a></code>, <code>BlandAltmanLeh</code>, <code>ggplot2</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Bland-Altman plot</li>
+<li>ICC table</li>
+<li>Batch effect plot with p-value</li>
+<li>Control performance timeline</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-4-meta-analysis-enhancements-sprint-5"><strong>Phase 4: Meta-Analysis Enhancements (Sprint 5)</strong><a class="anchor" aria-label="anchor" href="#phase-4-meta-analysis-enhancements-sprint-5"></a></h3>
+<div class="section level4">
+<h4 id="m-dta-meta-analysis-diagnostics"><strong>[M] DTA Meta-Analysis Diagnostics</strong><a class="anchor" aria-label="anchor" href="#m-dta-meta-analysis-diagnostics"></a></h4>
+<p><em>Advanced diagnostic test accuracy meta-analysis</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">study_id</span><span class="kw">:</span><span class="at"> Nominal factor (study identifier)</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">true_positive</span><span class="kw">:</span><span class="at"> Numeric (TP count)</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">false_positive</span><span class="kw">:</span><span class="at"> Numeric (FP count)</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">true_negative</span><span class="kw">:</span><span class="at"> Numeric (TN count)</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">false_negative</span><span class="kw">:</span><span class="at"> Numeric (FN count)</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">bias_domain</span><span class="kw">:</span><span class="at"> Nominal factor (QUADAS-2 domains)</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">bias_level</span><span class="kw">:</span><span class="at"> Nominal factor (low, high, unclear)</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">subgroup</span><span class="kw">:</span><span class="at"> Nominal factor (for meta-regression)</span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="fu">Expected Data Format (one row per study)</span><span class="kw">:</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="at">| study_id | TP | FP | TN | FN | bias_patient_selection | bias_index_test |</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="at">|----------|----|----|----|----|------------------------|-----------------|</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="at">| Study_A  | 45 | 10 | 90 | 5  | low                    | low             |</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="at">| Study_B  | 30 | 15 | 75 | 10 | high                   | unclear         |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>
+<strong>Influence diagnostics</strong>:
+<ul><li>Leave-one-out analysis (rerun meta-analysis excluding each study)</li>
+<li>Cook’s distance for influential studies</li>
+<li>DFBETAs for each parameter</li>
+</ul></li>
+<li>
+<strong>GOSH plots</strong> (Graphical Display of Study Heterogeneity):
+<ul><li>Scatterplot of all possible meta-analysis subsets</li>
+<li>Outlier detection via clustering</li>
+</ul></li>
+<li>
+<strong>Publication bias</strong>:
+<ul><li>Deeks’ asymmetry test (for DTA)</li>
+<li>Funnel plot with regression line</li>
+<li>Egger’s test adaptation for DTA</li>
+</ul></li>
+<li>
+<strong>Subgroup analysis</strong>:
+<ul><li>Forest plots by QUADAS-2 risk-of-bias domain</li>
+<li>Meta-regression on bias domains</li>
+<li>Sensitivity analysis excluding high-risk studies</li>
+</ul></li>
+<li>R packages: <code>meta</code>, <code>mada</code>, <code>diagmeta</code>, <code>dmetatools</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Influence plot (study ID vs Cook’s distance)</li>
+<li>GOSH plot</li>
+<li>Deeks’ funnel plot with p-value</li>
+<li>Subgroup forest plot by bias domain</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-systematic-review-tools"><strong>[L] Systematic Review Tools</strong><a class="anchor" aria-label="anchor" href="#l-systematic-review-tools"></a></h4>
+<p><em>PRISMA-DTA and QUADAS visualization</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># PRISMA flow diagram</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">Required Variables (manual input)</span><span class="kw">:</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">stage</span><span class="kw">:</span><span class="at"> Nominal factor (identification, screening, eligibility, included)</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">count</span><span class="kw">:</span><span class="at"> Numeric (number of records at each stage)</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">exclusion_reason</span><span class="kw">:</span><span class="at"> Nominal factor (for excluded studies)</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co"># QUADAS-2</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">study_id</span><span class="kw">:</span><span class="at"> Nominal factor</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">domain</span><span class="kw">:</span><span class="at"> Nominal factor (patient selection, index test, reference standard, flow/timing)</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">risk_of_bias</span><span class="kw">:</span><span class="at"> Nominal factor (low, high, unclear)</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">applicability_concern</span><span class="kw">:</span><span class="at"> Nominal factor (low, high, unclear)</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="fu">Expected Data Format (QUADAS-2, one row per study per domain)</span><span class="kw">:</span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a><span class="at">| study_id | domain          | risk_of_bias | applicability |</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="at">|----------|-----------------|--------------|---------------|</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="at">| Study_A  | patient_selection | low        | low           |</span></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="at">| Study_A  | index_test      | low          | high          |</span></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="at">| Study_B  | patient_selection | high       | low           |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>
+<strong>PRISMA-DTA flow diagram</strong>:
+<ul><li>Automated diagram generation</li>
+<li>Box counts from user input</li>
+<li>Export as editable diagram</li>
+</ul></li>
+<li>
+<strong>QUADAS-2/QUADAS-C visualization</strong>:
+<ul><li>Risk-of-bias summary plot (traffic light plot)</li>
+<li>Domain-level bar charts (% low/high/unclear)</li>
+<li>Study-level table</li>
+</ul></li>
+<li>R packages: <code>PRISMAstatement</code>, <code>robvis</code>, custom ggplot</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>PRISMA flowchart (PNG, PDF)</li>
+<li>QUADAS-2 traffic light plot</li>
+<li>Bias summary table</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-5-genomic-visualization-sprint-6"><strong>Phase 5: Genomic Visualization (Sprint 6)</strong><a class="anchor" aria-label="anchor" href="#phase-5-genomic-visualization-sprint-6"></a></h3>
+<div class="section level4">
+<h4 id="m-clinical-heatmap-analysis"><strong>[M] Clinical Heatmap Analysis</strong><a class="anchor" aria-label="anchor" href="#m-clinical-heatmap-analysis"></a></h4>
+<p><em>ComplexHeatmap-style jamovi module</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Wide format: patients × biomarkers/genes</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">patient_id</span><span class="kw">:</span><span class="at"> Identifier (row names)</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">biomarker_vars</span><span class="kw">:</span><span class="at"> Multiple continuous or categorical variables (heatmap body)</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">annotation_vars</span><span class="kw">:</span><span class="at"> Categorical variables for side annotations (age group, stage, etc.)</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">outcome</span><span class="kw">:</span><span class="at"> Binary or categorical (for color annotation)</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="fu">Expected Data Format (wide format)</span><span class="kw">:</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="at">| patient_id | Gene_A | Gene_B | Gene_C | Age_Group | Stage | Outcome |</span></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="at">|------------|--------|--------|--------|-----------|-------|---------|</span></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="at">| P001       | 2.5    | 1.2    | 0.8    | &lt;50       | III   | CR      |</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a><span class="at">| P002       | 1.8    | 3.4    | 1.5    | &gt;=50      | IV    | PD      |</span></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="at">| P003       | 0.5    | 0.9    | 2.1    | &lt;50       | II    | PR      |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Heatmap body:
+<ul><li>Continuous data: Color gradient (red-white-blue, viridis, etc.)</li>
+<li>Categorical data: Discrete colors</li>
+</ul></li>
+<li>Row/column clustering:
+<ul><li>Hierarchical clustering (complete, average, ward.D2 linkage)</li>
+<li>Distance metrics: Euclidean, correlation, Manhattan</li>
+<li>Dendrogram display</li>
+</ul></li>
+<li>Side annotations:
+<ul><li>Top/bottom/left/right annotations</li>
+<li>Clinical variables (age, stage, treatment)</li>
+<li>Outcome status</li>
+<li>Color-coded legends</li>
+</ul></li>
+<li>Export:
+<ul><li>High-resolution PNG, PDF, SVG</li>
+<li>Journal-ready dimensions</li>
+</ul></li>
+<li>R packages: Build on existing vignette, use <code>ComplexHeatmap</code>, <code>pheatmap</code>, or <code>heatmaply</code>
+</li>
+<li>Files: Create <code>/R/clinicalheatmap.b.R</code> (if not exists), update jamovi YAML</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Publication-ready heatmap</li>
+<li>Clustering dendrogram</li>
+<li>Legend for annotations</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-oncoplotmutational-landscape"><strong>[L] Oncoplot/Mutational Landscape</strong><a class="anchor" aria-label="anchor" href="#l-oncoplotmutational-landscape"></a></h4>
+<p><em>Genomic alteration visualization</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Long format: one row per alteration per patient</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">Required Variables</span><span class="kw">:</span></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">patient_id</span><span class="kw">:</span><span class="at"> Identifier</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">gene</span><span class="kw">:</span><span class="at"> Nominal factor (gene name)</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">alteration_type</span><span class="kw">:</span><span class="at"> Nominal factor (mutation, amplification, deletion, fusion)</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="fu">Optional Variables</span><span class="kw">:</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">variant_classification</span><span class="kw">:</span><span class="at"> Nominal factor (missense, nonsense, frameshift, etc.)</span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">vaf</span><span class="kw">:</span><span class="at"> Continuous (variant allele frequency, 0-1)</span></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">tmb</span><span class="kw">:</span><span class="at"> Continuous (tumor mutational burden, per patient)</span></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a><span class="fu">Expected Data Format (long format)</span><span class="kw">:</span></span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a><span class="at">| patient_id | gene  | alteration_type | variant_class | vaf  | tmb |</span></span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a><span class="at">|------------|-------|-----------------|---------------|------|-----|</span></span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a><span class="at">| P001       | TP53  | mutation        | missense      | 0.45 | 12  |</span></span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a><span class="at">| P001       | KRAS  | mutation        | missense      | 0.38 | 12  |</span></span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a><span class="at">| P002       | EGFR  | amplification   | NA            | NA   | 5   |</span></span>
+<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a><span class="at">| P002       | BRCA1 | deletion        | NA            | NA   | 5   |</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Oncoplot layout:
+<ul><li>Rows = genes, Columns = patients</li>
+<li>Alteration types color-coded</li>
+<li>Gene alteration frequency (% of patients)</li>
+<li>Patient alteration count (number of genes altered)</li>
+</ul></li>
+<li>Co-occurrence/mutual exclusivity:
+<ul><li>Fisher’s exact test for gene pairs</li>
+<li>Significant pairs highlighted</li>
+</ul></li>
+<li>Top bar annotations:
+<ul><li>TMB per patient</li>
+<li>Clinical variables (stage, outcome)</li>
+</ul></li>
+<li>Copy-number tracks:
+<ul><li>Amplification/deletion frequency</li>
+</ul></li>
+<li>R packages: <code>maftools</code>, <code>GenVisR</code>, custom ggplot</li>
+<li>Files: Create <code>/R/oncoplot.b.R</code>, jamovi YAML files</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>Oncoplot (genes × patients)</li>
+<li>Co-occurrence heatmap</li>
+<li>Gene alteration frequency bar chart</li>
+<li>TMB distribution plot</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="phase-6-data--reporting-sprint-7"><strong>Phase 6: Data &amp; Reporting (Sprint 7)</strong><a class="anchor" aria-label="anchor" href="#phase-6-data--reporting-sprint-7"></a></h3>
+<div class="section level4">
+<h4 id="l-clinical-trial-data-standards"><strong>[L] Clinical Trial Data Standards</strong><a class="anchor" aria-label="anchor" href="#l-clinical-trial-data-standards"></a></h4>
+<p><em>CDISC/SDTM compliance</em></p>
+<p><strong>Jamovi Data Structure</strong>:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># Import SDTM-formatted data</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="co"># Automatic mapping of SDTM domains to jamovi analyses</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="fu">Required Variables (RS domain - tumor response)</span><span class="kw">:</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">USUBJID</span><span class="kw">:</span><span class="at"> Subject ID</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">RSSTRESC</span><span class="kw">:</span><span class="at"> Response (CR, PR, SD, PD)</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">RSDTC</span><span class="kw">:</span><span class="at"> Assessment date</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">RSTESTCD</span><span class="kw">:</span><span class="at"> Test code (OVRLRESP, BESRSPI, etc.)</span></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a><span class="fu">Required Variables (TR domain - tumor results)</span><span class="kw">:</span></span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">USUBJID</span><span class="kw">:</span><span class="at"> Subject ID</span></span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">TRLINKID</span><span class="kw">:</span><span class="at"> Lesion link ID</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">TRSTRESC</span><span class="kw">:</span><span class="at"> Result (diameter in mm)</span></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">TRDTC</span><span class="kw">:</span><span class="at"> Assessment date</span></span></code></pre></div>
+<p><strong>Implementation</strong>:</p>
+<ul><li>SDTM domain mappers:
+<ul><li>RS (Response) → waterfall plot data</li>
+<li>TR (Tumor Results) → lesion trajectory data</li>
+<li>TU (Tumor Identification) → lesion inventory</li>
+</ul></li>
+<li>Schema validation:
+<ul><li>Check for required SDTM variables</li>
+<li>Validate controlled terminology</li>
+<li>Flag missing/invalid data</li>
+</ul></li>
+<li>Automatic transformation:
+<ul><li>SDTM → jamovi internal format</li>
+<li>Date parsing (ISO 8601)</li>
+</ul></li>
+<li>Missingness heatmaps:
+<ul><li>Visualize missing data patterns in SDTM domains</li>
+</ul></li>
+<li>R packages: <code>Tplyr</code>, <code>admiral</code>, <code>xportr</code>
+</li>
+</ul><p><strong>Outputs</strong>:</p>
+<ul><li>SDTM compliance report</li>
+<li>Missingness heatmap</li>
+<li>Transformed data for jamovi analyses</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-one-click-reporting"><strong>[L] One-Click Reporting</strong><a class="anchor" aria-label="anchor" href="#l-one-click-reporting"></a></h4>
+<p><em>Bundled figure + table exports</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Export bundles:
+<ul><li>Swimmer plot + summary table → DOCX</li>
+<li>Waterfall plot + response table → DOCX</li>
+<li>DTA meta-analysis → full report with forest plot, SROC, funnel plot</li>
+</ul></li>
+<li>Journal-specific formatting:
+<ul><li>Figure dimensions (single column, double column)</li>
+<li>Font sizes, colors (grayscale for print)</li>
+</ul></li>
+<li>Automated captions:
+<ul><li>Figure legends with method descriptions</li>
+<li>Table footnotes with statistical tests</li>
+</ul></li>
+<li>R packages: <code>officer</code>, <code>flextable</code>, <code>rvg</code>
+</li>
+</ul><p><strong>UI elements</strong>:</p>
+<ul><li>“Export Report” button</li>
+<li>Dropdown: Select journal template</li>
+<li>Checkbox: Include methods section</li>
+</ul><hr></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="hammer_and_wrench-6-cross-module-infrastructure">🛠️ <strong>6. Cross-Module Infrastructure</strong>
+<a class="anchor" aria-label="anchor" href="#hammer_and_wrench-6-cross-module-infrastructure"></a></h2>
+<div class="section level3">
+<h3 id="shared-enhancements-ongoing"><strong>Shared Enhancements (Ongoing)</strong><a class="anchor" aria-label="anchor" href="#shared-enhancements-ongoing"></a></h3>
+<div class="section level4">
+<h4 id="h-consistent-error-handling"><strong>[H] Consistent Error Handling</strong><a class="anchor" aria-label="anchor" href="#h-consistent-error-handling"></a></h4>
+<p><em>Standardized validation and user feedback</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Validation messages:
+<ul><li>Clear, actionable error messages</li>
+<li>Example: “Variable ‘age’ contains non-numeric values. Please recode or exclude.”</li>
+</ul></li>
+<li>Input data validators:
+<ul><li>Check variable types before analysis</li>
+<li>Detect and warn about missing data patterns</li>
+<li>Flag outliers (optional)</li>
+</ul></li>
+<li>User-friendly error reporting:
+<ul><li>HTML-formatted messages (not raw R errors)</li>
+<li>Suggestions for fixing issues</li>
+</ul></li>
+<li>R packages: <code>assertthat</code>, <code>validate</code>, custom validators</li>
+</ul><p><strong>Example validation</strong>:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">time_var</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Time variable contains missing values. Please exclude or impute before analysis."</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<hr></div>
+<div class="section level4">
+<h4 id="m-performance-optimization"><strong>[M] Performance Optimization</strong><a class="anchor" aria-label="anchor" href="#m-performance-optimization"></a></h4>
+<p><em>Responsive analyses for large datasets</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Checkpoint system:
+<ul><li>Use <code>private$.checkpoint()</code> before expensive operations</li>
+<li>Allow users to cancel long-running analyses</li>
+</ul></li>
+<li>Progress indicators:
+<ul><li>Progress bars for bootstrap, permutation tests, simulation</li>
+<li>Estimated time remaining</li>
+</ul></li>
+<li>Cancellation support:
+<ul><li>“Cancel” button during execution</li>
+<li>Graceful cleanup after cancellation</li>
+</ul></li>
+<li>R packages: <code>progressr</code>, <code>future</code>, <code>furrr</code> (for parallelization)</li>
+</ul><p><strong>UI elements</strong>:</p>
+<ul><li>Progress bar widget (built-in to jamovi)</li>
+<li>Status messages (“Processing 1000 bootstrap iterations…”)</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="m-documentation-harmonization"><strong>[M] Documentation Harmonization</strong><a class="anchor" aria-label="anchor" href="#m-documentation-harmonization"></a></h4>
+<p><em>Consistent vignette structure across modules</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Vignette template:
+<ul><li>Introduction</li>
+<li>Data structure requirements</li>
+<li>Step-by-step tutorial with screenshots</li>
+<li>Interpretation guide</li>
+<li>References</li>
+</ul></li>
+<li>Cross-module examples:
+<ul><li>Workflow: Descriptives → Survival → Decision Analysis</li>
+<li>Example: Create Table 1 → KM curves → Cost-effectiveness</li>
+</ul></li>
+<li>Video tutorials:
+<ul><li>Screen recordings for complex analyses</li>
+<li>Hosted on YouTube or module website</li>
+</ul></li>
+<li>R packages: <code>knitr</code>, <code>rmarkdown</code>, <code>pkgdown</code>
+</li>
+</ul><p><strong>Deliverables</strong>:</p>
+<ul><li>Standardized vignette format</li>
+<li>Cross-module workflow vignettes</li>
+<li>Video tutorial series</li>
+</ul><hr></div>
+<div class="section level4">
+<h4 id="l-internationalization"><strong>[L] Internationalization</strong><a class="anchor" aria-label="anchor" href="#l-internationalization"></a></h4>
+<p><em>Multi-language support</em></p>
+<p><strong>Implementation</strong>:</p>
+<ul><li>Translation framework:
+<ul><li>Existing i18n files: <code>inst/i18n/en.json</code>, <code>inst/i18n/tr.json</code>
+</li>
+<li>Expand to additional languages (Spanish, Chinese, French, German)</li>
+</ul></li>
+<li>UI text translation:
+<ul><li>All labels, titles, descriptions in translation files</li>
+<li>Dynamic loading based on user locale</li>
+</ul></li>
+<li>Output translation:
+<ul><li>Table headers, footnotes, interpretation text</li>
+</ul></li>
+<li>R packages: jamovi i18n system</li>
+</ul><p><strong>Files to update</strong>:</p>
+<ul><li>Add <code>inst/i18n/es.json</code>, <code>inst/i18n/zh.json</code>, etc.</li>
+<li>Ensure all new features use translation keys</li>
+</ul><hr></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="date-implementation-timeline">📅 <strong>Implementation Timeline</strong>
+<a class="anchor" aria-label="anchor" href="#date-implementation-timeline"></a></h2>
+<div class="section level3">
+<h3 id="year-1-foundation--high-impact-features"><strong>Year 1: Foundation &amp; High-Impact Features</strong><a class="anchor" aria-label="anchor" href="#year-1-foundation--high-impact-features"></a></h3>
+<div class="section level4">
+<h4 id="q1-months-1-3"><strong>Q1 (Months 1-3)</strong><a class="anchor" aria-label="anchor" href="#q1-months-1-3"></a></h4>
+<ul><li>
+<strong>meddecide</strong>: Decision Curve Analysis, Markov model enhancements</li>
+<li>
+<strong>jSurvival</strong>: Fine-Gray regression (CRR) with CIF plots</li>
+<li>
+<strong>JJStatsPlot</strong>: Critical bug fixes (compressed plots, missing bars)</li>
+<li>
+<strong>Infrastructure</strong>: Consistent error handling framework</li>
+</ul></div>
+<div class="section level4">
+<h4 id="q2-months-4-6"><strong>Q2 (Months 4-6)</strong><a class="anchor" aria-label="anchor" href="#q2-months-4-6"></a></h4>
+<ul><li>
+<strong>meddecide</strong>: Clinical prediction model builder with calibration</li>
+<li>
+<strong>jSurvival</strong>: Time-dependent calibration &amp; validation dashboards</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Comprehensive effect sizes</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Multiple comparison control (FDR, Bonferroni)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="q3-months-7-9"><strong>Q3 (Months 7-9)</strong><a class="anchor" aria-label="anchor" href="#q3-months-7-9"></a></h4>
+<ul><li>
+<strong>OncoPath</strong>: iRECIST support, multi-lesion RECIST aggregation</li>
+<li>
+<strong>OncoPath</strong>: Survival integration (one-click KM from swimmer plots)</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: One-click export pipelines (DOCX, LaTeX)</li>
+<li>
+<strong>JJStatsPlot</strong>: Enhanced customization (colors, themes, symbols)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="q4-months-10-12"><strong>Q4 (Months 10-12)</strong><a class="anchor" aria-label="anchor" href="#q4-months-10-12"></a></h4>
+<ul><li>
+<strong>meddecide</strong>: Cost-effectiveness analysis basics (ICER, CEAC)</li>
+<li>
+<strong>jSurvival</strong>: Parametric survival models (AFT, Royston-Parmar)</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Biomarker panel dashboard</li>
+<li>
+<strong>Infrastructure</strong>: Performance optimization (progress bars, checkpoints)</li>
+</ul><hr></div>
+</div>
+<div class="section level3">
+<h3 id="year-2-depth--integration"><strong>Year 2: Depth &amp; Integration</strong><a class="anchor" aria-label="anchor" href="#year-2-depth--integration"></a></h3>
+<div class="section level4">
+<h4 id="q1-months-13-15"><strong>Q1 (Months 13-15)</strong><a class="anchor" aria-label="anchor" href="#q1-months-13-15"></a></h4>
+<ul><li>
+<strong>jSurvival</strong>: Recurrent event models (AG, PWP), frailty models</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Multiple imputation support</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Survey/weighted data analysis</li>
+<li>
+<strong>Documentation</strong>: Cross-module workflow vignettes</li>
+</ul></div>
+<div class="section level4">
+<h4 id="q2-months-16-18"><strong>Q2 (Months 16-18)</strong><a class="anchor" aria-label="anchor" href="#q2-months-16-18"></a></h4>
+<ul><li>
+<strong>OncoPath</strong>: DTA meta-analysis diagnostics (GOSH plots, influence)</li>
+<li>
+<strong>OncoPath</strong>: QUADAS-2 visualization, PRISMA-DTA diagrams</li>
+<li>
+<strong>JJStatsPlot</strong>: Model coefficient plots, meta-analysis forest plots</li>
+<li>
+<strong>JJStatsPlot</strong>: Plot combining &amp; layout (patchwork)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="q3-months-19-21"><strong>Q3 (Months 19-21)</strong><a class="anchor" aria-label="anchor" href="#q3-months-19-21"></a></h4>
+<ul><li>
+<strong>jSurvival</strong>: Multi-state models, cure models</li>
+<li>
+<strong>OncoPath</strong>: Clinical heatmap analysis (ComplexHeatmap-style)</li>
+<li>
+<strong>OncoPath</strong>: Spatial heterogeneity metrics (Moran’s I, CV)</li>
+<li>
+<strong>meddecide</strong>: Time-to-event decision analysis (survival DCA)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="q4-months-22-24"><strong>Q4 (Months 22-24)</strong><a class="anchor" aria-label="anchor" href="#q4-months-22-24"></a></h4>
+<ul><li>
+<strong>OncoPath</strong>: Oncoplot/mutational landscape</li>
+<li>
+<strong>ClinicoPathDescriptives</strong>: Advanced categorical plots (Marimekko, risk-difference)</li>
+<li>
+<strong>Cross-module</strong>: Inter-module handoffs (send to jSurvival, etc.)</li>
+<li>
+<strong>Cross-module</strong>: Audit trail &amp; reproducibility (R code export, session info)</li>
+<li>
+<strong>Infrastructure</strong>: Internationalization expansion (ES, ZH, FR, DE)</li>
+</ul><hr></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="dart-success-metrics">🎯 <strong>Success Metrics</strong>
+<a class="anchor" aria-label="anchor" href="#dart-success-metrics"></a></h2>
+<div class="section level3">
+<h3 id="user-adoption"><strong>User Adoption</strong><a class="anchor" aria-label="anchor" href="#user-adoption"></a></h3>
+<ul><li>Downloads from jamovi library: Target 10k+ downloads/year by Year 2</li>
+<li>Forum activity: Active user questions and discussions</li>
+<li>Citations: Peer-reviewed publications using ClinicoPath modules</li>
+</ul></div>
+<div class="section level3">
+<h3 id="feature-coverage"><strong>Feature Coverage</strong><a class="anchor" aria-label="anchor" href="#feature-coverage"></a></h3>
+<ul><li>% of requested features implemented: &gt;80% of high-priority items by Year 2</li>
+<li>Module completeness: All modules reach parity with standalone R packages</li>
+</ul></div>
+<div class="section level3">
+<h3 id="code-quality"><strong>Code Quality</strong><a class="anchor" aria-label="anchor" href="#code-quality"></a></h3>
+<ul><li>Test coverage: &gt;80% for core functions</li>
+<li>No critical bugs: Zero P1 bugs in released versions</li>
+<li>Passing CI/CD: All checks pass on main branch</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation"><strong>Documentation</strong><a class="anchor" aria-label="anchor" href="#documentation"></a></h3>
+<ul><li>All new features with vignettes: 100% coverage</li>
+<li>Example datasets: At least 2 per module</li>
+<li>Video tutorials: 1 per major feature</li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance"><strong>Performance</strong><a class="anchor" aria-label="anchor" href="#performance"></a></h3>
+<ul><li>Analysis speed: &lt;2s for typical datasets (n=500)</li>
+<li>Progress bars: Displayed for all operations &gt;5s</li>
+<li>Responsiveness: No UI freezing on datasets up to 100k rows</li>
+</ul></div>
+<div class="section level3">
+<h3 id="interoperability"><strong>Interoperability</strong><a class="anchor" aria-label="anchor" href="#interoperability"></a></h3>
+<ul><li>Seamless data flow: One-click variable transfer between modules</li>
+<li>CDISC compliance: Full support for SDTM oncology domains</li>
+</ul><hr></div>
+</div>
+<div class="section level2">
+<h2 id="pencil-development-guidelines">📝 <strong>Development Guidelines</strong>
+<a class="anchor" aria-label="anchor" href="#pencil-development-guidelines"></a></h2>
+<div class="section level3">
+<h3 id="jamovi-data-structure-principles"><strong>Jamovi Data Structure Principles</strong><a class="anchor" aria-label="anchor" href="#jamovi-data-structure-principles"></a></h3>
+<ol style="list-style-type: decimal"><li>
+<strong>Rectangular data only</strong>: All analyses work with single data frames (rows = cases, columns = variables)</li>
+<li>
+<strong>Variable types matter</strong>:
+<ul><li>Continuous: Numeric measurements (age, biomarker levels)</li>
+<li>Nominal: Unordered categories (treatment arm, tumor type)</li>
+<li>Ordinal: Ordered categories (stage I/II/III/IV, grade)</li>
+</ul></li>
+<li>
+<strong>No nested data</strong>: For longitudinal/clustered data, use long format (one row per observation)</li>
+<li>
+<strong>Missing data</strong>: Use NA, not special codes (99, -999)</li>
+<li>
+<strong>Date handling</strong>: Dates should be numeric (days from baseline) or properly parsed Date objects</li>
+</ol></div>
+<div class="section level3">
+<h3 id="implementation-checklist-for-new-features"><strong>Implementation Checklist for New Features</strong><a class="anchor" aria-label="anchor" href="#implementation-checklist-for-new-features"></a></h3>
+<p>For each new feature:</p>
+<ul class="task-list"><li><label><input type="checkbox"><strong>Data structure</strong>: Document required variables and expected format</label></li>
+<li><label><input type="checkbox"><strong><code>.a.yaml</code></strong>: Define options, specify variable types (Data, Variable, Variables)</label></li>
+<li><label><input type="checkbox"><strong><code>.u.yaml</code></strong>: Create user interface (dropdowns, checkboxes, sliders)</label></li>
+<li><label><input type="checkbox"><strong><code>.r.yaml</code></strong>: Define output structure (tables, images, HTML)</label></li>
+<li><label><input type="checkbox"><strong><code>.b.R</code></strong>: Implement analysis logic in <code>.run()</code> and <code>.init()</code></label></li>
+<li><label><input type="checkbox"><strong>Validation</strong>: Check variable types, detect missing data, validate inputs</label></li>
+<li><label><input type="checkbox"><strong>Error handling</strong>: Clear, actionable error messages</label></li>
+<li><label><input type="checkbox"><strong>Example data</strong>: Create sample dataset in <code>data/</code> directory</label></li>
+<li><label><input type="checkbox"><strong>Vignette</strong>: Write tutorial with step-by-step instructions</label></li>
+<li><label><input type="checkbox"><strong>Tests</strong>: Unit tests for core functions (if applicable)</label></li>
+<li><label><input type="checkbox"><strong>i18n</strong>: Add translation keys to <code>inst/i18n/en.json</code></label></li>
+</ul></div>
+<div class="section level3">
+<h3 id="priority-decision-framework"><strong>Priority Decision Framework</strong><a class="anchor" aria-label="anchor" href="#priority-decision-framework"></a></h3>
+<p>When prioritizing features, consider:</p>
+<ol style="list-style-type: decimal"><li>
+<strong>Clinical impact</strong>: Does this address a real-world clinical research need?</li>
+<li>
+<strong>User demand</strong>: Have users requested this in forums/issues?</li>
+<li>
+<strong>Feasibility</strong>: Can this be implemented within jamovi’s tabular structure?</li>
+<li>
+<strong>Dependencies</strong>: Does this require other features to be built first?</li>
+<li>
+<strong>Competitive advantage</strong>: Do other jamovi modules lack this feature?</li>
+</ol></div>
+<div class="section level3">
+<h3 id="quality-standards"><strong>Quality Standards</strong><a class="anchor" aria-label="anchor" href="#quality-standards"></a></h3>
+<ul><li>
+<strong>No errors with <code><a href="https://rdrr.io/pkg/jmvtools/man/check.html" class="external-link">jmvtools::check()</a></code></strong>: All modules must pass jamovi validation</li>
+<li>
+<strong>No errors with <code><a href="https://rdrr.io/pkg/jmvtools/man/prepare.html" class="external-link">jmvtools::prepare()</a></code></strong>: Module must compile without errors</li>
+<li>
+<strong>Documentation</strong>: README.Rmd updated, NEWS.md entries for each version</li>
+<li>
+<strong>Reproducibility</strong>: All analyses reproducible with provided example data</li>
+<li>
+<strong>Performance</strong>: Use <code>private$.checkpoint()</code> before operations &gt;5s</li>
+</ul><hr></div>
+</div>
+<div class="section level2">
+<h2 id="link-references--resources">🔗 <strong>References &amp; Resources</strong>
+<a class="anchor" aria-label="anchor" href="#link-references--resources"></a></h2>
+<div class="section level3">
+<h3 id="jamovi-development"><strong>Jamovi Development</strong><a class="anchor" aria-label="anchor" href="#jamovi-development"></a></h3>
+<ul><li>Official documentation: <code>./vignettes/dev.jamovi.org-master</code>
+</li>
+<li>R6 class system: <a href="https://r6.r-lib.org/" class="external-link uri">https://r6.r-lib.org/</a>
+</li>
+<li>jmvcore documentation: <a href="https://github.com/jamovi/jmvcore" class="external-link uri">https://github.com/jamovi/jmvcore</a>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="statistical-methods"><strong>Statistical Methods</strong><a class="anchor" aria-label="anchor" href="#statistical-methods"></a></h3>
+<ul><li>
+<strong>Decision Curve Analysis</strong>: Vickers &amp; Elkin (2006) Med Decis Making</li>
+<li>
+<strong>Fine-Gray Regression</strong>: Fine &amp; Gray (1999) JASA</li>
+<li>
+<strong>iRECIST</strong>: Seymour et al. (2017) Lancet Oncol</li>
+<li>
+<strong>TRIPOD</strong>: Collins et al. (2015) BMJ</li>
+<li>
+<strong>QUADAS-2</strong>: Whiting et al. (2011) Ann Intern Med</li>
+</ul></div>
+<div class="section level3">
+<h3 id="r-packages"><strong>R Packages</strong><a class="anchor" aria-label="anchor" href="#r-packages"></a></h3>
+<ul><li>Decision analysis: <code>dcurves</code>, <code>heemod</code>, <code>dampack</code>
+</li>
+<li>Survival: <code>survival</code>, <code>cmprsk</code>, <code>riskRegression</code>, <code>flexsurv</code>
+</li>
+<li>Meta-analysis: <code>meta</code>, <code>mada</code>, <code>diagmeta</code>
+</li>
+<li>Plotting: <code>ggplot2</code>, <code>ggstatsplot</code>, <code>ComplexHeatmap</code>
+</li>
+<li>Export: <code>officer</code>, <code>flextable</code>, <code>gt</code>, <code>gtsummary</code>
+</li>
+</ul><hr></div>
+</div>
+<div class="section level2">
+<h2 id="dart-critical-improvement-areas-2026-q1-q2">🎯 <strong>CRITICAL IMPROVEMENT AREAS (2026 Q1-Q2)</strong>
+<a class="anchor" aria-label="anchor" href="#dart-critical-improvement-areas-2026-q1-q2"></a></h2>
+<div class="section level3">
+<h3 id="priority-1-technical-debt--code-quality"><strong>Priority 1: Technical Debt &amp; Code Quality</strong><a class="anchor" aria-label="anchor" href="#priority-1-technical-debt--code-quality"></a></h3>
+<div class="section level4">
+<h4 id="h-warning-notice-serialization-migration-urgent"><strong>[H] ⚠️ Notice Serialization Migration (URGENT)</strong><a class="anchor" aria-label="anchor" href="#h-warning-notice-serialization-migration-urgent"></a></h4>
+<p><strong>Status:</strong> 34 of 364 files still using deprecated <code>insert(999, Notice)</code> pattern <strong>Impact:</strong> Serialization errors, potential data loss, unreliable notice display <strong>Effort:</strong> 2-3 weeks</p>
+<p><strong>Files requiring conversion (see CLAUDE.md for pattern):</strong></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Identified files with insert(999, issues:</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="ex">-</span> clinicalheatmap.b.R</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="ex">-</span> flexparametric.b.R</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="ex">-</span> greyzoneroc.b.R</span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="ex">-</span> jjcorrmat.b.R</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="ex">-</span> jjpiestats.b.R</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="ex">-</span> jjwithinstats.b.R</span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="ex">-</span> oddsratio.b.R</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="ex">-</span> ordinalroc.b.R</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="ex">-</span> precisionrecall.b.R</span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="ex">-</span> psychopdaROC.b.R</span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="ex">-</span> [24 additional files <span class="at">-</span> run grep to identify]</span></code></pre></div>
+<p><strong>Action items:</strong> - [ ] Complete conversion using waterfall.b.R as reference template - [ ] Add <code>.noticeList</code>, <code>.addNotice()</code>, <code>.renderNotices()</code> helper methods - [ ] Convert Notice objects to HTML output items in .r.yaml - [ ] Test each converted function with jmvtools::prepare() - [ ] Update CLAUDE.md status tracking</p>
+<p><strong>Reference:</strong> <code>docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md</code>, <code>R/waterfall.b.R</code> (complete example)</p>
+<hr></div>
+<div class="section level4">
+<h4 id="h-resolve-todofixme-technical-debt-white_check_mark-resolved">
+<strong>[H] <del>Resolve TODO/FIXME Technical Debt</del></strong> ✅ RESOLVED<a class="anchor" aria-label="anchor" href="#h-resolve-todofixme-technical-debt-white_check_mark-resolved"></a></h4>
+<p><strong>Status:</strong> ✅ Verified 2026-01-04 - No TODO/FIXME/HACK comments found in R/ files <strong>Audit Result:</strong> All files clean, no unresolved technical debt markers</p>
+<p><del><strong>Files identified:</strong></del> <em>All previously listed files have been cleaned or the markers were false positives.</em></p>
+<hr></div>
+<div class="section level4">
+<h4 id="m-automated-testing-infrastructure"><strong>[M] Automated Testing Infrastructure</strong><a class="anchor" aria-label="anchor" href="#m-automated-testing-infrastructure"></a></h4>
+<p><strong>Status:</strong> Test guides exist but limited automated unit tests <strong>Coverage:</strong> Unknown (estimate &lt;20% based on testthat setup) <strong>Effort:</strong> 4-6 weeks ongoing</p>
+<p><strong>Current state:</strong></p>
+<ul><li>❌ Limited automated testthat suite</li>
+<li>❌ No CI/CD test automation</li>
+<li>❌ No coverage reporting</li>
+</ul><p><strong>Recommendations:</strong></p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">Phase 1 (Weeks 1-2)</span><span class="kw">:</span><span class="at"> Core function testing</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Add testthat tests for top 20 most-used functions</span></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">Focus on</span><span class="kw">:</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Input validation (variable types, missing data)</span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Edge cases (empty data, single observation, all NA)</span></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> Output structure (table dimensions, column names)</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">Target</span><span class="kw">:</span><span class="at"> 40% coverage of core modules</span></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a><span class="fu">Phase 2 (Weeks 3-4)</span><span class="kw">:</span><span class="at"> Statistical accuracy validation</span></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Compare outputs to validated R packages (survival, pROC, meta)</span></span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Test against published datasets with known results</span></span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Validate effect sizes, CIs, p-values</span></span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">Target</span><span class="kw">:</span><span class="at"> 100% accuracy for statistical calculations</span></span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a><span class="fu">Phase 3 (Weeks 5-6)</span><span class="kw">:</span><span class="at"> CI/CD integration</span></span>
+<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Set up GitHub Actions workflow</span></span>
+<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Run tests on every PR and merge to main</span></span>
+<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Generate coverage reports (codecov.io)</span></span>
+<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> Block merges if tests fail or coverage drops</span></span></code></pre></div>
+<p><strong>Example test structure:</strong></p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># tests/testthat/test-enhancedROC.R</span></span>
+<span><span class="fu">test_that</span><span class="op">(</span><span class="st">"enhancedROC handles binary outcome correctly"</span>, <span class="op">{</span></span>
+<span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"disease"</span>, <span class="fl">50</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"healthy"</span>, <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    predictor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span>, mean <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50</span>, mean <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/enhancedROC.html">enhancedROC</a></span><span class="op">(</span><span class="va">data</span>, outcome <span class="op">=</span> <span class="va">outcome</span>, predictors <span class="op">=</span> <span class="va">predictor</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">expect_true</span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">auc</span> <span class="op">&gt;</span> <span class="fl">0.5</span><span class="op">)</span>  <span class="co"># Should discriminate</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">rocTable</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_named</span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">rocTable</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"predictor"</span>, <span class="st">"auc"</span>, <span class="st">"ci_lower"</span>, <span class="st">"ci_upper"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Priority test coverage:</strong> 1. enhancedROC - comprehensive ROC analysis 2. survival - Kaplan-Meier and Cox regression 3. decisioncurve - decision curve analysis 4. diagnosticmeta - meta-analysis 5. conttables - contingency tables with effect sizes</p>
+<hr></div>
+</div>
+<div class="section level3">
+<h3 id="priority-2-documentation--user-experience"><strong>Priority 2: Documentation &amp; User Experience</strong><a class="anchor" aria-label="anchor" href="#priority-2-documentation--user-experience"></a></h3>
+<div class="section level4">
+<h4 id="h-warning-severe-documentation-gap"><strong>[H] ⚠️ Severe Documentation Gap</strong><a class="anchor" aria-label="anchor" href="#h-warning-severe-documentation-gap"></a></h4>
+<p><strong>Status:</strong> Only 6 vignettes for 364 analysis functions (1.6% coverage!) <strong>Impact:</strong> Users cannot learn/use 98%+ of module features <strong>Effort:</strong> 8-12 weeks (phased approach required)</p>
+<p><strong>Current vignette inventory:</strong></p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Existing (6 total):</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="ex">-</span> General vignettes <span class="er">(</span><span class="ex">domain-based</span> distribution working well<span class="kw">)</span></span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="ex">-</span> Module-specific guides scattered across vignettes/</span></code></pre></div>
+<p><strong>Phased documentation plan:</strong></p>
+<p><strong>Phase 1 - High-Impact Quick Wins (Weeks 1-2):</strong> Create comprehensive guides for top 10 most-used functions:</p>
+<pre><code>Priority vignettes needed:
+1. enhancedROC-comprehensive.qmd - Diagnostic ROC analysis
+2. survival-comprehensive.qmd - Kaplan-Meier &amp; Cox regression
+3. decisioncurve-comprehensive.qmd - Clinical decision analysis
+4. crosstable-comprehensive.qmd - Table One generation
+5. conttables-comprehensive.qmd - Contingency tables
+6. diagnosticmeta-comprehensive.qmd - Meta-analysis
+7. waterfall-comprehensive.qmd - Treatment response plots
+8. swimmer-comprehensive.qmd - Patient timelines
+9. oddsratio-comprehensive.qmd - Logistic regression
+10. agreement-comprehensive.qmd - Inter-rater reliability</code></pre>
+<p><strong>Phase 2 - Modular Function Groups (Weeks 3-6):</strong></p>
+<pre><code>Survival module cluster (jsurvival-XX-*.qmd):
+- jsurvival-01-kaplan-meier.qmd
+- jsurvival-02-cox-regression.qmd
+- jsurvival-03-competing-risks.qmd
+- jsurvival-04-time-dependent-covariates.qmd
+
+ROC/Diagnostic cluster (meddecide-XX-*.qmd):
+- meddecide-01-basic-roc.qmd
+- meddecide-02-comparative-roc.qmd
+- meddecide-03-calibration.qmd
+- meddecide-04-decision-curves.qmd
+
+[Repeat for each of 5 main modules]</code></pre>
+<p><strong>Phase 3 - Workflow Tutorials (Weeks 7-8):</strong></p>
+<pre><code>End-to-end clinical research workflows:
+- workflow-01-biomarker-validation.qmd
+  (Descriptives → ROC → Decision curve → Publication export)
+
+- workflow-02-survival-analysis.qmd
+  (KM curves → Cox regression → Validation → Reporting)
+
+- workflow-03-diagnostic-meta-analysis.qmd
+  (Data preparation → Meta-analysis → Publication bias → GRADE)</code></pre>
+<p><strong>Vignette template structure:</strong></p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Function Name - Comprehensive Guide"</span></span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a><span class="an">author:</span><span class="co"> "ClinicoPath Team"</span></span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a><span class="an">output:</span><span class="co"> rmarkdown::html_vignette</span></span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a><span class="an">vignette:</span><span class="co"> &gt;</span></span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a><span class="co">  %\VignetteIndexEntry{Function Name - Comprehensive Guide}</span></span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a><span class="co">  %\VignetteEngine{knitr::rmarkdown}</span></span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a><span class="co">  %\VignetteEncoding{UTF-8}</span></span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a></span>
+<span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a><span class="fu">## Clinical Use Case</span></span>
+<span id="cb29-13"><a href="#cb29-13" tabindex="-1"></a><span class="co">[</span><span class="ot">Why would a pathologist/clinician use this?</span><span class="co">]</span></span>
+<span id="cb29-14"><a href="#cb29-14" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" tabindex="-1"></a><span class="fu">## Data Requirements</span></span>
+<span id="cb29-16"><a href="#cb29-16" tabindex="-1"></a><span class="co">[</span><span class="ot">Required variables, format, sample size considerations</span><span class="co">]</span></span>
+<span id="cb29-17"><a href="#cb29-17" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" tabindex="-1"></a><span class="fu">## Step-by-Step Tutorial</span></span>
+<span id="cb29-19"><a href="#cb29-19" tabindex="-1"></a><span class="co">[</span><span class="ot">Numbered steps with screenshots</span><span class="co">]</span></span>
+<span id="cb29-20"><a href="#cb29-20" tabindex="-1"></a></span>
+<span id="cb29-21"><a href="#cb29-21" tabindex="-1"></a><span class="fu">## Interpreting Results</span></span>
+<span id="cb29-22"><a href="#cb29-22" tabindex="-1"></a><span class="co">[</span><span class="ot">How to read each output table/plot</span><span class="co">]</span></span>
+<span id="cb29-23"><a href="#cb29-23" tabindex="-1"></a></span>
+<span id="cb29-24"><a href="#cb29-24" tabindex="-1"></a><span class="fu">## Clinical Examples</span></span>
+<span id="cb29-25"><a href="#cb29-25" tabindex="-1"></a><span class="co">[</span><span class="ot">2-3 real-world scenarios with interpretation</span><span class="co">]</span></span>
+<span id="cb29-26"><a href="#cb29-26" tabindex="-1"></a></span>
+<span id="cb29-27"><a href="#cb29-27" tabindex="-1"></a><span class="fu">## Statistical Details</span></span>
+<span id="cb29-28"><a href="#cb29-28" tabindex="-1"></a><span class="co">[</span><span class="ot">Methods, assumptions, limitations</span><span class="co">]</span></span>
+<span id="cb29-29"><a href="#cb29-29" tabindex="-1"></a></span>
+<span id="cb29-30"><a href="#cb29-30" tabindex="-1"></a><span class="fu">## References</span></span>
+<span id="cb29-31"><a href="#cb29-31" tabindex="-1"></a><span class="co">[</span><span class="ot">Key papers, guidelines</span><span class="co">]</span></span></code></pre></div>
+<p><strong>Automation opportunities:</strong> - Generate skeleton vignettes from .a.yaml analysis definitions - Auto-extract option descriptions from YAML to reduce manual writing - Use AI to draft initial content, human review for accuracy</p>
+<hr></div>
+<div class="section level4">
+<h4 id="m-clinical-presets-system-expansion"><strong>[M] Clinical Presets System Expansion</strong><a class="anchor" aria-label="anchor" href="#m-clinical-presets-system-expansion"></a></h4>
+<p><strong>Status:</strong> Only enhancedROC has clinicalPresets feature (massive success!) <strong>Opportunity:</strong> Expand to 15-20 additional high-value analyses <strong>Impact:</strong> Reduces cognitive load, prevents misconfiguration, speeds workflow <strong>Effort:</strong> 3-4 weeks</p>
+<p><strong>Current implementation (enhancedROC):</strong></p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># jamovi/enhancedROC.a.yaml</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> clinicalPresets</span></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> List</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a><span class="at">  </span><span class="fu">options</span><span class="kw">:</span></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">'Custom Configuration'</span></span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a><span class="at">      </span><span class="fu">name</span><span class="kw">:</span><span class="at"> custom</span></span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">'Biomarker Screening (High Sensitivity)'</span></span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1"></a><span class="at">      </span><span class="fu">name</span><span class="kw">:</span><span class="at"> biomarker_screening</span></span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">'Diagnostic Test Validation (Balanced)'</span></span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1"></a><span class="at">      </span><span class="fu">name</span><span class="kw">:</span><span class="at"> diagnostic_validation</span></span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">'Confirmatory Testing (High Specificity)'</span></span>
+<span id="cb30-12"><a href="#cb30-12" tabindex="-1"></a><span class="at">      </span><span class="fu">name</span><span class="kw">:</span><span class="at"> confirmatory_testing</span></span>
+<span id="cb30-13"><a href="#cb30-13" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">'Research Analysis (Comprehensive)'</span></span>
+<span id="cb30-14"><a href="#cb30-14" tabindex="-1"></a><span class="at">      </span><span class="fu">name</span><span class="kw">:</span><span class="at"> research_comprehensive</span></span></code></pre></div>
+<p><strong>Target modules for preset expansion:</strong></p>
+<ol style="list-style-type: decimal"><li>
+<p><strong>survival.b.R</strong> - Survival analysis presets:</p>
+<pre><code>- Early-stage cancer (5-year follow-up focus)
+- Advanced cancer (short-term outcomes)
+- Screening cohort (long follow-up, few events)
+- Clinical trial (strict proportional hazards checks)</code></pre>
+</li>
+<li>
+<p><strong>diagnosticmeta.b.R</strong> - Meta-analysis presets:</p>
+<pre><code>- QUADAS-C compliant (cancer screening)
+- High heterogeneity expected (subgroup focus)
+- Publication bias concern (extensive diagnostics)
+- Network meta-analysis ready</code></pre>
+</li>
+<li>
+<p><strong>decisioncurve.b.R</strong> - Decision curve presets:</p>
+<pre><code>- Screening decision (low threshold range 0.01-0.10)
+- Diagnostic decision (mid threshold 0.10-0.50)
+- Treatment decision (high threshold 0.30-0.80)</code></pre>
+</li>
+<li>
+<p><strong>conttables.b.R</strong> - Table One presets:</p>
+<pre><code>- Randomized trial (balance checking, SMD)
+- Observational study (full covariate adjustment)
+- Case-control study (matched pairs emphasis)
+- Diagnostic accuracy (sensitivity/specificity focus)</code></pre>
+</li>
+<li>
+<p><strong>oddsratio.b.R</strong> - Logistic regression presets:</p>
+<pre><code>- Prediction model development (calibration priority)
+- Risk factor identification (parsimonious model)
+- External validation (performance metrics only)</code></pre>
+</li>
+</ol><p><strong>Implementation pattern (from enhancedROC.b.R):</strong></p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">.applyClinicalPresets</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">preset</span> <span class="op">&lt;-</span> <span class="va">self</span><span class="op">$</span><span class="va">options</span><span class="op">$</span><span class="va">clinicalPresets</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">preset</span><span class="op">)</span> <span class="op">||</span> <span class="va">preset</span> <span class="op">==</span> <span class="st">"custom"</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">private</span><span class="op">$</span><span class="va">.presetConfig</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">preset</span>,</span>
+<span>    biomarker_screening <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      sensitivityThreshold <span class="op">=</span> <span class="fl">0.90</span>,</span>
+<span>      specificityThreshold <span class="op">=</span> <span class="fl">0.60</span>,</span>
+<span>      youdenOptimization <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>      rocCurve <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>      <span class="co"># ... preset configuration</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    <span class="co"># ... other presets</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p><strong>JavaScript UI automation</strong> (see CLAUDE.md reference):</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="co">// jamovi/js/enhancedROC.events.js</span></span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>onUpdate<span class="op">:</span> <span class="kw">function</span>(ui) {</span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a>  <span class="kw">let</span> preset <span class="op">=</span> ui<span class="op">.</span><span class="at">clinicalPresets</span><span class="op">.</span><span class="fu">value</span>()<span class="op">;</span></span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>  <span class="cf">if</span> (preset <span class="op">===</span> <span class="st">'biomarker_screening'</span>) {</span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>    ui<span class="op">.</span><span class="at">sensitivityThreshold</span><span class="op">.</span><span class="fu">setValue</span>(<span class="fl">0.90</span>)<span class="op">;</span></span>
+<span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a>    ui<span class="op">.</span><span class="at">specificityThreshold</span><span class="op">.</span><span class="fu">setValue</span>(<span class="fl">0.60</span>)<span class="op">;</span></span>
+<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>    ui<span class="op">.</span><span class="at">youdenOptimization</span><span class="op">.</span><span class="fu">setValue</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb37-9"><a href="#cb37-9" tabindex="-1"></a>    ui<span class="op">.</span><span class="at">rocCurve</span><span class="op">.</span><span class="fu">setValue</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb37-10"><a href="#cb37-10" tabindex="-1"></a>  }</span>
+<span id="cb37-11"><a href="#cb37-11" tabindex="-1"></a>  <span class="co">// ... handle other presets</span></span>
+<span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a>}</span></code></pre></div>
+<hr></div>
+<div class="section level4">
+<h4 id="m-consistent-variable-name-handling"><strong>[M] Consistent Variable Name Handling</strong><a class="anchor" aria-label="anchor" href="#m-consistent-variable-name-handling"></a></h4>
+<p><strong>Status:</strong> Mixed implementation - some modules escape, others don’t <strong>Issue:</strong> Variables with spaces/special characters break in plots/tables <strong>Files affected:</strong> Unknown (requires systematic audit) <strong>Effort:</strong> 2-3 weeks</p>
+<p><strong>Problem examples:</strong></p>
+<pre><code>User variable names with issues:
+- "Age at Diagnosis" (space)
+- "ER+" (special character)
+- "Stage (AJCC 8th)" (parentheses + space)
+- "Ki-67 (%)" (hyphen + parentheses)</code></pre>
+<p><strong>Current best practice (from oddsratio.b.R):</strong></p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Apply labelled variable logic to preserve original names</span></span>
+<span><span class="va">.escapeVar</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">is.character</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"[^A-Za-z0-9_]"</span>, <span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/make.names.html" class="external-link">make.names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Use jmvcore helpers</span></span>
+<span><span class="va">lhs</span> <span class="op">&lt;-</span> <span class="fu">jmvcore</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvcore/man/decomposeTerm.html" class="external-link">composeTerm</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">options</span><span class="op">$</span><span class="va">dep</span><span class="op">)</span></span>
+<span><span class="va">rhs</span> <span class="op">&lt;-</span> <span class="fu">jmvcore</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvcore/man/decomposeTerm.html" class="external-link">composeTerms</a></span><span class="op">(</span><span class="va">modelTerms</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Systematic fix required:</strong> 1. Audit all 364 .b.R files for variable name handling 2. Implement <code><a href="reference/dot-escapeVar.html">.escapeVar()</a></code> consistently across modules 3. Preserve original names in output using <code>labelled</code> package 4. Test with pathology datasets (known to have complex variable names)</p>
+<p><strong>See:</strong> <code>vignettes/jamovi_module_patterns_guide.md</code> - Data Handling section</p>
+<hr></div>
+</div>
+<div class="section level3">
+<h3 id="priority-3-feature-enhancements"><strong>Priority 3: Feature Enhancements</strong><a class="anchor" aria-label="anchor" href="#priority-3-feature-enhancements"></a></h3>
+<div class="section level4">
+<h4 id="h-enhancedroc-feature-extensions"><strong>[H] enhancedROC Feature Extensions</strong><a class="anchor" aria-label="anchor" href="#h-enhancedroc-feature-extensions"></a></h4>
+<p><strong>Status:</strong> Comprehensive but missing key clinical workflows <strong>Opportunity:</strong> Build on successful foundation <strong>Effort:</strong> 2-3 weeks</p>
+<p><strong>Proposed enhancements:</strong></p>
+<ol style="list-style-type: decimal"><li>
+<p><strong>Multi-marker combination strategies:</strong></p>
+<pre><code>Options to add:
+- Simple sum/average of markers
+- Logistic regression combination
+- Machine learning ensemble (random forest, XGBoost)
+- Clinical algorithm (if marker1 &gt; X, then marker2)</code></pre>
+</li>
+<li>
+<p><strong>Time-dependent ROC integration:</strong></p>
+<pre><code># Currently commented out in enhancedROC.a.yaml (lines 544-568)
+# IMPLEMENT THIS - high clinical value!
+
+Use cases:
+- Biomarker measured at baseline, predict 1/3/5-year survival
+- Validate prognostic scores (Oncotype DX, PREDICT, etc.)
+- Time-varying AUC plots</code></pre>
+</li>
+<li>
+<p><strong>Automated reporting enhancements:</strong></p>
+<pre><code>Current: Plain text summary
+Proposed:
+- STARD-compliant checklist export
+- Copy-ready methods section
+- Copy-ready results paragraph
+- Journal-formatted table (NEJM, Lancet, JAMA styles)</code></pre>
+</li>
+<li>
+<p><strong>Clinical decision integration:</strong></p>
+<pre><code>Link to decisioncurve module:
+- "Calculate net benefit" button → pre-fills decisioncurve analysis
+- Automatic threshold recommendation based on clinical context
+- Cost-effectiveness integration (if costs provided)</code></pre>
+</li>
+<li>
+<p><strong>Expand clinical presets:</strong></p>
+<pre><code>Additional presets needed:
+- PD-L1 scoring (ASCO/CAP guidelines)
+- HER2 testing (binary + continuous IHC)
+- ctDNA detection (ultra-high specificity required)
+- Liquid biopsy validation</code></pre>
+</li>
+</ol><hr></div>
+<div class="section level4">
+<h4 id="m-cross-module-workflow-integration"><strong>[M] Cross-Module Workflow Integration</strong><a class="anchor" aria-label="anchor" href="#m-cross-module-workflow-integration"></a></h4>
+<p><strong>Status:</strong> Modules work independently but no seamless handoffs <strong>Opportunity:</strong> Reduce copy-paste, errors, and user frustration <strong>Effort:</strong> 4-5 weeks</p>
+<p><strong>Proposed integration points:</strong></p>
+<ol style="list-style-type: decimal"><li>
+<p><strong>Descriptives → Survival:</strong></p>
+<pre><code>crosstable.b.R / summary.b.R:
+- Add "Send to jSurvival" button
+- Pre-populate time/event variables if detected
+- Transfer grouping variables automatically</code></pre>
+</li>
+<li>
+<p><strong>ROC → Decision Curves:</strong></p>
+<pre><code>enhancedROC.b.R:
+- "Evaluate clinical utility" button
+- Passes predicted probabilities to decisioncurve
+- Links optimal cutoff to threshold probabilities</code></pre>
+</li>
+<li>
+<p><strong>Swimmer → Survival:</strong></p>
+<pre><code>swimmer.b.R:
+- "Generate KM curve" button
+- Auto-derives PFS/OS from swimmer data
+- Transfers treatment arms as strata</code></pre>
+</li>
+<li>
+<p><strong>Table One → Export:</strong></p>
+<pre><code>crosstable.b.R:
+- One-click DOCX export (CONSORT-style)
+- Embedded footnotes with statistical methods
+- Automatic STROBE checklist generation</code></pre>
+</li>
+</ol><p><strong>Implementation approach:</strong></p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Add to .b.R files:</span></span>
+<span><span class="va">.exportToModule</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">targetModule</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Prepare data in format expected by target module</span></span>
+<span>  <span class="va">transferData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    variables <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">options</span><span class="op">$</span><span class="va">selectedVars</span>,</span>
+<span>    data <span class="op">=</span> <span class="va">private</span><span class="op">$</span><span class="va">.data</span>,</span>
+<span>    options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>  <span class="co"># Pre-configured options</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># Use jamovi session state to pass data</span></span>
+<span>  <span class="va">self</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="fu">.setExportData</span><span class="op">(</span><span class="va">transferData</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># Trigger target module (requires jamovi API enhancement)</span></span>
+<span>  <span class="co"># OR: Export as temporary .omv file that user opens</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<hr></div>
+<div class="section level4">
+<h4 id="l-performance-optimization-for-large-datasets"><strong>[L] Performance Optimization for Large Datasets</strong><a class="anchor" aria-label="anchor" href="#l-performance-optimization-for-large-datasets"></a></h4>
+<p><strong>Status:</strong> No systematic optimization; users report slowness with &gt;10k rows <strong>Target:</strong> Sub-2 second response for n=10,000; sub-10s for n=100,000 <strong>Effort:</strong> 3-4 weeks</p>
+<p><strong>Optimization strategies:</strong></p>
+<ol style="list-style-type: decimal"><li>
+<p><strong>Lazy evaluation &amp; caching:</strong></p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Only recompute when options change</span></span>
+<span><span class="va">private</span><span class="op">$</span><span class="va">.cache</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">.getCachedResult</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">key</span>, <span class="va">computeFn</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">private</span><span class="op">$</span><span class="va">.cache</span><span class="op">[[</span><span class="va">key</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">private</span><span class="op">$</span><span class="va">.cache</span><span class="op">[[</span><span class="va">key</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">computeFn</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">private</span><span class="op">$</span><span class="va">.cache</span><span class="op">[[</span><span class="va">key</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</li>
+<li>
+<p><strong>Progress indicators for long operations:</strong></p>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># For bootstrap, permutation, cross-validation</span></span>
+<span><span class="va">.runBootstrap</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">nIter</span> <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nIter</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># Checkpoint every 100 iterations for cancellation</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">i</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">100</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">private</span><span class="op">$</span><span class="fu">.checkpoint</span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="co"># ... bootstrap iteration</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</li>
+<li>
+<p><strong>Data.table for aggregation:</strong></p>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Replace dplyr for large datasets</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">.aggregateLargeData</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">dt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
+<span>  <span class="va">dt</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">group</span><span class="op">]</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</li>
+<li>
+<p><strong>Parallel processing for independence:</strong></p>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Use future/furrr for bootstrap</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DavisVaughan/furrr" class="external-link">furrr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">bootstrap_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://furrr.futureverse.org/reference/future_map.html" class="external-link">future_map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, <span class="op">~</span><span class="op">{</span></span>
+<span>  <span class="co"># Bootstrap iteration</span></span>
+<span><span class="op">}</span>, .options <span class="op">=</span> <span class="fu"><a href="https://furrr.futureverse.org/reference/furrr_options.html" class="external-link">furrr_options</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</li>
+</ol><hr></div>
+</div>
+<div class="section level3">
+<h3 id="priority-4-quality-assurance--standards"><strong>Priority 4: Quality Assurance &amp; Standards</strong><a class="anchor" aria-label="anchor" href="#priority-4-quality-assurance--standards"></a></h3>
+<div class="section level4">
+<h4 id="h-statistical-accuracy-validation"><strong>[H] Statistical Accuracy Validation</strong><a class="anchor" aria-label="anchor" href="#h-statistical-accuracy-validation"></a></h4>
+<p><strong>Status:</strong> No systematic validation against reference implementations <strong>Risk:</strong> Incorrect results damage reputation, mislead clinical decisions <strong>Effort:</strong> 3-4 weeks (one-time audit + ongoing testing)</p>
+<p><strong>Validation protocol:</strong></p>
+<ol style="list-style-type: decimal"><li>
+<p><strong>Benchmark against validated packages:</strong></p>
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Test survival.b.R against survival package</span></span>
+<span><span class="fu">test_that</span><span class="op">(</span><span class="st">"Cox regression matches survival::coxph"</span>, <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># Use built-in lung dataset</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">lung</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># ClinicoPath result</span></span>
+<span>  <span class="va">cp_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/survival.html">survival</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">lung</span>, time <span class="op">=</span> <span class="va">time</span>,</span>
+<span>                        event <span class="op">=</span> <span class="va">status</span>, covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">sex</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># Reference result</span></span>
+<span>  <span class="va">ref_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span>, data <span class="op">=</span> <span class="va">lung</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># Compare coefficients (within floating point tolerance)</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span><span class="va">cp_result</span><span class="op">$</span><span class="va">coef</span>, <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">ref_result</span><span class="op">)</span>, tolerance <span class="op">=</span> <span class="fl">1e-6</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span><span class="va">cp_result</span><span class="op">$</span><span class="va">hr</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">ref_result</span><span class="op">)</span><span class="op">)</span>, tolerance <span class="op">=</span> <span class="fl">1e-6</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+</li>
+<li>
+<p><strong>Validate against published datasets:</strong></p>
+<pre><code>Use canonical datasets with known results:
+- Mayo Clinic lung cancer (survival analysis)
+- Framingham Heart Study (logistic regression)
+- Scottish thyroid cancer (competing risks)
+- Kidney function eGFR (ROC curves)
+
+Compare ClinicoPath outputs to published papers</code></pre>
+</li>
+<li>
+<p><strong>Edge case testing:</strong></p>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">test_that</span><span class="op">(</span><span class="st">"survivalhandlesedgecases"</span>,<span class="op">{</span></span>
+<span>  <span class="co"># Single event</span></span>
+<span>  <span class="co"># All censored</span></span>
+<span>  <span class="co"># Ties in event times</span></span>
+<span>  <span class="co"># Missing covariates</span></span>
+<span>  <span class="co"># Zero variance covariate</span></span>
+<span>  <span class="co"># Perfect separation in logistic regression</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+</li>
+</ol><hr></div>
+<div class="section level4">
+<h4 id="m-uiux-consistency-audit"><strong>[M] UI/UX Consistency Audit</strong><a class="anchor" aria-label="anchor" href="#m-uiux-consistency-audit"></a></h4>
+<p><strong>Status:</strong> 364 analyses created over time → inconsistent patterns <strong>Impact:</strong> Confusing for users, increases learning curve <strong>Effort:</strong> 2 weeks audit + 3-4 weeks fixes</p>
+<p><strong>Inconsistencies to address:</strong></p>
+<ol style="list-style-type: decimal"><li>
+<p><strong>Option naming conventions:</strong></p>
+<pre><code>Current problems:
+- Some use camelCase, others use snake_case
+- Inconsistent abbreviations (CI vs ci vs confInt)
+- Unclear labels ("Advanced options" vs "Statistical options")
+
+Standard to adopt:
+- All options: camelCase (jamovi convention)
+- All titles: Title Case with Full Words
+- Grouping: "Analysis Options", "Output Options",
+           "Statistical Settings", "Plot Settings"</code></pre>
+</li>
+<li>
+<p><strong>Checkbox defaults:</strong></p>
+<pre><code>Current: Mixed (some analyses default to many outputs, causing slowness)
+Recommended:
+- Core tables: TRUE by default
+- Advanced tables: FALSE by default
+- Plots: FALSE by default (user opts in)
+- Diagnostic plots: FALSE by default</code></pre>
+</li>
+<li>
+<p><strong>CollapseBox organization:</strong></p>
+<pre><code>Standard structure for all analyses:
+1. Variable Selection (always first, never collapsed)
+2. Analysis Options (collapsed: false for simple analyses)
+3. Output Options (collapsed: false)
+4. Statistical Options (collapsed: true)
+5. Plot Settings (collapsed: true)
+6. Advanced/Experimental (collapsed: true)</code></pre>
+</li>
+<li>
+<p><strong>Help text standardization:</strong></p>
+<pre><code>Every option should have description in .a.yaml:
+
+- name: bootstrapSamples
+  title: 'Bootstrap Samples'
+  type: Integer
+  default: 1000
+  min: 100
+  max: 10000
+  description: 'Number of bootstrap resamples for confidence intervals. Higher values increase precision but slow computation. Recommended: 1000 for exploratory, 5000+ for publication.'</code></pre>
+</li>
+</ol><hr></div>
+</div>
+<div class="section level3">
+<h3 id="priority-5-community--adoption"><strong>Priority 5: Community &amp; Adoption</strong><a class="anchor" aria-label="anchor" href="#priority-5-community--adoption"></a></h3>
+<div class="section level4">
+<h4 id="m-example-dataset-repository"><strong>[M] Example Dataset Repository</strong><a class="anchor" aria-label="anchor" href="#m-example-dataset-repository"></a></h4>
+<p><strong>Status:</strong> Scattered example data, unclear provenance <strong>Need:</strong> Curated, documented, clinically realistic datasets <strong>Effort:</strong> 2-3 weeks</p>
+<p><strong>Proposed structure:</strong></p>
+<pre><code>data/
+├── README.md (dataset catalog)
+├── breast_ihc_validation.csv
+│   └── Description: 500 patients, ER/PR/HER2/Ki67 IHC scores
+│       Use cases: enhancedROC, agreement, ihccluster
+├── lung_cancer_survival.csv
+│   └── Description: 228 patients from Mayo Clinic lung cancer study
+│       Use cases: survival, cox, competingrisks
+├── diagnostic_meta_thyroid.csv
+│   └── Description: 24 studies of thyroid FNA diagnostic accuracy
+│       Use cases: diagnosticmeta, meta-analysis
+├── recist_trial_lesions.csv
+│   └── Description: Synthetic trial data with lesion measurements
+│       Use cases: waterfall, swimmer, recist
+└── ... [15-20 total datasets]
+
+data-raw/
+├── generate_breast_ihc.R (data generation scripts)
+├── generate_lung_survival.R
+└── ...</code></pre>
+<p><strong>Dataset requirements:</strong> - Realistic clinical variable names (with spaces, special characters) - Missing data patterns typical of real studies - Adequate sample size for statistical power - Documented data dictionary - Clear provenance (simulated vs real de-identified) - Covers all major module functions</p>
+<hr></div>
+<div class="section level4">
+<h4 id="l-video-tutorial-series"><strong>[L] Video Tutorial Series</strong><a class="anchor" aria-label="anchor" href="#l-video-tutorial-series"></a></h4>
+<p><strong>Status:</strong> No video content <strong>Platform:</strong> YouTube (ClinicoPath channel) <strong>Effort:</strong> 4-6 weeks (1-2 videos/week)</p>
+<p><strong>Proposed series (10 videos, 5-15 min each):</strong></p>
+<ol style="list-style-type: decimal"><li>
+<strong>Getting Started with ClinicoPath</strong> (10 min)
+<ul><li>Installing jamovi + ClinicoPath</li>
+<li>Interface overview</li>
+<li>Loading example data</li>
+<li>Running first analysis (Table One)</li>
+</ul></li>
+<li>
+<strong>Creating Publication-Ready Table One</strong> (12 min)
+<ul><li>crosstable module</li>
+<li>Selecting variables</li>
+<li>Statistical tests</li>
+<li>Export to DOCX</li>
+</ul></li>
+<li>
+<strong>Survival Analysis Fundamentals</strong> (15 min)
+<ul><li>Kaplan-Meier curves</li>
+<li>Log-rank test</li>
+<li>Cox regression basics</li>
+<li>Interpreting hazard ratios</li>
+</ul></li>
+<li>
+<strong>ROC Curve Analysis for Biomarker Validation</strong> (15 min)
+<ul><li>enhancedROC module</li>
+<li>Youden index optimization</li>
+<li>Comparing multiple markers</li>
+<li>Clinical interpretation</li>
+</ul></li>
+<li>
+<strong>Decision Curve Analysis</strong> (12 min)
+<ul><li>decisioncurve module</li>
+<li>Net benefit interpretation</li>
+<li>Threshold selection</li>
+<li>Clinical decision making</li>
+</ul></li>
+<li>
+<strong>Diagnostic Test Meta-Analysis</strong> (15 min)
+<ul><li>diagnosticmeta module</li>
+<li>Sensitivity/specificity pooling</li>
+<li>SROC curves</li>
+<li>Heterogeneity assessment</li>
+</ul></li>
+<li>
+<strong>Treatment Response Visualization</strong> (10 min)
+<ul><li>waterfall plots</li>
+<li>swimmer plots</li>
+<li>RECIST integration</li>
+</ul></li>
+<li>
+<strong>Agreement &amp; Reliability Analysis</strong> (12 min)
+<ul><li>Cohen’s kappa</li>
+<li>ICC for continuous measures</li>
+<li>Bland-Altman plots</li>
+</ul></li>
+<li>
+<strong>Advanced Survival: Competing Risks</strong> (15 min)
+<ul><li>competingsurvival module</li>
+<li>Cumulative incidence functions</li>
+<li>Fine-Gray regression</li>
+</ul></li>
+<li>
+<strong>End-to-End Workflow: Biomarker Study</strong> (20 min)
+<ul><li>Data import → Descriptives → ROC → Decision curves → Export</li>
+<li>Publication-ready outputs</li>
+</ul></li>
+</ol><p><strong>Recording setup:</strong> - Screen recording (1080p minimum) - Clear narration with clinical context - Closed captions (accessibility) - Time-stamped chapters - Accompanying written transcript</p>
+<hr></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="pushpin-implementation-roadmap-update-2026">📌 <strong>IMPLEMENTATION ROADMAP UPDATE (2026)</strong>
+<a class="anchor" aria-label="anchor" href="#pushpin-implementation-roadmap-update-2026"></a></h2>
+<div class="section level3">
+<h3 id="q1-2026-jan-mar-critical-fixes--foundation"><strong>Q1 2026 (Jan-Mar): Critical Fixes &amp; Foundation</strong><a class="anchor" aria-label="anchor" href="#q1-2026-jan-mar-critical-fixes--foundation"></a></h3>
+<p><strong>Week 1-2:</strong> - [ ] Complete notice serialization migration (34 remaining files) - [ ] Resolve critical TODO/FIXME issues (P0 bugs only)</p>
+<p><strong>Week 3-4:</strong> - [ ] Create automated test framework - [ ] Write tests for top 5 functions (enhancedROC, survival, decisioncurve, crosstable, diagnosticmeta)</p>
+<p><strong>Week 5-8:</strong> - [ ] Write 10 high-priority comprehensive vignettes - [ ] Launch first 2 video tutorials (Getting Started + Table One)</p>
+<p><strong>Week 9-12:</strong> - [ ] Expand clinical presets to 5 additional modules - [ ] Implement cross-module integration (3 key workflows) - [ ] Curate and document 10 example datasets</p>
+</div>
+<div class="section level3">
+<h3 id="q2-2026-apr-jun-enhanced-ux--quality"><strong>Q2 2026 (Apr-Jun): Enhanced UX &amp; Quality</strong><a class="anchor" aria-label="anchor" href="#q2-2026-apr-jun-enhanced-ux--quality"></a></h3>
+<p><strong>Week 1-3:</strong> - [ ] UI/UX consistency audit across all 364 functions - [ ] Standardize option naming, defaults, help text - [ ] Implement consistent CollapseBox organization</p>
+<p><strong>Week 4-6:</strong> - [ ] Statistical accuracy validation (benchmark top 20 functions) - [ ] Performance optimization (n=100k target) - [ ] Add progress indicators to long-running analyses</p>
+<p><strong>Week 7-9:</strong> - [ ] Variable name handling standardization (all modules) - [ ] Systematic .escapeVar() implementation - [ ] Test with real pathology datasets (complex names)</p>
+<p><strong>Week 10-12:</strong> - [ ] Complete remaining 8 video tutorials - [ ] Write 10 additional vignettes (cumulative: 20 total) - [ ] CI/CD integration with automated testing</p>
+<p><strong>Deliverables:</strong> - [ ] Consistent UI/UX across all modules - [ ] 80% test coverage for statistical calculations - [ ] &lt;2s response time for n=10,000 rows - [ ] 20 comprehensive vignettes (5.5% coverage) - [ ] 10 video tutorials complete - [ ] GitHub Actions CI/CD running</p>
+<hr></div>
+</div>
+<div class="section level2">
+<h2 id="bar_chart-success-metrics-updated-2026">📊 <strong>SUCCESS METRICS (Updated 2026)</strong>
+<a class="anchor" aria-label="anchor" href="#bar_chart-success-metrics-updated-2026"></a></h2>
+<div class="section level3">
+<h3 id="technical-quality"><strong>Technical Quality</strong><a class="anchor" aria-label="anchor" href="#technical-quality"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox"><strong>Zero</strong> serialization errors in released version</label></li>
+<li><label><input type="checkbox"><strong>&lt;5</strong> open P0/P1 bugs at any time</label></li>
+<li><label><input type="checkbox"><strong>80%+</strong> test coverage for core statistical functions</label></li>
+<li><label><input type="checkbox"><strong>100%</strong> accuracy vs reference implementations</label></li>
+<li><label><input type="checkbox"><strong>All</strong> 364 functions pass jmvtools::prepare()</label></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-1"><strong>Documentation</strong><a class="anchor" aria-label="anchor" href="#documentation-1"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox"><strong>20+</strong> comprehensive vignettes by Q2 2026 (target: 50+ by year-end)</label></li>
+<li><label><input type="checkbox"><strong>10</strong> video tutorials by Q2 2026</label></li>
+<li><label><input type="checkbox"><strong>15+</strong> curated example datasets</label></li>
+<li><label><input type="checkbox"><strong>100%</strong> of new functions documented before release</label></li>
+</ul></div>
+<div class="section level3">
+<h3 id="user-experience"><strong>User Experience</strong><a class="anchor" aria-label="anchor" href="#user-experience"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox"><strong>10+</strong> modules with clinical presets</label></li>
+<li><label><input type="checkbox"><strong>&lt;2s</strong> analysis response for typical datasets (n ≤ 10,000)</label></li>
+<li><label><input type="checkbox"><strong>Consistent</strong> UI patterns across all modules</label></li>
+<li><label><input type="checkbox"><strong>5+</strong> cross-module workflow integrations</label></li>
+</ul></div>
+<div class="section level3">
+<h3 id="adoption--impact"><strong>Adoption &amp; Impact</strong><a class="anchor" aria-label="anchor" href="#adoption--impact"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox"><strong>15k+</strong> jamovi library downloads/year (up from 10k target)</label></li>
+<li><label><input type="checkbox"><strong>50+</strong> citations in peer-reviewed literature</label></li>
+<li><label><input type="checkbox"><strong>100+</strong> active forum discussions</label></li>
+<li><label><input type="checkbox"><strong>4.5+/5</strong> user satisfaction rating</label></li>
+</ul><hr></div>
+</div>
+<div class="section level2">
+<h2 id="pushpin-conclusion">📌 <strong>Conclusion</strong>
+<a class="anchor" aria-label="anchor" href="#pushpin-conclusion"></a></h2>
+<p>This roadmap provides a comprehensive, <strong>jamovi-compatible</strong> enhancement plan for the ClinicoPath module ecosystem. All features are designed to work within jamovi’s tabular data structure, with clear specifications for variable types, data formats, and UI elements.</p>
+<p><strong>CRITICAL NEXT STEPS (Start Immediately):</strong> 1. [ ] Complete notice serialization migration (34 files) 2. [ ] Write first 10 comprehensive vignettes 3. [ ] Implement automated testing for top 20 functions 4. [ ] Expand clinical presets to 5 key modules 5. [ ] Create 10 curated example datasets</p>
+<p><strong>Key Principles</strong>:</p>
+<ul><li>Rectangular data frames only</li>
+<li>Clear variable type specifications (Continuous, Nominal, Ordinal)</li>
+<li>Long format for repeated measures/clustered data</li>
+<li>One-click workflows with intuitive UIs</li>
+<li>Publication-ready outputs</li>
+</ul><p><strong>Next Actions</strong>:</p>
+<ol style="list-style-type: decimal"><li>Review and approve roadmap</li>
+<li>Create GitHub issues for high-priority features</li>
+<li>Set up project milestones aligned with timeline</li>
+<li>Begin implementation starting with Q1 Year 1 features</li>
+</ol><p>For questions or suggestions, please open an issue on the ClinicoPathJamoviModule repository.</p>
+<hr></div>
+<div class="section level2">
+<h2 id="drafts--next-steps-to-implement-later">Drafts / Next steps (to implement later)<a class="anchor" aria-label="anchor" href="#drafts--next-steps-to-implement-later"></a></h2>
+<ul><li>jjoncoplot: expose a dedicated result for per-sample mutation burden (currently only in plot logic), and add UI enable/disable logic (e.g., enable <code>log10TransformTMB</code> only when <code>showTMB</code> is TRUE).</li>
+</ul><hr></div>
+<div class="section level2">
+<h2 id="chisqposttest-enhancements-optional---production-ready-function">chisqposttest Enhancements (Optional - Production-Ready Function)<a class="anchor" aria-label="anchor" href="#chisqposttest-enhancements-optional---production-ready-function"></a></h2>
+<p><strong>Status</strong>: Function is production-ready and clinically safe (5/5 stars) <strong>Notice Pattern</strong>: Recently refactored to use jmvcore::Notice (10 notices implemented) <strong>Priority</strong>: Medium (enhancements, not fixes)</p>
+<div class="section level3">
+<h3 id="enhancement-1-bootstrap-confidence-intervals-for-phi-coefficient-m">Enhancement 1: Bootstrap Confidence Intervals for Phi Coefficient [M]<a class="anchor" aria-label="anchor" href="#enhancement-1-bootstrap-confidence-intervals-for-phi-coefficient-m"></a></h3>
+<p><strong>Status</strong>: ⏳ Planned for v0.0.32 <strong>Dependencies</strong>: boot package (suggested, not required)</p>
+<p><strong>Implementation</strong>: - Add <code>phi_ci</code> column to <code>posthocTable</code> in chisqposttest.r.yaml - Add <code>.calculatePhiCI()</code> private method in chisqposttest.b.R - Use BCa bootstrap (999 iterations) for accurate interval estimates - Handle small samples (n&lt;20) gracefully with “n too small” message</p>
+<p><strong>Files to modify</strong>: - <code>jamovi/chisqposttest.r.yaml</code> (line 127 - add phi_ci column) - <code>R/chisqposttest.b.R</code> (line 900 - add helper method, line 594 - compute CIs)</p>
+<p><strong>Clinical value</strong>: Pathologists can report “Moderate association (φ=0.34, 95% CI [0.21, 0.48])” with precision estimates</p>
+<p><strong>Rationale</strong>: Bootstrap BCa CIs provide accurate intervals without parametric assumptions; ~50ms per comparison for n=100</p>
+<hr></div>
+<div class="section level3">
+<h3 id="enhancement-2-residuals-interpretation-guidance-panel-h">Enhancement 2: Residuals Interpretation Guidance Panel [H]<a class="anchor" aria-label="anchor" href="#enhancement-2-residuals-interpretation-guidance-panel-h"></a></h3>
+<p><strong>Status</strong>: ⏳ Planned for v0.0.32 <strong>Dependencies</strong>: None (pure HTML)</p>
+<p><strong>Implementation</strong>: - Add <code>residualsGuidance</code> Html output to chisqposttest.r.yaml - Insert blue-bordered guidance panel before residuals table - Include clinical example: “If ‘Grade 3 × Positive’ has residual = +3.2…” - Explain positive vs negative residuals with cutoff value</p>
+<p><strong>Files to modify</strong>: - <code>jamovi/chisqposttest.r.yaml</code> (line 82 - add new Html output) - <code>R/chisqposttest.b.R</code> (line 1220 - add guidance HTML before residuals)</p>
+<p><strong>Clinical value</strong>: Reduces user confusion about standardized residuals; clinicians understand which cells drive significant associations</p>
+<p><strong>Rationale</strong>: Standardized residuals are powerful but often misinterpreted by non-statisticians; contextual help improves usability</p>
+<hr></div>
+<div class="section level3">
+<h3 id="enhancement-3-power-analysis-warning-for-small-samples-m">Enhancement 3: Power Analysis Warning for Small Samples [M]<a class="anchor" aria-label="anchor" href="#enhancement-3-power-analysis-warning-for-small-samples-m"></a></h3>
+<p><strong>Status</strong>: ⏳ Planned for v0.0.32 <strong>Dependencies</strong>: pwr package (suggested, not required)</p>
+<p><strong>Implementation</strong>: - Detect underpowered studies (n&lt;50) after assumptions check - Calculate required n for 80% power to detect medium effect (φ=0.3, Cohen 1988) - Add WARNING notice with required sample size - Fallback to heuristic (≥5 observations per cell) if pwr package unavailable</p>
+<p><strong>Files to modify</strong>: - <code>R/chisqposttest.b.R</code> (line 1726 - add after low expected counts warning) - DESCRIPTION (add pwr to Suggests)</p>
+<p><strong>Clinical value</strong>: Prevents misinterpretation of null results as “no association” when study is simply underpowered</p>
+<p><strong>Rationale</strong>: Small samples common in pathology studies; users need guidance on Type II error risk</p>
+<hr></div>
+<div class="section level3">
+<h3 id="implementation-priority">Implementation Priority<a class="anchor" aria-label="anchor" href="#implementation-priority"></a></h3>
+<p><strong>High Priority (Next Release v0.0.32)</strong>:</p>
+<p><strong>Medium Priority (Future Release)</strong>: - ⏳ Enhancement 3: Power Analysis Warning (helps prevent Type II error misinterpretation) - ⏳ Enhancement 1: Bootstrap CIs (enhances reporting quality)</p>
+<p><strong>Timeline</strong>: Can be implemented independently or together in ~2 hours total</p>
+<p><strong>Note</strong>: These are OPTIONAL enhancements for an already production-ready function. Current version (with Notice pattern) is ready for clinical use.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="related-documentation">Related Documentation<a class="anchor" aria-label="anchor" href="#related-documentation"></a></h3>
+<ul><li>Systematic check report: <code>/check-function chisqposttest</code> (2025-01-13)</li>
+<li>Comprehensive review: <code>/review-function chisqposttest</code> (2025-01-13)</li>
+</ul><hr><hr></div>
 </div>
 
 

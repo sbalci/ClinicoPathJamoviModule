@@ -1,0 +1,121 @@
+"patient_id","treatment","timepoint","response_category","tumor_size","symptom_burden"
+1,"Standard","Baseline","Responder",52.1482493383004,89.1646871294482
+1,"Standard","Week 12","Responder",35.7611100771164,36.9245124459174
+2,"Standard","Baseline","Non-responder",55.7663756662396,66.5478803708833
+2,"Standard","Week 12","Non-responder",50.1390928309146,58.133817749013
+3,"Experimental","Baseline","Responder",69.5868733111586,76.6583792929464
+3,"Experimental","Week 12","Responder",33.1164583154934,30.274636698554
+4,"Standard","Baseline","Non-responder",26.9516001122287,71.0343333013652
+4,"Standard","Week 12","Non-responder",20.8732837835638,34.8395174299994
+5,"Experimental","Baseline","Non-responder",38.6792556389143,84.4413640625238
+5,"Experimental","Week 12","Non-responder",33.3610784562119,31.911330730755
+6,"Experimental","Baseline","Responder",40.1082622919583,53.8670178873525
+6,"Experimental","Week 12","Responder",23.7900997300594,18.4526489183713
+7,"Experimental","Baseline","Responder",53.2855995985303,67.8557831513125
+7,"Experimental","Week 12","Responder",32.347842641577,29.3373558907916
+8,"Standard","Baseline","Responder",68.8728465816497,66.5451799363262
+8,"Standard","Week 12","Responder",46.9429506198285,51.0073702177553
+9,"Experimental","Baseline","Non-responder",52.6945297832978,65.7194114809723
+9,"Experimental","Week 12","Non-responder",43.4713307994286,44.3801128490354
+10,"Standard","Baseline","Responder",38.2442783537114,67.4817823287082
+10,"Standard","Week 12","Responder",23.1272706520222,32.7219544284707
+11,"Experimental","Baseline","Non-responder",44.6876158547292,75.4718000256692
+11,"Experimental","Week 12","Non-responder",42.5662416303943,40.8036249875845
+12,"Experimental","Baseline","Non-responder",67.6194808608409,42.5991046662337
+12,"Experimental","Week 12","Non-responder",49.353280707182,58.0796708961531
+13,"Standard","Baseline","Non-responder",38.8378059680316,54.9766729810225
+13,"Standard","Week 12","Non-responder",38.5156881593841,42.8783032412351
+14,"Experimental","Baseline","Non-responder",71.8977571948278,66.9547816796849
+14,"Experimental","Week 12","Non-responder",66.3757091330272,76.3732853789743
+15,"Experimental","Baseline","Responder",45.5503816754687,50.7241518407263
+15,"Experimental","Week 12","Responder",17.100075450852,15.8979203842909
+16,"Experimental","Baseline","Responder",50.376700563185,77.0365997299022
+16,"Experimental","Week 12","Responder",29.3497249932164,24.4092352335142
+17,"Standard","Baseline","Responder",61.1142815195028,68.3291847611154
+17,"Standard","Week 12","Responder",43.4360949878668,48.6711892491187
+18,"Experimental","Baseline","Responder",39.5025985276077,63.2856291898179
+18,"Experimental","Week 12","Responder",29.2922146168319,17.5328552128462
+19,"Experimental","Baseline","Responder",73.1893675081592,67.0895088807395
+19,"Experimental","Week 12","Responder",39.8466530846461,37.6439723244065
+20,"Experimental","Baseline","Responder",63.2223793154397,77.5635271790589
+20,"Experimental","Week 12","Responder",37.692525947799,37.4590177573848
+21,"Standard","Baseline","Responder",59.6730404079964,64.6480758955736
+21,"Standard","Week 12","Responder",43.0559936512763,47.3942506622989
+22,"Standard","Baseline","Non-responder",37.9484058750798,56.7296359277123
+22,"Standard","Week 12","Non-responder",21.8840497160737,25.637491134636
+23,"Standard","Baseline","Non-responder",55.2867836205032,60.7196506749766
+23,"Standard","Week 12","Non-responder",52.5270646646099,62.3084143303102
+24,"Standard","Baseline","Responder",49.646128059035,47.1127110464545
+24,"Standard","Week 12","Responder",31.3594716881538,25.6949461446054
+25,"Standard","Baseline","Responder",53.5758471597007,54.3406657873713
+25,"Standard","Week 12","Responder",42.5964096494843,43.6310089813881
+26,"Experimental","Baseline","Responder",61.569876802115,72.915732304907
+26,"Experimental","Week 12","Responder",37.3759256636083,37.9597265824668
+27,"Experimental","Baseline","Non-responder",40.9774368063341,85.5461693274831
+27,"Experimental","Week 12","Non-responder",25.1509493419381,15.4807518373121
+28,"Standard","Baseline","Non-responder",55.9646924901678,72.7503348459504
+28,"Standard","Week 12","Non-responder",60.8501476549377,77.6490855703379
+29,"Standard","Baseline","Responder",36.5609132028237,55.3630626373563
+29,"Standard","Week 12","Responder",18.291339910622,21.924669104303
+30,"Experimental","Baseline","Responder",52.5163032838035,61.4537466114141
+30,"Experimental","Week 12","Responder",21.4116135135417,17.5799102059413
+31,"Standard","Baseline","Responder",58.3720983593403,72.6958715993328
+31,"Standard","Week 12","Responder",38.0091470624724,51.312854970029
+32,"Experimental","Baseline","Non-responder",33.726120112568,78.8104939765058
+32,"Experimental","Week 12","Non-responder",18.1408677647899,10.0812763258413
+33,"Standard","Baseline","Non-responder",51.1182676835036,41.516630190885
+33,"Standard","Week 12","Non-responder",49.0340793696679,55.1852794383887
+34,"Standard","Baseline","Responder",18.2151828976758,75.115398310653
+34,"Standard","Week 12","Responder",10.3472967474492,13.7774733851021
+35,"Experimental","Baseline","Responder",51.9954968266107,67.7629739498746
+35,"Experimental","Week 12","Responder",21.6305175042118,24.4391044907457
+36,"Standard","Baseline","Non-responder",55.3895303477385,33.9175217964362
+36,"Standard","Week 12","Non-responder",49.6288235260145,53.8424295609822
+37,"Standard","Baseline","Non-responder",22.3426259797079,55.0908506730213
+37,"Standard","Week 12","Non-responder",13.8095199735628,6.24649083134954
+38,"Experimental","Baseline","Non-responder",55.3036615624145,52.3925363608897
+38,"Experimental","Week 12","Non-responder",42.5240300504211,43.8500645339609
+39,"Standard","Baseline","Responder",82.7229083915119,59.2304842819339
+39,"Standard","Week 12","Responder",50.3355420841503,65.646485459106
+40,"Standard","Baseline","Responder",26.0489118516141,64.3937329795844
+40,"Standard","Week 12","Responder",25.3394850672735,22.1526789818681
+41,"Experimental","Baseline","Non-responder",67.6684035346533,53.2966438373354
+41,"Experimental","Week 12","Non-responder",47.0329410558438,53.983439719267
+42,"Experimental","Baseline","Responder",35.9366915822296,60.6113795468392
+42,"Experimental","Week 12","Responder",9.85439939477566,0
+43,"Experimental","Baseline","Non-responder",52.1186248821027,66.8044903989338
+43,"Experimental","Week 12","Non-responder",52.4583982822654,59.9751423080744
+44,"Standard","Baseline","Responder",35.3601124575645,66.6920604832934
+44,"Standard","Week 12","Responder",30.4727296570295,37.1914528331765
+45,"Experimental","Baseline","Non-responder",76.361342204457,76.9506183832402
+45,"Experimental","Week 12","Non-responder",67.165825189028,80.5905525383271
+46,"Experimental","Baseline","Responder",36.8970342721905,71.7357957722172
+46,"Experimental","Week 12","Responder",23.353775390285,25.7233747940016
+47,"Standard","Baseline","Non-responder",20.89147387193,68.0562646637364
+47,"Standard","Week 12","Non-responder",19.7256071434384,16.4693482406064
+48,"Experimental","Baseline","Responder",20.7424173333747,86.9971126194106
+48,"Experimental","Week 12","Responder",9.62383761535967,11.2649780163974
+49,"Experimental","Baseline","Non-responder",49.536973010168,65.6775171377172
+49,"Experimental","Week 12","Non-responder",43.6985376626235,43.489596503921
+50,"Experimental","Baseline","Non-responder",42.6509108683887,47.3051681040523
+50,"Experimental","Week 12","Non-responder",37.0921593958836,33.468170842732
+51,"Standard","Baseline","Non-responder",86.3445903574423,62.8409124987314
+51,"Standard","Week 12","Non-responder",73.2131334155601,84.182357895226
+52,"Experimental","Baseline","Responder",57.1913499090441,83.6913723531027
+52,"Experimental","Week 12","Responder",22.5476384457615,11.3390683402224
+53,"Experimental","Baseline","Non-responder",56.0668172895526,50.2234916465013
+53,"Experimental","Week 12","Non-responder",51.2616962150558,42.1338967414685
+54,"Standard","Baseline","Responder",11.5429512219037,79.703947189211
+54,"Standard","Week 12","Responder",6.4734082026549,25.4142195963459
+55,"Standard","Baseline","Non-responder",38.6174671110918,78.7587998045764
+55,"Standard","Week 12","Non-responder",36.4246157548008,56.6508569612694
+56,"Standard","Baseline","Responder",37.060627760103,80.6529440356857
+56,"Standard","Week 12","Responder",28.2349338002297,42.9704861657985
+57,"Standard","Baseline","Responder",59.9129737630052,75.7582281887717
+57,"Standard","Week 12","Responder",38.3615680694746,65.2041747223385
+58,"Standard","Baseline","Responder",32.3300212206809,58.3951760816512
+58,"Standard","Week 12","Responder",24.9510863761218,22.8092228441698
+59,"Standard","Baseline","Non-responder",40.6409313280526,94.7809231143381
+59,"Standard","Week 12","Non-responder",43.480806296605,53.2047917086027
+60,"Experimental","Baseline","Non-responder",32.1055142204328,69.3541926635666
+60,"Experimental","Week 12","Non-responder",29.4933799272821,52.8034120245982

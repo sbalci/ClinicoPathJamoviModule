@@ -1,0 +1,208 @@
+#' Test Datasets for Waterfall Function
+#'
+#' A collection of test datasets for the waterfall function, which creates
+#' waterfall and spider plots for tumor response analysis following RECIST v1.1 criteria.
+#'
+#' @name waterfall_test_datasets
+#' @aliases waterfall_test waterfall_spider_test waterfall_raw_test
+#' @aliases waterfall_small waterfall_large waterfall_missing
+#' @aliases waterfall_extreme waterfall_no_baseline waterfall_phase2
+#'
+#' @format
+#' ## `waterfall_test`
+#' Main test dataset with pre-calculated percentage changes (30 patients):
+#' \describe{
+#'   \item{patientID}{Character. Unique patient identifier (PT001-PT030)}
+#'   \item{best_response}{Numeric. Percentage change from baseline (-100% to +180%)}
+#'   \item{treatment}{Character. Treatment group (Monotherapy, Combination, Control)}
+#'   \item{disease_subtype}{Character. Disease classification (Type A/B/C)}
+#'   \item{prior_lines}{Integer. Number of prior therapy lines (0-3)}
+#' }
+#'
+#' ## `waterfall_spider_test`
+#' Longitudinal data for spider plot testing (120 observations: 20 patients × 6 timepoints):
+#' \describe{
+#'   \item{patientID}{Character. Patient identifier (PT001-PT020)}
+#'   \item{treatment}{Character. Treatment group (Experimental, Standard)}
+#'   \item{time}{Numeric. Months from baseline (0, 2, 4, 6, 8, 12)}
+#'   \item{pct_change}{Numeric. Percentage change at each timepoint}
+#'   \item{response_category}{Character. RECIST category (CR/PR/SD/PD)}
+#' }
+#'
+#' ## `waterfall_raw_test`
+#' Raw tumor measurements for percentage calculation (125 observations: 25 patients × 5 timepoints):
+#' \describe{
+#'   \item{patientID}{Character. Patient identifier (PT001-PT025)}
+#'   \item{time}{Numeric. Months from baseline (0, 1, 2, 4, 6)}
+#'   \item{tumor_size}{Numeric. Sum of target lesion diameters (mm)}
+#'   \item{treatment}{Character. Treatment arm (Drug A, Drug B, Placebo)}
+#' }
+#'
+#' ## `waterfall_small`
+#' Minimal viable dataset (5 patients):
+#' \describe{
+#'   \item{patientID}{Character. Patient identifier}
+#'   \item{best_response}{Numeric. Percentage change}
+#'   \item{treatment}{Character. Treatment group (A, B, Control)}
+#' }
+#'
+#' ## `waterfall_large`
+#' Large dataset for performance testing (200 patients):
+#' \describe{
+#'   \item{patientID}{Character. Patient identifier}
+#'   \item{best_response}{Numeric. Percentage change}
+#'   \item{treatment}{Character. Treatment arm (8 levels)}
+#'   \item{biomarker_status}{Character. Biomarker status (Positive, Negative)}
+#' }
+#'
+#' ## `waterfall_missing`
+#' Dataset with missing values (20 patients, ~15% missing):
+#' \describe{
+#'   \item{patientID}{Character. Patient identifier}
+#'   \item{best_response}{Numeric. Percentage change (some NA)}
+#'   \item{treatment}{Character. Treatment group (some NA)}
+#' }
+#'
+#' ## `waterfall_extreme`
+#' Dataset with extreme values and outliers (15 patients):
+#' \describe{
+#'   \item{patientID}{Character. Patient identifier}
+#'   \item{best_response}{Numeric. Percentage change (includes CRs and extreme PD)}
+#'   \item{treatment}{Character. Treatment group}
+#' }
+#'
+#' ## `waterfall_no_baseline`
+#' Dataset missing baseline measurements for error testing (20 observations):
+#' \describe{
+#'   \item{patientID}{Character. Patient identifier}
+#'   \item{treatment}{Character. Treatment group}
+#'   \item{time}{Numeric. Time from baseline (no time=0 values)}
+#'   \item{pct_change}{Numeric. Percentage change}
+#' }
+#'
+#' ## `waterfall_phase2`
+#' Realistic Phase II oncology trial simulation (50 patients):
+#' \describe{
+#'   \item{patientID}{Character. Study identifier (STUDY001-001 to STUDY001-050)}
+#'   \item{best_response}{Numeric. Percentage change (ORR ~30%, DCR ~60%)}
+#'   \item{cohort}{Character. Dose level (1, 2, 3)}
+#'   \item{age}{Numeric. Patient age (years)}
+#'   \item{ecog_ps}{Integer. ECOG performance status (0-2)}
+#'   \item{pdl1_status}{Character. PD-L1 expression level (<1%, 1-49%, ≥50%)}
+#'   \item{time_on_treatment}{Numeric. Duration on treatment (months)}
+#' }
+#'
+#' @section RECIST v1.1 Criteria:
+#' Response categories are based on RECIST v1.1 thresholds:
+#' \itemize{
+#'   \item CR (Complete Response): ≤ -100% (complete disappearance)
+#'   \item PR (Partial Response): -99% to -30% (significant shrinkage)
+#'   \item SD (Stable Disease): -29% to +19% (minimal change)
+#'   \item PD (Progressive Disease): ≥ +20% (tumor growth)
+#' }
+#'
+#' Clinical metrics:
+#' \itemize{
+#'   \item ORR (Objective Response Rate) = (CR + PR) / Total
+#'   \item DCR (Disease Control Rate) = (CR + PR + SD) / Total
+#' }
+#'
+#' @section Data Generation:
+#' All datasets were generated with seed 42 for reproducibility.
+#' Values are clinically realistic and incorporate appropriate correlations
+#' (e.g., treatment effects, baseline characteristics).
+#'
+#' @section Use Cases:
+#' \itemize{
+#'   \item \strong{waterfall_test}: Basic waterfall plot testing, RECIST categorization
+#'   \item \strong{waterfall_spider_test}: Spider plot generation, longitudinal analysis
+#'   \item \strong{waterfall_raw_test}: Raw measurement processing, percentage calculation
+#'   \item \strong{waterfall_small}: Minimal dataset, edge case testing
+#'   \item \strong{waterfall_large}: Performance testing, scalability validation
+#'   \item \strong{waterfall_missing}: Missing data handling
+#'   \item \strong{waterfall_extreme}: Outlier handling, extreme values
+#'   \item \strong{waterfall_no_baseline}: Error validation, missing baseline detection
+#'   \item \strong{waterfall_phase2}: Complete clinical trial workflow
+#' }
+#'
+#' @examples
+#' # Load main test dataset
+#' data(waterfall_test)
+#' head(waterfall_test)
+#'
+#' # Basic waterfall plot
+#' \dontrun{
+#' waterfall(
+#'   data = waterfall_test,
+#'   patientID = "patientID",
+#'   responseVar = "best_response",
+#'   inputType = "percentage"
+#' )
+#' }
+#'
+#' # Spider plot with longitudinal data
+#' \dontrun{
+#' data(waterfall_spider_test)
+#' waterfall(
+#'   data = waterfall_spider_test,
+#'   patientID = "patientID",
+#'   responseVar = "pct_change",
+#'   timeVar = "time",
+#'   showSpiderPlot = TRUE,
+#'   timeUnitLabel = "months"
+#' )
+#' }
+#'
+#' # Raw measurements with automatic calculation
+#' \dontrun{
+#' data(waterfall_raw_test)
+#' waterfall(
+#'   data = waterfall_raw_test,
+#'   patientID = "patientID",
+#'   responseVar = "tumor_size",
+#'   timeVar = "time",
+#'   inputType = "raw",
+#'   groupVar = "treatment"
+#' )
+#' }
+#'
+#' # Clinical trial analysis
+#' \dontrun{
+#' data(waterfall_phase2)
+#' waterfall(
+#'   data = waterfall_phase2,
+#'   patientID = "patientID",
+#'   responseVar = "best_response",
+#'   groupVar = "cohort",
+#'   generateCopyReadyReport = TRUE,
+#'   showConfidenceIntervals = TRUE
+#' )
+#' }
+#'
+#' @source Generated using data-raw/waterfall_test_data.R (seed = 42)
+#' @seealso \code{\link{waterfall}} for the waterfall analysis function
+"waterfall_test"
+
+#' @rdname waterfall_test_datasets
+"waterfall_spider_test"
+
+#' @rdname waterfall_test_datasets
+"waterfall_raw_test"
+
+#' @rdname waterfall_test_datasets
+"waterfall_small"
+
+#' @rdname waterfall_test_datasets
+"waterfall_large"
+
+#' @rdname waterfall_test_datasets
+"waterfall_missing"
+
+#' @rdname waterfall_test_datasets
+"waterfall_extreme"
+
+#' @rdname waterfall_test_datasets
+"waterfall_no_baseline"
+
+#' @rdname waterfall_test_datasets
+"waterfall_phase2"

@@ -11,7 +11,7 @@ clinical milestones, tumor characteristics, and biomarker information."></head><
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,13 +21,12 @@ clinical milestones, tumor characteristics, and biomarker information."></head><
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../dev/index.html"><span class="fa fa-cogs"></span></a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
-    <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
-    <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
-    <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-test-data" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fa-database"></span> Test Data</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-test-data"><li><a class="dropdown-item" href="../articles/test-data-catalog.html">Test Data Catalog</a></li>
+    <li><a class="dropdown-item" href="../articles/test-data-complete-catalog.html">Complete Catalog (945 files)</a></li>
+    <li><a class="dropdown-item" href="../articles/function-reference.html">Function Reference</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci"><span class="fa fab fa-twitter fa-lg"></span></a></li>
@@ -138,72 +137,7 @@ clinical milestones, tumor characteristics, and biomarker information.</p>
 <span class="r-in"><span>  plotTheme <span class="op">=</span> <span class="st">"ggswim"</span>,</span></span>
 <span class="r-in"><span>  sortOrder <span class="op">=</span> <span class="st">"duration_desc"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  SWIMMER PLOT</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Timeline Summary Statistics         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Metric                Value       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Number of Patients     20.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Total Observations     20.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Median Duration        31.50000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mean Duration          30.80000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Total Person-Time     616.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mean Follow-up         30.80000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    CR Rate (%)            30.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    PD Rate (%)            25.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    PR Rate (%)            25.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    SD Rate (%)            20.00000   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ─────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background-color: #e8f5e8; padding: 15px; border-radius:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5px; margin: 10px 0;'&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Clinical Interpretation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 10px 0;'&gt;&lt;h5 style='color: #2e7d32;'&gt;Timeline</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Analysis:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Study included 20 patients with 20 timeline observations. Median</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  follow-up was 31.5 months (range: 8.0 to 54.0 months).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 10px 0;'&gt;&lt;h5 style='color: #2e7d32;'&gt;Person-Time</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Analysis:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Total person-time: 616.0 months. Average follow-up per patient: 30.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  months.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='margin: 10px 0;'&gt;&lt;h5 style='color: #2e7d32;'&gt;Response</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Pattern Analysis:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Most common response was CR (30.0% of observations). Response</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  distribution shows clinical patterns suitable for efficacy analysis.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Person-Time Analysis                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Type    Patients    Total Time    Mean Time    Incidence Rate   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Milestone Event Summary                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Milestone    Events    Median Time    Time Range   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Advanced Clinical Metrics                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Metric    Value    Unit    Clinical Interpretation   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-plt img"><img src="swimmer_unified_oncology-1.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Argument 'milestone1Date' contains 'Surgery' which is not present in the dataset</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

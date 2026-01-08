@@ -1,0 +1,125 @@
+"source","target","weight","group","network_type","edge_type"
+"TP53","CDKN2A",0.92,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"TP53","BAX",0.88,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"TP53","MDM2",0.85,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"TP53","GADD45",0.78,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"TP53","P21",0.95,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"BRCA1","ATM",0.87,"DNA Repair","Gene Regulatory","Regulatory"
+"BRCA1","CHEK2",0.82,"DNA Repair","Gene Regulatory","Regulatory"
+"BRCA2","RAD51",0.9,"DNA Repair","Gene Regulatory","Regulatory"
+"BRCA2","PALB2",0.85,"DNA Repair","Gene Regulatory","Regulatory"
+"EGFR","PIK3CA",0.91,"Growth Factor","Gene Regulatory","Regulatory"
+"EGFR","KRAS",0.89,"Growth Factor","Gene Regulatory","Regulatory"
+"EGFR","BRAF",0.86,"Growth Factor","Gene Regulatory","Regulatory"
+"MYC","CDK4",0.84,"Oncogene","Gene Regulatory","Regulatory"
+"MYC","CCND1",0.88,"Oncogene","Gene Regulatory","Regulatory"
+"MYC","E2F1",0.79,"Oncogene","Gene Regulatory","Regulatory"
+"KRAS","PIK3CA",0.93,"Oncogene","Gene Regulatory","Regulatory"
+"KRAS","BRAF",0.9,"Oncogene","Gene Regulatory","Regulatory"
+"KRAS","MAPK",0.87,"Oncogene","Gene Regulatory","Regulatory"
+"PTEN","AKT",0.85,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"PTEN","PIK3CA",0.91,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"APC","CTNNB1",0.83,"Tumor Suppressor","Gene Regulatory","Regulatory"
+"RB1","CDK4",0.89,"Cell Cycle","Gene Regulatory","Regulatory"
+"RB1","E2F1",0.86,"Cell Cycle","Gene Regulatory","Regulatory"
+"CDKN2A","CDK4",0.88,"Cell Cycle","Gene Regulatory","Regulatory"
+"PIK3CA","AKT",0.94,"Growth Factor","Gene Regulatory","Regulatory"
+"PIK3CA","MTOR",0.9,"Growth Factor","Gene Regulatory","Regulatory"
+"BRAF","MEK",0.92,"Oncogene","Gene Regulatory","Regulatory"
+"ATM","TP53",0.87,"DNA Repair","Gene Regulatory","Regulatory"
+"CDK4","RB1",0.85,"Cell Cycle","Gene Regulatory","Regulatory"
+"P001","P002",0.889354588463902,"Triple Negative","Patient Similarity",NA
+"P001","P003",0.695556691568345,"Triple Negative","Patient Similarity",NA
+"P001","P004",0.678667293023318,"Triple Negative","Patient Similarity",NA
+"P001","P008",0.662295252364129,"Triple Negative","Patient Similarity",NA
+"P001","P010",0.634401703998446,"Triple Negative","Patient Similarity",NA
+"P001","P012",0.624422056507319,"Triple Negative","Patient Similarity",NA
+"P001","P013",0.792277259007096,"Triple Negative","Patient Similarity",NA
+"P001","P015",0.633166432101279,"Triple Negative","Patient Similarity",NA
+"P001","P017",0.984996291808784,"Triple Negative","Patient Similarity",NA
+"P002","P003",0.68941596550867,"Triple Negative","Patient Similarity",NA
+"P002","P005",0.68303063865751,"Triple Negative","Patient Similarity",NA
+"P002","P006",0.655101962201297,"Triple Negative","Patient Similarity",NA
+"P002","P008",0.688386644143611,"Triple Negative","Patient Similarity",NA
+"P002","P013",0.821664408501238,"Triple Negative","Patient Similarity",NA
+"P002","P016",0.620723324920982,"Triple Negative","Patient Similarity",NA
+"P002","P017",0.840886628767475,"Triple Negative","Patient Similarity",NA
+"P002","P018",0.693126879166812,"Triple Negative","Patient Similarity",NA
+"P002","P019",0.603817707020789,"Triple Negative","Patient Similarity",NA
+"P003","P004",0.639875887427479,"Luminal A","Patient Similarity",NA
+"P003","P007",0.631263394095004,"Luminal A","Patient Similarity",NA
+"P003","P008",0.825390876084566,"Luminal A","Patient Similarity",NA
+"P003","P014",0.789319282816723,"Luminal A","Patient Similarity",NA
+"P003","P018",0.764222642639652,"Luminal A","Patient Similarity",NA
+"P004","P005",0.610329345054924,"HER2+","Patient Similarity",NA
+"P004","P007",0.611477462714538,"HER2+","Patient Similarity",NA
+"P004","P010",0.767018385184929,"HER2+","Patient Similarity",NA
+"P004","P012",1,"HER2+","Patient Similarity",NA
+"P005","P006",0.844069149857387,"Luminal B","Patient Similarity",NA
+"P005","P007",0.6850432055071,"Luminal B","Patient Similarity",NA
+"P005","P009",0.900450620288029,"Luminal B","Patient Similarity",NA
+"P005","P011",0.910935292905197,"Luminal B","Patient Similarity",NA
+"P005","P012",0.600609025079757,"Luminal B","Patient Similarity",NA
+"P005","P015",0.715226846840233,"Luminal B","Patient Similarity",NA
+"P005","P018",0.631576852221042,"Luminal B","Patient Similarity",NA
+"P005","P019",0.724815824907273,"Luminal B","Patient Similarity",NA
+"P005","P020",0.847326020291075,"Luminal B","Patient Similarity",NA
+"P006","P009",1,"Luminal B","Patient Similarity",NA
+"P006","P011",0.970525945024565,"Luminal B","Patient Similarity",NA
+"P006","P014",0.67495433986187,"Luminal B","Patient Similarity",NA
+"P006","P015",0.956157280085608,"Luminal B","Patient Similarity",NA
+"P006","P016",0.628561569564044,"Luminal B","Patient Similarity",NA
+"P006","P018",0.605803103465587,"Luminal B","Patient Similarity",NA
+"P006","P019",0.779134704219177,"Luminal B","Patient Similarity",NA
+"P006","P020",0.624919696897268,"Luminal B","Patient Similarity",NA
+"P007","P008",0.611747264582664,"HER2+","Patient Similarity",NA
+"P007","P010",0.860924674011767,"HER2+","Patient Similarity",NA
+"P007","P011",0.67788813021034,"HER2+","Patient Similarity",NA
+"P007","P012",0.647263947036117,"HER2+","Patient Similarity",NA
+"P007","P015",0.611523799411952,"HER2+","Patient Similarity",NA
+"P007","P018",0.610330017097294,"HER2+","Patient Similarity",NA
+"P008","P011",0.67392918150872,"Luminal A","Patient Similarity",NA
+"P008","P014",0.685845117364079,"Luminal A","Patient Similarity",NA
+"P009","P011",0.777622944721952,"Luminal B","Patient Similarity",NA
+"P009","P013",0.629871762543917,"Luminal B","Patient Similarity",NA
+"P009","P015",0.971565276198089,"Luminal B","Patient Similarity",NA
+"P009","P016",0.667222566902637,"Luminal B","Patient Similarity",NA
+"P009","P017",0.645051910821348,"Luminal B","Patient Similarity",NA
+"P009","P019",0.752157520782202,"Luminal B","Patient Similarity",NA
+"P009","P020",0.982525253528729,"Luminal B","Patient Similarity",NA
+"P010","P011",0.617276483681053,"HER2+","Patient Similarity",NA
+"P010","P012",0.610881797736511,"HER2+","Patient Similarity",NA
+"P010","P014",0.613643753062934,"HER2+","Patient Similarity",NA
+"P011","P014",0.654047074820846,"Luminal B","Patient Similarity",NA
+"P011","P015",0.877230619220063,"Luminal B","Patient Similarity",NA
+"P011","P019",0.984011052781716,"Luminal B","Patient Similarity",NA
+"P011","P020",0.652921371813864,"Luminal B","Patient Similarity",NA
+"P012","P018",0.635502013377845,"HER2+","Patient Similarity",NA
+"P013","P015",0.657087437529117,"Triple Negative","Patient Similarity",NA
+"P013","P016",0.730322650866583,"Triple Negative","Patient Similarity",NA
+"P013","P017",0.909505936782807,"Triple Negative","Patient Similarity",NA
+"P013","P019",0.628205819241702,"Triple Negative","Patient Similarity",NA
+"P014","P018",0.672247245209292,"Luminal A","Patient Similarity",NA
+"P015","P016",0.698621071688831,"Luminal B","Patient Similarity",NA
+"P015","P017",0.621757325064391,"Luminal B","Patient Similarity",NA
+"P015","P019",0.958890480548143,"Luminal B","Patient Similarity",NA
+"P015","P020",0.682078732550144,"Luminal B","Patient Similarity",NA
+"P016","P017",0.738719561463222,"Triple Negative","Patient Similarity",NA
+"P018","P019",0.67622595122084,"Luminal A","Patient Similarity",NA
+"P019","P020",0.629316967492923,"Luminal B","Patient Similarity",NA
+"Diabetes","Hypertension",156,"Metabolic","Disease Comorbidity",NA
+"Diabetes","Obesity",142,"Metabolic","Disease Comorbidity",NA
+"Diabetes","CAD",98,"Metabolic","Disease Comorbidity",NA
+"Diabetes","CKD",87,"Metabolic","Disease Comorbidity",NA
+"Hypertension","CAD",134,"Cardiovascular","Disease Comorbidity",NA
+"Hypertension","CKD",76,"Cardiovascular","Disease Comorbidity",NA
+"Hypertension","Obesity",145,"Cardiovascular","Disease Comorbidity",NA
+"Obesity","CAD",121,"Metabolic","Disease Comorbidity",NA
+"Obesity","Arthritis",89,"Metabolic","Disease Comorbidity",NA
+"Obesity","Depression",67,"Metabolic","Disease Comorbidity",NA
+"CAD","CKD",112,"Cardiovascular","Disease Comorbidity",NA
+"CAD","COPD",54,"Cardiovascular","Disease Comorbidity",NA
+"CKD","Hypertension",92,"Renal","Disease Comorbidity",NA
+"COPD","Asthma",78,"Respiratory","Disease Comorbidity",NA
+"Depression","Arthritis",45,"Mental Health","Disease Comorbidity",NA
+"Arthritis","Osteoporosis",67,"Musculoskeletal","Disease Comorbidity",NA

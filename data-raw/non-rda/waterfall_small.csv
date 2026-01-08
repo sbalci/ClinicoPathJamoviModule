@@ -1,0 +1,6 @@
+"patientID","best_response","treatment"
+"PT001",-80,"A"
+"PT002",-40,"A"
+"PT003",-10,"B"
+"PT004",15,"B"
+"PT005",60,"Control"

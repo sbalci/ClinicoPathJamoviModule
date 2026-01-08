@@ -1,0 +1,21 @@
+"PatientID","StartTime","EndTime","Outcome","SurgeryDate","Discharge","FirstVisit","ComplicationDate","ComplicationType","SurgeryType","ASA_Score","Censored"
+"SX001",0,88,"No Complications",0,10,17,NA,"None","Abdominal","ASA III",1
+"SX002",0,354,"Major Complications",0,13,19,12,"Bleeding","Abdominal","ASA III",1
+"SX003",0,199,"Minor Complications",0,2,23,7,"Infection","Thoracic","ASA I-II",1
+"SX004",0,219,"Minor Complications",0,7,29,10,"Infection","Vascular","ASA I-II",1
+"SX005",0,191,"No Complications",0,8,25,NA,"None","Abdominal","ASA I-II",1
+"SX006",0,116,"No Complications",0,14,29,NA,"None","Abdominal","ASA III",1
+"SX007",0,257,"No Complications",0,4,16,NA,"None","Vascular","ASA IV",1
+"SX008",0,86,"No Complications",0,11,20,NA,"None","Abdominal","ASA IV",1
+"SX009",0,177,"No Complications",0,14,16,NA,"None","Thoracic","ASA III",1
+"SX010",0,56,"Minor Complications",0,7,23,10,"Bleeding","Thoracic","ASA I-II",1
+"SX011",0,203,"No Complications",0,2,23,NA,"None","Thoracic","ASA I-II",1
+"SX012",0,203,"No Complications",0,12,20,NA,"None","Abdominal","ASA IV",1
+"SX013",0,32,"Minor Complications",0,14,26,16,"Bleeding","Thoracic","ASA IV",1
+"SX014",0,124,"Minor Complications",0,11,23,15,"Bleeding","Vascular","ASA I-II",1
+"SX015",0,220,"No Complications",0,11,27,NA,"None","Abdominal","ASA I-II",1
+"SX016",0,167,"Major Complications",0,11,24,16,"Wound Dehiscence","Vascular","ASA I-II",1
+"SX017",0,284,"No Complications",0,12,26,NA,"None","Abdominal","ASA III",1
+"SX018",0,113,"No Complications",0,14,16,NA,"None","Abdominal","ASA I-II",1
+"SX019",0,338,"Minor Complications",0,2,23,7,"Bleeding","Abdominal","ASA I-II",1
+"SX020",0,186,"No Complications",0,9,15,NA,"None","Abdominal","ASA I-II",1

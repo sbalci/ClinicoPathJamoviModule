@@ -146,7 +146,10 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Creates waterfall and spider plots to analyze tumor response data following
-RECIST criteria. Supports both raw tumor measurements and pre-calculated
-percentage changes. Provides comprehensive response analysis including ORR,
-DCR, and person-time metrics.
+RECIST criteria.
+}
+\details{
+Supports both raw tumor measurements and pre-calculated percentage changes.
+Provides comprehensive response analysis including ORR, DCR, and
+person-time metrics.
 }

@@ -1,0 +1,161 @@
+audit_id,quality_grade,compliance,risk_category,accreditation,institution_type,quarter,audit_count
+QA0001,Good,Mostly Compliant,Low Risk,Provisional,Academic Center,Q1 2025,1
+QA0002,Excellent,Partially Compliant,Low Risk,Accredited,Private Practice,Q1 2025,1
+QA0003,Excellent,Fully Compliant,Low Risk,Accredited,Specialty Clinic,Q3 2025,1
+QA0004,Poor,Fully Compliant,Low Risk,Accredited,Private Practice,Q2 2025,1
+QA0005,Good,Partially Compliant,Intermediate Risk,Provisional,Private Practice,Q1 2025,1
+QA0006,NA,Partially Compliant,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0007,Good,NA,High Risk,Accredited,Academic Center,Q4 2025,1
+QA0008,Good,Mostly Compliant,Low Risk,Accredited,Specialty Clinic,Q2 2025,1
+QA0009,Good,Fully Compliant,Low Risk,Accredited,Academic Center,Q3 2025,1
+QA0010,Good,Mostly Compliant,Low Risk,Accredited,Academic Center,Q4 2025,1
+QA0011,Excellent,Mostly Compliant,Low Risk,Accredited,Private Practice,Q3 2025,1
+QA0012,Fair,Partially Compliant,Low Risk,Accredited,Private Practice,Q4 2025,1
+QA0013,Good,Mostly Compliant,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0014,Poor,Mostly Compliant,Low Risk,Accredited,Community Hospital,Q1 2025,1
+QA0015,Fair,Partially Compliant,Low Risk,Accredited,Community Hospital,Q2 2025,1
+QA0016,Excellent,Partially Compliant,Intermediate Risk,Accredited,Academic Center,Q3 2025,1
+QA0017,Good,Mostly Compliant,Intermediate Risk,Provisional,Community Hospital,Q2 2025,1
+QA0018,Good,Partially Compliant,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0019,Excellent,Mostly Compliant,Low Risk,Accredited,Specialty Clinic,Q3 2025,1
+QA0020,Good,Fully Compliant,Low Risk,Accredited,Community Hospital,Q1 2025,1
+QA0021,Excellent,Partially Compliant,Intermediate Risk,Accredited,Community Hospital,Q2 2025,1
+QA0022,Excellent,Mostly Compliant,Low Risk,Accredited,Academic Center,Q1 2025,1
+QA0023,Good,NA,High Risk,Accredited,Community Hospital,Q3 2025,1
+QA0024,Poor,Fully Compliant,Intermediate Risk,Provisional,Community Hospital,Q3 2025,1
+QA0025,Excellent,Fully Compliant,Low Risk,Accredited,Private Practice,Q4 2025,1
+QA0026,Excellent,Non-Compliant,Intermediate Risk,Accredited,Community Hospital,Q4 2025,1
+QA0027,Excellent,Mostly Compliant,Intermediate Risk,Accredited,Private Practice,Q4 2025,1
+QA0028,Fair,Fully Compliant,Intermediate Risk,Accredited,Community Hospital,Q1 2025,1
+QA0029,Good,Non-Compliant,Low Risk,Accredited,Specialty Clinic,Q1 2025,1
+QA0030,Good,Fully Compliant,Low Risk,Accredited,Community Hospital,Q4 2025,1
+QA0031,Fair,Fully Compliant,Low Risk,Accredited,Specialty Clinic,Q1 2025,1
+QA0032,Excellent,Partially Compliant,High Risk,Accredited,Private Practice,Q1 2025,1
+QA0033,Excellent,Partially Compliant,Intermediate Risk,Accredited,Community Hospital,Q4 2025,1
+QA0034,Fair,Fully Compliant,Low Risk,Accredited,Community Hospital,Q1 2025,1
+QA0035,Excellent,Non-Compliant,Low Risk,Provisional,Academic Center,Q4 2025,1
+QA0036,NA,Mostly Compliant,Intermediate Risk,Accredited,Specialty Clinic,Q2 2025,1
+QA0037,Fair,Fully Compliant,Intermediate Risk,Accredited,Community Hospital,Q4 2025,1
+QA0038,Excellent,Mostly Compliant,Intermediate Risk,Provisional,Community Hospital,Q3 2025,1
+QA0039,Good,Fully Compliant,Intermediate Risk,Accredited,Academic Center,Q3 2025,1
+QA0040,Excellent,NA,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0041,Excellent,Partially Compliant,High Risk,Accredited,Private Practice,Q2 2025,1
+QA0042,Fair,Fully Compliant,Intermediate Risk,Accredited,Academic Center,Q4 2025,1
+QA0043,Excellent,Fully Compliant,Intermediate Risk,Provisional,Private Practice,Q3 2025,1
+QA0044,NA,Fully Compliant,Intermediate Risk,Provisional,Academic Center,Q1 2025,1
+QA0045,Poor,Partially Compliant,Low Risk,Accredited,Private Practice,Q3 2025,1
+QA0046,Fair,Mostly Compliant,Low Risk,Accredited,Community Hospital,Q3 2025,1
+QA0047,Good,Non-Compliant,High Risk,Accredited,Community Hospital,Q3 2025,1
+QA0048,Fair,Mostly Compliant,Low Risk,Provisional,Community Hospital,Q1 2025,1
+QA0049,Good,Fully Compliant,Intermediate Risk,Accredited,Academic Center,Q2 2025,1
+QA0050,Poor,Fully Compliant,Low Risk,Provisional,Academic Center,Q4 2025,1
+QA0051,Fair,Mostly Compliant,Low Risk,Accredited,Academic Center,Q3 2025,1
+QA0052,Excellent,Non-Compliant,Low Risk,Provisional,Academic Center,Q2 2025,1
+QA0053,Fair,Mostly Compliant,Low Risk,Provisional,Academic Center,Q1 2025,1
+QA0054,Excellent,Mostly Compliant,Low Risk,Accredited,Private Practice,Q4 2025,1
+QA0055,Good,Fully Compliant,Low Risk,Accredited,Community Hospital,Q3 2025,1
+QA0056,Good,Fully Compliant,Low Risk,Accredited,Academic Center,Q1 2025,1
+QA0057,Good,Fully Compliant,Intermediate Risk,Accredited,Academic Center,Q2 2025,1
+QA0058,Excellent,Mostly Compliant,High Risk,Not Accredited,Community Hospital,Q3 2025,1
+QA0059,Excellent,Fully Compliant,Low Risk,Accredited,Community Hospital,Q3 2025,1
+QA0060,NA,Mostly Compliant,Low Risk,Accredited,Academic Center,Q1 2025,1
+QA0061,Good,Fully Compliant,Low Risk,Provisional,Specialty Clinic,Q3 2025,1
+QA0062,Excellent,Mostly Compliant,Intermediate Risk,Accredited,Community Hospital,Q4 2025,1
+QA0063,Good,Mostly Compliant,Intermediate Risk,Accredited,Academic Center,Q3 2025,1
+QA0064,Excellent,Partially Compliant,Intermediate Risk,Accredited,Community Hospital,Q4 2025,1
+QA0065,Good,Mostly Compliant,Low Risk,Not Accredited,Private Practice,Q2 2025,1
+QA0066,Good,Mostly Compliant,Low Risk,Not Accredited,Academic Center,Q2 2025,1
+QA0067,Fair,Mostly Compliant,High Risk,Accredited,Academic Center,Q3 2025,1
+QA0068,Excellent,Fully Compliant,Low Risk,Provisional,Academic Center,Q3 2025,1
+QA0069,Excellent,Fully Compliant,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0070,Excellent,Fully Compliant,Low Risk,Accredited,Academic Center,Q3 2025,1
+QA0071,Excellent,Fully Compliant,Intermediate Risk,Accredited,Academic Center,Q3 2025,1
+QA0072,Good,Mostly Compliant,Intermediate Risk,Accredited,Community Hospital,Q1 2025,1
+QA0073,Excellent,Mostly Compliant,Low Risk,Accredited,Private Practice,Q2 2025,1
+QA0074,Fair,Partially Compliant,Low Risk,Accredited,Community Hospital,Q4 2025,1
+QA0075,Good,Partially Compliant,Low Risk,Provisional,Community Hospital,Q2 2025,1
+QA0076,Excellent,Partially Compliant,Intermediate Risk,Accredited,Specialty Clinic,Q4 2025,1
+QA0077,Fair,Partially Compliant,High Risk,Accredited,Specialty Clinic,Q3 2025,1
+QA0078,Fair,Partially Compliant,Intermediate Risk,Accredited,Community Hospital,Q3 2025,1
+QA0079,Excellent,Partially Compliant,Low Risk,Accredited,Private Practice,Q1 2025,1
+QA0080,Poor,Mostly Compliant,Low Risk,Provisional,Private Practice,Q4 2025,1
+QA0081,Excellent,Mostly Compliant,Intermediate Risk,Accredited,Academic Center,Q4 2025,1
+QA0082,Excellent,Fully Compliant,Intermediate Risk,Accredited,Community Hospital,Q1 2025,1
+QA0083,Good,Partially Compliant,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0084,Good,Partially Compliant,Low Risk,Accredited,Private Practice,Q3 2025,1
+QA0085,NA,Mostly Compliant,Low Risk,Accredited,Private Practice,Q1 2025,1
+QA0086,Fair,Non-Compliant,Low Risk,Accredited,Community Hospital,Q2 2025,1
+QA0087,Excellent,Partially Compliant,Intermediate Risk,Accredited,Private Practice,Q4 2025,1
+QA0088,Poor,Mostly Compliant,High Risk,Accredited,Community Hospital,Q4 2025,1
+QA0089,Fair,Fully Compliant,Low Risk,Provisional,Community Hospital,Q4 2025,1
+QA0090,Good,Fully Compliant,Low Risk,Accredited,Private Practice,Q4 2025,1
+QA0091,Excellent,Fully Compliant,Intermediate Risk,Accredited,Community Hospital,Q1 2025,1
+QA0092,Excellent,Mostly Compliant,Intermediate Risk,Accredited,Community Hospital,Q4 2025,1
+QA0093,Excellent,Partially Compliant,Low Risk,Provisional,Community Hospital,Q4 2025,1
+QA0094,Good,Partially Compliant,High Risk,Accredited,Private Practice,Q2 2025,1
+QA0095,Excellent,Mostly Compliant,Low Risk,Accredited,Specialty Clinic,Q3 2025,1
+QA0096,Excellent,Mostly Compliant,Intermediate Risk,Accredited,Academic Center,Q4 2025,1
+QA0097,Poor,Fully Compliant,High Risk,Accredited,Community Hospital,Q4 2025,1
+QA0098,Fair,Fully Compliant,High Risk,Provisional,Community Hospital,Q3 2025,1
+QA0099,Excellent,Partially Compliant,High Risk,Provisional,Community Hospital,Q1 2025,1
+QA0100,Excellent,Mostly Compliant,Low Risk,Accredited,Community Hospital,Q4 2025,1
+QA0101,Excellent,Partially Compliant,Intermediate Risk,Accredited,Community Hospital,Q3 2025,1
+QA0102,Excellent,Fully Compliant,Low Risk,Accredited,Private Practice,Q2 2025,1
+QA0103,Good,Mostly Compliant,Intermediate Risk,Provisional,Community Hospital,Q1 2025,1
+QA0104,Poor,Mostly Compliant,Intermediate Risk,Not Accredited,Specialty Clinic,Q2 2025,1
+QA0105,Fair,Mostly Compliant,Low Risk,Accredited,Academic Center,Q1 2025,1
+QA0106,Fair,Fully Compliant,High Risk,Accredited,Specialty Clinic,Q1 2025,1
+QA0107,Excellent,Fully Compliant,Low Risk,Provisional,Private Practice,Q2 2025,1
+QA0108,Fair,Partially Compliant,Intermediate Risk,Provisional,Academic Center,Q1 2025,1
+QA0109,Good,Partially Compliant,Intermediate Risk,Provisional,Academic Center,Q4 2025,1
+QA0110,Good,NA,Intermediate Risk,Accredited,Academic Center,Q1 2025,1
+QA0111,Poor,Partially Compliant,Low Risk,Accredited,Specialty Clinic,Q2 2025,1
+QA0112,Good,Mostly Compliant,Intermediate Risk,Accredited,Academic Center,Q4 2025,1
+QA0113,Fair,Fully Compliant,Low Risk,Accredited,Academic Center,Q3 2025,1
+QA0114,Fair,Non-Compliant,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0115,Fair,Mostly Compliant,Low Risk,Accredited,Private Practice,Q3 2025,1
+QA0116,Good,Partially Compliant,Intermediate Risk,Provisional,Private Practice,Q2 2025,1
+QA0117,Good,Mostly Compliant,Low Risk,Accredited,Community Hospital,Q4 2025,1
+QA0118,Excellent,Non-Compliant,High Risk,Accredited,Private Practice,Q4 2025,1
+QA0119,Fair,Mostly Compliant,High Risk,Accredited,Private Practice,Q1 2025,1
+QA0120,Good,Mostly Compliant,Low Risk,Accredited,Specialty Clinic,Q3 2025,1
+QA0121,Fair,Partially Compliant,High Risk,Accredited,Specialty Clinic,Q3 2025,1
+QA0122,Fair,Non-Compliant,Low Risk,Accredited,Private Practice,Q4 2025,1
+QA0123,Good,Fully Compliant,High Risk,Accredited,Community Hospital,Q3 2025,1
+QA0124,Good,Fully Compliant,Low Risk,Accredited,Specialty Clinic,Q4 2025,1
+QA0125,Good,Mostly Compliant,High Risk,Provisional,Academic Center,Q1 2025,1
+QA0126,Excellent,Partially Compliant,Intermediate Risk,Accredited,Community Hospital,Q2 2025,1
+QA0127,Good,Fully Compliant,Low Risk,Provisional,Academic Center,Q1 2025,1
+QA0128,Good,Non-Compliant,High Risk,Not Accredited,Private Practice,Q3 2025,1
+QA0129,Excellent,Fully Compliant,Intermediate Risk,Accredited,Private Practice,Q2 2025,1
+QA0130,Fair,Non-Compliant,Low Risk,Accredited,Specialty Clinic,Q2 2025,1
+QA0131,Excellent,Fully Compliant,High Risk,Provisional,Private Practice,Q2 2025,1
+QA0132,Good,Fully Compliant,Low Risk,Provisional,Specialty Clinic,Q4 2025,1
+QA0133,Good,Mostly Compliant,Intermediate Risk,Accredited,Community Hospital,Q2 2025,1
+QA0134,Good,Fully Compliant,Intermediate Risk,Provisional,Specialty Clinic,Q1 2025,1
+QA0135,Excellent,NA,Intermediate Risk,Accredited,Specialty Clinic,Q4 2025,1
+QA0136,Fair,Partially Compliant,Intermediate Risk,Provisional,Private Practice,Q1 2025,1
+QA0137,Fair,Mostly Compliant,Low Risk,Accredited,Academic Center,Q4 2025,1
+QA0138,Fair,Mostly Compliant,Low Risk,Accredited,Specialty Clinic,Q1 2025,1
+QA0139,Good,Fully Compliant,High Risk,Not Accredited,Specialty Clinic,Q4 2025,1
+QA0140,Good,Fully Compliant,Low Risk,Accredited,Community Hospital,Q4 2025,1
+QA0141,Good,Mostly Compliant,Low Risk,Accredited,Private Practice,Q3 2025,1
+QA0142,Fair,Fully Compliant,Low Risk,Accredited,Specialty Clinic,Q1 2025,1
+QA0143,Good,Fully Compliant,Intermediate Risk,Accredited,Specialty Clinic,Q3 2025,1
+QA0144,Excellent,Mostly Compliant,Intermediate Risk,Provisional,Academic Center,Q3 2025,1
+QA0145,Good,Mostly Compliant,High Risk,Accredited,Academic Center,Q2 2025,1
+QA0146,Excellent,Partially Compliant,Intermediate Risk,Accredited,Academic Center,Q1 2025,1
+QA0147,Excellent,Partially Compliant,High Risk,Accredited,Academic Center,Q3 2025,1
+QA0148,Good,Fully Compliant,Intermediate Risk,Accredited,Specialty Clinic,Q4 2025,1
+QA0149,Good,Partially Compliant,High Risk,Accredited,Academic Center,Q3 2025,1
+QA0150,Good,Partially Compliant,High Risk,Accredited,Community Hospital,Q1 2025,1
+QA0151,Excellent,Fully Compliant,Low Risk,Accredited,Academic Center,Q2 2025,1
+QA0152,Good,Fully Compliant,Intermediate Risk,Accredited,Private Practice,Q2 2025,1
+QA0153,Excellent,Fully Compliant,Low Risk,Provisional,Academic Center,Q4 2025,1
+QA0154,Good,Fully Compliant,Low Risk,Provisional,Private Practice,Q4 2025,1
+QA0155,Good,Fully Compliant,Low Risk,Provisional,Academic Center,Q4 2025,1
+QA0156,Excellent,Partially Compliant,Low Risk,Accredited,Private Practice,Q3 2025,1
+QA0157,Excellent,Fully Compliant,Low Risk,Provisional,Academic Center,Q2 2025,1
+QA0158,Fair,Mostly Compliant,Low Risk,Accredited,Private Practice,Q4 2025,1
+QA0159,Fair,Fully Compliant,Intermediate Risk,Accredited,Community Hospital,Q1 2025,1
+QA0160,Fair,Mostly Compliant,Low Risk,Accredited,Community Hospital,Q4 2025,1

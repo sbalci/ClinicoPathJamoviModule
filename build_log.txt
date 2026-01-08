@@ -1,0 +1,15 @@
+* checking for file ‘./DESCRIPTION’ ... OK
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/layoutlmv2/__init__.py: fcopyfile failed: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/layoutlmv2/__pycache__: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/layoutlmv2/processing_layoutlmv2.py: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/layoutlmv2/modeling_layoutlmv2.py: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/layoutlmv2/image_processing_layoutlmv2.py: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/layoutlmv2/configuration_layoutlmv2.py: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/dinov3_vit: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/__init__.py: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/granitemoehybrid: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/unispeech_sat: No space left on device
+cp: /var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T//RtmpeKyBhu/Rbuild1690574ce175a/ClinicoPathJamoviModule/.venv/lib/python3.13/site-packages/transformers/models/t5: No space left on device
+ ERROR
+copying to build directory failed

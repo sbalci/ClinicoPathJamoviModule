@@ -4,11 +4,10 @@ destination: docs
 authors:
   Serdar Balci:
     href: https://www.serdarbalci.com/
-# development:
-#   mode: auto
+
 navbar:
   structure:
-    left:  [home, intro, devversion, reference, articles, tutorials, news]
+    left:  [home, intro, devversion, reference, articles, tutorials, test-data, news]
     right: [twitter, github]
   components:
     twitter:
@@ -17,7 +16,56 @@ navbar:
     devversion:
       icon: "fa-cogs"
       href: dev/index.html
+    test-data:
+      text: "Test Data"
+      icon: "fa-database"
+      menu:
+      - text: "Test Data Catalog"
+        href: articles/test-data-catalog.html
+      - text: "Complete Catalog (945 files)"
+        href: articles/test-data-complete-catalog.html
+      - text: "Function Reference"
+        href: articles/function-reference.html
+
 home:
   strip_header: true
+
 template:
   bootstrap: 5
+
+articles:
+- title: "Test Data & Examples"
+  desc: "Comprehensive test datasets with downloadable .omv files"
+  contents:
+  - test-data-catalog
+  - test-data-complete-catalog
+  - function-reference
+
+- title: "Module Development"
+  desc: "Guides for developing jamovi modules"
+  contents:
+  - module-development-jamovi
+  - developer_guide
+
+- title: "General Guides"
+  desc: "General statistical and methodological guides"
+  contents:
+  - general-independent-vs-dependent-sampling-explained
+
+- title: "User Guides"
+  desc: "Guides for ClinicoPath users"
+  contents:
+  - users-of-ClinicoPath
+  - pathology-jamovi
+
+- title: "ClinicoPathDescriptive Module"
+  desc: "Guides for checkdata and descriptive statistics"
+  contents:
+  - clinicopath-descriptives-checkdata-guide
+
+- title: "OncoPath Module"
+  desc: "Guides for IHC clustering and oncology analysis"
+  contents:
+  - ihccluster-marker-distance-pathologist-guide
+  - ihccluster-quick-reference-card
+

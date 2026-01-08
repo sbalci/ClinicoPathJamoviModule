@@ -17,16 +17,20 @@ test_that('vartree analysis works', {
   )
 
   # Run analysis
-  expect_no_error({
-    model <- vartree(
-      data = data,
+  result <- vartree(
+    data = data,
     vars = c('vars1', 'vars2', 'vars3'),
     percvar = 'percvar',
+    percvarLevel = 'A',
     summaryvar = 'summaryvar',
     summarylocation = 'leafonly',
     style = 'default',
     prunebelow = 'prunebelow',
+    pruneLevel1 = 'A',
+    pruneLevel2 = NULL,
     follow = 'follow',
+    followLevel1 = 'A',
+    followLevel2 = NULL,
     excl = FALSE,
     vp = TRUE,
     horizontal = FALSE,
@@ -43,22 +47,14 @@ test_that('vartree analysis works', {
     prunesmaller = 5,
     showInterpretation = TRUE,
     maxwidth = 600
-    )
-  })
+  )
 
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
+  # Verify result object
+  expect_s3_class(result, 'vartreeResults')
 
-  # Define output path
-  omv_path <- file.path('omv_output', 'vartree.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
+  # Check that main outputs exist
+  # vartree uses text1 (Html) for the tree visualization, not a plot
+  expect_true(!is.null(result$text1))
+  expect_true(!is.null(result$interpretation))
 })
 

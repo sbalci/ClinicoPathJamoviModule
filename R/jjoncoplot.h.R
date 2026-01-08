@@ -392,7 +392,7 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="tmbTable",
                 title="Per-sample Mutation Burden",
                 rows=0,
-                visible="(showTMB && showMutationLoad && showTMBTable)",
+                visible="(showTMB && showTMBTable)",
                 clearWith=list(
                     "geneVars",
                     "sampleVar",

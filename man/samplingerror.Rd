@@ -86,5 +86,9 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$errorSummary)}
 }
 \description{
-Sampling Error & Efficiency Calculator
+Practical tool for evaluating sampling adequacy and statistical power
+in clinicopathological research.
+}
+\details{
+Calculates sampling efficiency and error rates according to Kayser (2009).
 }

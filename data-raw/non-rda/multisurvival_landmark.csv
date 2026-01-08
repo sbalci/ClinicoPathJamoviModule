@@ -1,0 +1,161 @@
+"PatientID","elapsedtime","outcome","response_3mo","treatment","pdl1_status","age"
+"LM001",2.53184939296124,1,"Partial Response","Immunotherapy","Negative",61
+"LM002",1.28718534058978,1,"Progression","Chemotherapy","Positive",75
+"LM003",0.765828687079747,1,"Progression","Chemotherapy","Positive",45
+"LM004",0.687023714956513,1,"Progression","Chemotherapy","Positive",49
+"LM005",1.99873949114336,1,"Partial Response","Chemotherapy","Negative",66
+"LM006",1.80716197057816,1,"Partial Response","Chemotherapy","Positive",76
+"LM007",2.09163612064537,1,"Progression","Chemotherapy","Negative",73
+"LM008",1.98917929430436,1,"Progression","Immunotherapy","Negative",78
+"LM009",1.02612774629566,1,"Partial Response","Immunotherapy","Positive",75
+"LM010",0.84106148622548,1,"Partial Response","Immunotherapy","Negative",74
+"LM011",2.21783359499741,1,"Stable Disease","Chemotherapy","Negative",58
+"LM012",2.23699130331591,1,"Partial Response","Immunotherapy","Positive",64
+"LM013",0.5,1,"Progression","Chemotherapy","Positive",58
+"LM014",1.11622945800519,1,"Complete Response","Chemotherapy","Positive",57
+"LM015",3.17097659348566,1,"Complete Response","Chemotherapy","Positive",64
+"LM016",3.20226348518308,1,"Complete Response","Chemotherapy","Negative",63
+"LM017",2.96891813930987,1,"Progression","Immunotherapy","Negative",75
+"LM018",1.25637014374759,1,"Stable Disease","Chemotherapy","Negative",57
+"LM019",2.44925754722523,1,"Stable Disease","Immunotherapy","Negative",42
+"LM020",2.31427145396989,1,"Partial Response","Chemotherapy","Negative",58
+"LM021",2.73658874526195,1,"Complete Response","Immunotherapy","Positive",78
+"LM022",0.853582378448027,1,"Stable Disease","Chemotherapy","Negative",63
+"LM023",2.60180707426443,1,"Progression","Chemotherapy","Negative",77
+"LM024",2.7176708775439,1,"Complete Response","Chemotherapy","Negative",67
+"LM025",1.57625604383955,1,"Stable Disease","Chemotherapy","Negative",69
+"LM026",1.49709463601921,1,"Partial Response","Immunotherapy","Negative",72
+"LM027",1.46648426484606,1,"Stable Disease","Immunotherapy","Negative",69
+"LM028",2.08245881333713,1,"Stable Disease","Chemotherapy","Negative",60
+"LM029",0.5,1,"Stable Disease","Chemotherapy","Negative",53
+"LM030",1.29234731263716,1,"Complete Response","Chemotherapy","Negative",65
+"LM031",3.18016498632165,0,"Partial Response","Chemotherapy","Negative",42
+"LM032",1.10952008360922,0,"Stable Disease","Immunotherapy","Positive",83
+"LM033",1.27467726512743,0,"Complete Response","Immunotherapy","Positive",61
+"LM034",2.11397968669207,0,"Partial Response","Chemotherapy","Negative",74
+"LM035",1.74733682914914,0,"Partial Response","Immunotherapy","Negative",38
+"LM036",0.5,1,"Progression","Immunotherapy","Positive",60
+"LM037",1.8270810435714,1,"Stable Disease","Chemotherapy","Positive",84
+"LM038",1.77641563607741,0,"Complete Response","Immunotherapy","Negative",69
+"LM039",0.890394659466265,1,"Progression","Chemotherapy","Positive",54
+"LM040",1.98712455221176,0,"Partial Response","Immunotherapy","Negative",65
+"LM041",65.962835857369,0,"Partial Response","Immunotherapy","Negative",70
+"LM042",13.8637392749566,0,"Stable Disease","Chemotherapy","Negative",72
+"LM043",0.5,1,"Partial Response","Immunotherapy","Negative",52
+"LM044",0.822072558713556,1,"Progression","Immunotherapy","Negative",49
+"LM045",44.9098172236718,1,"Partial Response","Chemotherapy","Negative",67
+"LM046",11.303047605722,1,"Partial Response","Immunotherapy","Negative",65
+"LM047",71.5331902647255,0,"Partial Response","Immunotherapy","Positive",45
+"LM048",30.3138951606747,1,"Stable Disease","Chemotherapy","Negative",59
+"LM049",7.17786314228525,1,"Progression","Immunotherapy","Positive",68
+"LM050",36.6958539949263,0,"Stable Disease","Immunotherapy","Negative",65
+"LM051",0.5,1,"Progression","Immunotherapy","Negative",56
+"LM052",24.1907758765545,1,"Stable Disease","Immunotherapy","Positive",69
+"LM053",18,1,"Progression","Chemotherapy","Negative",71
+"LM054",37.4675061493962,0,"Stable Disease","Chemotherapy","Negative",65
+"LM055",40.7895201673831,1,"Stable Disease","Immunotherapy","Negative",72
+"LM056",46.0247544824648,0,"Complete Response","Immunotherapy","Positive",55
+"LM057",18,1,"Progression","Immunotherapy","Negative",64
+"LM058",74.548206225341,0,"Complete Response","Immunotherapy","Positive",77
+"LM059",12.2177539403129,1,"Stable Disease","Immunotherapy","Negative",68
+"LM060",18,1,"Progression","Immunotherapy","Positive",60
+"LM061",20.8152001704626,1,"Partial Response","Chemotherapy","Positive",61
+"LM062",27.9085221348539,0,"Stable Disease","Chemotherapy","Positive",61
+"LM063",5.85795330926892,0,"Stable Disease","Immunotherapy","Positive",76
+"LM064",6.10152739135838,0,"Partial Response","Chemotherapy","Negative",47
+"LM065",43.8942445476377,0,"Partial Response","Immunotherapy","Positive",78
+"LM066",56.0800584675884,1,"Partial Response","Chemotherapy","Negative",77
+"LM067",60.0398671220539,1,"Stable Disease","Chemotherapy","Negative",60
+"LM068",47.6548171210163,0,"Complete Response","Immunotherapy","Negative",71
+"LM069",18,1,"Progression","Immunotherapy","Positive",60
+"LM070",53.2128301503075,0,"Partial Response","Chemotherapy","Negative",74
+"LM071",6.40303215977362,1,"Progression","Immunotherapy","Negative",52
+"LM072",9.28741990239077,0,"Stable Disease","Immunotherapy","Negative",90
+"LM073",50.6775298925449,1,"Stable Disease","Chemotherapy","Negative",62
+"LM074",48.5566408850411,0,"Complete Response","Immunotherapy","Negative",46
+"LM075",19.5029503578547,0,"Stable Disease","Chemotherapy","Negative",58
+"LM076",16.4712704313311,0,"Partial Response","Chemotherapy","Positive",47
+"LM077",0.5,1,"Progression","Immunotherapy","Negative",79
+"LM078",31.4652373206552,0,"Complete Response","Immunotherapy","Negative",31
+"LM079",22.6649253948499,0,"Partial Response","Immunotherapy","Positive",58
+"LM080",15.386071066361,1,"Stable Disease","Chemotherapy","Positive",56
+"LM081",18,1,"Progression","Chemotherapy","Negative",51
+"LM082",33.0312473839519,0,"Partial Response","Immunotherapy","Negative",71
+"LM083",17.6737209651202,0,"Stable Disease","Chemotherapy","Positive",68
+"LM084",53.9968942524856,0,"Partial Response","Chemotherapy","Negative",53
+"LM085",17.1831174172023,1,"Complete Response","Immunotherapy","Negative",48
+"LM086",20.4894173691773,0,"Stable Disease","Chemotherapy","Negative",58
+"LM087",29.2501066806757,0,"Partial Response","Chemotherapy","Negative",60
+"LM088",33.016448206121,0,"Complete Response","Immunotherapy","Positive",88
+"LM089",0.5,1,"Partial Response","Chemotherapy","Negative",66
+"LM090",27.0323091198062,0,"Complete Response","Chemotherapy","Negative",73
+"LM091",29.2604045873086,1,"Partial Response","Immunotherapy","Positive",69
+"LM092",18,1,"Progression","Chemotherapy","Negative",57
+"LM093",17.9651269843598,1,"Progression","Chemotherapy","Positive",65
+"LM094",0.731293498218561,1,"Progression","Chemotherapy","Positive",42
+"LM095",23.2540473440809,0,"Stable Disease","Chemotherapy","Negative",62
+"LM096",13.8614988106502,1,"Stable Disease","Immunotherapy","Positive",75
+"LM097",50.7343944187905,1,"Partial Response","Immunotherapy","Positive",32
+"LM098",3.93722540697602,1,"Stable Disease","Chemotherapy","Negative",59
+"LM099",20.6310086379475,0,"Stable Disease","Chemotherapy","Negative",58
+"LM100",53.8392115144744,0,"Partial Response","Immunotherapy","Positive",64
+"LM101",55.7517742542811,1,"Partial Response","Immunotherapy","Positive",53
+"LM102",82.8347963596984,0,"Complete Response","Chemotherapy","Negative",52
+"LM103",29.332767675213,1,"Partial Response","Immunotherapy","Negative",79
+"LM104",44.9314345263112,0,"Stable Disease","Immunotherapy","Negative",79
+"LM105",37.6891495979491,1,"Partial Response","Chemotherapy","Negative",84
+"LM106",52.6698018339539,1,"Complete Response","Immunotherapy","Negative",34
+"LM107",40.3444045320006,0,"Stable Disease","Chemotherapy","Negative",80
+"LM108",76.2628744060412,0,"Complete Response","Chemotherapy","Negative",61
+"LM109",21.2067597824352,0,"Complete Response","Chemotherapy","Negative",62
+"LM110",18,1,"Progression","Chemotherapy","Negative",66
+"LM111",0.5,1,"Progression","Chemotherapy","Negative",53
+"LM112",18.6488557458723,1,"Stable Disease","Chemotherapy","Negative",65
+"LM113",18,1,"Progression","Immunotherapy","Negative",42
+"LM114",0.75,1,"Complete Response","Immunotherapy","Negative",54
+"LM115",35.1061177664499,0,"Partial Response","Chemotherapy","Positive",86
+"LM116",22.6032342249169,0,"Stable Disease","Chemotherapy","Positive",63
+"LM117",0.5,0,"Partial Response","Immunotherapy","Positive",61
+"LM118",18,1,"Progression","Immunotherapy","Positive",68
+"LM119",3.70812189990133,0,"Partial Response","Immunotherapy","Positive",63
+"LM120",65.185253477356,1,"Complete Response","Immunotherapy","Negative",61
+"LM121",20.3180397377636,0,"Partial Response","Immunotherapy","Positive",63
+"LM122",7.4918421482426,0,"Partial Response","Chemotherapy","Negative",79
+"LM123",18,1,"Progression","Chemotherapy","Positive",74
+"LM124",41.2767960055137,1,"Partial Response","Immunotherapy","Positive",63
+"LM125",81.5411186510647,0,"Complete Response","Chemotherapy","Negative",78
+"LM126",34.1951310667303,1,"Partial Response","Immunotherapy","Positive",68
+"LM127",22.5753026033762,0,"Complete Response","Immunotherapy","Positive",63
+"LM128",5.25380558686473,1,"Complete Response","Immunotherapy","Negative",56
+"LM129",84.5064783153231,0,"Stable Disease","Immunotherapy","Positive",73
+"LM130",18,1,"Progression","Chemotherapy","Negative",71
+"LM131",7.44248225655707,0,"Partial Response","Immunotherapy","Positive",74
+"LM132",70.1828060513107,0,"Complete Response","Chemotherapy","Negative",47
+"LM133",61.9225576091686,0,"Complete Response","Chemotherapy","Negative",70
+"LM134",18,1,"Progression","Chemotherapy","Positive",46
+"LM135",18,1,"Progression","Immunotherapy","Negative",53
+"LM136",5.9874247916229,1,"Stable Disease","Immunotherapy","Negative",66
+"LM137",37.6677257769523,0,"Partial Response","Chemotherapy","Positive",58
+"LM138",21.8767152985242,1,"Stable Disease","Immunotherapy","Positive",67
+"LM139",18,1,"Progression","Immunotherapy","Negative",54
+"LM140",32.9870587610313,0,"Stable Disease","Immunotherapy","Negative",30
+"LM141",58.5445589936767,0,"Complete Response","Immunotherapy","Positive",70
+"LM142",29.7171837304779,1,"Partial Response","Immunotherapy","Negative",77
+"LM143",38.573055864332,1,"Complete Response","Chemotherapy","Negative",88
+"LM144",0.5,0,"Stable Disease","Chemotherapy","Positive",91
+"LM145",18,1,"Progression","Immunotherapy","Negative",66
+"LM146",56.1880651037726,0,"Stable Disease","Chemotherapy","Positive",49
+"LM147",69.3332215102942,1,"Stable Disease","Immunotherapy","Positive",64
+"LM148",18,1,"Progression","Immunotherapy","Negative",72
+"LM149",76.0524929525999,0,"Stable Disease","Chemotherapy","Negative",55
+"LM150",78.4147091606133,0,"Partial Response","Immunotherapy","Negative",72
+"LM151",48.7383379877697,1,"Complete Response","Immunotherapy","Positive",52
+"LM152",39.2611120854121,1,"Partial Response","Immunotherapy","Negative",56
+"LM153",69.0649730186743,0,"Partial Response","Chemotherapy","Negative",79
+"LM154",51.6037795138783,0,"Complete Response","Immunotherapy","Positive",82
+"LM155",0.5,0,"Partial Response","Chemotherapy","Negative",77
+"LM156",33.3497672207808,1,"Stable Disease","Immunotherapy","Negative",48
+"LM157",23.8684363685693,0,"Stable Disease","Chemotherapy","Negative",76
+"LM158",38.0845226883082,0,"Complete Response","Chemotherapy","Negative",53
+"LM159",48.8672421460317,0,"Stable Disease","Immunotherapy","Positive",72
+"LM160",32.4211529165428,0,"Complete Response","Immunotherapy","Positive",54

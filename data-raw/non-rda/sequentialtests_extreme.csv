@@ -1,0 +1,9 @@
+"case_type","test1_sens","test1_spec","test2_sens","test2_spec","test1_cost","test2_cost","prevalence"
+"Rare disease",0.9,0.85,0.85,0.95,50,200,0.001
+"Common disease",0.9,0.85,0.85,0.95,50,200,0.8
+"Very high sens",0.99,0.8,0.85,0.95,50,200,0.1
+"Very high spec",0.8,0.99,0.85,0.95,50,200,0.1
+"Very low sens",0.5,0.8,0.85,0.95,50,200,0.1
+"Very low spec",0.8,0.5,0.85,0.95,50,200,0.1
+"Expensive test 2",0.85,0.85,0.9,0.95,50,5000,0.1
+"Cheap test 2",0.85,0.85,0.9,0.95,50,10,0.1

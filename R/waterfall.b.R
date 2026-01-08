@@ -1,4 +1,3 @@
-#' @export waterfallClass
 
 
 waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(

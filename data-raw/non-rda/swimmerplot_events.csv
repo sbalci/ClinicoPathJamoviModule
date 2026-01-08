@@ -1,0 +1,16 @@
+"PatientID","StartTime","EndTime","Response","TreatmentStart","Event1_Type","Event1_Time","Event2_Type","Event2_Time","Event3_Type","Event3_Time","TreatmentLine","Censored"
+"EV001",0,304,"SD",0,"Treatment Delay",47,"Lab Abnormality",225,"ER Visit",297,"First Line",1
+"EV002",0,207,"PD",0,"Treatment Delay",59,"None",NA,"ER Visit",125,"Third Line+",1
+"EV003",0,227,"PR",0,"Lab Abnormality",50,"Dose Reduction",161,"None",NA,"Third Line+",1
+"EV004",0,197,"SD",0,"Dose Reduction",14,"None",NA,"None",NA,"First Line",1
+"EV005",0,337,"PD",0,"Treatment Delay",43,"None",NA,"Hospitalization",206,"Third Line+",1
+"EV006",0,329,"PR",0,"Treatment Delay",31,"Lab Abnormality",191,"ER Visit",225,"Third Line+",1
+"EV007",0,333,"PR",0,"Lab Abnormality",17,"None",NA,"None",NA,"Second Line",1
+"EV008",0,228,"PD",0,"Treatment Delay",28,"Lab Abnormality",133,"None",NA,"First Line",1
+"EV009",0,274,"SD",0,"Lab Abnormality",20,"Lab Abnormality",154,"None",NA,"Third Line+",1
+"EV010",0,283,"SD",0,"Lab Abnormality",27,"Treatment Delay",51,"None",NA,"Third Line+",1
+"EV011",0,209,"PR",0,"Treatment Delay",23,"None",NA,"ER Visit",61,"Third Line+",1
+"EV012",0,251,"PD",0,"Dose Reduction",48,"Dose Reduction",71,"ER Visit",107,"First Line",1
+"EV013",0,358,"SD",0,"Lab Abnormality",20,"Lab Abnormality",274,"None",NA,"First Line",1
+"EV014",0,354,"SD",0,"Treatment Delay",18,"Dose Reduction",339,"None",NA,"Third Line+",1
+"EV015",0,237,"PR",0,"Dose Reduction",37,"Dose Reduction",72,"Hospitalization",157,"Third Line+",1

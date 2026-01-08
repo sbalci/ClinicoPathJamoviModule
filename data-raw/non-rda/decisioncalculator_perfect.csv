@@ -1,0 +1,2 @@
+"test_name","condition","TP","TN","FP","FN","total_n","prevalence","expected_sensitivity","expected_specificity","expected_ppv","expected_npv","notes"
+"Perfect Test (Theoretical)","Any Disease",50,150,0,0,200,0.25,1,1,1,1,"Perfect test with 100% sensitivity and specificity (theoretical)"

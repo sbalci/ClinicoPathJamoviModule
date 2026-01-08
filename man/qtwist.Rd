@@ -246,25 +246,37 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$descriptiveStats)}
 }
 \description{
-Performs Q-TWiST (Quality-adjusted Time Without Symptoms or Toxicity)
-analysis to compare treatments while accounting for both quantity and
-quality of survival time. Particularly valuable in oncology trials where
-treatments may extend survival but with significant toxicity or disease
-symptoms.
-\strong{What Q-TWiST Does:} Partitions overall survival into three health states
-with different quality-of-life weights: - TOX: Time with treatment toxicity
-(typically μ = 0-0.5) - TWiST: Time without symptoms or toxicity (μ = 1.0,
-perfect health) - REL: Time after disease relapse/progression (typically μ
-= 0-0.5)
-\strong{Key Features:} - State-based survival partitioning with clinical
-significance - Utility weight application for quality adjustment -
-Sensitivity analysis across utility values - Bootstrap confidence intervals
-for treatment differences - Visual comparison with partitioned survival
-plots
-\strong{Clinical Applications:} - Adjuvant therapy evaluation (balancing
-toxicity vs. benefit) - Treatment comparison when survival similar but
-quality differs - Shared decision-making (patient-relevant quality metrics)
+Perform Quality-adjusted Time Without Symptoms or Toxicity (Q-TWiST)
+analysis
+to compare treatments using both quantity and quality of life.
+Particularly valuable in oncology trials where treatments may extend
+survival but
+with significant toxicity or disease symptoms.
+}
+\details{
+\strong{What Q-TWiST Does:}
+Partitions overall survival into three health states with different
+quality-of-life weights:
 \itemize{
+\item TOX: Time with treatment toxicity (typically μ = 0-0.5)
+\item TWiST: Time without symptoms or toxicity (μ = 1.0, perfect health)
+\item REL: Time after disease relapse/progression (typically μ = 0-0.5)
+}
+
+\strong{Key Features:}
+\itemize{
+\item State-based survival partitioning with clinical significance
+\item Utility weight application for quality adjustment
+\item Sensitivity analysis across utility values
+\item Bootstrap confidence intervals for treatment differences
+\item Visual comparison with partitioned survival plots
+}
+
+\strong{Clinical Applications:}
+\itemize{
+\item Adjuvant therapy evaluation (balancing toxicity vs. benefit)
+\item Treatment comparison when survival similar but quality differs
+\item Shared decision-making (patient-relevant quality metrics)
 \item Regulatory submissions (FDA/EMA recognized endpoint)
 }
 }

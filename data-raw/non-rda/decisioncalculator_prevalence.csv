@@ -1,0 +1,3 @@
+"scenario","setting","TP","TN","FP","FN","total_n","prevalence","expected_ppv","expected_npv","notes"
+"High Prevalence (Pediatric)","Pediatric Clinic",85,133,7,15,240,0.417,0.924,0.899,"High prevalence: Excellent PPV and NPV"
+"Low Prevalence (Adult)","Adult Primary Care",43,903,47,7,1000,0.05,0.478,0.992,"Low prevalence: Poor PPV, excellent NPV"

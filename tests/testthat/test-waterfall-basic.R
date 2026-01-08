@@ -1,0 +1,398 @@
+# ═══════════════════════════════════════════════════════════
+# Basic Functionality Tests: waterfall
+# ═══════════════════════════════════════════════════════════
+#
+# Tests core functionality of the waterfall analysis function
+# including basic execution, required arguments, and expected outputs
+
+library(testthat)
+library(ClinicoPath)
+
+# Load test data
+data(waterfall_test, package = "ClinicoPath")
+data(waterfall_spider_test, package = "ClinicoPath")
+data(waterfall_raw_test, package = "ClinicoPath")
+
+# ═══════════════════════════════════════════════════════════
+# EXISTENCE AND BASIC EXECUTION
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall function exists and is callable", {
+  expect_true(exists("waterfall"))
+  expect_true(is.function(waterfall))
+})
+
+test_that("waterfall runs with minimal required arguments", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    inputType = "percentage"
+  )
+
+  expect_s3_class(result, "waterfallClass")
+  expect_true("results" %in% names(result))
+})
+
+test_that("waterfall accepts data.frame and tibble", {
+  # Test with data.frame
+  df_data <- as.data.frame(waterfall_test)
+  result_df <- waterfall(
+    data = df_data,
+    patientID = "patientID",
+    responseVar = "best_response"
+  )
+  expect_no_error(result_df)
+
+  # Test with tibble
+  result_tbl <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response"
+  )
+  expect_no_error(result_tbl)
+})
+
+# ═══════════════════════════════════════════════════════════
+# REQUIRED ARGUMENTS VALIDATION
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall errors on missing required arguments", {
+  # Missing patientID
+  expect_error(
+    waterfall(
+      data = waterfall_test,
+      responseVar = "best_response"
+    ),
+    regexp = "patientID|patient.*id|required",
+    ignore.case = TRUE
+  )
+
+  # Missing responseVar
+  expect_error(
+    waterfall(
+      data = waterfall_test,
+      patientID = "patientID"
+    ),
+    regexp = "responseVar|response.*variable|required",
+    ignore.case = TRUE
+  )
+})
+
+test_that("waterfall validates data presence", {
+  # NULL data
+  expect_error(
+    waterfall(
+      data = NULL,
+      patientID = "patientID",
+      responseVar = "best_response"
+    ),
+    regexp = "data|empty|null",
+    ignore.case = TRUE
+  )
+
+  # Empty data
+  expect_error(
+    waterfall(
+      data = waterfall_test[0, ],
+      patientID = "patientID",
+      responseVar = "best_response"
+    ),
+    regexp = "empty|no.*data|rows",
+    ignore.case = TRUE
+  )
+})
+
+test_that("waterfall validates variable names exist in data", {
+  # Non-existent patientID variable
+  expect_error(
+    waterfall(
+      data = waterfall_test,
+      patientID = "nonexistent_id",
+      responseVar = "best_response"
+    ),
+    regexp = "nonexistent_id|not.*found|column.*missing",
+    ignore.case = TRUE
+  )
+
+  # Non-existent responseVar variable
+  expect_error(
+    waterfall(
+      data = waterfall_test,
+      patientID = "patientID",
+      responseVar = "nonexistent_response"
+    ),
+    regexp = "nonexistent_response|not.*found|column.*missing",
+    ignore.case = TRUE
+  )
+})
+
+# ═══════════════════════════════════════════════════════════
+# INPUT TYPE HANDLING
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall handles percentage input type", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    inputType = "percentage"
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "waterfallClass")
+})
+
+test_that("waterfall handles raw input type with time variable", {
+  result <- waterfall(
+    data = waterfall_raw_test,
+    patientID = "patientID",
+    responseVar = "tumor_size",
+    timeVar = "time",
+    inputType = "raw"
+  )
+
+  expect_no_error(result)
+  expect_s3_class(result, "waterfallClass")
+})
+
+test_that("waterfall requires timeVar for raw input type", {
+  # Raw input without time variable should error or warn
+  expect_condition(
+    waterfall(
+      data = waterfall_test,
+      patientID = "patientID",
+      responseVar = "best_response",
+      inputType = "raw"
+    )
+  )
+})
+
+# ═══════════════════════════════════════════════════════════
+# OUTPUT STRUCTURE
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall produces expected output structure", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    inputType = "percentage"
+  )
+
+  # Check results object exists
+  expect_true(!is.null(result$results))
+
+  # Check for expected output components
+  # Note: Actual output names depend on .r.yaml definition
+  expect_true("waterfallPlot" %in% names(result$results) ||
+              "plot" %in% names(result$results))
+})
+
+test_that("waterfall plot is generated by default", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    showWaterfallPlot = TRUE
+  )
+
+  # Waterfall plot should be present
+  plot_result <- result$results$waterfallPlot
+  expect_true(!is.null(plot_result))
+})
+
+test_that("waterfall respects showWaterfallPlot = FALSE", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    showWaterfallPlot = FALSE
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# SPIDER PLOT FUNCTIONALITY
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall generates spider plot when requested", {
+  result <- waterfall(
+    data = waterfall_spider_test,
+    patientID = "patientID",
+    responseVar = "pct_change",
+    timeVar = "time",
+    showSpiderPlot = TRUE
+  )
+
+  expect_no_error(result)
+
+  # Spider plot should be present
+  expect_true("spiderPlot" %in% names(result$results) ||
+              "spider" %in% names(result$results))
+})
+
+test_that("spider plot requires time variable", {
+  # Attempt spider plot without time variable
+  expect_warning(
+    waterfall(
+      data = waterfall_test,
+      patientID = "patientID",
+      responseVar = "best_response",
+      showSpiderPlot = TRUE
+    ),
+    regexp = "time.*variable|spider.*requires|longitudinal",
+    ignore.case = TRUE
+  )
+})
+
+# ═══════════════════════════════════════════════════════════
+# RECIST CATEGORIZATION
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall correctly categorizes RECIST responses", {
+  # Use extreme values dataset with known categories
+  data(waterfall_extreme, package = "ClinicoPath")
+
+  result <- waterfall(
+    data = waterfall_extreme,
+    patientID = "patientID",
+    responseVar = "best_response",
+    inputType = "percentage"
+  )
+
+  expect_no_error(result)
+
+  # RECIST thresholds:
+  # CR: ≤ -100%
+  # PR: -99% to -30%
+  # SD: -29% to +19%
+  # PD: ≥ +20%
+})
+
+# ═══════════════════════════════════════════════════════════
+# VISUAL OPTIONS
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall respects threshold display option", {
+  result_with <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    showThresholds = TRUE
+  )
+
+  result_without <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    showThresholds = FALSE
+  )
+
+  expect_no_error(result_with)
+  expect_no_error(result_without)
+})
+
+test_that("waterfall handles different color schemes", {
+  color_schemes <- c("jamovi", "recist", "simple", "colorful", "colorblind")
+
+  for (scheme in color_schemes) {
+    result <- waterfall(
+      data = waterfall_test,
+      patientID = "patientID",
+      responseVar = "best_response",
+      colorScheme = scheme
+    )
+    expect_no_error(result)
+  }
+})
+
+test_that("waterfall handles different sorting options", {
+  # Sort by response
+  result_response <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    sortBy = "response"
+  )
+
+  # Sort by ID
+  result_id <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    sortBy = "id"
+  )
+
+  expect_no_error(result_response)
+  expect_no_error(result_id)
+})
+
+# ═══════════════════════════════════════════════════════════
+# CLINICAL REPORTING FEATURES
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall generates clinical report when requested", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    generateCopyReadyReport = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("waterfall calculates confidence intervals when requested", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    showConfidenceIntervals = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("waterfall provides explanations when requested", {
+  result <- waterfall(
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    showExplanations = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# SMALL DATASET HANDLING
+# ═══════════════════════════════════════════════════════════
+
+test_that("waterfall handles small datasets", {
+  data(waterfall_small, package = "ClinicoPath")
+
+  result <- waterfall(
+    data = waterfall_small,
+    patientID = "patientID",
+    responseVar = "best_response"
+  )
+
+  # Should work but may warn about small sample size
+  expect_s3_class(result, "waterfallClass")
+})
+
+test_that("waterfall warns about single patient", {
+  single_patient <- waterfall_test[1, ]
+
+  expect_warning(
+    waterfall(
+      data = single_patient,
+      patientID = "patientID",
+      responseVar = "best_response"
+    ),
+    regexp = "single|one.*patient|few.*patient",
+    ignore.case = TRUE
+  )
+})

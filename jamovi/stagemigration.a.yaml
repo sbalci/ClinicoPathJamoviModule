@@ -8,7 +8,7 @@ version: '0.0.31'
 jas: '1.2'
 
 description:
-    main: >-
+    main: |
       Comprehensive analysis for validating TNM staging system improvements using state-of-the-art 
       statistical methods. This analysis provides pathologists with robust tools to evaluate whether 
       a new staging system provides superior prognostic discrimination compared to existing systems.
@@ -208,7 +208,7 @@ options:
       max: 0.99
       default: 0.95
       description: >-
-        Confidence level for all confidence intervals and hypothesis tests.
+        Confidence level for all confidence intervals and hypothesis tests (default: 0.95 for 95% CI).
 
     # Advanced Statistical Methods
     - name: calculateNRI

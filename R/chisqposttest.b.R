@@ -206,6 +206,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 chi_pvalue = chi_test$p.value,
                                 sample_size = sum(subtable),
                                 effect_size = sqrt(chi_test$statistic / sum(subtable)),
+                                phi_ci = if (self$options$phiCI) private$.calculatePhiCI(subtable) else "",
                                 test_selection = test_selection
                             )
                             
@@ -267,6 +268,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 chi_pvalue = chi_test$p.value,
                                 sample_size = sum(subtable),
                                 effect_size = sqrt(chi_test$statistic / sum(subtable)),
+                                phi_ci = if (self$options$phiCI) private$.calculatePhiCI(subtable) else "",
                                 test_selection = test_selection
                             )
                             
@@ -413,6 +415,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             chi_pvalue = chi_test$p.value,
                             sample_size = sum(subtable),
                             effect_size = sqrt(chi_test$statistic / sum(subtable)),
+                            phi_ci = if (self$options$phiCI) private$.calculatePhiCI(subtable) else "",
                             test_selection = test_selection
                         )
                         
@@ -817,6 +820,18 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 recommendation <- c(recommendation, .("Results may be unreliable with small samples."))
             }
             
+            
+            # Check power
+            power_results <- private$.checkPower(total_n, chiSqTest$parameter)
+            if (power_results$underpowered) {
+                # If we don't already have a severe warning, set to moderate
+                if (warning_level == "none" || warning_level == "mild") {
+                    warning_level <- "moderate"
+                }
+                warning_msg <- c(warning_msg, power_results$warning_msg)
+                recommendation <- c(recommendation, power_results$recommendation)
+            }
+            
             return(list(
                 warning_level = warning_level,
                 warning_msg = warning_msg,
@@ -825,7 +840,58 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 low_expected_1 = low_expected_1,
                 prop_low_5 = prop_low_5,
                 prop_low_1 = prop_low_1,
-                total_n = total_n
+                total_n = total_n,
+                power_n_required = power_results$n_required
+            ))
+        },
+        
+        # Check statistical power for chi-square test
+        .checkPower = function(total_n, df) {
+            # Define medium effect size (w = 0.3)
+            medium_effect <- 0.3
+            target_power <- 0.8
+            alpha <- 0.05
+            
+            # Default values
+            underpowered <- FALSE
+            warning_msg <- NULL
+            recommendation <- NULL
+            n_required <- NULL
+            
+            # Attempt to use pwr package if available
+            if (requireNamespace("pwr", quietly = TRUE)) {
+                # Calculate power for actual n
+                power_actual <- try(pwr::pwr.chisq.test(w = medium_effect, df = df, N = total_n, sig.level = alpha), silent = TRUE)
+                
+                # Calculate required n for target power
+                power_required <- try(pwr::pwr.chisq.test(w = medium_effect, df = df, power = target_power, sig.level = alpha), silent = TRUE)
+                
+                if (!inherits(power_actual, "try-error") && !inherits(power_required, "try-error")) {
+                    n_required <- ceiling(power_required$N)
+                    
+                    if (power_actual$power < target_power) {
+                        underpowered <- TRUE
+                        warning_msg <- sprintf(.("The study may be underpowered (Power = %.1f%%) to detect a medium effect size."), power_actual$power * 100)
+                        recommendation <- sprintf(.("A total sample size of at least n=%d is recommended to achieve 80%% power."), n_required)
+                    }
+                }
+            } else {
+                # Fallback to heuristic if pwr not available
+                # Cohen (1988) suggests n=88 for df=1, n=107 for df=2, etc. for medium effect
+                # A safe general heuristic for clinical studies is total_n < 50 or < 100 depending on complexity
+                heuristic_limit <- 50 + (df * 10)
+                if (total_n < heuristic_limit) {
+                    underpowered <- TRUE
+                    warning_msg <- sprintf(.("Small sample size (n=%d) may limit statistical power."), total_n)
+                    recommendation <- .("Consider if the study has sufficient power to detect clinically relevant differences.")
+                }
+            }
+            
+            return(list(
+                underpowered = underpowered,
+                warning_msg = warning_msg,
+                recommendation = recommendation,
+                n_required = n_required
             ))
         },
         
@@ -1031,6 +1097,90 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
+        # Create detailed guidance HTML for residuals interpretation
+        .createResidualsGuidanceHTML = function(cutoff) {
+            guidance <- htmltools::div(
+                style = "padding: 15px; background-color: #f0f7ff; border-left: 4px solid #1976d2; margin: 10px 0; font-family: 'Segoe UI', system-ui, sans-serif;",
+                htmltools::h4(.("Residuals Interpretation Guidance"), style = "color: #1976d2; margin-top: 0;"),
+                htmltools::p(
+                    htmltools::strong(.("How to read the Residuals Table:")),
+                    htmltools::br(),
+                    .("Standardized residuals identify which specific cells in the table drive the overall significant association. They represent the distance (in standard deviations) between the observed count and the expected count.")
+                ),
+                htmltools::div(
+                    style = "background-color: #ffffff; padding: 12px; border: 1px border; border-color: #d1e3f8; border-radius: 5px; margin-bottom: 15px;",
+                    htmltools::tags$ul(
+                        style = "margin: 0; padding-left: 20px;",
+                        htmltools::tags$li(
+                            htmltools::strong(.("Positive values (+)")), ": ", 
+                            .("Over-represented. There are MORE observations in this cell than expected.")
+                        ),
+                        htmltools::tags$li(
+                            htmltools::strong(.("Negative values (-)")), ": ", 
+                            .("Under-represented. There are FEWER observations in this cell than expected.")
+                        ),
+                        htmltools::tags$li(
+                            htmltools::strong(.("Significance:")), " ",
+                            sprintf(.("Values exceeding ±%.2f are considered statistically significant."), cutoff)
+                        )
+                    )
+                ),
+                htmltools::div(
+                    style = "font-style: italic; background-color: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px dashed #dee2e6;",
+                    htmltools::strong(.("Example Interpretation:")), htmltools::br(),
+                    sprintf(.("If the cell 'Grade 3 × Positive' has a residual of +3.2 (with cutoff ±%.2f):"), cutoff), htmltools::br(),
+                    .("It indicates that Grade 3 cases are significantly over-represented among the Positive group compared to what would be expected by chance.")
+                )
+            )
+            return(as.character(guidance))
+        },
+        
+        # Calculate Bootstrap CI for Phi Coefficient
+        .calculatePhiCI = function(subtable, conf_level = 0.95, n_boot = 999) {
+            if (!requireNamespace("boot", quietly = TRUE)) {
+                return(NA)
+            }
+            
+            # Phi statistic function for boot
+            phi_fun <- function(data, indices) {
+                d <- data[indices, ]
+                tab <- table(d[[1]], d[[2]])
+                # Handle cases where bootstrap sample has only 1 dimension
+                if (any(dim(tab) < 2)) return(0)
+                
+                # Chi-square with no correction for Phi calculation
+                chi <- try(stats::chisq.test(tab, correct = FALSE), silent = TRUE)
+                if (inherits(chi, "try-error")) return(0)
+                
+                return(sqrt(chi$statistic / sum(tab)))
+            }
+            
+            # Prepare data for bootstrapping (reconstruct cases from table)
+            row_names <- rownames(subtable)
+            col_names <- colnames(subtable)
+            cases <- expand.grid(R = row_names, C = col_names, stringsAsFactors = FALSE)
+            counts <- as.vector(subtable)
+            df <- cases[rep(seq_len(nrow(cases)), counts), ]
+            
+            # Run bootstrap
+            boot_res <- try(boot::boot(data = df, statistic = phi_fun, R = n_boot), silent = TRUE)
+            if (inherits(boot_res, "try-error")) return(NA)
+            
+            # Calculate BCa interval
+            ci_res <- try(boot::boot.ci(boot_res, conf = conf_level, type = "bca"), silent = TRUE)
+            
+            # Fallback to percentile if BCa fails or is inappropriate
+            if (inherits(ci_res, "try-error") || is.null(ci_res$bca)) {
+                ci_res <- try(boot::boot.ci(boot_res, conf = conf_level, type = "perc"), silent = TRUE)
+            }
+            
+            if (inherits(ci_res, "try-error")) return(NA)
+            
+            # Extract CI
+            interval <- if (!is.null(ci_res$bca)) ci_res$bca[4:5] else ci_res$percent[4:5]
+            return(sprintf("[%s, %s]", round(interval[1], 3), round(interval[2], 3)))
+        },
+        
         # Helper method to handle initial setup and validation
         .handleInitialSetup = function() {
             # ToDo Message ----
@@ -1192,6 +1342,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             cutoff_value <- if (self$options$residualsCutoff != 2.0) self$options$residualsCutoff else NULL
             residuals_analysis <- private$.analyzeResiduals(chiSqTest, contTable, self$options$sig, cutoff_value)
             
+            # Create residuals guidance panel and results using htmltools
+            guidance_cutoff <- if (!is.null(cutoff_value)) cutoff_value else residuals_analysis$critical_value
+            residuals_guidance <- private$.createResidualsGuidanceHTML(guidance_cutoff)
+            
             # Create residuals interpretation panel and results using htmltools
             residuals_panel <- private$.createEducationalPanel("residuals")
             residuals_table <- private$.createResidualsTableHTML(residuals_analysis, contTable, rows, cols)
@@ -1210,6 +1364,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             )
             
+            self$results$residualsGuidance$setContent(residuals_guidance)
             self$results$residualsAnalysis$setContent(as.character(full_content))
         },
         
@@ -1453,6 +1608,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     p_raw <- result$actual_pvalue
                     p_adj <- result$actual_pvalue_adjusted
 
+                    sig_indicator <- if (p_adj < self$options$sig) .("Yes") else .("No")
                     self$results$posthocTable$addRow(
                         rowKey = i,
                         values = list(
@@ -1462,7 +1618,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             p = p_raw,
                             padj = p_adj,
                             effect_size = round(result$effect_size, 3),
-                            sig = ifelse(p_adj < self$options$sig, .("Yes"), .("No"))
+                            phi_ci = if (is.null(result$phi_ci)) "" else result$phi_ci,
+                            sig = sig_indicator
                         )
                     )
                 }

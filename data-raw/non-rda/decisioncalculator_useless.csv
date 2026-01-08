@@ -1,0 +1,2 @@
+"test_name","condition","TP","TN","FP","FN","total_n","prevalence","expected_sensitivity","expected_specificity","notes"
+"Useless Test (Random)","Any Disease",25,75,75,25,200,0.25,0.5,0.5,"No diagnostic value, equivalent to random guessing"

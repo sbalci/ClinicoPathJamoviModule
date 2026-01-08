@@ -10,42 +10,34 @@
 #' This function provides an extensive ROC analysis toolkit that goes beyond
 #' basic ROC curve generation. Key features include:
 #' 
-#' \strong{Core ROC Analysis:}
-#' \itemize{
-#'   \item AUC calculation with confidence intervals
-#'   \item Multiple cutpoint optimization methods (12 different approaches)
-#'   \item 16 different optimization metrics (Youden, accuracy, F1, etc.)
-#'   \item Bootstrap confidence intervals
-#'   \item Manual cutpoint specification
-#' }
+#' **Core ROC Analysis:**
+#' - AUC calculation with confidence intervals
+#' - Multiple cutpoint optimization methods (12 different approaches)
+#' - 16 different optimization metrics (Youden, accuracy, F1, etc.)
+#' - Bootstrap confidence intervals
+#' - Manual cutpoint specification
 #' 
-#' \strong{Advanced Statistical Methods:}
-#' \itemize{
-#'   \item DeLong test for comparing multiple AUCs
-#'   \item IDI (Integrated Discrimination Index) with bootstrap CI
-#'   \item NRI (Net Reclassification Index) with bootstrap CI  
-#'   \item Partial AUC calculations
-#'   \item ROC curve smoothing (multiple methods)
-#'   \item Classifier performance comparison
-#' }
+#' **Advanced Statistical Methods:**
+#' - DeLong test for comparing multiple AUCs
+#' - IDI (Integrated Discrimination Index) with bootstrap CI
+#' - NRI (Net Reclassification Index) with bootstrap CI  
+#' - Partial AUC calculations
+#' - ROC curve smoothing (multiple methods)
+#' - Classifier performance comparison
 #' 
-#' \strong{Visualization Options:}
-#' \itemize{
-#'   \item ROC curves (individual and combined)
-#'   \item Sensitivity/specificity vs threshold plots
-#'   \item Predictive value vs prevalence plots
-#'   \item Precision-recall curves
-#'   \item Dot plots showing class distributions
-#'   \item Interactive ROC plots
-#'   \item Confidence bands and quantile confidence intervals
-#' }
+#' **Visualization Options:**
+#' - ROC curves (individual and combined)
+#' - Sensitivity/specificity vs threshold plots
+#' - Predictive value vs prevalence plots
+#' - Precision-recall curves
+#' - Dot plots showing class distributions
+#' - Interactive ROC plots
+#' - Confidence bands and quantile confidence intervals
 #' 
-#' \strong{Subgroup Analysis:}
-#' \itemize{
-#'   \item Stratified analysis by grouping variables
-#'   \item Cost-benefit optimization with custom cost ratios
-#'   \item Hospital/site comparisons
-#' }
+#' **Subgroup Analysis:**
+#' - Stratified analysis by grouping variables
+#' - Cost-benefit optimization with custom cost ratios
+#' - Hospital/site comparisons
 #' 
 #' @param data A data frame containing the variables for analysis
 #' @param dependentVars Character vector of test variable names to evaluate. 
@@ -56,15 +48,13 @@
 #'   If not specified, the first level is used.
 #' @param subGroup Optional grouping variable for stratified analysis.
 #' @param method Cutpoint optimization method. Options include:
-#'   \itemize{
-#'     \item "maximize_metric": Maximize the specified metric
-#'     \item "minimize_metric": Minimize the specified metric  
-#'     \item "oc_youden_kernel": Youden index with kernel smoothing
-#'     \item "oc_manual": Use manually specified cutpoint
-#'     \item "oc_cost_ratio": Optimize based on cost ratio
-#'     \item "oc_equal_sens_spec": Equal sensitivity and specificity
-#'     \item "oc_closest_01": Closest to perfect classifier (0,1)
-#'   }
+#' - "maximize_metric": Maximize the specified metric
+#' - "minimize_metric": Minimize the specified metric  
+#' - "oc_youden_kernel": Youden index with kernel smoothing
+#' - "oc_manual": Use manually specified cutpoint
+#' - "oc_cost_ratio": Optimize based on cost ratio
+#' - "oc_equal_sens_spec": Equal sensitivity and specificity
+#' - "oc_closest_01": Closest to perfect classifier (0,1)
 #' @param metric Optimization metric when using maximize/minimize methods:
 #'   "youden", "accuracy", "F1_score", "cohens_kappa", etc.
 #' @param direction Classification direction: ">=" (higher values = positive) or 
@@ -85,16 +75,14 @@
 #' @param ... Additional parameters for fine-tuning analysis
 #' 
 #' @return A psychopdaROCResults object containing:
-#' \itemize{
-#'   \item \code{resultsTable}: Detailed results for each threshold
-#'   \item \code{simpleResultsTable}: Summary AUC results with confidence intervals
-#'   \item \code{sensSpecTable}: Confusion matrix at optimal cutpoint
-#'   \item \code{plotROC}: ROC curve visualization
-#'   \item \code{delongTest}: DeLong test results (if requested)
-#'   \item \code{idiTable}: IDI results with confidence intervals (if requested)
-#'   \item \code{nriTable}: NRI results with confidence intervals (if requested)
-#'   \item Additional plots and tables based on options selected
-#' }
+#' - `resultsTable`: Detailed results for each threshold
+#' - `simpleResultsTable`: Summary AUC results with confidence intervals
+#' - `sensSpecTable`: Confusion matrix at optimal cutpoint
+#' - `plotROC`: ROC curve visualization
+#' - `delongTest`: DeLong test results (if requested)
+#' - `idiTable`: IDI results with confidence intervals (if requested)
+#' - `nriTable`: NRI results with confidence intervals (if requested)
+#' - Additional plots and tables based on options selected
 #' 
 #' @examples
 #' \dontrun{

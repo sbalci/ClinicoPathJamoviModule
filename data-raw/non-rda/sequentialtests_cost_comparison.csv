@@ -1,0 +1,10 @@
+"scenario","strategy","test1_name","test1_sens","test1_spec","test1_cost","test2_name","test2_sens","test2_spec","test2_cost","prevalence","population_size"
+"Low prevalence","serial_positive","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.01,10000
+"Low prevalence","serial_negative","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.01,10000
+"Low prevalence","parallel","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.01,10000
+"Medium prevalence","serial_positive","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.1,10000
+"Medium prevalence","serial_negative","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.1,10000
+"Medium prevalence","parallel","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.1,10000
+"High prevalence","serial_positive","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.4,10000
+"High prevalence","serial_negative","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.4,10000
+"High prevalence","parallel","Screening Test",0.9,0.85,50,"Confirmatory Test",0.85,0.95,300,0.4,10000

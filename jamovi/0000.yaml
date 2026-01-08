@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.32.71
+version: 0.0.32.72
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-01-03'
+date: '2026-01-04'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -131,11 +131,9 @@ analyses:
     menuGroup: OncoPath
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
-    description: >
+    description: >-
       Creates waterfall and spider plots to analyze tumor response data
-      following RECIST criteria. Supports both raw tumor measurements and
-      pre-calculated percentage changes. Provides comprehensive response
-      analysis including ORR, DCR, and person-time metrics.
+      following RECIST criteria.
     menuSubtitle: Waterfall Plot, Spider Plot
     ribbon: analyses
     category: analyses
@@ -309,10 +307,9 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Sampling Error Calculator
     menuSubtitle: Calculate sampling efficiency and error rates (Kayser 2009)
-    description: >-
-      Kayser et al. (2009) sampling error formula. Calculates E(p) from
-      detection error, biological variance, and frequency estimation. Provides
-      optimization.
+    description: |-
+      Practical tool for evaluating sampling adequacy and statistical power 
+      in clinicopathological research.
     ribbon: analyses
     category: analyses
   - title: Functional Sampling - Rare Event Analysis
@@ -1362,14 +1359,13 @@ analyses:
     menuSubtitle: State-of-the-Art Staging System Validation
     description: >-
       Comprehensive analysis for validating TNM staging system improvements
-      using state-of-the-art  statistical methods. This analysis provides
-      pathologists with robust tools to evaluate whether  a new staging system
-      provides superior prognostic discrimination compared to existing systems.
+      using state-of-the-art 
 
-      Includes advanced metrics: Net Reclassification Improvement (NRI),
-      Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
-      decision curve analysis, bootstrap validation,  and comprehensive clinical
-      interpretation guidance.
+      statistical methods. This analysis provides pathologists with robust tools
+      to evaluate whether 
+
+      a new staging system provides superior prognostic discrimination compared
+      to existing systems.
     ribbon: analyses
     category: analyses
   - title: Interrater Reliability
@@ -2554,28 +2550,15 @@ analyses:
     menuTitle: Q-TWiST Analysis
     menuSubtitle: Quality-adjusted Time Without Symptoms or Toxicity
     description: >-
-      Performs Q-TWiST (Quality-adjusted Time Without Symptoms or Toxicity)
-      analysis to compare treatments while accounting for both quantity and
-      quality of survival time. Particularly valuable in oncology trials where
-      treatments may extend survival but with significant toxicity or disease
-      symptoms.
+      Perform Quality-adjusted Time Without Symptoms or Toxicity (Q-TWiST)
+      analysis 
 
-      **What Q-TWiST Does:** Partitions overall survival into three health
-      states with different quality-of-life weights: - TOX: Time with treatment
-      toxicity (typically μ = 0-0.5) - TWiST: Time without symptoms or toxicity
-      (μ = 1.0, perfect health) - REL: Time after disease relapse/progression
-      (typically μ = 0-0.5)
+      to compare treatments using both quantity and quality of life.
 
-      **Key Features:** - State-based survival partitioning with clinical
-      significance - Utility weight application for quality adjustment -
-      Sensitivity analysis across utility values - Bootstrap confidence
-      intervals for treatment differences - Visual comparison with partitioned
-      survival plots
+      Particularly valuable in oncology trials where treatments may extend
+      survival but
 
-      **Clinical Applications:** - Adjuvant therapy evaluation (balancing
-      toxicity vs. benefit) - Treatment comparison when survival similar but
-      quality differs - Shared decision-making (patient-relevant quality
-      metrics) - Regulatory submissions (FDA/EMA recognized endpoint)
+      with significant toxicity or disease symptoms.
     ribbon: analyses
   - title: Spatial Statistics from Coordinates
     name: spatialanalysis
@@ -2906,13 +2889,10 @@ analyses:
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survey-Weighted Survival Analysis
     menuSubtitle: Survey-weighted Kaplan-Meier, Weighted Cox regression
-    description: >-
-      Performs survival analysis with complex survey designs and sampling
-      weights. This module implements survey-weighted survival methods for
-      population-based inference from complex sampling designs including
-      stratified, clustered, and multi-stage sampling. The analysis accounts for
-      survey design effects on standard errors and confidence intervals,
-      enabling proper population-level survival estimates from survey data.
+    description: |-
+      Perform survival analysis on complex survey data using the survey
+      package. Supports weighted estimates, complex sampling designs, and
+      weighted Cox proportional hazards models.
   - title: Penalized Cox Regression
     name: penalizedcox
     ns: ClinicoPath
@@ -3716,21 +3696,11 @@ analyses:
     menuSubgroup: Machine Learning
     menuTitle: Bayesian Additive Regression Trees (BART) for Survival
     menuSubtitle: Nonparametric Bayesian ensemble learning for survival analysis
-    description: >
-      Bayesian Additive Regression Trees (BART) for survival analysis providing
-      flexible nonparametric modeling with automatic variable selection and
-      interaction detection. BART combines an ensemble of weak learners (trees)
-      with Bayesian priors to create a powerful predictive model that naturally
-      handles nonlinear relationships, interactions, and variable selection
-      without requiring preprocessing. The method provides full posterior
-      distributions for predictions, built-in uncertainty quantification, and
-      robust performance across diverse survival scenarios. Particularly
-      effective for complex survival data with unknown functional forms,
-      high-dimensional predictors, mixed variable types, and scenarios requiring
-      individualized survival predictions with credible intervals.
-      Implementation supports both accelerated failure time and proportional
-      hazards formulations with comprehensive posterior inference and model
-      diagnostics.
+    description: >-
+      Bayesian Additive Regression Trees (BART) for survival analysis, providing
+      a flexible 
+
+      non-parametric approach to modeling complex clinical survival data.
   - title: Landmark Analysis for Time-varying Predictors
     name: landmarkanalysis
     ns: ClinicoPath
@@ -5589,11 +5559,24 @@ analyses:
     menuSubgroup: Decision Curve Analysis
     menuTitle: Time-Dependent DCA
     menuSubtitle: Net benefit for survival and longitudinal data
-    description: >-
-      Time-Dependent Decision Curve Analysis (tdDCA) extends standard DCA to
+    description: >
+      Perform time-dependent Decision Curve Analysis (DCA) for survival data 
 
-      evaluate the clinical utility of prognostic models with time-to-event
-      outcomes.
+      using the dcurves package. This method extends standard DCA to evaluate
+
+      the clinical utility of prognostic models with time-to-event outcomes.
+
+      It calculates net benefit at specific time points, accounting for
+
+      censoring and time-varying risk predictions. It's essential for evaluating
+
+      survival models, recurrence prediction models, and other longitudinal
+      outcomes. 
+
+      Common applications: Serial biopsy surveillance, recurrence vs death
+      prediction,
+
+      time-varying treatment decisions.
   - title: Sampling Error & Efficiency Calculator
     name: samplingerror
     ns: ClinicoPath

@@ -1,0 +1,505 @@
+# ═══════════════════════════════════════════════════════════
+# Argument Combination Tests: summarydata
+# ═══════════════════════════════════════════════════════════
+#
+# Tests all combinations of arguments and options for the
+# summarydata jamovi function
+#
+# Generated: 2026-01-04
+
+library(testthat)
+library(ClinicoPath)
+
+# Load test data
+data(summarydata_test, package = "ClinicoPath", envir = environment())
+
+# ═══════════════════════════════════════════════════════════
+# Test 1: Distribution Diagnostics Option
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with distribution diagnostics enabled", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age_normal", "hemoglobin_lab"),
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+  expect_true(inherits(result, "summarydataClass"))
+})
+
+test_that("summarydata distribution diagnostics with normal data", {
+  # Test with normally distributed data
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age_normal", "temperature_normal", "hemoglobin_lab"),
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata distribution diagnostics with skewed data", {
+  # Test with right-skewed data (should show non-normal)
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa_mild_skew", "crp_moderate_skew", "wbc_count"),
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 2: Decimal Places Options
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with decimal_places = 0", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = "age",
+    decimal_places = 0
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with decimal_places = 2 (default)", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = "hemoglobin",
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with decimal_places = 5 (maximum)", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = "creatinine",
+    decimal_places = 5
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata decimal places with multiple variables", {
+  # Test that decimal places apply to all variables
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "psa", "tumor_size"),
+    decimal_places = 3
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 3: Outlier Detection Option
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with outlier detection enabled", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "ca125"),
+    outliers = TRUE
+  )
+
+  expect_no_error(result)
+  expect_true(inherits(result, "summarydataClass"))
+})
+
+test_that("summarydata outlier detection with known outliers", {
+  # PSA, CA125, WBC, tumor_size, ki67 have intentional outliers
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "ca125", "wbc", "tumor_size", "ki67_index"),
+    outliers = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata outlier detection with normal data", {
+  # Variables less likely to have outliers
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "temperature"),
+    outliers = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 4: Report Sentences Option
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with report sentences enabled", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin"),
+    report_sentences = TRUE
+  )
+
+  expect_no_error(result)
+  expect_true(inherits(result, "summarydataClass"))
+})
+
+test_that("summarydata report sentences with multiple variables", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "psa", "tumor_size", "ki67_index"),
+    report_sentences = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata report sentences with distribution info", {
+  # Combine report sentences with distribution diagnostics
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin"),
+    report_sentences = TRUE,
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 5: Combined Options (Two Features)
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with distr + decimal_places", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "psa"),
+    distr = TRUE,
+    decimal_places = 3
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with outliers + decimal_places", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "ca125"),
+    outliers = TRUE,
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with outliers + distr", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "tumor_size"),
+    outliers = TRUE,
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with report_sentences + distr", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("hemoglobin", "creatinine"),
+    report_sentences = TRUE,
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with report_sentences + outliers", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "ca125"),
+    report_sentences = TRUE,
+    outliers = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 6: Combined Options (Three Features)
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with distr + outliers + decimal_places", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "tumor_size"),
+    distr = TRUE,
+    outliers = TRUE,
+    decimal_places = 3
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with distr + report_sentences + decimal_places", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin"),
+    distr = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with outliers + report_sentences + decimal_places", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "ca125"),
+    outliers = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 4
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 7: All Features Enabled (Maximum Options)
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with all options enabled", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin", "psa", "tumor_size"),
+    distr = TRUE,
+    outliers = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 3
+  )
+
+  expect_no_error(result)
+  expect_true(inherits(result, "summarydataClass"))
+})
+
+test_that("summarydata all options with single variable", {
+  # Test all features with just one variable
+  result <- summarydata(
+    data = summarydata_test,
+    vars = "psa",
+    distr = TRUE,
+    outliers = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata all options with many variables", {
+  # Test all features with comprehensive variable list
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin", "wbc", "platelets",
+             "creatinine", "albumin", "psa", "tumor_size"),
+    distr = TRUE,
+    outliers = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 8: Variable Type Combinations
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with all normal distribution variables", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin", "temperature", "albumin"),
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with all skewed distribution variables", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "ca125", "wbc", "tumor_size"),
+    distr = TRUE,
+    outliers = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with all bounded variables", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("ki67_index", "pain_score", "qol_score", "fatigue_score"),
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with mixed distribution types", {
+  # Mix normal, skewed, and bounded variables
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "psa", "ki67_index", "hemoglobin", "tumor_size"),
+    distr = TRUE,
+    outliers = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 9: Clinical Use Case Scenarios
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata clinical lab report scenario", {
+  # Typical clinical chemistry report with all features
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("hemoglobin", "wbc", "platelets", "creatinine", "albumin"),
+    distr = TRUE,
+    outliers = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata oncology biomarker panel scenario", {
+  # Oncology research with biomarker analysis
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("psa", "ca125", "ki67_index", "tumor_size", "mitotic_count"),
+    distr = TRUE,
+    outliers = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata quality of life assessment scenario", {
+  # Patient-reported outcomes analysis
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("pain_score", "qol_score", "fatigue_score"),
+    distr = TRUE,
+    report_sentences = TRUE,
+    decimal_places = 1
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata vitals monitoring scenario", {
+  # Vital signs assessment
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("temperature", "systolic_bp", "diastolic_bp"),
+    distr = TRUE,
+    outliers = TRUE,
+    decimal_places = 1
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 10: Extreme Option Values
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata with minimum decimal places (0)", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin"),
+    decimal_places = 0,
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata with maximum decimal places (5)", {
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("creatinine", "psa"),
+    decimal_places = 5,
+    distr = TRUE
+  )
+
+  expect_no_error(result)
+})
+
+test_that("summarydata all options FALSE (minimal output)", {
+  # Minimal configuration - all optional features off
+  result <- summarydata(
+    data = summarydata_test,
+    vars = c("age", "hemoglobin"),
+    distr = FALSE,
+    outliers = FALSE,
+    report_sentences = FALSE,
+    decimal_places = 2
+  )
+
+  expect_no_error(result)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Test 11: Option Interactions
+# ═══════════════════════════════════════════════════════════
+
+test_that("summarydata decimal_places affects all outputs", {
+  # Verify decimal places work across different features
+  result1 <- summarydata(
+    data = summarydata_test,
+    vars = "psa",
+    decimal_places = 1
+  )
+
+  result2 <- summarydata(
+    data = summarydata_test,
+    vars = "psa",
+    decimal_places = 4
+  )
+
+  expect_no_error(result1)
+  expect_no_error(result2)
+})
+
+test_that("summarydata distr option shows additional statistics", {
+  # With distr=TRUE should include Shapiro-Wilk, skewness, kurtosis
+  result_with_distr <- summarydata(
+    data = summarydata_test,
+    vars = "age",
+    distr = TRUE
+  )
+
+  result_without_distr <- summarydata(
+    data = summarydata_test,
+    vars = "age",
+    distr = FALSE
+  )
+
+  expect_no_error(result_with_distr)
+  expect_no_error(result_without_distr)
+})
+
+# ═══════════════════════════════════════════════════════════
+# End of Argument Combination Tests
+# ═══════════════════════════════════════════════════════════

@@ -1,0 +1,201 @@
+patient_id,timepoint,treatment,response_category,tumor_response_score,disease_stage
+PT0001,Week 12,Immunotherapy,NA,67.00599551539584,Stage I
+PT0002,Baseline,Chemotherapy,Stable Disease,NA,Stage III
+PT0003,Week 6,Chemotherapy,Stable Disease,41.753607407195,Stage I
+PT0004,Baseline,Combination,Progressive Disease,27.187831910129024,Stage I
+PT0005,Week 12,Chemotherapy,Stable Disease,32.75387498609919,Stage III
+PT0006,Week 6,Immunotherapy,Partial Response,NA,Stage II
+PT0007,Week 12,Chemotherapy,Partial Response,72.35457822968823,Stage II
+PT0008,Baseline,Chemotherapy,Stable Disease,35.46517807788045,Stage II
+PT0009,Week 24,Immunotherapy,Complete Response,100,Stage III
+PT0010,Week 6,Chemotherapy,Stable Disease,42.62066331127774,Stage II
+PT0011,Week 12,Immunotherapy,Stable Disease,40.8439220141378,Stage III
+PT0012,Week 6,Chemotherapy,Complete Response,100,Stage II
+PT0013,Week 12,Combination,Stable Disease,43.32621964302918,Stage III
+PT0014,Week 12,Chemotherapy,Partial Response,70.34493543115677,Stage I
+PT0015,Week 6,Combination,Stable Disease,46.01852854212459,Stage IV
+PT0016,Baseline,Combination,Stable Disease,44.39582856641302,Stage II
+PT0017,Baseline,Immunotherapy,Stable Disease,41.282753233993596,Stage II
+PT0018,Baseline,Chemotherapy,Stable Disease,30.907827883518834,Stage IV
+PT0019,Week 24,Combination,Progressive Disease,14.614487825929157,Stage II
+PT0020,Baseline,Immunotherapy,Stable Disease,45.76346815947534,Stage III
+PT0021,Week 6,Immunotherapy,Progressive Disease,11.409886197366658,Stage III
+PT0022,Week 6,Immunotherapy,Partial Response,63.895396730931814,Stage III
+PT0023,Baseline,Immunotherapy,Partial Response,65.5665977188419,Stage III
+PT0024,Week 24,Chemotherapy,Partial Response,60.07781646115074,Stage IV
+PT0025,Week 12,Chemotherapy,Stable Disease,46.579299363521145,Stage III
+PT0026,Baseline,Chemotherapy,Stable Disease,55.820685589393534,Stage II
+PT0027,Week 6,Immunotherapy,Stable Disease,45.77295267213359,Stage III
+PT0028,Week 24,Combination,NA,68.64936937423022,Stage II
+PT0029,Baseline,Immunotherapy,Complete Response,95.08728945743607,Stage III
+PT0030,Week 24,Chemotherapy,Partial Response,61.30764110205124,Stage III
+PT0031,Week 12,Chemotherapy,Stable Disease,43.2577252971452,Stage II
+PT0032,Baseline,Chemotherapy,Stable Disease,47.6625026753729,Stage III
+PT0033,Week 12,Immunotherapy,Stable Disease,45.38582669580276,Stage III
+PT0034,Week 12,Chemotherapy,Progressive Disease,40.75334862034114,Stage IV
+PT0035,Week 12,Combination,Partial Response,53.663071727565566,Stage III
+PT0036,Week 12,Immunotherapy,Partial Response,71.85422263397035,Stage III
+PT0037,Week 24,Chemotherapy,Complete Response,94.04707625570433,Stage IV
+PT0038,Week 12,Immunotherapy,Partial Response,72.26665577179386,Stage III
+PT0039,Week 6,Chemotherapy,Stable Disease,41.65620410930811,Stage I
+PT0040,Week 24,Immunotherapy,Complete Response,95.51929943122083,Stage II
+PT0041,Week 6,Chemotherapy,Complete Response,NA,Stage III
+PT0042,Baseline,Immunotherapy,Stable Disease,46.536434571004385,Stage II
+PT0043,Week 12,Immunotherapy,Stable Disease,49.43898814117794,Stage II
+PT0044,Week 12,Chemotherapy,Stable Disease,61.62385492694902,Stage IV
+PT0045,Week 24,Chemotherapy,Partial Response,57.3448723160227,Stage I
+PT0046,Week 12,Chemotherapy,Partial Response,79.94259762954748,Stage III
+PT0047,Week 24,Immunotherapy,Complete Response,96.40394381466035,Stage III
+PT0048,Baseline,Chemotherapy,Stable Disease,49.32543922164245,Stage III
+PT0049,Week 24,Chemotherapy,Stable Disease,54.443360109180944,Stage III
+PT0050,Week 24,Combination,Progressive Disease,15.631595815683179,Stage IV
+PT0051,Week 24,Chemotherapy,Partial Response,68.9976005969498,Stage I
+PT0052,Week 6,Immunotherapy,Partial Response,67.94056925217834,Stage I
+PT0053,Week 6,Chemotherapy,Partial Response,79.68930357581046,Stage I
+PT0054,Week 6,Immunotherapy,Stable Disease,60.35328107055043,Stage III
+PT0055,Baseline,Chemotherapy,Progressive Disease,14.748419907596213,Stage I
+PT0056,Week 12,Combination,Complete Response,94.9971487034104,Stage IV
+PT0057,Week 24,Combination,Complete Response,100,Stage III
+PT0058,Week 12,Chemotherapy,Stable Disease,41.782988156966944,Stage III
+PT0059,Week 24,Combination,Complete Response,100,Stage III
+PT0060,Week 24,Combination,Complete Response,88.73978711745676,Stage IV
+PT0061,Baseline,Combination,Complete Response,95.770150131214,Stage III
+PT0062,Week 24,Immunotherapy,Stable Disease,55.50132697186162,Stage II
+PT0063,Week 12,Immunotherapy,Stable Disease,44.11475851740907,Stage III
+PT0064,Week 6,Chemotherapy,Stable Disease,35.870688084806474,Stage III
+PT0065,Week 12,Chemotherapy,NA,61.45110532607335,Stage I
+PT0066,Week 24,Immunotherapy,Partial Response,66.01881323154225,Stage I
+PT0067,Baseline,Chemotherapy,Stable Disease,52.77771798313392,Stage III
+PT0068,Week 12,Chemotherapy,Partial Response,80.97050745555269,Stage III
+PT0069,Baseline,Immunotherapy,Stable Disease,38.743310788350684,Stage III
+PT0070,Week 12,Immunotherapy,Complete Response,96.1608925314266,Stage II
+PT0071,Week 24,Immunotherapy,Complete Response,91.03176371832215,Stage III
+PT0072,Week 12,Chemotherapy,Partial Response,70.29592148235648,Stage I
+PT0073,Week 24,Chemotherapy,Stable Disease,48.265156165901985,Stage II
+PT0074,Week 24,Chemotherapy,Progressive Disease,25.183119761774,Stage III
+PT0075,Week 6,Immunotherapy,Stable Disease,37.13834853620107,Stage II
+PT0076,Baseline,Immunotherapy,Stable Disease,47.88835236062193,Stage II
+PT0077,Week 24,Chemotherapy,Stable Disease,38.20475671860336,Stage IV
+PT0078,Week 12,Chemotherapy,Partial Response,57.193488350362095,Stage III
+PT0079,Week 24,Immunotherapy,Partial Response,68.37916666788573,Stage IV
+PT0080,Week 12,Immunotherapy,Partial Response,75.61516161752527,Stage III
+PT0081,Week 12,Chemotherapy,Partial Response,66.24435746572924,Stage III
+PT0082,Week 6,Immunotherapy,Stable Disease,32.019672840553774,Stage III
+PT0083,Baseline,Chemotherapy,Partial Response,49.491697274836916,Stage I
+PT0084,Baseline,Combination,Progressive Disease,17.810126118646107,Stage I
+PT0085,Week 12,Combination,Progressive Disease,26.50765101104802,Stage II
+PT0086,Week 24,Combination,Partial Response,86.06272994658812,Stage IV
+PT0087,Week 12,Immunotherapy,Partial Response,78.93926106955294,Stage II
+PT0088,Week 24,Immunotherapy,Partial Response,63.389066842231045,Stage III
+PT0089,Week 6,Chemotherapy,Progressive Disease,32.560063219934335,Stage IV
+PT0090,Week 6,Combination,Complete Response,99.39214266160654,Stage III
+PT0091,Week 12,Immunotherapy,Stable Disease,41.49444144350674,Stage III
+PT0092,Baseline,Combination,Progressive Disease,18.201113798299758,Stage II
+PT0093,Baseline,Chemotherapy,Stable Disease,51.80697932657375,Stage II
+PT0094,Baseline,Combination,Progressive Disease,14.934315314914958,Stage II
+PT0095,Week 6,Combination,Stable Disease,45.41639921867616,Stage II
+PT0096,Baseline,Combination,Stable Disease,60.11602021763402,Stage I
+PT0097,Week 24,Immunotherapy,Partial Response,76.81185583944475,Stage I
+PT0098,Week 6,Chemotherapy,Progressive Disease,16.72089533327892,Stage III
+PT0099,Week 12,Immunotherapy,Complete Response,85.19030825093104,Stage III
+PT0100,Week 12,Chemotherapy,Stable Disease,50.938500859837596,Stage II
+PT0101,Baseline,Chemotherapy,Stable Disease,29.267142163713373,Stage IV
+PT0102,Week 12,Combination,Partial Response,66.465413412756,Stage III
+PT0103,Week 12,Immunotherapy,Complete Response,97.76396158799356,Stage IV
+PT0104,Week 6,Chemotherapy,Stable Disease,43.799726163750776,Stage II
+PT0105,Week 12,Immunotherapy,Partial Response,56.823541983937815,Stage II
+PT0106,Baseline,Chemotherapy,Partial Response,NA,Stage IV
+PT0107,Week 6,Immunotherapy,Partial Response,44.53222261781042,Stage III
+PT0108,Week 24,Immunotherapy,Partial Response,70.48792748331155,Stage III
+PT0109,Week 24,Immunotherapy,Partial Response,80.83060478813955,Stage IV
+PT0110,Week 6,Combination,Stable Disease,62.514728913183944,Stage III
+PT0111,Week 6,Immunotherapy,Stable Disease,47.917409920680356,Stage II
+PT0112,Baseline,Chemotherapy,Stable Disease,43.70857945600056,Stage IV
+PT0113,Week 6,Chemotherapy,Partial Response,71.9988138009194,Stage I
+PT0114,Week 24,Chemotherapy,Complete Response,93.05632516482684,Stage IV
+PT0115,Week 6,Chemotherapy,Stable Disease,33.36299500085396,Stage III
+PT0116,Week 12,Combination,Partial Response,68.5817265941964,Stage IV
+PT0117,Week 6,Chemotherapy,NA,94.3079584990517,Stage II
+PT0118,Baseline,Combination,Complete Response,95.67090632385825,Stage III
+PT0119,Week 6,Chemotherapy,Partial Response,65.96386530884695,Stage II
+PT0120,Baseline,Immunotherapy,Stable Disease,41.53058827215683,Stage II
+PT0121,Week 24,Immunotherapy,Progressive Disease,16.298553874073157,Stage III
+PT0122,Baseline,Immunotherapy,Stable Disease,51.49278456021648,Stage III
+PT0123,Week 6,Chemotherapy,Progressive Disease,35.24055783814033,Stage I
+PT0124,Week 24,Immunotherapy,Complete Response,98.27268987103945,Stage III
+PT0125,Week 24,Combination,Complete Response,88.3106512073044,Stage I
+PT0126,Baseline,Chemotherapy,Stable Disease,49.31318408451018,Stage II
+PT0127,Week 24,Immunotherapy,Complete Response,91.9198876446483,Stage III
+PT0128,Week 6,Chemotherapy,Stable Disease,52.45883019482342,Stage II
+PT0129,Week 6,Immunotherapy,Stable Disease,46.419323023883294,Stage II
+PT0130,Baseline,Chemotherapy,Progressive Disease,3.675467870133131,Stage IV
+PT0131,Week 6,Immunotherapy,Complete Response,98.47925374648842,Stage III
+PT0132,Baseline,Chemotherapy,Stable Disease,36.84815135208699,Stage I
+PT0133,Week 12,Combination,Partial Response,81.04247015428635,Stage III
+PT0134,Week 12,Immunotherapy,Partial Response,61.42649737564965,Stage I
+PT0135,Week 6,Combination,Stable Disease,38.13751160078088,Stage I
+PT0136,Week 6,Combination,Partial Response,62.361426286503665,Stage II
+PT0137,Baseline,Immunotherapy,Stable Disease,51.95669367636918,Stage III
+PT0138,Week 24,Immunotherapy,NA,79.22880598445995,Stage III
+PT0139,Week 24,Combination,Partial Response,77.79751939269418,Stage III
+PT0140,Baseline,Immunotherapy,Stable Disease,41.03617850834553,Stage III
+PT0141,Baseline,Combination,Partial Response,58.953917464605304,Stage IV
+PT0142,Baseline,Immunotherapy,Stable Disease,51.33910605531094,Stage IV
+PT0143,Week 12,Chemotherapy,Partial Response,78.0963199431739,Stage II
+PT0144,Week 6,Immunotherapy,Stable Disease,43.46750866867562,Stage II
+PT0145,Week 6,Chemotherapy,Complete Response,89.66424038902514,Stage III
+PT0146,Baseline,Combination,Progressive Disease,24.961205757276748,Stage IV
+PT0147,Week 12,Immunotherapy,Stable Disease,34.45066400263475,Stage III
+PT0148,Week 24,Chemotherapy,Stable Disease,43.036911960781715,Stage IV
+PT0149,Week 6,Combination,Partial Response,78.8299619303272,Stage III
+PT0150,Week 24,Combination,Partial Response,68.32097373399789,Stage I
+PT0151,Week 24,Chemotherapy,Partial Response,67.57996814279348,Stage III
+PT0152,Week 24,Chemotherapy,Progressive Disease,NA,Stage IV
+PT0153,Week 24,Combination,Complete Response,94.82262889153687,Stage III
+PT0154,Baseline,Immunotherapy,Stable Disease,51.54234031759722,Stage III
+PT0155,Week 12,Immunotherapy,Stable Disease,39.96458989959793,Stage III
+PT0156,Week 12,Chemotherapy,Partial Response,78.81263917142273,Stage II
+PT0157,Week 6,Immunotherapy,Progressive Disease,0,Stage I
+PT0158,Week 6,Immunotherapy,Partial Response,59.844516339282904,Stage II
+PT0159,Week 12,Chemotherapy,Stable Disease,44.85642794574107,Stage II
+PT0160,Week 12,Chemotherapy,Stable Disease,58.63172759379985,Stage III
+PT0161,Week 24,Immunotherapy,Stable Disease,44.194558056666175,Stage IV
+PT0162,Week 24,Chemotherapy,Partial Response,61.53009025716064,Stage IV
+PT0163,Week 24,Combination,Partial Response,67.02859720340417,Stage III
+PT0164,Week 6,Combination,Complete Response,100,Stage III
+PT0165,Week 6,Immunotherapy,Stable Disease,47.93976085459774,Stage III
+PT0166,Week 6,Immunotherapy,Stable Disease,57.706186357997986,Stage I
+PT0167,Week 12,Chemotherapy,Stable Disease,50.213020805486074,Stage I
+PT0168,Week 12,Combination,Partial Response,67.8865041022156,Stage III
+PT0169,Baseline,Combination,Partial Response,67.42382438026463,Stage II
+PT0170,Baseline,Combination,Partial Response,74.14394164265231,Stage III
+PT0171,Week 6,Combination,Stable Disease,35.874229390625295,Stage IV
+PT0172,Week 6,Combination,Stable Disease,29.271714737893618,Stage III
+PT0173,Week 24,Chemotherapy,Stable Disease,NA,Stage III
+PT0174,Baseline,Immunotherapy,Stable Disease,48.44399160413896,Stage III
+PT0175,Week 12,Chemotherapy,Partial Response,77.71373504672012,Stage IV
+PT0176,Week 6,Immunotherapy,Progressive Disease,21.910484061418607,Stage IV
+PT0177,Week 24,Combination,Stable Disease,36.085569315946444,Stage I
+PT0178,Week 24,Combination,NA,51.81717747543065,Stage III
+PT0179,Week 6,Chemotherapy,Partial Response,57.222063321533774,Stage III
+PT0180,Week 12,Chemotherapy,Partial Response,77.95554572300416,Stage II
+PT0181,Week 24,Combination,Partial Response,77.23889992205709,Stage IV
+PT0182,Baseline,Combination,Stable Disease,46.76152389933739,Stage III
+PT0183,Week 6,Chemotherapy,Progressive Disease,29.121058215658103,Stage III
+PT0184,Week 12,Combination,Partial Response,51.347755973731395,Stage I
+PT0185,Week 6,Chemotherapy,Progressive Disease,24.45875856122674,Stage I
+PT0186,Week 6,Combination,Partial Response,65.8187135774843,Stage III
+PT0187,Week 6,Immunotherapy,Stable Disease,44.66347901046763,Stage I
+PT0188,Week 12,Chemotherapy,Stable Disease,50.8744382009642,Stage II
+PT0189,Week 6,Chemotherapy,Partial Response,78.68930367900055,Stage IV
+PT0190,Week 24,Chemotherapy,Complete Response,94.66061984442112,Stage IV
+PT0191,Week 24,Combination,Complete Response,88.02624118911682,Stage IV
+PT0192,Week 12,Chemotherapy,Partial Response,83.06123859191229,Stage III
+PT0193,Week 6,Combination,Stable Disease,43.32666006324049,Stage III
+PT0194,Week 6,Chemotherapy,Stable Disease,30.26875633671485,Stage III
+PT0195,Week 24,Chemotherapy,Stable Disease,38.136785704977456,Stage III
+PT0196,Baseline,Immunotherapy,Progressive Disease,25.879721285801057,Stage III
+PT0197,Baseline,Chemotherapy,Stable Disease,37.239394138364226,Stage II
+PT0198,Baseline,Immunotherapy,Progressive Disease,22.0374383210913,Stage III
+PT0199,Week 24,Immunotherapy,Partial Response,65.40335537828142,Stage II
+PT0200,Baseline,Immunotherapy,Stable Disease,38.8062811886477,Stage III

@@ -1,0 +1,21 @@
+"patientID","best_response","treatment","disease_subtype","prior_lines"
+"PT001",-90,"Control","Type B",1
+"PT002",-90,"Control","Type C",0
+"PT003",NA,"Combination","Type B",1
+"PT004",-65,"Control","Type A",2
+"PT005",-65,NA,"Type B",1
+"PT006",-55,"Monotherapy","Type B",1
+"PT007",NA,"Monotherapy","Type C",0
+"PT008",-50,"Combination","Type C",1
+"PT009",-32,"Monotherapy","Type B",0
+"PT010",-25,"Monotherapy","Type B",1
+"PT011",-20,"Monotherapy","Type B",1
+"PT012",-15,NA,"Type B",0
+"PT013",0,"Control","Type A",2
+"PT014",-20,"Combination","Type A",0
+"PT015",NA,"Monotherapy","Type B",1
+"PT016",15,"Control","Type B",1
+"PT017",20,"Control","Type C",1
+"PT018",0,"Combination","Type C",1
+"PT019",18,"Monotherapy","Type A",0
+"PT020",22,"Monotherapy","Type A",1

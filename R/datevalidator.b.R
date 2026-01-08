@@ -4,8 +4,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom magrittr %>%
-#' @importFrom datefixR fix_date_char fix_date_df
-#' @importFrom anytime anytime anydate
 #' @importFrom lubridate dmy mdy ymd dmy_hms mdy_hms ymd_hms parse_date_time
 #' @importFrom dplyr mutate select bind_cols case_when
 #' @importFrom htmltools HTML

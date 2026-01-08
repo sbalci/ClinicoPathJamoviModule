@@ -1019,25 +1019,33 @@ qtwistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Q-TWiST Analysis
 #'
-#' Performs Q-TWiST (Quality-adjusted Time Without Symptoms or Toxicity) 
-#' analysis to compare treatments while accounting for both quantity and 
-#' quality of survival time. Particularly valuable in oncology trials where 
-#' treatments may extend survival but with significant toxicity or disease 
-#' symptoms.
-#' **What Q-TWiST Does:** Partitions overall survival into three health states 
-#' with different quality-of-life weights: - TOX: Time with treatment toxicity 
-#' (typically μ = 0-0.5) - TWiST: Time without symptoms or toxicity (μ = 1.0, 
-#' perfect health) - REL: Time after disease relapse/progression (typically μ 
-#' = 0-0.5)
-#' **Key Features:** - State-based survival partitioning with clinical 
-#' significance - Utility weight application for quality adjustment - 
-#' Sensitivity analysis across utility values - Bootstrap confidence intervals 
-#' for treatment differences - Visual comparison with partitioned survival 
-#' plots
-#' **Clinical Applications:** - Adjuvant therapy evaluation (balancing 
-#' toxicity vs. benefit) - Treatment comparison when survival similar but 
-#' quality differs - Shared decision-making (patient-relevant quality metrics) 
+#' Perform Quality-adjusted Time Without Symptoms or Toxicity (Q-TWiST) 
+#' analysis 
+#' to compare treatments using both quantity and quality of life.
+#' Particularly valuable in oncology trials where treatments may extend 
+#' survival but
+#' with significant toxicity or disease symptoms.
+#' 
+#' **What Q-TWiST Does:**
+#' Partitions overall survival into three health states with different 
+#' quality-of-life weights:
+#' - TOX: Time with treatment toxicity (typically μ = 0-0.5)
+#' - TWiST: Time without symptoms or toxicity (μ = 1.0, perfect health)
+#' - REL: Time after disease relapse/progression (typically μ = 0-0.5)
+#' 
+#' **Key Features:**
+#' - State-based survival partitioning with clinical significance
+#' - Utility weight application for quality adjustment
+#' - Sensitivity analysis across utility values
+#' - Bootstrap confidence intervals for treatment differences
+#' - Visual comparison with partitioned survival plots
+#' 
+#' **Clinical Applications:**
+#' - Adjuvant therapy evaluation (balancing toxicity vs. benefit)
+#' - Treatment comparison when survival similar but quality differs
+#' - Shared decision-making (patient-relevant quality metrics)
 #' - Regulatory submissions (FDA/EMA recognized endpoint)
+#' 
 #'
 #' @examples
 #' # Load example data

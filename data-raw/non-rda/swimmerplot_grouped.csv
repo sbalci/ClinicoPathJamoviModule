@@ -1,0 +1,25 @@
+"PatientID","StartTime","Group","EndTime","Response","TreatmentStart","FirstAssessment","BestResponse","Progression","AdverseEvent","EventTime","Biomarker","Censored"
+"GP001",0,"Experimental",358,"CR",0,50,166.5,251,"None",NA,"Positive",0
+"GP002",0,"Experimental",363,"CR",0,63,42.5,NA,"None",NA,"Positive",1
+"GP003",0,"Experimental",286,"PR",0,68,105.5,277,"Grade 3+",198,"Positive",0
+"GP004",0,"Experimental",285,"CR",0,49,87.5,273,"Grade 3+",147,"Positive",0
+"GP005",0,"Experimental",345,"PR",0,60,158.5,280,"Grade 1-2",97,"Negative",0
+"GP006",0,"Experimental",232,"CR",0,48,104,NA,"Grade 3+",122,"Positive",1
+"GP007",0,"Experimental",240,"PR",0,67,78,NA,"Grade 3+",171,"Negative",1
+"GP008",0,"Experimental",447,"SD",0,57,186,NA,"None",NA,"Negative",1
+"GP009",0,"Experimental",441,"SD",0,49,96,356,"Grade 3+",343,"Negative",0
+"GP010",0,"Experimental",388,"PR",0,64,147,241,"Grade 1-2",127,"Negative",0
+"GP011",0,"Experimental",238,"PR",0,62,111,234,"Grade 1-2",223,"Negative",0
+"GP012",0,"Experimental",286,"PR",0,57,73.5,273,"Grade 1-2",143,"Negative",0
+"GP013",0,"Control",115,"PR",0,72,56,114,"Grade 3+",46,"Negative",0
+"GP014",0,"Control",143,"PD",0,70,55,108,"Grade 1-2",103,"Positive",0
+"GP015",0,"Control",213,"PR",0,84,67,171,"None",NA,"Negative",0
+"GP016",0,"Control",116,"PR",0,68,53,92,"Grade 1-2",18,"Negative",0
+"GP017",0,"Control",142,"PD",0,51,60,NA,"Grade 1-2",7,"Negative",1
+"GP018",0,"Control",185,"SD",0,61,61.5,174,"Grade 3+",44,"Negative",0
+"GP019",0,"Control",62,"PD",0,59,32,NA,"None",NA,"Negative",1
+"GP020",0,"Control",104,"SD",0,57,51,NA,"None",NA,"Negative",1
+"GP021",0,"Control",206,"SD",0,49,65.5,102,"Grade 1-2",115,"Negative",0
+"GP022",0,"Control",180,"SD",0,62,65,160,"None",NA,"Positive",0
+"GP023",0,"Control",109,"SD",0,78,45,NA,"Grade 1-2",25,"Negative",1
+"GP024",0,"Control",143,"SD",0,64,58,103,"Grade 1-2",43,"Negative",0

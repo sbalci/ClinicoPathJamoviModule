@@ -1,0 +1,7 @@
+"condition","test1_name","test1_sens","test1_spec","test1_cost","test2_name","test2_sens","test2_spec","test2_cost","prevalence","strategy","urgency"
+"Myocardial Infarction","Troponin",0.95,0.85,50,"ECG",0.9,0.92,100,0.15,"parallel","High"
+"Stroke","NIHSS",0.85,0.75,0,"CT Brain",0.92,0.95,800,0.1,"parallel","High"
+"Pulmonary Embolism","D-dimer",0.95,0.4,30,"CT Angiography",0.9,0.95,600,0.05,"parallel","High"
+"Appendicitis","Alvarado Score",0.8,0.75,0,"CT Abdomen",0.95,0.98,500,0.2,"parallel","High"
+"Meningitis","Clinical Exam",0.7,0.6,0,"LP + Culture",0.95,0.98,200,0.02,"parallel","High"
+"Sepsis","qSOFA",0.85,0.7,0,"Blood Culture",0.8,0.95,100,0.12,"parallel","High"

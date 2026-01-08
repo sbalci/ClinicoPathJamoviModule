@@ -1,0 +1,151 @@
+patient_id,treatment_center,age_group,gender,ethnicity,ecog_performance_status,patient_count
+PAT0001,Center C,76+,Female,Caucasian,3,1
+PAT0002,Center A,66-75,Female,African American,1,1
+PAT0003,Center B,66-75,Male,Asian,2,1
+PAT0004,Center D,41-55,Female,Caucasian,3,1
+PAT0005,Center B,66-75,Male,Hispanic,0,1
+PAT0006,Center D,66-75,Female,African American,2,1
+PAT0007,Center D,66-75,Male,Caucasian,1,1
+PAT0008,Center D,76+,Female,African American,3,1
+PAT0009,Center B,66-75,Male,Caucasian,0,1
+PAT0010,Center C,18-40,Female,Caucasian,0,1
+PAT0011,Center D,66-75,Male,Other,1,1
+PAT0012,Center A,18-40,Other,Caucasian,1,1
+PAT0013,Center C,41-55,Female,Caucasian,0,1
+PAT0014,Center A,NA,Female,African American,1,1
+PAT0015,Center A,76+,Female,Asian,1,1
+PAT0016,Center C,41-55,Female,Asian,1,1
+PAT0017,Center C,76+,Female,Caucasian,2,1
+PAT0018,Center C,66-75,Female,Caucasian,0,1
+PAT0019,Center C,56-65,Female,Caucasian,0,1
+PAT0020,Center B,NA,Female,Caucasian,0,1
+PAT0021,Center C,56-65,Male,Caucasian,1,1
+PAT0022,Center C,56-65,Male,Caucasian,3,1
+PAT0023,Center D,66-75,Female,Caucasian,2,1
+PAT0024,Center A,18-40,Male,Caucasian,0,1
+PAT0025,Center A,66-75,Female,Caucasian,0,1
+PAT0026,Center D,56-65,Male,Caucasian,0,1
+PAT0027,Center B,56-65,Female,Caucasian,1,1
+PAT0028,Center A,18-40,Female,Caucasian,3,1
+PAT0029,Center B,76+,Female,Asian,1,1
+PAT0030,Center A,41-55,Female,Caucasian,2,1
+PAT0031,Center D,66-75,Male,African American,1,1
+PAT0032,Center C,66-75,Female,Asian,1,1
+PAT0033,Center A,66-75,Male,African American,1,1
+PAT0034,Center D,18-40,Female,Caucasian,3,1
+PAT0035,Center A,41-55,Male,Asian,0,1
+PAT0036,Center B,41-55,Female,Asian,0,1
+PAT0037,Center C,66-75,Male,Caucasian,2,1
+PAT0038,Center A,66-75,Female,African American,1,1
+PAT0039,Center B,76+,Male,Asian,0,1
+PAT0040,Center B,41-55,Female,African American,2,1
+PAT0041,Center D,18-40,Male,African American,2,1
+PAT0042,Center B,56-65,Female,Caucasian,1,1
+PAT0043,Center C,56-65,Male,Caucasian,1,1
+PAT0044,Center D,56-65,Female,Caucasian,0,1
+PAT0045,Center C,41-55,Male,African American,1,1
+PAT0046,Center A,56-65,Male,Caucasian,0,1
+PAT0047,Center B,41-55,Male,Caucasian,1,1
+PAT0048,Center C,66-75,Female,Caucasian,1,1
+PAT0049,Center A,56-65,Male,Caucasian,2,1
+PAT0050,Center A,56-65,Male,Caucasian,1,1
+PAT0051,Center B,66-75,Male,African American,2,1
+PAT0052,Center C,56-65,Male,Other,2,1
+PAT0053,Center C,18-40,Male,Asian,3,1
+PAT0054,Center B,56-65,Female,Caucasian,3,1
+PAT0055,Center A,66-75,Female,Caucasian,0,1
+PAT0056,Center C,56-65,Male,Asian,0,1
+PAT0057,Center D,18-40,Male,Caucasian,0,1
+PAT0058,Center B,56-65,Female,African American,1,1
+PAT0059,Center B,41-55,Female,Caucasian,0,1
+PAT0060,Center C,56-65,Male,Asian,0,1
+PAT0061,Center A,18-40,Female,Asian,3,1
+PAT0062,Center A,76+,Male,Caucasian,2,1
+PAT0063,Center A,56-65,Other,Caucasian,0,1
+PAT0064,Center D,56-65,Female,African American,1,1
+PAT0065,Center A,41-55,Female,Asian,1,1
+PAT0066,Center A,56-65,Male,Caucasian,0,1
+PAT0067,Center A,18-40,Female,Asian,1,1
+PAT0068,Center B,66-75,Female,Other,1,1
+PAT0069,Center B,56-65,Male,African American,3,1
+PAT0070,Center A,56-65,Male,Caucasian,1,1
+PAT0071,Center A,76+,Male,African American,1,1
+PAT0072,Center B,18-40,Female,Other,3,1
+PAT0073,Center D,41-55,Male,Caucasian,1,1
+PAT0074,Center A,NA,Female,Caucasian,1,1
+PAT0075,Center A,66-75,Female,Caucasian,0,1
+PAT0076,Center B,56-65,Female,NA,0,1
+PAT0077,Center C,41-55,Female,African American,1,1
+PAT0078,Center B,66-75,Female,Caucasian,2,1
+PAT0079,Center A,56-65,Male,Other,1,1
+PAT0080,Center A,76+,Female,Asian,2,1
+PAT0081,Center D,41-55,Male,Caucasian,1,1
+PAT0082,Center D,56-65,Female,African American,1,1
+PAT0083,Center A,66-75,Female,Caucasian,2,1
+PAT0084,Center D,41-55,Male,Caucasian,2,1
+PAT0085,Center B,66-75,Male,African American,1,1
+PAT0086,Center D,66-75,Female,Caucasian,0,1
+PAT0087,Center A,18-40,Other,Hispanic,0,1
+PAT0088,Center B,41-55,Female,Caucasian,2,1
+PAT0089,Center A,66-75,Female,Caucasian,3,1
+PAT0090,Center C,18-40,Male,Asian,1,1
+PAT0091,Center D,56-65,Female,Hispanic,1,1
+PAT0092,Center C,41-55,Male,Caucasian,1,1
+PAT0093,Center C,66-75,Male,African American,3,1
+PAT0094,Center B,18-40,Female,NA,0,1
+PAT0095,Center A,56-65,Male,Asian,0,1
+PAT0096,Center D,41-55,Female,Other,0,1
+PAT0097,Center D,56-65,Male,African American,0,1
+PAT0098,Center B,41-55,Female,Caucasian,0,1
+PAT0099,Center D,66-75,Male,African American,3,1
+PAT0100,Center D,66-75,Female,Caucasian,3,1
+PAT0101,Center D,41-55,Male,Caucasian,3,1
+PAT0102,Center A,56-65,Male,NA,2,1
+PAT0103,Center B,56-65,Male,Asian,3,1
+PAT0104,Center A,41-55,Male,African American,3,1
+PAT0105,Center D,56-65,Male,Asian,0,1
+PAT0106,Center B,66-75,Male,Caucasian,0,1
+PAT0107,Center B,56-65,Female,African American,1,1
+PAT0108,Center A,76+,Female,Caucasian,0,1
+PAT0109,Center D,66-75,Male,African American,0,1
+PAT0110,Center A,41-55,Male,Caucasian,2,1
+PAT0111,Center C,76+,Female,Caucasian,2,1
+PAT0112,Center C,76+,Male,Caucasian,2,1
+PAT0113,Center B,76+,Female,Caucasian,3,1
+PAT0114,Center A,56-65,Female,Caucasian,2,1
+PAT0115,Center A,41-55,Male,Caucasian,1,1
+PAT0116,Center D,18-40,Male,Caucasian,3,1
+PAT0117,Center B,56-65,Female,Caucasian,1,1
+PAT0118,Center A,66-75,Female,Caucasian,3,1
+PAT0119,Center B,41-55,Female,Caucasian,2,1
+PAT0120,Center D,41-55,Male,African American,0,1
+PAT0121,Center B,41-55,Other,Asian,2,1
+PAT0122,Center A,56-65,Male,Caucasian,1,1
+PAT0123,Center A,66-75,Female,Caucasian,1,1
+PAT0124,Center A,76+,Male,African American,1,1
+PAT0125,Center A,56-65,Male,African American,0,1
+PAT0126,Center C,56-65,Male,Caucasian,1,1
+PAT0127,Center C,56-65,Male,African American,0,1
+PAT0128,Center C,41-55,Female,Caucasian,1,1
+PAT0129,Center B,56-65,Male,NA,1,1
+PAT0130,Center A,66-75,Female,Asian,1,1
+PAT0131,Center A,18-40,Male,Hispanic,2,1
+PAT0132,Center A,41-55,Male,Hispanic,3,1
+PAT0133,Center B,66-75,Male,Caucasian,1,1
+PAT0134,Center D,66-75,Male,Caucasian,0,1
+PAT0135,Center A,41-55,Female,Caucasian,3,1
+PAT0136,Center B,76+,Female,Hispanic,1,1
+PAT0137,Center A,56-65,Male,African American,1,1
+PAT0138,Center A,41-55,Female,African American,0,1
+PAT0139,Center B,NA,Female,Caucasian,0,1
+PAT0140,Center B,66-75,Female,Caucasian,2,1
+PAT0141,Center A,41-55,Female,Caucasian,2,1
+PAT0142,Center B,41-55,Female,African American,0,1
+PAT0143,Center B,41-55,Female,Asian,3,1
+PAT0144,Center A,56-65,Male,Other,1,1
+PAT0145,Center B,41-55,Other,African American,0,1
+PAT0146,Center C,41-55,Male,Asian,2,1
+PAT0147,Center D,18-40,Female,African American,2,1
+PAT0148,Center B,41-55,Female,Asian,0,1
+PAT0149,Center A,66-75,Female,Caucasian,1,1
+PAT0150,Center D,66-75,Female,Caucasian,0,1

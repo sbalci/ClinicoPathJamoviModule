@@ -312,7 +312,7 @@ Comprehensive analysis includes all available methods for thorough staging
 system validation.}
 
 \item{confidenceLevel}{Confidence level for all confidence intervals and
-hypothesis tests.}
+hypothesis tests (default: 0.95 for 95\\% CI).}
 
 \item{calculateNRI}{Calculate Net Reclassification Improvement to quantify
 improvement in  risk classification between staging systems. Essential for
@@ -1436,13 +1436,18 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Comprehensive analysis for validating TNM staging system improvements using
-state-of-the-art  statistical methods. This analysis provides pathologists
-with robust tools to evaluate whether  a new staging system provides
-superior prognostic discrimination compared to existing systems.
+state-of-the-art
+statistical methods. This analysis provides pathologists with robust tools
+to evaluate whether
+a new staging system provides superior prognostic discrimination compared
+to existing systems.
+}
+\details{
 Includes advanced metrics: Net Reclassification Improvement (NRI),
-Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
-decision curve analysis, bootstrap validation,  and comprehensive clinical
-interpretation guidance.
+Integrated Discrimination
+Improvement (IDI), time-dependent ROC analysis, decision curve analysis,
+bootstrap validation,
+and comprehensive clinical interpretation guidance.
 }
 \examples{
 \donttest{

@@ -802,19 +802,25 @@ survivalbartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Bayesian Additive Regression Trees (BART) for Survival
 #'
-#' Bayesian Additive Regression Trees (BART) for survival analysis providing 
-#' flexible nonparametric modeling with automatic variable selection and 
-#' interaction detection. BART combines an ensemble of weak learners (trees) 
-#' with Bayesian priors to create a powerful predictive model that naturally 
-#' handles nonlinear relationships, interactions, and variable selection 
-#' without requiring preprocessing. The method provides full posterior 
-#' distributions for predictions, built-in uncertainty quantification, and 
-#' robust performance across diverse survival scenarios. Particularly 
-#' effective for complex survival data with unknown functional forms, 
-#' high-dimensional predictors, mixed variable types, and scenarios requiring 
-#' individualized survival predictions with credible intervals. Implementation 
+#' Bayesian Additive Regression Trees (BART) for survival analysis, providing 
+#' a flexible 
+#' non-parametric approach to modeling complex clinical survival data.
+#' 
+#' Automatically captures non-linear relationships and high-order interactions 
+#' without explicit specification. Supports Accelerated Failure Time (AFT), 
+#' Proportional Hazards (PH), and Cure models.
+#' BART combines an ensemble of weak learners (trees)
+#' with Bayesian priors to create a powerful predictive model that naturally
+#' handles nonlinear relationships, interactions, and variable selection
+#' without requiring preprocessing. The method provides full posterior
+#' distributions for predictions, built-in uncertainty quantification,
+#' and robust performance across diverse survival scenarios. Particularly
+#' effective for complex survival data with unknown functional forms,
+#' high-dimensional predictors, mixed variable types, and scenarios requiring
+#' individualized survival predictions with credible intervals. Implementation
 #' supports both accelerated failure time and proportional hazards 
-#' formulations with comprehensive posterior inference and model diagnostics.
+#' formulations
+#' with comprehensive posterior inference and model diagnostics.
 #' 
 #'
 #' @examples

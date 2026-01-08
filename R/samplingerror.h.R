@@ -282,6 +282,11 @@ samplingerrorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Sampling Error & Efficiency Calculator
 #'
+#' Practical tool for evaluating sampling adequacy and statistical power 
+#' in clinicopathological research.
+#' 
+#' @details
+#' Calculates sampling efficiency and error rates according to Kayser (2009).
 #' 
 #' @param data .
 #' @param detectionSensitivity Probability of correctly detecting/identifying

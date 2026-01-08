@@ -111,11 +111,11 @@ options:
 
     - name: highlight
       title: 'Highlight Level'
-      type: Level
-      variable: (group)
+      type: String
+      default: ''
       description:
           R: >
-            Specific level to highlight in the plot with different color/style.
+            Specific level to highlight in the plot with different color/style. Only used when useHighlight is TRUE.
 
     - name: aggregation
       title: 'Data Aggregation'

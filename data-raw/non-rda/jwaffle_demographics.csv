@@ -1,0 +1,151 @@
+patient_id,age_group,gender,ethnicity,smoking_status,comorbidities,region,patient_count
+DM0001,41-55,Male,Asian,Former,5+,Midwest,1
+DM0002,66-75,Female,NA,Former,5+,Northeast,1
+DM0003,41-55,Female,African American,Former,None,Northeast,1
+DM0004,66-75,Female,Hispanic,Current,None,Northeast,1
+DM0005,41-55,Female,Asian,Former,5+,Southwest,1
+DM0006,66-75,Male,Caucasian,Current,1-2,Southwest,1
+DM0007,41-55,Male,Caucasian,Current,3-4,Midwest,1
+DM0008,56-65,Male,African American,Never,None,Southeast,1
+DM0009,41-55,Female,Caucasian,Former,None,Southeast,1
+DM0010,41-55,Male,Caucasian,Former,None,West,1
+DM0011,56-65,Male,Caucasian,Never,3-4,Southwest,1
+DM0012,66-75,Male,Caucasian,Never,None,Southeast,1
+DM0013,56-65,Male,Hispanic,Former,1-2,Southeast,1
+DM0014,76+,Male,Caucasian,Former,1-2,Midwest,1
+DM0015,56-65,Female,Asian,Current,3-4,Midwest,1
+DM0016,41-55,Female,Asian,Former,1-2,Midwest,1
+DM0017,18-40,Female,Other,Former,1-2,Northeast,1
+DM0018,66-75,Male,Hispanic,Former,3-4,West,1
+DM0019,66-75,Male,African American,Never,5+,Southeast,1
+DM0020,41-55,Female,Caucasian,Never,1-2,Southeast,1
+DM0021,56-65,Male,African American,Never,None,Midwest,1
+DM0022,66-75,Male,Caucasian,Never,3-4,West,1
+DM0023,56-65,Male,Caucasian,Current,3-4,Southeast,1
+DM0024,41-55,Female,African American,Former,3-4,Southeast,1
+DM0025,66-75,Female,Hispanic,NA,3-4,Northeast,1
+DM0026,56-65,Male,Asian,Former,3-4,West,1
+DM0027,18-40,Male,African American,Former,1-2,West,1
+DM0028,56-65,Female,Caucasian,Former,3-4,Southwest,1
+DM0029,66-75,Female,Caucasian,NA,3-4,Southeast,1
+DM0030,56-65,Male,NA,Current,1-2,Southeast,1
+DM0031,66-75,Female,Caucasian,Current,None,Midwest,1
+DM0032,56-65,Female,Caucasian,Former,3-4,Southwest,1
+DM0033,56-65,Female,Other,Current,1-2,Midwest,1
+DM0034,56-65,Male,Caucasian,Former,1-2,West,1
+DM0035,56-65,Male,Caucasian,Never,None,Southwest,1
+DM0036,66-75,Female,Hispanic,Former,None,Northeast,1
+DM0037,56-65,Male,Caucasian,Current,5+,West,1
+DM0038,56-65,Male,Caucasian,Current,3-4,West,1
+DM0039,56-65,Male,African American,Former,1-2,Southwest,1
+DM0040,56-65,Female,African American,NA,1-2,Southwest,1
+DM0041,66-75,Male,Caucasian,Never,None,West,1
+DM0042,66-75,Male,Hispanic,Former,3-4,Southwest,1
+DM0043,18-40,Female,Caucasian,Former,1-2,West,1
+DM0044,56-65,Female,Asian,Former,1-2,Midwest,1
+DM0045,18-40,Male,Caucasian,Never,1-2,West,1
+DM0046,56-65,Female,Caucasian,Former,1-2,Southeast,1
+DM0047,56-65,Male,Asian,Former,None,West,1
+DM0048,41-55,Male,Asian,Former,None,Southwest,1
+DM0049,41-55,Female,Caucasian,Current,3-4,Southwest,1
+DM0050,66-75,Male,African American,Former,1-2,West,1
+DM0051,18-40,Female,African American,Never,1-2,Southeast,1
+DM0052,66-75,Male,Asian,Never,1-2,West,1
+DM0053,66-75,Male,Hispanic,Former,3-4,Midwest,1
+DM0054,41-55,Female,Caucasian,Former,1-2,Southwest,1
+DM0055,66-75,Female,Caucasian,Never,1-2,Southwest,1
+DM0056,56-65,Male,Caucasian,Former,5+,Northeast,1
+DM0057,41-55,Female,Hispanic,Never,3-4,Northeast,1
+DM0058,56-65,Male,African American,Former,1-2,Northeast,1
+DM0059,41-55,Female,African American,Current,3-4,Midwest,1
+DM0060,66-75,Female,African American,Former,3-4,Northeast,1
+DM0061,41-55,Female,African American,Never,1-2,Midwest,1
+DM0062,66-75,Male,Caucasian,Former,3-4,Northeast,1
+DM0063,41-55,Female,Hispanic,Former,1-2,Midwest,1
+DM0064,66-75,Male,Hispanic,Current,1-2,Southwest,1
+DM0065,56-65,Male,Hispanic,Never,1-2,Northeast,1
+DM0066,41-55,Male,Hispanic,Former,5+,Southwest,1
+DM0067,41-55,Female,Hispanic,Former,3-4,Southeast,1
+DM0068,76+,Male,Hispanic,Never,None,Southwest,1
+DM0069,76+,Female,African American,Never,None,Southwest,1
+DM0070,41-55,Male,Caucasian,Current,None,Southeast,1
+DM0071,56-65,Female,Caucasian,Current,5+,Northeast,1
+DM0072,66-75,Male,Caucasian,Never,1-2,Midwest,1
+DM0073,76+,Male,African American,Current,1-2,West,1
+DM0074,41-55,Male,Asian,Former,1-2,Southwest,1
+DM0075,66-75,Male,Asian,Current,1-2,Southeast,1
+DM0076,41-55,Male,Asian,Never,None,Southeast,1
+DM0077,66-75,Male,Other,Former,1-2,Northeast,1
+DM0078,66-75,Male,Asian,Never,1-2,West,1
+DM0079,41-55,Male,Caucasian,Former,3-4,Southeast,1
+DM0080,41-55,Male,Hispanic,Never,5+,Southeast,1
+DM0081,66-75,Male,Caucasian,Former,1-2,Northeast,1
+DM0082,56-65,Male,Hispanic,Former,3-4,West,1
+DM0083,56-65,Male,Asian,Never,None,West,1
+DM0084,76+,Female,Caucasian,Current,3-4,Midwest,1
+DM0085,18-40,Female,Asian,Former,3-4,Southwest,1
+DM0086,41-55,Male,Caucasian,Current,1-2,Northeast,1
+DM0087,66-75,Male,Caucasian,Current,3-4,West,1
+DM0088,18-40,Female,Caucasian,Former,None,Midwest,1
+DM0089,76+,Male,African American,Current,1-2,West,1
+DM0090,41-55,Male,Caucasian,Never,1-2,Southeast,1
+DM0091,41-55,Female,African American,Current,3-4,Southwest,1
+DM0092,66-75,Male,Caucasian,Current,1-2,West,1
+DM0093,18-40,Female,Caucasian,Former,None,Midwest,1
+DM0094,66-75,Female,Caucasian,Never,1-2,Northeast,1
+DM0095,56-65,Female,NA,Former,None,Southwest,1
+DM0096,41-55,Female,Hispanic,Former,None,Southwest,1
+DM0097,41-55,Male,Caucasian,Never,1-2,Midwest,1
+DM0098,41-55,Male,African American,Former,1-2,Southwest,1
+DM0099,56-65,Male,Hispanic,Current,3-4,West,1
+DM0100,66-75,Female,Caucasian,Current,1-2,Midwest,1
+DM0101,41-55,Female,NA,Current,3-4,Southwest,1
+DM0102,66-75,Male,African American,Never,None,Southeast,1
+DM0103,66-75,Male,African American,Never,3-4,Southwest,1
+DM0104,66-75,Male,Asian,Former,3-4,Southeast,1
+DM0105,56-65,Male,Asian,Never,3-4,Southwest,1
+DM0106,66-75,Female,African American,Former,1-2,Northeast,1
+DM0107,56-65,Female,Hispanic,Never,3-4,Southeast,1
+DM0108,56-65,Female,Caucasian,Former,5+,Southwest,1
+DM0109,18-40,Female,African American,Current,1-2,Southeast,1
+DM0110,41-55,Female,Asian,Never,None,Northeast,1
+DM0111,56-65,Female,Asian,Current,3-4,Northeast,1
+DM0112,66-75,Female,African American,NA,1-2,Midwest,1
+DM0113,56-65,Male,Caucasian,Former,1-2,Southwest,1
+DM0114,66-75,Male,African American,Former,1-2,Midwest,1
+DM0115,66-75,Female,Caucasian,Former,None,Southwest,1
+DM0116,56-65,Male,African American,Former,3-4,Northeast,1
+DM0117,41-55,Female,Asian,Former,3-4,Southeast,1
+DM0118,56-65,Female,Other,Former,None,Southwest,1
+DM0119,18-40,Female,African American,Former,1-2,Midwest,1
+DM0120,41-55,Female,Caucasian,Never,None,West,1
+DM0121,56-65,Male,Caucasian,Former,1-2,Northeast,1
+DM0122,56-65,Female,Asian,Former,1-2,Northeast,1
+DM0123,66-75,Male,Asian,Former,3-4,Southeast,1
+DM0124,66-75,Female,Asian,Former,None,Midwest,1
+DM0125,18-40,Male,Caucasian,Former,3-4,West,1
+DM0126,66-75,Male,Caucasian,Never,1-2,Northeast,1
+DM0127,66-75,Female,Caucasian,Former,1-2,Southwest,1
+DM0128,56-65,Male,Caucasian,Never,3-4,Southeast,1
+DM0129,41-55,Male,African American,Current,1-2,Southeast,1
+DM0130,76+,Male,Asian,Former,1-2,Southwest,1
+DM0131,66-75,Female,Asian,Former,None,Southeast,1
+DM0132,66-75,Female,African American,Never,1-2,Midwest,1
+DM0133,56-65,Female,African American,Former,1-2,Southwest,1
+DM0134,66-75,Female,Caucasian,Current,5+,West,1
+DM0135,66-75,Male,Caucasian,Never,1-2,Northeast,1
+DM0136,66-75,Female,Asian,Never,None,Southeast,1
+DM0137,66-75,Female,African American,Never,5+,Southwest,1
+DM0138,56-65,Female,Asian,Former,None,West,1
+DM0139,66-75,Male,Caucasian,Never,5+,Northeast,1
+DM0140,66-75,Female,Hispanic,Never,3-4,Southeast,1
+DM0141,56-65,Male,Hispanic,Former,1-2,West,1
+DM0142,56-65,Female,Caucasian,Current,1-2,West,1
+DM0143,41-55,Male,Other,Former,3-4,Northeast,1
+DM0144,66-75,Female,Caucasian,Former,1-2,West,1
+DM0145,56-65,Male,Caucasian,Never,None,Midwest,1
+DM0146,41-55,Male,Caucasian,Former,None,Southeast,1
+DM0147,56-65,Male,African American,Former,5+,Northeast,1
+DM0148,66-75,Female,African American,Former,3-4,Southwest,1
+DM0149,76+,Female,Asian,Current,3-4,Southeast,1
+DM0150,41-55,Male,Hispanic,Current,3-4,Midwest,1

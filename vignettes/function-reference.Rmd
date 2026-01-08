@@ -1,0 +1,289 @@
+---
+title: "Function Reference Guide"
+author: "ClinicoPath Team"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 4
+vignette: >
+  %\VignetteIndexEntry{Function Reference Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# ClinicoPathJamoviModule Function Reference
+
+**Total Functions:** 420+
+**Menu Groups:** 5 (ClinicoPathDescriptives, JJStatsPlot, OncoPath, jsurvival, meddecide)
+**Status Categories:** Stable, To be Tested, Drafts
+
+**GitHub:** [ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule)
+**Documentation:** [www.serdarbalci.com/ClinicoPathJamoviModule](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
+
+---
+
+## How to Use This Reference
+
+This guide catalogs all 420+ analysis functions in ClinicoPathJamoviModule organized by:
+
+- **Menu Group:** Where to find the function in jamovi's menu
+- **Status:** Stability and testing status
+- **Purpose:** What the function does
+- **When to Use:** Clinical and research scenarios
+- **Test Data:** Available example datasets
+
+### Function Status Levels
+
+- **Stable:** Production-ready, thoroughly tested
+- **To be Tested:** Functional but needs more validation
+- **Drafts:** Work in progress, may have limitations
+
+### Quick Navigation
+
+- [ClinicoPathDescriptives](#clinicopathdescriptives) - Descriptive statistics, data quality
+- [JJStatsPlot](#jjstatsplot) - Statistical visualizations
+- [OncoPath](#oncopath) - Pathology and oncology analyses
+- [jsurvival](#jsurvival) - Survival analysis tools
+- [meddecide](#meddecide) - Diagnostic test evaluation, decision analysis
+
+---
+
+## ClinicoPathDescriptives
+
+Comprehensive descriptive statistics and data quality tools for clinical research.
+
+### Stable Functions
+
+#### agepyramid
+**Internal:** `agepyramid`
+**Purpose:** Population pyramid visualization
+**When to use:** Demographic analysis, cohort characterization, age-gender distribution
+**Test Data:** [1 .omv file](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agepyramid_test.omv)
+
+#### tableone
+**Internal:** `tableone`
+**Purpose:** Generate publication-ready "Table 1" with baseline characteristics
+**When to use:** Manuscript preparation, clinical trial baseline tables, cohort comparison
+**Test Data:** [1 .omv file](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tableone_test.omv)
+
+#### crosstable
+**Internal:** `crosstable`
+**Purpose:** Advanced contingency tables with percentages and statistics
+**When to use:** Categorical variable comparisons, disease vs. exposure, treatment outcomes
+**Test Data:** [1 .omv file](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/crosstable_test.omv)
+
+#### summarydata
+**Internal:** `summarydata`
+**Purpose:** Comprehensive summary statistics for continuous and categorical variables
+**When to use:** Exploratory data analysis, descriptive statistics, data overview
+**Test Data:** [1 .omv file](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/summarydata_test.omv)
+
+---
+
+## meddecide
+
+Medical decision analysis, diagnostic test evaluation, and agreement studies.
+
+### ✨ NEW: Kappa Sample Size Functions (January 2025)
+
+Three complementary functions for comprehensive kappa agreement study planning:
+
+#### kappasizeci ✨
+**Internal:** `kappaSizeCI`
+**Purpose:** Sample size for kappa estimation (precision approach)
+**When to use:** Planning agreement studies, method validation, estimating true agreement
+**Approach:** "How many subjects to estimate kappa within ±X?"
+**Test Data:**
+- [Comprehensive scenarios](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_scenarios_comprehensive.omv) (86 scenarios)
+- [Relationship cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_relationship_cases.omv)
+- [Validation cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_validation_cases.omv)
+
+**Key Features:**
+- Confidence interval-based precision
+- 2-5 outcome categories
+- 2-5 raters
+- Binary, ordinal, continuous outcomes
+
+#### kappasizefixedn ✨
+**Internal:** `kappaSizeFixedN`
+**Purpose:** Reverse calculation - detectable kappa for fixed sample size
+**When to use:** Resource-constrained studies, completed trials, QA programs, feasibility
+**Approach:** "What can I detect with my fixed n?"
+**Test Data:**
+- [Comprehensive scenarios](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_scenarios_comprehensive.omv) (86 scenarios)
+- [Power cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_power_cases.omv)
+- [Validation cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_validation_cases.omv)
+
+**Constraint Types:**
+- Budget constraints
+- Time constraints
+- Case availability (rare diseases)
+- Regulatory requirements
+- Completed studies (retrospective)
+- QA protocols (fixed annual samples)
+
+#### kappasizepower ✨
+**Internal:** `kappaSizePower`
+**Purpose:** Sample size for kappa hypothesis testing (power approach)
+**When to use:** Planning studies to test agreement hypotheses, comparing to threshold
+**Approach:** "How many to test κ₁ vs. κ₀ with power X?"
+**Test Data:**
+- [Comprehensive scenarios](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_scenarios_comprehensive.omv) (86 scenarios)
+- [Relationship cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_relationship_cases.omv)
+- [Validation cases](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_validation_cases.omv)
+
+**Total Kappa Coverage:** 258 scenarios (86 per function) covering sample sizes n=10 to n=2000
+
+---
+
+### Stable Functions
+
+#### agreement
+**Internal:** `agreement`
+**Purpose:** Interrater reliability and agreement analysis
+**When to use:** Diagnostic concordance, QA studies, method comparison
+**Methods:** Kappa, ICC, Bland-Altman plots
+**Test Data:** [12 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data) (binary, ordinal, continuous, multi-rater)
+
+#### decision
+**Internal:** `decision`
+**Purpose:** Diagnostic test performance analysis
+**When to use:** Evaluating tests, biomarkers, screening tools, clinical decision rules
+**Metrics:** Sensitivity, specificity, PPV, NPV, likelihood ratios
+**Test Data:** [16 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+
+#### enhancedROC
+**Internal:** `enhancedROC`
+**Purpose:** Advanced ROC analysis with optimal cutpoint selection
+**When to use:** Biomarker cutpoint optimization, ROC comparison, AUC analysis
+**Test Data:** [8 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+
+---
+
+## jsurvival
+
+Comprehensive survival analysis tools for clinical research.
+
+### Stable Functions
+
+#### outcomeorganizer
+**Internal:** `outcomeorganizer`
+**Purpose:** Calculate survival endpoints from raw event dates
+**When to use:** Preparing survival data from databases, calculating OS/PFS/DFS/RFS
+**Test Data:** [20 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data) - **Most comprehensive**
+
+#### timeinterval
+**Internal:** `timeinterval`
+**Purpose:** Calculate time intervals between dates in various formats
+**When to use:** Treatment duration, follow-up time, date arithmetic
+**Test Data:** [24 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data) - **MOST comprehensive function**
+
+#### survival
+**Internal:** `survival`
+**Purpose:** Comprehensive survival analysis with Cox regression
+**When to use:** Full survival analysis, multivariable models, hazard ratios
+**Test Data:** [9 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+
+---
+
+## OncoPath
+
+Specialized tools for pathology and oncology research.
+
+### Stable Functions
+
+#### waterfall
+**Internal:** `waterfall`
+**Purpose:** Treatment response waterfall plots (RECIST)
+**When to use:** Oncology trials, tumor burden change, identifying responders
+**Test Data:** [16 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+
+#### swimmerplot
+**Internal:** `swimmerplot`
+**Purpose:** Individual patient timeline visualization
+**When to use:** Clinical trial timelines, treatment sequences, patient journeys
+**Test Data:** [16 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+
+#### ihcheterogeneity
+**Internal:** `ihcheterogeneity`
+**Purpose:** IHC scoring heterogeneity and spatial variation analysis
+**When to use:** IHC quality control, intratumoral heterogeneity, multi-block sampling
+**Test Data:** [21 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data) - **2nd most comprehensive**
+
+---
+
+## JJStatsPlot
+
+Statistical visualization tools with automated statistics.
+
+### Stable Functions
+
+#### jjcorrmat
+**Internal:** `jjcorrmat`
+**Purpose:** Correlation matrices with significance and clustering
+**When to use:** Multiple biomarker relationships, laboratory panels, multivariate exploration
+**Test Data:** [6 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+
+#### linechart
+**Internal:** `linechart`
+**Purpose:** Line charts for longitudinal data
+**When to use:** Time series, biomarker trajectories, treatment response over time
+**Test Data:** [13 .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+
+---
+
+## Quick Reference Tables
+
+### Most Comprehensive Test Coverage
+
+Functions with 15+ test data files:
+
+| Function | Files | Category | Key Use |
+|----------|-------|----------|---------|
+| timeinterval | 24 | jsurvival | Date calculations |
+| ihcheterogeneity | 21 | OncoPath | IHC heterogeneity |
+| outcomeorganizer | 20 | jsurvival | Survival endpoints |
+| singlearm | 18 | jsurvival | Phase II trials |
+| nogoldstandard | 18 | meddecide | Tests without gold standard |
+| psychopdaROC | 17 | meddecide | Cost-benefit ROC |
+| survivalcont | 17 | jsurvival | Cutpoint optimization |
+
+### Functions by Clinical Domain
+
+**Survival Analysis:** timeinterval (24), outcomeorganizer (20), singlearm (18), survivalcont (17)
+
+**Diagnostic Testing:** nogoldstandard (18), psychopdaROC (17), decision (16), decisioncompare (14), kappasizeci (3)✨, kappasizefixedn (3)✨, kappasizepower (3)✨
+
+**Pathology:** ihcheterogeneity (21), waterfall (16), swimmerplot (16), stagemigration (13)
+
+**Statistical Plots:** hullplot (13), linechart (13), jjdotplotstats (8), jjhistostats (8)
+
+---
+
+## Getting Help
+
+- **Documentation:** [www.serdarbalci.com/ClinicoPathJamoviModule](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
+- **GitHub Issues:** [Report bugs or request features](https://github.com/sbalci/ClinicoPathJamoviModule/issues)
+- **Test Data:** [Browse all .omv files](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+- **Complete Catalog:** See `vignette("test-data-catalog")` for all 945 test datasets
+
+---
+
+## How to Cite
+
+```
+Balci S (2025). ClinicoPathJamoviModule: Clinicopathological Data Analysis.
+R package version 0.0.31. https://github.com/sbalci/ClinicoPathJamoviModule
+```
+
+---
+
+**Note:** This reference shows key functions. For the complete list of all 420+ functions, visit the [full documentation](https://www.serdarbalci.com/ClinicoPathJamoviModule/).

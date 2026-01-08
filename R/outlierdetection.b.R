@@ -10,81 +10,65 @@
 #' @details
 #' The outlier detection module supports four main categories of methods:
 #' 
-#' \strong{Univariate Methods:}
-#' \itemize{
-#'   \item \strong{Robust Z-Score (MAD-based):} Uses median absolute deviation for robust standardization
-#'   \item \strong{Standard Z-Score:} Classical z-score based on mean and standard deviation
-#'   \item \strong{Interquartile Range (IQR):} Tukey's method using quartiles and IQR multiplier
-#'   \item \strong{Equal-Tailed Interval (ETI):} Symmetric confidence interval approach
-#'   \item \strong{Highest Density Interval (HDI):} Bayesian credible interval method
-#' }
+#' **Univariate Methods:**
+#' - **Robust Z-Score (MAD-based):** Uses median absolute deviation for robust standardization
+#' - **Standard Z-Score:** Classical z-score based on mean and standard deviation
+#' - **Interquartile Range (IQR):** Tukey's method using quartiles and IQR multiplier
+#' - **Equal-Tailed Interval (ETI):** Symmetric confidence interval approach
+#' - **Highest Density Interval (HDI):** Bayesian credible interval method
 #' 
-#' \strong{Multivariate Methods:}
-#' \itemize{
-#'   \item \strong{Mahalanobis Distance:} Classical multivariate distance accounting for covariance
-#'   \item \strong{Robust Mahalanobis Distance:} Robust version using minimum covariance determinant
-#'   \item \strong{Minimum Covariance Determinant (MCD):} Robust covariance estimation
-#'   \item \strong{OPTICS Clustering:} Density-based clustering approach
-#'   \item \strong{Local Outlier Factor (LOF):} Local density deviation method
-#' }
+#' **Multivariate Methods:**
+#' - **Mahalanobis Distance:** Classical multivariate distance accounting for covariance
+#' - **Robust Mahalanobis Distance:** Robust version using minimum covariance determinant
+#' - **Minimum Covariance Determinant (MCD):** Robust covariance estimation
+#' - **OPTICS Clustering:** Density-based clustering approach
+#' - **Local Outlier Factor (LOF):** Local density deviation method
 #' 
 #' \strong{Composite Methods:} Combine multiple algorithms for robust detection with adjustable thresholds
 #' 
 #' \strong{All Methods:} Comprehensive analysis using all available techniques
 #'
 #' @section Method Selection Guidelines:
-#' \itemize{
-#'   \item \strong{Univariate:} When analyzing variables independently, simple interpretation needed
-#'   \item \strong{Multivariate:} When variable relationships matter, detecting complex outlier patterns
-#'   \item \strong{Composite:} When robust detection across different data patterns is needed
-#'   \item \strong{All:} For comprehensive analysis and method comparison
-#' }
+#' - **Univariate:** When analyzing variables independently, simple interpretation needed
+#' - **Multivariate:** When variable relationships matter, detecting complex outlier patterns
+#' - **Composite:** When robust detection across different data patterns is needed
+#' - **All:** For comprehensive analysis and method comparison
 #'
 #' @section Threshold Recommendations:
-#' \itemize{
-#'   \item \strong{Z-Score:} 3.29 (99.9% confidence, ~0.1% outliers)
-#'   \item \strong{IQR Multiplier:} 1.7 (more conservative than Tukey's 1.5)
-#'   \item \strong{Confidence Level:} 0.999 (99.9% for interval methods)
-#'   \item \strong{Composite Threshold:} 0.5 (outliers detected by ≥50% of methods)
-#' }
+#' - **Z-Score:** 3.29 (99.9\% confidence, ~0.1\% outliers)
+#' - **IQR Multiplier:** 1.7 (more conservative than Tukey's 1.5)
+#' - **Confidence Level:** 0.999 (99.9\% for interval methods)
+#' - **Composite Threshold:** 0.5 (outliers detected by ≥50\% of methods)
 #'
 #' @section Clinical Applications:
-#' \itemize{
-#'   \item \strong{Laboratory Data:} CBC, chemistry panels, liver function tests
-#'   \item \strong{Anthropometric Data:} Height, weight, BMI measurements
-#'   \item \strong{Physiological Data:} Blood pressure, heart rate, temperature
-#'   \item \strong{Biomarker Data:} Protein levels, genetic markers, metabolites
-#'   \item \strong{Quality Control:} Data entry errors, instrument malfunctions
-#' }
+#' - **Laboratory Data:** CBC, chemistry panels, liver function tests
+#' - **Anthropometric Data:** Height, weight, BMI measurements
+#' - **Physiological Data:** Blood pressure, heart rate, temperature
+#' - **Biomarker Data:** Protein levels, genetic markers, metabolites
+#' - **Quality Control:** Data entry errors, instrument malfunctions
 #'
 #' @section Output Components:
-#' \itemize{
-#'   \item \strong{Outlier Table:} Detailed results with outlier scores and classifications
-#'   \item \strong{Method Comparison:} Performance across different detection algorithms
-#'   \item \strong{Exclusion Summary:} Recommendations for data cleaning procedures
-#'   \item \strong{Visualization:} Plots showing outlier patterns and distributions
-#'   \item \strong{Interpretation:} Detailed guidance on results and methodology
-#' }
+#' - **Outlier Table:** Detailed results with outlier scores and classifications
+#' - **Method Comparison:** Performance across different detection algorithms
+#' - **Exclusion Summary:** Recommendations for data cleaning procedures
+#' - **Visualization:** Plots showing outlier patterns and distributions
+#' - **Interpretation:** Detailed guidance on results and methodology
 #'
 #' @section Statistical Considerations:
-#' \itemize{
-#'   \item \strong{Sample Size:} Minimum 30 observations recommended for robust results
-#'   \item \strong{Distribution:} Robust methods handle non-normal distributions better
-#'   \item \strong{Missing Data:} Complete cases analysis performed automatically
-#'   \item \strong{Correlations:} Multivariate methods account for variable relationships
-#'   \item \strong{False Positives:} Conservative thresholds reduce over-detection
-#' }
+#' - **Sample Size:** Minimum 30 observations recommended for robust results
+#' - **Distribution:** Robust methods handle non-normal distributions better
+#' - **Missing Data:** Complete cases analysis performed automatically
+#' - **Correlations:** Multivariate methods account for variable relationships
+#' - **False Positives:** Conservative thresholds reduce over-detection
 #'
 #' @section References:
-#' \itemize{
-#'   \item Lüdecke, D., Ben-Shachar, M., Patil, I., Waggoner, P., & Makowski, D. (2021). 
-#'         performance: An R Package for Assessment, Comparison and Testing of Statistical Models. 
-#'         Journal of Open Source Software, 6(60), 3139. https://doi.org/10.21105/joss.03139
-#'   \item Rousseeuw, P. J., & Hubert, M. (2018). Anomaly detection by robust statistics. 
-#'         Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 8(2), e1236.
-#'   \item Breunig, M. M., Kriegel, H. P., Ng, R. T., & Sander, J. (2000). LOF: identifying 
-#'         density-based local outliers. ACM sigmod record, 29(2), 93-104.
-#' }
+#' - Lüdecke, D., Ben-Shachar, M., Patil, I., Waggoner, P., & Makowski, D. (2021). 
+#'   performance: An R Package for Assessment, Comparison and Testing of Statistical Models. 
+#'   Journal of Open Source Software, 6(60), 3139. https://doi.org/10.21105/joss.03139
+#' - Rousseeuw, P. J., & Hubert, M. (2018). Anomaly detection by robust statistics. 
+#'   Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 8(2), e1236.
+#' - Breunig, M. M., Kriegel, H. P., Ng, R. T., & Sander, J. (2000). LOF: identifying 
+#'   density-based local outliers. ACM sigmod record, 29(2), 93-104.
 #'
 #' @examples
 #' \dontrun{

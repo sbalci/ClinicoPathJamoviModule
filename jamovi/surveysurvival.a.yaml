@@ -8,8 +8,11 @@ version: '0.0.1'
 jas: '1.2'
 
 description:
-    main: >-
-        Performs survival analysis with complex survey designs and sampling weights.
+    main: |
+        Perform survival analysis on complex survey data using the survey
+        package. Supports weighted estimates, complex sampling designs, and
+        weighted Cox proportional hazards models.
+        
         This module implements survey-weighted survival methods for population-based
         inference from complex sampling designs including stratified, clustered, and
         multi-stage sampling. The analysis accounts for survey design effects on

@@ -67,6 +67,11 @@ children:
             name: showAssumptionsCheck
           - type: CheckBox
             name: showGlossary
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: phiCI
   - type: CollapseBox
     label: Display Options
     collapsed: false

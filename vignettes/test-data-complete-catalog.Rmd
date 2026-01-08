@@ -1,0 +1,1851 @@
+# Complete Test Data Catalog - All .omv Files with Download Links
+
+**Total Files:** 945 
+ **Last Generated:** 2026-01-07 
+
+## Download Instructions
+
+ Click any filename below to download the .omv file directly from GitHub.
+
+ ---
+
+### timeinterval (24 files)
+
+- [timeinterval_allmissing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_allmissing.omv) 
+- [timeinterval_clinical_trial.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_clinical_trial.omv) 
+- [timeinterval_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_datasets_summary.omv) 
+- [timeinterval_dmy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_dmy.omv) 
+- [timeinterval_epidemiological.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_epidemiological.omv) 
+- [timeinterval_european_dates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_european_dates.omv) 
+- [timeinterval_extreme.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_extreme.omv) 
+- [timeinterval_landmark.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_landmark.omv) 
+- [timeinterval_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_large.omv) 
+- [timeinterval_longterm.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_longterm.omv) 
+- [timeinterval_mdy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_mdy.omv) 
+- [timeinterval_mixed_formats.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_mixed_formats.omv) 
+- [timeinterval_mixedformat.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_mixedformat.omv) 
+- [timeinterval_negative.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_negative.omv) 
+- [timeinterval_quality.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_quality.omv) 
+- [timeinterval_sameday.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_sameday.omv) 
+- [timeinterval_shortterm.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_shortterm.omv) 
+- [timeinterval_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_small.omv) 
+- [timeinterval_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_test.omv) 
+- [timeinterval_test_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_test_scenarios.omv) 
+- [timeinterval_trial.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_trial.omv) 
+- [timeinterval_us_datetime.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_us_datetime.omv) 
+- [timeinterval_ymd.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_ymd.omv) 
+- [timeinterval_ymdhms.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeinterval_ymdhms.omv) 
+
+### ihc (21 files)
+
+- [ihc_breast_cancer.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_breast_cancer.omv) 
+- [ihc_comprehensive_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_comprehensive_data.omv) 
+- [ihc_heterogeneity.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity.omv) 
+- [ihc_heterogeneity_basic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_basic.omv) 
+- [ihc_heterogeneity_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_comprehensive.omv) 
+- [ihc_heterogeneity_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_datasets_summary.omv) 
+- [ihc_heterogeneity_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_edge_cases.omv) 
+- [ihc_heterogeneity_er_low.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_er_low.omv) 
+- [ihc_heterogeneity_interregional.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_interregional.omv) 
+- [ihc_heterogeneity_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_large.omv) 
+- [ihc_heterogeneity_minimal.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_minimal.omv) 
+- [ihc_heterogeneity_outliers.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_outliers.omv) 
+- [ihc_heterogeneity_pdl1_high.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_pdl1_high.omv) 
+- [ihc_heterogeneity_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_small.omv) 
+- [ihc_heterogeneity_spatial.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_spatial.omv) 
+- [ihc_heterogeneity_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_test.omv) 
+- [ihc_heterogeneity_test_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_heterogeneity_test_scenarios.omv) 
+- [ihc_ki67_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_ki67_data.omv) 
+- [ihc_molecular_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_molecular_comprehensive.omv) 
+- [ihc_special_names.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_special_names.omv) 
+- [ihc_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihc_test_data.omv) 
+
+### outcomeorganizer (20 files)
+
+- [outcomeorganizer_admin_censor.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_admin_censor.omv) 
+- [outcomeorganizer_allevents.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_allevents.omv) 
+- [outcomeorganizer_basic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_basic.omv) 
+- [outcomeorganizer_causespecific.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_causespecific.omv) 
+- [outcomeorganizer_censored.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_censored.omv) 
+- [outcomeorganizer_compete.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_compete.omv) 
+- [outcomeorganizer_complex.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_complex.omv) 
+- [outcomeorganizer_dfs.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_dfs.omv) 
+- [outcomeorganizer_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_edge_cases.omv) 
+- [outcomeorganizer_international.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_international.omv) 
+- [outcomeorganizer_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_large.omv) 
+- [outcomeorganizer_multievent.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_multievent.omv) 
+- [outcomeorganizer_multistate.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_multistate.omv) 
+- [outcomeorganizer_os.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_os.omv) 
+- [outcomeorganizer_pfs.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_pfs.omv) 
+- [outcomeorganizer_problematic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_problematic.omv) 
+- [outcomeorganizer_recurrence.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_recurrence.omv) 
+- [outcomeorganizer_rfs.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_rfs.omv) 
+- [outcomeorganizer_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_small.omv) 
+- [outcomeorganizer_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outcomeorganizer_test_data.omv) 
+
+### nogoldstandard (18 files)
+
+- [nogoldstandard_allnegative.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_allnegative.omv) 
+- [nogoldstandard_allpositive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_allpositive.omv) 
+- [nogoldstandard_common.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_common.omv) 
+- [nogoldstandard_highagreement.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_highagreement.omv) 
+- [nogoldstandard_imbalanced.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_imbalanced.omv) 
+- [nogoldstandard_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_large.omv) 
+- [nogoldstandard_lowagreement.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_lowagreement.omv) 
+- [nogoldstandard_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_missing.omv) 
+- [nogoldstandard_pathology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_pathology.omv) 
+- [nogoldstandard_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_perfect.omv) 
+- [nogoldstandard_rare.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_rare.omv) 
+- [nogoldstandard_screening.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_screening.omv) 
+- [nogoldstandard_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_small.omv) 
+- [nogoldstandard_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_test.omv) 
+- [nogoldstandard_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_test_data.omv) 
+- [nogoldstandard_test_data_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_test_data_small.omv) 
+- [nogoldstandard_tumormarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_tumormarker.omv) 
+- [nogoldstandard_validation.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogoldstandard_validation.omv) 
+
+### singlearm (18 files)
+
+- [singlearm_allevents.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_allevents.omv) 
+- [singlearm_causespecific.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_causespecific.omv) 
+- [singlearm_censored.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_censored.omv) 
+- [singlearm_compete.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_compete.omv) 
+- [singlearm_dates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_dates.omv) 
+- [singlearm_datetime.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_datetime.omv) 
+- [singlearm_dmy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_dmy.omv) 
+- [singlearm_early.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_early.omv) 
+- [singlearm_landmark.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_landmark.omv) 
+- [singlearm_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_large.omv) 
+- [singlearm_longfu.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_longfu.omv) 
+- [singlearm_mdy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_mdy.omv) 
+- [singlearm_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_missing.omv) 
+- [singlearm_persontime.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_persontime.omv) 
+- [singlearm_shortfu.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_shortfu.omv) 
+- [singlearm_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_small.omv) 
+- [singlearm_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_test.omv) 
+- [singlearm_zerotime.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/singlearm_zerotime.omv) 
+
+### psychopdaROC (17 files)
+
+- [psychopdaROC_cardiac.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_cardiac.omv) 
+- [psychopdaROC_constant.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_constant.omv) 
+- [psychopdaROC_costbenefit.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_costbenefit.omv) 
+- [psychopdaROC_imbalanced.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_imbalanced.omv) 
+- [psychopdaROC_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_large.omv) 
+- [psychopdaROC_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_missing.omv) 
+- [psychopdaROC_multibiomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_multibiomarker.omv) 
+- [psychopdaROC_overlap.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_overlap.omv) 
+- [psychopdaROC_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_perfect.omv) 
+- [psychopdaROC_poor.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_poor.omv) 
+- [psychopdaROC_rare.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_rare.omv) 
+- [psychopdaROC_screening.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_screening.omv) 
+- [psychopdaROC_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_small.omv) 
+- [psychopdaROC_spectrum.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_spectrum.omv) 
+- [psychopdaROC_subgroup.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_subgroup.omv) 
+- [psychopdaROC_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_test.omv) 
+- [psychopdaROC_timedep.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychopdaROC_timedep.omv) 
+
+### survivalcont (17 files)
+
+- [survivalcont_age.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_age.omv) 
+- [survivalcont_compete.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_compete.omv) 
+- [survivalcont_constant.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_constant.omv) 
+- [survivalcont_dates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_dates.omv) 
+- [survivalcont_expression.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_expression.omv) 
+- [survivalcont_extreme.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_extreme.omv) 
+- [survivalcont_hemoglobin.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_hemoglobin.omv) 
+- [survivalcont_ki67.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_ki67.omv) 
+- [survivalcont_landmark.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_landmark.omv) 
+- [survivalcont_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_large.omv) 
+- [survivalcont_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_missing.omv) 
+- [survivalcont_multicut.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_multicut.omv) 
+- [survivalcont_nocutoff.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_nocutoff.omv) 
+- [survivalcont_psa.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_psa.omv) 
+- [survivalcont_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_small.omv) 
+- [survivalcont_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_test.omv) 
+- [survivalcont_tumorsize.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalcont_tumorsize.omv) 
+
+### decision (16 files)
+
+- [decision_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_biomarker.omv) 
+- [decision_common.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_common.omv) 
+- [decision_diagnostic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_diagnostic.omv) 
+- [decision_imaging.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_imaging.omv) 
+- [decision_infectious.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_infectious.omv) 
+- [decision_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_large.omv) 
+- [decision_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_missing.omv) 
+- [decision_multilevel.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_multilevel.omv) 
+- [decision_pathology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_pathology.omv) 
+- [decision_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_perfect.omv) 
+- [decision_pointofcare.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_pointofcare.omv) 
+- [decision_poor.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_poor.omv) 
+- [decision_rare.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_rare.omv) 
+- [decision_screening.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_screening.omv) 
+- [decision_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_small.omv) 
+- [decision_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decision_test.omv) 
+
+### swimmerplot (16 files)
+
+- [swimmerplot_censoring.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_censoring.omv) 
+- [swimmerplot_dates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_dates.omv) 
+- [swimmerplot_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_edge_cases.omv) 
+- [swimmerplot_events.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_events.omv) 
+- [swimmerplot_group_comparison.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_group_comparison.omv) 
+- [swimmerplot_grouped.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_grouped.omv) 
+- [swimmerplot_immuno.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_immuno.omv) 
+- [swimmerplot_milestones.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_milestones.omv) 
+- [swimmerplot_milestones_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_milestones_comprehensive.omv) 
+- [swimmerplot_numeric_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_numeric_data.omv) 
+- [swimmerplot_sample.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_sample.omv) 
+- [swimmerplot_single_patient.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_single_patient.omv) 
+- [swimmerplot_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_small.omv) 
+- [swimmerplot_surgery.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_surgery.omv) 
+- [swimmerplot_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_test.omv) 
+- [swimmerplot_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmerplot_test_data.omv) 
+
+### waterfall (16 files)
+
+- [waterfall_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_edge_cases.omv) 
+- [waterfall_extreme.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_extreme.omv) 
+- [waterfall_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_large.omv) 
+- [waterfall_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_missing.omv) 
+- [waterfall_missing_baseline.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_missing_baseline.omv) 
+- [waterfall_no_baseline.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_no_baseline.omv) 
+- [waterfall_oncology_trial.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_oncology_trial.omv) 
+- [waterfall_percentage_basic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_percentage_basic.omv) 
+- [waterfall_phase2.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_phase2.omv) 
+- [waterfall_raw_longitudinal.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_raw_longitudinal.omv) 
+- [waterfall_raw_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_raw_test.omv) 
+- [waterfall_single_patient.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_single_patient.omv) 
+- [waterfall_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_small.omv) 
+- [waterfall_spider_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_spider_test.omv) 
+- [waterfall_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_test.omv) 
+- [waterfall_time_to_event.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/waterfall_time_to_event.omv) 
+
+### decisioncompare (14 files)
+
+- [decisioncompare_common.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_common.omv) 
+- [decisioncompare_identical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_identical.omv) 
+- [decisioncompare_imaging.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_imaging.omv) 
+- [decisioncompare_indeterminate.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_indeterminate.omv) 
+- [decisioncompare_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_large.omv) 
+- [decisioncompare_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_missing.omv) 
+- [decisioncompare_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_perfect.omv) 
+- [decisioncompare_poor.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_poor.omv) 
+- [decisioncompare_rare.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_rare.omv) 
+- [decisioncompare_raters.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_raters.omv) 
+- [decisioncompare_screening.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_screening.omv) 
+- [decisioncompare_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_small.omv) 
+- [decisioncompare_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_test.omv) 
+- [decisioncompare_threetest.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncompare_threetest.omv) 
+
+### hullplot (13 files)
+
+- [hullplot_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_clinical.omv) 
+- [hullplot_clinical_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_clinical_data.omv) 
+- [hullplot_clusters.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_clusters.omv) 
+- [hullplot_customer_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_customer_data.omv) 
+- [hullplot_experimental_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_experimental_data.omv) 
+- [hullplot_fourgroup.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_fourgroup.omv) 
+- [hullplot_outliers.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_outliers.omv) 
+- [hullplot_overlap.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_overlap.omv) 
+- [hullplot_quality_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_quality_data.omv) 
+- [hullplot_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_small.omv) 
+- [hullplot_survey_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_survey_data.omv) 
+- [hullplot_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_test.omv) 
+- [hullplot_unbalanced.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hullplot_unbalanced.omv) 
+
+### linechart (13 files)
+
+- [linechart_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_biomarker.omv) 
+- [linechart_blood_pressure.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_blood_pressure.omv) 
+- [linechart_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_clinical.omv) 
+- [linechart_grouped.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_grouped.omv) 
+- [linechart_hemoglobin.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_hemoglobin.omv) 
+- [linechart_irregular.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_irregular.omv) 
+- [linechart_long.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_long.omv) 
+- [linechart_multiple.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_multiple.omv) 
+- [linechart_patterns.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_patterns.omv) 
+- [linechart_quality_life.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_quality_life.omv) 
+- [linechart_short.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_short.omv) 
+- [linechart_simple.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_simple.omv) 
+- [linechart_tumor_response.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linechart_tumor_response.omv) 
+
+### pathsampling (13 files)
+
+- [pathsampling_basic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_basic.omv) 
+- [pathsampling_complete.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_complete.omv) 
+- [pathsampling_enhanced.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_enhanced.omv) 
+- [pathsampling_invalid.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_invalid.omv) 
+- [pathsampling_late.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_late.omv) 
+- [pathsampling_lymphnodes.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_lymphnodes.omv) 
+- [pathsampling_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_missing.omv) 
+- [pathsampling_omentum.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_omentum.omv) 
+- [pathsampling_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_perfect.omv) 
+- [pathsampling_sections.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_sections.omv) 
+- [pathsampling_simulation_full.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_simulation_full.omv) 
+- [pathsampling_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_small.omv) 
+- [pathsampling_specialchars.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathsampling_specialchars.omv) 
+
+### stagemigration (13 files)
+
+- [stagemigration_breast_cancer.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_breast_cancer.omv) 
+- [stagemigration_breast_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_breast_data.omv) 
+- [stagemigration_colon_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_colon_data.omv) 
+- [stagemigration_colorectal_cancer.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_colorectal_cancer.omv) 
+- [stagemigration_combined.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_combined.omv) 
+- [stagemigration_comprehensive_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_comprehensive_data.omv) 
+- [stagemigration_large_performance.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_large_performance.omv) 
+- [stagemigration_large_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_large_test.omv) 
+- [stagemigration_lung_cancer.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_lung_cancer.omv) 
+- [stagemigration_lung_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_lung_data.omv) 
+- [stagemigration_problematic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_problematic.omv) 
+- [stagemigration_small_sample.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_small_sample.omv) 
+- [stagemigration_small_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stagemigration_small_test.omv) 
+
+### agreement (12 files)
+
+- [agreement_binary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_binary.omv) 
+- [agreement_continuous.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_continuous.omv) 
+- [agreement_hierarchical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_hierarchical.omv) 
+- [agreement_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_missing.omv) 
+- [agreement_multiRater.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_multiRater.omv) 
+- [agreement_ordinal.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_ordinal.omv) 
+- [agreement_pathology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_pathology.omv) 
+- [agreement_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_perfect.omv) 
+- [agreement_poor.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_poor.omv) 
+- [agreement_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_small.omv) 
+- [agreement_testRetest.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_testRetest.omv) 
+- [agreement_threeRater.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agreement_threeRater.omv) 
+
+### decisioncalculator (12 files)
+
+- [decisioncalculator_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_biomarker.omv) 
+- [decisioncalculator_confirmatory.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_confirmatory.omv) 
+- [decisioncalculator_imaging.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_imaging.omv) 
+- [decisioncalculator_multiplecuts.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_multiplecuts.omv) 
+- [decisioncalculator_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_perfect.omv) 
+- [decisioncalculator_pointofcare.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_pointofcare.omv) 
+- [decisioncalculator_prevalence.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_prevalence.omv) 
+- [decisioncalculator_raredisease.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_raredisease.omv) 
+- [decisioncalculator_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_scenarios.omv) 
+- [decisioncalculator_screening.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_screening.omv) 
+- [decisioncalculator_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_small.omv) 
+- [decisioncalculator_useless.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncalculator_useless.omv) 
+
+### outlierdetection (11 files)
+
+- [outlierdetection_basic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_basic.omv) 
+- [outlierdetection_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_clinical.omv) 
+- [outlierdetection_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_edge_cases.omv) 
+- [outlierdetection_international.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_international.omv) 
+- [outlierdetection_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_large.omv) 
+- [outlierdetection_multivariate.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_multivariate.omv) 
+- [outlierdetection_problematic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_problematic.omv) 
+- [outlierdetection_psychological.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_psychological.omv) 
+- [outlierdetection_temporal.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_temporal.omv) 
+- [outlierdetection_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_test.omv) 
+- [outlierdetection_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlierdetection_test_data.omv) 
+
+### pathagreement (11 files)
+
+- [pathagreement_breast.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_breast.omv) 
+- [pathagreement_clustering.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_clustering.omv) 
+- [pathagreement_clustering_rater_info.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_clustering_rater_info.omv) 
+- [pathagreement_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_comprehensive.omv) 
+- [pathagreement_disagreement.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_disagreement.omv) 
+- [pathagreement_melanoma.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_melanoma.omv) 
+- [pathagreement_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_missing.omv) 
+- [pathagreement_multi_raters.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_multi_raters.omv) 
+- [pathagreement_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_perfect.omv) 
+- [pathagreement_single.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_single.omv) 
+- [pathagreement_two_raters.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathagreement_two_raters.omv) 
+
+### sequentialtests (11 files)
+
+- [sequentialtests_cancer.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_cancer.omv) 
+- [sequentialtests_cost_comparison.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_cost_comparison.omv) 
+- [sequentialtests_covid.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_covid.omv) 
+- [sequentialtests_emergency.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_emergency.omv) 
+- [sequentialtests_extreme.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_extreme.omv) 
+- [sequentialtests_infectious.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_infectious.omv) 
+- [sequentialtests_preset_examples.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_preset_examples.omv) 
+- [sequentialtests_prevalence_sensitivity.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_prevalence_sensitivity.omv) 
+- [sequentialtests_reference.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_reference.omv) 
+- [sequentialtests_strategy_comparison.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_strategy_comparison.omv) 
+- [sequentialtests_teaching.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequentialtests_teaching.omv) 
+
+### test (11 files)
+
+- [test_clinical_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_clinical_data.omv) 
+- [test_data_clinical_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_data_clinical_flow.omv) 
+- [test_data_edge_list.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_data_edge_list.omv) 
+- [test_data_jconsort_complete.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_data_jconsort_complete.omv) 
+- [test_data_node_count.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_data_node_count.omv) 
+- [test_datetimeconverter.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_datetimeconverter.omv) 
+- [test_datevalidator.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_datevalidator.omv) 
+- [test_expected_results.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_expected_results.omv) 
+- [test_long_time_dependent.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_long_time_dependent.omv) 
+- [test_segmented_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_segmented_data.omv) 
+- [test_wide_time_dependent.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/test_wide_time_dependent.omv) 
+
+### jjarcdiagram (10 files)
+
+- [jjarcdiagram_academic_network.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_academic_network.omv) 
+- [jjarcdiagram_gene_network.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_gene_network.omv) 
+- [jjarcdiagram_large_network.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_large_network.omv) 
+- [jjarcdiagram_minimal_network.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_minimal_network.omv) 
+- [jjarcdiagram_org_hierarchy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_org_hierarchy.omv) 
+- [jjarcdiagram_selfloop_network.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_selfloop_network.omv) 
+- [jjarcdiagram_simple_weighted.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_simple_weighted.omv) 
+- [jjarcdiagram_social_network.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_social_network.omv) 
+- [jjarcdiagram_supply_chain.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_supply_chain.omv) 
+- [jjarcdiagram_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjarcdiagram_test.omv) 
+
+### swimmer (10 files)
+
+- [swimmer_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_data.omv) 
+- [swimmer_data_date_formats.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_data_date_formats.omv) 
+- [swimmer_data_raw.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_data_raw.omv) 
+- [swimmer_plot_base_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_plot_base_data.omv) 
+- [swimmer_plot_milestone_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_plot_milestone_data.omv) 
+- [swimmer_unified_basic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_unified_basic.omv) 
+- [swimmer_unified_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_unified_comprehensive.omv) 
+- [swimmer_unified_datetime.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_unified_datetime.omv) 
+- [swimmer_unified_events.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_unified_events.omv) 
+- [swimmer_unified_oncology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/swimmer_unified_oncology.omv) 
+
+### turkey (10 files)
+
+- [turkey_eastern_anatolia.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_eastern_anatolia.omv) 
+- [turkey_eastern_regions_real.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_eastern_regions_real.omv) 
+- [turkey_major_provinces_real.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_major_provinces_real.omv) 
+- [turkey_nuts1_aggregated.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_nuts1_aggregated.omv) 
+- [turkey_nuts1_real.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_nuts1_real.omv) 
+- [turkey_nuts2_eurostat.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_nuts2_eurostat.omv) 
+- [turkey_nuts2_real.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_nuts2_real.omv) 
+- [turkey_real_eurostat_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_real_eurostat_data.omv) 
+- [turkey_timeseries_nuts2.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_timeseries_nuts2.omv) 
+- [turkey_timeseries_real.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/turkey_timeseries_real.omv) 
+
+### datetimeconverter (9 files)
+
+- [datetimeconverter_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_clinical.omv) 
+- [datetimeconverter_components.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_components.omv) 
+- [datetimeconverter_edge.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_edge.omv) 
+- [datetimeconverter_excel.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_excel.omv) 
+- [datetimeconverter_mixed.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_mixed.omv) 
+- [datetimeconverter_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_small.omv) 
+- [datetimeconverter_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_test.omv) 
+- [datetimeconverter_timezone.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_timezone.omv) 
+- [datetimeconverter_unix.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/datetimeconverter_unix.omv) 
+
+### survival (9 files)
+
+- [survival_analysis_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_analysis_data.omv) 
+- [survival_competing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_competing.omv) 
+- [survival_dates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_dates.omv) 
+- [survival_landmark.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_landmark.omv) 
+- [survival_person_time.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_person_time.omv) 
+- [survival_rmst.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_rmst.omv) 
+- [survival_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_small.omv) 
+- [survival_stratified.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_stratified.omv) 
+- [survival_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survival_test.omv) 
+
+### chisqposttest (8 files)
+
+- [chisqposttest_all_features.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_all_features.omv) 
+- [chisqposttest_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_comprehensive.omv) 
+- [chisqposttest_null.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_null.omv) 
+- [chisqposttest_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_perfect.omv) 
+- [chisqposttest_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_small.omv) 
+- [chisqposttest_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_test.omv) 
+- [chisqposttest_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_test_data.omv) 
+- [chisqposttest_weighted.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_weighted.omv) 
+
+### decisioncombine (8 files)
+
+- [decisioncombine_concordant.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_concordant.omv) 
+- [decisioncombine_discordant.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_discordant.omv) 
+- [decisioncombine_imaging.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_imaging.omv) 
+- [decisioncombine_pathology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_pathology.omv) 
+- [decisioncombine_screening.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_screening.omv) 
+- [decisioncombine_serial.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_serial.omv) 
+- [decisioncombine_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_small.omv) 
+- [decisioncombine_threetest.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisioncombine_threetest.omv) 
+
+### enhancedroc (8 files)
+
+- [enhancedroc_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_biomarker.omv) 
+- [enhancedroc_calibration.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_calibration.omv) 
+- [enhancedroc_comparative.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_comparative.omv) 
+- [enhancedroc_confirmatory.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_confirmatory.omv) 
+- [enhancedroc_imbalanced.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_imbalanced.omv) 
+- [enhancedroc_multiclass.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_multiclass.omv) 
+- [enhancedroc_screening.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_screening.omv) 
+- [enhancedroc_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/enhancedroc_small.omv) 
+
+### haralick (8 files)
+
+- [haralick_cd8_infiltration.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_cd8_infiltration.omv) 
+- [haralick_comprehensive_study.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_comprehensive_study.omv) 
+- [haralick_her2_expression.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_her2_expression.omv) 
+- [haralick_high_dimensional.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_high_dimensional.omv) 
+- [haralick_ki67_proliferation.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_ki67_proliferation.omv) 
+- [haralick_missing_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_missing_data.omv) 
+- [haralick_pdl1_immunotherapy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_pdl1_immunotherapy.omv) 
+- [haralick_small_sample.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/haralick_small_sample.omv) 
+
+### jjdotplotstats (8 files)
+
+- [jjdotplotstats_fourgroup.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_fourgroup.omv) 
+- [jjdotplotstats_labvalues.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_labvalues.omv) 
+- [jjdotplotstats_outliers.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_outliers.omv) 
+- [jjdotplotstats_qol.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_qol.omv) 
+- [jjdotplotstats_reference.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_reference.omv) 
+- [jjdotplotstats_skewed.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_skewed.omv) 
+- [jjdotplotstats_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_test.omv) 
+- [jjdotplotstats_twogroup.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjdotplotstats_twogroup.omv) 
+
+### jjhistostats (8 files)
+
+- [jjhistostats_bimodal.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_bimodal.omv) 
+- [jjhistostats_grouped.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_grouped.omv) 
+- [jjhistostats_labvalues.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_labvalues.omv) 
+- [jjhistostats_pathology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_pathology.omv) 
+- [jjhistostats_skewed.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_skewed.omv) 
+- [jjhistostats_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_small.omv) 
+- [jjhistostats_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_test.omv) 
+- [jjhistostats_uniform.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjhistostats_uniform.omv) 
+
+### multisurvival (8 files)
+
+- [multisurvival_competing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_competing.omv) 
+- [multisurvival_dates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_dates.omv) 
+- [multisurvival_landmark.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_landmark.omv) 
+- [multisurvival_persontime.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_persontime.omv) 
+- [multisurvival_risk.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_risk.omv) 
+- [multisurvival_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_small.omv) 
+- [multisurvival_stratify.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_stratify.omv) 
+- [multisurvival_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multisurvival_test.omv) 
+
+### oddsratio (8 files)
+
+- [oddsratio_casecontrol.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_casecontrol.omv) 
+- [oddsratio_diagnostic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_diagnostic.omv) 
+- [oddsratio_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_large.omv) 
+- [oddsratio_multiple.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_multiple.omv) 
+- [oddsratio_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_perfect.omv) 
+- [oddsratio_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_small.omv) 
+- [oddsratio_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_test.omv) 
+- [oddsratio_zerocell.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oddsratio_zerocell.omv) 
+
+### pathology (8 files)
+
+- [pathology_agreement_ai.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_agreement_ai.omv) 
+- [pathology_agreement_edge.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_agreement_edge.omv) 
+- [pathology_agreement_main.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_agreement_main.omv) 
+- [pathology_agreement_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_agreement_missing.omv) 
+- [pathology_agreement_multimethod.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_agreement_multimethod.omv) 
+- [pathology_agreement_multisite.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_agreement_multisite.omv) 
+- [pathology_consensus_study.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_consensus_study.omv) 
+- [pathology_diagnosis.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pathology_diagnosis.omv) 
+
+### timeroc (8 files)
+
+- [timeroc_cancer_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_cancer_biomarker.omv) 
+- [timeroc_cardiovascular_risk.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_cardiovascular_risk.omv) 
+- [timeroc_competing_risks.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_competing_risks.omv) 
+- [timeroc_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_datasets_summary.omv) 
+- [timeroc_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_edge_cases.omv) 
+- [timeroc_landmark_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_landmark_biomarker.omv) 
+- [timeroc_multi_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_multi_biomarker.omv) 
+- [timeroc_test_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/timeroc_test_scenarios.omv) 
+
+### tinytable (8 files)
+
+- [tinytable_clinical_demographics.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_clinical_demographics.omv) 
+- [tinytable_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_datasets_summary.omv) 
+- [tinytable_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_edge_cases.omv) 
+- [tinytable_laboratory_results.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_laboratory_results.omv) 
+- [tinytable_multimodal_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_multimodal_summary.omv) 
+- [tinytable_small_sample.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_small_sample.omv) 
+- [tinytable_test_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_test_scenarios.omv) 
+- [tinytable_timeseries_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tinytable_timeseries_summary.omv) 
+
+### toolssummary (8 files)
+
+- [toolssummary_clinical_demographics.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_clinical_demographics.omv) 
+- [toolssummary_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_datasets_summary.omv) 
+- [toolssummary_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_edge_cases.omv) 
+- [toolssummary_laboratory_results.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_laboratory_results.omv) 
+- [toolssummary_mixed_datatypes.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_mixed_datatypes.omv) 
+- [toolssummary_small_sample.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_small_sample.omv) 
+- [toolssummary_test_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_test_scenarios.omv) 
+- [toolssummary_timeseries_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toolssummary_timeseries_data.omv) 
+
+### toxicityprofile (8 files)
+
+- [toxicityprofile_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_datasets_summary.omv) 
+- [toxicityprofile_dose_escalation.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_dose_escalation.omv) 
+- [toxicityprofile_immunotherapy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_immunotherapy.omv) 
+- [toxicityprofile_oncology_trial.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_oncology_trial.omv) 
+- [toxicityprofile_pediatric.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_pediatric.omv) 
+- [toxicityprofile_small_sample.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_small_sample.omv) 
+- [toxicityprofile_targeted_therapy.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_targeted_therapy.omv) 
+- [toxicityprofile_test_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/toxicityprofile_test_scenarios.omv) 
+
+### classification (7 files)
+
+- [classification_binary_balanced.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/classification_binary_balanced.omv) 
+- [classification_binary_imbalanced.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/classification_binary_imbalanced.omv) 
+- [classification_high_dim.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/classification_high_dim.omv) 
+- [classification_multiclass.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/classification_multiclass.omv) 
+- [classification_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/classification_perfect.omv) 
+- [classification_small_sample.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/classification_small_sample.omv) 
+- [classification_with_missing.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/classification_with_missing.omv) 
+
+### clinical (7 files)
+
+- [clinical_decision_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/clinical_decision_flow.omv) 
+- [clinical_lab_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/clinical_lab_data.omv) 
+- [clinical_lollipop_example.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/clinical_lollipop_example.omv) 
+- [clinical_prism_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/clinical_prism_data.omv) 
+- [clinical_trial_consort_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/clinical_trial_consort_data.omv) 
+- [clinical_trial_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/clinical_trial_data.omv) 
+- [clinical_trial_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/clinical_trial_flow.omv) 
+
+### ihcheterogeneity (7 files)
+
+- [ihcheterogeneity_compartments.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihcheterogeneity_compartments.omv) 
+- [ihcheterogeneity_er_hscore.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihcheterogeneity_er_hscore.omv) 
+- [ihcheterogeneity_high_hetero.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihcheterogeneity_high_hetero.omv) 
+- [ihcheterogeneity_ki67.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihcheterogeneity_ki67.omv) 
+- [ihcheterogeneity_no_reference.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihcheterogeneity_no_reference.omv) 
+- [ihcheterogeneity_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihcheterogeneity_test.omv) 
+- [ihcheterogeneity_test_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ihcheterogeneity_test_small.omv) 
+
+### jjpiestats (7 files)
+
+- [jjpiestats_aggregated.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjpiestats_aggregated.omv) 
+- [jjpiestats_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjpiestats_biomarker.omv) 
+- [jjpiestats_diagnostic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjpiestats_diagnostic.omv) 
+- [jjpiestats_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjpiestats_small.omv) 
+- [jjpiestats_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjpiestats_test.omv) 
+- [jjpiestats_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjpiestats_test_data.omv) 
+- [jjpiestats_treatment.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjpiestats_treatment.omv) 
+
+### onesurvival (7 files)
+
+- [onesurvival_basic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/onesurvival_basic.omv) 
+- [onesurvival_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/onesurvival_clinical.omv) 
+- [onesurvival_edge_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/onesurvival_edge_cases.omv) 
+- [onesurvival_international.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/onesurvival_international.omv) 
+- [onesurvival_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/onesurvival_large.omv) 
+- [onesurvival_problematic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/onesurvival_problematic.omv) 
+- [onesurvival_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/onesurvival_test_data.omv) 
+
+### streamgraph (7 files)
+
+- [streamgraph_cancer_incidence.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/streamgraph_cancer_incidence.omv) 
+- [streamgraph_covid_admissions.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/streamgraph_covid_admissions.omv) 
+- [streamgraph_patient_biomarkers.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/streamgraph_patient_biomarkers.omv) 
+- [streamgraph_patient_satisfaction.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/streamgraph_patient_satisfaction.omv) 
+- [streamgraph_population_health.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/streamgraph_population_health.omv) 
+- [streamgraph_treatment_response.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/streamgraph_treatment_response.omv) 
+- [streamgraph_trial_enrollment.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/streamgraph_trial_enrollment.omv) 
+
+### tidyplots (7 files)
+
+- [tidyplots_business.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tidyplots_business.omv) 
+- [tidyplots_demo.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tidyplots_demo.omv) 
+- [tidyplots_education.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tidyplots_education.omv) 
+- [tidyplots_environmental.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tidyplots_environmental.omv) 
+- [tidyplots_medical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tidyplots_medical.omv) 
+- [tidyplots_simple.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tidyplots_simple.omv) 
+- [tidyplots_testdata.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tidyplots_testdata.omv) 
+
+### cancer (6 files)
+
+- [cancer_biomarker_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cancer_biomarker_data.omv) 
+- [cancer_biomarkers.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cancer_biomarkers.omv) 
+- [cancer_in_dogs_tbl_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cancer_in_dogs_tbl_df.omv) 
+- [cancer_pathway_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cancer_pathway_flow.omv) 
+- [cancer_prognosis_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cancer_prognosis_data.omv) 
+- [cancer_screening_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cancer_screening_data.omv) 
+
+### grafify (6 files)
+
+- [grafify_comprehensive_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/grafify_comprehensive_data.omv) 
+- [grafify_correlation_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/grafify_correlation_data.omv) 
+- [grafify_dose_response_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/grafify_dose_response_data.omv) 
+- [grafify_factorial_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/grafify_factorial_data.omv) 
+- [grafify_longitudinal_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/grafify_longitudinal_data.omv) 
+- [grafify_simple_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/grafify_simple_data.omv) 
+
+### groupedforest (6 files)
+
+- [groupedforest_biomarker_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupedforest_biomarker_data.omv) 
+- [groupedforest_comprehensive_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupedforest_comprehensive_data.omv) 
+- [groupedforest_interaction_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupedforest_interaction_data.omv) 
+- [groupedforest_multi_subgroups.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupedforest_multi_subgroups.omv) 
+- [groupedforest_precision_medicine.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupedforest_precision_medicine.omv) 
+- [groupedforest_simple_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupedforest_simple_data.omv) 
+
+### groupsummary (6 files)
+
+- [groupsummary_financial_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupsummary_financial_data.omv) 
+- [groupsummary_manufacturing_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupsummary_manufacturing_data.omv) 
+- [groupsummary_sales_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupsummary_sales_data.omv) 
+- [groupsummary_simple.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupsummary_simple.omv) 
+- [groupsummary_survey_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupsummary_survey_data.omv) 
+- [groupsummary_web_analytics.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/groupsummary_web_analytics.omv) 
+
+### jforester (6 files)
+
+- [jforester_cardio_rr_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jforester_cardio_rr_data.omv) 
+- [jforester_complex_meta_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jforester_complex_meta_data.omv) 
+- [jforester_mean_diff_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jforester_mean_diff_data.omv) 
+- [jforester_meta_analysis_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jforester_meta_analysis_data.omv) 
+- [jforester_smd_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jforester_smd_data.omv) 
+- [jforester_survival_hr_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jforester_survival_hr_data.omv) 
+
+### jjcorrmat (6 files)
+
+- [jjcorrmat_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjcorrmat_biomarker.omv) 
+- [jjcorrmat_imaging.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjcorrmat_imaging.omv) 
+- [jjcorrmat_labvalues.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjcorrmat_labvalues.omv) 
+- [jjcorrmat_mixed.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjcorrmat_mixed.omv) 
+- [jjcorrmat_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjcorrmat_test.omv) 
+- [jjcorrmat_vitals.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjcorrmat_vitals.omv) 
+
+### jjridges (6 files)
+
+- [jjridges_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjridges_biomarker.omv) 
+- [jjridges_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjridges_clinical.omv) 
+- [jjridges_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjridges_small.omv) 
+- [jjridges_survival.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjridges_survival.omv) 
+- [jjridges_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjridges_test.omv) 
+- [jjridges_treatment.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjridges_treatment.omv) 
+
+### jjscatterstats (6 files)
+
+- [jjscatterstats_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjscatterstats_clinical.omv) 
+- [jjscatterstats_expression.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjscatterstats_expression.omv) 
+- [jjscatterstats_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjscatterstats_small.omv) 
+- [jjscatterstats_survival.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjscatterstats_survival.omv) 
+- [jjscatterstats_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjscatterstats_test.omv) 
+- [jjscatterstats_treatment.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjscatterstats_treatment.omv) 
+
+### jjsegmentedtotalbar (6 files)
+
+- [jjsegmentedtotalbar_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjsegmentedtotalbar_biomarker.omv) 
+- [jjsegmentedtotalbar_demographics.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjsegmentedtotalbar_demographics.omv) 
+- [jjsegmentedtotalbar_quality.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjsegmentedtotalbar_quality.omv) 
+- [jjsegmentedtotalbar_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjsegmentedtotalbar_small.omv) 
+- [jjsegmentedtotalbar_temporal.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjsegmentedtotalbar_temporal.omv) 
+- [jjsegmentedtotalbar_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjsegmentedtotalbar_test.omv) 
+
+### jwaffle (6 files)
+
+- [jwaffle_demographics.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jwaffle_demographics.omv) 
+- [jwaffle_disease.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jwaffle_disease.omv) 
+- [jwaffle_pathology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jwaffle_pathology.omv) 
+- [jwaffle_quality.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jwaffle_quality.omv) 
+- [jwaffle_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jwaffle_small.omv) 
+- [jwaffle_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jwaffle_test.omv) 
+
+### lollipop (6 files)
+
+- [lollipop_aggregated.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lollipop_aggregated.omv) 
+- [lollipop_biomarkers.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lollipop_biomarkers.omv) 
+- [lollipop_hospital.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lollipop_hospital.omv) 
+- [lollipop_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lollipop_small.omv) 
+- [lollipop_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lollipop_test.omv) 
+- [lollipop_treatment.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lollipop_treatment.omv) 
+
+### raincloud (6 files)
+
+- [raincloud_biomarker.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raincloud_biomarker.omv) 
+- [raincloud_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raincloud_clinical.omv) 
+- [raincloud_skewed.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raincloud_skewed.omv) 
+- [raincloud_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raincloud_small.omv) 
+- [raincloud_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raincloud_test.omv) 
+- [raincloud_treatment.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raincloud_treatment.omv) 
+
+### simple (6 files)
+
+- [simple_cancer_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simple_cancer_data.omv) 
+- [simple_flow_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simple_flow_data.omv) 
+- [simple_lollipop_example.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simple_lollipop_example.omv) 
+- [simple_pathway_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simple_pathway_data.omv) 
+- [simple_process_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simple_process_flow.omv) 
+- [simple_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simple_test_data.omv) 
+
+### advancedraincloud (5 files)
+
+- [advancedraincloud_baseline.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/advancedraincloud_baseline.omv) 
+- [advancedraincloud_change.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/advancedraincloud_change.omv) 
+- [advancedraincloud_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/advancedraincloud_data.omv) 
+- [advancedraincloud_endpoint.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/advancedraincloud_endpoint.omv) 
+- [advancedraincloud_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/advancedraincloud_test.omv) 
+
+### data (5 files)
+
+- [data_analysis_pipeline.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/data_analysis_pipeline.omv) 
+- [data_longitudinal.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/data_longitudinal.omv) 
+- [data_percentage.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/data_percentage.omv) 
+- [data_raw.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/data_raw.omv) 
+- [data_subgroup.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/data_subgroup.omv) 
+
+### diagnostic (5 files)
+
+- [diagnostic_meta_example.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnostic_meta_example.omv) 
+- [diagnostic_meta_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnostic_meta_test.omv) 
+- [diagnostic_sample_size_examples.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnostic_sample_size_examples.omv) 
+- [diagnostic_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnostic_test_data.omv) 
+- [diagnostic_validation_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnostic_validation_flow.omv) 
+
+### diagnosticmeta (5 files)
+
+- [diagnosticmeta_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnosticmeta_test.omv) 
+- [diagnosticmeta_test_categorical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnosticmeta_test_categorical.omv) 
+- [diagnosticmeta_test_large.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnosticmeta_test_large.omv) 
+- [diagnosticmeta_test_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnosticmeta_test_small.omv) 
+- [diagnosticmeta_test_zeros.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diagnosticmeta_test_zeros.omv) 
+
+### gtsummary (5 files)
+
+- [gtsummary_clinical_trial.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/gtsummary_clinical_trial.omv) 
+- [gtsummary_cross_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/gtsummary_cross_data.omv) 
+- [gtsummary_laboratory_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/gtsummary_laboratory_data.omv) 
+- [gtsummary_manufacturing_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/gtsummary_manufacturing_data.omv) 
+- [gtsummary_survey_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/gtsummary_survey_data.omv) 
+
+### minimal (5 files)
+
+- [minimal_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/minimal_flow.omv) 
+- [minimal_ggflow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/minimal_ggflow.omv) 
+- [minimal_prism_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/minimal_prism_data.omv) 
+- [minimal_sample_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/minimal_sample_test.omv) 
+- [minimal_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/minimal_test_data.omv) 
+
+### patient (5 files)
+
+- [patient_care_pathway.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/patient_care_pathway.omv) 
+- [patient_journey_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/patient_journey_flow.omv) 
+- [patient_satisfaction_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/patient_satisfaction_data.omv) 
+- [patient_treatment_long.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/patient_treatment_long.omv) 
+- [patient_treatment_wide.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/patient_treatment_wide.omv) 
+
+### riverplot (5 files)
+
+- [riverplot_example_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/riverplot_example_data.omv) 
+- [riverplot_patient_journey.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/riverplot_patient_journey.omv) 
+- [riverplot_simple_clinical.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/riverplot_simple_clinical.omv) 
+- [riverplot_treatment_long.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/riverplot_treatment_long.omv) 
+- [riverplot_wide_example_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/riverplot_wide_example_data.omv) 
+
+### sarcoma (5 files)
+
+- [sarcoma_ihc_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sarcoma_ihc_data.omv) 
+- [sarcoma_ihc_olsen.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sarcoma_ihc_olsen.omv) 
+- [sarcoma_ihc_query_realistic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sarcoma_ihc_query_realistic.omv) 
+- [sarcoma_ihc_query_with_validation.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sarcoma_ihc_query_with_validation.omv) 
+- [sarcoma_ihc_training_realistic.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sarcoma_ihc_training_realistic.omv) 
+
+### biomarker (4 files)
+
+- [biomarker_discovery_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/biomarker_discovery_flow.omv) 
+- [biomarker_expression_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/biomarker_expression_data.omv) 
+- [biomarker_survival_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/biomarker_survival_data.omv) 
+- [biomarker_validation_study.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/biomarker_validation_study.omv) 
+
+### breast (4 files)
+
+- [breast_agreement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/breast_agreement_data.omv) 
+- [breast_cancer_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/breast_cancer_data.omv) 
+- [breast_diagnostic_styles.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/breast_diagnostic_styles.omv) 
+- [breast_pathologist_info.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/breast_pathologist_info.omv) 
+
+### comprehensive (4 files)
+
+- [comprehensive_agreement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/comprehensive_agreement_data.omv) 
+- [comprehensive_dca_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/comprehensive_dca_data.omv) 
+- [comprehensive_prism_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/comprehensive_prism_data.omv) 
+- [comprehensive_survival_comparison_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/comprehensive_survival_comparison_data.omv) 
+
+### ein (4 files)
+
+- [ein_agreement_long.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ein_agreement_long.omv) 
+- [ein_agreement_wide.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ein_agreement_wide.omv) 
+- [ein_agreement_wide_with_metadata.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ein_agreement_wide_with_metadata.omv) 
+- [ein_pathologist_info.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ein_pathologist_info.omv) 
+
+### eurostat (4 files)
+
+- [eurostat_comprehensive_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/eurostat_comprehensive_data.omv) 
+- [eurostat_health_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/eurostat_health_data.omv) 
+- [eurostat_nuts1_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/eurostat_nuts1_data.omv) 
+- [eurostat_timeseries_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/eurostat_timeseries_data.omv) 
+
+### jiwillsurvive (4 files)
+
+- [jiwillsurvive_long_followup.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jiwillsurvive_long_followup.omv) 
+- [jiwillsurvive_short_followup.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jiwillsurvive_short_followup.omv) 
+- [jiwillsurvive_single_group.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jiwillsurvive_single_group.omv) 
+- [jiwillsurvive_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jiwillsurvive_test_data.omv) 
+
+### jjoncoplot (4 files)
+
+- [jjoncoplot_small_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjoncoplot_small_test_data.omv) 
+- [jjoncoplot_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjoncoplot_test_data.omv) 
+- [jjoncoplot_test_data_duplicates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjoncoplot_test_data_duplicates.omv) 
+- [jjoncoplot_test_data_multivalue.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjoncoplot_test_data_multivalue.omv) 
+
+### medical (4 files)
+
+- [medical_ai_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/medical_ai_data.omv) 
+- [medical_research_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/medical_research_data.omv) 
+- [medical_roc_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/medical_roc_data.omv) 
+- [medical_study_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/medical_study_data.omv) 
+
+### nomogrammer (4 files)
+
+- [nomogrammer_clinical_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nomogrammer_clinical_test_data.omv) 
+- [nomogrammer_edge_cases_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nomogrammer_edge_cases_test_data.omv) 
+- [nomogrammer_lr_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nomogrammer_lr_test_data.omv) 
+- [nomogrammer_math_validation_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nomogrammer_math_validation_data.omv) 
+
+### simon (4 files)
+
+- [simon_makuch_examples.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simon_makuch_examples.omv) 
+- [simon_makuch_expanded.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simon_makuch_expanded.omv) 
+- [simon_makuch_landmark.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simon_makuch_landmark.omv) 
+- [simon_makuch_simple.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/simon_makuch_simple.omv) 
+
+### basic (3 files)
+
+- [basic_clinical_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/basic_clinical_data.omv) 
+- [basic_decision_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/basic_decision_data.omv) 
+- [basic_survival_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/basic_survival_data.omv) 
+
+### cardiac (3 files)
+
+- [cardiac_joint_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cardiac_joint_data.omv) 
+- [cardiac_risk_prediction.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cardiac_risk_prediction.omv) 
+- [cardiac_troponin_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cardiac_troponin_data.omv) 
+
+### education (3 files)
+
+- [education_attainment_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/education_attainment_data.omv) 
+- [education_pathways_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/education_pathways_data.omv) 
+- [education_roc_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/education_roc_data.omv) 
+
+### her2 (3 files)
+
+- [her2_agreement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/her2_agreement_data.omv) 
+- [her2_breast_cancer_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/her2_breast_cancer_data.omv) 
+- [her2_modality_comparison.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/her2_modality_comparison.omv) 
+
+### kappasizeci (3 files)
+
+- [kappasizeci_relationship_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_relationship_cases.omv) 
+- [kappasizeci_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_scenarios_comprehensive.omv) 
+- [kappasizeci_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_validation_cases.omv) 
+
+### kappasizefixedn (3 files)
+
+- [kappasizefixedn_power_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_power_cases.omv) 
+- [kappasizefixedn_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_scenarios_comprehensive.omv) 
+- [kappasizefixedn_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_validation_cases.omv) 
+
+### kappasizepower (3 files)
+
+- [kappasizepower_relationship_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_relationship_cases.omv) 
+- [kappasizepower_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_scenarios_comprehensive.omv) 
+- [kappasizepower_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_validation_cases.omv) 
+
+### oncology (3 files)
+
+- [oncology_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oncology_data.omv) 
+- [oncology_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oncology_datasets_summary.omv) 
+- [oncology_response_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oncology_response_data.omv) 
+
+### thyroid (3 files)
+
+- [thyroid_agreement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/thyroid_agreement_data.omv) 
+- [thyroid_function_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/thyroid_function_data.omv) 
+- [thyroid_nodule_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/thyroid_nodule_data.omv) 
+
+### treatment (3 files)
+
+- [treatment_decision_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/treatment_decision_data.omv) 
+- [treatment_pathways.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/treatment_pathways.omv) 
+- [treatment_pathways_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/treatment_pathways_data.omv) 
+
+### usubutun (3 files)
+
+- [usubutun_exact_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/usubutun_exact_data.omv) 
+- [usubutun_improved_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/usubutun_improved_data.omv) 
+- [usubutun_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/usubutun_test_data.omv) 
+
+### colorectal (2 files)
+
+- [colorectal_ihc_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/colorectal_ihc_data.omv) 
+- [colorectal_spatial_ihc.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/colorectal_spatial_ihc.omv) 
+
+### common (2 files)
+
+- [common_test_combinations.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/common_test_combinations.omv) 
+- [common_tests.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/common_tests.omv) 
+
+### competing (2 files)
+
+- [competing_risks_person_time.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/competing_risks_person_time.omv) 
+- [competing_survival_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/competing_survival_data.omv) 
+
+### complex (2 files)
+
+- [complex_alluvial_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/complex_alluvial_data.omv) 
+- [complex_decision_tree.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/complex_decision_tree.omv) 
+
+### dca (2 files)
+
+- [dca_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/dca_test.omv) 
+- [dca_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/dca_test_data.omv) 
+
+### digital (2 files)
+
+- [digital_pathology_validation.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/digital_pathology_validation.omv) 
+- [digital_technology_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/digital_technology_data.omv) 
+
+### economic (2 files)
+
+- [economic_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/economic_data.omv) 
+- [economic_indicators_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/economic_indicators_data.omv) 
+
+### edge (2 files)
+
+- [edge_case_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/edge_case_data.omv) 
+- [edge_cases_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/edge_cases_data.omv) 
+
+### endometrial (2 files)
+
+- [endometrial_diagnostic_styles.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/endometrial_diagnostic_styles.omv) 
+- [endometrial_pathologist_info.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/endometrial_pathologist_info.omv) 
+
+### financial (2 files)
+
+- [financial_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/financial_data.omv) 
+- [financial_roc_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/financial_roc_data.omv) 
+
+### low (2 files)
+
+- [low_event_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/low_event_data.omv) 
+- [low_variability_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/low_variability_data.omv) 
+
+### lung (2 files)
+
+- [lung_agreement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lung_agreement_data.omv) 
+- [lung_stage_migration_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lung_stage_migration_data.omv) 
+
+### lymphoma (2 files)
+
+- [lymphoma_diagnostic_styles.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lymphoma_diagnostic_styles.omv) 
+- [lymphoma_pathologist_info.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lymphoma_pathologist_info.omv) 
+
+### manufacturing (2 files)
+
+- [manufacturing_process.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/manufacturing_process.omv) 
+- [manufacturing_roc_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/manufacturing_roc_data.omv) 
+
+### melanoma (2 files)
+
+- [melanoma.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/melanoma.omv) 
+- [melanoma_agreement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/melanoma_agreement_data.omv) 
+
+### multi (2 files)
+
+- [multi_group_survival_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multi_group_survival_data.omv) 
+- [multi_group_workflow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multi_group_workflow.omv) 
+
+### multicenter (2 files)
+
+- [multicenter_pathway_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multicenter_pathway_data.omv) 
+- [multicenter_trial_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multicenter_trial_data.omv) 
+
+### percent (2 files)
+
+- [percent_no_time.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/percent_no_time.omv) 
+- [percent_with_time.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/percent_with_time.omv) 
+
+### psa (2 files)
+
+- [psa_joint_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psa_joint_data.omv) 
+- [psa_longitudinal_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psa_longitudinal_data.omv) 
+
+### raw (2 files)
+
+- [raw_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raw_data.omv) 
+- [raw_with_time.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/raw_with_time.omv) 
+
+### screening (2 files)
+
+- [screening_decision_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/screening_decision_data.omv) 
+- [screening_examples.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/screening_examples.omv) 
+
+### sequential (2 files)
+
+- [sequential_demo.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequential_demo.omv) 
+- [sequential_testing_examples.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sequential_testing_examples.omv) 
+
+### stage (2 files)
+
+- [stage_migration_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stage_migration_comprehensive.omv) 
+- [stage_migration_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stage_migration_test_data.omv) 
+
+### time (2 files)
+
+- [time_course_prism_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/time_course_prism_data.omv) 
+- [time_intervals_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/time_intervals_test_data.omv) 
+
+### tree (2 files)
+
+- [tree_datasets_summary.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tree_datasets_summary.omv) 
+- [tree_test_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tree_test_scenarios.omv) 
+
+### AIPulmonaryNodules (1 files)
+
+- [AIPulmonaryNodules_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/AIPulmonaryNodules_df.omv) 
+
+### AflatoxinLiverCancer (1 files)
+
+- [AflatoxinLiverCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/AflatoxinLiverCancer_df.omv) 
+
+### AlcoholIntakeCancer (1 files)
+
+- [AlcoholIntakeCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/AlcoholIntakeCancer_df.omv) 
+
+### BRCA1BreastCancer (1 files)
+
+- [BRCA1BreastCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BRCA1BreastCancer_df.omv) 
+
+### BRCA1OvarianCancer (1 files)
+
+- [BRCA1OvarianCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BRCA1OvarianCancer_df.omv) 
+
+### BRCA2BreastCancer (1 files)
+
+- [BRCA2BreastCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BRCA2BreastCancer_df.omv) 
+
+### BRCA2OvarianCancer (1 files)
+
+- [BRCA2OvarianCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BRCA2OvarianCancer_df.omv) 
+
+### BladderCancer (1 files)
+
+- [BladderCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BladderCancer_df.omv) 
+
+### BloodStorageProstate (1 files)
+
+- [BloodStorageProstate_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BloodStorageProstate_df.omv) 
+
+### BrainCancerCases (1 files)
+
+- [BrainCancerCases_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BrainCancerCases_df.omv) 
+
+### BrainCancerGeo (1 files)
+
+- [BrainCancerGeo_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BrainCancerGeo_df.omv) 
+
+### BreastCancer (1 files)
+
+- [BreastCancer.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BreastCancer.omv) 
+
+### BreastCancerWI (1 files)
+
+- [BreastCancerWI_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/BreastCancerWI_df.omv) 
+
+### CA19PancreaticCancer (1 files)
+
+- [CA19PancreaticCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/CA19PancreaticCancer_df.omv) 
+
+### CASP8BreastCancer (1 files)
+
+- [CASP8BreastCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/CASP8BreastCancer_df.omv) 
+
+### CancerSmokeCity (1 files)
+
+- [CancerSmokeCity_array.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/CancerSmokeCity_array.omv) 
+
+### Carcinoma (1 files)
+
+- [Carcinoma_p53_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/Carcinoma_p53_df.omv) 
+
+### CervicalCancer (1 files)
+
+- [CervicalCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/CervicalCancer_df.omv) 
+
+### ChildCancer (1 files)
+
+- [ChildCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ChildCancer_df.omv) 
+
+### ColonCancerChemo (1 files)
+
+- [ColonCancerChemo_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ColonCancerChemo_df.omv) 
+
+### ColorectalMiRNAs (1 files)
+
+- [ColorectalMiRNAs_tbl_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ColorectalMiRNAs_tbl_df.omv) 
+
+### EndometrialCancer (1 files)
+
+- [EndometrialCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/EndometrialCancer_df.omv) 
+
+### HeadNeckCarcinoma (1 files)
+
+- [HeadNeckCarcinoma_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/HeadNeckCarcinoma_df.omv) 
+
+### ICGCLiver (1 files)
+
+- [ICGCLiver_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ICGCLiver_df.omv) 
+
+### LeukemiaLymphomaCases (1 files)
+
+- [LeukemiaLymphomaCases_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/LeukemiaLymphomaCases_df.omv) 
+
+### LeukemiaLymphomaControl (1 files)
+
+- [LeukemiaLymphomaControl_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/LeukemiaLymphomaControl_df.omv) 
+
+### LeukemiaLymphomaGeo (1 files)
+
+- [LeukemiaLymphomaGeo_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/LeukemiaLymphomaGeo_df.omv) 
+
+### LeukemiaRemission (1 files)
+
+- [LeukemiaRemission_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/LeukemiaRemission_df.omv) 
+
+### LeukemiaSurvival (1 files)
+
+- [LeukemiaSurvival_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/LeukemiaSurvival_df.omv) 
+
+### LungCancerETS (1 files)
+
+- [LungCancerETS_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/LungCancerETS_df.omv) 
+
+### LungNodulesDetected (1 files)
+
+- [LungNodulesDetected_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/LungNodulesDetected_df.omv) 
+
+### MaleMiceCancer (1 files)
+
+- [MaleMiceCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/MaleMiceCancer_df.omv) 
+
+### Melanoma (1 files)
+
+- [Melanoma_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/Melanoma_df.omv) 
+
+### MiceDeathRadiation (1 files)
+
+- [MiceDeathRadiation_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/MiceDeathRadiation_df.omv) 
+
+### NCCTGLungCancer (1 files)
+
+- [NCCTGLungCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/NCCTGLungCancer_df.omv) 
+
+### NodalProstate (1 files)
+
+- [NodalProstate_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/NodalProstate_df.omv) 
+
+### OvarianCancer (1 files)
+
+- [OvarianCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/OvarianCancer_df.omv) 
+
+### PSAProstateCancer (1 files)
+
+- [PSAProstateCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/PSAProstateCancer_df.omv) 
+
+### PancreaticMiRNAs (1 files)
+
+- [PancreaticMiRNAs_tbl_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/PancreaticMiRNAs_tbl_df.omv) 
+
+### ProstateMethylation (1 files)
+
+- [ProstateMethylation_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ProstateMethylation_df.omv) 
+
+### ProstateSurgery (1 files)
+
+- [ProstateSurgery_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ProstateSurgery_df.omv) 
+
+### ProstateSurvival (1 files)
+
+- [ProstateSurvival_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/ProstateSurvival_df.omv) 
+
+### RadiationEffects (1 files)
+
+- [RadiationEffects_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/RadiationEffects_df.omv) 
+
+### RotterdamBreastCancer (1 files)
+
+- [RotterdamBreastCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/RotterdamBreastCancer_df.omv) 
+
+### SkinCancerChemo (1 files)
+
+- [SkinCancerChemo_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/SkinCancerChemo_df.omv) 
+
+### SmallCellLung (1 files)
+
+- [SmallCellLung_tbl_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/SmallCellLung_tbl_df.omv) 
+
+### SmokingLungCancer (1 files)
+
+- [SmokingLungCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/SmokingLungCancer_df.omv) 
+
+### SuspectedCancer (1 files)
+
+- [SuspectedCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/SuspectedCancer_df.omv) 
+
+### UKLungCancerDeaths (1 files)
+
+- [UKLungCancerDeaths_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/UKLungCancerDeaths_df.omv) 
+
+### USCancerStats (1 files)
+
+- [USCancerStats_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/USCancerStats_df.omv) 
+
+### USMortalityCancer (1 files)
+
+- [USMortalityCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/USMortalityCancer_df.omv) 
+
+### USRegionalMortality (1 files)
+
+- [USRegionalMortality_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/USRegionalMortality_df.omv) 
+
+### VinylideneLiverCancer (1 files)
+
+- [VinylideneLiverCancer_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/VinylideneLiverCancer_df.omv) 
+
+### WBreastCancer (1 files)
+
+- [WBreastCancer_tbl_df.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/WBreastCancer_tbl_df.omv) 
+
+### agepyramid (1 files)
+
+- [agepyramid_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agepyramid_test.omv) 
+
+### alluvial (1 files)
+
+- [alluvial_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/alluvial_test.omv) 
+
+### arcDiagram (1 files)
+
+- [arcDiagram.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/arcDiagram.omv) 
+
+### bayesdca (1 files)
+
+- [bayesdca_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/bayesdca_test_data.omv) 
+
+### benford (1 files)
+
+- [benford_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/benford_test.omv) 
+
+### bujang (1 files)
+
+- [bujang_table2_validation.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/bujang_table2_validation.omv) 
+
+### business (1 files)
+
+- [business_process_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/business_process_data.omv) 
+
+### cardio (1 files)
+
+- [cardio_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cardio_data.omv) 
+
+### cardiovascular (1 files)
+
+- [cardiovascular_risk.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cardiovascular_risk.omv) 
+
+### categorical (1 files)
+
+- [categorical_quality_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/categorical_quality_data.omv) 
+
+### categorize (1 files)
+
+- [categorize_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/categorize_test.omv) 
+
+### cd4 (1 files)
+
+- [cd4_joint_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cd4_joint_data.omv) 
+
+### checkdata (1 files)
+
+- [checkdata_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/checkdata_test.omv) 
+
+### climate (1 files)
+
+- [climate_environment_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/climate_environment_data.omv) 
+
+### colon (1 files)
+
+- [colon.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/colon.omv) 
+
+### colorblind (1 files)
+
+- [colorblind_safe_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/colorblind_safe_data.omv) 
+
+### combined (1 files)
+
+- [combined_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/combined_data.omv) 
+
+### cost (1 files)
+
+- [cost_effectiveness_examples.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cost_effectiveness_examples.omv) 
+
+### covid (1 files)
+
+- [covid_screening_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/covid_screening_data.omv) 
+
+### cross (1 files)
+
+- [cross_tab_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cross_tab_data.omv) 
+
+### crosstable (1 files)
+
+- [crosstable_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/crosstable_test.omv) 
+
+### cyp2d6 (1 files)
+
+- [cyp2d6_pharmacogenomics_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/cyp2d6_pharmacogenomics_data.omv) 
+
+### dataquality (1 files)
+
+- [dataquality_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/dataquality_test.omv) 
+
+### date (1 files)
+
+- [date_formats.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/date_formats.omv) 
+
+### decisiongraph (1 files)
+
+- [decisiongraph_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/decisiongraph_test_data.omv) 
+
+### diabetes (1 files)
+
+- [diabetes_complications.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/diabetes_complications.omv) 
+
+### dose (1 files)
+
+- [dose_response_prism_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/dose_response_prism_data.omv) 
+
+### drug (1 files)
+
+- [drug_response.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/drug_response.omv) 
+
+### duan2023 (1 files)
+
+- [duan2023_vi_blocks.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/duan2023_vi_blocks.omv) 
+
+### effect (1 files)
+
+- [effect_size_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/effect_size_data.omv) 
+
+### election (1 files)
+
+- [election_survey_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/election_survey_data.omv) 
+
+### epidemiology (1 files)
+
+- [epidemiology_study_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/epidemiology_study_flow.omv) 
+
+### excellent (1 files)
+
+- [excellent_quality_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/excellent_quality_data.omv) 
+
+### exercise (1 files)
+
+- [exercise_physiology_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/exercise_physiology_data.omv) 
+
+### external (1 files)
+
+- [external_prevalence_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/external_prevalence_data.omv) 
+
+### fraudulent (1 files)
+
+- [fraudulent_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/fraudulent_data.omv) 
+
+### gee (1 files)
+
+- [gee_liver_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/gee_liver_data.omv) 
+
+### health (1 files)
+
+- [health_statistics_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/health_statistics_data.omv) 
+
+### heartdisease (1 files)
+
+- [heartdisease.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/heartdisease.omv) 
+
+### high (1 files)
+
+- [high_event_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/high_event_data.omv) 
+
+### histopathology (1 files)
+
+- [histopathology.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.omv) 
+
+### histopathologyDescriptives (1 files)
+
+- [histopathologyDescriptives.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathologyDescriptives.omv) 
+
+### histopathologyGraphsPlots (1 files)
+
+- [histopathologyGraphsPlots.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathologyGraphsPlots.omv) 
+
+### histopathologyGraphsPlots2 (1 files)
+
+- [histopathologyGraphsPlots2.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathologyGraphsPlots2.omv) 
+
+### histopathologyMedicalDecision (1 files)
+
+- [histopathologyMedicalDecision.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathologyMedicalDecision.omv) 
+
+### histopathologySurvival (1 files)
+
+- [histopathologySurvival.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathologySurvival.omv) 
+
+### histopathologyanalysis (1 files)
+
+- [histopathologyanalysis.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathologyanalysis.omv) 
+
+### hospital (1 files)
+
+- [hospital_admission_hourly.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/hospital_admission_hourly.omv) 
+
+### jcomplexupset (1 files)
+
+- [jcomplexupset_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jcomplexupset_test_data.omv) 
+
+### jconsort (1 files)
+
+- [jconsort_examples_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jconsort_examples_data.omv) 
+
+### jflowchart (1 files)
+
+- [jflowchart_comprehensive_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jflowchart_comprehensive_data.omv) 
+
+### jjbarstats (1 files)
+
+- [jjbarstats_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjbarstats_test.omv) 
+
+### jjbetweenstats (1 files)
+
+- [jjbetweenstats_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjbetweenstats_test.omv) 
+
+### jjridgestats (1 files)
+
+- [jjridgestats_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjridgestats_test_data.omv) 
+
+### jjwithinstats (1 files)
+
+- [jjwithinstats_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/jjwithinstats_test.omv) 
+
+### kidney (1 files)
+
+- [kidney_joint_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kidney_joint_data.omv) 
+
+### lab (1 files)
+
+- [lab_workflow_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/lab_workflow_flow.omv) 
+
+### large (1 files)
+
+- [large_prism_dataset.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/large_prism_dataset.omv) 
+
+### likert (1 files)
+
+- [likert_survey_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/likert_survey_data.omv) 
+
+### linear (1 files)
+
+- [linear_model_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/linear_model_data.omv) 
+
+### logistic (1 files)
+
+- [logistic_model_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/logistic_model_data.omv) 
+
+### longitudinal (1 files)
+
+- [longitudinal_quality_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/longitudinal_quality_data.omv) 
+
+### markov (1 files)
+
+- [markov_decision_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/markov_decision_data.omv) 
+
+### mi (1 files)
+
+- [mi_ruleout_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/mi_ruleout_data.omv) 
+
+### missing (1 files)
+
+- [missing_data_challenge.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/missing_data_challenge.omv) 
+
+### mixed (1 files)
+
+- [mixed_effects_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/mixed_effects_data.omv) 
+
+### model (1 files)
+
+- [model_comparison_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/model_comparison_data.omv) 
+
+### modelbuilder (1 files)
+
+- [modelbuilder_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/modelbuilder_test_data.omv) 
+
+### molecular (1 files)
+
+- [molecular_subtype_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/molecular_subtype_data.omv) 
+
+### multiarm (1 files)
+
+- [multiarm_trial_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/multiarm_trial_flow.omv) 
+
+### natural (1 files)
+
+- [natural_phenomena_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/natural_phenomena_data.omv) 
+
+### nogold (1 files)
+
+- [nogold_standard.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nogold_standard.omv) 
+
+### nsclc (1 files)
+
+- [nsclc_til_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/nsclc_til_data.omv) 
+
+### observational (1 files)
+
+- [observational_study_flow_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/observational_study_flow_data.omv) 
+
+### omentum (1 files)
+
+- [omentum_sampling.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/omentum_sampling.omv) 
+
+### oncotype (1 files)
+
+- [oncotype_dx_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/oncotype_dx_data.omv) 
+
+### outlier (1 files)
+
+- [outlier_detection_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/outlier_detection_data.omv) 
+
+### patientTimelines (1 files)
+
+- [patientTimelines.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/patientTimelines.omv) 
+
+### patientTimelinesDates (1 files)
+
+- [patientTimelinesDates.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/patientTimelinesDates.omv) 
+
+### pcaloadingtest (1 files)
+
+- [pcaloadingtest_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pcaloadingtest_data.omv) 
+
+### pdl1 (1 files)
+
+- [pdl1_immunotherapy_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pdl1_immunotherapy_data.omv) 
+
+### pediatric (1 files)
+
+- [pediatric_growth.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pediatric_growth.omv) 
+
+### performance (1 files)
+
+- [performance_demo.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/performance_demo.omv) 
+
+### person (1 files)
+
+- [person_time_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/person_time_test_data.omv) 
+
+### pharma (1 files)
+
+- [pharma_decision_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pharma_decision_data.omv) 
+
+### pharmacokinetics (1 files)
+
+- [pharmacokinetics_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pharmacokinetics_data.omv) 
+
+### pmid (1 files)
+
+- [pmid.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/pmid.omv) 
+
+### poor (1 files)
+
+- [poor_quality_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/poor_quality_data.omv) 
+
+### precision (1 files)
+
+- [precision_oncology_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/precision_oncology_data.omv) 
+
+### prevalence (1 files)
+
+- [prevalence_demo.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/prevalence_demo.omv) 
+
+### prostate (1 files)
+
+- [prostate_agreement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/prostate_agreement_data.omv) 
+
+### psychological (1 files)
+
+- [psychological_assessment_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/psychological_assessment_data.omv) 
+
+### publication (1 files)
+
+- [publication_prism_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/publication_prism_data.omv) 
+
+### quality (1 files)
+
+- [quality_improvement_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/quality_improvement_data.omv) 
+
+### renal (1 files)
+
+- [renal_ihc_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/renal_ihc_data.omv) 
+
+### reportcat (1 files)
+
+- [reportcat_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/reportcat_test.omv) 
+
+### research (1 files)
+
+- [research_pipeline_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/research_pipeline_flow.omv) 
+
+### response (1 files)
+
+- [response_to_treatment.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/response_to_treatment.omv) 
+
+### retraction (1 files)
+
+- [retraction_example_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/retraction_example_data.omv) 
+
+### retractiondio2 (1 files)
+
+- [retractiondio2.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/retractiondio2.omv) 
+
+### retractiondoi (1 files)
+
+- [retractiondoi.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/retractiondoi.omv) 
+
+### rocdata (1 files)
+
+- [rocdata.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/rocdata.omv) 
+
+### sankey (1 files)
+
+- [sankey_simple_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sankey_simple_data.omv) 
+
+### scientific (1 files)
+
+- [scientific_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/scientific_data.omv) 
+
+### separation (1 files)
+
+- [separation_challenge.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/separation_challenge.omv) 
+
+### sepsis (1 files)
+
+- [sepsis_biomarker_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sepsis_biomarker_data.omv) 
+
+### small (1 files)
+
+- [small_sample_tree.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/small_sample_tree.omv) 
+
+### software (1 files)
+
+- [software_dev_flow.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/software_dev_flow.omv) 
+
+### sports (1 files)
+
+- [sports_performance_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/sports_performance_data.omv) 
+
+### statistical (1 files)
+
+- [statistical_comparison_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/statistical_comparison_data.omv) 
+
+### statsplot2 (1 files)
+
+- [statsplot2_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/statsplot2_test.omv) 
+
+### stereology (1 files)
+
+- [stereology_vessel_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/stereology_vessel_data.omv) 
+
+### strategy (1 files)
+
+- [strategy_comparison.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/strategy_comparison.omv) 
+
+### summarydata (1 files)
+
+- [summarydata_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/summarydata_test.omv) 
+
+### survey (1 files)
+
+- [survey_proportion_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survey_proportion_data.omv) 
+
+### survivalendpoints (1 files)
+
+- [survivalendpoints_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalendpoints_test.omv) 
+
+### survivalpower (1 files)
+
+- [survivalpower_scenarios.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/survivalpower_scenarios.omv) 
+
+### tableone (1 files)
+
+- [tableone_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tableone_test.omv) 
+
+### tb (1 files)
+
+- [tb_diagnosis_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tb_diagnosis_data.omv) 
+
+### teaching (1 files)
+
+- [teaching_examples.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/teaching_examples.omv) 
+
+### tech (1 files)
+
+- [tech_migration_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tech_migration_data.omv) 
+
+### treatmentResponse (1 files)
+
+- [treatmentResponse.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/treatmentResponse.omv) 
+
+### tumor (1 files)
+
+- [tumor_response_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/tumor_response_data.omv) 
+
+### unbalanced (1 files)
+
+- [unbalanced_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/unbalanced_data.omv) 
+
+### vartree (1 files)
+
+- [vartree_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/vartree_test.omv) 
+
+### venn (1 files)
+
+- [venn_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/venn_test.omv) 
+
+### weighted (1 files)
+
+- [weighted_analysis_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/weighted_analysis_data.omv) 
+
+
+---
+
+## Summary Statistics
+
+- **Total .omv Files:**945
+- **Total Functions:**295
+- **Average Files per Function:**3.2
+- **Most Files:**timeinterval(24files)
+

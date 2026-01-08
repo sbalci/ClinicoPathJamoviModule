@@ -13,7 +13,7 @@ linechart(
   trendline = FALSE,
   points = TRUE,
   smooth = FALSE,
-  refline,
+  refline = 0,
   reflineLabel = "Reference",
   colorPalette = "default",
   theme = "default",
@@ -47,7 +47,7 @@ plot.}
 \item{smooth}{Whether to apply smoothing (loess) to the line(s).}
 
 \item{refline}{Optional reference line value (e.g., normal range,
-threshold).}
+threshold). Set to 0 for no reference line.}
 
 \item{reflineLabel}{Label for the reference line.}
 

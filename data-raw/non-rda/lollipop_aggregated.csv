@@ -1,0 +1,6 @@
+"region","mean_income","median_age","population_density","unemployment_rate"
+"North",75000,42,850,5.2
+"South",62000,38,420,6.8
+"East",88000,45,1200,4.1
+"West",71000,41,680,5.9
+"Central",69000,39,920,5.5

@@ -211,7 +211,11 @@
       "Skill(generate-test-data:*)",
       "Bash(JAMOVI_HOME=\"/Applications/jamovi.app/Contents/Resources/app/bin\" /Applications/jamovi.app/Contents/Resources/app/bin/jamovi-compiler:*)",
       "Bash(git diff:*)",
-      "Bash(do echo \"=== $file ===\")"
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(if Rscript -e \"parse\\(''$file''\\)\")",
+      "Bash(__NEW_LINE__ echo \"\n═══════════════════════════════════════════════════════════\nNEXT STEPS:\n═══════════════════════════════════════════════════════════\n1. devtools::document\\(\\)\n2. devtools::test\\(filter = ''timeinterval''\\)\n3. covr::package_coverage\\(\\)\n\")",
+      "Bash(if [ -f \"$f\" ])",
+      "Bash(if Rscript -e \"parse\\(''$f''\\)\")"
     ],
     "deny": [],
     "ask": [],

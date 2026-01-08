@@ -8,9 +8,9 @@ version: '0.0.1'
 jas: '1.2'
 
 description:
-    main: >-
-        Performs Q-TWiST (Quality-adjusted Time Without Symptoms or Toxicity) analysis
-        to compare treatments while accounting for both quantity and quality of survival time.
+    main: |
+        Perform Quality-adjusted Time Without Symptoms or Toxicity (Q-TWiST) analysis 
+        to compare treatments using both quantity and quality of life.
         Particularly valuable in oncology trials where treatments may extend survival but
         with significant toxicity or disease symptoms.
 

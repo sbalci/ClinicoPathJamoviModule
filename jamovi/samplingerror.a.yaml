@@ -8,12 +8,20 @@ menuSubtitle: Calculate sampling efficiency and error rates (Kayser 2009)
 version: '1.0.0'
 jas: '1.2'
 
+description:
+    main: |
+        Practical tool for evaluating sampling adequacy and statistical power 
+        in clinicopathological research.
+        
+        @details
+        Calculates sampling efficiency and error rates according to Kayser (2009).
+
 options:
     - name: data
       type: Data
 
     - name: detectionSensitivity
-      title: Detection Sensitivity (%)
+      title: Detection Sensitivity (\%)
       type: Number
       min: 0
       max: 100
@@ -23,7 +31,7 @@ options:
         100% means perfect detection, 95% means 5% false negative rate.
 
     - name: biologicalVarianceCV
-      title: Biological Variance (CV%)
+      title: Biological Variance (CV\%)
       type: Number
       min: 0
       max: 100
@@ -43,7 +51,7 @@ options:
         Number of samples/sections/areas examined.
 
     - name: eventFrequency
-      title: Event Frequency in Sample (%)
+      title: Event Frequency in Sample (\%)
       type: Number
       min: 0
       max: 100
@@ -93,7 +101,7 @@ options:
         Actual measurements from samples (for empirical calculation).
 
     - name: targetError
-      title: Target Sampling Error (%)
+      title: Target Sampling Error (\%)
       type: Number
       min: 1
       max: 50

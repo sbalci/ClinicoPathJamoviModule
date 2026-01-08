@@ -8,10 +8,14 @@ version: '0.0.31'
 jas: '1.2'
 
 description:
-    main: >
-        Bayesian Additive Regression Trees (BART) for survival analysis providing
-        flexible nonparametric modeling with automatic variable selection and
-        interaction detection. BART combines an ensemble of weak learners (trees)
+    main: |
+        Bayesian Additive Regression Trees (BART) for survival analysis, providing a flexible 
+        non-parametric approach to modeling complex clinical survival data.
+        
+        Automatically captures non-linear relationships and high-order interactions 
+        without explicit specification. Supports Accelerated Failure Time (AFT), 
+        Proportional Hazards (PH), and Cure models.
+        BART combines an ensemble of weak learners (trees)
         with Bayesian priors to create a powerful predictive model that naturally
         handles nonlinear relationships, interactions, and variable selection
         without requiring preprocessing. The method provides full posterior

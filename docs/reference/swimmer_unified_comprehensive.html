@@ -11,7 +11,7 @@ Designed to showcase the full capabilities of the swimmer plot function."></head
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,13 +21,12 @@ Designed to showcase the full capabilities of the swimmer plot function."></head
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../dev/index.html"><span class="fa fa-cogs"></span></a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
-    <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
-    <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
-    <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-test-data" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fa-database"></span> Test Data</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-test-data"><li><a class="dropdown-item" href="../articles/test-data-catalog.html">Test Data Catalog</a></li>
+    <li><a class="dropdown-item" href="../articles/test-data-complete-catalog.html">Complete Catalog (945 files)</a></li>
+    <li><a class="dropdown-item" href="../articles/function-reference.html">Function Reference</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci"><span class="fa fab fa-twitter fa-lg"></span></a></li>
@@ -173,25 +172,39 @@ Designed to showcase the full capabilities of the swimmer plot function.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Most common response was CR (30.0% of observations). Response</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  distribution shows clinical patterns suitable for efficacy analysis.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Person-Time Analysis                                                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Type    Patients    Total Time    Mean Time    Incidence Rate   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Person-Time Analysis                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Response Type    Patients    Total Time    Mean Time    Follow-up Density   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CR                      6     207.00000    34.500000             2.899000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    PD                      5      41.00000     8.200000            12.195000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    PR                      5     145.00000    29.000000             3.448000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    SD                      4     105.00000    26.250000             3.810000   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ───────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Milestone Event Summary                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Milestone    Events    Median Time    Time Range   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Milestone Event Summary                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Milestone         Events    Median Time    Time Range      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Death/Last FU          7       9.000000    6 - 18 months   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    First Response        14       9.000000    3 - 18 months   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Progression           14      12.000000    4 - 36 months   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Surgery               17       3.000000    1 - 9 months    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Advanced Clinical Metrics                              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Metric    Value    Unit    Clinical Interpretation   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────── </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Advanced Clinical Metrics                                                                                                                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Metric                           Value         95% CI         Unit                 Clinical Interpretation                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Median Follow-up Time             22.500000                   months               Central tendency of patient follow-up duration                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Interquartile Range               25.000000                   months               Middle 50% of follow-up duration range                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Total Study Person-Time          498.000000                   months cumulative    Total observation time across all patients                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Follow-up Density                  4.016000                   per 100 months       Number of patients per 100 units of observation time (descriptive metric)   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Objective Response Rate (ORR)     55.000000    31.5 - 76.9    percent              Proportion with complete or partial response                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Disease Control Rate (DCR)        75.000000    50.9 - 91.3    percent              Proportion with response or stable disease                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-plt img"><img src="swimmer_unified_comprehensive-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

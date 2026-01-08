@@ -18,6 +18,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showEducational = FALSE,
             showDetailedTables = FALSE,
             residualsCutoff = 2,
+            phiCI = FALSE,
             testSelection = "auto",
             exportResults = FALSE,
             showClinicalSummary = FALSE,
@@ -100,6 +101,10 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 min=1.5,
                 max=4,
                 default=2)
+            private$..phiCI <- jmvcore::OptionBool$new(
+                "phiCI",
+                phiCI,
+                default=FALSE)
             private$..testSelection <- jmvcore::OptionList$new(
                 "testSelection",
                 testSelection,
@@ -141,6 +146,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showEducational)
             self$.addOption(private$..showDetailedTables)
             self$.addOption(private$..residualsCutoff)
+            self$.addOption(private$..phiCI)
             self$.addOption(private$..testSelection)
             self$.addOption(private$..exportResults)
             self$.addOption(private$..showClinicalSummary)
@@ -161,6 +167,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showEducational = function() private$..showEducational$value,
         showDetailedTables = function() private$..showDetailedTables$value,
         residualsCutoff = function() private$..residualsCutoff$value,
+        phiCI = function() private$..phiCI$value,
         testSelection = function() private$..testSelection$value,
         exportResults = function() private$..exportResults$value,
         showClinicalSummary = function() private$..showClinicalSummary$value,
@@ -180,6 +187,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showEducational = NA,
         ..showDetailedTables = NA,
         ..residualsCutoff = NA,
+        ..phiCI = NA,
         ..testSelection = NA,
         ..exportResults = NA,
         ..showClinicalSummary = NA,
@@ -199,6 +207,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         educationalOverview = function() private$.items[["educationalOverview"]],
         weightedDataInfo = function() private$.items[["weightedDataInfo"]],
         contingencyTable = function() private$.items[["contingencyTable"]],
+        residualsGuidance = function() private$.items[["residualsGuidance"]],
         residualsAnalysis = function() private$.items[["residualsAnalysis"]],
         multipleTestingInfo = function() private$.items[["multipleTestingInfo"]],
         posthocTable = function() private$.items[["posthocTable"]],
@@ -299,6 +308,17 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "exp")))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="residualsGuidance",
+                title="Residuals Interpretation Guidance",
+                visible="(showResiduals)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "excl",
+                    "showResiduals",
+                    "residualsCutoff")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="residualsAnalysis",
                 title="Standardized Residuals Analysis",
                 visible="(showResiduals)",
@@ -347,6 +367,10 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="effect_size", 
                         `title`="Effect Size (Phi)", 
                         `type`="number"),
+                    list(
+                        `name`="phi_ci", 
+                        `title`="95% CI (Phi)", 
+                        `type`="text"),
                     list(
                         `name`="sig", 
                         `title`="Significant", 
@@ -486,6 +510,9 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   comparison
 #' @param residualsCutoff critical value for identifying significant residuals
 #'   (typically 2.0 or 3.0)
+#' @param phiCI calculate bootstrap confidence intervals for the Phi
+#'   coefficient using BCa method (Bias-Corrected and accelerated). Note: This
+#'   is computationally intensive and may take longer for large tables.
 #' @param testSelection method for selecting statistical test for pairwise
 #'   comparisons
 #' @param exportResults Export comprehensive analysis results to downloadable
@@ -507,6 +534,7 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$residualsGuidance} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
@@ -538,6 +566,7 @@ chisqposttest <- function(
     showEducational = FALSE,
     showDetailedTables = FALSE,
     residualsCutoff = 2,
+    phiCI = FALSE,
     testSelection = "auto",
     exportResults = FALSE,
     showClinicalSummary = FALSE,
@@ -574,6 +603,7 @@ chisqposttest <- function(
         showEducational = showEducational,
         showDetailedTables = showDetailedTables,
         residualsCutoff = residualsCutoff,
+        phiCI = phiCI,
         testSelection = testSelection,
         exportResults = exportResults,
         showClinicalSummary = showClinicalSummary,

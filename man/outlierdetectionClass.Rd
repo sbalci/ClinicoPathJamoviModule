@@ -52,10 +52,10 @@ The outlier detection module supports four main categories of methods:
 \section{Threshold Recommendations}{
 
 \itemize{
-\item \strong{Z-Score:} 3.29 (99.9\% confidence, ~0.1\% outliers)
+\item \strong{Z-Score:} 3.29 (99.9\\% confidence, ~0.1\\% outliers)
 \item \strong{IQR Multiplier:} 1.7 (more conservative than Tukey's 1.5)
-\item \strong{Confidence Level:} 0.999 (99.9\% for interval methods)
-\item \strong{Composite Threshold:} 0.5 (outliers detected by ≥50\% of methods)
+\item \strong{Confidence Level:} 0.999 (99.9\\% for interval methods)
+\item \strong{Composite Threshold:} 0.5 (outliers detected by ≥50\\% of methods)
 }
 }
 

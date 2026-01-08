@@ -1,0 +1,2 @@
+"test_name","condition","setting","sample_size","TP","TN","FP","FN","study_prevalence","population_prevalence","expected_sensitivity","expected_specificity","notes"
+"Cardiac Troponin","Myocardial Infarction","Emergency Department",500,95,368,32,5,0.2,0.15,0.95,0.92,"Excellent biomarker with high sensitivity and specificity"

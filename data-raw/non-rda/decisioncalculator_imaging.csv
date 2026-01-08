@@ -1,0 +1,2 @@
+"test_name","condition","setting","TP","TN","FP","FN","total_n","prevalence","cost_per_test","radiation_exposure","notes"
+"CT Scan","Appendicitis","Emergency Department",88,180,20,12,300,0.33,1200,"5-10 mSv","High-performance imaging with cost and radiation considerations"

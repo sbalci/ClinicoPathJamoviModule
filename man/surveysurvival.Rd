@@ -159,12 +159,18 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$designDiagnostics)}
 }
 \description{
-Performs survival analysis with complex survey designs and sampling
-weights. This module implements survey-weighted survival methods for
-population-based inference from complex sampling designs including
-stratified, clustered, and multi-stage sampling. The analysis accounts for
-survey design effects on standard errors and confidence intervals, enabling
-proper population-level survival estimates from survey data.
+Perform survival analysis on complex survey data using the survey
+package. Supports weighted estimates, complex sampling designs, and
+weighted Cox proportional hazards models.
+}
+\details{
+This module implements survey-weighted survival methods for
+population-based
+inference from complex sampling designs including stratified, clustered,
+and
+multi-stage sampling. The analysis accounts for survey design effects on
+standard errors and confidence intervals, enabling proper population-level
+survival estimates from survey data.
 }
 \examples{
 # Example 1: Basic survey-weighted Kaplan-Meier

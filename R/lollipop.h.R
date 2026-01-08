@@ -9,7 +9,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             group = NULL,
             useHighlight = FALSE,
-            highlight = NULL,
+            highlight = "",
             aggregation = "none",
             sortBy = "original",
             orientation = "vertical",
@@ -54,10 +54,10 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "useHighlight",
                 useHighlight,
                 default=FALSE)
-            private$..highlight <- jmvcore::OptionLevel$new(
+            private$..highlight <- jmvcore::OptionString$new(
                 "highlight",
                 highlight,
-                variable="(group)")
+                default="")
             private$..aggregation <- jmvcore::OptionList$new(
                 "aggregation",
                 aggregation,
@@ -384,7 +384,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param useHighlight Enable or disable highlighting of specific levels in
 #'   the plot.
 #' @param highlight Specific level to highlight in the plot with different
-#'   color/style.
+#'   color/style. Only used when useHighlight is TRUE.
 #' @param aggregation How to aggregate multiple values per group. Use 'Mean'
 #'   or 'Median' for typical clinical measurements, 'Sum' for counts. 'No
 #'   Aggregation' will over-plot if multiple rows per group exist.
@@ -425,7 +425,7 @@ lollipop <- function(
     dep,
     group,
     useHighlight = FALSE,
-    highlight,
+    highlight = "",
     aggregation = "none",
     sortBy = "original",
     orientation = "vertical",

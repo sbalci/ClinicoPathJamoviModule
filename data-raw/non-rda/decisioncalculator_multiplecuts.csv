@@ -1,0 +1,4 @@
+"cutoff_scenario","cutoff_value","TP","TN","FP","FN","total_n","diseased","healthy","sensitivity","specificity","clinical_strategy"
+"Conservative (PSA ≥10)",10,65,195,5,35,300,100,200,0.65,0.975,"Minimize false positives, accept missing some cases"
+"Standard (PSA ≥4)",4,85,180,20,15,300,100,200,0.85,0.9,"Balanced approach, standard clinical practice"
+"Aggressive (PSA ≥2.5)",2.5,95,160,40,5,300,100,200,0.95,0.8,"Maximize case detection, more false positives"

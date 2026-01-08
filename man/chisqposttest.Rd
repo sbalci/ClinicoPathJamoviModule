@@ -18,6 +18,7 @@ chisqposttest(
   showEducational = FALSE,
   showDetailedTables = FALSE,
   residualsCutoff = 2,
+  phiCI = FALSE,
   testSelection = "auto",
   exportResults = FALSE,
   showClinicalSummary = FALSE,
@@ -63,6 +64,10 @@ comparison}
 \item{residualsCutoff}{critical value for identifying significant residuals
 (typically 2.0 or 3.0)}
 
+\item{phiCI}{calculate bootstrap confidence intervals for the Phi
+coefficient using BCa method (Bias-Corrected and accelerated). Note: This
+is computationally intensive and may take longer for large tables.}
+
 \item{testSelection}{method for selecting statistical test for pairwise
 comparisons}
 
@@ -91,6 +96,7 @@ A results object containing:
 \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
+\code{results$residualsGuidance} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr

@@ -1,0 +1,593 @@
+# ═══════════════════════════════════════════════════════════
+# Test Data Generation: agreement (Interrater Reliability)
+# ═══════════════════════════════════════════════════════════
+#
+# This script generates realistic test data for the agreement jamovi function
+#
+# Function: Interrater Reliability Analysis
+# Purpose: Calculate agreement between multiple raters for categorical or continuous data
+#
+# Key Features Tested:
+# - Cohen's Kappa (2 raters, categorical)
+# - Fleiss' Kappa (3+ raters, categorical)
+# - Weighted Kappa (ordinal data)
+# - ICC (continuous data)
+# - Bland-Altman (continuous, 2 raters)
+# - Krippendorff's Alpha
+# - Gwet's AC1/AC2
+# - Lin's CCC
+# - Specific Agreement Indices
+# - Test-Retest (intra-rater reliability)
+# - Hierarchical/Multilevel Agreement
+#
+# Generated: 2026-01-07
+# Seed: 42
+
+library(tibble)
+library(dplyr)
+library(here)
+set.seed(42)
+
+# ═══════════════════════════════════════════════════════════
+# Helper Functions
+# ═══════════════════════════════════════════════════════════
+
+#' Generate correlated categorical ratings
+#' @param n Number of cases
+#' @param k Number of categories
+#' @param agreement Target agreement proportion (0-1)
+#' @param true_class True underlying class (if NULL, generated randomly)
+#' @return Factor vector of ratings
+generate_categorical_ratings <- function(n, k, agreement = 0.8, true_class = NULL) {
+  if (is.null(true_class)) {
+    true_class <- sample(1:k, n, replace = TRUE)
+  }
+
+  # Generate ratings with specified agreement to true class
+  ratings <- sapply(1:n, function(i) {
+    if (runif(1) < agreement) {
+      true_class[i]  # Agree with true class
+    } else {
+      sample(setdiff(1:k, true_class[i]), 1)  # Disagree (random other class)
+    }
+  })
+
+  return(ratings)
+}
+
+#' Generate correlated continuous measurements
+#' @param n Number of cases
+#' @param true_value True underlying value
+#' @param sd_measurement Measurement error SD
+#' @param bias Systematic bias to add
+#' @return Numeric vector of measurements
+generate_continuous_ratings <- function(n, true_value, sd_measurement = 5, bias = 0) {
+  measurements <- true_value + rnorm(n, mean = bias, sd = sd_measurement)
+  return(pmax(0, measurements))  # Non-negative values
+}
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 1: agreement_pathology (Basic 2-Rater Categorical)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Basic Cohen's kappa (2 raters, categorical)
+# N = 200 cases
+# Raters: 2 pathologists
+# Categories: 4 (Benign, Borderline, Low-grade malignant, High-grade malignant)
+
+n <- 200
+true_diagnosis <- sample(1:4, n, replace = TRUE, prob = c(0.4, 0.2, 0.25, 0.15))
+
+agreement_pathology <- tibble(
+  case_id = sprintf("CASE-%03d", 1:n),
+  specimen_type = sample(c("Biopsy", "Resection"), n, replace = TRUE, prob = c(0.7, 0.3)),
+  age = round(rnorm(n, mean = 62, sd = 14)),
+  sex = sample(c("Male", "Female"), n, replace = TRUE),
+
+  # Two pathologists with moderate agreement (kappa ~ 0.70)
+  Pathologist1 = factor(generate_categorical_ratings(n, 4, agreement = 0.80, true_diagnosis),
+                        levels = 1:4,
+                        labels = c("Benign", "Borderline", "Low-grade malignant", "High-grade malignant")),
+
+  Pathologist2 = factor(generate_categorical_ratings(n, 4, agreement = 0.75, true_diagnosis),
+                        levels = 1:4,
+                        labels = c("Benign", "Borderline", "Low-grade malignant", "High-grade malignant"))
+)
+
+# Save all formats
+save(agreement_pathology, file = here("data", "agreement_pathology.rda"))
+write.csv(agreement_pathology, file = here("data", "agreement_pathology.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_pathology, path = here("data", "agreement_pathology.xlsx"))
+jmvReadWrite::write_omv(agreement_pathology, here("data", "agreement_pathology.omv"))
+
+cat("✓ Generated agreement_pathology (n=200, 2 raters, 4 categories)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 2: agreement_threeRater (Three-Rater Categorical)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Fleiss' kappa (3 raters, categorical)
+# N = 150 cases
+# Raters: 3 pathologists
+# Categories: 3 (Negative, Atypical, Positive)
+
+n <- 150
+true_diagnosis <- sample(1:3, n, replace = TRUE, prob = c(0.5, 0.3, 0.2))
+
+agreement_threeRater <- tibble(
+  case_id = sprintf("CASE-%03d", 1:n),
+  tissue_site = sample(c("Lung", "Colon", "Breast", "Prostate"), n, replace = TRUE),
+
+  # Three raters with varying agreement levels
+  Rater1 = factor(generate_categorical_ratings(n, 3, agreement = 0.85, true_diagnosis),
+                  levels = 1:3, labels = c("Negative", "Atypical", "Positive")),
+
+  Rater2 = factor(generate_categorical_ratings(n, 3, agreement = 0.80, true_diagnosis),
+                  levels = 1:3, labels = c("Negative", "Atypical", "Positive")),
+
+  Rater3 = factor(generate_categorical_ratings(n, 3, agreement = 0.75, true_diagnosis),
+                  levels = 1:3, labels = c("Negative", "Atypical", "Positive"))
+)
+
+save(agreement_threeRater, file = here("data", "agreement_threeRater.rda"))
+write.csv(agreement_threeRater, file = here("data", "agreement_threeRater.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_threeRater, path = here("data", "agreement_threeRater.xlsx"))
+jmvReadWrite::write_omv(agreement_threeRater, here("data", "agreement_threeRater.omv"))
+
+cat("✓ Generated agreement_threeRater (n=150, 3 raters, 3 categories)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 3: agreement_ordinal (Ordinal Data - Weighted Kappa)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Weighted kappa for ordinal categories
+# N = 180 cases
+# Raters: 2 pathologists
+# Categories: 4 ordinal (Grade 1, Grade 2, Grade 3, Grade 4)
+
+n <- 180
+true_grade <- sample(1:4, n, replace = TRUE, prob = c(0.3, 0.35, 0.25, 0.1))
+
+agreement_ordinal <- tibble(
+  case_id = sprintf("TUMOR-%03d", 1:n),
+  tumor_site = sample(c("Breast", "Prostate", "Colon"), n, replace = TRUE),
+  tumor_size_mm = round(rnorm(n, mean = 25, sd = 12)),
+
+  # Two raters with adjacent-category disagreements (ideal for weighted kappa)
+  PathologistA = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.75) {
+      true_grade[i]  # Exact agreement
+    } else if (runif(1) < 0.8) {
+      # Adjacent category disagreement
+      min(4, max(1, true_grade[i] + sample(c(-1, 1), 1)))
+    } else {
+      # Larger disagreement (less common)
+      sample(setdiff(1:4, true_grade[i]), 1)
+    }
+  }), levels = 1:4, labels = c("Grade 1", "Grade 2", "Grade 3", "Grade 4")),
+
+  PathologistB = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.70) {
+      true_grade[i]
+    } else if (runif(1) < 0.8) {
+      min(4, max(1, true_grade[i] + sample(c(-1, 1), 1)))
+    } else {
+      sample(setdiff(1:4, true_grade[i]), 1)
+    }
+  }), levels = 1:4, labels = c("Grade 1", "Grade 2", "Grade 3", "Grade 4"))
+)
+
+save(agreement_ordinal, file = here("data", "agreement_ordinal.rda"))
+write.csv(agreement_ordinal, file = here("data", "agreement_ordinal.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_ordinal, path = here("data", "agreement_ordinal.xlsx"))
+jmvReadWrite::write_omv(agreement_ordinal, here("data", "agreement_ordinal.omv"))
+
+cat("✓ Generated agreement_ordinal (n=180, 2 raters, 4 ordered grades)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 4: agreement_continuous (Continuous - Bland-Altman/ICC)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Bland-Altman, ICC, Lin's CCC for continuous measurements
+# N = 120 cases
+# Raters: 2 pathologists measuring tumor size in mm
+# Measurement: Continuous (tumor size)
+
+n <- 120
+true_size <- rnorm(n, mean = 25, sd = 15)
+
+agreement_continuous <- tibble(
+  case_id = sprintf("MEAS-%03d", 1:n),
+  specimen_id = sprintf("SPEC-%03d", 1:n),
+  tumor_type = sample(c("Adenocarcinoma", "Squamous", "Other"), n, replace = TRUE),
+
+  # Two pathologists with good agreement (ICC ~ 0.85)
+  # PathologistA: accurate with random error
+  MeasurementA = generate_continuous_ratings(n, true_size, sd_measurement = 3.5, bias = 0),
+
+  # PathologistB: slightly systematic bias (+2mm) and more measurement error
+  MeasurementB = generate_continuous_ratings(n, true_size, sd_measurement = 4.5, bias = 2)
+)
+
+save(agreement_continuous, file = here("data", "agreement_continuous.rda"))
+write.csv(agreement_continuous, file = here("data", "agreement_continuous.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_continuous, path = here("data", "agreement_continuous.xlsx"))
+jmvReadWrite::write_omv(agreement_continuous, here("data", "agreement_continuous.omv"))
+
+cat("✓ Generated agreement_continuous (n=120, 2 raters, continuous measurements)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 5: agreement_multiRater (Five Raters - Fleiss Kappa)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Fleiss' kappa, Light's kappa, Krippendorff's alpha (5 raters)
+# N = 100 cases
+# Raters: 5 pathologists
+# Categories: 3 (Benign, Uncertain, Malignant)
+
+n <- 100
+true_diagnosis <- sample(1:3, n, replace = TRUE, prob = c(0.45, 0.3, 0.25))
+
+agreement_multiRater <- tibble(
+  case_id = sprintf("PANEL-%03d", 1:n),
+  difficulty = sample(c("Easy", "Moderate", "Difficult"), n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
+
+  # Five raters with varying expertise (agreement levels)
+  SeniorPath1 = factor(generate_categorical_ratings(n, 3, agreement = 0.90, true_diagnosis),
+                       levels = 1:3, labels = c("Benign", "Uncertain", "Malignant")),
+
+  SeniorPath2 = factor(generate_categorical_ratings(n, 3, agreement = 0.88, true_diagnosis),
+                       levels = 1:3, labels = c("Benign", "Uncertain", "Malignant")),
+
+  MidLevelPath = factor(generate_categorical_ratings(n, 3, agreement = 0.80, true_diagnosis),
+                        levels = 1:3, labels = c("Benign", "Uncertain", "Malignant")),
+
+  JuniorPath1 = factor(generate_categorical_ratings(n, 3, agreement = 0.72, true_diagnosis),
+                       levels = 1:3, labels = c("Benign", "Uncertain", "Malignant")),
+
+  JuniorPath2 = factor(generate_categorical_ratings(n, 3, agreement = 0.70, true_diagnosis),
+                       levels = 1:3, labels = c("Benign", "Uncertain", "Malignant"))
+)
+
+save(agreement_multiRater, file = here("data", "agreement_multiRater.rda"))
+write.csv(agreement_multiRater, file = here("data", "agreement_multiRater.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_multiRater, path = here("data", "agreement_multiRater.xlsx"))
+jmvReadWrite::write_omv(agreement_multiRater, path = here("data", "agreement_multiRater.omv"))
+
+cat("✓ Generated agreement_multiRater (n=100, 5 raters, 3 categories)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 6: agreement_testRetest (Test-Retest / Intra-Rater)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Inter-rater AND intra-rater reliability
+# N = 80 cases
+# Design: 3 raters, each rating cases at 2 time points
+# Columns: Rater1_T1, Rater1_T2, Rater2_T1, Rater2_T2, Rater3_T1, Rater3_T2
+
+n <- 80
+true_class <- sample(1:3, n, replace = TRUE, prob = c(0.4, 0.35, 0.25))
+
+agreement_testRetest <- tibble(
+  case_id = sprintf("RETEST-%03d", 1:n),
+  weeks_between_readings = sample(1:4, n, replace = TRUE),
+
+  # Rater 1 at Time 1 and Time 2 (high intra-rater reliability)
+  Rater1_T1 = factor(generate_categorical_ratings(n, 3, agreement = 0.85, true_class),
+                     levels = 1:3, labels = c("Normal", "Abnormal", "Indeterminate")),
+  Rater1_T2 = factor(generate_categorical_ratings(n, 3, agreement = 0.82, true_class),
+                     levels = 1:3, labels = c("Normal", "Abnormal", "Indeterminate")),
+
+  # Rater 2 at Time 1 and Time 2 (moderate intra-rater reliability)
+  Rater2_T1 = factor(generate_categorical_ratings(n, 3, agreement = 0.80, true_class),
+                     levels = 1:3, labels = c("Normal", "Abnormal", "Indeterminate")),
+  Rater2_T2 = factor(generate_categorical_ratings(n, 3, agreement = 0.78, true_class),
+                     levels = 1:3, labels = c("Normal", "Abnormal", "Indeterminate")),
+
+  # Rater 3 at Time 1 and Time 2 (lower intra-rater reliability)
+  Rater3_T1 = factor(generate_categorical_ratings(n, 3, agreement = 0.75, true_class),
+                     levels = 1:3, labels = c("Normal", "Abnormal", "Indeterminate")),
+  Rater3_T2 = factor(generate_categorical_ratings(n, 3, agreement = 0.72, true_class),
+                     levels = 1:3, labels = c("Normal", "Abnormal", "Indeterminate"))
+)
+
+save(agreement_testRetest, file = here("data", "agreement_testRetest.rda"))
+write.csv(agreement_testRetest, file = here("data", "agreement_testRetest.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_testRetest, path = here("data", "agreement_testRetest.xlsx"))
+jmvReadWrite::write_omv(agreement_testRetest, path = here("data", "agreement_testRetest.omv"))
+
+cat("✓ Generated agreement_testRetest (n=80, 3 raters × 2 time points)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 7: agreement_hierarchical (Nested - Raters Within Institutions)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Hierarchical/multilevel kappa (raters nested within institutions)
+# N = 200 cases
+# Design: 6 raters from 3 institutions (2 raters per institution)
+# Clusters: institution variable
+
+n <- 200
+true_diagnosis <- sample(1:4, n, replace = TRUE, prob = c(0.35, 0.3, 0.25, 0.1))
+
+# Institution effects (some institutions have better agreement)
+inst_effect <- c(0.05, 0, -0.03)  # Institution 1 best, 3 worst
+
+agreement_hierarchical <- tibble(
+  case_id = sprintf("MULTI-%03d", 1:n),
+  institution = sample(c("Hospital_A", "Hospital_B", "Hospital_C"), n, replace = TRUE),
+  case_complexity = sample(c("Simple", "Moderate", "Complex"), n, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
+
+  # Hospital A - Raters 1 and 2 (good agreement within hospital)
+  HospitalA_Rater1 = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.85 + inst_effect[1]) true_diagnosis[i] else sample(setdiff(1:4, true_diagnosis[i]), 1)
+  }), levels = 1:4, labels = c("Type I", "Type II", "Type III", "Type IV")),
+
+  HospitalA_Rater2 = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.83 + inst_effect[1]) true_diagnosis[i] else sample(setdiff(1:4, true_diagnosis[i]), 1)
+  }), levels = 1:4, labels = c("Type I", "Type II", "Type III", "Type IV")),
+
+  # Hospital B - Raters 3 and 4 (moderate agreement)
+  HospitalB_Rater1 = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.80 + inst_effect[2]) true_diagnosis[i] else sample(setdiff(1:4, true_diagnosis[i]), 1)
+  }), levels = 1:4, labels = c("Type I", "Type II", "Type III", "Type IV")),
+
+  HospitalB_Rater2 = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.78 + inst_effect[2]) true_diagnosis[i] else sample(setdiff(1:4, true_diagnosis[i]), 1)
+  }), levels = 1:4, labels = c("Type I", "Type II", "Type III", "Type IV")),
+
+  # Hospital C - Raters 5 and 6 (lower agreement)
+  HospitalC_Rater1 = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.75 + inst_effect[3]) true_diagnosis[i] else sample(setdiff(1:4, true_diagnosis[i]), 1)
+  }), levels = 1:4, labels = c("Type I", "Type II", "Type III", "Type IV")),
+
+  HospitalC_Rater2 = factor(sapply(1:n, function(i) {
+    if (runif(1) < 0.73 + inst_effect[3]) true_diagnosis[i] else sample(setdiff(1:4, true_diagnosis[i]), 1)
+  }), levels = 1:4, labels = c("Type I", "Type II", "Type III", "Type IV"))
+)
+
+save(agreement_hierarchical, file = here("data", "agreement_hierarchical.rda"))
+write.csv(agreement_hierarchical, file = here("data", "agreement_hierarchical.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_hierarchical, path = here("data", "agreement_hierarchical.xlsx"))
+jmvReadWrite::write_omv(agreement_hierarchical, path = here("data", "agreement_hierarchical.omv"))
+
+cat("✓ Generated agreement_hierarchical (n=200, 6 raters in 3 institutions)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 8: agreement_binary (Binary - Specific Agreement PSA/NSA)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Binary classification, specific agreement (PSA, NSA)
+# N = 250 cases
+# Raters: 2 pathologists
+# Categories: 2 (Negative, Positive)
+
+n <- 250
+true_status <- sample(0:1, n, replace = TRUE, prob = c(0.65, 0.35))
+
+agreement_binary <- tibble(
+  case_id = sprintf("BIN-%03d", 1:n),
+  patient_age = round(rnorm(n, mean = 58, sd = 15)),
+  specimen_quality = sample(c("Excellent", "Good", "Fair", "Poor"), n, replace = TRUE,
+                            prob = c(0.3, 0.4, 0.2, 0.1)),
+
+  # Two pathologists with high sensitivity but different specificities
+  PathologistX = factor(generate_categorical_ratings(n, 2, agreement = 0.85, true_status + 1),
+                        levels = 1:2, labels = c("Negative", "Positive")),
+
+  PathologistY = factor(generate_categorical_ratings(n, 2, agreement = 0.82, true_status + 1),
+                        levels = 1:2, labels = c("Negative", "Positive"))
+)
+
+save(agreement_binary, file = here("data", "agreement_binary.rda"))
+write.csv(agreement_binary, file = here("data", "agreement_binary.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_binary, path = here("data", "agreement_binary.xlsx"))
+jmvReadWrite::write_omv(agreement_binary, path = here("data", "agreement_binary.omv"))
+
+cat("✓ Generated agreement_binary (n=250, 2 raters, binary classification)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 9: agreement_missing (Missing Data)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Test handling of missing ratings
+# N = 120 cases
+# Raters: 3 pathologists with ~10% missing each
+
+n <- 120
+true_diagnosis <- sample(1:3, n, replace = TRUE, prob = c(0.45, 0.35, 0.20))
+
+agreement_missing <- tibble(
+  case_id = sprintf("MISS-%03d", 1:n),
+
+  Rater1 = factor(generate_categorical_ratings(n, 3, agreement = 0.80, true_diagnosis),
+                  levels = 1:3, labels = c("Low risk", "Intermediate risk", "High risk")),
+
+  Rater2 = factor(generate_categorical_ratings(n, 3, agreement = 0.78, true_diagnosis),
+                  levels = 1:3, labels = c("Low risk", "Intermediate risk", "High risk")),
+
+  Rater3 = factor(generate_categorical_ratings(n, 3, agreement = 0.75, true_diagnosis),
+                  levels = 1:3, labels = c("Low risk", "Intermediate risk", "High risk"))
+)
+
+# Introduce random missing data (10% per rater)
+n_missing <- round(n * 0.10)
+agreement_missing$Rater1[sample(n, n_missing)] <- NA
+agreement_missing$Rater2[sample(n, n_missing)] <- NA
+agreement_missing$Rater3[sample(n, n_missing)] <- NA
+
+save(agreement_missing, file = here("data", "agreement_missing.rda"))
+write.csv(agreement_missing, file = here("data", "agreement_missing.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_missing, path = here("data", "agreement_missing.xlsx"))
+jmvReadWrite::write_omv(agreement_missing, path = here("data", "agreement_missing.omv"))
+
+cat("✓ Generated agreement_missing (n=120, 3 raters, ~10% missing per rater)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 10: agreement_perfect (Perfect Agreement - Edge Case)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Perfect agreement (kappa = 1.0)
+# N = 60 cases
+# Raters: 2 pathologists with 100% agreement
+
+n <- 60
+true_class <- sample(1:3, n, replace = TRUE, prob = c(0.4, 0.35, 0.25))
+
+agreement_perfect <- tibble(
+  case_id = sprintf("PERF-%03d", 1:n),
+
+  # Perfect agreement (both raters identical)
+  RaterA = factor(true_class, levels = 1:3, labels = c("Class A", "Class B", "Class C")),
+  RaterB = factor(true_class, levels = 1:3, labels = c("Class A", "Class B", "Class C"))
+)
+
+save(agreement_perfect, file = here("data", "agreement_perfect.rda"))
+write.csv(agreement_perfect, file = here("data", "agreement_perfect.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_perfect, path = here("data", "agreement_perfect.xlsx"))
+jmvReadWrite::write_omv(agreement_perfect, path = here("data", "agreement_perfect.omv"))
+
+cat("✓ Generated agreement_perfect (n=60, 2 raters, 100% agreement)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 11: agreement_poor (Very Poor Agreement)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Very poor agreement (kappa ~ 0.2)
+# N = 80 cases
+# Raters: 2 pathologists with minimal agreement
+
+n <- 80
+true_diagnosis <- sample(1:4, n, replace = TRUE)
+
+agreement_poor <- tibble(
+  case_id = sprintf("POOR-%03d", 1:n),
+  difficulty_level = sample(c("Very Difficult", "Ambiguous"), n, replace = TRUE),
+
+  # Very low agreement (mostly random)
+  PathologistA = factor(generate_categorical_ratings(n, 4, agreement = 0.40, true_diagnosis),
+                        levels = 1:4, labels = c("Category 1", "Category 2", "Category 3", "Category 4")),
+
+  PathologistB = factor(generate_categorical_ratings(n, 4, agreement = 0.35, true_diagnosis),
+                        levels = 1:4, labels = c("Category 1", "Category 2", "Category 3", "Category 4"))
+)
+
+save(agreement_poor, file = here("data", "agreement_poor.rda"))
+write.csv(agreement_poor, file = here("data", "agreement_poor.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_poor, path = here("data", "agreement_poor.xlsx"))
+jmvReadWrite::write_omv(agreement_poor, path = here("data", "agreement_poor.omv"))
+
+cat("✓ Generated agreement_poor (n=80, 2 raters, poor agreement)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 12: agreement_small (Small Sample)
+# ═══════════════════════════════════════════════════════════
+# Purpose: Small sample size testing
+# N = 30 cases
+# Raters: 2 pathologists
+
+n <- 30
+true_class <- sample(1:3, n, replace = TRUE, prob = c(0.4, 0.4, 0.2))
+
+agreement_small <- tibble(
+  case_id = sprintf("SM-%02d", 1:n),
+
+  Rater1 = factor(generate_categorical_ratings(n, 3, agreement = 0.75, true_class),
+                  levels = 1:3, labels = c("Benign", "Atypical", "Malignant")),
+
+  Rater2 = factor(generate_categorical_ratings(n, 3, agreement = 0.72, true_class),
+                  levels = 1:3, labels = c("Benign", "Atypical", "Malignant"))
+)
+
+save(agreement_small, file = here("data", "agreement_small.rda"))
+write.csv(agreement_small, file = here("data", "agreement_small.csv"), row.names = FALSE)
+writexl::write_xlsx(agreement_small, path = here("data", "agreement_small.xlsx"))
+jmvReadWrite::write_omv(agreement_small, path = here("data", "agreement_small.omv"))
+
+cat("✓ Generated agreement_small (n=30, 2 raters, small sample)\n")
+
+# ═══════════════════════════════════════════════════════════
+# Summary Report
+# ═══════════════════════════════════════════════════════════
+
+cat("\n")
+cat("══════════════════════════════════════════════════════════════\n")
+cat("                TEST DATA GENERATION COMPLETE                 \n")
+cat("══════════════════════════════════════════════════════════════\n\n")
+
+cat("Function: agreement (Interrater Reliability)\n")
+cat("Generated: 2026-01-07\n")
+cat("Seed: 42\n\n")
+
+cat("DATASETS CREATED (12 total):\n")
+cat("────────────────────────────────────────────────────────────────\n\n")
+
+datasets_summary <- tibble(
+  Dataset = c(
+    "agreement_pathology",
+    "agreement_threeRater",
+    "agreement_ordinal",
+    "agreement_continuous",
+    "agreement_multiRater",
+    "agreement_testRetest",
+    "agreement_hierarchical",
+    "agreement_binary",
+    "agreement_missing",
+    "agreement_perfect",
+    "agreement_poor",
+    "agreement_small"
+  ),
+  N = c(200, 150, 180, 120, 100, 80, 200, 250, 120, 60, 80, 30),
+  Raters = c(2, 3, 2, 2, 5, 6, 6, 2, 3, 2, 2, 2),
+  Type = c(
+    "Categorical (4 categories)",
+    "Categorical (3 categories)",
+    "Ordinal (4 grades)",
+    "Continuous (mm)",
+    "Categorical (3 categories)",
+    "Test-Retest (2 time points)",
+    "Hierarchical (3 institutions)",
+    "Binary (Neg/Pos)",
+    "Missing data (~10%)",
+    "Perfect agreement",
+    "Poor agreement",
+    "Small sample"
+  ),
+  Purpose = c(
+    "Cohen's kappa (2 raters)",
+    "Fleiss' kappa (3 raters)",
+    "Weighted kappa (ordinal)",
+    "Bland-Altman, ICC, CCC",
+    "Multi-rater panel (5 raters)",
+    "Intra-rater reliability",
+    "Multilevel kappa (nested)",
+    "Specific agreement (PSA/NSA)",
+    "Missing data handling",
+    "Edge case (kappa=1.0)",
+    "Edge case (kappa~0.2)",
+    "Small sample stability"
+  )
+)
+
+print(datasets_summary, n = 12)
+
+cat("\n")
+cat("FILES PER DATASET: 4 formats (RDA, CSV, XLSX, OMV)\n")
+cat("TOTAL FILES: 48 (12 datasets × 4 formats)\n")
+cat("TOTAL CASES: 1,470 across all datasets\n\n")
+
+cat("MAIN FEATURES TESTED:\n")
+cat("────────────────────────────────────────────────────────────────\n")
+cat("✓ Cohen's Kappa (2 raters, categorical)\n")
+cat("✓ Fleiss' Kappa (3+ raters, categorical)\n")
+cat("✓ Weighted Kappa (ordinal data with adjacent disagreements)\n")
+cat("✓ ICC (continuous measurements)\n")
+cat("✓ Bland-Altman (continuous, 2 raters)\n")
+cat("✓ Specific Agreement (binary: PSA, NSA)\n")
+cat("✓ Light's Kappa (average pairwise kappa)\n")
+cat("✓ Krippendorff's Alpha (missing data robust)\n")
+cat("✓ Gwet's AC1/AC2 (marginal distribution robust)\n")
+cat("✓ Lin's CCC (concordance for continuous)\n")
+cat("✓ Test-Retest (intra-rater reliability)\n")
+cat("✓ Hierarchical/Multilevel (nested raters)\n")
+cat("✓ Missing data handling\n")
+cat("✓ Edge cases (perfect and poor agreement)\n")
+cat("✓ Small sample stability\n\n")
+
+cat("NEXT STEPS:\n")
+cat("────────────────────────────────────────────────────────────────\n")
+cat("1. Create test files (test-agreement-*.R)\n")
+cat("2. Create example usage (inst/examples/agreement_example.R)\n")
+cat("3. Create summary documentation (AGREEMENT_TEST_DATA_SUMMARY.md)\n\n")
+
+cat("STATUS: ✅ Data generation complete\n")
+cat("══════════════════════════════════════════════════════════════\n\n")

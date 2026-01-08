@@ -102,6 +102,52 @@ Hub](vignettes/documentation_hub.md).
 
 ------------------------------------------------------------------------
 
+## 📊 Test Data & Examples
+
+**NEW!** Comprehensive test data catalog with downloadable .omv files
+for learning and testing:
+
+- **[Test Data Catalog](vignettes/test-data-catalog.Rmd)** - Curated
+  overview with key functions and download links
+  - Quick start guide for downloading and using test data
+  - Featured: NEW kappa sample size functions (kappasizeci,
+    kappasizefixedn, kappasizepower) ✨
+  - Direct download links for example .omv files
+  - Access in R:
+    `vignette("test-data-catalog", package = "ClinicoPath")`
+- **[Complete Test Data
+  Catalog](vignettes/test-data-complete-catalog.Rmd)** - All 945 test
+  files
+  - Complete alphabetical listing of ALL .omv files
+  - Direct download links for every file
+  - Browse online: [GitHub Data
+    Directory](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+  - Access in R:
+    `vignette("test-data-complete-catalog", package = "ClinicoPath")`
+- **[Function Reference Guide](vignettes/function-reference.Rmd)** -
+  420+ analysis functions
+  - Functions organized by menu group (ClinicoPathDescriptives,
+    JJStatsPlot, OncoPath, jsurvival, meddecide)
+  - Purpose and “when to use” guidance for each function
+  - Test data availability for each function
+  - Access in R:
+    `vignette("function-reference", package = "ClinicoPath")`
+
+**Quick Download Example:**
+
+``` r
+# Download a specific test file
+download.file(
+  "https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_scenarios_comprehensive.omv",
+  destfile = "kappasizeci_test.omv"
+)
+```
+
+**Total Test Data:** 945 .omv files \| **Functions Covered:** 60+ \|
+**Menu Groups:** 5
+
+------------------------------------------------------------------------
+
 ## 🎓 Tutorials
 
 **NEW!** Comprehensive tutorial series for ClinicoPath users:
@@ -791,7 +837,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--12--13-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2026--01--07-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
@@ -871,7 +917,7 @@ Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_covera
 <!-- [![GitHub version](https://img.shields.io/badge/GitHub-0.0.1.1000-orange.svg?style=flat-square)](https://github.com/sbalci/clinicopathjamovimodule/) -->
 [![GitHub last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2025--12--13-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2026--01--07-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
 ![GitHub Release
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit

@@ -1,0 +1,201 @@
+patient_id,time_period,intervention,disease_status,disease_burden_score,patient_age
+TP0001,Month 12,Enhanced Monitoring,Minimal Disease,29.044584844567016,68
+TP0002,Month 3,Enhanced Monitoring,No Evidence of Disease,3.5720873109074645,51
+TP0003,Month 0,Experimental,No Evidence of Disease,1.4546283392669086,43
+TP0004,Month 3,Standard Care,Progressive Disease,78.19814383374509,79
+TP0005,Month 6,Standard Care,Minimal Disease,24.17674003920429,58
+TP0006,Month 12,Experimental,Minimal Disease,27.071881633952266,52
+TP0007,Month 6,Standard Care,Minimal Disease,NA,67
+TP0008,Month 12,Experimental,Minimal Disease,18.981429869862538,68
+TP0009,Month 0,Experimental,Minimal Disease,27.571002743480722,40
+TP0010,Month 9,Enhanced Monitoring,Minimal Disease,17.492754897425954,69
+TP0011,Month 9,Enhanced Monitoring,Active Disease,73.03527127027269,61
+TP0012,Month 6,Standard Care,Minimal Disease,26.703299751785725,55
+TP0013,Month 0,Enhanced Monitoring,No Evidence of Disease,4.544117986114381,55
+TP0014,Month 6,Standard Care,Progressive Disease,99.88418960509686,72
+TP0015,Month 12,Standard Care,Active Disease,49.995889615031324,62
+TP0016,Month 3,Experimental,Minimal Disease,23.10139134676743,58
+TP0017,Month 9,Experimental,No Evidence of Disease,0,52
+TP0018,Month 0,Experimental,Active Disease,70.83737768980323,48
+TP0019,Month 12,Standard Care,No Evidence of Disease,3.68828927369998,79
+TP0020,Month 0,Standard Care,No Evidence of Disease,9.366034651348066,63
+TP0021,Month 3,Enhanced Monitoring,Minimal Disease,27.590380336372597,61
+TP0022,Month 9,Standard Care,Active Disease,46.52407790247497,53
+TP0023,Month 9,Enhanced Monitoring,Minimal Disease,13.93215081143219,37
+TP0024,Month 0,Experimental,Minimal Disease,45.564503052907554,49
+TP0025,Month 0,Standard Care,Progressive Disease,99.74945449684309,82
+TP0026,Month 0,Standard Care,Active Disease,37.18248619099408,69
+TP0027,Month 6,Enhanced Monitoring,Minimal Disease,35.95807868705778,53
+TP0028,Month 0,Experimental,Minimal Disease,22.399779535889255,56
+TP0029,Month 9,Experimental,No Evidence of Disease,5.211951873768133,60
+TP0030,Month 12,Enhanced Monitoring,Minimal Disease,30.160199153315176,40
+TP0031,Month 6,Experimental,No Evidence of Disease,3.752456594556259,63
+TP0032,Month 0,Experimental,Minimal Disease,20.7435633873878,62
+TP0033,Month 0,Standard Care,Minimal Disease,12.747859510637976,58
+TP0034,Month 9,Experimental,No Evidence of Disease,5.386773439667126,52
+TP0035,Month 3,Standard Care,Minimal Disease,34.76978236992538,63
+TP0036,Month 9,Standard Care,Active Disease,60.88894130832163,76
+TP0037,Month 0,Standard Care,Active Disease,50.293462535680135,69
+TP0038,Month 9,Enhanced Monitoring,Minimal Disease,29.325885933283892,56
+TP0039,Month 0,Standard Care,Minimal Disease,32.46941797410572,90
+TP0040,Month 9,Enhanced Monitoring,Progressive Disease,68.62225673253948,88
+TP0041,Month 3,Experimental,No Evidence of Disease,5.9533779605092505,42
+TP0042,Month 9,Enhanced Monitoring,Minimal Disease,26.537694881230173,63
+TP0043,Month 9,Enhanced Monitoring,No Evidence of Disease,3.653084830233876,64
+TP0044,Month 3,Enhanced Monitoring,Minimal Disease,35.56159627263026,57
+TP0045,Month 6,Enhanced Monitoring,Active Disease,45.989815164754596,55
+TP0046,Month 12,Experimental,Minimal Disease,26.877181152432826,39
+TP0047,Month 9,Enhanced Monitoring,No Evidence of Disease,8.50831501186352,67
+TP0048,Month 6,Standard Care,Progressive Disease,65.95281620084232,62
+TP0049,Month 3,Experimental,Minimal Disease,19.022943428152928,78
+TP0050,Month 0,Enhanced Monitoring,No Evidence of Disease,8.101287070181419,75
+TP0051,Month 12,Experimental,No Evidence of Disease,9.610622763301718,58
+TP0052,Month 3,Standard Care,Active Disease,75.33768119882818,86
+TP0053,Month 9,Enhanced Monitoring,Minimal Disease,26.72590377695887,65
+TP0054,Month 3,Enhanced Monitoring,No Evidence of Disease,2.83612764642806,68
+TP0055,Month 6,Standard Care,Active Disease,40.011757689941305,56
+TP0056,Month 0,Standard Care,Minimal Disease,18.854750366913297,61
+TP0057,Month 12,Experimental,No Evidence of Disease,4.415620314716052,37
+TP0058,Month 3,Enhanced Monitoring,No Evidence of Disease,3.3848904418515255,39
+TP0059,Month 12,Enhanced Monitoring,Active Disease,46.83710602933927,62
+TP0060,Month 3,Enhanced Monitoring,Active Disease,62.04984517181195,62
+TP0061,Month 3,Enhanced Monitoring,No Evidence of Disease,4.641497325933158,64
+TP0062,Month 3,Enhanced Monitoring,Active Disease,55.01402169865402,76
+TP0063,Month 9,Experimental,No Evidence of Disease,6.237870073796461,48
+TP0064,Month 3,Enhanced Monitoring,Active Disease,53.457781071788766,55
+TP0065,Month 3,Enhanced Monitoring,Minimal Disease,19.926376866248333,67
+TP0066,Month 12,Experimental,No Evidence of Disease,7.169185318197662,57
+TP0067,Month 0,Standard Care,Progressive Disease,84.60479142553164,59
+TP0068,Month 3,Enhanced Monitoring,Active Disease,53.59022029583304,63
+TP0069,Month 9,Standard Care,Active Disease,65.73693893935975,59
+TP0070,Month 0,Enhanced Monitoring,Active Disease,82.16734944694637,53
+TP0071,Month 9,Experimental,No Evidence of Disease,6.918380822030492,48
+TP0072,Month 3,Enhanced Monitoring,Active Disease,62.56496407884404,70
+TP0073,Month 9,Standard Care,NA,65.74917157252258,70
+TP0074,Month 3,Enhanced Monitoring,Progressive Disease,76.78883580448286,50
+TP0075,Month 0,Standard Care,Progressive Disease,86.48634230011557,78
+TP0076,Month 3,Enhanced Monitoring,NA,27.40102045596812,57
+TP0077,Month 0,Standard Care,Progressive Disease,77.9165536072714,63
+TP0078,Month 9,Standard Care,Progressive Disease,70.75974494682809,60
+TP0079,Month 6,Experimental,Minimal Disease,17.67024388201075,61
+TP0080,Month 6,Experimental,Minimal Disease,31.617205330761237,59
+TP0081,Month 12,Standard Care,Active Disease,35.951427040914,44
+TP0082,Month 6,Standard Care,Minimal Disease,NA,56
+TP0083,Month 0,Experimental,Minimal Disease,27.005477843262188,62
+TP0084,Month 0,Standard Care,Active Disease,64.71418946646878,63
+TP0085,Month 9,Enhanced Monitoring,Progressive Disease,79.8376038537858,71
+TP0086,Month 12,Standard Care,Active Disease,61.93178084003388,64
+TP0087,Month 0,Experimental,Minimal Disease,43.88588724553,49
+TP0088,Month 6,Standard Care,No Evidence of Disease,5.179757721821933,64
+TP0089,Month 12,Enhanced Monitoring,No Evidence of Disease,2.7453478852299753,49
+TP0090,Month 12,Experimental,Minimal Disease,18.809489858634066,66
+TP0091,Month 0,Enhanced Monitoring,NA,17.897771653010896,58
+TP0092,Month 3,Standard Care,No Evidence of Disease,9.142452329827348,79
+TP0093,Month 12,Enhanced Monitoring,Minimal Disease,29.07649587363837,30
+TP0094,Month 9,Experimental,No Evidence of Disease,5.740619573827528,63
+TP0095,Month 0,Experimental,Active Disease,37.464114487230745,77
+TP0096,Month 3,Enhanced Monitoring,NA,4.314855193388911,51
+TP0097,Month 6,Enhanced Monitoring,Minimal Disease,20.427325504732273,81
+TP0098,Month 0,Standard Care,Minimal Disease,31.212348003807488,65
+TP0099,Month 12,Experimental,Progressive Disease,85.15967737941224,66
+TP0100,Month 12,Standard Care,No Evidence of Disease,2.4125914070534455,65
+TP0101,Month 6,Enhanced Monitoring,Progressive Disease,79.6737530506607,60
+TP0102,Month 6,Standard Care,Minimal Disease,29.17769685578518,67
+TP0103,Month 3,Experimental,Progressive Disease,75.3031228910974,67
+TP0104,Month 6,Standard Care,Progressive Disease,71.27019990893928,53
+TP0105,Month 12,Enhanced Monitoring,No Evidence of Disease,1.0741938338605443,72
+TP0106,Month 9,Standard Care,Active Disease,52.74757748096631,75
+TP0107,Month 0,Standard Care,Minimal Disease,30.200395016731548,75
+TP0108,Month 12,Standard Care,No Evidence of Disease,6.78240553361216,76
+TP0109,Month 12,Enhanced Monitoring,No Evidence of Disease,6.487065086686729,42
+TP0110,Month 12,Standard Care,Progressive Disease,86.67638223974079,66
+TP0111,Month 6,Enhanced Monitoring,No Evidence of Disease,NA,66
+TP0112,Month 6,Standard Care,Minimal Disease,18.899834170123043,82
+TP0113,Month 9,Standard Care,Active Disease,49.37452207331313,63
+TP0114,Month 3,Experimental,Minimal Disease,40.037574012245265,68
+TP0115,Month 9,Enhanced Monitoring,Minimal Disease,22.291070723828547,47
+TP0116,Month 6,Experimental,Minimal Disease,26.637884729664837,68
+TP0117,Month 12,Standard Care,No Evidence of Disease,4.498798356404794,67
+TP0118,Month 12,Enhanced Monitoring,Minimal Disease,38.35164990947727,79
+TP0119,Month 3,Enhanced Monitoring,Active Disease,56.08521020345196,70
+TP0120,Month 0,Experimental,Active Disease,65.02047256052727,74
+TP0121,Month 3,Enhanced Monitoring,No Evidence of Disease,1.0583527248420428,64
+TP0122,Month 9,Enhanced Monitoring,Active Disease,52.26096464333425,47
+TP0123,Month 6,Experimental,Minimal Disease,24.121107000534533,73
+TP0124,Month 12,Experimental,Minimal Disease,23.511581036607627,64
+TP0125,Month 6,Enhanced Monitoring,Progressive Disease,87.98232639087702,75
+TP0126,Month 12,Standard Care,No Evidence of Disease,5.148534254278081,46
+TP0127,Month 0,Enhanced Monitoring,Minimal Disease,33.194139741622365,45
+TP0128,Month 12,Standard Care,Active Disease,65.29811244519368,50
+TP0129,Month 3,Standard Care,Progressive Disease,96.5994188646198,45
+TP0130,Month 6,Standard Care,No Evidence of Disease,2.682830078080249,48
+TP0131,Month 3,Enhanced Monitoring,Active Disease,62.063191519413934,54
+TP0132,Month 3,Experimental,Active Disease,53.61128382718696,47
+TP0133,Month 12,Enhanced Monitoring,No Evidence of Disease,1.62485831172405,80
+TP0134,Month 12,Experimental,No Evidence of Disease,1.640393360855181,69
+TP0135,Month 12,Experimental,NA,5.147279322745564,77
+TP0136,Month 12,Experimental,No Evidence of Disease,2.747668338394562,61
+TP0137,Month 9,Enhanced Monitoring,Active Disease,68.1387070375377,71
+TP0138,Month 9,Enhanced Monitoring,Minimal Disease,32.658138069805695,68
+TP0139,Month 0,Standard Care,Minimal Disease,35.6495713256516,53
+TP0140,Month 0,Experimental,No Evidence of Disease,3.0596562654960264,44
+TP0141,Month 3,Standard Care,No Evidence of Disease,7.619748514335694,85
+TP0142,Month 9,Standard Care,Minimal Disease,26.134837368477864,68
+TP0143,Month 0,Enhanced Monitoring,Active Disease,84.5444214100287,55
+TP0144,Month 12,Enhanced Monitoring,No Evidence of Disease,3.1716460329161382,47
+TP0145,Month 0,Enhanced Monitoring,Active Disease,54.879949653695036,79
+TP0146,Month 6,Standard Care,Minimal Disease,14.327261054422925,58
+TP0147,Month 6,Standard Care,No Evidence of Disease,10.35610564003168,50
+TP0148,Month 3,Standard Care,Active Disease,57.6869915599567,65
+TP0149,Month 9,Enhanced Monitoring,Progressive Disease,87.76305964869495,73
+TP0150,Month 12,Experimental,No Evidence of Disease,3.069517662588378,61
+TP0151,Month 0,Enhanced Monitoring,No Evidence of Disease,0.6065513285278623,89
+TP0152,Month 9,Standard Care,Progressive Disease,91.74308716861205,55
+TP0153,Month 12,Standard Care,Active Disease,55.53254836183178,57
+TP0154,Month 3,Enhanced Monitoring,No Evidence of Disease,2.568786088642538,59
+TP0155,Month 6,Standard Care,Progressive Disease,68.01346377684284,44
+TP0156,Month 12,Standard Care,Minimal Disease,49.32764468304879,57
+TP0157,Month 9,Enhanced Monitoring,No Evidence of Disease,2.9415071212838058,45
+TP0158,Month 12,Standard Care,No Evidence of Disease,11.781433303164052,46
+TP0159,Month 6,Enhanced Monitoring,Active Disease,68.01392188087934,47
+TP0160,Month 6,Standard Care,Minimal Disease,9.643630087054161,70
+TP0161,Month 6,Standard Care,No Evidence of Disease,7.7496367507849495,71
+TP0162,Month 12,Experimental,Minimal Disease,32.85173892835844,63
+TP0163,Month 9,Standard Care,Progressive Disease,85.45988466169446,54
+TP0164,Month 12,Standard Care,Minimal Disease,47.01613082443069,54
+TP0165,Month 0,Enhanced Monitoring,Active Disease,57.15512059431979,80
+TP0166,Month 9,Standard Care,Active Disease,45.172864209874945,73
+TP0167,Month 6,Enhanced Monitoring,Minimal Disease,25.668698687357473,85
+TP0168,Month 9,Experimental,No Evidence of Disease,0,84
+TP0169,Month 12,Enhanced Monitoring,No Evidence of Disease,2.632823447823497,27
+TP0170,Month 12,Enhanced Monitoring,No Evidence of Disease,12.640939296120669,68
+TP0171,Month 9,Standard Care,Active Disease,64.0478297060594,75
+TP0172,Month 6,Enhanced Monitoring,No Evidence of Disease,4.491855346202054,48
+TP0173,Month 12,Experimental,Minimal Disease,33.33061895821221,70
+TP0174,Month 6,Experimental,No Evidence of Disease,2.7741544740793596,55
+TP0175,Month 9,Enhanced Monitoring,No Evidence of Disease,4.315142415379753,57
+TP0176,Month 3,Standard Care,Active Disease,38.66668748099992,82
+TP0177,Month 3,Standard Care,Active Disease,65.62249304510412,56
+TP0178,Month 3,Standard Care,Progressive Disease,96.17683520780604,54
+TP0179,Month 9,Standard Care,No Evidence of Disease,5.860441336318104,68
+TP0180,Month 0,Enhanced Monitoring,No Evidence of Disease,3.891864227560817,62
+TP0181,Month 6,Enhanced Monitoring,No Evidence of Disease,NA,66
+TP0182,Month 0,Enhanced Monitoring,NA,52.2938302684964,69
+TP0183,Month 0,Standard Care,Minimal Disease,23.160238692650925,90
+TP0184,Month 12,Enhanced Monitoring,No Evidence of Disease,3.0413156757774935,72
+TP0185,Month 6,Enhanced Monitoring,Progressive Disease,81.42601331706504,83
+TP0186,Month 9,Enhanced Monitoring,Minimal Disease,31.54656748253733,59
+TP0187,Month 12,Experimental,No Evidence of Disease,5.177275280928845,55
+TP0188,Month 9,Experimental,No Evidence of Disease,6.582157589431159,64
+TP0189,Month 0,Standard Care,No Evidence of Disease,3.225678418727922,65
+TP0190,Month 12,Enhanced Monitoring,Progressive Disease,81.23886927991622,65
+TP0191,Month 6,Enhanced Monitoring,Active Disease,65.99382132757626,62
+TP0192,Month 9,Enhanced Monitoring,Progressive Disease,87.27653964188538,65
+TP0193,Month 9,Experimental,Minimal Disease,33.98138105998614,65
+TP0194,Month 9,Experimental,No Evidence of Disease,5.0700544131676555,61
+TP0195,Month 12,Standard Care,Minimal Disease,NA,52
+TP0196,Month 0,Enhanced Monitoring,Minimal Disease,20.105068475495727,70
+TP0197,Month 3,Standard Care,Progressive Disease,NA,73
+TP0198,Month 9,Enhanced Monitoring,Active Disease,52.307341700751756,59
+TP0199,Month 0,Experimental,No Evidence of Disease,5.199331603804901,63
+TP0200,Month 3,Standard Care,Minimal Disease,25.322541124941072,78

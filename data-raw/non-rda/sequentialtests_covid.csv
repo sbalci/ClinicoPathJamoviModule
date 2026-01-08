@@ -1,0 +1,13 @@
+"scenario","strategy","test1_name","test1_sens","test1_spec","test1_cost","test2_name","test2_sens","test2_spec","test2_cost","prevalence","population_size"
+"Community","serial_positive","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.02,10000
+"Community","serial_negative","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.02,10000
+"Community","parallel","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.02,10000
+"Hospital","serial_positive","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.15,10000
+"Hospital","serial_negative","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.15,10000
+"Hospital","parallel","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.15,10000
+"Outbreak","serial_positive","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.4,10000
+"Outbreak","serial_negative","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.4,10000
+"Outbreak","parallel","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.4,10000
+"Travel","serial_positive","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.05,10000
+"Travel","serial_negative","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.05,10000
+"Travel","parallel","Rapid Antigen",0.85,0.95,5,"RT-PCR",0.95,0.99,100,0.05,10000

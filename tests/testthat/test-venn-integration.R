@@ -28,7 +28,17 @@ test_that("venn only excludes cases with NAs in SELECTED variables", {
         var1true = "A",
         var2 = "var2",
         var2true = "X"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # CRITICAL: Should NOT exclude any cases
     # (All 100 cases have complete var1 and var2)
@@ -61,7 +71,17 @@ test_that("venn reports exclusion warning when selected variables have NAs", {
         var1true = "A",
         var2 = "var2",
         var2true = "X"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # CRITICAL: Should report 30 cases (30%) excluded
     expect_s3_class(result, "vennResults")
@@ -89,7 +109,17 @@ test_that("venn with NO missing values shows no exclusion warning", {
         var1true = "A",
         var2 = "var2",
         var2true = "X"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # No warning should be displayed when no cases excluded
     expect_s3_class(result, "vennResults")
@@ -121,7 +151,17 @@ test_that("venn logical encoding is correct for 2-way Venn", {
         var1true = "Drug",
         var2 = "response",
         var2true = "Success"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # CRITICAL: The logical encoding should match expected counts
     expect_s3_class(result, "vennResults")
@@ -154,7 +194,15 @@ test_that("venn logical encoding is correct for 3-way Venn", {
         var2true = "X",
         var3 = "var3",
         var3true = "P"
-    )
+    ,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # CRITICAL: Should handle 3-way combinations correctly
     expect_s3_class(result, "vennResults")
@@ -184,7 +232,13 @@ test_that("venn with 4 variables works correctly", {
         var3true = "P",
         var4 = "var4",
         var4true = "M"
-    )
+    ,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # Should switch to UpSet plot for 4+ variables
     expect_s3_class(result, "vennResults")
@@ -209,7 +263,17 @@ test_that("venn handles variables with spaces correctly", {
         var1true = "Drug A",
         var2 = "Response Type",
         var2true = "Complete"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # Should handle special characters without errors
     expect_s3_class(result, "vennResults")
@@ -243,7 +307,17 @@ test_that("venn percentage calculations match expected values", {
         var1true = "Yes",
         var2 = "varB",
         var2true = "Yes"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # CRITICAL: Percentages should match expected values
     expect_s3_class(result, "vennResults")
@@ -271,7 +345,17 @@ test_that("venn with all FALSE values handles correctly", {
         var1true = "Yes",
         var2 = "var2",
         var2true = "Present"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # Should show all cases in the "Neither" category
     expect_s3_class(result, "vennResults")
@@ -295,7 +379,17 @@ test_that("venn with all TRUE values handles correctly", {
         var1true = "Positive",
         var2 = "var2",
         var2true = "Present"
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # Should show all cases in the "Both" intersection
     expect_s3_class(result, "vennResults")
@@ -327,7 +421,17 @@ test_that("venn calculates overlap counts correctly", {
         calculateOverlap = TRUE,
         calculateDiscern = TRUE,
         calculateUnite = TRUE
-    )
+    ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
     # CRITICAL: Set calculations should match expected values
     # This tests the FIXED overlap/discern/unite processing
@@ -349,7 +453,17 @@ test_that("validation fails when selected true level not present", {
             var1true = "Maybe",  # not present
             var2 = "b",
             var2true = "No"
-        ),
+        ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL),
         "does not exist"
     )
 })

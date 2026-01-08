@@ -1,0 +1,2 @@
+"test_name","condition","setting","TP","TN","FP","FN","total_n","prevalence","notes"
+"Pilot Study Test","Pilot Evaluation","Small Validation Study",18,22,3,7,50,0.5,"Small sample, wide confidence intervals expected"

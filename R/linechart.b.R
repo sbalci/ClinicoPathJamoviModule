@@ -1213,10 +1213,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Add reference lines
         .addReferenceLines = function(p, plot_data) {
-            if (is.null(self$options$refline) || is.na(self$options$refline)) return(p)
+            if (is.null(self$options$refline) || is.na(self$options$refline) || self$options$refline == 0) return(p)
 
             refline_value <- as.numeric(self$options$refline)
-            if (is.na(refline_value)) return(p)
+            if (is.na(refline_value) || refline_value == 0) return(p)
 
             refline_label <- if (!is.null(self$options$reflineLabel) &&
                                 nchar(self$options$reflineLabel) > 0) {

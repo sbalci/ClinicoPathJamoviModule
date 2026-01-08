@@ -1,20 +1,9 @@
-## Project review - potential improvement areas (2026-01-03)
-
-### 🧹 Project Hygiene & Cleanup
-- [ ] **Remove Redundant Backups**: Systematically remove `*.bak`, `*.backup`, `*.bak2`, and timestamped backup files from `jamovi/` and `R/` (e.g., `alluvial.r.yaml.backup_fix_20251122_211650`, `survival.b.R.backup`). Canonical versions should be kept.
-- [ ] **Cleanup Build Artifacts**: Add specific patterns to `.Rbuildignore` or `.gitignore` for `.Rd2pdf*` and other transient build files. *Note: Keep `temp*` folders as they are used for active work.*
-- [ ] **Scripted Consistency Check**: Implement a script to detect orphaned analysis files (e.g., `.a.yaml` without matching `.b.R` or `.h.R`) and mismatched option names between YAML and R code.
-
-### 📦 Dependency & Infrastructure Optimization
-- [ ] **Audit DESCRIPTION Imports**: Review the ~250 dependencies. Identify packages that can be moved to `Suggests` to reduce initial installation burden.
-- [ ] **Fix Redundant Dependencies**: Remove duplicate entries in `DESCRIPTION`, specifically: `PMCMRplus`, `boot`, `glmmTMB`, `icenReg`, `maxstat`, `quarto`, and `vcd`.
 - [ ] **Resolve Architecture Mismatch**: Debug and fix the `arm64` vs `x86_64` error encountered during module installation in jamovi. Ensure build environment consistency.
 - [ ] **Namespace Synchronization**: Ensure `NAMESPACE` and `DESCRIPTION` are perfectly synced, potentially using the `sync_namespace_description` mode in `_updateModules.R`.
 
-### 📝 Documentation & Reporting
-- [ ] **Fix Rd Macro Warnings**: Address "unknown macro \item" and "unexpected section header" warnings in `Rd` generation by reviewing `roxygen2` comments in `R/*.b.R` files.
+
 - [ ] **Build pkgdown Site**: Successfully build and deploy the `pkgdown` site, ensuring all vignettes are correctly included and examples are functional.
-- [ ] **Standardize menuGroup Statuses**: Clean up `menuGroup` suffixes (`D`, `T`, `T2`) to follow a consistent "Draft/Testing/Stable" convention.
+
 
 ### 🧪 Stabilization & Testing
 - [ ] **Promote 'To be Tested' Functions**: Prioritize unit testing for functions in the "To be Tested" category (e.g., `decisioncurve`, `stagemigration`) to move them to "Stable".
@@ -224,12 +213,6 @@ To continue this session, run codex resume 0199d3a9-6a19-7f91-8124-a9d493708b4a.
 
 ---
 
-# ClinicoPath Module Enhancement Roadmap
-
-**Version**: 1.0
-**Date**: 2025-10-18
-**Based on**: Comprehensive module evaluation (TODO2.md)
-
 ---
 
 ## 📋 **Overview**
@@ -241,219 +224,6 @@ This roadmap outlines planned enhancements for the ClinicoPath jamovi module eco
 - **Case-by-case data** (no longitudinal/nested structures without reshaping)
 - **Single dataset per analysis** (no multi-table joins in UI)
 
----
-
-## 🎯 **Priority Framework**
-
-- **[H] High Priority**: Clinical impact, immediate user needs, competitive necessity
-- **[M] Medium Priority**: Methodological depth, workflow improvements
-- **[L] Low Priority**: Polish, edge cases, future enhancements
-
----
-
-## 📊 **1. meddecide Module Enhancements**
-
-### **Phase 1: Core Decision Analysis (Sprints 1-2)**
-
-#### **[H] ✅ COMPLETED - Decision Curve Analysis (DCA)**
-
-*Clinical net benefit evaluation for prediction models*
-
-**✅ Implementation Status (Completed):**
-- ✅ Net benefit calculation across threshold range
-- ✅ "Treat All" vs "Treat None" reference strategies
-- ✅ Multiple model comparison
-- ✅ Bootstrap confidence intervals
-- ✅ Clinical impact metrics (interventions avoided, NNS)
-- ✅ Optimal threshold identification
-- ✅ Weighted AUC calculation
-- ✅ Cost-benefit analysis option
-- ✅ Decision consequences table (TP, FP, TN, FN)
-- ✅ Comprehensive visualization (decision curves, impact plots)
-- ✅ Files: `jamovi/decisioncurve.{a,r,u}.yaml`, `R/decisioncurve.b.R` (1366 lines)
-
-**Jamovi Data Structure**:
-
-```yaml
-Required Variables:
-  - outcome: Binary (0/1) or factor with 2 levels
-  - predictor_probability: Continuous (0-1) predicted probabilities
-
-Optional Variables:
-  - model_name: Nominal factor for comparing multiple models
-  - validation_set: Nominal factor (training/validation split)
-
-Expected Data Format (one row per patient):
-| patient_id | outcome | model1_prob | model2_prob | validation_set |
-|------------|---------|-------------|-------------|----------------|
-| 001        | 1       | 0.65        | 0.72        | training       |
-| 002        | 0       | 0.23        | 0.31        | training       |
-```
-
-**Implementation**:
-
-- Input: Binary outcome + continuous predicted probabilities
-- Output: Net benefit curves, decision tables across threshold range
-- Comparison: "Treat all" vs "Treat none" vs model strategies
-- R packages: `dcurves`, `rmda`
-
-**UI Elements**:
-
-- Threshold range slider (0.01 to 0.99)
-- Harm-to-benefit ratio input
-- Multiple model comparison option
-
----
-
-#### **[H] ✅ COMPLETED - Enhanced Markov Models**
-
-*Multi-cycle decision modeling for chronic diseases*
-
-**Status**: ✅ Completed (PSA verified 2025-01-05)
-**Files**: `jamovi/decisiongraph.{a,u}.yaml`, `R/decisiongraph.b.R`
-
-**✅ Completed Features:**
-- ✅ Separate discount rates for costs vs utilities (QALYs) - 2025-01-04
-- ✅ Checkbox to enable/disable separate rates
-- ✅ Default: 3% for costs, 1.5% for utilities
-- ✅ Probabilistic Sensitivity Analysis (PSA) with Monte Carlo simulation
-- ✅ Multiple processing modes (standard, parallel, chunked for large simulations)
-- ✅ Parameter distributions and correlation handling
-- ✅ CEAC (Cost-Effectiveness Acceptability Curve) generation
-- ✅ EVPI (Expected Value of Perfect Information) calculation
-- ✅ Bootstrap validation with 10,000 iterations
-- ✅ Performance optimization for memory efficiency
-
-**Jamovi Data Structure**:
-
-```yaml
-# Transition Matrix Input (wide format)
-Required Variables (per cycle):
-  - strategy: Nominal factor (treatment arms)
-  - state_from: Nominal factor (health states)
-  - state_to: Nominal factor (health states)
-  - probability: Continuous (0-1)
-  - cost: Continuous (≥0)
-  - utility: Continuous (0-1)
-
-Expected Data Format (one row per transition):
-| strategy | state_from | state_to  | probability | cost  | utility |
-|----------|------------|-----------|-------------|-------|---------|
-| Treatment| Healthy    | Sick      | 0.10        | 1000  | 0.8     |
-| Treatment| Sick       | Dead      | 0.05        | 5000  | 0.0     |
-| Control  | Healthy    | Sick      | 0.20        | 0     | 0.9     |
-```
-
-**Implementation**:
-
-- Expand existing `decisiongraph` Markov capabilities
-- Cohort trace simulation over time cycles
-- Discounting (costs and QALYs)
-- Probabilistic sensitivity analysis via parameter distributions
-- R packages: `heemod`, `dampack`
-
-**UI Elements**:
-
-- Cycle length input (years/months)
-- Time horizon (number of cycles)
-- Discount rates (costs, utilities)
-- Half-cycle correction toggle
-
----
-
-### **Phase 2: Prediction Models (Sprints 3-4)**
-
-#### **[H] ✅ COMPLETED - Clinical Prediction Model Builder**
-
-*Logistic regression with integrated calibration and validation*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ Logistic regression model fitting
-- ✅ Coefficient table with odds ratios and CIs
-- ✅ AUC (C-statistic) with confidence intervals
-- ✅ Brier score calculation
-- ✅ Hosmer-Lemeshow calibration test
-- ✅ Calibration slope
-- ✅ Bootstrap validation with optimism correction
-- ✅ ROC curve plot
-- ✅ Calibration plot with loess smooth
-- ✅ Risk stratification into groups
-- ✅ Clinical interpretation guidance
-- Files: `jamovi/predmodel.{a,r,u}.yaml`, `R/predmodel.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-Required Variables:
-  - outcome: Binary outcome (disease/event present)
-  - predictors: Multiple continuous or categorical variables
-
-Optional Variables:
-  - validation_fold: Nominal factor for k-fold CV
-  - external_cohort: Nominal factor for external validation
-
-Expected Data Format (one row per patient):
-| patient_id | outcome | age | biomarker | stage | validation_fold |
-|------------|---------|-----|-----------|-------|-----------------|
-| 001        | 1       | 65  | 12.5      | III   | fold_1          |
-| 002        | 0       | 52  | 8.2       | II    | fold_2          |
-```
-
-**Implementation**:
-
-- Model building: Logistic regression with stepwise/LASSO selection
-- Calibration: Hosmer-Lemeshow test, calibration plots, calibration slope
-- Discrimination: ROC curve, AUC with CI, Brier score
-- Validation: Bootstrap optimism-correction, k-fold CV
-- Risk score generation: Point-based scoring systems
-- R packages: `rms`, `pROC`, `PredictABEL`, `glmnet`
-
-**Outputs**:
-
-- Coefficient table with odds ratios
-- Calibration plot (observed vs predicted)
-- ROC curve with optimal cutpoint
-- Risk stratification table (low/medium/high)
-- TRIPOD-compliant reporting tables
-
----
-
-#### **[M] ✅ COMPLETED - Model Calibration & Validation Dashboard**
-
-*Comprehensive performance metrics panel*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ Calibration-in-the-large assessment
-- ✅ Calibration slope and intercept
-- ✅ Flexible calibration curves (loess/splines)
-- ✅ AUC, Brier score, scaled Brier score
-- ✅ Decision curve analysis (DCA) with net benefit
-- ✅ Subgroup performance analysis
-- ✅ Validation type selection (external/temporal/geographic)
-- ✅ ROC plot, calibration plot, DCA plot
-- ✅ Evidence-based recommendations for recalibration
-- Files: `jamovi/modelval.{a,r,u}.yaml`, `R/modelval.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-# Same as prediction model, but focus on validation metrics
-Required Variables:
-  - outcome: Binary
-  - predicted_probability: Continuous (from existing model)
-
-Optional Variables:
-  - time_period: Nominal factor for temporal validation
-  - hospital_site: Nominal factor for geographic validation
-```
-
-**Implementation**:
-
-- Calibration: Calibration-in-the-large, calibration slope, flexible curves
-- Performance: Brier score, scaled Brier score, integrated Brier score
-- Net benefit: DCA integration
-- Subgroup analysis: Performance by strata
-- R packages: `CalibrationCurves`, `riskRegression`
 
 ---
 
@@ -504,36 +274,8 @@ Expected Data Format (one row per patient per strategy):
 
 ### **Phase 4: Advanced Features (Sprint 7+)**
 
-#### **[M] ✅ COMPLETED - Time-to-Event Decision Analysis**
 
-*Survival-based ROC and decision metrics*
-
-**Jamovi Data Structure**:
-
-```yaml
-Required Variables:
-  - time: Continuous (survival time)
-  - event: Binary (0=censored, 1=event)
-  - marker: Continuous biomarker or risk score
-
-Optional Variables:
-  - landmark_time: Continuous (for landmark analysis)
-
-Expected Data Format (one row per patient):
-| patient_id | time | event | risk_score | biomarker_level |
-|------------|------|-------|------------|-----------------|
-| 001        | 24.5 | 1     | 0.72       | 145.2           |
-| 002        | 18.3 | 0     | 0.45       | 98.7            |
-```
-
-**Implementation**:
-
-- Time-dependent ROC curves at specific time points
-- C-index for survival data
-- Restricted mean survival time (RMST) differences
-- Net benefit for survival endpoints
-- Integration with jSurvival module
-- R packages: `timeROC`, `survivalROC`, `survRM2`
+---
 
 ---
 
@@ -555,190 +297,11 @@ Expected Data Format (one row per patient):
 
 ### **Phase 1: Competing Risks (Sprints 1-2)**
 
-#### **[H] ✅ COMPLETED - Fine-Gray Regression (CRR)**
-
-*Covariate-adjusted competing risks analysis*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ Fine-Gray subdistribution hazard regression
-- ✅ Sub-hazard ratio (sHR) table with confidence intervals
-- ✅ Cumulative incidence function (CIF) plots
-- ✅ Gray's test for group comparisons
-- ✅ Support for multiple competing events
-- ✅ Stratified analysis option
-- ✅ Comparison to cause-specific hazards
-- ✅ Prediction at specified time points
-- ✅ Diagnostic plots and influence statistics
-- ✅ Bootstrap confidence intervals
-- ✅ Color scheme options (default, colorblind, NEJM, Lancet)
-- ✅ Comprehensive clinical interpretation
-- ✅ Files: `jamovi/finegray.{a,r,u}.yaml`, `R/finegray.b.R` (900+ lines)
-
-**Jamovi Data Structure**:
-
-```yaml
-Required Variables:
-  - time: Continuous (time to event or censoring)
-  - status: Nominal factor with 3+ levels (0=censored, 1=event of interest, 2=competing event)
-  - covariates: Multiple continuous or categorical predictors
-
-Optional Variables:
-  - strata: Nominal factor for stratified analysis
-
-Expected Data Format (one row per patient):
-| patient_id | time | status              | age | stage | treatment |
-|------------|------|---------------------|-----|-------|-----------|
-| 001        | 24.5 | cancer_death        | 65  | III   | chemo     |
-| 002        | 18.3 | other_death         | 72  | II    | surgery   |
-| 003        | 36.0 | censored            | 58  | I     | chemo     |
-```
-
-**Status Variable Encoding**:
-
-- 0 or "censored" = Censored
-- 1 or "event_of_interest" = Event of interest
-- 2 or "competing_event" = Competing event
-- Multiple competing events: 2, 3, 4, etc.
-
-**Implementation**:
-
-- Fine-Gray subdistribution hazard models
-- Cumulative incidence function (CIF) plots with risk tables
-- Sub-hazard ratios (sHR) with confidence intervals
-- Gray's test for group comparisons
-- Stacked CIF plots for multiple competing events
-- R packages: `cmprsk`, `riskRegression`, `tidycmprsk`
-- Files: Create `/R/finegray.b.R`, `/jamovi/finegray.{a,u,r}.yaml`
-
-**Outputs**:
-
-- SHR table (similar to Cox HR table)
-- CIF curves by group
-- Risk tables showing cumulative incidence
-- Cause-specific vs cumulative incidence comparison
-
----
-
-#### **[H] ✅ COMPLETED - Enhanced Competing Risk Diagnostics**
-
-*Comprehensive competing risk visualization*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ Stacked probability plot (CIF1 + CIF2 + Survival)
-- ✅ 1-KM vs CIF comparison plot (demonstrates competing risk bias)
-- ✅ Color scheme options (default, colorblind-safe, grayscale)
-- ✅ Enhanced CIF visualization with customizable colors
-- ✅ UI controls for new plots
-- Files: `jamovi/competingsurvival.{a,r,u}.yaml`, `R/competingsurvival.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-# Same as Fine-Gray, but focused on visualization
-Required Variables:
-  - time: Continuous
-  - status: Multi-level factor (censored + multiple event types)
-  - group: Nominal factor (optional, for group comparison)
-```
-
-**Implementation**:
-
-- CIF curves with customizable colors per event type
-- Stacked probability plots (CIF1 + CIF2 + Survival)
-- Risk tables showing cumulative incidence by time
-- Cause-specific hazard vs cumulative incidence side-by-side
-- 1 - KM vs CIF comparison plots
 
 ---
 
 ### **Phase 2: Model Validation (Sprints 3-4)**
 
-#### **[H] ✅ COMPLETED - Time-Dependent Calibration**
-
-*Survival model performance evaluation*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ New module: `survivalcalibration`
-- ✅ Time-dependent C-index with confidence intervals
-- ✅ Integrated Brier score calculation
-- ✅ Calibration plot (observed vs predicted survival)
-- ✅ Calibration slope, intercept, and E:O ratio
-- ✅ Bootstrap validation with optimism correction
-- ✅ K-fold cross-validation
-- ✅ TRIPOD-compliant validation reporting
-- Files: `jamovi/survivalcalibration.{a,r,u}.yaml`, `R/survivalcalibration.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-Required Variables:
-  - time: Continuous (observed survival time)
-  - event: Binary (0=censored, 1=event)
-  - predicted_surv: Continuous (predicted survival probability at specific time)
-  OR
-  - linear_predictor: Continuous (from Cox model)
-
-Optional Variables:
-  - validation_set: Nominal factor (training/validation/external)
-  - calibration_time: Continuous (time point for calibration, e.g., 5 years)
-
-Expected Data Format (one row per patient):
-| patient_id | time | event | pred_5yr_surv | validation_set |
-|------------|------|-------|---------------|----------------|
-| 001        | 24.5 | 1     | 0.65          | training       |
-| 002        | 68.0 | 0     | 0.82          | validation     |
-```
-
-**Implementation**:
-
-- Calibration plots at specific time points (e.g., 1, 3, 5 years)
-- Grouped calibration curves (deciles of predicted risk)
-- Calibration slope and intercept
-- Bootstrap optimism-correction (internal validation)
-- K-fold cross-validation for C-index and Brier score
-- TRIPOD-compliant validation reporting
-- R packages: `pec`, `riskRegression`, `rms`, `survival`
-
-**Outputs**:
-
-- Calibration plot (observed vs predicted survival)
-- Time-dependent C-index with CI over time
-- Integrated Brier score
-- Calibration metrics table (slope, intercept, E:O ratio)
-
----
-
-#### **[M] ✅ COMPLETED - Predictive Performance Metrics**
-
-*Comprehensive discrimination and calibration*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ New module: `reclassmetrics`
-- ✅ Net Reclassification Improvement (NRI) - categorical and continuous
-- ✅ Integrated Discrimination Improvement (IDI)
-- ✅ Bootstrap confidence intervals for all metrics
-- ✅ Separate NRI for events and non-events
-- ✅ IDI components (integrated sensitivity and specificity)
-- ✅ Probability improvement scatter plot
-- ✅ Model comparison visualization
-- Files: `jamovi/reclassmetrics.{a,r,u}.yaml`, `R/reclassmetrics.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-# Same as calibration, plus:
-Optional Variables:
-  - old_model_pred: Continuous (for model comparison/reclassification)
-```
-
-**Implementation**:
-
-- Time-dependent C-index (concordance index) with CI
-- Integrated Brier score over time range
-- Net reclassification improvement (NRI)
-- Integrated discrimination improvement (IDI)
-- Likelihood ratio tests for nested models
-- R packages: `survC1`, `survAUC`, `nricens`, `PredictABEL`
 
 ---
 
@@ -940,48 +503,8 @@ Expected Data Format (one row per patient):
 
 ### **Phase 5: Non-PH Handling (Sprint 8)**
 
-#### **[M] ✅ COMPLETED - Enhanced Non-PH Diagnostics & Solutions**
 
-*Automated proportional hazards violation handling*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ Automatic PH violation detection (p < 0.05 flagging)
-- ✅ Color-coded status indicators (warning/success)
-- ✅ Educational content explaining Schoenfeld residuals test
-- ✅ Actionable recommendations when PH violated:
-  - Stratified Cox model (with R code example)
-  - Time-dependent coefficients (with R code example)
-  - Alternative approaches (RMST, AFT, landmark analysis)
-- ✅ HTML-formatted interpretation output
-- Files: `jamovi/survival.r.yaml`, `R/survival.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-# Same as standard Cox model
-Required Variables:
-  - time: Continuous
-  - event: Binary
-  - covariates: Predictors (test each for PH)
-```
-
-**Implementation**:
-
-- Schoenfeld residual tests (automated for all covariates)
-- Visual PH diagnostics with automatic flagging
-- Solutions when PH violated:
-  - Time-stratified effects (covariate × time interaction)
-  - Weighted Cox regression
-  - RMST-based comparisons (primary analysis)
-- Automatic suggestions based on diagnostic results
-- R packages: `survival`, `survminer`, `survRM2`
-
-**Outputs**:
-
-- PH test table (per covariate)
-- Schoenfeld residual plots
-- Time-stratified HR curves
-- RMST difference table (when PH violated)
+---
 
 ---
 
@@ -989,108 +512,22 @@ Required Variables:
 
 ### **Phase 1: Bug Fixes & Polish (Sprint 1)**
 
-#### **[H] ✅ COMPLETED - UI/Rendering Fixes**
 
-*Resolve critical display issues*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ Fixed compressed plots in multi-group comparisons (15% extra height)
-- ✅ Improved grouped plot sizing (dynamic width/height calculation)
-- ✅ Enhanced plot combination with equal spacing
-- ✅ Added subplot annotations (tag_levels = "A")
-- ✅ Optimal grid layout for grouped analyses
-- ✅ Pairwise comparison parameters correctly forwarded
-- Files: `R/jjbetweenstats.b.R`, `R/jjbarstats.b.R`, `R/jjhistostats.b.R`
-
-**Jamovi Data Structure**: No changes (existing analyses)
-
-**Implementation**:
-
-- Fix compressed/mis-scaled plots in multi-group comparisons
-  - Issue: Multiple plots shrink horizontally
-  - Solution: Dynamic width calculation in `.b.R` files
-- Resolve "bars not displayed" bug for significance tests
-  - Issue: Pairwise comparison bars missing
-  - Solution: Update ggstatsplot wrapper parameters
-- Improve export resolution and sizing controls
-  - Add UI options for plot width/height (pixels, inches)
-  - DPI control slider (72, 150, 300, 600)
-  - R packages: Review `ggplot2::ggsave()` parameters
-
-**Files to modify**:
-
-- `/R/jjbetweenstats.b.R` - fix multi-group plot scaling
-- `/R/jjwithinstats.b.R` - fix significance bars
-- All JJStatsPlot `.b.R` files - add export parameters
+---
 
 ---
 
 ### **Phase 2: Feature Parity (Sprints 2-3)**
 
-#### **[M] ✅ COMPLETED - Model Coefficient Plots**
-
-*Regression and meta-analysis forest plots*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ New module: `jjcoefstats`
-- ✅ Forest plots using ggstatsplot's ggcoefstats()
-- ✅ Support for pre-computed coefficients (term, estimate, SE, CI)
-- ✅ Automatic model fitting (lm, glm, Cox, mixed effects)
-- ✅ Exponentiation for odds ratios and hazard ratios
-- ✅ Sort coefficients by magnitude
-- ✅ Multiple color schemes and themes
-- ✅ P-value display (numeric or symbols)
-- ✅ Model fit metrics (R², AIC, concordance)
-- Files: `jamovi/jjcoefstats.{a,r,u}.yaml`, `R/jjcoefstats.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-# Option 1: Pre-computed coefficients (wide format)
-Required Variables:
-  - term: Nominal factor (coefficient names)
-  - estimate: Continuous (coefficient or log-OR)
-  - std_error: Continuous
-  - conf_low: Continuous (lower CI)
-  - conf_high: Continuous (upper CI)
-
-# Option 2: Raw data for automatic model fitting
-Required Variables:
-  - outcome: Continuous or binary
-  - predictors: Multiple variables
-
-Expected Data Format (pre-computed):
-| term        | estimate | std_error | conf_low | conf_high | p_value |
-|-------------|----------|-----------|----------|-----------|---------|
-| age         | 0.05     | 0.01      | 0.03     | 0.07      | 0.001   |
-| treatment   | -0.45    | 0.15      | -0.75    | -0.15     | 0.003   |
-```
-
-**Implementation**:
-
-- Full `ggcoefstats()` integration
-- Support for multiple model types: lm, glm, Cox, mixed models
-- Meta-analysis forest plots (fixed and random effects)
-- Multiple model comparison in single plot
-- R packages: `ggstatsplot`, `broom`, `meta`
-
-**Outputs**:
-
-- Forest plot with effect sizes and CIs
-- Heterogeneity statistics (I², tau²) for meta-analysis
-- Model comparison with AIC/BIC
 
 ---
 
-#### **[M] 🔄 PARTIALLY COMPLETED - Enhanced Customization**
+
+---
+
+#### **[M] Enhanced Customization**
 
 *User-controlled plot aesthetics*
-
-**✅ Currently Implemented (Existing):**
-- ✅ Basic theme toggle (originaltheme)
-- ✅ Colorblind-safe palettes (colorblindSafe)
-- ✅ Journal-style palettes (jco, npg, lancet, jama, nejm, aaas)
-- ✅ Present in most JJStatsPlot modules
 
 **⏳ Enhancement Opportunities (Future):**
 - ⏳ P-value symbol conversion (asterisks vs numeric)
@@ -1206,108 +643,6 @@ Required Variables:
 
 ### **Phase 1: Effect Sizes & Statistical Rigor (Sprints 1-2)**
 
-#### **[H] ✅ COMPLETED - Comprehensive Effect Sizes**
-
-*Standardized effect measures with confidence intervals*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ Risk Difference (RD) with 95% CI for 2×2 tables
-- ✅ Number Needed to Treat (NNT) with 95% CI
-- ✅ Proper CI inversion for NNT (from RD CIs)
-- ✅ Edge case handling (RD = 0, CI crosses zero)
-- ✅ Integrated into conttables module
-- Files: `jamovi/conttables.{a,r,u}.yaml`, `R/conttables.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-# For 2×2 tables
-Required Variables:
-  - exposure: Binary factor (exposed/unexposed)
-  - outcome: Binary factor (disease/no disease)
-
-Expected Data Format (one row per patient):
-| patient_id | exposure | outcome |
-|------------|----------|---------|
-| 001        | yes      | disease |
-| 002        | no       | disease |
-| 003        | yes      | healthy |
-
-# For continuous comparisons
-Required Variables:
-  - group: Nominal factor (2+ levels)
-  - continuous_var: Continuous outcome
-```
-
-**Implementation**:
-
-- **2×2 tables**:
-  - Risk ratio (RR) with 95% CI
-  - Odds ratio (OR) with 95% CI
-  - Risk difference (RD) with 95% CI
-  - Number needed to treat (NNT)
-- **Larger contingency tables**:
-  - Cramér's V with 95% CI
-  - Phi coefficient
-- **Continuous variables**:
-  - Standardized mean difference (Cohen's d, Hedges' g)
-  - Glass's delta
-  - Confidence intervals via bootstrap
-- **Table 1 enhancements**:
-  - SMD column for balance checks
-  - Automatic flagging of imbalanced variables (SMD > 0.1 or 0.2)
-- R packages: `effectsize`, `DescTools`, `epitools`
-
-**Outputs**:
-
-- Effect size table alongside p-values
-- Forest plots for effect sizes
-- Interpretation guidelines (small/medium/large effects)
-
----
-
-#### **[M] ✅ COMPLETED - Multiple Comparison Control**
-
-*FDR and familywise error rate correction*
-
-**✅ Implementation Status (Completed 2025-01-04):**
-- ✅ 5 adjustment methods: None, Bonferroni, Holm, BH (FDR), BY
-- ✅ Conditional adjusted p-value column (q-values)
-- ✅ Method-specific educational content
-- ✅ Dynamic table headers based on method
-- ✅ Integrated into crosstable module with gtsummary
-- Files: `jamovi/crosstable.a.yaml`, `R/crosstable.b.R`
-
-**Jamovi Data Structure**:
-
-```yaml
-# Same as existing crosstable/descriptive analyses
-# No data structure changes needed
-```
-
-**Implementation**:
-
-- Correction methods:
-  - False discovery rate: Benjamini-Hochberg, Benjamini-Yekutieli
-  - Familywise: Bonferroni, Holm, Hochberg, Hommel
-  - Others: Šidák, Dunnett (vs control)
-- UI options:
-  - Dropdown: "Correction method"
-  - Checkbox: "Show both raw and adjusted p-values"
-- Outputs:
-  - Q-value column (FDR-adjusted)
-  - Adjusted p-value column
-  - Significance annotation with adjustment method noted
-- R packages: `stats::p.adjust()`, `multcomp`
-
-**Table output example**:
-
-```
-Variable     | Group A | Group B | p-value | p-adj (BH) | Significant
--------------|---------|---------|---------|------------|-------------
-Age          | 45±12   | 48±10   | 0.045   | 0.135      | No
-Biomarker    | 12±3    | 18±5    | 0.001   | 0.010      | Yes (q<0.05)
-```
 
 ---
 
@@ -1628,164 +963,20 @@ Required Variables:
 
 ### **Phase 1: Response Evaluation (Sprints 1-2)**
 
-#### **[H] ✅ COMPLETED - iRECIST Support**
-
-*Immune-related response criteria*
-
-**Status**: ✅ Completed 2025-01-05 (Phase 11)
-**Files**: `jamovi/irecist.{a,r,u}.yaml`, `R/irecist.b.R`
-**Implementation**: See `IMPLEMENTATION_SUMMARY_2025-01-05_Phase11.md`
-
-**Jamovi Data Structure**:
-
-```yaml
-Required Variables:
-  - patient_id: Identifier
-  - assessment_time: Continuous (weeks or months from baseline)
-  - target_lesion_sum: Continuous (sum of target lesion diameters, mm)
-  - new_lesions: Binary (0=no, 1=yes)
-  - non_target_status: Nominal factor (CR, non-CR/non-PD, PD)
-
-Optional Variables:
-  - tumor_burden_total: Continuous (for burden tracking)
-
-Expected Data Format (one row per assessment per patient):
-| patient_id | assess_time | target_sum | new_lesions | non_target |
-|------------|-------------|------------|-------------|------------|
-| 001        | 0           | 45         | 0           | non-CR     | # Baseline
-| 001        | 8           | 52         | 0           | non-CR     | # iUPD (increase)
-| 001        | 16          | 48         | 0           | non-CR     | # Confirmation needed
-| 001        | 24          | 42         | 0           | PR         | # iCPD ruled out → iPR
-```
-
-**Implementation**:
-
-- iRECIST categories:
-  - iCR, iPR, iSD, iUPD (unconfirmed progression), iCPD (confirmed progression)
-- Pseudoprogression handling:
-  - Flag iUPD cases
-  - Require confirmation scan ≥4 weeks later
-  - Track iUPD → iCPD vs iUPD → iPR/iSD
-- Confirmation requirements:
-  - Time window for confirmation (default 4-8 weeks)
-  - Visual timeline showing iUPD → confirmation
-- R packages: Custom implementation based on iRECIST guidelines
-- Reference: Seymour et al. (2017) Lancet Oncology
-
-**Outputs**:
-
-- Response category table (per patient, per timepoint)
-- Waterfall plot with iRECIST colors
-- Swimmer plot with iUPD events marked
-- Time to iCPD (censoring iUPD cases)
 
 ---
 
-#### **[M] ✅ COMPLETED - Multi-Lesion RECIST Aggregation**
+---
 
-*Automated best overall response*
 
-**Status**: ✅ Completed 2025-01-05 (Phase 12)
-**Files**: `jamovi/recist.{a,r,u}.yaml`, `R/recist.b.R`
-**Implementation**: See `IMPLEMENTATION_SUMMARY_2025-01-05_Phase12.md`
-
-**Jamovi Data Structure**:
-
-```yaml
-# Long format: one row per lesion per assessment
-Required Variables:
-  - patient_id: Identifier
-  - assessment_time: Continuous
-  - lesion_id: Identifier
-  - lesion_type: Nominal factor (target, non-target, new)
-  - lesion_diameter: Continuous (mm, for target lesions)
-  - non_target_status: Nominal factor (present, absent, unequivocal PD)
-
-Expected Data Format (long format):
-| patient_id | assess_time | lesion_id | lesion_type | diameter | non_target_status |
-|------------|-------------|-----------|-------------|----------|-------------------|
-| 001        | 0           | L1        | target      | 25       | NA                |
-| 001        | 0           | L2        | target      | 20       | NA                |
-| 001        | 0           | L3        | non-target  | NA       | present           |
-| 001        | 8           | L1        | target      | 15       | NA                |
-| 001        | 8           | L2        | target      | 12       | NA                |
-| 001        | 8           | L3        | non-target  | NA       | absent            |
-```
-
-**Implementation**:
-
-- Target lesion rules:
-  - Sum of diameters (max 5 lesions, 2 per organ)
-  - CR: All target lesions disappear
-  - PR: ≥30% decrease from baseline
-  - PD: ≥20% increase from nadir (+5mm absolute)
-- Non-target lesion rules:
-  - CR: All non-target lesions disappear
-  - Non-CR/Non-PD: Persistence
-  - PD: Unequivocal progression
-- New lesion detection:
-  - Appearance of any new lesion = PD
-- Best overall response (BOR):
-  - Aggregate across all assessments
-  - Confirmation requirements (2 consecutive for CR/PR)
-- R packages: Custom RECIST logic
-
-**Outputs**:
-
-- BOR table (one row per patient)
-- Lesion-level trajectory plots
-- Sum of diameters over time
+---
 
 ---
 
 ### **Phase 2: Timeline Integration (Sprint 3)**
 
-#### **[H] ✅ COMPLETED - Survival Integration**
 
-*One-click KM from swimmer/waterfall data*
-
-**Jamovi Data Structure**:
-
-```yaml
-# Swimmer plot data can generate survival endpoints
-Required Variables (existing swimmer data):
-  - patient_id: Identifier
-  - treatment_start: Date or numeric (time)
-  - treatment_end: Date or numeric (time)
-  - last_follow_up: Date or numeric (time)
-  - event_occurred: Binary (death, progression)
-
-Derived Variables (auto-generated):
-  - time_to_event: last_follow_up - treatment_start
-  - event: Binary (from event_occurred)
-
-Expected Data Format (one row per patient):
-| patient_id | start_date | end_date | last_followup | death | progression |
-|------------|------------|----------|---------------|-------|-------------|
-| 001        | 2023-01-01 | 2023-06-15 | 2024-01-01  | 0     | 1           |
-| 002        | 2023-02-01 | 2023-08-20 | 2023-12-01  | 1     | 1           |
-```
-
-**Implementation**:
-
-- Automatic endpoint derivation:
-  - PFS: time from start to progression or death
-  - OS: time from start to death
-  - Time on treatment: start to end dates
-  - Duration of response: time from response to progression
-- "Generate KM curve" button in swimmer plot analysis:
-  - Opens jSurvival module with pre-filled variables
-  - Auto-detects time/event variables
-  - Seamless handoff
-- Landmark analysis:
-  - KM from specific landmark time (e.g., 12 weeks)
-- R packages: Integration with jSurvival
-
-**UI elements**:
-
-- "Survival Analysis" button in swimmer plot
-- Dropdown: Select endpoint (PFS, OS, TTP, DOR)
-- Automatic variable mapping
+---
 
 ---
 
@@ -2552,31 +1743,13 @@ When prioritizing features, consider:
 
 ---
 
-#### **[H] Resolve TODO/FIXME Technical Debt**
-**Status:** 10 files contain TODO/FIXME/HACK comments indicating incomplete features
-**Impact:** Incomplete functionality, potential bugs, user confusion
-**Effort:** 1-2 weeks
+#### **[H] ~~Resolve TODO/FIXME Technical Debt~~** ✅ RESOLVED
+**Status:** ✅ Verified 2026-01-04 - No TODO/FIXME/HACK comments found in R/ files
+**Audit Result:** All files clean, no unresolved technical debt markers
 
-**Files identified:**
-```
-clinicalheatmap.b.R - Incomplete features
-flexparametric.b.R - TODO markers
-greyzoneroc.b.R - FIXME comments
-jjcorrmat.b.R - Implementation gaps
-jjpiestats.b.R - Placeholder code
-jjwithinstats.b.R - Known issues
-oddsratio.b.R - HACK workarounds
-ordinalroc.b.R - TODO features
-precisionrecall.b.R - Incomplete logic
-psychopdaROC.b.R - FIXME warnings
-```
+~~**Files identified:**~~
+*All previously listed files have been cleaned or the markers were false positives.*
 
-**Action plan:**
-1. Audit each TODO/FIXME comment for criticality
-2. Create GitHub issues for feature requests vs bugs
-3. Fix critical bugs immediately (P0)
-4. Schedule feature completion or remove non-functional options from UI
-5. Document decisions in commit messages
 
 ---
 
@@ -2586,7 +1759,7 @@ psychopdaROC.b.R - FIXME warnings
 **Effort:** 4-6 weeks ongoing
 
 **Current state:**
-- ✅ Manual test guides in `tests/` directory (good documentation!)
+
 - ❌ Limited automated testthat suite
 - ❌ No CI/CD test automation
 - ❌ No coverage reporting
@@ -3309,16 +2482,6 @@ data-raw/
 - [ ] Implement cross-module integration (3 key workflows)
 - [ ] Curate and document 10 example datasets
 
-**Deliverables:**
-- ✅ Zero serialization errors
-- ✅ 40% test coverage for core functions
-- ✅ 10 comprehensive vignettes published
-- ✅ 6 modules with clinical presets
-- ✅ 10 documented example datasets
-- ✅ 2 video tutorials live
-
----
-
 ### **Q2 2026 (Apr-Jun): Enhanced UX & Quality**
 
 **Week 1-3:**
@@ -3341,13 +2504,14 @@ data-raw/
 - [ ] Write 10 additional vignettes (cumulative: 20 total)
 - [ ] CI/CD integration with automated testing
 
+
 **Deliverables:**
-- ✅ Consistent UI/UX across all modules
-- ✅ 80% test coverage for statistical calculations
-- ✅ <2s response time for n=10,000 rows
-- ✅ 20 comprehensive vignettes (5.5% coverage)
-- ✅ 10 video tutorials complete
-- ✅ GitHub Actions CI/CD running
+- [ ] Consistent UI/UX across all modules
+- [ ] 80% test coverage for statistical calculations
+- [ ] <2s response time for n=10,000 rows
+- [ ] 20 comprehensive vignettes (5.5% coverage)
+- [ ] 10 video tutorials complete
+- [ ] GitHub Actions CI/CD running
 
 ---
 
@@ -3384,20 +2548,22 @@ data-raw/
 
 This roadmap provides a comprehensive, **jamovi-compatible** enhancement plan for the ClinicoPath module ecosystem. All features are designed to work within jamovi's tabular data structure, with clear specifications for variable types, data formats, and UI elements.
 
+
 **CRITICAL NEXT STEPS (Start Immediately):**
-1. ✅ Complete notice serialization migration (34 files)
-2. ✅ Write first 10 comprehensive vignettes
-3. ✅ Implement automated testing for top 20 functions
-4. ✅ Expand clinical presets to 5 key modules
-5. ✅ Create 10 curated example datasets
+1. [ ] Complete notice serialization migration (34 files)
+2. [ ] Write first 10 comprehensive vignettes
+3. [ ] Implement automated testing for top 20 functions
+4. [ ] Expand clinical presets to 5 key modules
+5. [ ] Create 10 curated example datasets
+
 
 **Key Principles**:
 
-- ✅ Rectangular data frames only
-- ✅ Clear variable type specifications (Continuous, Nominal, Ordinal)
-- ✅ Long format for repeated measures/clustered data
-- ✅ One-click workflows with intuitive UIs
-- ✅ Publication-ready outputs
+- Rectangular data frames only
+- Clear variable type specifications (Continuous, Nominal, Ordinal)
+- Long format for repeated measures/clustered data
+- One-click workflows with intuitive UIs
+- Publication-ready outputs
 
 **Next Actions**:
 
@@ -3417,8 +2583,9 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 
 ## chisqposttest Enhancements (Optional - Production-Ready Function)
 
-**Status**: ✅ Function is production-ready and clinically safe (5/5 stars)
-**Notice Pattern**: ✅ Recently refactored to use jmvcore::Notice (10 notices implemented)
+
+**Status**: Function is production-ready and clinically safe (5/5 stars)
+**Notice Pattern**: Recently refactored to use jmvcore::Notice (10 notices implemented)
 **Priority**: Medium (enhancements, not fixes)
 
 ### Enhancement 1: Bootstrap Confidence Intervals for Phi Coefficient [M]
@@ -3484,10 +2651,10 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 
 ---
 
+
 ### Implementation Priority
 
 **High Priority (Next Release v0.0.32)**:
-- ✅ Enhancement 2: Residuals Guidance (no dependencies, high clinical value, low risk)
 
 **Medium Priority (Future Release)**:
 - ⏳ Enhancement 3: Power Analysis Warning (helps prevent Type II error misinterpretation)
@@ -3499,11 +2666,11 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 
 ---
 
+
 ### Related Documentation
 
 - Systematic check report: `/check-function chisqposttest` (2025-01-13)
 - Comprehensive review: `/review-function chisqposttest` (2025-01-13)
-- Notice pattern implementation: Completed 2025-01-13 (4 ERROR, 2 STRONG_WARNING, 2 WARNING, 2 INFO)
 
 ---
 

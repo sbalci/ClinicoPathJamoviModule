@@ -104,7 +104,7 @@ items:
       title: Per-sample Mutation Burden
       type: Table
       rows: 0
-      visible: (showTMB && showMutationLoad && showTMBTable)
+      visible: (showTMB && showTMBTable)
       clearWith:
         - geneVars
         - sampleVar

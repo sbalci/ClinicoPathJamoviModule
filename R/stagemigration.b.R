@@ -2594,13 +2594,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             )
 
             # Sample size adequacy
-            old_stage_var <- private$.escapeVar(self$options$oldStage)
-            new_stage_var <- private$.escapeVar(self$options$newStage)
+            old_stage_name <- self$options$oldStage
+            new_stage_name <- self$options$newStage
 
             interpretation$sample_adequacy <- private$.assessSampleAdequacy(
                 basic_results$total_patients, length(unique(c(
-                    levels(as.factor(self$data[[old_stage_var]])),
-                    levels(as.factor(self$data[[new_stage_var]]))
+                    levels(as.factor(self$data[[old_stage_name]])),
+                    levels(as.factor(self$data[[new_stage_name]]))
                 )))
             )
 
@@ -4683,18 +4683,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .populateStageDistribution = function(basic_results) {
             table <- self$results$stageDistribution
 
-            # Use escaped variable names for safety
-            old_stage_var <- private$.escapeVar(self$options$oldStage)
-            new_stage_var <- private$.escapeVar(self$options$newStage)
+            # Sample size and basic statistics
+            old_stage_name <- self$options$oldStage
+            new_stage_name <- self$options$newStage
 
-            old_dist <- as.data.frame(prop.table(table(self$data[[old_stage_var]])))
-            new_dist <- as.data.frame(prop.table(table(self$data[[new_stage_var]])))
+            old_dist <- as.data.frame(prop.table(table(self$data[[old_stage_name]])))
+            new_dist <- as.data.frame(prop.table(table(self$data[[new_stage_name]])))
 
-            all_stages <- sort(unique(c(as.character(old_dist$Var1), as.character(new_dist$Var1))))
-
-            for (stage in all_stages) {
-                old_count <- sum(self$data[[old_stage_var]] == stage, na.rm = TRUE)
-                new_count <- sum(self$data[[new_stage_var]] == stage, na.rm = TRUE)
+            # Migration summary statistics
+            migration_summary <- list()
+            for (stage in levels(as.factor(self$data[[old_stage_name]]))) {
+                old_count <- sum(self$data[[old_stage_name]] == stage, na.rm = TRUE)
+                new_count <- sum(self$data[[new_stage_name]] == stage, na.rm = TRUE)
                 old_pct <- (old_count / basic_results$total_patients) * 100
                 new_pct <- (new_count / basic_results$total_patients) * 100
 
@@ -28056,8 +28056,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 library(coxme)
                 
                 # Create survival objects
-                surv_formula_old <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage_var, "+ (1|", cluster_var, ")"))
-                surv_formula_new <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage_var, "+ (1|", cluster_var, ")"))
+                surv_formula_old <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage_var, "` + (1|`", cluster_var, "`)", sep=""))
+                surv_formula_new <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage_var, "` + (1|`", cluster_var, "`)", sep=""))
                 
                 
                 # Fit frailty models
@@ -28335,8 +28335,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             tryCatch({
                 
                 # Use survival::coxph with frailty() term
-                surv_formula_old <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage_var, "+ frailty(", cluster_var, ")"))
-                surv_formula_new <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage_var, "+ frailty(", cluster_var, ")"))
+                surv_formula_old <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage_var, "` + frailty(`", cluster_var, "`)", sep=""))
+                surv_formula_new <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage_var, "` + frailty(`", cluster_var, "`)", sep=""))
                 
                 model_old <- coxph(surv_formula_old, data = complete_data)
                 model_new <- coxph(surv_formula_new, data = complete_data)
@@ -28512,8 +28512,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 
                 # Fit Cox models for both staging systems
-                cox_formula_old <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage_var))
-                cox_formula_new <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage_var))
+                cox_formula_old <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage_var, "`", sep=""))
+                cox_formula_new <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage_var, "`", sep=""))
                 
                 model_old <- tryCatch({
                     coxph(cox_formula_old, data = complete_data)

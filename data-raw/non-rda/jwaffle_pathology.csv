@@ -1,0 +1,201 @@
+specimen_id,tumor_grade,differentiation,lvi_status,pni_status,margin_status,hospital,case_count
+PA0001,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0002,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital B,1
+PA0003,Grade 3,Moderately Differentiated,Absent,Present,Negative,Hospital A,1
+PA0004,Grade 2,Poorly Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0005,Grade 2,Poorly Differentiated,Present,Present,Negative,Hospital B,1
+PA0006,Grade 3,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0007,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital A,1
+PA0008,Grade 1,Poorly Differentiated,Present,Absent,Positive,Hospital A,1
+PA0009,Grade 3,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0010,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital C,1
+PA0011,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital A,1
+PA0012,Grade 2,Well Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0013,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0014,Grade 3,Poorly Differentiated,Present,Present,Negative,Hospital A,1
+PA0015,Grade 2,Poorly Differentiated,Present,Absent,Close (<1mm),Hospital C,1
+PA0016,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital B,1
+PA0017,Grade 1,Undifferentiated,Present,Absent,Negative,Hospital A,1
+PA0018,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital B,1
+PA0019,Grade 1,Well Differentiated,Present,Present,Negative,Hospital B,1
+PA0020,Grade 2,Moderately Differentiated,Absent,Present,Close (<1mm),Hospital A,1
+PA0021,Grade 2,Poorly Differentiated,Absent,Present,Negative,Hospital B,1
+PA0022,Grade 1,Poorly Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0023,Grade 2,Poorly Differentiated,Absent,Present,Negative,Hospital C,1
+PA0024,Grade 2,Poorly Differentiated,Present,Absent,Positive,Hospital B,1
+PA0025,Grade 3,Moderately Differentiated,Absent,Absent,Positive,Hospital A,1
+PA0026,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital C,1
+PA0027,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital C,1
+PA0028,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital B,1
+PA0029,Grade 2,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital B,1
+PA0030,Grade 1,Well Differentiated,Present,Present,Negative,Hospital B,1
+PA0031,Grade 3,Poorly Differentiated,Present,Absent,Negative,Hospital C,1
+PA0032,Grade 1,Poorly Differentiated,Present,Absent,Negative,Hospital B,1
+PA0033,Grade 2,Well Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0034,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital C,1
+PA0035,Grade 3,Moderately Differentiated,Present,Absent,Positive,Hospital B,1
+PA0036,Grade 2,Well Differentiated,Present,Absent,Negative,Hospital C,1
+PA0037,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0038,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital C,1
+PA0039,Grade 2,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital A,1
+PA0040,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital C,1
+PA0041,Grade 1,Poorly Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0042,Grade 3,Poorly Differentiated,Absent,Present,Positive,Hospital A,1
+PA0043,NA,Moderately Differentiated,Absent,Present,Positive,Hospital C,1
+PA0044,Grade 1,NA,Present,Absent,Negative,Hospital B,1
+PA0045,Grade 2,Moderately Differentiated,Absent,Present,Close (<1mm),Hospital A,1
+PA0046,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0047,Grade 3,Moderately Differentiated,Present,Absent,Negative,Hospital A,1
+PA0048,Grade 3,Well Differentiated,Absent,Present,Negative,Hospital A,1
+PA0049,Grade 1,Moderately Differentiated,Present,Present,Negative,Hospital B,1
+PA0050,Grade 1,Poorly Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0051,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital B,1
+PA0052,Grade 3,Poorly Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0053,Grade 3,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0054,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital C,1
+PA0055,Grade 3,Moderately Differentiated,Present,Present,Negative,Hospital C,1
+PA0056,Grade 1,Well Differentiated,Absent,Present,Negative,Hospital A,1
+PA0057,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0058,Grade 2,Undifferentiated,Present,Absent,Negative,Hospital B,1
+PA0059,Grade 2,Poorly Differentiated,Absent,Present,Negative,Hospital C,1
+PA0060,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0061,Grade 2,Well Differentiated,Present,Present,Positive,Hospital A,1
+PA0062,Grade 2,Poorly Differentiated,Present,Present,Positive,Hospital B,1
+PA0063,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital B,1
+PA0064,Grade 3,Poorly Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0065,Grade 2,Well Differentiated,Present,Absent,Negative,Hospital C,1
+PA0066,NA,Poorly Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0067,Grade 1,Well Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0068,Grade 2,Poorly Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0069,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital A,1
+PA0070,NA,Well Differentiated,Absent,Absent,Positive,Hospital A,1
+PA0071,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital A,1
+PA0072,NA,NA,Absent,Present,Negative,Hospital A,1
+PA0073,Grade 2,Well Differentiated,Absent,Present,Negative,Hospital A,1
+PA0074,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0075,Grade 2,Moderately Differentiated,Absent,Absent,Positive,Hospital A,1
+PA0076,Grade 3,Poorly Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0077,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0078,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0079,Grade 3,Poorly Differentiated,Present,Absent,Negative,Hospital C,1
+PA0080,Grade 2,Well Differentiated,Absent,Absent,Close (<1mm),Hospital A,1
+PA0081,Grade 2,Poorly Differentiated,Suspicious,Absent,Negative,Hospital B,1
+PA0082,Grade 1,Moderately Differentiated,Present,Present,Positive,Hospital A,1
+PA0083,Grade 2,Poorly Differentiated,Present,Absent,Close (<1mm),Hospital C,1
+PA0084,Grade 3,Poorly Differentiated,Absent,Absent,Close (<1mm),Hospital A,1
+PA0085,Grade 2,Poorly Differentiated,Absent,Absent,Close (<1mm),Hospital B,1
+PA0086,Grade 2,Well Differentiated,Present,Absent,Negative,Hospital A,1
+PA0087,Grade 2,Well Differentiated,Absent,Absent,Close (<1mm),Hospital C,1
+PA0088,NA,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0089,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital A,1
+PA0090,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital A,1
+PA0091,Grade 2,NA,Absent,Absent,Negative,Hospital B,1
+PA0092,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital A,1
+PA0093,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital C,1
+PA0094,Grade 1,Poorly Differentiated,Present,Absent,Negative,Hospital B,1
+PA0095,Grade 2,Moderately Differentiated,Absent,Present,Negative,Hospital A,1
+PA0096,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0097,Grade 2,Poorly Differentiated,Absent,Present,Negative,Hospital C,1
+PA0098,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital C,1
+PA0099,Grade 2,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital A,1
+PA0100,Grade 3,Moderately Differentiated,Suspicious,Absent,Negative,Hospital A,1
+PA0101,Grade 1,Well Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0102,Grade 2,Moderately Differentiated,Absent,Present,Positive,Hospital A,1
+PA0103,Grade 1,Poorly Differentiated,Present,Present,Negative,Hospital B,1
+PA0104,Grade 2,Well Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0105,Grade 2,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital A,1
+PA0106,Grade 1,Well Differentiated,Suspicious,Absent,Negative,Hospital C,1
+PA0107,Grade 2,Poorly Differentiated,Present,Absent,Positive,Hospital B,1
+PA0108,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital A,1
+PA0109,Grade 3,Poorly Differentiated,Absent,Present,Negative,Hospital B,1
+PA0110,Grade 1,Poorly Differentiated,Absent,Present,Positive,Hospital B,1
+PA0111,Grade 2,Undifferentiated,Suspicious,Present,Negative,Hospital B,1
+PA0112,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0113,Grade 1,Well Differentiated,Absent,Present,Negative,Hospital C,1
+PA0114,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital B,1
+PA0115,Grade 3,Poorly Differentiated,Present,Absent,Negative,Hospital B,1
+PA0116,Grade 2,Well Differentiated,Present,Absent,Close (<1mm),Hospital C,1
+PA0117,Grade 2,Poorly Differentiated,Absent,Absent,Positive,Hospital A,1
+PA0118,Grade 2,Poorly Differentiated,Present,Absent,Close (<1mm),Hospital B,1
+PA0119,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital B,1
+PA0120,Grade 1,Moderately Differentiated,Present,Absent,Positive,Hospital C,1
+PA0121,Grade 2,Well Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0122,Grade 3,Well Differentiated,Present,Absent,Negative,Hospital B,1
+PA0123,Grade 2,Moderately Differentiated,Absent,Present,Negative,Hospital A,1
+PA0124,Grade 3,Well Differentiated,Present,Present,Negative,Hospital A,1
+PA0125,Grade 3,Undifferentiated,Absent,Absent,Negative,Hospital B,1
+PA0126,Grade 2,Well Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0127,NA,Poorly Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0128,Grade 3,Poorly Differentiated,Present,Absent,Negative,Hospital A,1
+PA0129,Grade 3,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0130,Grade 3,Moderately Differentiated,Absent,Present,Close (<1mm),Hospital A,1
+PA0131,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0132,Grade 3,Well Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0133,Grade 1,Well Differentiated,Suspicious,Absent,Positive,Hospital A,1
+PA0134,Grade 3,Poorly Differentiated,Present,Absent,Close (<1mm),Hospital C,1
+PA0135,Grade 2,Well Differentiated,Present,Absent,Negative,Hospital C,1
+PA0136,Grade 2,Poorly Differentiated,Suspicious,Absent,Negative,Hospital B,1
+PA0137,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital C,1
+PA0138,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital C,1
+PA0139,Grade 1,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0140,Grade 3,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital A,1
+PA0141,Grade 1,Poorly Differentiated,Absent,Present,Negative,Hospital B,1
+PA0142,Grade 1,Moderately Differentiated,Present,Present,Negative,Hospital C,1
+PA0143,Grade 2,Well Differentiated,Present,Absent,Negative,Hospital A,1
+PA0144,Grade 2,Moderately Differentiated,Absent,Present,Negative,Hospital C,1
+PA0145,Grade 2,NA,Present,Absent,Close (<1mm),Hospital B,1
+PA0146,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0147,Grade 2,Moderately Differentiated,Present,Present,Negative,Hospital B,1
+PA0148,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0149,Grade 1,Well Differentiated,Present,Absent,Close (<1mm),Hospital B,1
+PA0150,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0151,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital A,1
+PA0152,Grade 2,Poorly Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0153,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital A,1
+PA0154,Grade 2,Poorly Differentiated,Present,Present,Negative,Hospital B,1
+PA0155,Grade 1,Undifferentiated,Absent,Present,Negative,Hospital A,1
+PA0156,Grade 2,Well Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0157,Grade 1,Moderately Differentiated,Absent,Absent,Positive,Hospital C,1
+PA0158,Grade 3,Moderately Differentiated,Absent,Absent,Positive,Hospital B,1
+PA0159,Grade 2,NA,Suspicious,Present,Negative,Hospital B,1
+PA0160,Grade 2,Moderately Differentiated,Absent,Absent,Positive,Hospital B,1
+PA0161,Grade 3,Moderately Differentiated,Absent,Present,Close (<1mm),Hospital A,1
+PA0162,Grade 1,Well Differentiated,Absent,Absent,Positive,Hospital C,1
+PA0163,Grade 3,Well Differentiated,Present,Absent,Negative,Hospital A,1
+PA0164,Grade 1,Poorly Differentiated,Present,Present,Negative,Hospital B,1
+PA0165,Grade 1,Moderately Differentiated,Present,Absent,Negative,Hospital C,1
+PA0166,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0167,Grade 2,Moderately Differentiated,Present,Present,Positive,Hospital A,1
+PA0168,Grade 3,Poorly Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0169,Grade 3,Well Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0170,Grade 2,Moderately Differentiated,Absent,Present,Close (<1mm),Hospital A,1
+PA0171,Grade 2,Undifferentiated,Absent,Present,Negative,Hospital B,1
+PA0172,Grade 2,Poorly Differentiated,Suspicious,Present,Positive,Hospital B,1
+PA0173,Grade 2,Moderately Differentiated,Absent,Absent,Positive,Hospital C,1
+PA0174,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0175,Grade 2,Well Differentiated,Present,Absent,Close (<1mm),Hospital B,1
+PA0176,Grade 3,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital B,1
+PA0177,Grade 1,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital B,1
+PA0178,Grade 3,Poorly Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0179,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital B,1
+PA0180,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital A,1
+PA0181,Grade 1,Poorly Differentiated,Present,Present,Positive,Hospital B,1
+PA0182,Grade 2,Moderately Differentiated,Suspicious,Absent,Negative,Hospital A,1
+PA0183,Grade 3,Well Differentiated,Absent,Present,Negative,Hospital C,1
+PA0184,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0185,Grade 2,Well Differentiated,Absent,Absent,Close (<1mm),Hospital B,1
+PA0186,Grade 2,Poorly Differentiated,Present,Absent,Negative,Hospital A,1
+PA0187,Grade 3,Poorly Differentiated,Absent,Absent,Negative,Hospital C,1
+PA0188,Grade 1,Moderately Differentiated,Present,Present,Negative,Hospital C,1
+PA0189,Grade 1,Well Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0190,Grade 3,Poorly Differentiated,Absent,Present,Negative,Hospital B,1
+PA0191,Grade 3,Well Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0192,Grade 3,Well Differentiated,Absent,Present,Close (<1mm),Hospital A,1
+PA0193,Grade 2,Moderately Differentiated,Absent,Present,Negative,Hospital A,1
+PA0194,Grade 3,Moderately Differentiated,Absent,Absent,Negative,Hospital A,1
+PA0195,Grade 2,Moderately Differentiated,Present,Absent,Negative,Hospital A,1
+PA0196,Grade 3,Poorly Differentiated,Absent,Absent,Close (<1mm),Hospital A,1
+PA0197,Grade 1,Moderately Differentiated,Absent,Absent,Close (<1mm),Hospital B,1
+PA0198,Grade 2,Moderately Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0199,Grade 2,Well Differentiated,Absent,Absent,Negative,Hospital B,1
+PA0200,Grade 1,NA,Present,Present,Negative,Hospital B,1

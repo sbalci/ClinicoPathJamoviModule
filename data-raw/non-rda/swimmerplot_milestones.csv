@@ -1,0 +1,21 @@
+"PatientID","StartTime","EndTime","Response","Diagnosis","Surgery","ChemoStart","Recurrence","Death","EventType","EventTime","Stage","Censored"
+"ML001",0,450,"PR",0,16,39,NA,450,"None",NA,"Stage III",0
+"ML002",0,247,"SD",0,33,47,186,NA,"Toxicity",64,"Stage IV",1
+"ML003",0,495,"CR",0,29,54,135,NA,"Toxicity",215,"Stage II",1
+"ML004",0,282,"CR",0,42,57,273,NA,"None",NA,"Stage I",1
+"ML005",0,317,"SD",0,35,59,NA,317,"Toxicity",42,"Stage IV",0
+"ML006",0,379,"PD",0,23,42,158,NA,"Secondary Surgery",127,"Stage IV",1
+"ML007",0,402,"PD",0,15,29,NA,NA,"Toxicity",257,"Stage III",1
+"ML008",0,534,"PR",0,21,36,348,534,"Secondary Surgery",326,"Stage III",0
+"ML009",0,352,"SD",0,14,34,107,NA,"Secondary Surgery",139,"Stage IV",1
+"ML010",0,263,"CR",0,26,52,NA,NA,"Toxicity",56,"Stage I",1
+"ML011",0,362,"PR",0,20,35,204,362,"None",NA,"Stage II",0
+"ML012",0,299,"SD",0,24,49,NA,NA,"None",NA,"Stage III",1
+"ML013",0,355,"PD",0,24,51,NA,NA,"None",NA,"Stage I",1
+"ML014",0,187,"PD",0,26,42,140,187,"Hospitalization",126,"Stage I",0
+"ML015",0,531,"SD",0,18,35,NA,531,"None",NA,"Stage II",0
+"ML016",0,284,"PR",0,15,38,110,NA,"None",NA,"Stage I",1
+"ML017",0,355,"PR",0,28,50,172,NA,"Toxicity",285,"Stage III",1
+"ML018",0,254,"SD",0,18,39,NA,254,"None",NA,"Stage IV",0
+"ML019",0,320,"CR",0,27,44,171,NA,"Hospitalization",94,"Stage IV",1
+"ML020",0,282,"PD",0,18,43,113,NA,"Hospitalization",107,"Stage II",1

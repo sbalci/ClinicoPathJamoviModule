@@ -79,6 +79,17 @@ items:
           - excl
           - exp
 
+    - name:  residualsGuidance
+      title: 'Residuals Interpretation Guidance'
+      type:  Html
+      visible: (showResiduals)
+      clearWith:
+          - rows
+          - cols
+          - excl
+          - showResiduals
+          - residualsCutoff
+
     - name:  residualsAnalysis
       title: 'Standardized Residuals Analysis'
       type:  Html
@@ -122,6 +133,9 @@ items:
         - name: effect_size
           title: "Effect Size (Phi)"
           type: number
+        - name: phi_ci
+          title: "95% CI (Phi)"
+          type: text
         - name: sig
           title: "Significant"
           type: text

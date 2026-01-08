@@ -1,9 +1,3 @@
-#' @title Causal Inference & Treatment Effects Analysis
-#' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import ggplot2
-#' @importFrom stats glm binomial gaussian lm aov t.test wilcox.test cor
-#' @export
 
 
 treatmenteffectsClass <- R6::R6Class(

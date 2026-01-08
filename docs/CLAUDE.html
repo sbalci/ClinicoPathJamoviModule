@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.01</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,12 +17,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="dev/index.html"><span class="fa fa-cogs"></span></a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/developer_guide.html">jamovi Module Development Guide</a></li>
-    <li><a class="dropdown-item" href="articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
-    <li><a class="dropdown-item" href="articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
-    <li><a class="dropdown-item" href="articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-test-data" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fa-database"></span> Test Data</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-test-data"><li><a class="dropdown-item" href="articles/test-data-catalog.html">Test Data Catalog</a></li>
+    <li><a class="dropdown-item" href="articles/test-data-complete-catalog.html">Complete Catalog (945 files)</a></li>
+    <li><a class="dropdown-item" href="articles/function-reference.html">Function Reference</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci"><span class="fa fab fa-twitter fa-lg"></span></a></li>
@@ -155,6 +155,58 @@
 <li>🎯 Users should always library(ClinicoPath) regardless of installation method</li>
 </ul><p>The confusion comes from folder/repository naming vs package naming, which is a common and acceptable practice in R package development.</p>
 <div class="section level2">
+<h2 id="reference-materials-and-learning-resources">Reference Materials and Learning Resources<a class="anchor" aria-label="anchor" href="#reference-materials-and-learning-resources"></a></h2>
+<div class="section level3">
+<h3 id="jmvbaser-example-module">jmvbaseR Example Module<a class="anchor" aria-label="anchor" href="#jmvbaser-example-module"></a></h3>
+<p><strong>Location:</strong> <code>/Users/serdarbalci/Documents/GitHub/jmvbaseR</code></p>
+<p>This is an official jamovi example module designed for teaching R syntax. It demonstrates: - Clean 4-file architecture patterns - Formula building (<code>.formula()</code> and <code>.ff()</code> methods) - Syntax generation (<code>.asSource()</code> and <code>.sourcifyOption()</code> methods) - Preformatted R output display - Model terms handling with <code><a href="https://rdrr.io/pkg/jmvcore/man/decomposeTerm.html" class="external-link">jmvcore::composeTerms()</a></code></p>
+<p><strong>Available Analyses:</strong> 1. One Sample T-Test (<code>ttestones</code>) 2. Independent Samples T-Test (<code>ttestis</code>) 3. Paired Samples T-Test (<code>ttestps</code>) 4. ANOVA (<code>anova</code>) 5. Correlation (<code>correlation</code>) 6. Linear Regression (<code>regression</code>)</p>
+<p><strong>Note:</strong> This module uses <code><a href="https://rdrr.io/pkg/jmvcore/man/Analysis.html" class="external-link">jmvcore::Preformatted</a></code> for all outputs (shows raw R console output) rather than structured tables. It’s excellent for learning basic patterns but ClinicoPath uses more sophisticated result presentation.</p>
+</div>
+<div class="section level3">
+<h3 id="development-guides">Development Guides<a class="anchor" aria-label="anchor" href="#development-guides"></a></h3>
+<p>Comprehensive guides are available in <code>vignettes/</code>:</p>
+<ol style="list-style-type: decimal"><li>
+<strong><code>jamovi_module_patterns_guide.md</code></strong> - NEW comprehensive guide covering:
+<ul><li>Module structure and 4-file architecture</li>
+<li>Data handling patterns (jmvcore functions)</li>
+<li>State management for plots (serialization solutions)</li>
+<li>Formula building patterns</li>
+<li>Syntax generation (asSource methods)</li>
+<li>Output patterns (Preformatted, Tables, Plots, HTML)</li>
+<li>Best practices and common pitfalls</li>
+<li>Reference examples from jmvbaseR</li>
+</ul></li>
+<li>
+<strong>Other guides</strong> (use when relevant):
+<ul><li>
+<code>*_guide.md</code> files for specific feature implementations</li>
+</ul></li>
+</ol></div>
+<div class="section level3">
+<h3 id="quick-reference-key-patterns">Quick Reference: Key Patterns<a class="anchor" aria-label="anchor" href="#quick-reference-key-patterns"></a></h3>
+<p><strong>State Management for Plots:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Include visual options in state to trigger updates</span></span>
+<span><span class="va">plotState</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="va">plotData</span>,</span>
+<span>    plot_title <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">options</span><span class="op">$</span><span class="va">plot_title</span>,</span>
+<span>    color_palette <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">options</span><span class="op">$</span><span class="va">color_palette</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">image</span><span class="op">$</span><span class="fu">setState</span><span class="op">(</span><span class="va">plotState</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Data Frame Serialization Fix:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Convert to base data.frame before setState() to avoid protobuf issues</span></span>
+<span><span class="va">plotData</span> <span class="op">&lt;-</span> <span class="va">private</span><span class="op">$</span><span class="fu">.ensureDataFrame</span><span class="op">(</span><span class="va">plotData</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Formula Building:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Use jmvcore helpers for safe variable names</span></span>
+<span><span class="va">lhs</span> <span class="op">&lt;-</span> <span class="fu">jmvcore</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvcore/man/decomposeTerm.html" class="external-link">composeTerm</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">options</span><span class="op">$</span><span class="va">dep</span><span class="op">)</span></span>
+<span><span class="va">rhs</span> <span class="op">&lt;-</span> <span class="fu">jmvcore</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jmvcore/man/decomposeTerm.html" class="external-link">composeTerms</a></span><span class="op">(</span><span class="va">modelTerms</span><span class="op">)</span></span>
+<span><span class="va">formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">lhs</span>, <span class="st">' ~ '</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">rhs</span>, collapse<span class="op">=</span><span class="st">' + '</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
 <h2 id="development-memories">Development Memories<a class="anchor" aria-label="anchor" href="#development-memories"></a></h2>
 <div class="section level3">
 <h3 id="vignette-management-system">Vignette Management System<a class="anchor" aria-label="anchor" href="#vignette-management-system"></a></h3>
@@ -166,12 +218,12 @@
 <li>Configuration: <code>updateModules_config.yaml</code> &gt; <code>vignette_domains</code> section</li>
 <li>Special files and exclude patterns are handled via configuration</li>
 </ul><p><strong>Domain-to-Module Mapping</strong>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">domain_mapping</span><span class="kw">:</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="at">  </span><span class="fu">clinicopath-descriptives</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"ClinicoPathDescriptives"</span><span class="kw">]</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="at">  </span><span class="fu">jjstatsplot</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"jjstatsplot"</span><span class="kw">]</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="at">  </span><span class="fu">meddecide</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"meddecide"</span><span class="kw">]</span><span class="at"> </span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="at">  </span><span class="fu">jsurvival</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"jsurvival"</span><span class="kw">]</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="at">  </span><span class="fu">general</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"jjstatsplot"</span><span class="kw">,</span><span class="at"> </span><span class="st">"meddecide"</span><span class="kw">,</span><span class="at"> </span><span class="st">"jsurvival"</span><span class="kw">,</span><span class="at"> </span><span class="st">"ClinicoPathDescriptives"</span><span class="kw">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">domain_mapping</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="at">  </span><span class="fu">clinicopath-descriptives</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"ClinicoPathDescriptives"</span><span class="kw">]</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="at">  </span><span class="fu">jjstatsplot</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"jjstatsplot"</span><span class="kw">]</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="at">  </span><span class="fu">meddecide</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"meddecide"</span><span class="kw">]</span><span class="at"> </span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="at">  </span><span class="fu">jsurvival</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"jsurvival"</span><span class="kw">]</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="at">  </span><span class="fu">general</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"jjstatsplot"</span><span class="kw">,</span><span class="at"> </span><span class="st">"meddecide"</span><span class="kw">,</span><span class="at"> </span><span class="st">"jsurvival"</span><span class="kw">,</span><span class="at"> </span><span class="st">"ClinicoPathDescriptives"</span><span class="kw">]</span></span></code></pre></div>
 <p><strong>Key Features</strong>:</p>
 <ul><li>Automatic discovery of all vignette files (.qmd, .Rmd, .md)</li>
 <li>Pattern-based exclusion of legacy/temp files</li>
@@ -207,6 +259,65 @@
 <div class="section level2">
 <h2 id="development-memories-1">Development Memories<a class="anchor" aria-label="anchor" href="#development-memories-1"></a></h2>
 <div class="section level3">
+<h3 id="using-guide-files">Using Guide Files<a class="anchor" aria-label="anchor" href="#using-guide-files"></a></h3>
+<p><strong>IMPORTANT:</strong> When working on jamovi module development, implementing features, or troubleshooting issues, <strong>always consult the relevant guide files</strong> in the <code>vignettes/</code> directory:</p>
+<div class="section level4">
+<h4 id="guide-index">Guide Index<a class="anchor" aria-label="anchor" href="#guide-index"></a></h4>
+<p><strong><code>vignettes/README_GUIDES.md</code></strong> - Complete guide index with descriptions and use cases for all 11 available guides.</p>
+</div>
+<div class="section level4">
+<h4 id="primary-guides">Primary Guides<a class="anchor" aria-label="anchor" href="#primary-guides"></a></h4>
+<ol style="list-style-type: decimal"><li>
+<strong><code>vignettes/jamovi_module_patterns_guide.md</code></strong> - <strong>START HERE</strong> - Comprehensive jamovi development guide
+<ul><li>
+<strong>Use when:</strong> Creating new analyses, debugging state management, implementing plots, building formulas</li>
+<li>
+<strong>Contains:</strong> Module structure, 4-file architecture, data handling, state management, formula building, output patterns, best practices</li>
+<li>
+<strong>Based on:</strong> jmvbaseR official example + ClinicoPath production code</li>
+</ul></li>
+<li>
+<strong>File-specific guides</strong> (<code>.a.yaml</code>, <code>.b.R</code>, <code>.r.yaml</code>, <code>.u.yaml</code>)
+<ul><li>
+<code>jamovi_a_yaml_guide.md</code> - Analysis definitions (options)</li>
+<li>
+<code>jamovi_b_R_guide.md</code> - Backend implementation (R6 classes)</li>
+<li>
+<code>jamovi_r_yaml_guide.md</code> - Results definitions (outputs)</li>
+<li>
+<code>jamovi_u_yaml_guide.md</code> - User interface definitions</li>
+</ul></li>
+<li>
+<strong>Feature-specific guides</strong>
+<ul><li>
+<code>jamovi_tables_guide.md</code> - Table output</li>
+<li>
+<code>jamovi_plots_guide.md</code> - Plot/image output</li>
+<li>
+<code>jamovi_notices_guide.md</code> - User notices (ERROR/WARNING/INFO)</li>
+<li>
+<code>jamovi_formula_guide.md</code> - Statistical formulas</li>
+<li>
+<code>jamovi_js_guide.md</code> - Custom JavaScript</li>
+<li>
+<code>jamovi_actions_guide.md</code> - UI actions &amp; events</li>
+</ul></li>
+</ol></div>
+<div class="section level4">
+<h4 id="when-to-use-guides">When to Use Guides<a class="anchor" aria-label="anchor" href="#when-to-use-guides"></a></h4>
+<p>✅ <strong>Before</strong> implementing a new jamovi analysis → Read <code>jamovi_module_patterns_guide.md</code> ✅ <strong>When</strong> encountering state serialization errors → Check State Management section ✅ <strong>When</strong> building statistical models → Reference Formula Building patterns ✅ <strong>When</strong> plots don’t update with option changes → Check State Management ✅ <strong>When</strong> variables have special characters/spaces → Reference Data Handling patterns ✅ <strong>When</strong> implementing syntax generation → Check Syntax Generation section</p>
+</div>
+<div class="section level4">
+<h4 id="how-to-use">How to Use<a class="anchor" aria-label="anchor" href="#how-to-use"></a></h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># List all available guides</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">ls</span> vignettes/<span class="pp">*</span>_guide.md</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># Read a specific guide</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">cat</span> vignettes/jamovi_module_patterns_guide.md</span></code></pre></div>
+<p><strong>Note:</strong> These guides are based on analysis of official jamovi examples (jmvbaseR) and production ClinicoPath implementations. They contain validated patterns and solutions to common problems.</p>
+</div>
+</div>
+<div class="section level3">
 <h3 id="documentation-structure">Documentation Structure<a class="anchor" aria-label="anchor" href="#documentation-structure"></a></h3>
 <div class="section level4">
 <h4 id="submodule-documentation-links">Submodule Documentation Links<a class="anchor" aria-label="anchor" href="#submodule-documentation-links"></a></h4>
@@ -231,6 +342,15 @@
 <code>.Rd</code> and <code>.h.R</code> files are autogenerated. make changes on <code>.b.R</code> and yaml files</li>
 </ul></div>
 <div class="section level3">
+<h3 id="notice-serialization-and-html-conversion">Notice Serialization and HTML Conversion<a class="anchor" aria-label="anchor" href="#notice-serialization-and-html-conversion"></a></h3>
+<p><strong>Critical Issue:</strong> Using <code>insert(999, notice)</code> with <code><a href="https://rdrr.io/pkg/jmvcore/man/Analysis.html" class="external-link">jmvcore::Notice</a></code> objects causes serialization errors because Notice objects contain function references that cannot be serialized by jamovi’s protobuf system.</p>
+<p><strong>Solution:</strong> Convert Notice objects to HTML output items. See comprehensive guide: <code>docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md</code></p>
+<p><strong>Status (as of 2025-12-28):</strong> - ✅ <strong>Converted:</strong> <code>R/waterfall.b.R</code> (complete reference implementation) - ⏳ <strong>Remaining:</strong> 40 files with 322 active <code>insert(999,)</code> calls - 📋 <strong>Priority files:</strong> decision.b.R (30), jjcoefstats.b.R (25), decisioncurve.b.R (20)</p>
+<p><strong>When to convert:</strong> 1. When encountering serialization errors in a specific function 2. Before adding new notices to an existing function 3. When maintaining frequently-used analyses</p>
+<p><strong>Quick conversion pattern:</strong> 1. Add HTML output to .r.yaml: <code>- name: notices, type: Html</code> 2. Add helper methods to .b.R: <code>.noticeList</code>, <code>.addNotice()</code>, <code>.renderNotices()</code> 3. Replace <code>insert(999, notice)</code> with <code>private$.addNotice(type, title, content)</code> 4. Call <code>private$.renderNotices()</code> at end of <code>.run()</code></p>
+<p>See <code>R/waterfall.b.R</code> for complete working example.</p>
+</div>
+<div class="section level3">
 <h3 id="context-limit-management">Context Limit Management<a class="anchor" aria-label="anchor" href="#context-limit-management"></a></h3>
 <ul><li>If there are errors similar to following, use Gemini CLI with the <code>-p</code> flag to analyze large codebases or multiple files that exceed the context limits of Claude. details are in @CLAUDE-GEMINI.md
 <ul><li>“Context low” or “Context window exceeded” or “Error: File content (40897 tokens) exceeds maximum allowed tokens (25000). Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content.”</li>
@@ -243,7 +363,18 @@
 <li>errors or warnings with jmvtools::prepare() means that the module cannot function in jamovi. there should be no errors.</li>
 <li>private$.checkpoint() is internal jamovi function we do not define it</li>
 <li>jmvtools::check() does not evaluate functions. it checks the presence of jamovi program. To evaluate functions use jmvtools::prepare and devtools::document()</li>
-</ul></div>
+<li>
+<strong>ALWAYS consult guides</strong> under <code>vignettes/</code> folder when generating codes and features:
+<ul><li>Primary: <code>vignettes/jamovi_module_patterns_guide.md</code> (comprehensive jamovi development guide)</li>
+<li>Specific features: <code>vignettes/*_guide.md</code> (targeted implementation guides)</li>
+<li>See “Using Guide Files” section above for when and how to use these guides</li>
+</ul></li>
+<li>The notices feature does not allow new lines for the time being. So we need to update the implementation. For the time being we need to have both previous html and the new notices features to be present at the same time.</li>
+<li>you are an expert R-package and jamovi developer. you are an expert in biostatistics working with pathologists and clinicians. critically evaluate functions. is it mathematically and statistically accurate? is it ready to be used by clinicians and pathologists? is it ready for release?</li>
+<li>The error “attempt to apply non-function” during serialization was caused by using jmvcore::Notice objects that were dynamically inserted with self<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mi>e</mi><mi>s</mi><mi>u</mi><mi>l</mi><mi>t</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">results</annotation></semantics></math>insert(). These Notice objects contain function references that cannot be serialized by jamovi’s protobuf system.</li>
+<li>jmvtools::check() only locates jamovi program bin file location. it does not check anything regarding module structure or code.</li>
+</ul><p>Always use available ‘skills’ when possible. Keep the output organized. Use these skills to update text and analysis in the project: pubmed-database biopython biorxiv-database openalex-database citation-management scholar-evaluation clinical-decision-support clinical-reports exploratory-data-analysis hypogenic hypothesis-generation literature-review peer-review scientific-brainstorming scientific-critical-thinking scientific-visualization scientific-schematics generate-image scientific-slides scientific-writing research-grants statistical-analysis statsmodels paper-2-web matplotlib scikit-learn scikit-survival plotly seaborn aeon docx xlsx pptx latex-posters pdf markitdown histolab pathml shap omero-integration pydicom pytorch-lightning</p>
+</div>
 </div>
 </div>
 

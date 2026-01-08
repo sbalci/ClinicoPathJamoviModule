@@ -99,7 +99,15 @@ agreement(
   nClusters = 3,
   showDendrogram = TRUE,
   showClusterHeatmap = TRUE,
-  showRaterClusterGuide = FALSE
+  showRaterClusterGuide = FALSE,
+  caseClustering = FALSE,
+  caseClusterMethod = "hierarchical",
+  caseClusterDistance = "correlation",
+  caseClusterLinkage = "average",
+  nCaseClusters = 3,
+  showCaseDendrogram = TRUE,
+  showCaseClusterHeatmap = TRUE,
+  showCaseClusterGuide = FALSE
 )
 }
 \arguments{
@@ -603,6 +611,33 @@ similar and validates cluster assignments. For continuous data: correlation
 matrix. For categorical data: agreement matrix.}
 
 \item{showRaterClusterGuide}{.}
+
+\item{caseClustering}{Perform clustering of cases based on rating patterns
+across raters. Identifies groups of cases that received similar ratings.}
+
+\item{caseClusterMethod}{Hierarchical: Creates a dendrogram showing nested
+groupings at all similarity levels. K-means: Partitions cases into K
+distinct clusters (continuous data only).}
+
+\item{caseClusterDistance}{Correlation (1 - r): Based on correlation
+between rating vectors (continuous). Euclidean: Straight-line distance in
+rating space. Manhattan: City-block distance (sum of absolute differences).
+Agreement-Based: Proportion of disagreeing raters (categorical).}
+
+\item{caseClusterLinkage}{Average: Uses average distance between all pairs.
+Complete: Uses maximum distance between pairs. Single: Uses minimum
+distance between pairs. Ward: Minimizes within-cluster variance.}
+
+\item{nCaseClusters}{Number of clusters to create for k-means clustering.}
+
+\item{showCaseDendrogram}{Display hierarchical clustering dendrogram for
+cases.}
+
+\item{showCaseClusterHeatmap}{Display similarity matrix heatmap with
+cluster boundaries.}
+
+\item{showCaseClusterGuide}{Show educational guide about case clustering
+analysis.}
 }
 \value{
 A results object containing:
@@ -679,6 +714,10 @@ A results object containing:
 \code{results$raterDendrogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$raterClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
 \code{results$raterClusterExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$caseClusterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$caseDendrogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$caseClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$caseClusterExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

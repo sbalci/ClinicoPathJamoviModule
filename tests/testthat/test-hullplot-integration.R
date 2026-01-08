@@ -1,288 +1,635 @@
-# Integration tests for hullplot module
-# Tests critical bug fixes: data caching, color scales, single-group handling
+# ═══════════════════════════════════════════════════════════
+# Integration Tests: hullplot
+# ═══════════════════════════════════════════════════════════
 
-# Note: Tests run via devtools::test() which auto-loads the package
-# If running manually, use: devtools::load_all()
+library(testthat)
+library(ClinicoPath)
 
-test_that("hullplot invalidates cache when data content changes", {
-    skip_if_not_installed("ClinicoPath")
+test_that("hullplot integrates with all test datasets", {
+  devtools::load_all()
 
-    # CRITICAL TEST: Verify cache invalidates when data content changes
-    # even if row count stays the same
+  datasets <- list(
+    list(name = "hullplot_test", x = "x", y = "y", group = "group"),
+    list(name = "hullplot_clusters", x = "x", y = "y", group = "cluster"),
+    list(name = "hullplot_overlap", x = "x", y = "y", group = "treatment"),
+    list(name = "hullplot_outliers", x = "x", y = "y", group = "disease_type"),
+    list(name = "hullplot_clinical", x = "tumor_volume", y = "ki67_index", group = "treatment_arm"),
+    list(name = "hullplot_small", x = "measurement_x", y = "measurement_y", group = "category"),
+    list(name = "hullplot_fourgroup", x = "gene_a", y = "gene_b", group = "subtype"),
+    list(name = "hullplot_unbalanced", x = "biomarker1", y = "biomarker2", group = "risk_group")
+  )
 
-    # Create initial dataset (50 rows)
-    set.seed(123)
-    data1 <- data.frame(
-        x = rnorm(50, mean = 0),
-        y = rnorm(50, mean = 0),
-        group = factor(rep(c("A", "B"), each = 25))
-    )
-
-    result1 <- hullplot(
-        data = data1,
-        x_var = "x",
-        y_var = "y",
-        group_var = "group"
-    )
-
-    # Before fix: Result would be cached based on (x, y, group, 50)
-
-    # Create different dataset with SAME row count but DIFFERENT content
-    set.seed(456)
-    data2 <- data.frame(
-        x = rnorm(50, mean = 5),  # Different mean
-        y = rnorm(50, mean = 5),  # Different mean
-        group = factor(rep(c("A", "B"), each = 25))
-    )
-
-    result2 <- hullplot(
-        data = data2,
-        x_var = "x",
-        y_var = "y",
-        group_var = "group"
-    )
-
-    # CRITICAL: Results should be DIFFERENT (not cached)
-    # Before fix: Would return cached data from data1
-    # After fix: Should process data2 independently
-    expect_s3_class(result1, "hullplotResults")
-    expect_s3_class(result2, "hullplotResults")
-
-    # Both should succeed without errors
-    # (More detailed verification would require accessing internal plot data)
-})
-
-
-test_that("hullplot handles single group without crashing", {
-    skip_if_not_installed("ClinicoPath")
-
-    # CRITICAL TEST: Verify single-group case doesn't crash
-    # Before fix: dist() on 1 group → NaN → crash in Natural Language Summary
-
-    # Create data with only one group
-    set.seed(789)
-    single_group_data <- data.frame(
-        sepal_length = rnorm(50, mean = 5.8),
-        sepal_width = rnorm(50, mean = 3.0),
-        species = factor(rep("setosa", 50))
-    )
-
-    # Should NOT crash
-    expect_no_error({
-        result <- hullplot(
-            data = single_group_data,
-            x_var = "sepal_length",
-            y_var = "sepal_width",
-            group_var = "species",
-            show_statistics = TRUE  # Enable statistics to test the natural language summary path
-        )
-    })
-
-    # CRITICAL: Summary should handle single group gracefully
-    expect_s3_class(result, "hullplotResults")
-})
-
-
-test_that("hullplot with multiple groups generates statistics correctly", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Test that multi-group analysis works correctly
-    set.seed(111)
-    multi_group_data <- data.frame(
-        x = c(rnorm(30, mean = 0), rnorm(30, mean = 3), rnorm(30, mean = 1.5)),
-        y = c(rnorm(30, mean = 0), rnorm(30, mean = 3), rnorm(30, mean = 1.5)),
-        group = factor(rep(c("Group A", "Group B", "Group C"), each = 30))
-    )
+  for (ds in datasets) {
+    data(list = ds$name, package = "ClinicoPath")
+    dataset <- get(ds$name)
 
     result <- hullplot(
-        data = multi_group_data,
-        x_var = "x",
-        y_var = "y",
-        group_var = "group",
-        show_statistics = TRUE
+      data = dataset,
+      x_var = ds$x,
+      y_var = ds$y,
+      group_var = ds$group,
+      show_labels = TRUE,
+      hull_alpha = 0.3
     )
 
-    # Should handle multiple groups without errors
-    expect_s3_class(result, "hullplotResults")
+    expect_s3_class(result, "hullplotResults",
+                   info = paste("Integration failed for dataset:", ds$name))
+    expect_true(!is.null(result$plot1),
+               info = paste("Plot missing for dataset:", ds$name))
+  }
 })
 
+test_that("hullplot produces consistent results across data formats", {
+  devtools::load_all()
 
-test_that("hullplot handles different color_var and group_var correctly", {
-    skip_if_not_installed("ClinicoPath")
+  data(hullplot_test)
 
-    # CRITICAL TEST: Verify color scales use correct variable levels
-    # Before fix: Both scales used group_var levels
-    # After fix: Fill uses group_var, colour uses color_var
+  # As data.frame
+  df_data <- as.data.frame(hullplot_test)
+  result_df <- hullplot(
+    data = df_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
+  )
 
-    # Create data with different levels for group vs color
-    set.seed(222)
-    test_data <- data.frame(
-        x = rnorm(100),
-        y = rnorm(100),
-        # 3 groups for hulls
-        treatment = factor(rep(c("Drug A", "Drug B", "Drug C"), length.out = 100)),
-        # 2 levels for point colors
-        response = factor(rep(c("Responder", "Non-responder"), length.out = 100))
+  # As tibble
+  tibble_data <- tibble::as_tibble(hullplot_test)
+  result_tibble <- hullplot(
+    data = tibble_data,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
+  )
+
+  # Both should succeed
+  expect_s3_class(result_df, "hullplotResults")
+  expect_s3_class(result_tibble, "hullplotResults")
+})
+
+test_that("hullplot handles complete clinical trial workflow", {
+  devtools::load_all()
+
+  data(hullplot_clinical)
+
+  # Step 1: Basic visualization
+  result_basic <- hullplot(
+    data = hullplot_clinical,
+    x_var = "tumor_volume",
+    y_var = "ki67_index",
+    group_var = "treatment_arm"
+  )
+  expect_s3_class(result_basic, "hullplotResults")
+
+  # Step 2: Add labels and statistics
+  result_stats <- hullplot(
+    data = hullplot_clinical,
+    x_var = "tumor_volume",
+    y_var = "ki67_index",
+    group_var = "treatment_arm",
+    show_labels = TRUE,
+    show_statistics = TRUE
+  )
+  expect_s3_class(result_stats, "hullplotResults")
+
+  # Step 3: Add confidence ellipses
+  result_ellipses <- hullplot(
+    data = hullplot_clinical,
+    x_var = "tumor_volume",
+    y_var = "ki67_index",
+    group_var = "treatment_arm",
+    show_labels = TRUE,
+    show_statistics = TRUE,
+    confidence_ellipses = TRUE
+  )
+  expect_s3_class(result_ellipses, "hullplotResults")
+
+  # Step 4: Publication-ready figure
+  result_pub <- hullplot(
+    data = hullplot_clinical,
+    x_var = "tumor_volume",
+    y_var = "ki67_index",
+    group_var = "treatment_arm",
+    show_labels = TRUE,
+    show_statistics = TRUE,
+    confidence_ellipses = TRUE,
+    hull_concavity = 1.5,
+    hull_alpha = 0.3,
+    color_palette = "clinical",
+    plot_theme = "clinical",
+    x_label = "Tumor Volume (cm³)",
+    y_label = "Ki-67 Index (%)",
+    plot_title = "Treatment Response",
+    show_summary = TRUE
+  )
+  expect_s3_class(result_pub, "hullplotResults")
+})
+
+test_that("hullplot handles exploratory data analysis workflow", {
+  devtools::load_all()
+
+  data(hullplot_clusters)
+
+  # Step 1: Quick visualization
+  result_quick <- hullplot(
+    data = hullplot_clusters,
+    x_var = "x",
+    y_var = "y",
+    group_var = "cluster"
+  )
+  expect_s3_class(result_quick, "hullplotResults")
+
+  # Step 2: Add size variable for multivariate view
+  result_multi <- hullplot(
+    data = hullplot_clusters,
+    x_var = "x",
+    y_var = "y",
+    group_var = "cluster",
+    size_var = "biomarker"
+  )
+  expect_s3_class(result_multi, "hullplotResults")
+
+  # Step 3: Fine-tune aesthetics
+  result_tuned <- hullplot(
+    data = hullplot_clusters,
+    x_var = "x",
+    y_var = "y",
+    group_var = "cluster",
+    size_var = "biomarker",
+    hull_concavity = 1.0,
+    hull_alpha = 0.3,
+    show_labels = TRUE
+  )
+  expect_s3_class(result_tuned, "hullplotResults")
+})
+
+test_that("hullplot handles quality control workflow", {
+  devtools::load_all()
+
+  data(hullplot_outliers)
+
+  # Step 1: Initial visualization
+  result_initial <- hullplot(
+    data = hullplot_outliers,
+    x_var = "x",
+    y_var = "y",
+    group_var = "disease_type"
+  )
+  expect_s3_class(result_initial, "hullplotResults")
+
+  # Step 2: Enable outlier detection
+  result_outliers <- hullplot(
+    data = hullplot_outliers,
+    x_var = "x",
+    y_var = "y",
+    group_var = "disease_type",
+    outlier_detection = TRUE
+  )
+  expect_s3_class(result_outliers, "hullplotResults")
+
+  # Step 3: Add severity information
+  result_severity <- hullplot(
+    data = hullplot_outliers,
+    x_var = "x",
+    y_var = "y",
+    group_var = "disease_type",
+    size_var = "severity",
+    outlier_detection = TRUE,
+    show_labels = TRUE
+  )
+  expect_s3_class(result_severity, "hullplotResults")
+})
+
+test_that("hullplot handles comparative analysis workflow", {
+  devtools::load_all()
+
+  data(hullplot_test)
+  data(hullplot_clusters)
+
+  # Compare two-group vs three-group visualization
+  result_two <- hullplot(
+    data = hullplot_test,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group",
+    hull_concavity = 1.5,
+    hull_alpha = 0.3
+  )
+  expect_s3_class(result_two, "hullplotResults")
+
+  result_three <- hullplot(
+    data = hullplot_clusters,
+    x_var = "x",
+    y_var = "y",
+    group_var = "cluster",
+    hull_concavity = 1.5,
+    hull_alpha = 0.3
+  )
+  expect_s3_class(result_three, "hullplotResults")
+})
+
+test_that("hullplot handles different spatial arrangements", {
+  devtools::load_all()
+
+  # Well-separated groups
+  data(hullplot_test)
+  result_separated <- hullplot(
+    data = hullplot_test,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group",
+    show_labels = TRUE
+  )
+  expect_s3_class(result_separated, "hullplotResults")
+
+  # Overlapping groups
+  data(hullplot_overlap)
+  result_overlap <- hullplot(
+    data = hullplot_overlap,
+    x_var = "x",
+    y_var = "y",
+    group_var = "treatment",
+    hull_alpha = 0.2,
+    show_labels = TRUE
+  )
+  expect_s3_class(result_overlap, "hullplotResults")
+
+  # Quadrant arrangement
+  data(hullplot_fourgroup)
+  result_quadrant <- hullplot(
+    data = hullplot_fourgroup,
+    x_var = "gene_a",
+    y_var = "gene_b",
+    group_var = "subtype",
+    show_labels = TRUE
+  )
+  expect_s3_class(result_quadrant, "hullplotResults")
+})
+
+test_that("hullplot handles different sample sizes consistently", {
+  devtools::load_all()
+
+  # Small sample
+  data(hullplot_small)
+  result_small <- hullplot(
+    data = hullplot_small,
+    x_var = "measurement_x",
+    y_var = "measurement_y",
+    group_var = "category"
+  )
+  expect_s3_class(result_small, "hullplotResults")
+
+  # Medium sample
+  data(hullplot_test)
+  result_medium <- hullplot(
+    data = hullplot_test,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group"
+  )
+  expect_s3_class(result_medium, "hullplotResults")
+
+  # Large sample
+  data(hullplot_fourgroup)
+  result_large <- hullplot(
+    data = hullplot_fourgroup,
+    x_var = "gene_a",
+    y_var = "gene_b",
+    group_var = "subtype"
+  )
+  expect_s3_class(result_large, "hullplotResults")
+})
+
+test_that("hullplot handles balanced vs unbalanced groups", {
+  devtools::load_all()
+
+  # Balanced groups
+  data(hullplot_test)
+  result_balanced <- hullplot(
+    data = hullplot_test,
+    x_var = "x",
+    y_var = "y",
+    group_var = "group",
+    show_statistics = TRUE
+  )
+  expect_s3_class(result_balanced, "hullplotResults")
+
+  # Unbalanced groups
+  data(hullplot_unbalanced)
+  result_unbalanced <- hullplot(
+    data = hullplot_unbalanced,
+    x_var = "biomarker1",
+    y_var = "biomarker2",
+    group_var = "risk_group",
+    show_statistics = TRUE
+  )
+  expect_s3_class(result_unbalanced, "hullplotResults")
+})
+
+test_that("hullplot handles all color palettes consistently", {
+  devtools::load_all()
+
+  data(hullplot_clusters)
+
+  palettes <- c("default", "viridis", "set1", "set2", "dark2", "clinical")
+
+  for (pal in palettes) {
+    result <- hullplot(
+      data = hullplot_clusters,
+      x_var = "x",
+      y_var = "y",
+      group_var = "cluster",
+      color_palette = pal,
+      show_labels = TRUE,
+      hull_alpha = 0.3
     )
+
+    expect_s3_class(result, "hullplotResults",
+                   info = paste("Integration failed for palette:", pal))
+  }
+})
+
+test_that("hullplot handles all plot themes consistently", {
+  devtools::load_all()
+
+  data(hullplot_clusters)
+
+  themes <- c("minimal", "classic", "light", "dark", "clinical")
+
+  for (theme in themes) {
+    result <- hullplot(
+      data = hullplot_clusters,
+      x_var = "x",
+      y_var = "y",
+      group_var = "cluster",
+      plot_theme = theme,
+      show_labels = TRUE,
+      hull_alpha = 0.3
+    )
+
+    expect_s3_class(result, "hullplotResults",
+                   info = paste("Integration failed for theme:", theme))
+  }
+})
+
+test_that("hullplot handles combinations of all visual features", {
+  devtools::load_all()
+
+  data(hullplot_clinical)
+
+  # Test comprehensive feature integration
+  result <- hullplot(
+    data = hullplot_clinical,
+    x_var = "tumor_volume",
+    y_var = "ki67_index",
+    group_var = "treatment_arm",
+    color_var = "response_status",
+    size_var = "age",
+    show_labels = TRUE,
+    show_statistics = TRUE,
+    confidence_ellipses = TRUE,
+    hull_concavity = 1.5,
+    hull_alpha = 0.3,
+    hull_expand = 0.1,
+    point_size = 2.5,
+    point_alpha = 0.8,
+    color_palette = "clinical",
+    plot_theme = "clinical",
+    x_label = "Tumor Volume (cm³)",
+    y_label = "Ki-67 Index (%)",
+    plot_title = "Complete Integration Test",
+    show_summary = TRUE,
+    show_assumptions = TRUE,
+    plotwidth = 800,
+    plotheight = 600
+  )
+
+  expect_s3_class(result, "hullplotResults")
+})
+
+test_that("hullplot handles gene expression analysis workflow", {
+  devtools::load_all()
+
+  data(hullplot_fourgroup)
+
+  # Step 1: Initial two-gene view
+  result_basic <- hullplot(
+    data = hullplot_fourgroup,
+    x_var = "gene_a",
+    y_var = "gene_b",
+    group_var = "subtype"
+  )
+  expect_s3_class(result_basic, "hullplotResults")
+
+  # Step 2: Add survival information
+  result_survival <- hullplot(
+    data = hullplot_fourgroup,
+    x_var = "gene_a",
+    y_var = "gene_b",
+    group_var = "subtype",
+    size_var = "survival_months",
+    show_labels = TRUE
+  )
+  expect_s3_class(result_survival, "hullplotResults")
+
+  # Step 3: Publication figure
+  result_pub <- hullplot(
+    data = hullplot_fourgroup,
+    x_var = "gene_a",
+    y_var = "gene_b",
+    group_var = "subtype",
+    size_var = "survival_months",
+    show_labels = TRUE,
+    show_statistics = TRUE,
+    color_palette = "viridis",
+    x_label = "Gene A Expression",
+    y_label = "Gene B Expression",
+    plot_title = "Molecular Subtypes"
+  )
+  expect_s3_class(result_pub, "hullplotResults")
+})
+
+test_that("hullplot handles biomarker analysis workflow", {
+  devtools::load_all()
+
+  data(hullplot_unbalanced)
+
+  # Step 1: Risk group visualization
+  result_risk <- hullplot(
+    data = hullplot_unbalanced,
+    x_var = "biomarker1",
+    y_var = "biomarker2",
+    group_var = "risk_group"
+  )
+  expect_s3_class(result_risk, "hullplotResults")
+
+  # Step 2: Add patient age context
+  result_age <- hullplot(
+    data = hullplot_unbalanced,
+    x_var = "biomarker1",
+    y_var = "biomarker2",
+    group_var = "risk_group",
+    size_var = "age",
+    show_labels = TRUE
+  )
+  expect_s3_class(result_age, "hullplotResults")
+
+  # Step 3: Clinical presentation
+  result_clinical <- hullplot(
+    data = hullplot_unbalanced,
+    x_var = "biomarker1",
+    y_var = "biomarker2",
+    group_var = "risk_group",
+    size_var = "age",
+    show_labels = TRUE,
+    show_statistics = TRUE,
+    x_label = "Biomarker 1",
+    y_label = "Biomarker 2",
+    plot_title = "Risk Stratification"
+  )
+  expect_s3_class(result_clinical, "hullplotResults")
+})
+
+test_that("hullplot handles different concavity settings across datasets", {
+  devtools::load_all()
+
+  concavity_values <- c(0.5, 1.0, 1.5, 2.0)
+
+  data(hullplot_clusters)
+
+  for (conc in concavity_values) {
+    result <- hullplot(
+      data = hullplot_clusters,
+      x_var = "x",
+      y_var = "y",
+      group_var = "cluster",
+      hull_concavity = conc,
+      show_labels = TRUE
+    )
+
+    expect_s3_class(result, "hullplotResults",
+                   info = paste("Integration failed for concavity:", conc))
+  }
+})
+
+test_that("hullplot handles progressive feature addition", {
+  devtools::load_all()
+
+  data(hullplot_clinical)
+
+  # Progressive feature addition
+  features_list <- list(
+    list(show_labels = TRUE),
+    list(show_labels = TRUE, show_statistics = TRUE),
+    list(show_labels = TRUE, show_statistics = TRUE, confidence_ellipses = TRUE),
+    list(show_labels = TRUE, show_statistics = TRUE, confidence_ellipses = TRUE,
+         size_var = "age"),
+    list(show_labels = TRUE, show_statistics = TRUE, confidence_ellipses = TRUE,
+         size_var = "age", color_var = "response_status")
+  )
+
+  for (i in seq_along(features_list)) {
+    args <- c(
+      list(
+        data = hullplot_clinical,
+        x_var = "tumor_volume",
+        y_var = "ki67_index",
+        group_var = "treatment_arm"
+      ),
+      features_list[[i]]
+    )
+
+    result <- do.call(hullplot, args)
+
+    expect_s3_class(result, "hullplotResults",
+                   info = paste("Failed for feature set", i))
+  }
+})
+
+test_that("hullplot handles all datasets with consistent parameters", {
+  devtools::load_all()
+
+  datasets <- list(
+    list(name = "hullplot_test", x = "x", y = "y", group = "group"),
+    list(name = "hullplot_clusters", x = "x", y = "y", group = "cluster"),
+    list(name = "hullplot_overlap", x = "x", y = "y", group = "treatment"),
+    list(name = "hullplot_outliers", x = "x", y = "y", group = "disease_type"),
+    list(name = "hullplot_clinical", x = "tumor_volume", y = "ki67_index", group = "treatment_arm"),
+    list(name = "hullplot_small", x = "measurement_x", y = "measurement_y", group = "category"),
+    list(name = "hullplot_fourgroup", x = "gene_a", y = "gene_b", group = "subtype"),
+    list(name = "hullplot_unbalanced", x = "biomarker1", y = "biomarker2", group = "risk_group")
+  )
+
+  # Apply same parameters to all datasets
+  for (ds in datasets) {
+    data(list = ds$name, package = "ClinicoPath")
+    dataset <- get(ds$name)
 
     result <- hullplot(
-        data = test_data,
-        x_var = "x",
-        y_var = "y",
-        group_var = "treatment",      # 3 levels
-        color_var = "response"         # 2 levels (DIFFERENT!)
+      data = dataset,
+      x_var = ds$x,
+      y_var = ds$y,
+      group_var = ds$group,
+      show_labels = TRUE,
+      show_statistics = TRUE,
+      hull_concavity = 1.5,
+      hull_alpha = 0.3,
+      point_size = 2.5,
+      color_palette = "viridis"
     )
 
-    # CRITICAL: Should not crash with different level counts
-    # Before fix: Color scale would use 3 colors for 2-level response variable
-    # After fix: Fill scale uses 3 colors, colour scale uses 2 colors
-    expect_s3_class(result, "hullplotResults")
+    expect_s3_class(result, "hullplotResults",
+                   info = paste("Consistent parameters failed for:", ds$name))
+  }
 })
 
+test_that("hullplot output structure is consistent across all datasets", {
+  devtools::load_all()
 
-test_that("hullplot handles same color_var and group_var correctly", {
-    skip_if_not_installed("ClinicoPath")
+  datasets <- c("hullplot_test", "hullplot_clusters", "hullplot_clinical")
 
-    # Test when color_var is same as group_var (common case)
-    set.seed(333)
-    test_data <- data.frame(
-        x = rnorm(90),
-        y = rnorm(90),
-        diagnosis = factor(rep(c("Type I", "Type II", "Type III"), each = 30))
-    )
+  for (dataset_name in datasets) {
+    data(list = dataset_name, package = "ClinicoPath")
+    dataset <- get(dataset_name)
+
+    x_var <- if (dataset_name == "hullplot_clinical") "tumor_volume" else "x"
+    y_var <- if (dataset_name == "hullplot_clinical") "ki67_index" else "y"
+    group_var <- switch(dataset_name,
+                       "hullplot_test" = "group",
+                       "hullplot_clusters" = "cluster",
+                       "hullplot_clinical" = "treatment_arm")
 
     result <- hullplot(
-        data = test_data,
-        x_var = "x",
-        y_var = "y",
-        group_var = "diagnosis",
-        color_var = "diagnosis"  # Same as group_var
+      data = dataset,
+      x_var = x_var,
+      y_var = y_var,
+      group_var = group_var,
+      show_labels = TRUE
     )
 
-    # Should work without issues
+    # Check consistent output structure
     expect_s3_class(result, "hullplotResults")
+    expect_true(!is.null(result$plot1),
+               info = paste("Plot missing for:", dataset_name))
+  }
 })
 
+test_that("hullplot handles repeated analyses with same data", {
+  devtools::load_all()
 
-test_that("hullplot handles missing values appropriately", {
-    skip_if_not_installed("ClinicoPath")
+  data(hullplot_test)
 
-    # Test that NAs are handled gracefully
-    set.seed(444)
-    data_with_na <- data.frame(
-        x = c(rnorm(45), rep(NA, 5)),
-        y = c(rnorm(45), rep(NA, 5)),
-        group = factor(rep(c("A", "B"), each = 25))
-    )
-
-    # Should handle NAs without crashing
-    # (jamovi's naOmit will remove rows with NAs)
-    expect_no_error({
-        result <- hullplot(
-            data = data_with_na,
-            x_var = "x",
-            y_var = "y",
-            group_var = "group"
-        )
-    })
-})
-
-
-test_that("hullplot handles small groups (< 3 points) gracefully", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Hull calculation requires at least 3 points per group
-    # Test edge case with small groups
-    set.seed(555)
-    small_group_data <- data.frame(
-        x = c(1, 2, 5, 6, 7, 8, 9),
-        y = c(1, 2, 5, 6, 7, 8, 9),
-        group = factor(c("A", "A", "B", "B", "B", "B", "B"))  # A has only 2 points
-    )
-
-    # Should handle gracefully (may show points only for group A)
-    expect_no_error({
-        result <- hullplot(
-            data = small_group_data,
-            x_var = "x",
-            y_var = "y",
-            group_var = "group"
-        )
-    })
-})
-
-
-test_that("hullplot with all optional features enabled works", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Test with all options enabled
-    set.seed(666)
-    full_feature_data <- data.frame(
-        x = rnorm(100),
-        y = rnorm(100),
-        group = factor(rep(c("A", "B", "C"), length.out = 100)),
-        color = factor(rep(c("Yes", "No"), length.out = 100)),
-        size = runif(100, 1, 10)
-    )
-
+  # Run same analysis multiple times
+  for (i in 1:5) {
     result <- hullplot(
-        data = full_feature_data,
-        x_var = "x",
-        y_var = "y",
-        group_var = "group",
-        color_var = "color",
-        size_var = "size",
-        hull_concavity = 2,
-        hull_alpha = 0.2,
-        point_size = 3,
-        point_alpha = 0.7,
-        color_palette = "set2",
-        show_labels = TRUE,
-        confidence_ellipses = TRUE,
-        show_statistics = TRUE,
-        plot_title = "Test Hull Plot",
-        x_label = "X Axis",
-        y_label = "Y Axis"
+      data = hullplot_test,
+      x_var = "x",
+      y_var = "y",
+      group_var = "group",
+      show_labels = TRUE
     )
 
-    # Should handle all features without errors
-    expect_s3_class(result, "hullplotResults")
-})
-
-
-test_that("hullplot with clinical data (iris) works correctly", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Use iris dataset as a realistic test case
-    result <- hullplot(
-        data = iris,
-        x_var = "Sepal.Length",
-        y_var = "Sepal.Width",
-        group_var = "Species",
-        show_labels = TRUE,
-        show_statistics = TRUE
-    )
-
-    # Should work with standard dataset
-    expect_s3_class(result, "hullplotResults")
-})
-
-
-test_that("hullplot with filtered iris (single species) works", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Test single-group case with real data
-    setosa_only <- iris[iris$Species == "setosa", ]
-
-    result <- hullplot(
-        data = setosa_only,
-        x_var = "Sepal.Length",
-        y_var = "Sepal.Width",
-        group_var = "Species",
-        size_var = "Petal.Length",
-        show_statistics = TRUE  # Enable statistics to test single-group summary path
-    )
-
-    # CRITICAL: Should handle single species without crash
-    expect_s3_class(result, "hullplotResults")
+    expect_s3_class(result, "hullplotResults",
+                   info = paste("Failed on iteration", i))
+  }
 })

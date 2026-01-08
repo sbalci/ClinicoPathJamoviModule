@@ -10,9 +10,14 @@ test_that("venn works", {
   mtcars_test$am <- factor(mtcars_test$am, levels = c(0, 1), labels = c("Automatic", "Manual"))
   
   # Test basic 2-variable venn
-  result <- venn(data = mtcars_test, 
-                 var1 = "vs", var1true = "V-shaped", 
-                 var2 = "am", var2true = "Manual")
+  result <- venn(data = mtcars_test,
+                 var1 = "vs", var1true = "V-shaped",
+                 var2 = "am", var2true = "Manual",
+                 var3 = NULL, var3true = NULL,
+                 var4 = NULL, var4true = NULL,
+                 var5 = NULL, var5true = NULL,
+                 var6 = NULL, var6true = NULL,
+                 var7 = NULL, var7true = NULL)
   
   # Check that result is not null
   expect_false(is.null(result))
@@ -27,7 +32,15 @@ test_that("venn works", {
   result3 <- venn(data = mtcars_test, 
                   var1 = "vs", var1true = "V-shaped", 
                   var2 = "am", var2true = "Manual",
-                  var3 = "gear_high", var3true = "High")
+                  var3 = "gear_high", var3true = "High",
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result3))
   expect_true(inherits(result3, "vennResults"))
@@ -39,7 +52,13 @@ test_that("venn works", {
                   var1 = "vs", var1true = "V-shaped", 
                   var2 = "am", var2true = "Manual",
                   var3 = "gear_high", var3true = "High",
-                  var4 = "cyl_high", var4true = "High")
+                  var4 = "cyl_high", var4true = "High",
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result4))
   expect_true(inherits(result4, "vennResults"))
@@ -49,9 +68,39 @@ test_that("venn requires minimum variables", {
   devtools::load_all()
   
   # Test error handling when insufficient variables provided
-  expect_error(venn(data = mtcars))
-  expect_error(venn(data = mtcars, var1 = "vs"))
-  expect_error(venn(data = mtcars, var1 = "vs", var1true = "1"))
+  expect_error(venn(data = mtcars,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL))
+  expect_error(venn(data = mtcars, var1 = "vs",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL))
+  expect_error(venn(data = mtcars, var1 = "vs", var1true = "1",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL))
 })
 
 test_that("venn handles factor conversion", {
@@ -66,7 +115,17 @@ test_that("venn handles factor conversion", {
   
   result <- venn(data = test_data, 
                  var1 = "var1", var1true = "A", 
-                 var2 = "var2", var2true = "X")
+                 var2 = "var2", var2true = "X",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
@@ -87,7 +146,15 @@ test_that("venn works with clinical data example", {
   result <- venn(data = clinical_data,
                  var1 = "diabetes", var1true = "Yes",
                  var2 = "hypertension", var2true = "Yes",
-                 var3 = "obesity", var3true = "Yes")
+                 var3 = "obesity", var3true = "Yes",
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
@@ -106,7 +173,17 @@ test_that("venn summary statistics work correctly", {
   # Test that venn can be created without errors
   result <- venn(data = test_data, 
                  var1 = "var1", var1true = "True", 
-                 var2 = "var2", var2true = "True")
+                 var2 = "var2", var2true = "True",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
@@ -126,7 +203,17 @@ test_that("venn handles edge cases", {
   
   result1 <- venn(data = all_true, 
                   var1 = "var1", var1true = "Yes", 
-                  var2 = "var2", var2true = "Yes")
+                  var2 = "var2", var2true = "Yes",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result1))
   
@@ -138,7 +225,17 @@ test_that("venn handles edge cases", {
   
   result2 <- venn(data = all_false, 
                   var1 = "var1", var1true = "Yes", 
-                  var2 = "var2", var2true = "Yes")
+                  var2 = "var2", var2true = "Yes",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result2))
   
@@ -150,7 +247,17 @@ test_that("venn handles edge cases", {
   
   result3 <- venn(data = single_obs, 
                   var1 = "var1", var1true = "Yes", 
-                  var2 = "var2", var2true = "Yes")
+                  var2 = "var2", var2true = "Yes",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result3))
 })
@@ -167,7 +274,17 @@ test_that("venn works with missing optional parameters", {
   # This should work with just var1 and var2
   result <- venn(data = test_data, 
                  var1 = "var1", var1true = "A", 
-                 var2 = "var2", var2true = "X")
+                 var2 = "var2", var2true = "X",
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
   
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
@@ -191,7 +308,15 @@ test_that("venn works with ComplexUpset options", {
                  show_complexUpset = TRUE,
                  sortBy = "freq",
                  minSize = 1,
-                 showAnnotations = TRUE)
+                 showAnnotations = TRUE,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
@@ -210,7 +335,17 @@ test_that("venn works with different upset sorting options", {
     result <- venn(data = test_data, 
                    var1 = "var1", var1true = "A", 
                    var2 = "var2", var2true = "X",
-                   sortBy = sort_option)
+                   sortBy = sort_option,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
     
     expect_false(is.null(result))
     expect_true(inherits(result, "vennResults"))
@@ -229,7 +364,17 @@ test_that("venn works with minimum size filtering", {
   result <- venn(data = test_data,
                  var1 = "var1", var1true = "A",
                  var2 = "var2", var2true = "X",
-                 minSize = 2)
+                 minSize = 2,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
@@ -250,7 +395,17 @@ test_that("venn works with separate plot type options", {
                   show_ggvenn = TRUE,
                   show_ggVennDiagram = FALSE,
                   show_upsetR = FALSE,
-                  show_complexUpset = FALSE)
+                  show_complexUpset = FALSE,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result1))
   expect_true(inherits(result1, "vennResults"))
@@ -262,7 +417,17 @@ test_that("venn works with separate plot type options", {
                   show_ggvenn = FALSE,
                   show_ggVennDiagram = TRUE,
                   show_upsetR = FALSE,
-                  show_complexUpset = FALSE)
+                  show_complexUpset = FALSE,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result2))
   expect_true(inherits(result2, "vennResults"))
@@ -274,7 +439,17 @@ test_that("venn works with separate plot type options", {
                   show_ggvenn = FALSE,
                   show_ggVennDiagram = FALSE,
                   show_upsetR = TRUE,
-                  show_complexUpset = FALSE)
+                  show_complexUpset = FALSE,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result3))
   expect_true(inherits(result3, "vennResults"))
@@ -286,7 +461,17 @@ test_that("venn works with separate plot type options", {
                   show_ggvenn = TRUE,
                   show_ggVennDiagram = TRUE,
                   show_upsetR = TRUE,
-                  show_complexUpset = TRUE)
+                  show_complexUpset = TRUE,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result4))
   expect_true(inherits(result4, "vennResults"))
@@ -314,7 +499,11 @@ test_that("venn shows warning message for ggvenn with >4 variables", {
                  show_ggvenn = TRUE,
                  show_ggVennDiagram = FALSE,
                  show_upsetR = FALSE,
-                 show_complexUpset = FALSE)
+                 show_complexUpset = FALSE,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result))
   expect_true(inherits(result, "vennResults"))
@@ -329,7 +518,11 @@ test_that("venn shows warning message for ggvenn with >4 variables", {
                   show_ggvenn = FALSE,
                   show_ggVennDiagram = TRUE,
                   show_upsetR = FALSE,
-                  show_complexUpset = FALSE)
+                  show_complexUpset = FALSE,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   expect_false(is.null(result2))
   expect_true(inherits(result2, "vennResults"))
@@ -349,7 +542,17 @@ test_that("membership table populates when enabled", {
     var2 = "var2", var2true = "X",
     showSetCalculations = TRUE,
     showMembershipTable = TRUE
-  )
+  ,
+                 var3 = NULL,
+                 var3true = NULL,
+                 var4 = NULL,
+                 var4true = NULL,
+                 var5 = NULL,
+                 var5true = NULL,
+                 var6 = NULL,
+                 var6true = NULL,
+                 var7 = NULL,
+                 var7true = NULL)
 
   output <- capture.output(print(result))
   expect_true(any(grepl("Membership Table", output, fixed = TRUE)))

@@ -1,0 +1,16 @@
+"scenario_id","scenario_name","test_type","disease_type","TP","TN","FP","FN","total_diseased","total_healthy","total_n","prevalence","population_prevalence","notes","sensitivity","specificity","ppv","npv","accuracy"
+1,"High Sensitivity Screening","Screening","Cancer",95,150,50,5,100,200,300,0.333,0.05,"Designed to catch all cases, will refer many false positives",0.95,0.75,0.655,0.968,0.817
+2,"High Specificity Confirmatory","Confirmatory","Infection",85,195,5,15,100,200,300,0.333,0.15,"High specificity to rule in disease after positive screen",0.85,0.975,0.944,0.929,0.933
+3,"Balanced Moderate Performance","Diagnostic","Cardiac",70,160,40,30,100,200,300,0.333,0.2,"Moderate performance, typical of many clinical tests",0.7,0.8,0.636,0.842,0.767
+4,"Excellent Biomarker","Biomarker","Cancer",98,192,8,2,100,200,300,0.333,0.08,"Excellent biomarker with high sensitivity and specificity",0.98,0.96,0.925,0.99,0.967
+5,"Poor Screening Test","Screening","Infection",50,140,60,50,100,200,300,0.333,0.25,"Poor test performance, not clinically useful",0.5,0.7,0.455,0.737,0.633
+6,"Rare Disease Screening","Screening","Genetic",19,980,20,1,20,1000,1020,0.02,0.001,"Screening rare genetic condition, PPV will be low",0.95,0.98,0.487,0.999,0.979
+7,"Common Disease Screening","Screening","Diabetes",85,210,90,15,100,300,400,0.25,0.3,"Common disease, better PPV than rare disease screening",0.85,0.7,0.486,0.933,0.738
+8,"Perfect Test","Gold Standard","Any",100,200,0,0,100,200,300,0.333,0.1,"Perfect test (theoretical), kappa = 1.0",1,1,1,1,1
+9,"Useless Test","Poor","Any",50,150,50,50,100,200,300,0.333,0.2,"Random test, sensitivity = specificity = 0.5",0.5,0.75,0.5,0.75,0.667
+10,"High Prevalence Setting","Diagnostic","Sepsis",180,120,80,20,200,200,400,0.5,0.4,"High prevalence setting (ICU), affects PPV/NPV",0.9,0.6,0.692,0.857,0.75
+11,"Low Prevalence Setting","Screening","Rare Disease",18,970,30,2,20,1000,1020,0.02,0.02,"Low prevalence setting, PPV will be low despite good test",0.9,0.97,0.375,0.998,0.969
+12,"Imaging Study","Imaging","Tumor",88,180,20,12,100,200,300,0.333,0.12,"CT scan for tumor detection",0.88,0.9,0.815,0.938,0.893
+13,"Point-of-Care Test","POC","COVID-19",92,185,15,8,100,200,300,0.333,0.1,"Rapid antigen test",0.92,0.925,0.86,0.959,0.923
+14,"Laboratory Assay","Laboratory","Thyroid",78,175,25,22,100,200,300,0.333,0.18,"TSH assay for thyroid disease",0.78,0.875,0.757,0.888,0.843
+15,"Clinical Examination","Clinical","Appendicitis",65,155,45,35,100,200,300,0.333,0.25,"McBurney point tenderness for appendicitis",0.65,0.775,0.591,0.816,0.733

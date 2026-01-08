@@ -1,181 +1,109 @@
 # =============================================================================
 # .Rbuildignore for ClinicoPath Package
 # =============================================================================
-# This file specifies which files and directories should be excluded from
-# the R package build process
-
-# =============================================================================
-# R and RStudio Files
-# =============================================================================
 ^\.RProfile$
 ^\.Rproj$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-
-# =============================================================================
-# Package Development and Documentation
-# =============================================================================
+^\.Rhistory$
+^\.RData$
+^\.Ruserdata$
 ^_pkgdown\.yml$
 ^\.github/
-^docs$
-^pkgdown$
+^docs/
+^pkgdown/
 ^public/
-^img$
-^renv$
+^img/
+^renv/
 ^renv\.lock$
-
-# License files
-^LICENSE\.md$
-
-# Documentation source files
-^README\.Rmd$
-^README\.html$
-^.*Class\.Rd$
-
-# =============================================================================
-# jamovi Module Files
-# =============================================================================
-# jamovi-specific files that shouldn't be in R package
+^VIGNETTE_INTEGRATION_SUMMARY\.md$
+^function_listing\.md$
+^omv_test_data_listing\.md$
 ^jamovi/
-^build/R/
-^build/js/
 ^build/
-^.*\.jmo$
-^.*\.omv$
-^.*\.jasp$
+^jamovi_modules/
+^tr/
+^quality-reports/
+^temp/
+^temp-books/
+^delete/
+^_tododata/
+^tododata/
+^_others/
+^others/
+^pdfs/
+^data-raw/
+^datageneration/
+^tests/
+^meddecide/
+^ClinicoPathDescriptives/
+^ClinicoPathLinuxDescriptives/
+^jsurvival/
+^jbbplot/
+^jjstatsplot/
+^ClinicoPath\.code-workspace$
+^ClinicoPathJamoviModule\.code-workspace$
+^DESCRIPTION-old\.txt$
+^Rplots\.pdf$
+^doc/
+^Meta/
+^temp$
+^temp2$
+^temp3$
+^test_backups/
+^temp-books/
 
-# =============================================================================
-# Development and Build Files
-# =============================================================================
-# Module update scripts
-^_updateModules\.R$
-^_updateModules_enhanced\.R$
-^_updateModules_config\.yaml$
+# Ignore non-RDA data files in data directory
+^data/.*\.csv$
+^data/.*\.xlsx$
+^data/.*\.omv$
+^data/.*\.rds$
+^data/.*\.RDS$
+^data/.*\.RData$
+^data/.*\.png$
+^data/.*\.md$
+^data/.*\.txt$
+^data/.*\.jasp$
+^data/.*\.xls$
+^data/.*\.gif$
+^data/.*\.mp4$
+^data/.*\.R$
+
+# Other exclusions
+^.*Class\.Rd$
+^_updateModules.*\.R$
 ^updateModules_config\.yaml$
-^module-updates\.R$
-^module-updates-jjstatsplot\.R$
-
-# Data generation scripts
-^data-raw$
-^datageneration$
+^module-updates.*\.R$
 ^oncology_response_data\.R$
 ^create_test_data\.R$
-
-# Test files
-^tests$
-
-# =============================================================================
-# Vignettes and Documentation
-# =============================================================================
-# Vignette source folders (domain-specific)
-^vignettes/$
-^vignettes-ClinicoPathDescriptives$
-^vignettes-jjstatsplot$
-^vignettes-jsurvival$
-^vignettes-meddecide$
-
-# Quarto/knitr output
-^vignettes/\.quarto$
-^vignettes/*_files$
-
-# Documentation builds
-^docs_docsify$
-^docs_docute$
-^docs_pkgdown$
-
-# =============================================================================
-# Temporary and Development Files
-# =============================================================================
-# Temporary directories
-^temp/$
-^delete/$
-^_tododata/$
-^/_tododata/$
-^_tododata$
-^tododata$
-^_others$
-^others$
-^pdfs$
-
-# Development utilities
 ^preparations-1\.R$
 ^quarto\.R$
 ^test_.*\.R$
-
-# =============================================================================
-# CI/CD and Deployment
-# =============================================================================
 ^\.travis\.yml$
 ^codecov\.yml$
 ^\.gitlab-ci\.yml$
-^\.github/
 ^tic\.R$
 ^\.circleci/
 ^appveyor\.yml$
 ^codemeta\.json$
-^\.gitpod\.Dockerfile$
-^\.gitpod\.yml$
-^\.binder$
-^\.ccache$
-^\.venv$
-
-# Build tools
+^\.gitpod.*$
+^\.binder/
+^\.ccache/
+^\.venv/
 ^clang-.*$
 ^gfortran.*$
-
-# Shell scripts
 ^.*\.sh$
-
-# =============================================================================
-# Sub-module Directories
-# =============================================================================
-# These are separate repositories that shouldn't be included in main package
-^meddecide$
-^ClinicoPathDescriptives$
-^ClinicoPathLinuxDescriptives$
-^jsurvival$
-^jbbplot$
-^jjstatsplot$
-
-# =============================================================================
-# IDE and Editor Files
-# =============================================================================
-^ClinicoPath\.code-workspace$
-^ClinicoPathJamoviModule\.code-workspace$
-
-# =============================================================================
-# Obsolete and Backup Files
-# =============================================================================
-^DESCRIPTION-old\.txt$
-^NEWS\.md$
-
-# =============================================================================
-# Incomplete/Deprecated Functions
-# =============================================================================
-# Functions that are not ready for release
+^.*\.Rd2pdf.*$
 ^chisq\.multcomp\.$
 ^modellingSurvival\.$
-
-# Deprecated utility files (consolidated into utils.R)
 ^R/for-utils\.R$
 ^R/utils-pipe\.R$
 ^R/diagnostic_metrics\.R$
 ^R/for_jjstatsplot\.R$
-
-# =============================================================================
-# Generated Files
-# =============================================================================
-# Auto-generated plots and outputs
-^Rplots\.pdf$
-^.*\.png$
-^.*\.gif$
-^.*\.mp4$
-^doc$
-^Meta$
-
-temp
-temp2
-temp3
-test_backups
-jamovi_modules
-^.*\.Rd2pdf.*$
+^CLAUDE.md
+^AGENTS.md
+^GEMINI.md
+^TODO.md
+^_updateModules.R
+^updateModules_config.yaml
+^module-updates.R

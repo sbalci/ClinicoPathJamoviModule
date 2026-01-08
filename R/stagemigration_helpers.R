@@ -13,8 +13,8 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
     event_var <- "event_binary"
 
     # Fit Cox models
-    old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-    new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+    old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+    new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
     tryCatch({
         if (!is.null(checkpoint_callback)) checkpoint_callback()
@@ -106,8 +106,8 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
         bic_improvement <- bic_old - bic_new
 
         lr_test <- tryCatch({
-            combined_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~ ",
-                                                old_stage, " + ", new_stage))
+            combined_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `",
+                                                old_stage, "` + `", new_stage, "`", sep=""))
             combined_cox <- survival::coxph(combined_formula, data = data)
             lr_new <- 2 * (combined_cox$loglik[2] - new_cox$loglik[2])
             df_new <- length(coef(combined_cox)) - length(coef(new_cox))
@@ -161,8 +161,8 @@ stagemigration_compareBootstrapCIndex <- function(data, old_stage, new_stage, ti
         n <- nrow(data)
         c_diffs <- numeric(n_boot)
 
-        old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-        new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+        old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+        new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
         # Calculate original difference
         old_cox_orig <- survival::coxph(old_formula, data = data)
@@ -333,8 +333,8 @@ stagemigration_calculateNRI <- function(data, options, time_points = NULL, check
     }
     if (length(time_points) == 0) time_points <- c(12, 24, 60)
 
-    old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-    new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+    old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+    new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
     tryCatch({
         cox_original <- survival::coxph(old_formula, data = data)
@@ -435,18 +435,36 @@ stagemigration_calculateIDI <- function(data, options, checkpoint_callback = NUL
     time_var <- options$survivalTime
     event_var <- "event_binary"
 
-    old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-    new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+    old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+    new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
     tryCatch({
         old_cox <- survival::coxph(old_formula, data = data)
         new_cox <- survival::coxph(new_formula, data = data)
         
-        old_lp <- predict(old_cox, type = "lp")
-        new_lp <- predict(new_cox, type = "lp")
+        # Calculate risk at median follow-up or specified time point for IDI
+        # Standard IDI for survival should use risk estimates (1-St)
+        time_points_str <- options$nriTimePoints
+        t_ref <- 60 # Default 5-year
+        if (!is.null(time_points_str)) {
+             tp <- as.numeric(unlist(strsplit(time_points_str, "\\s*,\\s*")))
+             if (length(tp) > 0) t_ref <- tp[length(tp)] # Use last time point
+        }
         
-        old_prob <- exp(old_lp) / (1 + exp(old_lp))
-        new_prob <- exp(new_lp) / (1 + exp(new_lp))
+        # Ensure t_ref is within observed range
+        max_time <- max(data[[time_var]], na.rm = TRUE)
+        if (t_ref > max_time) t_ref <- max_time
+        
+        get_risk <- function(model, t, newdata) {
+            surv_fit <- survival::survfit(model)
+            idx <- findInterval(t, surv_fit$time)
+            S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
+            lp <- predict(model, newdata = newdata, type = "lp")
+            1 - (S0_t ^ exp(lp))
+        }
+
+        old_prob <- get_risk(old_cox, t_ref, data)
+        new_prob <- get_risk(new_cox, t_ref, data)
         
         events <- data[[event_var]]
         
@@ -515,8 +533,22 @@ stagemigration_bootstrapIDI <- function(data, old_formula, new_formula, reps = 2
             old_c <- survival::coxph(old_formula, data = boot_data)
             new_c <- survival::coxph(new_formula, data = boot_data)
             
-            old_p <- exp(predict(old_c, type="lp")) / (1 + exp(predict(old_c, type="lp")))
-            new_p <- exp(predict(new_c, type="lp")) / (1 + exp(predict(new_c, type="lp")))
+            # Use same risk estimation as main IDI
+            # Note: t_ref should ideally be passed in but we'll approximate with 60 or max
+            t_ref <- 60
+            max_t <- max(boot_data[[all.vars(old_formula)[1]]], na.rm=TRUE) 
+            if (t_ref > max_t) t_ref <- max_t
+            
+            get_risk_boot <- function(model, t, newdata) {
+                surv_fit <- survival::survfit(model)
+                idx <- findInterval(t, surv_fit$time)
+                S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
+                lp <- predict(model, newdata = newdata, type = "lp")
+                1 - (S0_t ^ exp(lp))
+            }
+            
+            old_p <- get_risk_boot(old_c, t_ref, boot_data)
+            new_p <- get_risk_boot(new_c, t_ref, boot_data)
             
             ev <- boot_data[["event_binary"]]
             old_slope <- mean(old_p[ev==1], na.rm=TRUE) - mean(old_p[ev==0], na.rm=TRUE)

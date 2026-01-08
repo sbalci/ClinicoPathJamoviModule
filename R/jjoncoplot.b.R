@@ -1088,8 +1088,8 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Optional per-sample mutation burden table (aligned with TMB panel and mutation load)
-            if (effectiveOptions$showTMB && effectiveOptions$showMutationLoad && isTRUE(effectiveOptions$showTMBTable)) {
+            # Optional per-sample mutation burden table (aligned with TMB panel)
+            if (effectiveOptions$showTMB && isTRUE(effectiveOptions$showTMBTable)) {
                 sample_tmb <- prepared_data$data %>%
                     dplyr::mutate(
                         total_mutations = rowSums(dplyr::select(., dplyr::all_of(prepared_data$selected_genes)), na.rm = TRUE)
@@ -1104,6 +1104,10 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (i in seq_len(nrow(sample_tmb))) {
                     self$results$tmbTable$addRow(rowKey = i, values = sample_tmb[i, ])
                 }
+                
+                # Explicitly store sample_tmb in the results list for R exposure
+                # We use a custom attribute or just ensure it's available in state
+                self$results$tmbTable$setState(sample_tmb)
             }
 
             # Update clinical summary with actual analysis

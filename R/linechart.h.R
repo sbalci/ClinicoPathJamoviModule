@@ -13,7 +13,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             trendline = FALSE,
             points = TRUE,
             smooth = FALSE,
-            refline = NULL,
+            refline = 0,
             reflineLabel = "Reference",
             colorPalette = "default",
             theme = "default",
@@ -72,7 +72,10 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=FALSE)
             private$..refline <- jmvcore::OptionNumber$new(
                 "refline",
-                refline)
+                refline,
+                default=0,
+                min=-999999,
+                max=999999)
             private$..reflineLabel <- jmvcore::OptionString$new(
                 "reflineLabel",
                 reflineLabel,
@@ -300,7 +303,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param points Whether to show individual data points on the line(s).
 #' @param smooth Whether to apply smoothing (loess) to the line(s).
 #' @param refline Optional reference line value (e.g., normal range,
-#'   threshold).
+#'   threshold). Set to 0 for no reference line.
 #' @param reflineLabel Label for the reference line.
 #' @param colorPalette Color palette for multiple groups.
 #' @param theme Overall theme/appearance of the plot.
@@ -334,7 +337,7 @@ linechart <- function(
     trendline = FALSE,
     points = TRUE,
     smooth = FALSE,
-    refline,
+    refline = 0,
     reflineLabel = "Reference",
     colorPalette = "default",
     theme = "default",

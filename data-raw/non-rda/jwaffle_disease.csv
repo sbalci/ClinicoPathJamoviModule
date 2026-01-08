@@ -1,0 +1,181 @@
+sample_id,disease_subtype,disease_stage,molecular_subtype,tumor_location,case_count
+DS0001,Large Cell,Stage IV,EGFR+,Middle Lobe,1
+DS0002,Small Cell,Stage II,Wild Type,Lower Lobe,1
+DS0003,Squamous Cell,Stage IV,ALK+,Upper Lobe,1
+DS0004,Small Cell,Stage III,Wild Type,Lower Lobe,1
+DS0005,Squamous Cell,Stage I,EGFR+,Lower Lobe,1
+DS0006,NA,Stage III,Wild Type,Upper Lobe,1
+DS0007,Squamous Cell,Stage IV,Wild Type,Upper Lobe,1
+DS0008,Adenocarcinoma,Stage II,KRAS+,Upper Lobe,1
+DS0009,Squamous Cell,Stage III,ALK+,Upper Lobe,1
+DS0010,Adenocarcinoma,Stage IV,KRAS+,Upper Lobe,1
+DS0011,Adenocarcinoma,Stage II,Wild Type,Middle Lobe,1
+DS0012,Adenocarcinoma,Stage II,Wild Type,Lower Lobe,1
+DS0013,Adenocarcinoma,Stage III,Wild Type,Middle Lobe,1
+DS0014,Adenocarcinoma,Stage II,Wild Type,Middle Lobe,1
+DS0015,Squamous Cell,Stage IV,Wild Type,Lower Lobe,1
+DS0016,Small Cell,Stage II,Wild Type,Lower Lobe,1
+DS0017,Small Cell,Stage II,KRAS+,Lower Lobe,1
+DS0018,Adenocarcinoma,Stage I,ROS1+,Lower Lobe,1
+DS0019,Adenocarcinoma,Stage IV,KRAS+,Upper Lobe,1
+DS0020,Large Cell,Stage IV,ALK+,Multiple,1
+DS0021,Large Cell,Stage III,Wild Type,Middle Lobe,1
+DS0022,Adenocarcinoma,Stage III,Wild Type,Upper Lobe,1
+DS0023,Small Cell,Stage III,Wild Type,Upper Lobe,1
+DS0024,Squamous Cell,Stage IV,KRAS+,Upper Lobe,1
+DS0025,Small Cell,Stage III,EGFR+,Upper Lobe,1
+DS0026,Squamous Cell,Stage II,KRAS+,Upper Lobe,1
+DS0027,Squamous Cell,Stage IV,EGFR+,Lower Lobe,1
+DS0028,Adenocarcinoma,Stage II,ALK+,Lower Lobe,1
+DS0029,Adenocarcinoma,Stage III,KRAS+,Middle Lobe,1
+DS0030,Squamous Cell,Stage II,ALK+,Upper Lobe,1
+DS0031,Neuroendocrine,Stage II,KRAS+,Middle Lobe,1
+DS0032,Adenocarcinoma,Stage I,Wild Type,Upper Lobe,1
+DS0033,Adenocarcinoma,Stage IV,KRAS+,Lower Lobe,1
+DS0034,Squamous Cell,Stage III,EGFR+,Upper Lobe,1
+DS0035,Adenocarcinoma,Stage I,Wild Type,Multiple,1
+DS0036,Adenocarcinoma,Stage III,Wild Type,Middle Lobe,1
+DS0037,Squamous Cell,Stage II,Wild Type,Upper Lobe,1
+DS0038,Neuroendocrine,Stage I,EGFR+,Upper Lobe,1
+DS0039,Small Cell,Stage III,KRAS+,Multiple,1
+DS0040,Adenocarcinoma,Stage I,Wild Type,Lower Lobe,1
+DS0041,Adenocarcinoma,Stage IV,Wild Type,Upper Lobe,1
+DS0042,Small Cell,Stage I,EGFR+,Upper Lobe,1
+DS0043,Adenocarcinoma,Stage III,KRAS+,Middle Lobe,1
+DS0044,Adenocarcinoma,Stage II,Wild Type,Middle Lobe,1
+DS0045,Adenocarcinoma,Stage I,Wild Type,Lower Lobe,1
+DS0046,Large Cell,Stage II,Wild Type,Lower Lobe,1
+DS0047,Adenocarcinoma,Stage I,KRAS+,Multiple,1
+DS0048,Large Cell,Stage II,KRAS+,Lower Lobe,1
+DS0049,Neuroendocrine,Stage I,EGFR+,Upper Lobe,1
+DS0050,NA,Stage IV,ALK+,Upper Lobe,1
+DS0051,Adenocarcinoma,Stage IV,Wild Type,Middle Lobe,1
+DS0052,Small Cell,Stage II,Wild Type,Upper Lobe,1
+DS0053,NA,Stage II,Wild Type,Lower Lobe,1
+DS0054,Large Cell,Stage III,KRAS+,Upper Lobe,1
+DS0055,Small Cell,Stage II,ALK+,Lower Lobe,1
+DS0056,Adenocarcinoma,Stage III,KRAS+,Upper Lobe,1
+DS0057,Adenocarcinoma,Stage III,KRAS+,Upper Lobe,1
+DS0058,Adenocarcinoma,Stage IV,Wild Type,Multiple,1
+DS0059,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0060,Adenocarcinoma,Stage IV,Wild Type,Lower Lobe,1
+DS0061,Squamous Cell,Stage I,KRAS+,Upper Lobe,1
+DS0062,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0063,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0064,Squamous Cell,Stage I,ALK+,Upper Lobe,1
+DS0065,Large Cell,Stage III,ROS1+,Lower Lobe,1
+DS0066,Adenocarcinoma,Stage IV,ALK+,Upper Lobe,1
+DS0067,Adenocarcinoma,Stage III,ALK+,Upper Lobe,1
+DS0068,Squamous Cell,Stage I,Wild Type,Lower Lobe,1
+DS0069,Adenocarcinoma,Stage IV,Wild Type,Lower Lobe,1
+DS0070,Neuroendocrine,Stage II,Wild Type,Upper Lobe,1
+DS0071,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0072,Adenocarcinoma,Stage II,KRAS+,Lower Lobe,1
+DS0073,Squamous Cell,Stage III,Wild Type,Upper Lobe,1
+DS0074,Squamous Cell,Stage III,Wild Type,Upper Lobe,1
+DS0075,Small Cell,Stage II,Wild Type,Lower Lobe,1
+DS0076,Squamous Cell,Stage III,Wild Type,Lower Lobe,1
+DS0077,Large Cell,Stage III,KRAS+,Lower Lobe,1
+DS0078,Adenocarcinoma,Stage II,ROS1+,Middle Lobe,1
+DS0079,Adenocarcinoma,Stage IV,KRAS+,Middle Lobe,1
+DS0080,Squamous Cell,Stage II,EGFR+,Middle Lobe,1
+DS0081,Adenocarcinoma,Stage II,EGFR+,Lower Lobe,1
+DS0082,Squamous Cell,Stage I,Wild Type,Lower Lobe,1
+DS0083,Neuroendocrine,Stage III,KRAS+,Lower Lobe,1
+DS0084,Adenocarcinoma,Stage III,Wild Type,Upper Lobe,1
+DS0085,Squamous Cell,Stage III,KRAS+,Upper Lobe,1
+DS0086,Small Cell,Stage III,Wild Type,Lower Lobe,1
+DS0087,Adenocarcinoma,Stage III,Wild Type,Upper Lobe,1
+DS0088,Large Cell,Stage IV,Wild Type,Lower Lobe,1
+DS0089,Squamous Cell,Stage IV,Wild Type,Lower Lobe,1
+DS0090,Adenocarcinoma,Stage II,Wild Type,Middle Lobe,1
+DS0091,Small Cell,Stage I,KRAS+,Lower Lobe,1
+DS0092,Squamous Cell,Stage III,EGFR+,Middle Lobe,1
+DS0093,Squamous Cell,Stage II,Wild Type,Upper Lobe,1
+DS0094,Squamous Cell,Stage II,Wild Type,Lower Lobe,1
+DS0095,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0096,Adenocarcinoma,Stage I,Wild Type,Upper Lobe,1
+DS0097,Squamous Cell,Stage IV,EGFR+,Lower Lobe,1
+DS0098,Squamous Cell,Stage I,KRAS+,Middle Lobe,1
+DS0099,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0100,Large Cell,Stage I,EGFR+,Lower Lobe,1
+DS0101,Small Cell,Stage II,Wild Type,Lower Lobe,1
+DS0102,Squamous Cell,Stage III,ROS1+,Upper Lobe,1
+DS0103,Squamous Cell,Stage I,Wild Type,Multiple,1
+DS0104,Adenocarcinoma,Stage I,KRAS+,Middle Lobe,1
+DS0105,Adenocarcinoma,Stage I,Wild Type,Lower Lobe,1
+DS0106,Large Cell,Stage III,Wild Type,Upper Lobe,1
+DS0107,Adenocarcinoma,Stage I,EGFR+,Upper Lobe,1
+DS0108,Small Cell,Stage IV,ALK+,Middle Lobe,1
+DS0109,Squamous Cell,Stage III,EGFR+,Lower Lobe,1
+DS0110,Squamous Cell,Stage I,Wild Type,Upper Lobe,1
+DS0111,Squamous Cell,Stage I,Wild Type,Upper Lobe,1
+DS0112,Large Cell,Stage II,KRAS+,Lower Lobe,1
+DS0113,Large Cell,Stage III,Wild Type,Lower Lobe,1
+DS0114,Adenocarcinoma,Stage IV,Wild Type,Lower Lobe,1
+DS0115,Adenocarcinoma,Stage III,Wild Type,Lower Lobe,1
+DS0116,Adenocarcinoma,Stage III,Wild Type,Upper Lobe,1
+DS0117,Large Cell,Stage I,EGFR+,Lower Lobe,1
+DS0118,Large Cell,Stage II,KRAS+,Lower Lobe,1
+DS0119,Large Cell,Stage III,KRAS+,Lower Lobe,1
+DS0120,Adenocarcinoma,Stage II,ALK+,Upper Lobe,1
+DS0121,Small Cell,Stage IV,Wild Type,Upper Lobe,1
+DS0122,Squamous Cell,Stage IV,EGFR+,Middle Lobe,1
+DS0123,Adenocarcinoma,Stage II,Wild Type,Middle Lobe,1
+DS0124,Small Cell,Stage II,ALK+,Upper Lobe,1
+DS0125,Small Cell,Stage III,Wild Type,Lower Lobe,1
+DS0126,Squamous Cell,Stage III,Wild Type,Upper Lobe,1
+DS0127,Squamous Cell,Stage III,EGFR+,Lower Lobe,1
+DS0128,Small Cell,Stage III,EGFR+,Upper Lobe,1
+DS0129,Squamous Cell,Stage IV,EGFR+,Upper Lobe,1
+DS0130,Neuroendocrine,Stage III,Wild Type,Upper Lobe,1
+DS0131,Adenocarcinoma,Stage III,Wild Type,Upper Lobe,1
+DS0132,Large Cell,Stage II,Wild Type,Upper Lobe,1
+DS0133,Squamous Cell,Stage II,Wild Type,Upper Lobe,1
+DS0134,Adenocarcinoma,Stage IV,Wild Type,Lower Lobe,1
+DS0135,Squamous Cell,Stage II,EGFR+,Lower Lobe,1
+DS0136,NA,Stage IV,ALK+,Upper Lobe,1
+DS0137,Adenocarcinoma,Stage III,Wild Type,Lower Lobe,1
+DS0138,Adenocarcinoma,Stage II,KRAS+,Multiple,1
+DS0139,Adenocarcinoma,Stage II,EGFR+,Multiple,1
+DS0140,Adenocarcinoma,Stage II,Wild Type,Lower Lobe,1
+DS0141,Squamous Cell,Stage II,Wild Type,Upper Lobe,1
+DS0142,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0143,Small Cell,Stage III,EGFR+,Upper Lobe,1
+DS0144,Squamous Cell,Stage IV,ROS1+,Lower Lobe,1
+DS0145,Adenocarcinoma,Stage I,ROS1+,Upper Lobe,1
+DS0146,Neuroendocrine,Stage II,Wild Type,Upper Lobe,1
+DS0147,Squamous Cell,Stage I,NA,Lower Lobe,1
+DS0148,Adenocarcinoma,Stage III,KRAS+,Upper Lobe,1
+DS0149,Adenocarcinoma,Stage III,Wild Type,Middle Lobe,1
+DS0150,Adenocarcinoma,Stage III,Wild Type,Lower Lobe,1
+DS0151,Squamous Cell,Stage I,ALK+,Upper Lobe,1
+DS0152,Squamous Cell,Stage III,NA,Lower Lobe,1
+DS0153,Squamous Cell,Stage I,Wild Type,Upper Lobe,1
+DS0154,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0155,Squamous Cell,Stage III,NA,Lower Lobe,1
+DS0156,Adenocarcinoma,Stage II,Wild Type,Upper Lobe,1
+DS0157,Adenocarcinoma,Stage IV,Wild Type,Lower Lobe,1
+DS0158,Adenocarcinoma,Stage I,KRAS+,Multiple,1
+DS0159,Small Cell,Stage I,ALK+,Multiple,1
+DS0160,Large Cell,Stage II,Wild Type,Lower Lobe,1
+DS0161,Adenocarcinoma,Stage I,Wild Type,Multiple,1
+DS0162,Squamous Cell,Stage III,ROS1+,Middle Lobe,1
+DS0163,Adenocarcinoma,Stage III,NA,Lower Lobe,1
+DS0164,NA,Stage III,Wild Type,Middle Lobe,1
+DS0165,Adenocarcinoma,Stage II,Wild Type,Lower Lobe,1
+DS0166,Squamous Cell,Stage II,Wild Type,Multiple,1
+DS0167,Small Cell,Stage II,Wild Type,Upper Lobe,1
+DS0168,Neuroendocrine,Stage I,KRAS+,Upper Lobe,1
+DS0169,Small Cell,Stage III,Wild Type,Upper Lobe,1
+DS0170,Large Cell,Stage II,Wild Type,Multiple,1
+DS0171,Squamous Cell,Stage IV,KRAS+,Middle Lobe,1
+DS0172,Adenocarcinoma,Stage III,KRAS+,Upper Lobe,1
+DS0173,Adenocarcinoma,Stage III,EGFR+,Upper Lobe,1
+DS0174,Adenocarcinoma,Stage III,Wild Type,Middle Lobe,1
+DS0175,Squamous Cell,Stage II,KRAS+,Multiple,1
+DS0176,Squamous Cell,Stage II,Wild Type,Middle Lobe,1
+DS0177,Small Cell,Stage II,Wild Type,Lower Lobe,1
+DS0178,Squamous Cell,Stage III,Wild Type,Lower Lobe,1
+DS0179,Adenocarcinoma,Stage II,KRAS+,Upper Lobe,1
+DS0180,Adenocarcinoma,Stage II,NA,Middle Lobe,1

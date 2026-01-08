@@ -1,0 +1,6 @@
+"PatientID","StartTime","EndTime","Response","Milestone1","Milestone2","Milestone3","EventVar","EventTime","Group","Censored"
+"PT001",0,90,"CR",0,30,60,"AE Grade 2",15,"A",1
+"PT002",0,180,"PR",0,42,90,"None",NA,"B",1
+"PT003",0,45,"PD",0,21,NA,"AE Grade 3",10,"A",0
+"PT004",0,270,"SD",0,56,120,"AE Grade 1",80,"B",1
+"PT005",0,150,"PR",0,35,90,"None",NA,"A",1

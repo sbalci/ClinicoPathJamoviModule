@@ -1,0 +1,2 @@
+"test_name","condition","setting","sample_size","TP","TN","FP","FN","study_prevalence","population_prevalence","expected_sensitivity","expected_specificity","expected_ppv","notes"
+"PKU Screening Test","Phenylketonuria","Newborn Screening Program",10000,9,9890,100,1,0.001,1e-04,0.9,0.99,0.083,"Demonstrates that PPV is low even with excellent test when disease is rare"

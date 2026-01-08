@@ -1,0 +1,201 @@
+sample_id,disease_stage,biomarker,expression_level,expression_score,tumor_type
+BM0001,Early Stage,EGFR,Negative,0,Small Cell
+BM0002,Metastatic,PD-L1,High,66.83648049265433,Small Cell
+BM0003,Metastatic,EGFR,High,85.89515745845775,Adenocarcinoma
+BM0004,Early Stage,HER2,Low,32.753303680466175,Adenocarcinoma
+BM0005,Early Stage,PD-L1,Moderate,62.12160730862702,Adenocarcinoma
+BM0006,Early Stage,PD-L1,Negative,4.613561914894268,Small Cell
+BM0007,Locally Advanced,EGFR,Low,26.227410115799827,Adenocarcinoma
+BM0008,Metastatic,ALK,NA,54.978669343330736,Squamous Cell
+BM0009,Early Stage,ROS1,Low,32.64270401412555,Small Cell
+BM0010,Metastatic,HER2,Moderate,66.71477836814579,Adenocarcinoma
+BM0011,Early Stage,PD-L1,Moderate,71.19375902761256,Adenocarcinoma
+BM0012,Metastatic,PD-L1,High,72.25003828916012,Adenocarcinoma
+BM0013,Metastatic,ALK,Low,23.829793935903314,Squamous Cell
+BM0014,Locally Advanced,HER2,Moderate,39.311948696091555,Adenocarcinoma
+BM0015,Metastatic,PD-L1,High,62.85635143101112,Adenocarcinoma
+BM0016,Locally Advanced,PD-L1,High,84.57458215972346,Adenocarcinoma
+BM0017,Early Stage,PD-L1,Low,33.6038548642839,Small Cell
+BM0018,Locally Advanced,PD-L1,Low,21.09774530403378,Adenocarcinoma
+BM0019,Early Stage,ALK,Negative,NA,Adenocarcinoma
+BM0020,Early Stage,ALK,Low,19.253322884126447,Adenocarcinoma
+BM0021,Metastatic,EGFR,Moderate,41.96094691320661,Adenocarcinoma
+BM0022,Metastatic,HER2,High,75.97016939094397,Squamous Cell
+BM0023,Locally Advanced,PD-L1,Low,28.770492685653785,Small Cell
+BM0024,Early Stage,HER2,Negative,4.180535458860604,Small Cell
+BM0025,Locally Advanced,HER2,Low,29.571899772854586,Small Cell
+BM0026,Metastatic,HER2,High,82.06916921065738,Adenocarcinoma
+BM0027,Early Stage,PD-L1,Low,24.72512477135327,Adenocarcinoma
+BM0028,Metastatic,ROS1,High,92.00042196500542,Adenocarcinoma
+BM0029,Metastatic,HER2,High,NA,Small Cell
+BM0030,Early Stage,PD-L1,Low,34.81088187940698,Adenocarcinoma
+BM0031,Locally Advanced,EGFR,Negative,3.6010454198254553,Squamous Cell
+BM0032,Locally Advanced,HER2,Moderate,60.15854567983324,Adenocarcinoma
+BM0033,Metastatic,PD-L1,Negative,9.993767448747171,Adenocarcinoma
+BM0034,Early Stage,HER2,Negative,1.46143269539174,Squamous Cell
+BM0035,Early Stage,PD-L1,Low,33.52034292295214,Adenocarcinoma
+BM0036,Locally Advanced,PD-L1,Low,18.20843090618573,Adenocarcinoma
+BM0037,Metastatic,PD-L1,Moderate,55.082658986531676,Adenocarcinoma
+BM0038,Early Stage,ROS1,Moderate,67.82470437348677,Squamous Cell
+BM0039,Locally Advanced,EGFR,Negative,4.058165855405419,Adenocarcinoma
+BM0040,Locally Advanced,EGFR,Low,31.925585835221458,Squamous Cell
+BM0041,Early Stage,ALK,Negative,3.85475724829418,Adenocarcinoma
+BM0042,Early Stage,EGFR,Low,29.980922409532106,Adenocarcinoma
+BM0043,Early Stage,ROS1,Moderate,61.23403238144889,Adenocarcinoma
+BM0044,Early Stage,HER2,High,70.73911476094958,Squamous Cell
+BM0045,Metastatic,PD-L1,High,81.50809814427747,Small Cell
+BM0046,Locally Advanced,HER2,Negative,4.555030085486016,Small Cell
+BM0047,Metastatic,PD-L1,Low,13.389153655680637,Small Cell
+BM0048,Early Stage,ALK,Moderate,79.91832353242276,Squamous Cell
+BM0049,Early Stage,PD-L1,Low,29.371329695732733,Squamous Cell
+BM0050,Locally Advanced,PD-L1,Negative,6.192251832004253,Adenocarcinoma
+BM0051,Locally Advanced,EGFR,Negative,9.858946206774894,Adenocarcinoma
+BM0052,Metastatic,ROS1,Low,20.41901974586917,Small Cell
+BM0053,Metastatic,PD-L1,High,77.26482386419175,Small Cell
+BM0054,Locally Advanced,HER2,Negative,3.651574883350654,Adenocarcinoma
+BM0055,Metastatic,EGFR,Low,32.402881705949916,Adenocarcinoma
+BM0056,Early Stage,HER2,Low,24.83575162305657,Adenocarcinoma
+BM0057,Early Stage,EGFR,Moderate,57.55815506014575,Adenocarcinoma
+BM0058,Early Stage,PD-L1,Negative,NA,Adenocarcinoma
+BM0059,Metastatic,EGFR,Low,30.317223762729345,Squamous Cell
+BM0060,Metastatic,ALK,Moderate,55.648319065858935,Adenocarcinoma
+BM0061,Locally Advanced,PD-L1,High,83.29121052786616,Adenocarcinoma
+BM0062,Early Stage,PD-L1,Negative,6.117245999364034,Squamous Cell
+BM0063,Early Stage,HER2,NA,24.07032711287023,Small Cell
+BM0064,Locally Advanced,PD-L1,Moderate,52.82445060394706,Squamous Cell
+BM0065,Locally Advanced,EGFR,High,NA,Small Cell
+BM0066,Locally Advanced,PD-L1,Moderate,57.16916703935264,Squamous Cell
+BM0067,Early Stage,ALK,Negative,7.494785467825029,Adenocarcinoma
+BM0068,Locally Advanced,EGFR,Negative,8.382125719741872,Small Cell
+BM0069,Locally Advanced,PD-L1,High,69.94499723523789,Squamous Cell
+BM0070,Locally Advanced,PD-L1,Low,16.187740680831716,Squamous Cell
+BM0071,Metastatic,EGFR,Negative,5.118338638931272,Adenocarcinoma
+BM0072,Locally Advanced,PD-L1,Low,30.458559816072395,Adenocarcinoma
+BM0073,Early Stage,EGFR,Low,21.06983483191068,Large Cell
+BM0074,Early Stage,EGFR,Low,54.59494721297999,Adenocarcinoma
+BM0075,Locally Advanced,HER2,Negative,4.501082005475348,Adenocarcinoma
+BM0076,Locally Advanced,HER2,Moderate,63.73814296676232,Large Cell
+BM0077,Early Stage,HER2,Negative,7.343373474874019,Adenocarcinoma
+BM0078,Early Stage,PD-L1,Low,24.33539659212382,Adenocarcinoma
+BM0079,Early Stage,HER2,Moderate,40.3611794022688,Small Cell
+BM0080,Locally Advanced,ROS1,Negative,5.402095041365572,Squamous Cell
+BM0081,Metastatic,PD-L1,High,71.51289390843556,Adenocarcinoma
+BM0082,Locally Advanced,ALK,High,87.99104581092222,Large Cell
+BM0083,Early Stage,EGFR,NA,20.751247034155625,Adenocarcinoma
+BM0084,Locally Advanced,PD-L1,Negative,2.617579844865133,Adenocarcinoma
+BM0085,Locally Advanced,HER2,Negative,3.7696293838361465,Adenocarcinoma
+BM0086,Metastatic,HER2,Moderate,62.36936827002553,Adenocarcinoma
+BM0087,Early Stage,EGFR,Negative,4.599228410512763,Squamous Cell
+BM0088,Locally Advanced,EGFR,Negative,5.008386465721631,Small Cell
+BM0089,Locally Advanced,EGFR,Moderate,52.79295041220619,Adenocarcinoma
+BM0090,Metastatic,ALK,Low,26.978457890113706,Adenocarcinoma
+BM0091,Early Stage,PD-L1,High,61.541057843736866,Adenocarcinoma
+BM0092,Metastatic,ALK,Negative,3.279863952187007,Small Cell
+BM0093,Metastatic,PD-L1,High,59.55588617749849,Squamous Cell
+BM0094,Early Stage,PD-L1,Negative,0,Large Cell
+BM0095,Metastatic,HER2,High,88.95158202081053,Adenocarcinoma
+BM0096,Locally Advanced,ALK,Low,4.938727342988265,Adenocarcinoma
+BM0097,Metastatic,HER2,High,76.3951651451124,Adenocarcinoma
+BM0098,Metastatic,HER2,Moderate,NA,Adenocarcinoma
+BM0099,Locally Advanced,PD-L1,High,91.69023014943124,Large Cell
+BM0100,Early Stage,HER2,Negative,5.639968433085578,Squamous Cell
+BM0101,Locally Advanced,PD-L1,High,80.57906497893957,Adenocarcinoma
+BM0102,Early Stage,PD-L1,Moderate,43.23428115599717,Adenocarcinoma
+BM0103,Early Stage,ALK,Low,29.683002674687707,Adenocarcinoma
+BM0104,Early Stage,PD-L1,Negative,1.9580604895060187,Adenocarcinoma
+BM0105,Metastatic,PD-L1,High,73.26254249974494,Squamous Cell
+BM0106,Metastatic,ROS1,Low,28.927093002324163,Adenocarcinoma
+BM0107,Locally Advanced,PD-L1,Negative,6.7024587948844525,Adenocarcinoma
+BM0108,Metastatic,ALK,Low,21.11917847502164,Adenocarcinoma
+BM0109,Metastatic,ROS1,NA,18.132760238650054,Squamous Cell
+BM0110,Early Stage,ALK,Negative,9.24814639736304,Squamous Cell
+BM0111,Metastatic,ROS1,High,71.8934231491303,Small Cell
+BM0112,Early Stage,HER2,Low,39.18012226269572,Squamous Cell
+BM0113,Metastatic,PD-L1,Moderate,61.42071130727454,Squamous Cell
+BM0114,Metastatic,PD-L1,Low,26.842854270723016,Squamous Cell
+BM0115,Locally Advanced,HER2,High,90.21848314913295,Adenocarcinoma
+BM0116,Early Stage,HER2,Negative,6.862571396275455,Adenocarcinoma
+BM0117,Locally Advanced,ALK,Negative,13.538536459974958,Adenocarcinoma
+BM0118,Locally Advanced,ALK,High,88.23864713582009,Adenocarcinoma
+BM0119,Early Stage,ROS1,Low,48.857326572627365,Adenocarcinoma
+BM0120,Locally Advanced,HER2,Low,12.108931336922707,Squamous Cell
+BM0121,Metastatic,HER2,Negative,0,Small Cell
+BM0122,Metastatic,HER2,Moderate,64.42992286670412,Small Cell
+BM0123,Metastatic,HER2,Negative,5.094764862965467,Squamous Cell
+BM0124,Early Stage,ROS1,Moderate,56.4981563747994,Small Cell
+BM0125,Early Stage,ROS1,Low,21.14966548207567,Squamous Cell
+BM0126,Locally Advanced,ALK,Negative,4.717906081931673,Squamous Cell
+BM0127,Early Stage,HER2,Low,19.89778576516023,Squamous Cell
+BM0128,Locally Advanced,HER2,Low,NA,Squamous Cell
+BM0129,Early Stage,PD-L1,Moderate,52.395513640456315,Adenocarcinoma
+BM0130,Locally Advanced,PD-L1,Low,33.38983253069876,Small Cell
+BM0131,Metastatic,PD-L1,High,63.13997637023073,Small Cell
+BM0132,Early Stage,ALK,High,100,Adenocarcinoma
+BM0133,Metastatic,HER2,Negative,7.630044416831952,Large Cell
+BM0134,Early Stage,PD-L1,Negative,5.9386018374854395,Small Cell
+BM0135,Locally Advanced,PD-L1,High,81.19972295733133,Squamous Cell
+BM0136,Early Stage,PD-L1,Negative,13.38785328303183,Adenocarcinoma
+BM0137,Locally Advanced,PD-L1,High,100,Adenocarcinoma
+BM0138,Early Stage,PD-L1,Moderate,52.913350783509024,Adenocarcinoma
+BM0139,Locally Advanced,ALK,NA,47.85875472444477,Squamous Cell
+BM0140,Locally Advanced,EGFR,High,85.39955735912551,Small Cell
+BM0141,Early Stage,PD-L1,NA,26.109549595811192,Squamous Cell
+BM0142,Early Stage,PD-L1,Negative,7.624425095938066,Squamous Cell
+BM0143,Locally Advanced,HER2,Negative,5.025209288560509,Squamous Cell
+BM0144,Locally Advanced,EGFR,Negative,5.855691523259969,Adenocarcinoma
+BM0145,Locally Advanced,PD-L1,Low,25.382181967176493,Adenocarcinoma
+BM0146,Locally Advanced,PD-L1,Low,21.968353456480806,Small Cell
+BM0147,Locally Advanced,ROS1,Moderate,65.76401275953376,Adenocarcinoma
+BM0148,Early Stage,EGFR,Negative,12.64978249225804,Small Cell
+BM0149,Locally Advanced,ALK,Moderate,57.830682972467656,Adenocarcinoma
+BM0150,Metastatic,HER2,High,90.400107004144445,Squamous Cell
+BM0151,Metastatic,PD-L1,Low,20.067334153259736,Squamous Cell
+BM0152,Early Stage,PD-L1,Negative,7.671021101129957,Squamous Cell
+BM0153,Locally Advanced,HER2,Negative,2.2169013539359015,Adenocarcinoma
+BM0154,Early Stage,HER2,Moderate,69.5267199808594,Adenocarcinoma
+BM0155,Locally Advanced,PD-L1,Low,43.77418992913455,Squamous Cell
+BM0156,Metastatic,EGFR,Low,26.446931263547103,Small Cell
+BM0157,Early Stage,HER2,Low,17.424333548900073,Adenocarcinoma
+BM0158,Early Stage,ROS1,Low,39.29757596218269,Small Cell
+BM0159,Early Stage,EGFR,Negative,0,Adenocarcinoma
+BM0160,Early Stage,EGFR,Low,22.508857036892987,Adenocarcinoma
+BM0161,Early Stage,HER2,Moderate,56.11748249562177,Large Cell
+BM0162,Early Stage,HER2,Negative,3.5073005182438943,Squamous Cell
+BM0163,Early Stage,ALK,Low,34.801000254391106,Small Cell
+BM0164,Metastatic,HER2,Low,24.901865076743785,Squamous Cell
+BM0165,Locally Advanced,EGFR,Moderate,48.40345113574948,Large Cell
+BM0166,Early Stage,HER2,Low,31.09371984178295,Adenocarcinoma
+BM0167,Metastatic,EGFR,High,100,Squamous Cell
+BM0168,Locally Advanced,PD-L1,Low,29.103339597201973,Small Cell
+BM0169,Locally Advanced,EGFR,Low,26.618512158270576,Large Cell
+BM0170,Early Stage,HER2,Negative,7.536962352381971,Adenocarcinoma
+BM0171,Metastatic,HER2,High,84.49411299252365,Adenocarcinoma
+BM0172,Metastatic,EGFR,Negative,3.547896606780377,Squamous Cell
+BM0173,Metastatic,PD-L1,Negative,2.3804324451044288,Small Cell
+BM0174,Metastatic,EGFR,Low,19.404054012439108,Adenocarcinoma
+BM0175,Metastatic,HER2,Negative,3.268451650984738,Large Cell
+BM0176,Early Stage,EGFR,Moderate,49.63712307503969,Adenocarcinoma
+BM0177,Metastatic,HER2,High,83.05034255988457,Large Cell
+BM0178,Early Stage,ROS1,Low,19.473216362622566,Adenocarcinoma
+BM0179,Early Stage,ROS1,Low,32.47148045883158,Adenocarcinoma
+BM0180,Metastatic,ALK,Moderate,59.81621536881885,Squamous Cell
+BM0181,Metastatic,PD-L1,High,69.78107784673145,Adenocarcinoma
+BM0182,Metastatic,ROS1,Moderate,69.15129143337289,Adenocarcinoma
+BM0183,Early Stage,PD-L1,Low,31.264976338196988,Squamous Cell
+BM0184,Early Stage,ROS1,High,91.37067801474134,Adenocarcinoma
+BM0185,Locally Advanced,HER2,High,73.07024926644505,Adenocarcinoma
+BM0186,Locally Advanced,HER2,Low,20.055669938613747,Adenocarcinoma
+BM0187,Early Stage,ROS1,Low,18.103267012064922,Adenocarcinoma
+BM0188,Locally Advanced,HER2,Low,19.838755198396427,Squamous Cell
+BM0189,Locally Advanced,PD-L1,Moderate,48.90066153769956,Adenocarcinoma
+BM0190,Early Stage,HER2,Negative,2.5720991487412963,Adenocarcinoma
+BM0191,Metastatic,HER2,Negative,6.575325614468472,Squamous Cell
+BM0192,Locally Advanced,PD-L1,High,81.23012358106634,Squamous Cell
+BM0193,Early Stage,ALK,Moderate,36.99226527131506,Small Cell
+BM0194,Early Stage,PD-L1,Low,18.929762115871178,Small Cell
+BM0195,Early Stage,EGFR,Moderate,53.94878391066121,Adenocarcinoma
+BM0196,Early Stage,HER2,Negative,4.778547696348873,Small Cell
+BM0197,Early Stage,PD-L1,Negative,3.6168796966437573,Small Cell
+BM0198,Early Stage,PD-L1,High,90.3500381729208,Adenocarcinoma
+BM0199,Early Stage,ROS1,Negative,3.4202095951209155,Adenocarcinoma
+BM0200,Early Stage,EGFR,Moderate,61.534477315946475,Adenocarcinoma

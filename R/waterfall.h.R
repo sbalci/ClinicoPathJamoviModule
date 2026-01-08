@@ -681,9 +681,11 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Treatment Response Analysis
 #'
 #' Creates waterfall and spider plots to analyze tumor response data following 
-#' RECIST criteria. Supports both raw tumor measurements and pre-calculated 
-#' percentage changes. Provides comprehensive response analysis including ORR, 
-#' DCR, and person-time metrics.
+#' RECIST criteria.
+#' 
+#' Supports both raw tumor measurements and pre-calculated percentage changes.
+#' Provides comprehensive response analysis including ORR, DCR, and 
+#' person-time metrics.
 #' 
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers (e.g., PT001,

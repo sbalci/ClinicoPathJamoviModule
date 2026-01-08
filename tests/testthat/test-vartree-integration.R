@@ -525,6 +525,13 @@ test_that("percvar level must exist in data", {
             vars = c("group"),
             percvar = "outcome",
             percvarLevel = "Maybe", # not present
+            summaryvar = NULL,
+            prunebelow = NULL,
+            pruneLevel1 = NULL,
+            pruneLevel2 = NULL,
+            follow = NULL,
+            followLevel1 = NULL,
+            followLevel2 = NULL,
             pct = TRUE
         ),
         "level is not present"

@@ -1,0 +1,201 @@
+"patient_id","outcome","treatment","stage","biomarker_status","age","tumor_size","psa_level"
+"PT001","Dead","Treatment A","Early","Positive",70,4.7,2.60802470513757
+"PT002","Dead","Control","Early","Negative",67,4.6,7.74373362206191
+"PT003","Alive","Treatment B","Early","Positive",63,3.6,7.3823358103207
+"PT004","Dead","Control","Advanced","Negative",89,4.7,7.34081354600067
+"PT005","Alive","Treatment A","Advanced","Positive",59,4.9,10.3189709122812
+"PT006","Alive","Treatment A","Advanced","Positive",59,3.7,7.34056744722084
+"PT007","Dead","Treatment A","Early","Positive",46,5.8,10.8919448912664
+"PT008","Alive","Treatment A","Early","Negative",65,6.1,2.70373008802861
+"PT009","Alive","Treatment B","Advanced","Positive",76,3,4.20346738483747
+"PT010","Dead","Treatment B","Early","Negative",40,2.8,8.79690351083104
+"PT011","Alive","Treatment A","Early","Negative",62,4.8,6.1938121846664
+"PT012","Dead","Control","Advanced","Negative",51,2.6,11.8507042827534
+"PT013","Dead","Treatment A","Early","Negative",82,3.3,4.4711250846138
+"PT014","Alive","Control","Early","Positive",81,5.2,10.6116384550317
+"PT015","Alive","Treatment A","Early","Negative",69,3.1,5.2887590250093
+"PT016","Dead","Control","Advanced","Positive",82,1.1,4.23540901503628
+"PT017","Dead","Control","Early","Positive",55,5,6.22514917124912
+"PT018","Alive","Control","Early","Positive",76,1.6,7.57527505467481
+"PT019","Dead","Treatment B","Advanced","Negative",58,2,3.99945866910256
+"PT020","Alive","Treatment A","Advanced","Positive",69,-0.5,5.04297933126494
+"PT021","Dead","Treatment A","Early","Positive",61,5.2,3.96263405359361
+"PT022","Alive","Treatment A","Early","Negative",62,4.4,12.2850980704008
+"PT023","Dead","Control","Early","Positive",72,4.7,10.6100993037363
+"PT024","Dead","Control","Advanced","Negative",49,5.3,4.40939032431736
+"PT025","Alive","Treatment B","Early","Positive",62,3.9,9.76371537896586
+"PT026","Alive","Treatment A","Advanced","Negative",67,2.3,6.50264676379371
+"PT027","Alive","Treatment A","Early","Positive",60,4.8,4.23466457300561
+"PT028","Dead","Treatment B","Early","Negative",66,6,9.12117578716409
+"PT029","Alive","Treatment B","Advanced","Negative",61,1.7,6.28725673284908
+"PT030","Dead","Control","Early","Positive",84,3.1,11.474072796061
+"PT031","Dead","Treatment B","Advanced","Negative",74,3.6,6.70308720147765
+"PT032","Dead","Treatment A","Early","Negative",101,2.1,13.3835653933413
+"PT033","Alive","Control","Advanced","Negative",55,5,5.72657570632155
+"PT034","Alive","Treatment B","Early","Negative",75,3.1,8.2463774375567
+"PT035","Alive","Treatment B","Early","Positive",90,5.9,8.8919574481501
+"PT036","Dead","Treatment A","Early","Positive",69,4.1,8.49564939741348
+"PT037","Dead","Treatment B","Advanced","Positive",52,5.1,8.17410490182128
+"PT038","Alive","Control","Early","Positive",53,6.3,7.34119568177637
+"PT039","Dead","Control","Advanced","Negative",65,4.4,7.06086451784716
+"PT040","Alive","Control","Early","Negative",81,5.6,14.6218309529397
+"PT041","Alive","Treatment A","Early","Negative",74,4.3,11.6355525323612
+"PT042","Alive","Control","Early","Positive",39,1.7,5.44695051911848
+"PT043","Alive","Treatment B","Advanced","Negative",57,4,14.8532487239198
+"PT044","Dead","Treatment A","Early","Positive",65,5.1,7.9438590739858
+"PT045","Alive","Treatment B","Early","Negative",48,4.7,5.36392838454964
+"PT046","Dead","Control","Early","Positive",73,3.7,8.04379615048012
+"PT047","Dead","Control","Early","Positive",35,2.2,6.83055723261795
+"PT048","Alive","Control","Early","Negative",67,5,7.77155130242281
+"PT049","Dead","Control","Early","Negative",60,2.6,4.54170695617321
+"PT050","Dead","Control","Advanced","Negative",59,2.1,4.90417735018526
+"PT051","Alive","Treatment A","Early","Negative",62,4.9,14.6063955550399
+"PT052","Alive","Treatment B","Advanced","Positive",69,2.2,11.9494525458534
+"PT053","Alive","Treatment B","Early","Negative",70,4.4,4.74996743768785
+"PT054","Dead","Treatment B","Early","Positive",62,4,4.71125318802212
+"PT055","Dead","Control","Advanced","Positive",42,2,17.4906519933169
+"PT056","Dead","Control","Early","Negative",48,5.8,19.192528852962
+"PT057","Alive","Control","Early","Negative",47,3.1,5.00996736985399
+"PT058","Dead","Treatment A","Advanced","Positive",74,5.8,3.85298190269194
+"PT059","Alive","Treatment B","Early","Positive",62,3.3,27.433025104952
+"PT060","Alive","Treatment B","Early","Negative",68,3.1,8.28804783562526
+"PT061","Alive","Control","Early","Positive",46,4,8.11224741346274
+"PT062","Dead","Treatment B","Early","Negative",59,3.5,7.67576772260913
+"PT063","Dead","Treatment A","Early","Negative",72,3.5,14.9159348298128
+"PT064","Alive","Treatment B","Early","Positive",63,2.7,6.71362391759208
+"PT065","Dead","Treatment A","Early","Negative",64,2.2,15.3282277887943
+"PT066","Alive","Treatment B","Early","Positive",64,4.9,6.61719970012177
+"PT067","Alive","Treatment B","Advanced","Positive",80,2.8,9.5121786726899
+"PT068","Dead","Control","Advanced","Positive",58,1.9,4.40725257727173
+"PT069","Alive","Control","Advanced","Positive",73,3.2,8.04649614937407
+"PT070","Alive","Control","Early","Negative",76,2.8,13.4682367580346
+"PT071","Alive","Treatment B","Advanced","Negative",51,0.7,6.80935255270273
+"PT072","Dead","Treatment A","Advanced","Positive",66,3.6,14.0305617366259
+"PT073","Alive","Control","Early","Negative",65,4.3,28.8929665624046
+"PT074","Alive","Treatment B","Advanced","Negative",77,4.4,11.8338268037067
+"PT075","Alive","Treatment B","Early","Negative",76,4.6,6.52533949251981
+"PT076","Dead","Control","Early","Positive",65,2.5,7.75423720317541
+"PT077","Alive","Control","Advanced","Negative",67,3.5,5.94787807171799
+"PT078","Alive","Control","Early","Negative",56,2.5,21.9624446592382
+"PT079","Alive","Treatment A","Advanced","Negative",63,3,1.6830543200824
+"PT080","Dead","Control","Advanced","Negative",53,2.2,7.69402550772546
+"PT081","Alive","Control","Early","Positive",53,2.3,7.80737580032029
+"PT082","Alive","Treatment A","Early","Positive",50,4.9,8.22126560002497
+"PT083","Alive","Treatment B","Early","Positive",75,3.6,3.3908824379002
+"PT084","Alive","Control","Early","Negative",78,3.6,8.2326320327453
+"PT085","Dead","Treatment A","Early","Negative",60,6.6,8.11595525296033
+"PT086","Alive","Treatment A","Early","Positive",51,3.9,13.8642150349902
+"PT087","Dead","Treatment A","Advanced","Negative",64,3.2,9.59995960309963
+"PT088","Dead","Treatment A","Advanced","Positive",92,5.1,12.9064493847586
+"PT089","Alive","Treatment B","Early","Positive",89,3.3,4.57793891791324
+"PT090","Alive","Treatment A","Early","Negative",44,6.1,6.94343917461612
+"PT091","Alive","Treatment B","Early","Positive",61,3.4,8.13250435218673
+"PT092","Dead","Treatment A","Advanced","Positive",83,3.1,8.46642740158431
+"PT093","Alive","Control","Advanced","Negative",65,2.2,5.22310873725009
+"PT094","Dead","Control","Early","Negative",84,4.5,15.4805741989033
+"PT095","Dead","Treatment B","Early","Positive",61,6.2,5.44183591973878
+"PT096","Dead","Treatment B","Early","Negative",72,3.5,3.29644631116289
+"PT097","Dead","Control","Advanced","Positive",68,4.4,9.03625713830566
+"PT098","Alive","Treatment A","Early","Positive",104,4.5,10.3013785248551
+"PT099","Dead","Control","Advanced","Positive",76,6.1,11.8468680787604
+"PT100","Alive","Treatment A","Early","Negative",51,5,4.60374269094829
+"PT101","Alive","Control","Early","Positive",58,2.4,6.52640186524144
+"PT102","Alive","Treatment A","Early","Positive",69,3,3.80296781452704
+"PT103","Alive","Control","Advanced","Positive",42,2.9,11.2726774275744
+"PT104","Alive","Treatment B","Early","Positive",43,4.2,8.79205406321171
+"PT105","Dead","Treatment A","Advanced","Negative",52,4,11.6683645281333
+"PT106","Dead","Treatment B","Advanced","Negative",61,4.6,10.0155338895692
+"PT107","Dead","Treatment A","Advanced","Negative",80,3,5.45332768145396
+"PT108","Dead","Treatment A","Early","Negative",62,3.4,8.08353304845817
+"PT109","Alive","Treatment A","Early","Negative",67,5.1,2.84566075033618
+"PT110","Alive","Treatment B","Early","Negative",64,3.9,9.50172279345405
+"PT111","Alive","Control","Early","Negative",57,3,11.9945163767187
+"PT112","Dead","Treatment B","Early","Negative",81,5.5,4.76897519075961
+"PT113","Dead","Control","Advanced","Positive",52,4,2.53955210953019
+"PT114","Alive","Treatment B","Early","Negative",62,2.6,3.45073140218448
+"PT115","Alive","Treatment A","Early","Negative",61,6.6,4.23524380729841
+"PT116","Alive","Control","Advanced","Positive",71,2.2,13.7424825060185
+"PT117","Alive","Treatment A","Advanced","Negative",84,1.3,7.40193141018466
+"PT118","Alive","Treatment A","Early","Positive",71,0.6,3.97928719691214
+"PT119","Alive","Treatment A","Advanced","Positive",82,5,9.75567882894078
+"PT120","Dead","Control","Early","Negative",74,3.2,2.48041361204211
+"PT121","Alive","Treatment B","Early","Positive",58,3.6,6.53052782923607
+"PT122","Alive","Treatment A","Advanced","Positive",66,4.4,12.8896989813099
+"PT123","Alive","Treatment A","Early","Negative",82,3.3,6.22867345462647
+"PT124","Alive","Control","Early","Positive",46,1.6,14.1925782719639
+"PT125","Dead","Treatment B","Advanced","Negative",69,1.1,18.1317026855386
+"PT126","Alive","Treatment B","Early","Positive",63,3.5,4.12094450660272
+"PT127","Dead","Treatment A","Early","Negative",76,4.3,4.1531047518602
+"PT128","Dead","Treatment B","Advanced","Negative",74,0.6,4.67753969418682
+"PT129","Alive","Control","Advanced","Positive",69,4.4,9.6250013098949
+"PT130","Dead","Treatment B","Advanced","Positive",83,4.6,11.2182224824973
+"PT131","Dead","Treatment B","Early","Positive",47,5.9,13.5253876633419
+"PT132","Alive","Control","Early","Negative",76,4.2,14.1503063308807
+"PT133","Alive","Treatment A","Advanced","Positive",46,4.3,12.6526433283173
+"PT134","Dead","Treatment A","Advanced","Positive",72,4.9,11.8212707156897
+"PT135","Dead","Control","Early","Negative",66,4,8.01798662986038
+"PT136","Dead","Treatment A","Advanced","Positive",77,3.9,4.73949561960846
+"PT137","Dead","Treatment B","Early","Positive",66,4.2,5.13931349170519
+"PT138","Alive","Control","Advanced","Positive",46,5.1,9.0593602303226
+"PT139","Dead","Treatment A","Early","Negative",41,3.4,17.1460558852376
+"PT140","Dead","Treatment B","Advanced","Positive",71,3.3,17.3395481329424
+"PT141","Dead","Control","Advanced","Negative",64,2.7,2.8205069818435
+"PT142","Alive","Control","Early","Positive",58,2.6,4.86954738030311
+"PT143","Alive","Treatment A","Early","Positive",61,4.5,15.0227581028981
+"PT144","Dead","Treatment B","Early","Negative",57,6.3,4.34030725847677
+"PT145","Dead","Control","Early","Positive",63,2.5,3.29765385884044
+"PT146","Dead","Treatment A","Early","Positive",54,3.7,9.97324038140768
+"PT147","Alive","Treatment A","Early","Positive",41,2.5,17.575086381281
+"PT148","Dead","Treatment B","Early","Positive",62,5.4,19.4384347969156
+"PT149","Alive","Treatment B","Advanced","Positive",78,3.5,9.64471684120904
+"PT150","Alive","Treatment A","Early","Negative",88,4.3,10.589181619443
+"PT151","Dead","Control","Early","Positive",65,4.5,9.77713692152837
+"PT152","Alive","Treatment B","Early","Positive",64,2.4,7.32253466809413
+"PT153","Dead","Treatment A","Advanced","Negative",77,3.8,1.36906833180612
+"PT154","Alive","Control","Early","Positive",66,3.7,10.8087027776188
+"PT155","Alive","Control","Early","Positive",60,5,6.07624297890245
+"PT156","Dead","Control","Early","Positive",44,2.2,12.2429542946909
+"PT157","Alive","Treatment A","Early","Positive",50,2.2,5.40061818900391
+"PT158","Alive","Treatment B","Early","Negative",70,5.1,3.26320980993749
+"PT159","Alive","Treatment A","Advanced","Negative",47,3.1,13.7717766273941
+"PT160","Alive","Treatment B","Early","Positive",78,3,8.09048535151558
+"PT161","Dead","Treatment A","Advanced","Negative",49,4.2,42.4213652187309
+"PT162","Alive","Treatment B","Advanced","Positive",63,3.5,11.6790420370832
+"PT163","Alive","Treatment B","Early","Positive",65,6.8,12.4815712781391
+"PT164","Alive","Control","Early","Positive",65,4.4,10.8255866722134
+"PT165","Alive","Treatment A","Early","Negative",67,4.2,5.46468407716378
+"PT166","Alive","Control","Early","Positive",72,5.4,6.13975702345365
+"PT167","Alive","Treatment B","Early","Positive",63,3.9,12.5524136421109
+"PT168","Alive","Treatment A","Early","Negative",62,4.1,12.5228536237387
+"PT169","Alive","Control","Early","Positive",67,2.4,9.88962354357855
+"PT170","Alive","Treatment B","Advanced","Negative",60,0.6,4.51189066669623
+"PT171","Dead","Treatment A","Early","Negative",83,2.2,17.1553641969947
+"PT172","Alive","Control","Advanced","Negative",39,4.2,3.73063879295905
+"PT173","Alive","Control","Early","Positive",77,2.5,5.95000955652226
+"PT174","Alive","Control","Early","Negative",62,5,23.630287239962
+"PT175","Alive","Treatment A","Advanced","Negative",70,5.1,9.6028611504558
+"PT176","Alive","Treatment A","Early","Positive",77,4.3,12.0055219711128
+"PT177","Dead","Control","Early","Positive",75,3.7,8.92170166999406
+"PT178","Alive","Treatment B","Early","Positive",57,2,4.49081096711478
+"PT179","Dead","Control","Early","Positive",84,3.5,5.48084092950349
+"PT180","Dead","Treatment B","Early","Negative",46,3.3,8.02551395771247
+"PT181","Dead","Treatment A","Early","Positive",75,5,1.70874880670373
+"PT182","Dead","Treatment B","Advanced","Positive",59,6,4.83578216224816
+"PT183","Alive","Control","Early","Positive",42,4.8,11.0153775550399
+"PT184","Alive","Treatment A","Early","Negative",43,2.3,6.36473123723548
+"PT185","Dead","Treatment A","Advanced","Negative",68,6.5,6.41214797002074
+"PT186","Dead","Treatment A","Advanced","Positive",92,5.5,11.4130752889894
+"PT187","Dead","Treatment A","Early","Negative",68,4.3,5.62838394624197
+"PT188","Dead","Treatment B","Early","Positive",79,0.7,10.118866156277
+"PT189","Alive","Control","Early","Negative",75,2.6,3.62854873576759
+"PT190","Alive","Treatment B","Advanced","Negative",57,3.9,3.99979729398826
+"PT191","Alive","Control","Early","Negative",76,5.1,3.19934864972991
+"PT192","Dead","Treatment B","Advanced","Negative",69,2.2,7.7075413149642
+"PT193","Alive","Control","Early","Positive",67,8.8,6.66544799892603
+"PT194","Alive","Treatment A","Early","Negative",77,0.2,15.1945349454865
+"PT195","Alive","Treatment A","Advanced","Negative",74,3.6,7.23629220118223
+"PT196","Dead","Treatment B","Advanced","Negative",57,3.6,14.5396185739336
+"PT197","Alive","Treatment B","Early","Negative",70,3,19.5429115078054
+"PT198","Alive","Treatment A","Advanced","Negative",54,3.5,5.78073526543036
+"PT199","Dead","Control","Advanced","Positive",73,5.1,8.97299523674151
+"PT200","Dead","Treatment A","Advanced","Negative",60,2.7,4.84309205170761

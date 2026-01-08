@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.32.71
-Date: 2026-01-03
+Version: 0.0.32.72
+Date: 2026-01-04
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -38,7 +38,6 @@ Imports:
     pammtools,
     utils,
     e1071,
-    covr,
     arsenal,
     DiagrammeRsvg,
     dplyr,
@@ -116,10 +115,8 @@ Imports:
     BayesFactor,
     effectsize,
     rstatix,
-    boot,
     FFTrees,
     knitr,
-    tiff,
     ggbeeswarm,
     ggrastr,
     waffle,
@@ -174,8 +171,6 @@ Imports:
     lme4,
     nlme,
     glmmTMB,
-    datefixR,
-    anytime,
     TidyDensity,
     mice,
     ggmice,
@@ -231,7 +226,6 @@ Imports:
     geepack,
     icenReg,
     pseudo,
-    pwr,
     rsm,
     interval,
     Icens,
@@ -251,8 +245,6 @@ Imports:
     np,
     KernSmooth,
     locfit,
-    BoomSpikeSlab,
-    rstanarm,
     MCMCglmm,
     bayesplot,
     coda,
@@ -291,7 +283,6 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests:
-    quarto,
     rmarkdown,
     randomForestSRC,
     OncoDataSets,
@@ -305,5 +296,12 @@ Suggests:
     VGAM,
     effsize,
     testthat (>= 3.0.0),
-    jmvReadWrite
+    pwr,
+    boot,
+    jmvReadWrite,
+    anytime,
+    datefixR,
+    covr,
+    BoomSpikeSlab,
+    rstanarm
 Config/testthat/edition: 3

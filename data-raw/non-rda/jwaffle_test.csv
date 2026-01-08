@@ -1,0 +1,201 @@
+patient_id,response_category,treatment,timepoint,ecog_status,patient_count
+PT0001,Stable Disease,Immunotherapy,Week 24,1,1
+PT0002,Complete Response,Chemotherapy,Week 24,0,1
+PT0003,Partial Response,Chemotherapy,Week 24,0,1
+PT0004,Stable Disease,Targeted Therapy,Week 12,2,1
+PT0005,Partial Response,Chemotherapy,Week 12,0,1
+PT0006,Partial Response,Immunotherapy,Week 12,1,1
+PT0007,Stable Disease,Chemotherapy,Week 12,0,1
+PT0008,Progressive Disease,Chemotherapy,Week 24,1,1
+PT0009,Complete Response,Immunotherapy,Week 12,1,1
+PT0010,Partial Response,Chemotherapy,Week 12,3,1
+PT0011,Stable Disease,Immunotherapy,Baseline,0,1
+PT0012,Partial Response,Chemotherapy,Baseline,3,1
+PT0013,Complete Response,Targeted Therapy,Week 12,0,1
+PT0014,Partial Response,Chemotherapy,Week 12,1,1
+PT0015,Partial Response,Targeted Therapy,Baseline,3,1
+PT0016,Stable Disease,Targeted Therapy,Week 24,3,1
+PT0017,Complete Response,Immunotherapy,Week 12,3,1
+PT0018,Complete Response,Chemotherapy,Week 24,0,1
+PT0019,Complete Response,Targeted Therapy,Baseline,1,1
+PT0020,Complete Response,Immunotherapy,Week 24,1,1
+PT0021,Partial Response,Immunotherapy,Baseline,1,1
+PT0022,Partial Response,Immunotherapy,Week 12,3,1
+PT0023,Progressive Disease,Immunotherapy,Baseline,3,1
+PT0024,Stable Disease,Chemotherapy,Week 24,1,1
+PT0025,Stable Disease,Chemotherapy,Week 24,1,1
+PT0026,Progressive Disease,Chemotherapy,Week 12,0,1
+PT0027,Partial Response,Immunotherapy,Week 24,0,1
+PT0028,Complete Response,Targeted Therapy,Week 12,2,1
+PT0029,Complete Response,Immunotherapy,Baseline,0,1
+PT0030,Stable Disease,Chemotherapy,Week 24,3,1
+PT0031,NA,Chemotherapy,Week 12,1,1
+PT0032,Progressive Disease,Chemotherapy,Week 24,0,1
+PT0033,Partial Response,Immunotherapy,Week 12,1,1
+PT0034,Stable Disease,Chemotherapy,Baseline,0,1
+PT0035,Partial Response,Targeted Therapy,Week 12,1,1
+PT0036,Stable Disease,Immunotherapy,Week 24,0,1
+PT0037,Stable Disease,Chemotherapy,Baseline,1,1
+PT0038,Partial Response,Immunotherapy,Week 24,2,1
+PT0039,Partial Response,Chemotherapy,Week 24,2,1
+PT0040,Stable Disease,Immunotherapy,Week 12,0,1
+PT0041,Partial Response,Chemotherapy,Baseline,1,1
+PT0042,Progressive Disease,Immunotherapy,Week 24,1,1
+PT0043,Stable Disease,Immunotherapy,Week 12,2,1
+PT0044,Stable Disease,Chemotherapy,Week 24,2,1
+PT0045,Stable Disease,Chemotherapy,Week 24,0,1
+PT0046,Partial Response,Chemotherapy,Week 12,0,1
+PT0047,Stable Disease,Immunotherapy,Week 12,1,1
+PT0048,Progressive Disease,Chemotherapy,Week 12,1,1
+PT0049,Stable Disease,Chemotherapy,Week 12,0,1
+PT0050,Stable Disease,Targeted Therapy,Baseline,1,1
+PT0051,Stable Disease,Chemotherapy,Week 24,1,1
+PT0052,Partial Response,Immunotherapy,Week 12,0,1
+PT0053,Partial Response,Chemotherapy,Week 12,0,1
+PT0054,Partial Response,Immunotherapy,Week 24,0,1
+PT0055,Progressive Disease,Chemotherapy,Week 12,2,1
+PT0056,Complete Response,Targeted Therapy,Baseline,2,1
+PT0057,Complete Response,Targeted Therapy,Baseline,0,1
+PT0058,Stable Disease,Chemotherapy,Week 12,0,1
+PT0059,Stable Disease,Targeted Therapy,Week 12,0,1
+PT0060,Complete Response,Targeted Therapy,Week 12,1,1
+PT0061,Stable Disease,Targeted Therapy,Baseline,1,1
+PT0062,Stable Disease,Immunotherapy,Baseline,2,1
+PT0063,Partial Response,Immunotherapy,Week 12,1,1
+PT0064,Partial Response,Chemotherapy,Week 12,1,1
+PT0065,Partial Response,Chemotherapy,Baseline,1,1
+PT0066,Complete Response,Immunotherapy,Week 24,1,1
+PT0067,Progressive Disease,Chemotherapy,Week 24,0,1
+PT0068,Partial Response,Chemotherapy,Baseline,1,1
+PT0069,Complete Response,Immunotherapy,Week 24,0,1
+PT0070,Stable Disease,Immunotherapy,Baseline,0,1
+PT0071,Stable Disease,Immunotherapy,Week 12,0,1
+PT0072,Partial Response,Chemotherapy,Week 12,0,1
+PT0073,Stable Disease,Chemotherapy,Week 12,0,1
+PT0074,Stable Disease,Chemotherapy,Baseline,1,1
+PT0075,Partial Response,Immunotherapy,Week 24,1,1
+PT0076,Complete Response,Immunotherapy,Week 24,2,1
+PT0077,Stable Disease,Chemotherapy,Week 12,1,1
+PT0078,Partial Response,Chemotherapy,Week 12,0,1
+PT0079,Stable Disease,Immunotherapy,Week 12,0,1
+PT0080,Stable Disease,Immunotherapy,Week 24,3,1
+PT0081,Stable Disease,Chemotherapy,Week 12,0,1
+PT0082,Partial Response,Immunotherapy,Week 24,3,1
+PT0083,Complete Response,Chemotherapy,Baseline,3,1
+PT0084,Stable Disease,Targeted Therapy,Week 12,1,1
+PT0085,Partial Response,Targeted Therapy,Baseline,0,1
+PT0086,Complete Response,Targeted Therapy,Week 24,1,1
+PT0087,Stable Disease,Immunotherapy,Week 12,3,1
+PT0088,Stable Disease,Immunotherapy,Week 24,0,1
+PT0089,Partial Response,Chemotherapy,Baseline,1,1
+PT0090,Partial Response,Targeted Therapy,Baseline,1,1
+PT0091,Partial Response,Immunotherapy,Week 12,1,1
+PT0092,Stable Disease,Targeted Therapy,Baseline,3,1
+PT0093,Complete Response,Chemotherapy,Week 24,0,1
+PT0094,Stable Disease,Targeted Therapy,Week 12,0,1
+PT0095,Partial Response,Targeted Therapy,Week 12,1,1
+PT0096,Stable Disease,Targeted Therapy,Week 12,1,1
+PT0097,Stable Disease,Immunotherapy,Week 24,1,1
+PT0098,Partial Response,Chemotherapy,Baseline,1,1
+PT0099,Stable Disease,Immunotherapy,Baseline,1,1
+PT0100,NA,Chemotherapy,Week 24,0,1
+PT0101,Complete Response,Chemotherapy,Week 24,1,1
+PT0102,Partial Response,Targeted Therapy,Week 24,2,1
+PT0103,Stable Disease,Immunotherapy,Baseline,1,1
+PT0104,Partial Response,Chemotherapy,Week 24,1,1
+PT0105,Stable Disease,Immunotherapy,Week 24,1,1
+PT0106,Progressive Disease,Chemotherapy,Baseline,0,1
+PT0107,Partial Response,Immunotherapy,Week 12,0,1
+PT0108,Complete Response,Immunotherapy,Week 24,0,1
+PT0109,Complete Response,Immunotherapy,Week 24,2,1
+PT0110,Partial Response,Targeted Therapy,Week 12,1,1
+PT0111,Partial Response,Immunotherapy,Week 24,0,1
+PT0112,Complete Response,Chemotherapy,Week 24,1,1
+PT0113,Partial Response,Chemotherapy,Baseline,2,1
+PT0114,Progressive Disease,Chemotherapy,Baseline,0,1
+PT0115,Partial Response,Chemotherapy,Week 24,0,1
+PT0116,Partial Response,Targeted Therapy,Week 24,1,1
+PT0117,Partial Response,Chemotherapy,Week 12,2,1
+PT0118,Stable Disease,Targeted Therapy,Baseline,3,1
+PT0119,Partial Response,Chemotherapy,Baseline,1,1
+PT0120,Progressive Disease,Immunotherapy,Week 24,1,1
+PT0121,Complete Response,Immunotherapy,Baseline,0,1
+PT0122,Progressive Disease,Immunotherapy,Week 12,0,1
+PT0123,Partial Response,Chemotherapy,Baseline,2,1
+PT0124,Complete Response,Immunotherapy,Week 12,1,1
+PT0125,Complete Response,Targeted Therapy,Baseline,3,1
+PT0126,Progressive Disease,Chemotherapy,Week 24,0,1
+PT0127,Stable Disease,Immunotherapy,Baseline,2,1
+PT0128,Partial Response,Chemotherapy,Week 24,2,1
+PT0129,Partial Response,Immunotherapy,Week 24,1,1
+PT0130,Complete Response,Chemotherapy,Week 12,1,1
+PT0131,Partial Response,Immunotherapy,Baseline,2,1
+PT0132,Progressive Disease,Chemotherapy,Week 12,0,1
+PT0133,Complete Response,Targeted Therapy,Week 24,2,1
+PT0134,Stable Disease,Immunotherapy,Week 24,0,1
+PT0135,Partial Response,Targeted Therapy,Week 12,2,1
+PT0136,Partial Response,Targeted Therapy,Week 24,0,1
+PT0137,Progressive Disease,Immunotherapy,Week 12,2,1
+PT0138,Stable Disease,Immunotherapy,Week 24,2,1
+PT0139,Complete Response,Targeted Therapy,Week 24,0,1
+PT0140,Progressive Disease,Immunotherapy,Week 24,0,1
+PT0141,Stable Disease,Targeted Therapy,Baseline,1,1
+PT0142,Complete Response,Immunotherapy,Week 12,1,1
+PT0143,Stable Disease,Chemotherapy,Week 12,1,1
+PT0144,NA,Immunotherapy,Week 24,1,1
+PT0145,Partial Response,Chemotherapy,Baseline,1,1
+PT0146,NA,Targeted Therapy,Baseline,0,1
+PT0147,Stable Disease,Immunotherapy,Week 12,1,1
+PT0148,Stable Disease,Chemotherapy,Week 12,1,1
+PT0149,Partial Response,Targeted Therapy,Week 24,3,1
+PT0150,Stable Disease,Targeted Therapy,Week 24,0,1
+PT0151,Stable Disease,Chemotherapy,Week 24,1,1
+PT0152,Progressive Disease,Chemotherapy,Baseline,1,1
+PT0153,Complete Response,Targeted Therapy,Week 12,1,1
+PT0154,Progressive Disease,Immunotherapy,Week 12,2,1
+PT0155,Partial Response,Immunotherapy,Week 12,1,1
+PT0156,Partial Response,Chemotherapy,Week 12,1,1
+PT0157,Partial Response,Immunotherapy,Baseline,0,1
+PT0158,Partial Response,Immunotherapy,Week 12,1,1
+PT0159,Stable Disease,Chemotherapy,Week 24,3,1
+PT0160,Partial Response,Chemotherapy,Week 24,1,1
+PT0161,Complete Response,Immunotherapy,Baseline,1,1
+PT0162,Stable Disease,Chemotherapy,Week 12,0,1
+PT0163,Complete Response,Targeted Therapy,Week 24,0,1
+PT0164,Partial Response,Targeted Therapy,Baseline,0,1
+PT0165,Partial Response,Immunotherapy,Week 24,0,1
+PT0166,Partial Response,Immunotherapy,Week 24,0,1
+PT0167,Stable Disease,Chemotherapy,Week 24,0,1
+PT0168,Complete Response,Targeted Therapy,Week 24,3,1
+PT0169,Stable Disease,Targeted Therapy,Baseline,3,1
+PT0170,Stable Disease,Targeted Therapy,Baseline,3,1
+PT0171,Partial Response,Targeted Therapy,Week 12,0,1
+PT0172,Partial Response,Targeted Therapy,Week 12,2,1
+PT0173,Stable Disease,Chemotherapy,Week 12,0,1
+PT0174,Complete Response,Immunotherapy,Week 24,0,1
+PT0175,Stable Disease,Chemotherapy,Week 12,1,1
+PT0176,Partial Response,Immunotherapy,Baseline,1,1
+PT0177,Complete Response,Targeted Therapy,Baseline,3,1
+PT0178,Complete Response,Targeted Therapy,Week 24,1,1
+PT0179,Partial Response,Chemotherapy,Week 12,2,1
+PT0180,Stable Disease,Chemotherapy,Week 12,1,1
+PT0181,Complete Response,Targeted Therapy,Week 24,0,1
+PT0182,NA,Targeted Therapy,Week 12,0,1
+PT0183,Partial Response,Chemotherapy,Baseline,1,1
+PT0184,Complete Response,Targeted Therapy,Week 24,2,1
+PT0185,Partial Response,Chemotherapy,Baseline,1,1
+PT0186,Partial Response,Targeted Therapy,Week 24,0,1
+PT0187,Partial Response,Immunotherapy,Week 24,0,1
+PT0188,Stable Disease,Chemotherapy,Week 24,0,1
+PT0189,NA,Chemotherapy,Week 12,0,1
+PT0190,Stable Disease,Chemotherapy,Baseline,2,1
+PT0191,Complete Response,Targeted Therapy,Week 12,3,1
+PT0192,Partial Response,Chemotherapy,Week 12,0,1
+PT0193,Partial Response,Targeted Therapy,Baseline,2,1
+PT0194,Partial Response,Chemotherapy,Week 24,0,1
+PT0195,Stable Disease,Chemotherapy,Week 12,1,1
+PT0196,Progressive Disease,Immunotherapy,Week 12,2,1
+PT0197,Complete Response,Chemotherapy,Week 24,1,1
+PT0198,Complete Response,Immunotherapy,Baseline,0,1
+PT0199,Complete Response,Immunotherapy,Week 24,3,1
+PT0200,Complete Response,Immunotherapy,Week 24,1,1

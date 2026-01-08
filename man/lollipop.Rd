@@ -9,7 +9,7 @@ lollipop(
   dep,
   group,
   useHighlight = FALSE,
-  highlight,
+  highlight = "",
   aggregation = "none",
   sortBy = "original",
   orientation = "vertical",
@@ -41,7 +41,7 @@ lollipop(
 the plot.}
 
 \item{highlight}{Specific level to highlight in the plot with different
-color/style.}
+color/style. Only used when useHighlight is TRUE.}
 
 \item{aggregation}{How to aggregate multiple values per group. Use 'Mean'
 or 'Median' for typical clinical measurements, 'Sum' for counts. 'No

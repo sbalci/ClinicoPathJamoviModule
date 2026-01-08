@@ -11,7 +11,7 @@ visualizations, export functionality, and clinical examples."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.91</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,13 +21,12 @@ visualizations, export functionality, and clinical examples."></head><body>
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../dev/index.html"><span class="fa fa-cogs"></span></a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clinical-workflow.html">Clinical Research Workflow with ClinicoPathDescriptives</a></li>
-    <li><a class="dropdown-item" href="../articles/module-development-jamovi.html">ClinicoPath Module Development Guide</a></li>
-    <li><a class="dropdown-item" href="../articles/pathology-jamovi.html">Using jamovi for the Common Statistical Analysis in Pathology</a></li>
-    <li><a class="dropdown-item" href="../articles/pkgnet-report.html">ClinicoPath Package Report, by pkgnet</a></li>
-    <li><a class="dropdown-item" href="../articles/users-of-ClinicoPath.html">Users of ClinicoPath</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-test-data" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fa-database"></span> Test Data</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-test-data"><li><a class="dropdown-item" href="../articles/test-data-catalog.html">Test Data Catalog</a></li>
+    <li><a class="dropdown-item" href="../articles/test-data-complete-catalog.html">Complete Catalog (945 files)</a></li>
+    <li><a class="dropdown-item" href="../articles/function-reference.html">Function Reference</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="http://twitter.com/serdarbalci"><span class="fa fab fa-twitter fa-lg"></span></a></li>
@@ -53,7 +52,7 @@ visualizations, export functionality, and clinical examples.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survivalpower-enhanced.html">survivalpower</a></span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">survivalpower</span><span class="op">(</span></span>
 <span>  calculation_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_size"</span>, <span class="st">"power"</span>, <span class="st">"events"</span>, <span class="st">"hazard_ratio"</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lachin_foulkes"</span>, <span class="st">"schoenfeld"</span><span class="op">)</span>, </span>
 <span>  hazard_control <span class="op">=</span> <span class="fl">0.083</span>,</span>
@@ -208,7 +207,7 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="survival.html">survival</a></code>, <code><a href="survivalcont.html">survivalcont</a></code>, <code><a href="powersurvival.html">powersurvival</a></code>,
+    <div class="dont-index"><p><code><a href="survival.html">survival</a></code>, <code><a href="survivalcont.html">survivalcont</a></code>, <code>powersurvival</code>,
 <code>survivalpower_scenarios</code></p></div>
     </div>
     <div class="section level2">
@@ -219,7 +218,7 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Oncology Phase III Trial - Sample Size Calculation</span></span></span>
-<span class="r-in"><span><span class="va">oncology_trial</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survivalpower-enhanced.html">survivalpower</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">oncology_trial</span> <span class="op">&lt;-</span> <span class="fu">survivalpower</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  calculation_type <span class="op">=</span> <span class="st">"sample_size"</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"lachin_foulkes"</span>,</span></span>
 <span class="r-in"><span>  hazard_control <span class="op">=</span> <span class="fl">0.083</span>,      <span class="co"># ~12 month median survival</span></span></span>
@@ -230,12 +229,10 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
 <span class="r-in"><span>  beta <span class="op">=</span> <span class="fl">0.1</span>,                 <span class="co"># 90% power</span></span></span>
 <span class="r-in"><span>  show_interpretation <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : Could not evaluate 'calculation_type &amp;&amp; method'</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     invalid 'x' type in 'x &amp;&amp; y'</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Could not resolve 'calculation_type &amp;&amp; method'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in survivalpower(calculation_type = "sample_size", method = "lachin_foulkes",     hazard_control = 0.083, hazard_treatment = 0.042, study_duration = 36,     accrual_duration = 24, alpha = 0.025, beta = 0.1, show_interpretation = TRUE):</span> could not find function "survivalpower"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Cardiology Trial - Events-Based Quick Calculation</span></span></span>
-<span class="r-in"><span><span class="va">cardio_trial</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survivalpower-enhanced.html">survivalpower</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">cardio_trial</span> <span class="op">&lt;-</span> <span class="fu">survivalpower</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  calculation_type <span class="op">=</span> <span class="st">"events"</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"schoenfeld"</span>,</span></span>
 <span class="r-in"><span>  hazard_ratio <span class="op">=</span> <span class="fl">0.75</span>,        <span class="co"># 25% risk reduction</span></span></span>
@@ -243,12 +240,10 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
 <span class="r-in"><span>  beta <span class="op">=</span> <span class="fl">0.2</span>,                 <span class="co"># 80% power</span></span></span>
 <span class="r-in"><span>  show_summary <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : Could not evaluate 'calculation_type &amp;&amp; method'</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     invalid 'x' type in 'x &amp;&amp; y'</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Could not resolve 'calculation_type &amp;&amp; method'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in survivalpower(calculation_type = "events", method = "schoenfeld",     hazard_ratio = 0.75, alpha = 0.025, beta = 0.2, show_summary = TRUE):</span> could not find function "survivalpower"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 3: Power Analysis with Visualization</span></span></span>
-<span class="r-in"><span><span class="va">power_analysis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survivalpower-enhanced.html">survivalpower</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">power_analysis</span> <span class="op">&lt;-</span> <span class="fu">survivalpower</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  calculation_type <span class="op">=</span> <span class="st">"power"</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"schoenfeld"</span>, </span></span>
 <span class="r-in"><span>  hazard_ratio <span class="op">=</span> <span class="fl">0.6</span>,</span></span>
@@ -256,12 +251,10 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
 <span class="r-in"><span>  show_power_plot <span class="op">=</span> <span class="cn">TRUE</span>,     <span class="co"># Show power curve</span></span></span>
 <span class="r-in"><span>  power_plot_range <span class="op">=</span> <span class="st">"50,400"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : Could not evaluate 'calculation_type &amp;&amp; method'</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     invalid 'x' type in 'x &amp;&amp; y'</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Could not resolve 'calculation_type &amp;&amp; method'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in survivalpower(calculation_type = "power", method = "schoenfeld",     hazard_ratio = 0.6, events_input = 150, show_power_plot = TRUE,     power_plot_range = "50,400"):</span> could not find function "survivalpower"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 4: Complex Study Design with Timeline</span></span></span>
-<span class="r-in"><span><span class="va">complex_study</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survivalpower-enhanced.html">survivalpower</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">complex_study</span> <span class="op">&lt;-</span> <span class="fu">survivalpower</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  calculation_type <span class="op">=</span> <span class="st">"sample_size"</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"lachin_foulkes"</span>,</span></span>
 <span class="r-in"><span>  hazard_control <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
@@ -275,12 +268,10 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
 <span class="r-in"><span>  show_timeline_plot <span class="op">=</span> <span class="cn">TRUE</span>,  <span class="co"># Show study phases</span></span></span>
 <span class="r-in"><span>  show_formulas <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : Could not evaluate 'calculation_type &amp;&amp; method'</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     invalid 'x' type in 'x &amp;&amp; y'</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Could not resolve 'calculation_type &amp;&amp; method'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in survivalpower(calculation_type = "sample_size", method = "lachin_foulkes",     hazard_control = 0.05, hazard_treatment = 0.03, study_duration = 48,     accrual_duration = 30, entry_type = "expo", gamma = 1, dropout_rate = 0.02,     allocation_ratio = 2, show_timeline_plot = TRUE, show_formulas = TRUE):</span> could not find function "survivalpower"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 5: Export for External Analysis</span></span></span>
-<span class="r-in"><span><span class="va">export_analysis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survivalpower-enhanced.html">survivalpower</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">export_analysis</span> <span class="op">&lt;-</span> <span class="fu">survivalpower</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  calculation_type <span class="op">=</span> <span class="st">"sample_size"</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"lachin_foulkes"</span>,</span></span>
 <span class="r-in"><span>  hazard_control <span class="op">=</span> <span class="fl">0.083</span>,</span></span>
@@ -291,15 +282,13 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
 <span class="r-in"><span>  export_power_curve <span class="op">=</span> <span class="cn">TRUE</span>,  <span class="co"># Export power curve</span></span></span>
 <span class="r-in"><span>  power_plot_range <span class="op">=</span> <span class="st">"200,600"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : Could not evaluate 'calculation_type &amp;&amp; method'</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     invalid 'x' type in 'x &amp;&amp; y'</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Could not resolve 'calculation_type &amp;&amp; method'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in survivalpower(calculation_type = "sample_size", method = "lachin_foulkes",     hazard_control = 0.083, hazard_treatment = 0.042, study_duration = 36,     accrual_duration = 24, export_results = TRUE, export_power_curve = TRUE,     power_plot_range = "200,600"):</span> could not find function "survivalpower"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 6: Using Pre-configured Scenarios</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">survivalpower_scenarios</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">oncology_scenario</span> <span class="op">&lt;-</span> <span class="va">survivalpower_scenarios</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>  <span class="co"># Oncology Phase III</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">scenario_analysis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/survivalpower-enhanced.html">survivalpower</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">scenario_analysis</span> <span class="op">&lt;-</span> <span class="fu">survivalpower</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  calculation_type <span class="op">=</span> <span class="st">"sample_size"</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"lachin_foulkes"</span>,</span></span>
 <span class="r-in"><span>  hazard_control <span class="op">=</span> <span class="va">oncology_scenario</span><span class="op">$</span><span class="va">Control_Hazard_Rate</span>,</span></span>
@@ -312,9 +301,7 @@ including oncology, cardiology, neurology, and rare disease studies.</p>
 <span class="r-in"><span>  dropout_rate <span class="op">=</span> <span class="va">oncology_scenario</span><span class="op">$</span><span class="va">Dropout_Rate</span>,</span></span>
 <span class="r-in"><span>  show_interpretation <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error : Could not evaluate 'calculation_type &amp;&amp; method'</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     invalid 'x' type in 'x &amp;&amp; y'</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Could not resolve 'calculation_type &amp;&amp; method'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in survivalpower(calculation_type = "sample_size", method = "lachin_foulkes",     hazard_control = oncology_scenario$Control_Hazard_Rate, hazard_treatment = oncology_scenario$Treatment_Hazard_Rate,     study_duration = oncology_scenario$Study_Duration_Months,     accrual_duration = oncology_scenario$Accrual_Duration_Months,     alpha = oncology_scenario$Alpha_Level, power = oncology_scenario$Target_Power,     allocation_ratio = oncology_scenario$Allocation_Ratio, dropout_rate = oncology_scenario$Dropout_Rate,     show_interpretation = TRUE):</span> could not find function "survivalpower"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

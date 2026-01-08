@@ -1,0 +1,26 @@
+"PatientID","StartTime","EndTime","Response","ImmunotherapyStart","FirstResponse","ConfirmedResponse","irAE","irAE_Time","PDL1_Status","Censored"
+"IM001",0,636,"PR",0,56,105,"Endocrine",486,"Low (1-49%)",1
+"IM002",0,294,"CR",0,84,93,"Endocrine",244,"Negative",1
+"IM003",0,392,"CR",0,59,90,"None",NA,"High (≥50%)",1
+"IM004",0,471,"PR",0,68,102,"None",NA,"Low (1-49%)",1
+"IM005",0,605,"PR",0,61,111,"Endocrine",379,"Negative",1
+"IM006",0,393,"PR",0,77,101,"None",NA,"Low (1-49%)",1
+"IM007",0,617,"PR",0,67,108,"None",NA,"Low (1-49%)",1
+"IM008",0,721,"CR",0,84,95,"GI",129,"Negative",1
+"IM009",0,648,"PR",0,62,93,"None",NA,"Low (1-49%)",1
+"IM010",0,284,"CR",0,67,92,"None",NA,"Low (1-49%)",1
+"IM011",0,133,"SD",0,60,NA,"None",NA,"High (≥50%)",0
+"IM012",0,147,"PR",0,73,102,"Endocrine",121,"Low (1-49%)",1
+"IM013",0,173,"SD",0,62,NA,"None",NA,"Low (1-49%)",0
+"IM014",0,114,"SD",0,68,NA,"None",NA,"Low (1-49%)",0
+"IM015",0,66,"SD",0,81,NA,"Pneumonitis",32,"Low (1-49%)",0
+"IM016",0,73,"SD",0,77,NA,"Pneumonitis",19,"High (≥50%)",0
+"IM017",0,71,"PR",0,57,98,"Skin",57,"Negative",1
+"IM018",0,112,"SD",0,83,NA,"Skin",102,"Negative",0
+"IM019",0,110,"PR",0,58,97,"Skin",43,"Negative",1
+"IM020",0,69,"SD",0,56,NA,"Pneumonitis",55,"Low (1-49%)",0
+"IM021",0,86,"PD",0,70,NA,"None",NA,"High (≥50%)",0
+"IM022",0,54,"PD",0,84,NA,"Endocrine",52,"High (≥50%)",0
+"IM023",0,66,"PD",0,75,NA,"None",NA,"Low (1-49%)",0
+"IM024",0,31,"PD",0,66,NA,"Skin",15,"Negative",0
+"IM025",0,64,"PD",0,64,NA,"Endocrine",51,"High (≥50%)",0

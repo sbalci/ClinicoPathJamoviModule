@@ -1,0 +1,2 @@
+"test_name","condition","setting","sample_size","TP","TN","FP","FN","study_prevalence","population_prevalence","expected_sensitivity","expected_specificity","notes"
+"Mammography Screening","Breast Cancer","Community Screening Program",1000,45,808,142,5,0.05,0.005,0.9,0.85,"High sensitivity screening test designed to minimize false negatives"

@@ -1,7 +1,7 @@
 # Test for summarydata function
 
 # Load testthat
-library(testthat)
+# library(testthat)
 
 # Create a sample dataset for testing
 set.seed(123)
@@ -19,7 +19,7 @@ test_that("summarydata - Basic functionality", {
     # Run the analysis
     results <- summarydata(
         data = test_data,
-        vars = c("age", "biomarker1")
+        vars = c("age_normal", "biomarker1")
     )
 
     # Check that the results object is of the correct class
@@ -34,7 +34,7 @@ test_that("summarydata - Statistical correctness", {
     # Run the analysis
     results <- summarydata(
         data = test_data,
-        vars = "age",
+        vars = "age_normal",
         decimal_places = 3
     )
 
@@ -54,7 +54,7 @@ test_that("summarydata - Distribution diagnostics", {
     # Run the analysis with distribution diagnostics
     results <- summarydata(
         data = test_data,
-        vars = "age",
+        vars = "age_normal",
         distr = TRUE
     )
 

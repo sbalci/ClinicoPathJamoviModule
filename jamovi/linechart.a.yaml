@@ -98,9 +98,12 @@ options:
     - name: refline
       title: 'Reference Line Value'
       type: Number
+      default: 0
+      min: -999999
+      max: 999999
       description:
           R: >
-            Optional reference line value (e.g., normal range, threshold).
+            Optional reference line value (e.g., normal range, threshold). Set to 0 for no reference line.
 
     - name: reflineLabel
       title: 'Reference Line Label'

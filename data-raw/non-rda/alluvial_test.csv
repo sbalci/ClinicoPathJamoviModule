@@ -1,0 +1,201 @@
+"patient_id","age_group","sex","tumor_site","initial_grade","initial_stage","treatment","response","followup_status","presenting_symptom","diagnostic_test","test_result","comorbidity","performance_status","risk_group","encounter_type","care_setting","frequency","treatment_cost"
+1,"Young (<50)","Female","Breast","Grade 1","Stage III","Surgery + Radio","Complete Response","Disease-Free","Asymptomatic","CT","Positive","None","PS 1","Intermediate Risk","Outpatient","Day Hospital",1,70059
+2,"Young (<50)","Female","Colon","Grade 2","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Bleeding","Endoscopy","Positive","Moderate","PS 1","Intermediate Risk","Outpatient","Day Hospital",7,18869
+3,"Middle (50-70)","Male","Colon","Grade 3","Stage III","Surgery + Radio","Partial Response",NA,"Asymptomatic","Screening","Negative","None","PS 0","High Risk","Outpatient","Clinic",2,71675
+4,"Young (<50)","Female","Lung","Grade 2","Stage III","Chemo + Radio","Partial Response","Disease-Free","Pain","X-ray","Suspicious","None","PS 0","Intermediate Risk","Outpatient","Day Hospital",2,64629
+5,"Older (>70)","Male","Prostate","Grade 1","Stage I","Surgery Only",NA,"Disease-Free","Bleeding","CT",NA,"None","PS 0","Low Risk","Referral","Clinic",1,11067
+6,"Older (>70)","Male","Breast","Grade 1","Stage I","Surgery + Chemo","Stable Disease","Residual Disease","Bleeding","CT","Negative","Mild","PS 3-4","Low Risk","Outpatient","Clinic",3,18570
+7,"Older (>70)","Female","Prostate","Grade 3","Stage IV","Palliative","Progression","Progression","Mass","Biopsy","Positive","Mild","PS 0","High Risk","Emergency","Admitted",4,64379
+8,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery Only","Complete Response","Disease-Free","Constitutional","CT","Negative","None","PS 1","Intermediate Risk","Outpatient","Clinic",4,23862
+9,"Older (>70)","Female","Breast","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Pain","X-ray","Negative","Moderate","PS 2","Intermediate Risk","Outpatient","Clinic",1,40404
+10,"Older (>70)","Female","Lung","Grade 1","Stage I","Surgery + Radio","Partial Response","Residual Disease","Mass","CT","Suspicious","None","PS 2","Low Risk","Referral","Clinic",1,17738
+11,"Middle (50-70)","Female","Breast","Grade 1","Stage I","Surgery Only","Stable Disease","Residual Disease","Mass","Biopsy","Positive","Mild","PS 2","Low Risk","Outpatient","Day Hospital",3,8031
+12,"Older (>70)","Male","Colon","Grade 1","Stage III","Chemo + Radio","Progression",NA,"Mass","Biopsy","Positive","None","PS 0","Intermediate Risk","Outpatient","Clinic",4,66438
+13,"Young (<50)","Female","Breast","Grade 1","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Mass","CT","Suspicious","Mild","PS 1","Low Risk","Emergency","Admitted",4,15259
+14,"Middle (50-70)","Male","Ovary","Grade 2","Stage III","Surgery + Chemo","Complete Response","Disease-Free","Constitutional","MRI","Positive","Mild","PS 0","Intermediate Risk","Referral","Day Hospital",4,76403
+15,"Middle (50-70)","Female","Breast","Grade 3","Stage IV","Chemo Only","Complete Response","Disease-Free","Bleeding","CT","Suspicious","None","PS 3-4","High Risk","Outpatient","Clinic",1,97053
+16,"Young (<50)","Male","Breast","Grade 3","Stage IV","Chemo + Radio","Complete Response","Disease-Free","Asymptomatic","Screening","Negative","None","PS 2","High Risk","Emergency","Admitted",1,103959
+17,"Young (<50)","Female","Lung","Grade 2","Stage IV","Chemo Only","Partial Response","Residual Disease","Constitutional","MRI","Suspicious","Moderate","PS 0","High Risk","Emergency","ICU",4,96877
+18,"Middle (50-70)","Female","Ovary","Grade 2","Stage II","Surgery + Chemo",NA,"Disease-Free","Bleeding","Endoscopy","Negative","None","PS 2","Intermediate Risk","Outpatient","Admitted",1,35079
+19,"Middle (50-70)","Male","Lung","Grade 1","Stage I","Surgery Only","Complete Response","Disease-Free","Bleeding","Endoscopy","Negative","Moderate","PS 1","Intermediate Risk","Outpatient","Clinic",1,7191
+20,"Older (>70)","Female","Breast","Grade 2","Stage III","Surgery + Chemo","Partial Response","Recurrence","Constitutional","PET","Negative","Mild","PS 1","Intermediate Risk","Outpatient","Day Hospital",2,76441
+21,"Young (<50)","Male","Breast","Grade 1","Stage I","Surgery + Radio","Complete Response","Disease-Free","Pain","MRI","Suspicious","None","PS 1","Low Risk","Referral","Clinic",3,14172
+22,"Middle (50-70)","Male","Lung","Grade 1","Stage II","Surgery + Chemo","Partial Response","Residual Disease","Constitutional","PET","Positive","Mild","PS 0","Intermediate Risk","Outpatient","Clinic",2,37237
+23,"Young (<50)","Male","Prostate","Grade 2","Stage II","Surgery + Chemo","Partial Response","Progression","Constitutional","MRI","Suspicious","Moderate","PS 2","Intermediate Risk","Emergency","Admitted",6,34148
+24,"Young (<50)","Male","Ovary","Grade 1","Stage I","Surgery + Chemo","Complete Response","Recurrence","Pain","CT","Suspicious","None","PS 2","Low Risk","Outpatient","Clinic",1,13861
+25,"Middle (50-70)","Female","Colon","Grade 2","Stage II","Surgery + Chemo","Progression","Progression","Asymptomatic","CT","Negative","Mild","PS 0","Intermediate Risk","Emergency","Admitted",3,37884
+26,"Older (>70)","Female","Breast","Grade 1","Stage III","Chemo + Radio","Stable Disease","Disease-Free","Asymptomatic","Screening","Negative","None","PS 1","Intermediate Risk","Outpatient","Day Hospital",1,64027
+27,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery Only","Partial Response","Disease-Free","Bleeding","CT","Suspicious","Moderate","PS 2","Intermediate Risk","Outpatient","Clinic",4,25163
+28,"Young (<50)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Mass","Biopsy","Positive","None","PS 2","Intermediate Risk","Emergency",NA,4,38270
+29,"Middle (50-70)","Male","Colon","Grade 1","Stage I","Surgery + Radio","Stable Disease","Progression","Pain","Ultrasound","Negative","Mild","PS 0","Low Risk","Outpatient","Clinic",1,13725
+30,"Young (<50)","Male","Colon","Grade 1","Stage I","Surgery + Radio","Partial Response","Recurrence","Mass","MRI","Positive","Mild","PS 1","Low Risk","Outpatient","Clinic",1,14855
+31,"Older (>70)","Male","Colon","Grade 2","Stage II","Surgery + Radio","Partial Response","Disease-Free","Pain","CT","Suspicious","None","PS 0","Intermediate Risk","Outpatient","Day Hospital",3,34514
+32,"Young (<50)","Female","Colon","Grade 2","Stage II","Surgery + Chemo","Complete Response",NA,"Pain","Ultrasound",NA,"Moderate","PS 3-4","Intermediate Risk","Outpatient","Clinic",3,36863
+33,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Complete Response","Second Primary","Mass","Biopsy","Positive","Moderate","PS 3-4","Intermediate Risk","Outpatient",NA,5,36992
+34,"Older (>70)","Male","Breast","Grade 2","Stage II","Surgery + Chemo","Partial Response",NA,"Pain","CT","Suspicious","Mild","PS 0","Intermediate Risk","Referral","Clinic",3,38778
+35,"Middle (50-70)","Male","Prostate","Grade 1","Stage I","Surgery + Chemo","Partial Response",NA,"Asymptomatic","Screening","Negative","None","PS 1","Low Risk","Emergency","Admitted",1,16642
+36,"Young (<50)","Male","Breast","Grade 1","Stage II","Surgery Only","Complete Response","Disease-Free","Asymptomatic","Screening","Negative","Severe","PS 1","High Risk","Referral","Admitted",5,29671
+37,"Middle (50-70)","Male","Lung","Grade 2","Stage II","Surgery + Radio","Partial Response","Disease-Free","Pain","MRI","Suspicious","Moderate","PS 0","Intermediate Risk","Referral","Admitted",4,33033
+38,"Middle (50-70)","Female","Breast","Grade 1","Stage II","Surgery Only","Complete Response","Second Primary","Pain","MRI","Suspicious","Mild","PS 2","Intermediate Risk","Referral","Day Hospital",2,23585
+39,"Young (<50)","Female","Breast","Grade 3","Stage II","Surgery Only","Complete Response","Disease-Free","Constitutional","CT","Suspicious","Severe","PS 0","High Risk","Outpatient","Clinic",1,26288
+40,"Older (>70)","Female","Lung","Grade 1","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Constitutional","Labs","Normal","Severe","PS 0","High Risk","Emergency","Admitted",1,18275
+41,"Middle (50-70)","Male","Colon","Grade 2","Stage I","Surgery + Radio","Partial Response","Residual Disease","Pain","X-ray","Positive","None","PS 0","Intermediate Risk","Outpatient","Clinic",2,16453
+42,"Middle (50-70)","Male","Prostate","Grade 2","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Bleeding","CT",NA,"None","PS 3-4","Intermediate Risk","Outpatient","Clinic",3,14065
+43,"Middle (50-70)","Male","Lung","Grade 1","Stage I","Surgery + Chemo","Partial Response","Progression","Mass","Biopsy",NA,"Severe","PS 0","High Risk","Referral","Admitted",9,13644
+44,"Young (<50)","Female","Prostate","Grade 3","Stage IV","Chemo + Radio","Progression","Progression","Pain","X-ray","Suspicious","None","PS 1","High Risk","Emergency","Discharged",2,107393
+45,"Middle (50-70)","Female","Lung","Grade 1","Stage I","Surgery Only","Complete Response","Disease-Free","Mass","Biopsy","Indeterminate","Severe","PS 1","High Risk","Outpatient","Clinic",3,13086
+46,"Young (<50)","Female","Lung","Grade 1","Stage I","Surgery + Chemo","Partial Response","Residual Disease","Pain","MRI","Positive","None","PS 1","Low Risk","Outpatient","Admitted",7,15429
+47,"Young (<50)","Female","Breast","Grade 1","Stage I","Surgery Only","Partial Response",NA,"Pain","MRI","Negative","None","PS 2","Low Risk","Emergency","Admitted",2,13401
+48,"Older (>70)","Male","Ovary","Grade 2","Stage II","Surgery + Radio","Partial Response","Recurrence","Constitutional","PET","Positive","None","PS 0","Intermediate Risk","Referral","Clinic",3,34984
+49,"Young (<50)","Male","Colon","Grade 3","Stage IV","Trimodal","Partial Response","Residual Disease","Mass","CT","Suspicious","Mild","PS 1","High Risk","Outpatient","Clinic",4,158364
+50,"Older (>70)","Male","Breast","Grade 3","Stage III","Surgery + Chemo","Partial Response","Recurrence","Pain","Ultrasound","Suspicious","Mild","PS 1","High Risk","Outpatient","Admitted",1,74899
+51,"Middle (50-70)","Male","Lung","Grade 2","Stage III","Surgery + Radio","Partial Response","Progression","Asymptomatic","CT","Negative","None","PS 1","Intermediate Risk","Outpatient","Clinic",2,70160
+52,"Middle (50-70)","Female","Lung","Grade 3","Stage IV","Chemo Only","Complete Response","Disease-Free","Pain","MRI","Positive","None","PS 0","High Risk","Outpatient","Clinic",2,92881
+53,"Middle (50-70)","Male","Colon","Grade 3","Stage III","Surgery + Chemo","Complete Response","Disease-Free","Pain","CT","Suspicious","None","PS 0","High Risk","Outpatient","Clinic",3,74657
+54,"Older (>70)","Male","Colon","Grade 1","Stage I","Surgery Only","Complete Response","Disease-Free","Constitutional","Labs","Abnormal","Moderate","PS 0","Intermediate Risk","Referral","Admitted",1,9163
+55,"Middle (50-70)","Female","Lung","Grade 1","Stage II","Surgery + Chemo","Partial Response","Disease-Free","Pain","MRI","Positive","Moderate","PS 0","Intermediate Risk","Referral","Clinic",2,38483
+56,"Older (>70)","Female","Lung","Grade 1","Stage I","Surgery + Radio","Complete Response","Second Primary","Bleeding","Colonoscopy","Positive","Mild","PS 1","Low Risk","Referral","Clinic",1,12938
+57,"Older (>70)","Male","Lung","Grade 2","Stage III","Trimodal","Complete Response","Disease-Free","Mass","Biopsy","Positive","None","PS 0","Intermediate Risk","Outpatient","Clinic",1,100964
+58,"Middle (50-70)","Male","Colon","Grade 2","Stage IV","Palliative","Stable Disease","Residual Disease","Mass","MRI",NA,"Mild","PS 0","High Risk","Emergency","Discharged",4,65073
+59,"Middle (50-70)","Male","Prostate","Grade 1","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Mass","MRI","Suspicious","Mild","PS 0","Low Risk","Referral","Clinic",3,14441
+60,"Older (>70)","Female","Ovary","Grade 2","Stage IV","Chemo Only","Progression","Progression","Constitutional","MRI","Positive","Mild","PS 0","High Risk","Referral","Admitted",1,95913
+61,"Older (>70)","Male","Lung","Grade 3","Stage II","Surgery + Chemo","Partial Response","Residual Disease","Mass","CT","Negative","Mild","PS 1","High Risk","Referral","Clinic",2,42263
+62,"Young (<50)","Male","Breast","Grade 3","Stage IV","Chemo + Radio",NA,"Progression","Constitutional","Labs","Normal","Severe","PS 0","High Risk","Outpatient","Clinic",7,107096
+63,"Older (>70)","Male","Ovary","Grade 2","Stage II","Surgery + Chemo","Partial Response","Residual Disease","Bleeding","Colonoscopy","Positive","Mild","PS 0","Intermediate Risk","Outpatient","Clinic",1,40610
+64,"Older (>70)","Female","Breast","Grade 3","Stage III","Surgery + Chemo","Complete Response","Disease-Free","Bleeding","CT","Suspicious","Mild","PS 0","High Risk","Referral","Day Hospital",2,75116
+65,"Young (<50)","Female","Breast","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Mass","CT","Negative","Mild","PS 0","Intermediate Risk","Outpatient","Day Hospital",2,35820
+66,"Middle (50-70)","Male","Colon","Grade 3","Stage IV","Chemo + Radio","Complete Response","Disease-Free","Pain","Ultrasound","Negative","Mild","PS 0","High Risk","Outpatient","Day Hospital",1,105142
+67,"Middle (50-70)","Female","Lung","Grade 1","Stage I","Surgery + Radio","Stable Disease","Residual Disease","Asymptomatic","Screening",NA,"Severe","PS 2","High Risk","Emergency","Admitted",6,14132
+68,"Young (<50)","Male","Breast","Grade 2","Stage II","Surgery + Chemo","Partial Response","Disease-Free","Mass","CT","Suspicious","None","PS 1","Intermediate Risk","Outpatient","Clinic",1,44669
+69,"Older (>70)","Female","Lung","Grade 3","Stage III","Chemo + Radio","Progression","Progression","Pain","MRI","Suspicious","None","PS 0","High Risk","Outpatient","Day Hospital",3,61136
+70,"Middle (50-70)","Male","Prostate","Grade 2","Stage II","Surgery Only","Complete Response",NA,"Bleeding","Colonoscopy","Polyp Found","Moderate","PS 2","Intermediate Risk","Outpatient","Admitted",1,24594
+71,"Middle (50-70)","Male","Lung","Grade 1","Stage II","Surgery Only","Complete Response","Recurrence","Pain","CT","Suspicious","None","PS 2","Intermediate Risk","Outpatient","Clinic",4,27967
+72,"Middle (50-70)","Male","Breast","Grade 3","Stage IV","Chemo Only","Complete Response","Disease-Free","Pain","MRI","Positive","None","PS 2","High Risk","Outpatient","Day Hospital",3,91803
+73,"Middle (50-70)","Female","Prostate","Grade 2","Stage II","Surgery Only","Complete Response","Disease-Free","Bleeding","CT","Positive","Moderate","PS 1","Intermediate Risk","Outpatient","Clinic",3,24481
+74,"Middle (50-70)","Male","Prostate","Grade 2","Stage I","Surgery + Radio","Complete Response","Recurrence","Pain","MRI","Positive","None","PS 2","Intermediate Risk","Outpatient","Clinic",1,14668
+75,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Partial Response","Disease-Free","Mass","MRI","Suspicious","Mild","PS 0","Intermediate Risk","Outpatient","Day Hospital",2,37061
+76,"Older (>70)","Male","Lung","Grade 2","Stage III","Trimodal","Complete Response","Disease-Free","Pain","CT","Suspicious","Mild","PS 1","Intermediate Risk","Emergency","Admitted",3,98136
+77,"Middle (50-70)","Female","Colon","Grade 2","Stage II","Surgery + Radio","Complete Response","Recurrence","Asymptomatic","Screening","Negative","Mild","PS 0","Intermediate Risk","Emergency","ICU",3,34756
+78,"Middle (50-70)","Male","Prostate","Grade 2","Stage II","Surgery + Chemo","Partial Response","Disease-Free","Pain","CT","Positive","Mild","PS 1","Intermediate Risk","Emergency","Discharged",1,40177
+79,"Older (>70)","Male","Breast","Grade 2","Stage IV","Chemo Only","Partial Response","Residual Disease","Pain","CT","Suspicious","Moderate","PS 1","High Risk","Outpatient","Clinic",2,93303
+80,"Middle (50-70)","Male","Ovary","Grade 2","Stage III","Surgery + Chemo","Complete Response","Recurrence","Constitutional","CT","Suspicious","Moderate","PS 2","Intermediate Risk","Referral","Clinic",3,77830
+81,"Older (>70)","Female","Breast","Grade 1","Stage III","Chemo + Radio","Stable Disease",NA,"Asymptomatic","Screening","Negative","None","PS 2","Intermediate Risk","Emergency","Discharged",1,66828
+82,"Middle (50-70)","Female","Colon","Grade 3","Stage IV","Trimodal","Partial Response","Progression","Asymptomatic","CT","Suspicious","Moderate","PS 2","High Risk","Referral","Clinic",4,157527
+83,"Middle (50-70)","Male","Ovary","Grade 1","Stage II","Surgery + Chemo","Complete Response","Second Primary","Pain",NA,"Suspicious","Moderate","PS 1","Intermediate Risk","Emergency","Discharged",3,34498
+84,"Older (>70)","Female","Breast","Grade 3","Stage IV","Chemo + Radio","Partial Response","Residual Disease","Pain","CT","Negative","Moderate","PS 1","High Risk","Emergency",NA,3,104069
+85,"Older (>70)","Female","Prostate","Grade 2","Stage IV","Chemo + Radio",NA,"Disease-Free","Pain","Ultrasound","Suspicious","Mild","PS 0","High Risk","Outpatient","Day Hospital",1,104573
+86,"Older (>70)","Male","Lung","Grade 3","Stage III","Surgery + Chemo","Partial Response","Residual Disease","Mass","CT","Suspicious","Severe","PS 1","High Risk","Emergency","Admitted",1,77372
+87,"Middle (50-70)","Male","Prostate","Grade 2","Stage II","Surgery + Radio","Partial Response","Disease-Free","Mass","CT","Suspicious","Moderate","PS 1","Intermediate Risk","Outpatient","Clinic",1,34925
+88,"Middle (50-70)","Male","Breast","Grade 2","Stage II","Surgery Only","Partial Response","Progression","Pain","CT","Suspicious","Severe","PS 0","High Risk","Outpatient","Clinic",1,25841
+89,"Middle (50-70)","Male","Breast","Grade 1","Stage II","Surgery Only","Complete Response","Disease-Free","Mass","Biopsy","Negative","None","PS 1","Intermediate Risk","Referral","Day Hospital",2,27578
+90,"Middle (50-70)","Male","Breast","Grade 1","Stage II","Surgery + Chemo","Partial Response","Residual Disease","Bleeding","Colonoscopy","Negative","Mild","PS 1","Intermediate Risk","Referral","Clinic",8,39841
+91,"Older (>70)","Male","Prostate","Grade 1","Stage I","Surgery + Radio","Complete Response","Disease-Free","Pain","Ultrasound","Negative","None","PS 2","Low Risk","Outpatient","Clinic",2,15652
+92,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Mass","MRI","Positive","Mild","PS 0","Intermediate Risk","Outpatient","Clinic",7,38148
+93,"Middle (50-70)","Male","Ovary","Grade 3","Stage IV","Chemo + Radio","Partial Response","Disease-Free","Pain","CT","Suspicious","None","PS 2","High Risk","Outpatient","Clinic",2,104762
+94,"Young (<50)","Male","Lung","Grade 3","Stage III","Chemo + Radio","Stable Disease","Residual Disease","Asymptomatic","Screening","Negative","None","PS 3-4","High Risk","Outpatient","Clinic",2,67405
+95,"Young (<50)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Partial Response","Disease-Free","Pain","MRI",NA,"None","PS 2","Intermediate Risk","Outpatient","Clinic",4,39704
+96,"Older (>70)","Female","Breast","Grade 1","Stage III","Chemo + Radio","Partial Response","Residual Disease","Asymptomatic","Screening","Negative","Moderate","PS 1","Intermediate Risk","Outpatient","Day Hospital",4,64877
+97,"Middle (50-70)","Male","Ovary","Grade 1","Stage I","Surgery Only","Complete Response","Disease-Free","Asymptomatic","CT","Suspicious","Severe","PS 1","High Risk","Emergency","Admitted",1,10729
+98,"Older (>70)","Male","Lung","Grade 3","Stage III","Surgery + Chemo","Complete Response","Disease-Free","Pain","CT","Suspicious","None","PS 1","High Risk","Outpatient","Clinic",1,78385
+99,"Older (>70)","Male","Breast","Grade 3","Stage IV","Trimodal","Complete Response","Disease-Free","Asymptomatic",NA,"Negative","None","PS 0","High Risk","Outpatient","Day Hospital",1,162943
+100,"Older (>70)","Female","Breast","Grade 1","Stage II","Surgery Only","Complete Response","Disease-Free","Pain","CT","Suspicious","Mild","PS 2","Intermediate Risk","Referral","Admitted",3,23046
+101,"Older (>70)","Male","Breast","Grade 3","Stage III","Surgery + Chemo","Partial Response","Disease-Free","Pain","X-ray","Negative","Mild","PS 1","High Risk","Outpatient","Clinic",4,77896
+102,"Middle (50-70)","Female","Breast","Grade 1","Stage I","Surgery Only","Progression","Death","Pain","Ultrasound","Suspicious","Moderate","PS 2","Intermediate Risk","Emergency","Admitted",1,9828
+103,"Middle (50-70)","Female","Colon","Grade 2","Stage II","Surgery Only","Complete Response","Disease-Free","Bleeding","Ultrasound","Negative","Moderate","PS 1","Intermediate Risk","Outpatient","Clinic",2,21852
+104,"Middle (50-70)","Female","Ovary","Grade 1","Stage I","Surgery + Chemo","Complete Response","Second Primary","Mass","CT","Negative","Mild","PS 0","Low Risk","Outpatient","Clinic",1,17585
+105,"Young (<50)","Male","Breast","Grade 3","Stage IV","Palliative","Stable Disease","Residual Disease","Mass","Biopsy","Positive","Moderate","PS 3-4","High Risk","Emergency","ICU",2,64169
+106,"Young (<50)","Male","Prostate","Grade 1","Stage III","Trimodal","Stable Disease",NA,"Bleeding","Ultrasound","Suspicious","Mild","PS 0","Intermediate Risk","Emergency","ICU",2,101934
+107,"Older (>70)","Female","Colon","Grade 2","Stage II","Surgery + Radio","Partial Response","Residual Disease","Pain","CT","Negative","Moderate","PS 1","Intermediate Risk","Outpatient","Clinic",2,38878
+108,"Older (>70)","Male","Breast","Grade 2","Stage II","Surgery + Chemo","Stable Disease","Residual Disease","Pain","MRI",NA,"Severe","PS 0","High Risk","Outpatient","Clinic",3,39660
+109,"Older (>70)","Male","Prostate","Grade 2","Stage III","Trimodal","Progression","Progression","Bleeding","Endoscopy","Negative","Severe","PS 1","High Risk","Emergency","Discharged",1,99293
+110,"Middle (50-70)","Female","Lung","Grade 1","Stage I","Surgery + Radio","Complete Response","Disease-Free","Asymptomatic",NA,"Negative","Severe","PS 2","High Risk","Emergency","Admitted",1,13730
+111,"Older (>70)","Female","Breast","Grade 3","Stage III","Trimodal","Partial Response","Residual Disease","Mass","CT","Negative","Mild","PS 0","High Risk","Emergency","Admitted",1,98026
+112,"Young (<50)","Female","Ovary","Grade 3","Stage III","Chemo + Radio","Stable Disease","Residual Disease","Asymptomatic","Screening","Positive","Severe","PS 2","High Risk","Outpatient","Day Hospital",1,63357
+113,"Older (>70)","Female","Breast","Grade 2","Stage IV","Trimodal","Partial Response","Residual Disease","Asymptomatic","CT","Negative","Severe","PS 2","High Risk","Outpatient","Clinic",3,160979
+114,"Middle (50-70)","Female","Lung","Grade 1","Stage III","Trimodal","Partial Response","Disease-Free","Asymptomatic","Screening","Positive","Severe","PS 1","High Risk","Outpatient","Clinic",4,99401
+115,"Older (>70)","Male","Colon","Grade 3","Stage IV","Chemo Only","Partial Response","Progression","Mass","MRI","Negative","Mild","PS 1","High Risk","Outpatient","Clinic",2,97317
+116,"Older (>70)","Female","Lung","Grade 1","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Pain",NA,"Negative","None","PS 1","Intermediate Risk","Referral","Day Hospital",7,39165
+117,"Middle (50-70)","Male","Breast","Grade 2","Stage IV","Chemo + Radio","Partial Response","Residual Disease","Asymptomatic","Ultrasound","Suspicious","None","PS 1","High Risk","Outpatient","Clinic",1,104727
+118,"Middle (50-70)","Female","Lung","Grade 2","Stage III","Trimodal","Complete Response","Disease-Free","Pain","X-ray","Negative","Mild","PS 0","Intermediate Risk","Outpatient","Admitted",2,99203
+119,"Older (>70)","Male","Lung","Grade 2","Stage II","Surgery + Chemo","Partial Response","Residual Disease","Mass","MRI","Negative","None","PS 0","Intermediate Risk","Emergency","Discharged",3,34504
+120,"Young (<50)","Male","Colon","Grade 1","Stage I","Surgery + Radio","Complete Response","Second Primary","Asymptomatic","Screening","Negative","Severe","PS 1","High Risk","Outpatient","Clinic",1,14229
+121,"Middle (50-70)","Male","Ovary","Grade 2","Stage I","Surgery Only","Complete Response","Disease-Free","Bleeding","Colonoscopy","Negative","Moderate","PS 3-4","Intermediate Risk","Outpatient","Clinic",4,7924
+122,"Middle (50-70)","Male","Prostate","Grade 1","Stage III","Surgery + Radio","Complete Response","Disease-Free","Bleeding","Ultrasound","Suspicious","Moderate","PS 1","Intermediate Risk","Outpatient","Day Hospital",2,71292
+123,"Older (>70)","Male","Ovary","Grade 2","Stage IV","Palliative","Partial Response",NA,"Bleeding","CT","Suspicious","None","PS 1","High Risk","Referral","Clinic",2,65546
+124,"Older (>70)","Female","Breast","Grade 2","Stage II","Surgery + Chemo","Stable Disease",NA,"Pain","CT","Positive","Moderate","PS 1","Intermediate Risk","Referral","Clinic",3,38132
+125,"Older (>70)","Male","Colon","Grade 2","Stage III","Surgery + Radio","Complete Response","Disease-Free","Bleeding",NA,"Negative","Mild","PS 2","Intermediate Risk","Referral","Admitted",2,67924
+126,"Middle (50-70)","Female","Colon","Grade 3","Stage IV","Chemo + Radio","Stable Disease","Residual Disease","Mass","MRI","Negative","Moderate","PS 0","High Risk","Outpatient","Clinic",1,102490
+127,"Young (<50)","Male","Breast","Grade 2","Stage II","Surgery Only","Partial Response","Residual Disease","Bleeding","Endoscopy","Positive","Severe","PS 1","High Risk","Outpatient","Clinic",6,24017
+128,"Young (<50)","Female","Prostate","Grade 2","Stage II","Surgery Only","Partial Response","Residual Disease","Asymptomatic","Ultrasound","Suspicious","Moderate","PS 0","Intermediate Risk","Emergency","Discharged",1,25294
+129,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Stable Disease","Progression","Mass","CT","Suspicious","Mild","PS 1","Intermediate Risk","Outpatient","Clinic",3,42213
+130,"Older (>70)","Male","Lung","Grade 1","Stage I","Surgery Only","Complete Response","Recurrence","Pain","CT","Suspicious","Severe","PS 0","High Risk","Referral","Clinic",5,8159
+131,"Young (<50)","Male","Prostate","Grade 2","Stage II","Surgery + Chemo","Partial Response","Disease-Free","Mass",NA,"Suspicious","None","PS 1","Intermediate Risk","Outpatient","Clinic",5,33186
+132,"Older (>70)","Female","Breast","Grade 3","Stage II","Surgery Only","Complete Response","Recurrence","Bleeding","Endoscopy","Positive","None","PS 1","High Risk","Referral","Admitted",8,24759
+133,"Older (>70)","Female","Ovary","Grade 3","Stage II","Surgery Only","Partial Response","Disease-Free","Constitutional",NA,"Abnormal","None","PS 0","High Risk","Outpatient","Admitted",2,23322
+134,"Young (<50)","Male","Colon","Grade 3","Stage II","Surgery + Chemo","Stable Disease","Progression","Pain","MRI","Positive","None","PS 0","High Risk","Referral","Admitted",1,33155
+135,"Young (<50)","Female","Lung","Grade 2","Stage I","Surgery Only","Complete Response","Disease-Free","Asymptomatic","Screening","Negative","None","PS 0","Intermediate Risk","Outpatient","Clinic",6,8251
+136,"Older (>70)","Female","Breast","Grade 1","Stage I","Surgery Only","Partial Response","Progression","Pain","MRI","Positive","None","PS 0","Low Risk","Referral","Clinic",2,9253
+137,"Young (<50)","Female","Breast","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Pain","CT","Negative","None","PS 1","Intermediate Risk","Emergency","Admitted",2,35296
+138,"Middle (50-70)","Female","Colon","Grade 1","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Asymptomatic","Screening","Positive","None","PS 3-4","Low Risk","Emergency","Admitted",3,16431
+139,"Older (>70)","Female","Colon","Grade 1","Stage I","Surgery + Chemo","Partial Response","Residual Disease","Constitutional","Labs","Normal","Moderate","PS 2","Intermediate Risk","Outpatient","Clinic",4,16815
+140,"Older (>70)","Male","Breast","Grade 3","Stage IV","Palliative","Progression","Residual Disease","Pain","MRI","Suspicious","Mild","PS 1","High Risk","Outpatient","Day Hospital",3,63350
+141,"Middle (50-70)","Male","Ovary","Grade 3","Stage III","Surgery + Chemo","Partial Response","Progression","Bleeding","Endoscopy","Suspicious","Mild","PS 0","High Risk","Emergency","Discharged",2,72037
+142,"Middle (50-70)","Male","Prostate","Grade 1","Stage I","Surgery + Radio","Complete Response","Recurrence","Pain",NA,"Negative","Severe","PS 1","High Risk","Outpatient","Clinic",2,15188
+143,"Middle (50-70)","Male","Colon","Grade 1","Stage I","Surgery Only","Partial Response","Disease-Free","Pain","CT","Negative","Mild","PS 0","Low Risk","Emergency","Admitted",1,8290
+144,"Older (>70)","Male","Breast","Grade 3","Stage III","Trimodal","Complete Response","Disease-Free","Pain","CT","Suspicious","None","PS 0","High Risk","Emergency","Admitted",1,98340
+145,"Older (>70)","Female","Colon","Grade 3","Stage IV","Chemo Only","Stable Disease","Residual Disease","Bleeding","Colonoscopy","Negative","Mild","PS 1","High Risk","Outpatient","Clinic",4,96298
+146,"Young (<50)","Male","Ovary","Grade 2","Stage II","Surgery + Chemo","Stable Disease","Disease-Free","Pain",NA,"Negative","Mild","PS 1","Intermediate Risk","Emergency","Admitted",4,35548
+147,"Middle (50-70)","Female","Colon","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Mass","Ultrasound","Negative","None","PS 1","Intermediate Risk","Emergency","Admitted",8,36911
+148,"Young (<50)","Female","Breast","Grade 3","Stage IV","Palliative","Stable Disease","Progression","Bleeding","Endoscopy","Suspicious","Severe","PS 3-4","High Risk","Outpatient","Clinic",3,62458
+149,"Middle (50-70)","Female","Lung","Grade 3","Stage IV","Palliative","Progression","Residual Disease","Mass","Ultrasound","Negative","Mild","PS 1","High Risk","Emergency","ICU",2,64785
+150,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery + Chemo",NA,"Residual Disease","Pain","MRI","Suspicious","None","PS 2","Intermediate Risk","Emergency","Admitted",2,35807
+151,"Older (>70)","Male","Prostate","Grade 2","Stage II","Surgery + Radio","Complete Response","Disease-Free","Pain","Ultrasound","Negative","Mild","PS 0","Intermediate Risk","Outpatient","Admitted",6,33312
+152,"Middle (50-70)","Male","Breast","Grade 2","Stage II","Surgery + Chemo","Partial Response","Recurrence","Bleeding","Colonoscopy","Positive","Moderate","PS 0","Intermediate Risk","Outpatient","Clinic",3,35576
+153,"Older (>70)","Female","Colon","Grade 2","Stage II","Surgery + Radio","Complete Response","Disease-Free","Pain","Ultrasound",NA,"Mild","PS 0","Intermediate Risk","Outpatient","Clinic",2,35022
+154,"Middle (50-70)","Female","Breast","Grade 2","Stage I","Surgery + Radio","Complete Response","Disease-Free","Bleeding","Colonoscopy","Negative","None","PS 1","Intermediate Risk","Emergency","Admitted",1,16430
+155,"Older (>70)","Female","Breast","Grade 2","Stage II","Surgery Only","Partial Response","Residual Disease","Constitutional","PET","Positive","Severe","PS 2","High Risk","Emergency","Admitted",4,23222
+156,"Older (>70)","Male","Breast","Grade 2","Stage III","Surgery + Radio","Complete Response","Disease-Free","Pain","CT","Negative","Severe","PS 0","High Risk","Emergency","Admitted",2,70436
+157,"Middle (50-70)","Male","Prostate","Grade 1","Stage II","Surgery Only","Complete Response","Disease-Free","Asymptomatic","Screening","Negative","None","PS 0","Intermediate Risk","Emergency","Admitted",1,23688
+158,"Middle (50-70)","Male","Lung","Grade 2","Stage I","Surgery Only","Complete Response","Disease-Free","Mass","CT","Suspicious","Moderate","PS 0","Intermediate Risk","Outpatient","Clinic",3,7823
+159,"Middle (50-70)","Female","Prostate","Grade 3","Stage IV","Chemo + Radio","Complete Response","Disease-Free","Pain","CT","Suspicious","Severe","PS 2","High Risk","Outpatient","Admitted",3,106182
+160,"Older (>70)","Male","Ovary","Grade 3","Stage IV","Chemo Only","Partial Response","Residual Disease","Mass","Biopsy","Indeterminate","Mild","PS 2","High Risk","Outpatient","Clinic",1,94862
+161,"Young (<50)","Male","Ovary","Grade 3","Stage III","Chemo + Radio","Complete Response","Disease-Free","Pain","Ultrasound","Negative","Moderate","PS 0","High Risk","Referral","Admitted",1,68242
+162,"Older (>70)","Male","Breast","Grade 1","Stage II","Surgery Only",NA,"Progression","Pain","CT","Positive","Mild","PS 1","Intermediate Risk","Emergency","Discharged",2,23626
+163,"Older (>70)","Male","Breast","Grade 2","Stage II","Surgery + Chemo","Complete Response","Recurrence","Constitutional","CT","Suspicious","None","PS 1","Intermediate Risk","Outpatient","Clinic",1,38814
+164,"Middle (50-70)","Female","Breast","Grade 2","Stage I","Surgery Only","Complete Response","Disease-Free","Pain","MRI","Positive","None","PS 0","Intermediate Risk","Outpatient","Clinic",1,12221
+165,"Older (>70)","Male","Lung","Grade 1","Stage I","Surgery + Chemo","Stable Disease","Residual Disease","Constitutional","PET","Positive","None","PS 0","Low Risk","Outpatient","Clinic",3,19281
+166,"Middle (50-70)","Female","Lung","Grade 1","Stage III","Surgery + Chemo","Complete Response","Disease-Free","Constitutional","CT","Suspicious","None","PS 0","Intermediate Risk","Outpatient","Clinic",5,73338
+167,"Middle (50-70)","Female","Ovary","Grade 3","Stage III","Surgery + Chemo","Complete Response","Disease-Free","Pain","CT","Suspicious","None","PS 0","High Risk","Referral",NA,7,75153
+168,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Complete Response","Second Primary","Mass","CT","Negative","None","PS 0","Intermediate Risk","Referral","Clinic",1,39372
+169,"Middle (50-70)","Male","Colon","Grade 2","Stage I","Surgery Only","Partial Response","Recurrence","Pain","CT","Suspicious","None","PS 1","Intermediate Risk","Referral","Clinic",1,8997
+170,"Middle (50-70)","Female","Ovary","Grade 1","Stage I","Surgery Only","Complete Response","Disease-Free","Asymptomatic","Screening","Negative","Moderate","PS 1","Intermediate Risk","Referral","Clinic",1,11190
+171,"Older (>70)","Male","Colon","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Constitutional","PET","Positive","None","PS 0","Intermediate Risk","Outpatient","Day Hospital",1,36639
+172,"Middle (50-70)","Male","Breast","Grade 2","Stage II","Surgery Only","Partial Response","Progression","Bleeding","Endoscopy","Positive","Mild","PS 1","Intermediate Risk","Referral","Day Hospital",1,22733
+173,"Middle (50-70)","Female","Prostate","Grade 2","Stage III","Surgery + Radio","Complete Response","Disease-Free","Bleeding","CT","Suspicious","None","PS 3-4","Intermediate Risk","Outpatient","Clinic",1,65526
+174,"Middle (50-70)","Male","Breast","Grade 2","Stage III","Surgery + Radio","Complete Response","Disease-Free","Bleeding","Endoscopy","Negative","Mild","PS 2","Intermediate Risk","Outpatient","Day Hospital",3,71029
+175,"Middle (50-70)","Male","Breast","Grade 1","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Bleeding","Ultrasound","Suspicious","None","PS 1","Low Risk","Outpatient","Clinic",2,14316
+176,"Middle (50-70)","Female","Colon","Grade 2","Stage II","Surgery + Chemo","Complete Response",NA,"Pain","MRI","Suspicious","None","PS 0","Intermediate Risk","Emergency","Admitted",2,40936
+177,"Young (<50)","Male","Breast","Grade 3","Stage III","Chemo + Radio","Partial Response","Disease-Free","Mass","MRI","Suspicious","None","PS 2","High Risk","Outpatient","Day Hospital",3,62767
+178,"Older (>70)","Female","Breast","Grade 3","Stage III","Surgery + Radio","Complete Response","Disease-Free","Mass","CT","Suspicious","Mild","PS 1","High Risk","Emergency","Discharged",1,69023
+179,"Older (>70)","Male","Colon","Grade 3","Stage IV","Palliative","Stable Disease","Disease-Free","Constitutional","PET","Suspicious","None","PS 0","High Risk","Outpatient","Clinic",4,65615
+180,"Older (>70)","Male","Colon","Grade 3","Stage III","Surgery + Radio","Progression","Progression","Mass","CT","Suspicious","None","PS 1","High Risk","Emergency","ICU",1,69478
+181,"Young (<50)","Female","Breast","Grade 1","Stage I","Surgery Only","Complete Response","Disease-Free","Mass","CT","Suspicious","Mild","PS 2","Low Risk","Emergency","Discharged",3,10976
+182,"Young (<50)","Female","Prostate","Grade 1","Stage I","Surgery + Chemo","Stable Disease","Residual Disease","Pain","CT","Positive","Moderate","PS 2","Intermediate Risk","Outpatient","Clinic",6,17706
+183,"Middle (50-70)","Female","Colon","Grade 2","Stage II","Surgery Only","Complete Response","Disease-Free","Constitutional","CT","Suspicious","Moderate","PS 1","Intermediate Risk","Outpatient","Clinic",4,29354
+184,"Middle (50-70)","Male","Colon","Grade 2","Stage I","Surgery + Chemo","Complete Response","Disease-Free","Mass","Biopsy","Negative","Moderate","PS 0","Intermediate Risk","Outpatient","Day Hospital",3,15103
+185,"Older (>70)","Male","Breast","Grade 1","Stage I","Surgery Only","Partial Response","Recurrence","Mass","Biopsy","Positive","Moderate","PS 0","Intermediate Risk","Emergency",NA,2,8324
+186,"Older (>70)","Female","Lung","Grade 2","Stage II","Surgery Only","Complete Response",NA,"Mass","Biopsy","Negative","Severe","PS 0","High Risk","Emergency","Discharged",3,22831
+187,"Young (<50)","Female","Prostate","Grade 2","Stage I","Surgery Only","Complete Response","Disease-Free","Bleeding","Colonoscopy","Negative","Moderate","PS 0","Intermediate Risk","Outpatient",NA,2,8907
+188,"Older (>70)","Male","Prostate","Grade 1","Stage I","Surgery Only","Complete Response","Disease-Free","Bleeding","Colonoscopy","Negative","Mild","PS 2","Low Risk","Outpatient","Clinic",2,9147
+189,"Middle (50-70)","Male","Lung","Grade 2","Stage II","Surgery Only","Complete Response","Disease-Free","Pain","Ultrasound",NA,"Mild","PS 0","Intermediate Risk","Emergency","ICU",4,22578
+190,"Middle (50-70)","Female","Ovary","Grade 2","Stage I","Surgery + Radio","Complete Response","Disease-Free","Mass","CT","Positive","Moderate","PS 2","Intermediate Risk","Outpatient","Admitted",1,15196
+191,"Middle (50-70)","Male","Lung","Grade 3","Stage IV","Palliative","Stable Disease","Residual Disease","Bleeding","Colonoscopy","Positive","Severe","PS 0","High Risk","Outpatient","Day Hospital",2,66848
+192,"Older (>70)","Male","Ovary","Grade 2","Stage II","Surgery Only","Partial Response",NA,"Asymptomatic","Ultrasound","Suspicious","None","PS 2","Intermediate Risk","Emergency","Admitted",2,24113
+193,"Middle (50-70)","Male","Lung","Grade 1","Stage II","Surgery + Chemo","Complete Response",NA,"Asymptomatic","Screening","Positive","None","PS 0","Intermediate Risk","Outpatient","Clinic",1,35419
+194,"Middle (50-70)","Female","Prostate","Grade 2","Stage I","Surgery + Chemo","Partial Response",NA,"Bleeding","Colonoscopy","Polyp Found","Moderate","PS 1","Intermediate Risk","Outpatient","Clinic",3,12452
+195,"Middle (50-70)","Male","Ovary","Grade 1","Stage I","Surgery + Radio","Complete Response","Disease-Free","Mass","Ultrasound","Negative","None","PS 2","Low Risk","Emergency","Admitted",1,15540
+196,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery Only","Complete Response","Disease-Free","Pain","CT","Suspicious","Mild","PS 1","Intermediate Risk","Outpatient","Day Hospital",1,25063
+197,"Older (>70)","Male","Colon","Grade 2","Stage III","Surgery + Chemo","Complete Response","Disease-Free","Constitutional","CT","Suspicious","Mild","PS 0","Intermediate Risk","Emergency","Admitted",9,71190
+198,"Middle (50-70)","Female","Lung","Grade 2","Stage II","Surgery + Chemo","Complete Response","Disease-Free","Pain","CT","Suspicious","Moderate","PS 1","Intermediate Risk","Outpatient","Day Hospital",1,37252
+199,"Older (>70)","Male","Breast","Grade 3","Stage III","Surgery + Radio","Partial Response","Disease-Free","Constitutional","CT","Positive","Mild","PS 2","High Risk","Outpatient","Clinic",1,70001
+200,"Older (>70)","Male","Lung","Grade 2","Stage II","Surgery Only","Complete Response","Disease-Free","Pain",NA,"Negative","Moderate","PS 2","Intermediate Risk","Outpatient","Day Hospital",5,23312

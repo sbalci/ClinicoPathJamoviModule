@@ -6,46 +6,36 @@
 #'
 #' @details
 #' This function supports multiple clustering approaches:
-#' \itemize{
-#'   \item PAM (k-medoids) - partitioning around medoids
-#'   \item Hierarchical clustering - with multiple linkage methods (Ward, complete, average, single)
-#'   \item MCA/PCA + k-means - dimension reduction approach
-#' }
+#' - PAM (k-medoids) - partitioning around medoids
+#' - Hierarchical clustering - with multiple linkage methods (Ward, complete, average, single)
+#' - MCA/PCA + k-means - dimension reduction approach
 #'
 #' **Distance Metrics:**
-#' \itemize{
-#'   \item **Gower distance** (default) - handles mixed data types (categorical + continuous)
-#'   \item **Jaccard distance** - optimized for binary IHC data (Sterlacci et al. 2019)
-#' }
+#' - **Gower distance** (default) - handles mixed data types (categorical + continuous)
+#' - **Jaccard distance** - optimized for binary IHC data (Sterlacci et al. 2019)
 #'
 #' **Linkage Methods (hierarchical clustering):**
-#' \itemize{
-#'   \item **Ward** (default) - minimizes within-cluster variance, produces balanced clusters
-#'   \item **Complete** - furthest neighbor, produces compact spherical clusters (Sterlacci et al. 2019)
-#'   \item **Average** - mean distance between clusters
-#'   \item **Single** - nearest neighbor (may produce chains)
-#' }
+#' - **Ward** (default) - minimizes within-cluster variance, produces balanced clusters
+#' - **Complete** - furthest neighbor, produces compact spherical clusters (Sterlacci et al. 2019)
+#' - **Average** - mean distance between clusters
+#' - **Single** - nearest neighbor (may produce chains)
 #'
 #' @section Features:
-#' \itemize{
-#'   \item Automatic optimal k selection using silhouette analysis
-#'   \item Multiple distance metrics (Gower, Jaccard)
-#'   \item Multiple linkage methods for hierarchical clustering
-#'   \item Multiple testing correction (Bonferroni, FDR, Holm) for marker associations
-#'   \item Comprehensive visualization suite (heatmaps, dendrograms, PCA plots)
-#'   \item Consensus clustering for stability assessment
-#'   \item Clinical correlation analysis
-#'   \item Optimal antibody panel identification
-#'   \item Variable weighting support
-#'   \item Missing data handling (complete cases or pairwise distances)
-#' }
+#' - Automatic optimal k selection using silhouette analysis
+#' - Multiple distance metrics (Gower, Jaccard)
+#' - Multiple linkage methods for hierarchical clustering
+#' - Multiple testing correction (Bonferroni, FDR, Holm) for marker associations
+#' - Comprehensive visualization suite (heatmaps, dendrograms, PCA plots)
+#' - Consensus clustering for stability assessment
+#' - Clinical correlation analysis
+#' - Optimal antibody panel identification
+#' - Variable weighting support
+#' - Missing data handling (complete cases or pairwise distances)
 #'
 #' @section New in v2.0 (Sterlacci 2019 Features):
-#' \itemize{
-#'   \item Jaccard distance for binary IHC marker data
-#'   \item Complete linkage hierarchical clustering
-#'   \item Bonferroni correction for multiple testing of marker associations
-#' }
+#' - Jaccard distance for binary IHC marker data
+#' - Complete linkage hierarchical clustering
+#' - Bonferroni correction for multiple testing of marker associations
 #'
 #' @author ClinicoPath Development Team
 #' @keywords clustering immunohistochemistry pathology

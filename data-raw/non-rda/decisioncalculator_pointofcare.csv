@@ -1,0 +1,2 @@
+"test_name","condition","setting","TP","TN","FP","FN","total_n","prevalence","turnaround_time","cost_per_test","notes"
+"COVID-19 Rapid Antigen Test","SARS-CoV-2 Infection","Outpatient Clinic",92,185,15,8,300,0.33,"15 minutes",25,"Fast, low-cost test with good performance for symptomatic patients"

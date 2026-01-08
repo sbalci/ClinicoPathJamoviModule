@@ -90,16 +90,13 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$netBenefitTable)}
 }
 \description{
-Time-Dependent Decision Curve Analysis (tdDCA) extends standard DCA to
-evaluate the clinical utility of prognostic models with time-to-event
-outcomes.
-}
-\details{
-This method calculates net benefit at specific time points, accounting for
+Perform time-dependent Decision Curve Analysis (DCA) for survival data
+using the dcurves package. This method extends standard DCA to evaluate
+the clinical utility of prognostic models with time-to-event outcomes.
+It calculates net benefit at specific time points, accounting for
 censoring and time-varying risk predictions. It's essential for evaluating
 survival models, recurrence prediction models, and other longitudinal
 outcomes.
-
 Common applications: Serial biopsy surveillance, recurrence vs death
 prediction,
 time-varying treatment decisions.

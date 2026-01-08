@@ -1,0 +1,13 @@
+"treatment","response","count"
+"Control","Complete Response",20
+"Control","Partial Response",7
+"Control","Stable Disease",51
+"Control","Progression",13
+"Drug A","Complete Response",14
+"Drug A","Partial Response",58
+"Drug A","Stable Disease",20
+"Drug A","Progression",10
+"Drug B","Complete Response",56
+"Drug B","Partial Response",11
+"Drug B","Stable Disease",12
+"Drug B","Progression",13

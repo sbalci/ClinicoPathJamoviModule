@@ -353,13 +353,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Validate highlight level if provided and highlighting is enabled
-            highlight_level <- if (self$options$useHighlight) {
+            highlight_level <- if (self$options$useHighlight && !is.null(self$options$highlight) && self$options$highlight != "") {
                 self$options$highlight
             } else {
-                NULL  # Disable highlighting if useHighlight is FALSE
+                NULL  # Disable highlighting if useHighlight is FALSE or highlight is empty
             }
-            
-            if (self$options$useHighlight && !is.null(highlight_level) && !highlight_level %in% data[[group_var]]) {
+
+            if (self$options$useHighlight && !is.null(highlight_level) && highlight_level != "" && !highlight_level %in% data[[group_var]]) {
                 private$.addNotice(
                     jmvcore::NoticeType$WARNING,
                     sprintf("Highlight level '%s' not found in grouping variable. Highlight will be ignored.", highlight_level),
@@ -779,10 +779,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             orientation <- self$options$orientation
             show_values <- self$options$showValues
             show_mean <- self$options$showMean
-            highlight_level <- if (self$options$useHighlight) {
+            highlight_level <- if (self$options$useHighlight && !is.null(self$options$highlight) && self$options$highlight != "") {
                 self$options$highlight
             } else {
-                NULL  # Disable highlighting if useHighlight is FALSE
+                NULL  # Disable highlighting if useHighlight is FALSE or highlight is empty
             }
             point_size <- self$options$pointSize
             line_width <- self$options$lineWidth
