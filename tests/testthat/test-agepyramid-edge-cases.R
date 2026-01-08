@@ -50,7 +50,7 @@ test_that("agepyramid handles small sample sizes", {
   )
 
   # Should complete (may produce a simple plot)
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles extremely small sample size", {
@@ -69,7 +69,7 @@ test_that("agepyramid handles extremely small sample size", {
   )
 
   # Should handle minimal data
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles single gender data", {
@@ -88,7 +88,7 @@ test_that("agepyramid handles single gender data", {
   )
 
   # Should complete (one side of pyramid will be empty)
-  expect_s3_class(result1, "agepyramidClass")
+  expect_s3_class(result1, "agepyramidResults")
 
   # Only males
   male_only <- data.frame(
@@ -104,7 +104,7 @@ test_that("agepyramid handles single gender data", {
     male = "Male"
   )
 
-  expect_s3_class(result2, "agepyramidClass")
+  expect_s3_class(result2, "agepyramidResults")
 })
 
 test_that("agepyramid handles unbalanced gender distribution", {
@@ -120,7 +120,7 @@ test_that("agepyramid handles unbalanced gender distribution", {
     plot_title = "Unbalanced Gender Distribution"
   )
 
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles extreme age values", {
@@ -172,7 +172,7 @@ test_that("agepyramid handles narrow age range", {
     bin_width = 1
   )
 
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles constant age", {
@@ -191,7 +191,7 @@ test_that("agepyramid handles constant age", {
   )
 
   # Should handle (creates pyramid with single age bin)
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles non-standard gender labels", {
@@ -209,7 +209,7 @@ test_that("agepyramid handles non-standard gender labels", {
     male = "M"
   )
 
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles negative ages gracefully", {
@@ -243,7 +243,7 @@ test_that("agepyramid handles very large bin widths", {
   )
 
   # Should create a single bin
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles very small bin widths", {
@@ -258,7 +258,7 @@ test_that("agepyramid handles very small bin widths", {
   )
 
   # Should create many bins
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles wrong gender level specification", {
@@ -272,7 +272,7 @@ test_that("agepyramid handles wrong gender level specification", {
   )
 
   # Should still run (but pyramid will be backwards)
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles data with outliers", {
@@ -289,7 +289,7 @@ test_that("agepyramid handles data with outliers", {
   )
 
   # Should handle outliers (may warn or adjust bins)
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
 test_that("agepyramid handles special characters in variable names", {

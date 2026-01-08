@@ -8,7 +8,7 @@ library(stringr)
 
 # Get all .omv files in data directory
 omv_files <- list.files(
-  path = here::here("data"),
+  path = here::here("data-raw/non-rda"),
   pattern = "\\.omv$",
   full.names = FALSE
 )
@@ -16,7 +16,7 @@ omv_files <- list.files(
 cat("Found", length(omv_files), ".omv files\n")
 
 # Base GitHub raw URL
-github_base <- "https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/"
+github_base <- "https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/"
 
 # Function to create markdown link
 create_link <- function(filename) {

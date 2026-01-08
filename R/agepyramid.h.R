@@ -38,7 +38,8 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric",
+                    "factor"))
             private$..gender <- jmvcore::OptionVariable$new(
                 "gender",
                 gender,

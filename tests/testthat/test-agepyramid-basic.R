@@ -18,8 +18,8 @@ test_that("agepyramid function exists and runs", {
     male = "Male"
   )
 
-  expect_s3_class(result, "agepyramidClass")
-  expect_true("results" %in% names(result))
+  expect_s3_class(result, "agepyramidResults")
+  expect_true(!is.null(result$plot))
 })
 
 test_that("agepyramid handles required arguments", {
@@ -44,7 +44,7 @@ test_that("agepyramid errors on missing required arguments", {
       female = "Female",
       male = "Male"
     ),
-    regexp = "age.*required|missing.*age",
+    regexp = "age.*missing",
     ignore.case = TRUE
   )
 
@@ -56,7 +56,7 @@ test_that("agepyramid errors on missing required arguments", {
       female = "Female",
       male = "Male"
     ),
-    regexp = "gender.*required|missing.*gender",
+    regexp = "gender.*missing",
     ignore.case = TRUE
   )
 })
@@ -71,7 +71,7 @@ test_that("agepyramid produces expected outputs", {
   )
 
   # Check that plot exists
-  expect_true(!is.null(result$results$plot))
+  expect_true(!is.null(result$plot))
 
   # Result should have options
   expect_true(!is.null(result$options))
@@ -89,32 +89,10 @@ test_that("agepyramid works with complete cases only", {
     male = "Male"
   )
 
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })
 
-test_that("agepyramid accepts different plot engines", {
-  # Test ggcharts engine
-  result1 <- agepyramid(
-    data = agepyramid_test,
-    age = "age",
-    gender = "gender",
-    female = "Female",
-    male = "Male",
-    plot_engine = "ggcharts"
-  )
-  expect_no_error(result1)
 
-  # Test ggplot2 engine
-  result2 <- agepyramid(
-    data = agepyramid_test,
-    age = "age",
-    gender = "gender",
-    female = "Female",
-    male = "Male",
-    plot_engine = "ggplot2"
-  )
-  expect_no_error(result2)
-})
 
 test_that("agepyramid works with different age group presets", {
   # Test custom bins

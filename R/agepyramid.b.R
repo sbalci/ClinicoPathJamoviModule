@@ -63,6 +63,11 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use as.character before as.numeric to handle factors correctly
             mydata[["Age"]] <- as.numeric(as.character(mydata[[age]]))
             mydata[["Gender"]] <- as.factor(mydata[[gender]])
+            
+            # Filter out invalid ages (created by conversion)
+            n_before_age_filter <- nrow(mydata)
+            mydata <- mydata %>% dplyr::filter(!is.na(Age))
+            n_invalid_age <- n_before_age_filter - nrow(mydata)
 
             # Determine gender levels with smart defaults ----
             n_initial <- nrow(self$data)  # Track for data summary
@@ -134,8 +139,12 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         is_male ~ "Male",
                         TRUE ~ NA_character_  # Other values become NA
                     )
-                ) %>%
-                dplyr::filter(!is.na(Gender2))  # Remove unrecognized genders
+                )
+
+            # Filter unrecognised genders and track exclusion
+            n_before_gender_filter <- nrow(mydata)
+            mydata <- mydata %>% dplyr::filter(!is.na(Gender2))
+            n_missing_gender <- n_before_gender_filter - nrow(mydata)
 
             n_final <- nrow(mydata)  # Track for data summary
 
@@ -276,7 +285,9 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 is_single_gender = is_single_gender,
                 female_level = female_level,
                 male_level = male_level,
-                single_gender_label = single_gender_label
+                single_gender_label = single_gender_label,
+                n_invalid_age = n_invalid_age,
+                n_missing_gender = n_missing_gender
             )
             self$results$dataInfo$setContent(info_html)
         },
@@ -500,7 +511,8 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .build_data_summary_html = function(n_initial, n_final, is_single_gender,
-                                           female_level, male_level, single_gender_label) {
+                                           female_level, male_level, single_gender_label,
+                                           n_invalid_age = 0, n_missing_gender = 0) {
             # Build informative HTML showing data quality and gender level info
             n_excluded <- n_initial - n_final
 
@@ -514,6 +526,14 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pct_excluded <- round(n_excluded / n_initial * 100, 1)
                 html <- paste0(html, "<tr><td><strong>Excluded:</strong></td><td style='color: #d32f2f;'>",
                     n_excluded, " (", pct_excluded, "%)</td></tr>")
+                
+                # Add breakdown
+                if (n_invalid_age > 0) {
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Non-numeric ages:</td><td style='color: #d32f2f; font-size: 13px;'>", n_invalid_age, "</td></tr>")
+                }
+                if (n_missing_gender > 0) {
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Missing/unrecognized gender:</td><td style='color: #d32f2f; font-size: 13px;'>", n_missing_gender, "</td></tr>")
+                }
             }
 
             if (is_single_gender) {

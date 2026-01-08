@@ -43,7 +43,7 @@ test_that("agepyramid respects all color palette options", {
     gender = "gender",
     female = "Female",
     male = "Male",
-    color_palette = "accessible"
+    color_palette = "colorblind"
   )
   expect_no_error(result2)
 
@@ -55,8 +55,8 @@ test_that("agepyramid respects all color palette options", {
     female = "Female",
     male = "Male",
     color_palette = "custom",
-    color1 = "#FF0000",
-    color2 = "#0000FF"
+    female_color = "#FF0000",
+    male_color = "#0000FF"
   )
   expect_no_error(result3)
 })
@@ -119,29 +119,7 @@ test_that("agepyramid works with all age group presets", {
   expect_no_error(result5)
 })
 
-test_that("agepyramid works with both plot engines", {
-  # ggplot2 engine
-  result1 <- agepyramid(
-    data = agepyramid_test,
-    age = "age",
-    gender = "gender",
-    female = "Female",
-    male = "Male",
-    plot_engine = "ggplot2"
-  )
-  expect_no_error(result1)
 
-  # ggcharts engine
-  result2 <- agepyramid(
-    data = agepyramid_test,
-    age = "age",
-    gender = "gender",
-    female = "Female",
-    male = "Male",
-    plot_engine = "ggcharts"
-  )
-  expect_no_error(result2)
-})
 
 test_that("agepyramid respects custom plot titles", {
   custom_titles <- c(
@@ -241,13 +219,12 @@ test_that("agepyramid handles all argument combinations", {
     male = "Male",
     bin_width = 10,
     plot_title = "Complete Test",
-    color1 = "#E69F00",
-    color2 = "#56B4E9",
+    female_color = "#E69F00",
+    male_color = "#56B4E9",
     color_palette = "custom",
-    age_groups = "custom",
-    plot_engine = "ggcharts"
+    age_groups = "custom"
   )
 
   expect_no_error(result)
-  expect_s3_class(result, "agepyramidClass")
+  expect_s3_class(result, "agepyramidResults")
 })

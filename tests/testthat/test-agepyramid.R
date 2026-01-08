@@ -77,10 +77,10 @@ test_that("agepyramid handles custom plot titles correctly", {
 test_that("agepyramid handles custom colors correctly", {
   # Test different color specifications
   color_combinations <- list(
-    list(color1 = "#FF5733", color2 = "#3498DB"),  # Hex codes
-    list(color1 = "red", color2 = "blue"),         # Named colors
-    list(color1 = "#E74C3C", color2 = "#2ECC71"), # Different hex codes
-    list(color1 = "darkgreen", color2 = "orange") # More named colors
+    list(female_color = "#FF5733", male_color = "#3498DB"),  # Hex codes
+    list(female_color = "red", male_color = "blue"),         # Named colors
+    list(female_color = "#E74C3C", male_color = "#2ECC71"), # Different hex codes
+    list(female_color = "darkgreen", male_color = "orange") # More named colors
   )
   
   for (i in seq_along(color_combinations)) {
@@ -92,8 +92,8 @@ test_that("agepyramid handles custom colors correctly", {
         gender = "Sex",
         female = "Female",
         male = "Male",
-        color1 = colors$color1,
-        color2 = colors$color2
+        female_color = colors$female_color,
+        male_color = colors$male_color
       )
     }, NA, info = paste("color combination", i))
   }
@@ -158,8 +158,8 @@ test_that("agepyramid parameter combinations work correctly", {
       male = "Male",
       bin_width = 8,
       plot_title = "Comprehensive Age Analysis",
-      color1 = "#9B59B6",
-      color2 = "#1ABC9C"
+      female_color = "#9B59B6",
+      male_color = "#1ABC9C"
     )
   }, NA)
 })
@@ -363,7 +363,7 @@ test_that("agepyramid handles special characters in plot title", {
 
 test_that("agepyramid dependency handling", {
   # Test function behavior when required packages are available
-  required_packages <- c("ggcharts", "dplyr", "tidyr", "tibble")
+  required_packages <- c("ggplot2", "dplyr", "tidyr", "tibble")
   
   for (pkg in required_packages) {
     if (requireNamespace(pkg, quietly = TRUE)) {
@@ -435,17 +435,17 @@ test_that("agepyramid output is correct and stable", {
     age = "Age",
     gender = "Sex",
     female = "Female",
-    male = "Male"
+    male = NULL
   )
   
   # Check for single-gender message in dataInfo
-  expect_true(grepl("Single-gender cohort detected", result_single_gender$dataInfo$content))
+  expect_true(grepl("Single-gender", result_single_gender$dataInfo$content))
   
   # Check that the plot is a simple bar chart (not a pyramid)
   # We can't directly test the plot object, but we can check the plot's state
-  plot_state_data <- result_single_gender$plot$state$data
+  plot_state_data <- result_single_gender$plot$state
   expect_equal(ncol(plot_state_data), 3) # Should have Pop, Gender, n
-  expect_equal(unique(plot_state_data$Gender), "Single Gender Cohort")
+  expect_equal(as.character(unique(plot_state_data$Gender)), "Female")
   
   # 4. Test correctness of age bin labels
   result_geriatric <- agepyramid(

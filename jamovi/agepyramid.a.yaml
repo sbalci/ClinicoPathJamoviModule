@@ -19,7 +19,7 @@ options:
       title: Age
       type: Variable
       suggested: [ continuous ]
-      permitted: [ numeric ]
+      permitted: [ numeric, factor ]
       description:
           R: >
             a string naming the variable from `data` that contains the

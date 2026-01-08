@@ -77,49 +77,49 @@ All .omv files are available on GitHub. Click any filename to download:
 **When to use:** Patient demographic visualization, epidemiological studies, cohort characterization
 **Files:**
 
-- [agepyramid_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/agepyramid_test.omv)
+- [agepyramid_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/agepyramid_test.omv)
 
 ### alluvial (1 file)
 **Purpose:** Visualize flow and transitions between categorical states over time
 **When to use:** Treatment pathways, disease progression, patient journey visualization
 **Files:**
 
-- [alluvial_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/alluvial_test.omv)
+- [alluvial_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/alluvial_test.omv)
 
 ### benford (1 file)
 **Purpose:** Detect data fabrication using Benford's Law (first digit analysis)
 **When to use:** Data quality assessment, fraud detection, validating research data integrity
 **Files:**
 
-- [benford_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/benford_test.omv)
+- [benford_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/benford_test.omv)
 
 ### categorize (1 file)
 **Purpose:** Convert continuous variables into categorical bins/groups
 **When to use:** Age groups, biomarker cutoffs, clinical staging, risk stratification
 **Files:**
 
-- [categorize_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/categorize_test.omv)
+- [categorize_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/categorize_test.omv)
 
 ### checkdata (1 file)
 **Purpose:** Comprehensive data quality assessment and validation
 **When to use:** Before analysis, data cleaning, identifying missing values and outliers
 **Files:**
 
-- [checkdata_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/checkdata_test.omv)
+- [checkdata_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/checkdata_test.omv)
 
 ### chisqposttest (8 files)
 **Purpose:** Post-hoc pairwise comparisons after significant chi-square test
 **When to use:** Multiple group comparisons in contingency tables, identify which groups differ
 **Files:**
 
-- [chisqposttest_all_features.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_all_features.omv)
-- [chisqposttest_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_comprehensive.omv)
-- [chisqposttest_null.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_null.omv)
-- [chisqposttest_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_perfect.omv)
-- [chisqposttest_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_small.omv)
-- [chisqposttest_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_test.omv)
-- [chisqposttest_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_test_data.omv)
-- [chisqposttest_weighted.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/chisqposttest_weighted.omv)
+- [chisqposttest_all_features.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_all_features.omv)
+- [chisqposttest_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_comprehensive.omv)
+- [chisqposttest_null.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_null.omv)
+- [chisqposttest_perfect.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_perfect.omv)
+- [chisqposttest_small.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_small.omv)
+- [chisqposttest_test.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_test.omv)
+- [chisqposttest_test_data.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_test_data.omv)
+- [chisqposttest_weighted.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/chisqposttest_weighted.omv)
 
 ---
 
@@ -138,9 +138,9 @@ These three complementary functions provide comprehensive sample size planning f
 **Approach:** "How many subjects needed to estimate kappa within ±X?"
 **Files:**
 
-- [kappasizeci_relationship_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_relationship_cases.omv)
-- [kappasizeci_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_scenarios_comprehensive.omv)
-- [kappasizeci_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_validation_cases.omv)
+- [kappasizeci_relationship_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizeci_relationship_cases.omv)
+- [kappasizeci_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizeci_scenarios_comprehensive.omv)
+- [kappasizeci_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizeci_validation_cases.omv)
 
 ### kappasizefixedn (3 files) ✨ NEW
 **Purpose:** Reverse calculation - given fixed n, find lowest detectable kappa
@@ -149,9 +149,9 @@ These three complementary functions provide comprehensive sample size planning f
 **Constraint types:** Budget, time, case availability, regulatory, protocol
 **Files:**
 
-- [kappasizefixedn_power_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_power_cases.omv)
-- [kappasizefixedn_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_scenarios_comprehensive.omv)
-- [kappasizefixedn_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizefixedn_validation_cases.omv)
+- [kappasizefixedn_power_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizefixedn_power_cases.omv)
+- [kappasizefixedn_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizefixedn_scenarios_comprehensive.omv)
+- [kappasizefixedn_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizefixedn_validation_cases.omv)
 
 ### kappasizepower (3 files) ✨ NEW
 **Purpose:** Sample size for kappa hypothesis testing (power-based approach)
@@ -159,9 +159,9 @@ These three complementary functions provide comprehensive sample size planning f
 **Approach:** "How many needed to test κ₁ vs. κ₀ with power X?"
 **Files:**
 
-- [kappasizepower_relationship_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_relationship_cases.omv)
-- [kappasizepower_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_scenarios_comprehensive.omv)
-- [kappasizepower_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizepower_validation_cases.omv)
+- [kappasizepower_relationship_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizepower_relationship_cases.omv)
+- [kappasizepower_scenarios_comprehensive.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizepower_scenarios_comprehensive.omv)
+- [kappasizepower_validation_cases.omv](https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/kappasizepower_validation_cases.omv)
 
 **Kappa Test Coverage:** 258 scenarios across all functions covering:
 
