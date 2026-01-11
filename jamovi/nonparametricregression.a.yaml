@@ -1,7 +1,7 @@
 ---
 name: nonparametricregression
 title: Non-parametric Regression Methods
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Advanced Statistical Methods
 menuSubtitle: Distribution-free regression modeling for flexible data analysis
 version: '0.0.31'

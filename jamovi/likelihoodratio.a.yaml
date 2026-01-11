@@ -1,7 +1,7 @@
 ---
 name: likelihoodratio
 title: Likelihood Ratio Analysis
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Diagnostic Statistics  
 menuSubtitle: 'Likelihood ratios and diagnostic test evaluation'
 version: '0.0.31'

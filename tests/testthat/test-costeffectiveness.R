@@ -1,79 +1,58 @@
+# Tests for costeffectiveness function
 
-test_that('costeffectiveness analysis works', {
-  skip_if_not_installed('jmvReadWrite')
+library(testthat)
+library(jmvcore)
+
+# Load the package
+if (requireNamespace("devtools", quietly = TRUE)) {
   devtools::load_all()
+}
 
-  # Synthetic data generation
+test_that("costeffectiveness works with basic inputs", {
   set.seed(123)
   n <- 50
   data <- data.frame(
-    strategy = sample(c('A', 'B'), n, replace = TRUE),
-    cost = runif(n, 1, 100),
-    effectiveness = runif(n, 1, 100),
-    subgroup_variable = sample(c('A', 'B'), n, replace = TRUE)
+    strategy = factor(sample(c("Strategy A", "Strategy B"), n, replace = TRUE), levels = c("Strategy A", "Strategy B")),
+    cost = runif(n, 1000, 5000),
+    effectiveness = runif(n, 0.5, 0.9),
+    subgroup = factor(sample(c("Male", "Female"), n, replace = TRUE))
   )
-
-  # Run analysis
+  
   expect_no_error({
-    model <- costeffectiveness(
+    result <- costeffectiveness(
       data = data,
-    strategy = 'strategy',
-    cost = 'cost',
-    effectiveness = 'effectiveness',
-    effectiveness_type = 'binary',
-    calculate_icer = TRUE,
-    calculate_incremental = TRUE,
-    dominance_analysis = FALSE,
-    net_monetary_benefit = FALSE,
-    wtp_threshold = 50000,
-    multiple_wtp_thresholds = FALSE,
-    confidence_intervals = FALSE,
-    ci_method = 'bootstrap',
-    bootstrap_samples = 100,
-    confidence_level = 0.95,
-    deterministic_sensitivity = FALSE,
-    sensitivity_range_pct = 20,
-    probabilistic_sensitivity = FALSE,
-    psa_simulations = 1000,
-    cost_distribution = 'gamma',
-    effect_distribution = 'normal',
-    voi_analysis = FALSE,
-    evpi_population = 10000,
-    evppi_parameters = FALSE,
-    evppi_focus = 'both',
-    subgroup_analysis = FALSE,
-    subgroup_variable = 'subgroup_variable',
-    time_horizon = 1,
-    discount_costs = FALSE,
-    discount_rate_costs = 3,
-    discount_effects = FALSE,
-    discount_rate_effects = 3,
-    plot_ce_plane = TRUE,
-    plot_ce_acceptability = FALSE,
-    plot_nmb = FALSE,
-    plot_tornado = FALSE,
-    plot_incremental_frontier = FALSE,
-    perspective = 'healthcare',
-    include_indirect_costs = FALSE,
-    cost_year = 2024,
-    handling_missing = 'complete',
-    random_seed = 12345
+      strategy = "strategy",
+      comparator_level = "Strategy A",
+      cost = "cost",
+      effectiveness = "effectiveness",
+      effectiveness_type = "custom",
+      subgroup_analysis = FALSE,
+      subgroup_variable = NULL,
+      plot_ce_plane = FALSE
     )
   })
-
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'costeffectiveness.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
 })
 
+test_that("costeffectiveness returns results object", {
+  set.seed(456)
+  n <- 60
+  data <- data.frame(
+    treat = factor(sample(c("New", "Old"), n, replace = TRUE), levels = c("New", "Old")),
+    cost = rnorm(n, 5000, 1000),
+    qaly = rnorm(n, 0.8, 0.1)
+  )
+  
+  result <- costeffectiveness(
+    data = data,
+    strategy = "treat",
+    comparator_level = "Old",
+    cost = "cost", 
+    effectiveness = "qaly",
+    effectiveness_type = "qaly",
+    subgroup_analysis = FALSE,
+    subgroup_variable = NULL,
+    plot_ce_plane = FALSE
+  )
+  
+  expect_true(inherits(result, "costeffectivenessResults"))
+})

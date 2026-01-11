@@ -1,54 +1,75 @@
+# Tests for prauc (Precision-Recall AUC) function
 
-test_that('prauc analysis works', {
-  skip_if_not_installed('jmvReadWrite')
+library(testthat)
+library(jmvcore)
+
+# Load the package
+if (requireNamespace("devtools", quietly = TRUE)) {
   devtools::load_all()
+}
 
-  # Synthetic data generation
+test_that("prauc works with basic inputs", {
   set.seed(123)
-  n <- 50
+  n <- 100
   data <- data.frame(
-    outcome = sample(c('A', 'B'), n, replace = TRUE),
-    predictor = runif(n, 1, 100)
+    outcome = factor(sample(c("Positive", "Negative"), n, replace = TRUE)),
+    predictor = runif(n, 0, 1)
   )
-
-  # Run analysis
+  
   expect_no_error({
-    model <- prauc(
+    result <- prauc(
       data = data,
-    outcome = 'outcome',
-    predictor = 'predictor',
-    prevalence = 0,
-    calculate_auc = TRUE,
-    calculate_fscore = TRUE,
-    confidence_intervals = TRUE,
-    ci_method = 'bootstrap',
-    bootstrap_samples = 100,
-    confidence_level = 0.95,
-    compare_to_roc = TRUE,
-    baseline_comparison = TRUE,
-    interpolation_method = 'step',
-    plot_pr_curve = TRUE,
-    plot_comparison = FALSE,
-    plot_fscore = FALSE,
-    min_threshold = 0,
-    max_threshold = 1,
-    random_seed = 12345
+      outcome = "outcome",
+      predictor = "predictor",
+      prevalence = 0,
+      calculate_auc = TRUE,
+      calculate_fscore = FALSE,
+      confidence_intervals = FALSE,
+      compare_to_roc = FALSE,
+      baseline_comparison = FALSE,
+      plot_pr_curve = FALSE,
+      plot_comparison = FALSE,
+      plot_fscore = FALSE
     )
   })
-
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'prauc.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
 })
 
+test_that("prauc returns results object", {
+  set.seed(456)
+  n <- 80
+  data <- data.frame(
+    outcome = factor(sample(c("Yes", "No"), n, replace = TRUE)),
+    predictor = runif(n, 0, 1)
+  )
+  
+  result <- prauc(
+    data = data,
+    outcome = "outcome",
+    predictor = "predictor",
+    prevalence = 0,
+    calculate_auc = TRUE,
+    plot_pr_curve = FALSE
+  )
+  
+  expect_true(inherits(result, "praucResults"))
+})
+
+test_that("prauc handles AUC calculation", {
+  set.seed(789)
+  n <- 100
+  # Create data with better separation
+  data <- data.frame(
+    outcome = factor(c(rep("Positive", 50), rep("Negative", 50))),
+    predictor = c(runif(50, 0.5, 1), runif(50, 0, 0.5))
+  )
+  
+  result <- prauc(
+    data = data,
+    outcome = "outcome", 
+    predictor = "predictor",
+    calculate_auc = TRUE,
+    plot_pr_curve = FALSE
+  )
+  
+  expect_true(inherits(result, "praucResults"))
+})

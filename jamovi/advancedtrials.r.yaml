@@ -128,7 +128,7 @@ items:
       title: 'Biomarker Strategy Results'
       type: Table
       rows: 0
-      visible: (biomarker_strategy:!all_comers)
+      visible: (!biomarker_strategy:all_comers)
       columns:
           - name: population
             title: 'Population'

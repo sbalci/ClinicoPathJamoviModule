@@ -432,7 +432,8 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         if (self$options$plot_data_overview) {
             # Data overview insights
-            var_types <- sapply(data, class)
+            # Collapse multiple classes into single string to avoid length mismatch errors
+            var_types <- sapply(data, function(x) paste(class(x), collapse = "/"))
             type_summary <- table(var_types)
 
             insights_html <- paste0(insights_html,

@@ -1,7 +1,7 @@
 ---
 name: entropyanalysis
 title: Entropy and Mutual Information Analysis
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Medical Decision Analysis
 menuTitle: Entropy Analysis
 menuSubtitle: AI uncertainty quantification and information metrics

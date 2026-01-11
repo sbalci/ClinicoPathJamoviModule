@@ -110,7 +110,9 @@ roc2dResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        combinedAUC = function() private$.items[["combinedAUC"]],
+        individualAUCs = function() private$.items[["individualAUCs"]],
+        combinationRules = function() private$.items[["combinationRules"]],
+        optimalCombination = function() private$.items[["optimalCombination"]],
         roc2dPlot = function() private$.items[["roc2dPlot"]],
         interpretation = function() private$.items[["interpretation"]]),
     private = list(),
@@ -127,25 +129,96 @@ roc2dResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="combinedAUC",
-                title="Combined Marker Performance",
-                rows=1,
+                name="individualAUCs",
+                title="Individual Marker Performance",
+                rows=0,
                 columns=list(
                     list(
-                        `name`="auc_combined", 
-                        `title`="Combined AUC", 
+                        `name`="marker", 
+                        `title`="Marker", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="auc_marker1", 
-                        `title`="Marker 1 AUC", 
+                        `name`="ci_lower", 
+                        `title`="Lower 95% CI", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="auc_marker2", 
-                        `title`="Marker 2 AUC", 
+                        `name`="ci_upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="optimal_threshold", 
+                        `title`="Optimal Threshold", 
+                        `type`="number"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
                         `type`="number", 
                         `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="combinationRules",
+                title="Combination Rules Performance",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="combination", 
+                        `title`="Combination Rule", 
+                        `type`="text"),
+                    list(
+                        `name`="formula", 
+                        `title`="Formula", 
+                        `type`="text"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="clinical_use", 
+                        `title`="Clinical Utility", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="optimalCombination",
+                title="Optimal Linear Combination",
+                rows=1,
+                visible="(decision_rule:linear)",
+                columns=list(
+                    list(
+                        `name`="weight1", 
+                        `title`="Weight (Marker 1)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="weight2", 
+                        `title`="Weight (Marker 2)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="auc_optimal", 
+                        `title`="Optimized AUC", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="formula", 
+                        `title`="Formula", 
+                        `type`="text"),
+                    list(
+                        `name`="improvement", 
+                        `title`="Improvement", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="roc2dPlot",
@@ -220,16 +293,18 @@ roc2dBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$combinedAUC} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$individualAUCs} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$combinationRules} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$optimalCombination} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$roc2dPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$combinedAUC$asDF}
+#' \code{results$individualAUCs$asDF}
 #'
-#' \code{as.data.frame(results$combinedAUC)}
+#' \code{as.data.frame(results$individualAUCs)}
 #'
 #' @export
 roc2d <- function(

@@ -124,14 +124,10 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .escapeVar = function(x) {
-            # Escape variable names for special characters and spaces
+            # Return variable name directly - toB64 encoding is only for jamovi internal use
+            # When called from R, data columns have regular names
             if (is.null(x) || x == "") return(x)
-            # Use jmvcore's toB64 if available for consistency with other jamovi modules
-            if (requireNamespace("jmvcore", quietly = TRUE)) {
-                return(jmvcore::toB64(x))
-            }
-            # Fallback: make syntactically valid names
-            return(make.names(x))
+            return(x)
         },
 
         .computePredictions = function(data, time_var, event_var) {

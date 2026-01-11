@@ -12,7 +12,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
     .run = function() {
       
       # Check if analysis is ready with proper validation
-      if (!self$.isReady()) {
+      if (!private$.isReady()) {
         self$results$interactiveGuidance$setContent(
           "<div style='padding: 20px; background: #e3f2fd; border-left: 4px solid #2196f3;'>
            <h4>🔬 Interactive Clinical Model Validation</h4>
@@ -71,6 +71,26 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       private$.generatePlots(data, validation_results)
     },
     
+    # Check if ready to run
+    .isReady = function() {
+      outcome <- self$options$outcome
+      predictors <- self$options$predictors
+      
+      return(!is.null(outcome) && length(predictors) > 0)
+    },
+    
+    # Get and validate data
+    .getData = function() {
+      data <- self$data
+      
+      # Remove rows with missing outcome
+      if (!is.null(self$options$outcome)) {
+        data <- data[!is.na(data[[self$options$outcome]]), ]
+      }
+      
+      return(data)
+    },
+    
     # Data preparation and validation
     .prepareAndValidateData = function() {
       tryCatch({
@@ -93,7 +113,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
         }
         
         # Get data
-        data <- self$.getData()
+        data <- private$.getData()
         
         # Create analysis dataset
         analysis_vars <- c(outcome_var, predictor_vars)

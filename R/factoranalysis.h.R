@@ -416,13 +416,13 @@ factoranalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                     `title`="Rotated Eigenvalue", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(rotation:!none)"),
+                                    `visible`="(!rotation:none)"),
                                 list(
                                     `name`="variance_percent_rotated", 
                                     `title`="Rotated % Variance", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(rotation:!none)"))))
+                                    `visible`="(!rotation:none)"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="parallelAnalysis",
@@ -481,7 +481,7 @@ factoranalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                             options=options,
                             name="rotatedLoadings",
                             title="Rotated Factor Loadings",
-                            visible="(showRotated && rotation:!none)",
+                            visible="(showRotated && !rotation:none)",
                             columns=list(
                                 list(
                                     `name`="variable", 
@@ -511,7 +511,7 @@ factoranalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                             options=options,
                             name="factorScoresStats",
                             title="Factor Scores Statistics",
-                            visible="(scores:!none)",
+                            visible="(!scores:none)",
                             columns=list(
                                 list(
                                     `name`="factor", 

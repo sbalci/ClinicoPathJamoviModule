@@ -38,7 +38,7 @@ items:
         title: p (adjusted)
         type: number
         format: zto,pvalue
-        visible: (multipleComparison:!none)
+        visible: (!multipleComparison:none)
       - name: df
         title: df
         type: integer
@@ -108,7 +108,7 @@ items:
         title: p (adjusted)
         type: number
         format: zto,pvalue
-        visible: (multipleComparison:!none)
+        visible: (!multipleComparison:none)
       - name: df
         title: df
         type: integer
@@ -225,7 +225,7 @@ items:
   # Enhanced Correlation Plots
   - name: partialCorrelationNetwork
     title: Partial Correlation Network
-    visible: (matrixPlot && correlationType:!semipartial)
+    visible: (matrixPlot && !correlationType:semipartial)
     type: Image
     width: 600
     height: 500

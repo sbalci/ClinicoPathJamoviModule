@@ -1,7 +1,7 @@
 ---
 name: metaanalysis
 title: Meta-Analysis & Evidence Synthesis
-menuGroup: OncoPathD
+menuGroup: OncoPathExtraT
 version: '1.0.0'
 jas: '1.2'
 description:

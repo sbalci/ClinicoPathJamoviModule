@@ -290,7 +290,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `title`="p (adjusted)", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(multipleComparison:!none)"),
+                        `visible`="(!multipleComparison:none)"),
                     list(
                         `name`="df", 
                         `title`="df", 
@@ -375,7 +375,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `title`="p (adjusted)", 
                         `type`="number", 
                         `format`="zto,pvalue", 
-                        `visible`="(multipleComparison:!none)"),
+                        `visible`="(!multipleComparison:none)"),
                     list(
                         `name`="df", 
                         `title`="df", 
@@ -503,7 +503,7 @@ partialcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="partialCorrelationNetwork",
                 title="Partial Correlation Network",
-                visible="(matrixPlot && correlationType:!semipartial)",
+                visible="(matrixPlot && !correlationType:semipartial)",
                 width=600,
                 height=500,
                 renderFun=".plotNetwork"))

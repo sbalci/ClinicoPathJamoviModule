@@ -6,9 +6,9 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
     inherit = concordanceindexBase,
     private = list(
         .escapeVar = function(x) {
-            # Escape variable names with spaces/special chars
+            # Return variable name directly - escaping not needed for R calls
             if (is.null(x) || length(x) == 0) return(x)
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+            return(x)
         },
 
         .init = function() {
@@ -403,12 +403,18 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .populateInterpretation = function() {
             interpretation <- self$results$interpretation
 
-            # Get C-index from results if available
+            # Get C-index from results if available - use asDF for safer access
             cindex_table <- self$results$cindexSummary
-            cindex_val <- if (!is.null(cindex_table) && cindex_table$rowCount > 0) {
-                cindex_table$getRow(rowNo = 1)$cindex
-            } else {
-                NA
+            cindex_val <- NA
+            if (!is.null(cindex_table) && cindex_table$rowCount > 0) {
+                tryCatch({
+                    df <- cindex_table$asDF()
+                    if (nrow(df) > 0 && "cindex" %in% names(df)) {
+                        cindex_val <- df$cindex[1]
+                    }
+                }, error = function(e) {
+                    cindex_val <- NA
+                })
             }
 
             # Build context-specific interpretation

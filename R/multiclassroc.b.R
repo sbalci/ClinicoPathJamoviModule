@@ -73,20 +73,14 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                             n_classes <- length(classes)
 
                             if (n_classes >= 3) {
-                                # Build confusion matrix columns
-                                confusion_cols <- list(
-                                    list(name = 'true_class', title = 'True Class', type = 'text', combineBelow = TRUE)
-                                )
-
                                 for (cls in classes) {
-                                    confusion_cols[[length(confusion_cols) + 1]] <- list(
-                                        name = paste0('pred_', make.names(cls)),
+                                    col_name <- paste0('pred_', make.names(cls))
+                                    self$results$confusionMatrix$addColumn(
+                                        name = col_name,
                                         title = cls,
                                         type = 'integer'
                                     )
                                 }
-
-                                self$results$confusionMatrix$setColumns(confusion_cols)
                             }
                         }
                     }

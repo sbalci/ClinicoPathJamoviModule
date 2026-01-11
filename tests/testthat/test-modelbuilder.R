@@ -600,4 +600,30 @@ describe("modelbuilder Clinical Validation", {
     })
 })
 
+test_that("ClinicoPath::modelbuilder runs successfully", {
+    data <- create_simple_clinical_data(n = 200)
+    
+    # Run the analysis
+    results <- ClinicoPath::modelbuilder(
+        data = data,
+        outcome = "cardiovascular_event",
+        outcomePositive = "Yes",
+        basicPredictors = c("age", "sex", "diabetes"),
+        buildBasicModel = TRUE,
+        enhancedPredictors = NULL,
+        biomarkerPredictors = NULL,
+        customPredictors = NULL,
+        splitData = FALSE,
+        crossValidation = FALSE
+    )
+    
+    # Check if results object is returned
+    expect_true(!is.null(results))
+    expect_true(inherits(results, "modelbuilderResults"))
+    
+    # Check if main tables exist
+    # Note: accessors might vary, verify with .h.R if needed, but usually match structure
+    expect_true(!is.null(results$basicModelSummary))
+})
+
 print("All modelbuilder tests completed successfully!")

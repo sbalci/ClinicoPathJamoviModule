@@ -2,6 +2,10 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "metaanalysisClass",
     inherit = metaanalysisBase,
     private = list(
+        .optional_features_note = NULL,
+        .data_warnings = NULL,
+        .cached_clean_data = NULL,
+        .ma_model = NULL,
         .init = function() {
             # Check dependencies and provide helpful messages
             private$.checkDependencies()
@@ -380,6 +384,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Fixed-effects model
             if (model_type %in% c('fixed_effects', 'mixed_effects')) {
                 ma_fixed <- metafor::rma(yi = clean_data$effects, vi = clean_data$variances, method = "FE")
+                private$.ma_model <- ma_fixed
                 private$.populateOverallResults(ma_fixed, "Fixed-Effects")
                 private$.populateModelFitStatistics(ma_fixed)
             }
@@ -394,6 +399,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ma_random <- metafor::rma(yi = clean_data$effects, vi = clean_data$variances, method = tau2_method, knha = TRUE)
                 }
 
+                private$.ma_model <- ma_random
                 private$.populateOverallResults(ma_random, "Random-Effects")
                 private$.populateHeterogeneityAssessment(ma_random)
                 private$.populateModelFitStatistics(ma_random)
@@ -401,7 +407,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Subgroup analysis
             if (!is.null(self$options$subgroup_var)) {
-                private$.performSubgroupAnalysis(clean_data$effects, clean_data$variances, clean_data$studies)
+                private$.performSubgroupAnalysis(clean_data$effects, clean_data$variances, clean_data$studies, self$options$subgroup_var)
             }
         },
 
@@ -563,7 +569,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Calculate prediction interval if requested and applicable
             pi_text <- ""
             if (self$options$prediction_interval && !is.null(ma_model$tau2) && ma_model$tau2 > 0) {
-                pi_result <- metafor::predict(ma_model)
+                pi_result <- predict(ma_model)
                 pi_text <- sprintf("[%.3f, %.3f]", pi_result$pi.lb, pi_result$pi.ub)
             }
 
@@ -582,16 +588,18 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             het_table <- self$results$heterogeneityAssessment
             
             # Q-test for heterogeneity
-            q_statistic <- ma_model$QE
-            q_df <- ma_model$QE.df
-            q_p <- ma_model$QEp
+            q_statistic <- if (!is.null(ma_model$QE)) ma_model$QE else NA
+            q_df <- if (!is.null(ma_model$QE.df)) ma_model$QE.df else NA
+            q_p <- if (!is.null(ma_model$QEp)) ma_model$QEp else NA
             
-            q_interpretation <- if (q_p < 0.05) "Significant heterogeneity detected" else "No significant heterogeneity"
+            q_interpretation <- if (!is.na(q_p) && q_p < 0.05) "Significant heterogeneity detected" else "No significant heterogeneity"
+            
+            df_text <- if (!is.na(q_df)) sprintf("df = %d", as.integer(q_df)) else ""
             
             het_table$addRow(rowKey = "q_test", values = list(
                 statistic = "Q-statistic",
                 value = q_statistic,
-                confidence_interval = sprintf("df = %d", q_df),
+                confidence_interval = df_text,
                 p_value = q_p,
                 interpretation = q_interpretation
             ))
@@ -619,7 +627,10 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 tau <- sqrt(tau2)
                 
                 # Confidence interval for tau²
-                tau2_ci <- confint(ma_model, type = "tau2")
+                tau2_ci <- tryCatch(
+                    confint(ma_model, type = "tau2"),
+                    error = function(e) NULL
+                )
                 if (!is.null(tau2_ci)) {
                     tau2_ci_text <- sprintf("[%.4f, %.4f]", tau2_ci$random[1], tau2_ci$random[2])
                 } else {

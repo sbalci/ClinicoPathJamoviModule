@@ -12,6 +12,7 @@ modelvalClass <- if (requireNamespace('jmvcore'))
             .data = NULL,
             .outcome_binary = NULL,
             .predicted = NULL,
+            .cal_slope = NULL,
 
             # init ----
             .init = function() {
@@ -163,6 +164,7 @@ modelvalClass <- if (requireNamespace('jmvcore'))
                     logit_p <- log(p / (1 - p))
                     cal_model <- glm(y ~ logit_p, family = binomial)
                     cal_slope <- coef(cal_model)[2]
+                    private$.cal_slope <- cal_slope
                     se_slope <- summary(cal_model)$coefficients[2, 2]
 
                     interpretation <- if (abs(cal_slope - 1) < 0.1) {
@@ -330,17 +332,8 @@ modelvalClass <- if (requireNamespace('jmvcore'))
             # Populate recommendations ----
             .populateRecommendations = function() {
                 # Get calibration slope from results
-                cal_table <- self$results$calibrationMetrics
-                cal_slope <- NULL
-                if (cal_table$rowCount > 0) {
-                    for (i in 1:cal_table$rowCount) {
-                        row <- cal_table$get(rowNo = i)
-                        if (!is.null(row$metric) && row$metric == "Calibration Slope") {
-                            cal_slope <- row$estimate
-                            break
-                        }
-                    }
-                }
+                # Get calibration slope
+                cal_slope <- private$.cal_slope
 
                 recommendations <- paste0(
                     "<div style='padding: 15px; background-color: #e8f5e9; border-left: 4px solid #4caf50;'>",

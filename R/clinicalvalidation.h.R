@@ -640,7 +640,7 @@ clinicalvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="costreduction",
                 title="Clinical Cost-Benefit Analysis",
-                visible="(cost_matrix:!equal)",
+                visible="(cost_matrix != equal)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",

@@ -137,7 +137,7 @@ items:
       title: 'Age-Standardized Rates'
       type: Table
       rows: 0
-      visible: (age_standardization:!none)
+      visible: (!age_standardization:none)
       columns:
           - name: group
             title: 'Group'

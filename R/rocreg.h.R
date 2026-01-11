@@ -303,6 +303,8 @@ rocregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         covariateROCPlot = function() private$.items[["covariateROCPlot"]],
         aucByCovPlot = function() private$.items[["aucByCovPlot"]],
         effectEstimatesPlot = function() private$.items[["effectEstimatesPlot"]],
+        stratifiedSummary = function() private$.items[["stratifiedSummary"]],
+        groupSpecificAUC = function() private$.items[["groupSpecificAUC"]],
         interpretation = function() private$.items[["interpretation"]]),
     private = list(),
     public=list(
@@ -424,6 +426,88 @@ rocregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotEffectEstimates",
                 visible="(plot_effect_estimates)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stratifiedSummary",
+                title="Stratified ROC Summary",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="covariate", 
+                        `title`="Covariate", 
+                        `type`="text"),
+                    list(
+                        `name`="n_groups", 
+                        `title`="N Groups", 
+                        `type`="integer"),
+                    list(
+                        `name`="auc_range_min", 
+                        `title`="Min AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="auc_range_max", 
+                        `title`="Max AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="pooled_auc", 
+                        `title`="Pooled AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="q_statistic", 
+                        `title`="Q Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_homogeneity", 
+                        `title`="P(Homogeneity)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="heterogeneous", 
+                        `title`="Heterogeneous", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="groupSpecificAUC",
+                title="Group-Specific AUC",
+                visible=TRUE,
+                columns=list(
+                    list(
+                        `name`="covariate", 
+                        `title`="Covariate", 
+                        `type`="text", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n_diseased", 
+                        `title`="N Diseased", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_healthy", 
+                        `title`="N Healthy", 
+                        `type`="integer"),
+                    list(
+                        `name`="auc", 
+                        `title`="AUC", 
+                        `type`="number"),
+                    list(
+                        `name`="auc_se", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower CI", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper CI", 
+                        `type`="number"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -551,6 +635,8 @@ rocregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$covariateROCPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$aucByCovPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$effectEstimatesPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$stratifiedSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$groupSpecificAUC} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'

@@ -1,6 +1,12 @@
-test_that("icccoeff module loads correctly", {
-  skip_if_not_installed('jmvReadWrite')
+library(testthat)
+library(jmvcore)
+
+# Load the package
+if (requireNamespace("devtools", quietly = TRUE)) {
   devtools::load_all()
+}
+
+test_that("icccoeff module loads correctly", {
   expect_true(exists("icccoeffClass"))
   expect_true(is.function(icccoeff))
 })
@@ -26,7 +32,7 @@ test_that("icccoeff works with basic continuous data", {
     vars = c("Age", "LVI")
   )
   
-  expect_s3_class(result, "icccoeffClass")
+  expect_true(inherits(result, "icccoeffResults"))
   expect_true("Age" %in% names(histopathology))
   expect_true("LVI" %in% names(histopathology))
 })

@@ -367,8 +367,7 @@ multiclassdiagnosticsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Analysis Summary",
-                content="Multi-class Diagnostic Performance Evaluation\n\nThis analysis evaluates classification performance using comprehensive\ndiagnostic metrics including sensitivity, specificity, PPV, NPV,\nF1 scores, and ROC analysis."))}))
+                title="Analysis Summary"))}))
 
 multiclassdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "multiclassdiagnosticsBase",

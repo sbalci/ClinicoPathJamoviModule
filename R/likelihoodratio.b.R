@@ -317,27 +317,27 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Summary table
             if (self$options$showSummaryTable) {
                 summary <- self$results$summaryTable
-                summary$setRow(1, list(measure = "Sensitivity", value = results$sensitivity, 
+                summary$addRow(rowKey = 1, values = list(measure = "Sensitivity", value = results$sensitivity, 
                                      interpretation = private$.interpretSensitivity(results$sensitivity)))
-                summary$setRow(2, list(measure = "Specificity", value = results$specificity,
+                summary$addRow(rowKey = 2, values = list(measure = "Specificity", value = results$specificity,
                                      interpretation = private$.interpretSpecificity(results$specificity)))
-                summary$setRow(3, list(measure = "Positive Predictive Value", value = results$ppv,
+                summary$addRow(rowKey = 3, values = list(measure = "Positive Predictive Value", value = results$ppv,
                                      interpretation = private$.interpretPPV(results$ppv)))
-                summary$setRow(4, list(measure = "Negative Predictive Value", value = results$npv,
+                summary$addRow(rowKey = 4, values = list(measure = "Negative Predictive Value", value = results$npv,
                                      interpretation = private$.interpretNPV(results$npv)))
             }
             
             # Likelihood ratios table
             if (self$options$showLikelihoodRatios) {
                 lr_table <- self$results$likelihoodRatios
-                lr_table$setRow(1, list(
+                lr_table$addRow(rowKey = 1, values = list(
                     ratio_type = "LR+ (Positive)",
                     value = results$lr_positive,
                     ci_lower = results$lr_pos_lower,
                     ci_upper = results$lr_pos_upper,
                     interpretation = private$.interpretLRPositive(results$lr_positive)
                 ))
-                lr_table$setRow(2, list(
+                lr_table$addRow(rowKey = 2, values = list(
                     ratio_type = "LR- (Negative)", 
                     value = results$lr_negative,
                     ci_lower = results$lr_neg_lower,
@@ -349,11 +349,11 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Contingency table
             if (self$options$showCrosstabulation) {
                 crosstab <- self$results$crosstabulation
-                crosstab$setRow(1, list(test_result = "Positive", 
+                crosstab$addRow(rowKey = 1, values = list(test_result = "Positive", 
                                       disease_positive = results$tp,
                                       disease_negative = results$fp,
                                       total = results$tp + results$fp))
-                crosstab$setRow(2, list(test_result = "Negative",
+                crosstab$addRow(rowKey = 2, values = list(test_result = "Negative",
                                       disease_positive = results$fn, 
                                       disease_negative = results$tn,
                                       total = results$fn + results$tn))
@@ -362,7 +362,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Diagnostic odds ratio
             if (self$options$showDiagnosticOdds) {
                 dor_table <- self$results$diagnosticOddsRatio
-                dor_table$setRow(1, list(
+                dor_table$addRow(rowKey = 1, values = list(
                     measure = "Diagnostic Odds Ratio",
                     value = results$dor,
                     ci_lower = results$dor_lower, 
@@ -380,7 +380,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         .populateOptimalCutpoint = function(cutpoint) {
             if (self$options$showOptimalCutpoint) {
                 opt_table <- self$results$optimalCutpoint
-                opt_table$setRow(1, list(
+                opt_table$addRow(rowKey = 1, values = list(
                     method = paste(cutpoint$method, "Method"),
                     cutpoint = cutpoint$value,
                     criterion_value = cutpoint$criterion
@@ -393,7 +393,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (self$options$showLikelihoodRatios) {
                 lr_table <- self$results$likelihoodRatios
                 for (i in 1:nrow(lr_results)) {
-                    lr_table$setRow(i, list(
+                    lr_table$addRow(rowKey = i, values = list(
                         ratio_type = paste("LR for", lr_results$level[i]),
                         value = as.numeric(lr_results$lr[i]),
                         ci_lower = as.numeric(lr_results$lr_lower[i]),
@@ -420,7 +420,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Post-test probability if negative  
                 post_neg <- (lr_neg * prev) / (lr_neg * prev + (1 - prev))
                 
-                post_table$setRow(i, list(
+                post_table$addRow(rowKey = i, values = list(
                     prevalence = prev * 100,
                     positive_test_post = post_pos * 100,
                     negative_test_post = post_neg * 100,

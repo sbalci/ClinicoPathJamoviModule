@@ -169,7 +169,7 @@ items:
     - name: costreduction
       title: Clinical Cost-Benefit Analysis
       type: Table
-      visible: (cost_matrix:!equal)
+      visible: (cost_matrix != equal)
       clearWith:
         - outcome
         - outcomeLevel

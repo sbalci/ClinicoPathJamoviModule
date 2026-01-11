@@ -1,7 +1,7 @@
 ---
 name: bayesiannetworkma
 title: Bayesian Network Meta-Analysis
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Advanced Bayesian Methods
 menuSubtitle: Multiple treatment comparison with network geometry
 version: '0.0.31'

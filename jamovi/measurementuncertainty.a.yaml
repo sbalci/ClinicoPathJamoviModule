@@ -1,7 +1,7 @@
 ---
 name: measurementuncertainty
 title: Measurement Uncertainty Estimation
-menuGroup: ClinicoPathD
+menuGroup: ExplorationExtraT
 version: '1.0.0'
 jas: '1.2'
 description:

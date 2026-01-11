@@ -1,7 +1,7 @@
 ---
 name: clinicalvalidation
 title: Clinical Model Validation Suite
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Clinical Decision Support
 menuSubtitle: Comprehensive validation for clinical prediction models
 version: '0.0.32'

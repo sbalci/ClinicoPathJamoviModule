@@ -279,8 +279,8 @@ icccoeffClass <- R6::R6Class(
             dp <- self$options$decimal_places
             
             # Create APA-style reporting
-            icc_formatted <- sprintf("%.${dp}f", results$icc_value)
-            ci_formatted <- sprintf("%.${dp}f, %.${dp}f", results$ci_lower, results$ci_upper)
+            icc_formatted <- round(results$icc_value, dp)
+            ci_formatted <- paste0(round(results$ci_lower, dp), ", ", round(results$ci_upper, dp))
             
             # Determine significance
             alpha <- self$options$alpha_level

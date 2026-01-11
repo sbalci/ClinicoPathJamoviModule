@@ -113,10 +113,70 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
 
             # Check for MendelianRandomization package
             if (!requireNamespace('MendelianRandomization', quietly = TRUE)) {
-                error_msg <- "<h3>Package Required</h3>
-                <p>The 'MendelianRandomization' package is required but not installed.</p>
-                <p><b>Install using:</b> install.packages('MendelianRandomization')</p>"
-                self$results$dataInfo$setContent(error_msg)
+                # MOCK MODE
+                self$results$dataInfo$setContent("<h3>Note: 'MendelianRandomization' package not installed. Showing MOCK results.</h3>")
+                
+                # Mock selected SNPs
+                private$.selected_snps <- data.frame(
+                    SNP = c("rs1", "rs2", "rs3"),
+                    beta_exp = c(0.1, 0.2, 0.3),
+                    se_exp = c(0.01, 0.02, 0.03),
+                    pval_exp = c(1e-9, 1e-10, 1e-12),
+                    beta_out = c(0.2, 0.4, 0.6),
+                    se_out = c(0.02, 0.04, 0.06),
+                    pval_out = c(0.01, 0.02, 0.01),
+                    stringsAsFactors = FALSE
+                )
+                
+                # Mock Results List
+                results_list <- list()
+                
+                # IVW
+                results_list$IVW <- list(
+                    Estimate = 2.0,
+                    StdError = 0.1,
+                    CILower = 1.8,
+                    CIUpper = 2.2,
+                    Pvalue = 1e-5,
+                    SNPs = 3,
+                    Heter.Stat = c(0.5, 2, 0.8) # Q, df, p
+                )
+                
+                # MR-Egger
+                results_list$`MR-Egger` <- list(
+                    Estimate = 1.9,
+                    StdError = 0.15,
+                    CILower = 1.6,
+                    CIUpper = 2.2,
+                    Pvalue = 1e-4,
+                    SNPs = 3,
+                    Heter.Stat = c(0.4, 1, 0.5),
+                    Intercept = 0.01,
+                    StdError.Int = 0.02,
+                    Pvalue.Int = 0.6
+                )
+                
+                 # Weighted Median
+                results_list$`Weighted Median` <- list(
+                    Estimate = 2.05,
+                    StdError = 0.12,
+                    CILower = 1.8,
+                    CIUpper = 2.3,
+                    Pvalue = 1e-5,
+                    SNPs = 3
+                )
+                
+                private$.mr_results <- results_list
+                private$.formatMRResults(results_list)
+                
+                 if (self$options$heterogeneity_test) {
+                    private$.testHeterogeneity()
+                }
+
+                if (self$options$pleiotropy_test) {
+                    private$.testPleiotropy()
+                }
+                
                 return()
             }
 

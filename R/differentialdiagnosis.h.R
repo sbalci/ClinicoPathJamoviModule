@@ -444,7 +444,7 @@ differentialdiagnosisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                 options=options,
                 name="modelPerformance",
                 title="Diagnostic Model Performance",
-                visible="(confirmedDiagnosis && diagnostic_probability)",
+                visible="(diagnostic_probability)",
                 columns=list(
                     list(
                         `name`="performance_metric", 

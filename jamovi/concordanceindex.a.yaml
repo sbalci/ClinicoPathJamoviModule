@@ -1,7 +1,7 @@
 ---
 name: concordanceindex
 title: Concordance Index (Harrell's C-index)
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Survival Model Validation
 menuSubtitle: Rank-based discrimination for time-to-event predictions
 version: '0.0.32'

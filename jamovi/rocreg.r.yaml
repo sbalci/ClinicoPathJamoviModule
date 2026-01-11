@@ -103,6 +103,71 @@ items:
       renderFun: .plotEffectEstimates
       visible: (plot_effect_estimates)
 
+    - name: stratifiedSummary
+      title: Stratified ROC Summary
+      type: Table
+      visible: true
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+        - name: n_groups
+          title: N Groups
+          type: integer
+        - name: auc_range_min
+          title: Min AUC
+          type: number
+        - name: auc_range_max
+          title: Max AUC
+          type: number
+        - name: pooled_auc
+          title: Pooled AUC
+          type: number
+        - name: q_statistic
+          title: Q Statistic
+          type: number
+        - name: df
+          title: df
+          type: integer
+        - name: p_homogeneity
+          title: P(Homogeneity)
+          type: number
+          format: zto,pvalue
+        - name: heterogeneous
+          title: Heterogeneous
+          type: text
+
+    - name: groupSpecificAUC
+      title: Group-Specific AUC
+      type: Table
+      visible: true
+      columns:
+        - name: covariate
+          title: Covariate
+          type: text
+          combineBelow: true
+        - name: group
+          title: Group
+          type: text
+        - name: n_diseased
+          title: N Diseased
+          type: integer
+        - name: n_healthy
+          title: N Healthy
+          type: integer
+        - name: auc
+          title: AUC
+          type: number
+        - name: auc_se
+          title: SE
+          type: number
+        - name: ci_lower
+          title: Lower CI
+          type: number
+        - name: ci_upper
+          title: Upper CI
+          type: number
+
     - name: interpretation
       title: Clinical Interpretation
       type: Html

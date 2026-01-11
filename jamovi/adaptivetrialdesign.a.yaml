@@ -1,7 +1,7 @@
 ---
 name: adaptivetrialdesign
 title: Adaptive Trial Design Methods
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Advanced Bayesian Methods
 menuSubtitle: Bayesian interim analysis and adaptive sample size re-estimation
 version: '0.0.31'

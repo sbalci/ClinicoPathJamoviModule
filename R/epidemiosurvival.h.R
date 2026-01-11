@@ -575,7 +575,7 @@ epidemiosurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="age_standardized_rates",
                 title="Age-Standardized Rates",
                 rows=0,
-                visible="(age_standardization:!none)",
+                visible="(!age_standardization:none)",
                 columns=list(
                     list(
                         `name`="group", 

@@ -395,7 +395,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             ))
             
             # Power analysis if requested (simplified for now)
-            if (FALSE && requireNamespace("pwr", quietly = TRUE)) {
+            if (requireNamespace("pwr", quietly = TRUE)) {
                 tryCatch({
                     # Calculate observed power
                     n_per_group <- length(y_data) / nlevels(group_data)

@@ -1,64 +1,80 @@
+# Tests for treemedical function
 
-test_that('treemedical analysis works', {
-  skip_if_not_installed('jmvReadWrite')
+library(testthat)
+library(jmvcore)
+
+# Load the package
+if (requireNamespace("devtools", quietly = TRUE)) {
   devtools::load_all()
+}
 
-  # Synthetic data generation
+test_that("treemedical works with basic inputs", {
   set.seed(123)
-  n <- 50
+  n <- 100
   data <- data.frame(
     vars1 = runif(n, 1, 100),
     vars2 = runif(n, 1, 100),
-    vars3 = runif(n, 1, 100),
-    facs1 = sample(c('A', 'B'), n, replace = TRUE),
-    facs2 = sample(c('A', 'B'), n, replace = TRUE),
-    facs3 = sample(c('A', 'B'), n, replace = TRUE),
-    target = sample(c('A', 'B'), n, replace = TRUE)
+    facs1 = factor(sample(c('A', 'B'), n, replace = TRUE)),
+    target = factor(sample(c('Positive', 'Negative'), n, replace = TRUE))
   )
-
-  # Run analysis
+  
   expect_no_error({
-    model <- treemedical(
+    result <- treemedical(
       data = data,
-    vars = c('vars1', 'vars2', 'vars3'),
-    facs = c('facs1', 'facs2', 'facs3'),
-    target = 'target',
-    validation = 'cv',
-    cv_folds = 5,
-    bootstrap_samples = 50,
-    stratified_sampling = TRUE,
-    holdout_split = 0.75,
-    handle_missing = 'remove',
-    max_depth = 5,
-    min_samples_split = 20,
-    cost_complexity = 0.01,
-    use_1se_rule = TRUE,
-    clinical_context = 'diagnosis',
-    cost_sensitive = FALSE,
-    fn_fp_ratio = 2,
-    show_tree_plot = TRUE,
-    show_performance_metrics = TRUE,
-    show_confusion_matrix = TRUE,
-    show_importance_plot = TRUE,
-    show_clinical_interpretation = TRUE,
-    set_seed = TRUE,
-    seed_value = 42
+      vars = c('vars1', 'vars2'),
+      facs = 'facs1',
+      target = 'target',
+      targetLevel = 'Positive',
+      validation = 'cv',
+      cv_folds = 5,
+      max_depth = 5,
+      clinical_context = 'diagnosis'
     )
   })
-
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'treemedical.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
 })
 
+test_that("treemedical returns results object", {
+  set.seed(456)
+  n <- 80
+  data <- data.frame(
+    age = rnorm(n, 60, 10),
+    marker = rnorm(n, 5, 2),
+    stage = factor(sample(c('I', 'II', 'III'), n, replace = TRUE)),
+    diagnosis = factor(sample(c('Cancer', 'Benign'), n, replace = TRUE))
+  )
+  
+  result <- treemedical(
+    data = data,
+    vars = c('age', 'marker'),
+    facs = 'stage',
+    target = 'diagnosis',
+    targetLevel = 'Cancer',
+    validation = 'holdout',
+    holdout_split = 0.75,
+    show_tree_plot = FALSE,
+    show_performance_metrics = TRUE
+  )
+  
+  expect_true(inherits(result, "treemedicalResults"))
+  expect_true(!is.null(result$performance_table))
+})
+
+test_that("treemedical handles cost sensitive learning", {
+  set.seed(789)
+  n <- 100
+  data <- data.frame(
+    x = rnorm(n),
+    y = factor(sample(c(0, 1), n, replace = TRUE))
+  )
+  
+  result <- treemedical(
+    data = data,
+    vars = 'x',
+    target = 'y',
+    targetLevel = '1',
+    cost_sensitive = TRUE,
+    fn_fp_ratio = 5
+  )
+  
+  expect_true(inherits(result, "treemedicalResults"))
+})

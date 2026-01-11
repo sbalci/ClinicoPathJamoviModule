@@ -1,7 +1,7 @@
 ---
 name: prauc
 title: Precision-Recall Analysis
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: ROC Analysis
 menuSubtitle: PR curves for imbalanced datasets
 version: '0.0.32'

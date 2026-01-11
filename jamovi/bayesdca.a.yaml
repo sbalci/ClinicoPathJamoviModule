@@ -1,7 +1,7 @@
 ---
 name: bayesdca
 title: Bayesian Decision Curve Analysis
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Bayesian Decision Curve Analysis
 version: '0.0.31'

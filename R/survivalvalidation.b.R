@@ -18,7 +18,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                    paste(packages_missing, collapse = ", "),
                                    "\nInstall using: install.packages(c('", 
                                    paste(packages_missing, collapse = "', '"), "'))")
-                self$results$warnings$setContent(warning_msg)
+                self$results$todo$setContent(warning_msg)
             }
         },
         
@@ -26,7 +26,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check if variables are selected
             if (is.null(self$options$time) || is.null(self$options$status)) {
-                self$results$instructions$setContent(
+                self$results$todo$setContent(
                     "<h3>Welcome to Survival Model Validation</h3>
                     <p>This module provides comprehensive validation and performance assessment 
                     for survival models using state-of-the-art statistical methods.</p>
@@ -109,7 +109,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 time_var <- self$options$time
                 status_var <- self$options$status
                 pred_risk_var <- self$options$predicted_risk
-                external_data <- self$options$external_data
+                # external_data <- self$options$external_data
                 
                 # Get main dataset
                 data <- self$data
@@ -149,7 +149,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(data)
                 
             }, error = function(e) {
-                self$results$errors$setContent(
+                self$results$todo$setContent(
                     paste("Data preparation failed:", e$message)
                 )
                 return(NULL)
@@ -188,7 +188,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(model_info)
                 
             }, error = function(e) {
-                self$results$errors$setContent(
+                self$results$todo$setContent(
                     paste("Model preparation failed:", e$message)
                 )
                 return(NULL)
@@ -233,7 +233,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(validation_results)
                 
             }, error = function(e) {
-                self$results$errors$setContent(
+                self$results$todo$setContent(
                     paste("Validation failed:", e$message)
                 )
                 return(NULL)

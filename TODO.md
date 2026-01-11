@@ -78,12 +78,11 @@ use gemini to make Readiness for Clinicians and Pathologists assessment and Use 
 
 You are an expert R-package and jamovi developer.
 You are an expert in biostatistics working with pathologists and clinicians.
-Critically evaluate multisurvival function.
+Critically evaluate the next function.
 Is it mathematically and statistically accurate?
 Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 Is it ready to be used by clinicians and pathologists?
-Is it ready for release? Do not focus just on testing. Focus on functionality and accuracy. After you are
-satisfied with function then update and use tests.
+Is it ready for release? 
 Suggest improvements.
 Do not remove functionality.
 

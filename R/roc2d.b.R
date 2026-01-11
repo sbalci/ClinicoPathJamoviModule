@@ -41,7 +41,7 @@ roc2dClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             private$.calculateCombinationRules(marker1, marker2, outcome_binary)
 
             # Find optimal combination
-            if (self$options$optimize_combination) {
+            if (self$options$decision_rule == "linear") {
                 private$.optimizeLinearCombination(marker1, marker2, outcome_binary)
             }
 

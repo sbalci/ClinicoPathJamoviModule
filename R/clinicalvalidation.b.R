@@ -29,13 +29,13 @@ clinicalvalidationClass <- R6::R6Class(
     .run = function() {
       
       # Check if analysis is ready
-      if (!self$.isReady()) {
+      if (!private$.isReady()) {
         self$results$instructions$setContent("Select outcome variable and at least one predictor to begin analysis.")
         return()
       }
       
       # Get data
-      data <- self$.getData()
+      data <- private$.getData()
       
       # Set seed for reproducibility
       if (self$options$set_seed) {
@@ -916,7 +916,15 @@ clinicalvalidationClass <- R6::R6Class(
         ))
       }
       
-      self$results$performancetable$setContent(table_data)
+      for (i in seq_len(nrow(table_data))) {
+          self$results$performancetable$addRow(rowKey = i, values = list(
+              metric = table_data$metric[i],
+              estimate = table_data$estimate[i],
+              lower_ci = table_data$lower_ci[i],
+              upper_ci = table_data$upper_ci[i],
+              interpretation = table_data$interpretation[i]
+          ))
+      }
     },
     
     # Populate bootstrap detailed results
@@ -956,7 +964,16 @@ clinicalvalidationClass <- R6::R6Class(
         stringsAsFactors = FALSE
       )
       
-      self$results$bootstrapresults$setContent(table_data)
+      for (i in seq_len(nrow(table_data))) {
+          self$results$bootstrapresults$addRow(rowKey = i, values = list(
+              statistic = table_data$statistic[i],
+              original = table_data$original[i],
+              bias = table_data$bias[i],
+              bias_corrected = table_data$bias_corrected[i],
+              percentile_ci_lower = table_data$percentile_ci_lower[i],
+              percentile_ci_upper = table_data$percentile_ci_upper[i]
+          ))
+      }
     },
     
     # Populate calibration results
@@ -988,7 +1005,14 @@ clinicalvalidationClass <- R6::R6Class(
         ))
       }
       
-      self$results$calibrationtable$setContent(table_data)
+      for (i in seq_len(nrow(table_data))) {
+          self$results$calibrationtable$addRow(rowKey = i, values = list(
+              test = table_data$test[i],
+              statistic = table_data$statistic[i],
+              p_value = table_data$p_value[i],
+              interpretation = table_data$interpretation[i]
+          ))
+      }
       
       # Brier score
       if (!is.null(calibration_results$brier_score)) {
@@ -1007,14 +1031,29 @@ clinicalvalidationClass <- R6::R6Class(
           stringsAsFactors = FALSE
         )
         
-        self$results$brierscore$setContent(brier_data)
+        for (i in seq_len(nrow(brier_data))) {
+            self$results$brierscore$addRow(rowKey = i, values = list(
+                component = brier_data$component[i],
+                value = brier_data$value[i],
+                interpretation = brier_data$interpretation[i]
+            ))
+        }
       }
     },
     
     # Populate model comparison
     .populateModelComparison = function(comparison_results) {
       
-      self$results$modelcomparison$setContent(comparison_results)
+      for (i in seq_len(nrow(comparison_results))) {
+          self$results$modelcomparison$addRow(rowKey = i, values = list(
+              model = comparison_results$model[i],
+              auc = comparison_results$auc[i],
+              accuracy = comparison_results$accuracy[i],
+              sensitivity = comparison_results$sensitivity[i],
+              specificity = comparison_results$specificity[i],
+              rank = comparison_results$rank[i]
+          ))
+      }
     },
     
     # Populate clinical interpretation

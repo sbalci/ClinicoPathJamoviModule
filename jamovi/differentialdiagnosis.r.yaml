@@ -175,7 +175,7 @@ items:
     - name: modelPerformance
       title: Diagnostic Model Performance
       type: Table
-      visible: (confirmedDiagnosis && diagnostic_probability)
+      visible: (diagnostic_probability)
       columns:
         - name: performance_metric
           title: Performance Metric

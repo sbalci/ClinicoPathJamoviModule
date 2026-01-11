@@ -95,21 +95,46 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     # Shapiro-Wilk test (only valid if 3 <= sample size <= 5000)
                     # Use already cached numeric_data
                     valid_data <- na.omit(numeric_data)
-                    if (length(valid_data) >= 3 && length(valid_data) <= 5000) {
-                        sw_test <- shapiro.test(valid_data)
-                        p_val <- round(sw_test$p.value, 3)
-                    } else {
-                        p_val <- NA
+
+                    # Initialize variables
+                    p_val <- NA
+                    norm_status <- NULL
+
+                    # Check if data has variance (not all values identical)
+                    n_unique <- length(unique(valid_data))
+
+                    if (n_unique == 1) {
+                        # All values are identical - no variance
+                        norm_status <- .("constant value (no variance)")
+                    } else if (length(valid_data) >= 3 && length(valid_data) <= 5000) {
+                        # Perform Shapiro-Wilk test with error handling
+                        sw_result <- tryCatch({
+                            sw_test <- shapiro.test(valid_data)
+                            list(p_val = round(sw_test$p.value, 3), success = TRUE)
+                        }, error = function(e) {
+                            list(p_val = NA, success = FALSE)
+                        })
+                        p_val <- sw_result$p_val
+
+                        # Interpret normality result
+                        if (!is.na(p_val)) {
+                            norm_status <- if (p_val > 0.05) {
+                                .("appears to be normally distributed")
+                            } else {
+                                .("does not appear to be normally distributed. Please use relevant visualisation and tests to verify the characteristics of distribution.")
+                            }
+                        }
                     }
+
+                    # Default norm_status if not set
+                    if (is.null(norm_status)) {
+                        norm_status <- .("Normality test not applicable due to sample size")
+                    }
+
                     # Calculate skewness and kurtosis using the moments package.
                     skew_val <- round(moments::skewness(numeric_data, na.rm = TRUE), 2)
                     kurt_val <- round(moments::kurtosis(numeric_data, na.rm = TRUE), 2)
-                    # Interpret normality based on the Shapiro-Wilk p-value.
-                    norm_status <- if (!is.na(p_val)) {
-                        if (p_val > 0.05) .("appears to be normally distributed") else .("does not appear to be normally distributed. Please use relevant visualisation and tests to verify the characteristics of distribution.")
-                    } else {
-                        .("Normality test not applicable due to sample size")
-                    }
+
                     dist_text <- paste0(
                         "<br><em>", .("Distribution Diagnostics for"), " ", htmltools::htmlEscape(myvar) ,":</em> ", .("Shapiro-Wilk p-value"), " = ", p_val,
                         "; ", .("Skewness"), " = ", skew_val, "; ", .("Kurtosis"), " = ", kurt_val,
@@ -132,12 +157,19 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 # Filter and validate numeric variables
 
                 if (length(numeric_vars) > 0) {
-                    clean_data <- dataset[numeric_vars]
+                    # Ensure clean data.frame conversion from jamovi data structure
+                    clean_data <- as.data.frame(dataset[numeric_vars], stringsAsFactors = FALSE)
 
-                    # Ensure proper data types
+                    # Ensure proper data types and remove any attributes that might interfere
                     clean_data <- as.data.frame(lapply(clean_data, function(x) {
-                        if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
-                    }))
+                        x <- if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
+                        # Remove any attributes that might cause issues
+                        attributes(x) <- NULL
+                        x
+                    }), stringsAsFactors = FALSE)
+
+                    # Restore column names
+                    names(clean_data) <- numeric_vars
 
                     # Use gtExtras with default styling as intended
                     summary_table <- clean_data %>%
@@ -153,7 +185,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                             as.character(summary_table)
                         }, error = function(e3) {
                             # Final fallback: use custom method
-                            as.character(private$.create_summary_table(dataset, var_list))
+                            as.character(private$.gtExtras_style_fallback(dataset, var_list))
                         })
                     })
 
@@ -162,15 +194,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     htmltools::HTML(paste0("<p>", .("No numeric variables selected for summary table."), "</p>"))
                 }
             }, error = function(e) {
-                # Debug information and fallback to simple table if gtExtras fails
-                warning_msg <- paste0(
-                    "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 3px;'>",
-                    "<strong>", .("Note"), ":</strong> ", .("Using fallback table format"), ". ",
-                    .("Error"), ": ", e$message,
-                    "</div>"
-                )
-                simple_table <- private$.create_simple_summary_table(dataset, var_list)
-                htmltools::HTML(paste0(warning_msg, as.character(simple_table)))
+                # If gtExtras fails, use the comprehensive fallback without error message
+                # This is a design choice to avoid alarming users when the fallback works perfectly
+                simple_table <- private$.gtExtras_style_fallback(dataset, var_list)
+                htmltools::HTML(as.character(simple_table))
             })
             
             
@@ -287,16 +314,23 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     mean = mean(x_clean, na.rm = TRUE),
                     sd = sd(x_clean, na.rm = TRUE),
                     min = min(x_clean, na.rm = TRUE),
-                    q25 = quantile(x_clean, 0.25, na.rm = TRUE),
+                    q25 = unname(quantile(x_clean, 0.25, na.rm = TRUE)),
                     median = median(x_clean, na.rm = TRUE),
-                    q75 = quantile(x_clean, 0.75, na.rm = TRUE),
+                    q75 = unname(quantile(x_clean, 0.75, na.rm = TRUE)),
                     max = max(x_clean, na.rm = TRUE)
                 )
             }
             
             # Apply vectorized calculation to all variables
             stats_matrix <- vapply(dataset[numeric_vars], calc_stats, numeric(9))
-            
+
+            # Ensure stats_matrix is always a matrix (vapply returns vector for single variable)
+            if (!is.matrix(stats_matrix)) {
+                stats_matrix <- matrix(stats_matrix, ncol = 1)
+                rownames(stats_matrix) <- c("n", "missing", "mean", "sd", "min", "q25", "median", "q75", "max")
+                colnames(stats_matrix) <- numeric_vars
+            }
+
             summary_stats <- data.frame(
                 Variable = numeric_vars,
                 Type = rep("numeric", length(numeric_vars)),
@@ -569,10 +603,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50; margin: 10px 0; border-radius: 4px;'>",
                 "<h4 style='margin-top: 0; color: #2e7d32;'>", .("Copy-Ready Clinical Summary"), "</h4>",
                 "<div style='background-color: white; padding: 10px; border-radius: 3px; border: 1px solid #c8e6c9;'>",
-                paste(sentences, collapse = " "),
+                paste(sentences, collapse = "<br><br>"),
                 "</div>",
                 "<p style='margin-top: 10px; font-size: 0.9em; color: #2e7d32;'>",
-                "<strong>", .("Usage"), ":</strong> ", 
+                "<strong>", .("Usage"), ":</strong> ",
                 .("Copy the text above for use in clinical reports, research manuscripts, or medical documentation."),
                 "</p></div>"
             )

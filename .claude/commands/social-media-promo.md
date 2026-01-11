@@ -1,6 +1,6 @@
 ---
 description: Generate social media promotion text for a jamovi function (for pathologists and clinicians)
-argument-hint: "[function-name] [platform:twitter|linkedin|general]"
+argument-hint: "[function-name|random|surprise] [platform:twitter|linkedin|general]"
 ---
 
 # Social Media Promotion Generator for ClinicoPath Functions
@@ -9,9 +9,14 @@ Generate **concise, clinician-friendly promotional text** for the jamovi functio
 
 ## Function to Promote
 
-**Function Name**: `$1`
+**Function Name**: `$1` (or use "random"/"surprise" for automatic selection)
 
 **Target Platform**: `$2` (default: general if not specified)
+
+**Random Selection Mode**:
+- Use `random` or `surprise` (or leave empty) to automatically select a **mature function** to promote
+- Only functions with stable menuGroups are selected (excludes testing/development functions ending in "T" or "D")
+- Great for discovering lesser-known features or creating regular promotional content
 
 ## Analysis Steps
 
@@ -32,6 +37,49 @@ Generate **concise, clinician-friendly promotional text** for the jamovi functio
    - Output types (tables, plots, metrics)
    - Ease of use features
    - Clinical interpretation aids
+
+4. **Identify relevant example datasets**:
+   - Check the complete test data catalog for function-specific .omv files
+   - Match function name prefix to available test datasets
+   - Include 1-2 direct download links with clinical context
+   - See "Test Data Reference" section below
+
+## Test Data Reference
+
+**Complete Catalog**: See `vignettes/test-data-complete-catalog.Rmd` for all 945+ test datasets
+
+**Key Function Categories** (examples):
+- `timeinterval_*.omv` - Time interval calculations (24 files)
+- `ihc_*.omv` - IHC heterogeneity analysis (21 files)
+- `outcomeorganizer_*.omv` - Survival outcome organization (20 files)
+- `singlearm_*.omv` - Single-arm survival trials (18 files)
+- `psychopdaROC_*.omv` - ROC analysis (17 files)
+- `survivalcont_*.omv` - Continuous survival predictors (17 files)
+- `decision_*.omv` - Decision analysis (16 files)
+- `swimmerplot_*.omv` - Swimmer plots (16 files)
+- `waterfall_*.omv` - Waterfall plots (16 files)
+- `decisioncompare_*.omv` - Decision curve comparison (14 files)
+- `linechart_*.omv` - Longitudinal line charts (13 files)
+- `pathsampling_*.omv` - Pathology sampling adequacy (13 files)
+- `stagemigration_*.omv` - Stage migration analysis (13 files)
+
+**General Clinical Datasets**:
+- `histopathology.omv` - General histopathology data
+- `histopathologySurvival.omv` - Survival analysis examples
+- `histopathologyMedicalDecision.omv` - Decision tree examples
+- `rocdata.omv` - ROC curve examples
+- `colon.omv` - Colon cancer outcomes
+- `melanoma.omv` - Melanoma patient data
+- `BreastCancer.omv` - Breast cancer analysis
+
+**GitHub Base URL**: `https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/`
+
+**Usage in Promotional Content**:
+1. Look up function name in the catalog (e.g., for `swimmerplot` function, find `swimmerplot_*.omv` files)
+2. Select the most clinically relevant example (e.g., `swimmerplot_immuno.omv` for immunotherapy trials)
+3. Include direct download link in promotional text
+4. Phrase as: "Try it yourself: [dataset name] - [clinical scenario]"
+5. Always emphasize "download and test immediately" convenience
 
 ## Target Audience
 
@@ -222,12 +270,21 @@ Provide all three variants clearly labeled:
 
 ---
 
+## 📊 EXAMPLE DATASETS
+- **[Dataset 1 Name]** - [Clinical scenario]
+  Download: [GitHub raw URL]
+- **[Dataset 2 Name]** - [Clinical scenario]
+  Download: [GitHub raw URL]
+
+---
+
 ## 📋 USAGE NOTES
 - **Primary Audience**: [pathologists/oncologists/researchers]
 - **Key Message**: [main clinical benefit in one sentence]
 - **Clinical Context**: [typical use case]
 - **Best Platform**: [twitter/linkedin/both - with rationale]
 - **Suggested Posting Time**: [morning/afternoon - when clinicians are active]
+- **Test Data**: [Number of relevant .omv files available for this function]
 ```
 
 ## Important Reminders
@@ -237,7 +294,39 @@ Provide all three variants clearly labeled:
 - **No Medical Claims**: Don't claim FDA approval or clinical validation unless documented
 - **Professional Credibility**: Maintain scientific rigor and honesty
 - **Accessibility**: Make it understandable to varied expertise levels
+- **Include Test Data**: ALWAYS look up and include relevant .omv example files from the catalog
 
 ---
 
-Begin by analyzing the function files for `$1` and extracting its core clinical value proposition.
+## Execution Steps
+
+### Step 0: Random Function Selection (if needed)
+
+**If `$1` is empty, "random", or "surprise":**
+
+1. Use `Glob` to find all .a.yaml files: `jamovi/*.a.yaml`
+2. Filter out system files (0000.yaml, js.yaml)
+3. For each function, use `Grep` to check the `menuGroup:` field
+4. **Filter to mature functions only**: Exclude functions where menuGroup ends with "T" or "D"
+   - "T" suffix = Testing functions (e.g., `menuGroup: meddecideT`)
+   - "D" suffix = Development functions (e.g., `menuGroup: SurvivalD`)
+5. From the filtered list of mature functions, randomly select one
+6. Announce: "🎲 Randomly selected mature function: **[function_name]** (menuGroup: [group])"
+7. Use that function for the main execution steps below
+
+**Mature Function Examples:**
+- ✅ VALID: `menuGroup: meddecide`, `menuGroup: Survival`, `menuGroup: Descriptives`
+- ❌ INVALID: `menuGroup: meddecideT`, `menuGroup: SurvivalD`, `menuGroup: ClinicoPathT`
+
+**Otherwise:** Use the specified function name from `$1`
+
+### Main Execution Steps:
+
+1. **Read function files**: Analyze `jamovi/$1.a.yaml`, `R/$1.b.R`, `jamovi/$1.r.yaml`, `jamovi/$1.u.yaml`
+2. **Read test data catalog**: Use `Grep` to search `vignettes/test-data-complete-catalog.Rmd` for `$1_*.omv` files
+3. **Select 1-2 most relevant datasets**: Choose clinically meaningful examples (e.g., prefer `_immuno.omv` over `_test.omv`)
+4. **Extract clinical value**: Identify what clinical problem the function solves
+5. **Generate promotional variants**: Create all three versions with hashtags
+6. **Add dataset section**: Include direct GitHub download links with clinical context
+
+Begin by checking if random selection is needed (Step 0), then analyzing the function files and looking up relevant test datasets.

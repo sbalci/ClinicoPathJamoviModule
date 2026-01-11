@@ -1,58 +1,121 @@
 
-test_that('cohenskappa analysis works', {
-  skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
+library(testthat)
+library(jmvcore)
 
-  # Synthetic data generation
+# Load the package
+if (requireNamespace("devtools", quietly = TRUE)) {
+  devtools::load_all()
+} else {
+  stop("devtools needed to load package for tests")
+}
+
+test_that("cohenskappa works with binary categories", {
+  # Create synthetic data with proper factor levels  
   set.seed(123)
   n <- 50
-  data <- data.frame(
-    rater1 = sample(c('A', 'B'), n, replace = TRUE),
-    rater2 = sample(c('A', 'B'), n, replace = TRUE),
-    rater3 = sample(c('A', 'B'), n, replace = TRUE),
-    rater4 = sample(c('A', 'B'), n, replace = TRUE),
-    rater5 = sample(c('A', 'B'), n, replace = TRUE)
+  
+  # Use factors explicitly
+  rater1 <- factor(sample(c("A", "B"), n, replace = TRUE), levels = c("A", "B"))
+  rater2 <- factor(sample(c("A", "B"), n, replace = TRUE), levels = c("A", "B"))
+  
+  data <- data.frame(rater1 = rater1, rater2 = rater2)
+  
+  # Run basic analysis
+  results <- cohenskappa(
+    data = data,
+    rater1 = "rater1",
+    rater2 = "rater2",
+    kappa_type = "cohen"
   )
-
-  # Run analysis
-  expect_no_error({
-    model <- cohenskappa(
-      data = data,
-    rater1 = 'rater1',
-    rater2 = 'rater2',
-    kappa_type = 'cohen',
-    confidence_level = 0.95,
-    ci_method = 'asymptotic',
-    bootstrap_samples = 100,
-    exact_agreement = TRUE,
-    marginal_homogeneity = TRUE,
-    agreement_plot = TRUE,
-    confusion_matrix = TRUE,
-    category_analysis = FALSE,
-    interpretation_guide = TRUE,
-    missing_treatment = 'listwise',
-    minimum_categories = 2,
-    rater3 = 'rater3',
-    rater4 = 'rater4',
-    rater5 = 'rater5',
-    multi_rater_method = 'auto',
-    show_pairwise_kappa = FALSE
-    )
-  })
-
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'cohenskappa.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
+  
+  # Check results exist and are correct type
+  expect_true(!is.null(results))
+  expect_true(inherits(results, "cohenskappaResults"))
+  
+  # Check summary contains kappa result information
+  expect_true(!is.null(results$summary$content))
+  expect_match(results$summary$content, "Kappa|kappa|agreement|cohen", perl = TRUE, ignore.case = TRUE)
 })
 
+test_that("cohenskappa works with ordinal categories (3 levels)", {
+  set.seed(456)
+  n <- 60
+  
+  # Create ordinal data with explicit factors
+  categories <- c("Low", "Medium", "High")
+  rater1 <- factor(sample(categories, n, replace = TRUE), levels = categories, ordered = TRUE)
+  rater2 <- factor(sample(categories, n, replace = TRUE), levels = categories, ordered = TRUE)
+  
+  data <- data.frame(rater1 = rater1, rater2 = rater2)
+  
+  # Run with linear weights (appropriate for ordinal)
+  results <- cohenskappa(
+    data = data,
+    rater1 = "rater1",
+    rater2 = "rater2",
+    kappa_type = "linear"
+  )
+  
+  expect_true(!is.null(results))
+  expect_true(!is.null(results$summary$content))
+})
+
+test_that("cohenskappa calculates all kappa types when requested", {
+  set.seed(789)
+  n <- 40
+  
+  rater1 <- factor(sample(c("Yes", "No"), n, replace = TRUE), levels = c("Yes", "No"))
+  rater2 <- factor(sample(c("Yes", "No"), n, replace = TRUE), levels = c("Yes", "No"))
+  
+  data <- data.frame(rater1 = rater1, rater2 = rater2)
+  
+  results <- cohenskappa(
+    data = data,
+    rater1 = "rater1",
+    rater2 = "rater2",
+    kappa_type = "all"
+  )
+  
+  # When "all" is selected, summary should still be populated
+  expect_true(!is.null(results$summary$content))
+})
+
+test_that("cohenskappa handles multi-rater analysis (3+ raters)", {
+  set.seed(101)
+  n <- 50
+  
+  rater1 <- factor(sample(c("A", "B"), n, replace = TRUE), levels = c("A", "B"))
+  rater2 <- factor(sample(c("A", "B"), n, replace = TRUE), levels = c("A", "B"))
+  rater3 <- factor(sample(c("A", "B"), n, replace = TRUE), levels = c("A", "B"))
+  
+  data <- data.frame(rater1 = rater1, rater2 = rater2, rater3 = rater3)
+  
+  results <- cohenskappa(
+    data = data,
+    rater1 = "rater1",
+    rater2 = "rater2",
+    rater3 = "rater3",
+    multi_rater_method = "fleiss"
+  )
+  
+  # Basic check - should not error and should have summary
+  expect_true(!is.null(results))
+  expect_true(!is.null(results$summary$content))
+})
+
+test_that("cohenskappa returns warning with small sample", {
+  rater1 <- factor(c("A", "B", "A"), levels = c("A", "B"))
+  rater2 <- factor(c("A", "A", "B"), levels = c("A", "B"))
+  
+  data <- data.frame(rater1 = rater1, rater2 = rater2)
+  
+  results <- cohenskappa(
+    data = data,
+    rater1 = "rater1",
+    rater2 = "rater2"
+  )
+  
+  # Should have a warning/notice in summary about small sample
+  expect_true(!is.null(results$summary$content))
+  expect_match(results$summary$content, "Warning|Error|sample|Small", perl = TRUE, ignore.case = TRUE)
+})

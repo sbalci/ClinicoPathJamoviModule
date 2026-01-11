@@ -163,12 +163,7 @@ items:
     - name: text
       title: Analysis Summary
       type: Preformatted
-      content: |-
-        Multi-class Diagnostic Performance Evaluation
-        
-        This analysis evaluates classification performance using comprehensive
-        diagnostic metrics including sensitivity, specificity, PPV, NPV,
-        F1 scores, and ROC analysis.
+
 
 refs:
     - ClinicoPathJamoviModule

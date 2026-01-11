@@ -1,7 +1,7 @@
 ---
 name: bayesiandiagnostic
 title: Bayesian Diagnostic Test Evaluation
-menuGroup: meddecideD
+menuGroup: meddecideExtraT
 menuSubgroup: Diagnostic Test Evaluation
 menuSubtitle: Bayesian analysis of diagnostic test performance with uncertainty
 version: '0.0.31'

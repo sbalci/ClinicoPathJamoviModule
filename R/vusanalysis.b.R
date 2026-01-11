@@ -316,7 +316,7 @@ vusanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             null_vus <- 1 / factorial(n_classes)
 
             # Calculate observed VUS (from summary table)
-            summary_row <- self$results$vusSummary$asDF()
+            summary_row <- self$results$vusSummary$asDF
             observed_vus <- summary_row$vus[1]
 
             # Bootstrap test
@@ -352,7 +352,7 @@ vusanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             stratum_levels <- levels(stratum_var)
 
             # Overall VUS for comparison
-            overall_vus <- self$results$vusSummary$asDF()$vus[1]
+            overall_vus <- self$results$vusSummary$asDF$vus[1]
 
             for (strat in stratum_levels) {
                 strat_idx <- stratum_var == strat
@@ -486,7 +486,7 @@ vusanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .populateInterpretation = function() {
             interpretation <- self$results$interpretation
 
-            summary_row <- self$results$vusSummary$asDF()
+            summary_row <- self$results$vusSummary$asDF
             vus <- summary_row$vus[1]
             n_classes <- summary_row$n_classes[1]
             null_vus <- summary_row$null_vus[1]

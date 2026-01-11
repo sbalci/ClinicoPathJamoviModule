@@ -68,7 +68,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Populate AUC table
             aucTable <- self$results$aucTable
             for (i in seq_along(self$options$scores)) {
-                aucTable$setRow(rowKey = i, values = list(
+                aucTable$setRow(rowKey = self$options$scores[i], values = list(
                     model = self$options$scores[i],
                     auc = aucValues[i],
                     baseline = baseline,
@@ -91,7 +91,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         level = self$options$ciWidth
                     )
 
-                    aucTable$setRow(rowNo = i, values = list(
+                    aucTable$setRow(rowKey = self$options$scores[i], values = list(
                         lower = ci[1],
                         upper = ci[2]
                     ))

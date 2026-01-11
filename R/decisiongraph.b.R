@@ -842,6 +842,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     shape = character(),
                     color = character(),
                     level = integer(),
+                    cost = numeric(),
+                    utility = numeric(),
                     stringsAsFactors = FALSE
                 )
 
@@ -863,6 +865,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     shape = "square",
                     color = private$.getNodeColor("decision"),
                     level = 1,
+                    cost = NA,
+                    utility = NA,
                     stringsAsFactors = FALSE
                 ))
                 rootId <- nodeId
@@ -883,6 +887,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                 shape = "circle",
                                 color = private$.getNodeColor("chance"),
                                 level = 2,
+                                cost = NA,
+                                utility = NA,
                                 stringsAsFactors = FALSE
                             ))
 
@@ -950,6 +956,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         shape = "triangle",
                         color = private$.getNodeColor("terminal"),
                         level = 3,
+                        cost = if (i <= length(costs)) costs[i] else NA,
+                        utility = if (i <= length(utilities)) utilities[i] else NA,
                         stringsAsFactors = FALSE
                     ))
 
@@ -1091,79 +1099,81 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             },
 
             .traverseDecisionPath = function(strategy, nodes, edges) {
-                # CRITICAL FIX: This function is a PLACEHOLDER
-                # Real decision tree evaluation requires recursive traversal of tree structure
-
-                # Current implementation has been removed because it:
-                # 1. Used random numbers as fallbacks
-                # 2. Used hardcoded magic numbers (0.5, 0.8)
-                # 3. Never traversed the actual tree structure
-                # 4. All strategies shared the same aggregate inputs
-
-                stop(paste0(
-                    "Decision tree traversal is not yet fully implemented.\n\n",
-                    "Current placeholder behavior has been removed because it:\n",
-                    "  1. Used random numbers when data was missing\n",
-                    "  2. Applied arbitrary weighted averages (magic numbers 0.5, 0.8)\n",
-                    "  3. Never traversed the actual tree structure\n",
-                    "  4. Generated meaningless expected values\n\n",
-                    "To implement decision tree evaluation properly, the function must:\n",
-                    "  1. Start at root node for this strategy\n",
-                    "  2. For decision nodes: evaluate each branch\n",
-                    "  3. For chance nodes: multiply by branch-specific probabilities\n",
-                    "  4. For terminal nodes: accumulate costs and utilities\n",
-                    "  5. Use backward induction to calculate expected values\n\n",
-                    "Please provide a properly structured decision tree with:\n",
-                    "  - Node types (decision, chance, terminal)\n",
-                    "  - Branch probabilities (for chance nodes)\n",
-                    "  - Costs and utilities (for terminal nodes)"
+                # Find root decision node
+                rootNode <- nodes[nodes$type == "decision" & nodes$level == 1, ]
+                if (nrow(rootNode) == 0) {
+                    return(list(expectedCost = 0, expectedUtility = 0))
+                }
+                
+                # Find the edge corresponding to this strategy
+                strategyEdge <- edges[edges$from == rootNode$id & edges$label == strategy, ]
+                if (nrow(strategyEdge) == 0) {
+                    return(list(expectedCost = 0, expectedUtility = 0))
+                }
+                
+                # Recursive function to evaluate node
+                evaluate_node <- function(nodeId) {
+                    node <- nodes[nodes$id == nodeId, ]
+                    
+                    if (nrow(node) == 0) {
+                        return(list(cost = 0, utility = 0))
+                    }
+                    
+                    if (node$type == "terminal") {
+                        # Return terminal values
+                        return(list(
+                            cost = if (!is.na(node$cost)) node$cost else 0,
+                            utility = if (!is.na(node$utility)) node$utility else 0
+                        ))
+                    } else if (node$type == "chance") {
+                        # Calculate expected value of branches
+                        outgoingEdges <- edges[edges$from == nodeId, ]
+                        totalCost <- 0
+                        totalUtility <- 0
+                        
+                        if (nrow(outgoingEdges) > 0) {
+                            for (i in 1:nrow(outgoingEdges)) {
+                                edge <- outgoingEdges[i, ]
+                                childResult <- evaluate_node(edge$to)
+                                
+                                prob <- if (!is.na(edge$probability)) edge$probability else 0
+                                totalCost <- totalCost + (prob * childResult$cost)
+                                totalUtility <- totalUtility + (prob * childResult$utility)
+                            }
+                        }
+                        return(list(cost = totalCost, utility = totalUtility))
+                    } else if (node$type == "decision") {
+                        # Nested decision node: Choose optimal branch (Max NMB)
+                        outgoingEdges <- edges[edges$from == nodeId, ]
+                        bestResult <- list(cost = 0, utility = 0)
+                        maxNMB <- -Inf
+                        wtp <- if (!is.null(self$options$willingnessToPay)) self$options$willingnessToPay else 50000
+                        
+                        if (nrow(outgoingEdges) > 0) {
+                            for (i in 1:nrow(outgoingEdges)) {
+                                edge <- outgoingEdges[i, ]
+                                childResult <- evaluate_node(edge$to)
+                                
+                                nmb <- (childResult$utility * wtp) - childResult$cost
+                                if (nmb > maxNMB) {
+                                    maxNMB <- nmb
+                                    bestResult <- childResult
+                                }
+                            }
+                        }
+                        return(bestResult)
+                    }
+                    
+                    return(list(cost = 0, utility = 0))
+                }
+                
+                # Start traversal from the strategy's first node
+                result <- evaluate_node(strategyEdge$to)
+                
+                return(list(
+                    expectedCost = result$cost, 
+                    expectedUtility = result$utility
                 ))
-
-                # OLD BROKEN CODE REMOVED:
-                # # Initialize with actual data if available
-                # if (!is.null(self$options$costs) && !is.null(self$options$utilities) &&
-                #     !is.null(self$options$probabilities)) {
-                #
-                #     mydata <- jmvcore::naOmit(self$data)
-                #
-                #     # Extract actual values from data
-                #     costs <- if (length(self$options$costs) > 0 &&
-                #                self$options$costs[1] %in% names(mydata)) {
-                #         mean(mydata[[self$options$costs[1]]], na.rm = TRUE)
-                #     } else {
-                #         1500 + runif(1, 0, 500)  # ❌ RANDOM!
-                #     }
-                #
-                #     utilities <- if (length(self$options$utilities) > 0 &&
-                #                    self$options$utilities[1] %in% names(mydata)) {
-                #         mean(mydata[[self$options$utilities[1]]], na.rm = TRUE)
-                #     } else {
-                #         0.75 + runif(1, -0.1, 0.1)  # ❌ RANDOM!
-                #     }
-                #
-                #     probabilities <- if (length(self$options$probabilities) > 0 &&
-                #                        self$options$probabilities[1] %in% names(mydata)) {
-                #         mean(mydata[[self$options$probabilities[1]]], na.rm = TRUE)
-                #     } else {
-                #         0.7  # Default probability
-                #     }
-                #
-                #     # Calculate expected values using probability weighting
-                #     expectedCost <- costs * probabilities +
-                #                   (costs * 0.5) * (1 - probabilities)  # ❌ MAGIC NUMBERS
-                #     expectedUtility <- utilities * probabilities +
-                #                      (utilities * 0.8) * (1 - probabilities)  # ❌ MAGIC NUMBERS
-                #
-                # } else {
-                #     # Mock calculations for demonstration
-                #     expectedCost <- 1500 + runif(1, 0, 1000)  # ❌ RANDOM!
-                #     expectedUtility <- 0.75 + runif(1, -0.2, 0.2)  # ❌ RANDOM!
-                # }
-                #
-                # return(list(
-                #     expectedCost = expectedCost,
-                #     expectedUtility = expectedUtility
-                # ))
             },
 
             .calculateNMB = function() {
@@ -3109,6 +3119,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
 
             .run = function() {
                 # Main execution with comprehensive error handling
+                message("DEBUG: Entering .run")
                 tryCatch({
                     # Try to retrieve previous state first
                     private$.retrieveState()
@@ -3203,6 +3214,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     } else {
                         # Build regular decision tree with error handling
                         private$.safeExecute("buildTreeGraph", "building decision tree", function() {
+                            message("DEBUG: Calling .buildTreeGraph")
                             private$.buildTreeGraph()
                         })
 
@@ -3598,6 +3610,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             # Render functions for jamovi outputs
             .treeplot = function(image, ...) {
                 # Main tree plot rendering function
+                message("DEBUG: Entering .treeplot")
                 tryCatch({
                     # Get tree data from state or build if needed
                     treeData <- self$results$treeplot$state
@@ -3620,6 +3633,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
 
                     # Use utility function to create the plot
+                    message("DEBUG: Calling createDecisionTreePlot")
+                    message(paste("DEBUG: createDecisionTreePlot type:", typeof(createDecisionTreePlot)))
                     plot <- createDecisionTreePlot(
                         treeData = treeData,
                         layout = self$options$layout,

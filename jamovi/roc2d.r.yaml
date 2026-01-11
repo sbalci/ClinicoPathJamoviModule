@@ -9,23 +9,81 @@ items:
       type: Html
       visible: true
 
-    - name: combinedAUC
-      title: Combined Marker Performance
+    - name: individualAUCs
+      title: Individual Marker Performance
+      type: Table
+      rows: 0
+      columns:
+        - name: marker
+          title: Marker
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: ci_lower
+          title: Lower 95% CI
+          type: number
+          format: zto
+        - name: ci_upper
+          title: Upper 95% CI
+          type: number
+          format: zto
+        - name: optimal_threshold
+          title: Optimal Threshold
+          type: number
+        - name: sensitivity
+          title: Sensitivity
+          type: number
+          format: zto
+        - name: specificity
+          title: Specificity
+          type: number
+          format: zto
+
+    - name: combinationRules
+      title: Combination Rules Performance
+      type: Table
+      rows: 0
+      columns:
+        - name: combination
+          title: Combination Rule
+          type: text
+        - name: formula
+          title: Formula
+          type: text
+        - name: auc
+          title: AUC
+          type: number
+          format: zto
+        - name: clinical_use
+          title: Clinical Utility
+          type: text
+
+    - name: optimalCombination
+      title: Optimal Linear Combination
       type: Table
       rows: 1
+      visible: (decision_rule:linear)
       columns:
-        - name: auc_combined
-          title: Combined AUC
+        - name: weight1
+          title: Weight (Marker 1)
           type: number
           format: zto
-        - name: auc_marker1
-          title: Marker 1 AUC
+        - name: weight2
+          title: Weight (Marker 2)
           type: number
           format: zto
-        - name: auc_marker2
-          title: Marker 2 AUC
+        - name: auc_optimal
+          title: Optimized AUC
           type: number
           format: zto
+        - name: formula
+          title: Formula
+          type: text
+        - name: improvement
+          title: Improvement
+          type: text
 
     - name: roc2dPlot
       title: 2D ROC Surface
@@ -39,5 +97,4 @@ items:
       title: Interpretation
       type: Html
       visible: (show_interpretation)
-
 ...

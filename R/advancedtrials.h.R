@@ -639,7 +639,7 @@ advancedtrialsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="biomarker_strategy_results",
                 title="Biomarker Strategy Results",
                 rows=0,
-                visible="(biomarker_strategy:!all_comers)",
+                visible="(!biomarker_strategy:all_comers)",
                 columns=list(
                     list(
                         `name`="population", 

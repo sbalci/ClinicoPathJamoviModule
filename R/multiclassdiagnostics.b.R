@@ -37,17 +37,17 @@ multiclassdiagnosticsClass <- R6::R6Class(
             
             # Calculate confusion matrix
             if (self$options$showConfusion) {
-                self$.calculateConfusionMatrix(predicted, actual, classes)
+                private$.calculateConfusionMatrix(predicted, actual, classes)
             }
             
             # Calculate per-class metrics
             if (self$options$showPerClass) {
-                self$.calculatePerClassMetrics(predicted, actual, classes)
+                private$.calculatePerClassMetrics(predicted, actual, classes)
             }
             
             # Calculate overall metrics
             if (self$options$showOverall) {
-                self$.calculateOverallMetrics(predicted, actual)
+                private$.calculateOverallMetrics(predicted, actual)
             }
             
             # Model comparison if requested
@@ -55,20 +55,20 @@ multiclassdiagnosticsClass <- R6::R6Class(
                 predicted2 <- data[[self$options$predicted2]]
                 predicted2 <- predicted2[complete_cases]
                 if (!is.factor(predicted2)) predicted2 <- as.factor(predicted2)
-                self$.compareModels(predicted, predicted2, actual)
+                private$.compareModels(predicted, predicted2, actual)
             }
             
             # Generate plots
             if (self$options$showROC) {
-                self$.rocPlot(predicted, actual, classes)
+                private$.rocPlot(predicted, actual, classes)
             }
             
             if (self$options$showConfusion) {
-                self$.confusionPlot(predicted, actual, classes)
+                private$.confusionPlot(predicted, actual, classes)
             }
             
             if (self$options$showPerClass) {
-                self$.metricsPlot()
+                private$.metricsPlot()
             }
         },
         
@@ -530,7 +530,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
             }
             
             image$setState(list(
-                metricsTable = metricsTable$asDF(),
+                metricsTable = as.data.frame(metricsTable),
                 theme = self$options$plotTheme
             ))
         },
