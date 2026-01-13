@@ -1,5 +1,8 @@
-# This file is a generated template, your changes will not be overwritten
-
+#' @title Pathology Agreement Analysis Class
+#'
+#' @description R6 class for performing pathology agreement analysis.
+#' @name pathologyagreementClass
+#' @importFrom R6 R6Class
 pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "pathologyagreementClass",
     inherit = pathologyagreementBase,

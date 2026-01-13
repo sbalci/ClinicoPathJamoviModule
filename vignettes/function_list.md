@@ -17,7 +17,6 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `betabinomialdiagnostic` | Beta-Binomial Diagnostic Accuracy Models | **Coded** | ClinicoPathD |
 | `categoricaladvanced` | Enhanced Chi-Square and Fisher's Tests | **Coded** | ClinicoPathD |
 | `clinicalalerts` | Clinical Alert & Threshold Monitoring | **Coded** | ClinicoPathD |
-| `clinicalcalculators` | Clinical Risk Calculators & Nomograms | **Coded** | ClinicoPathD |
 | `clinicaldashboard` | Interactive Clinical Dashboard | **Coded** | ClinicoPathD |
 | `clinicaldataintegration` | Clinical Data Integration | **Coded** | ClinicoPathD |
 | `clinicalnomograms` | Clinical Nomograms & Risk Calculators | **Coded** | ClinicoPathD |
@@ -74,21 +73,34 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 
 ## ClinicoPathDescriptives
 
+### Stable Status
+
+| Function Name | Title | Implementation | Original Group |
+|---|---|---|---|
+| `agepyramid` | Age Pyramid | **Coded** | Exploration |
+| `alluvial` | Alluvial Diagrams | **Coded** | Exploration |
+| `benford` | Benford Analysis | **Coded** | Exploration |
+| `categorize` | Categorize Continuous Variables | **Coded** | Exploration |
+| `checkdata` | Single Variable Quality Check | **Coded** | Exploration |
+| `chisqposttest` | Chi-Square Post-Hoc Tests | **Coded** | Exploration |
+| `crosstable` | Cross Tables | **Coded** | Exploration |
+| `dataquality` | Multi-Variable Visual Quality | **Coded** | Exploration |
+| `outlierdetection` | Outlier Detection | **Coded** | Exploration |
+| `reportcat` | Summary of Categorical Variables | **Coded** | Exploration |
+| `summarydata` | Summary of Continuous Variables | **Coded** | Exploration |
+| `tableone` | Table One | **Coded** | Exploration |
+| `vartree` | Variable Tree | **Coded** | Exploration |
+| `venn` | Venn Diagram | **Coded** | Exploration |
+
 ### Draft Status
 
 | Function Name | Title | Implementation | Original Group |
 |---|---|---|---|
 | `advancedimputation` | Advanced Multiple Imputation & Sensitivity Analysis | **Coded** | ExplorationD |
-| `agepyramid` | Age Pyramid | **Coded** | ExplorationD |
-| `alluvial` | Alluvial Diagrams | **Coded** | ExplorationD |
 | `autoeda` | Automated Exploratory Data Analysis | **Coded** | ExplorationD |
 | `batcheffect` | Batch Effect Control & Quality Assessment | **Coded** | ExplorationD |
 | `bayesianclinical` | Bayesian Clinical Analysis & Decision Making | **Coded** | ExplorationD |
-| `benford` | Benford Analysis | **Coded** | ExplorationD |
 | `biomarkerdiscovery` | Biomarker Discovery Platform with ML Interpretability | **Coded** | ExplorationD |
-| `categorize` | Categorize Continuous Variables | **Coded** | ExplorationD |
-| `checkdata` | Single Variable Quality Check | **Coded** | ExplorationD |
-| `chisqposttest` | Chi-Square Post-Hoc Tests | **Coded** | ExplorationD |
 | `ciSingle` | Confidence Intervals for Mean Values | **Coded** | ExplorationD |
 | `clinicalprediction` | Clinical Prediction Models & ML Interpretability | **Coded** | ExplorationD |
 | `clinicaltrialdesign` | Clinical Trial Design & Power Analysis | **Coded** | ExplorationD |
@@ -96,10 +108,8 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `contTables` | Contingency Tables | **Coded** | ExplorationD |
 | `contTablesPaired` | Paired Samples Contingency Tables | **Coded** | ExplorationD |
 | `continuousrelationship` | Continuous Variable Relationship Analysis | **Coded** | ExplorationD |
-| `crosstable` | Cross Tables | **Coded** | ExplorationD |
 | `crosstable2` | Cross Tables | **Coded** | ExplorationD |
 | `crosstablepivot` | Enhanced Cross Tables (Pivot) | **Coded** | ExplorationD |
-| `dataquality` | Multi-Variable Visual Quality | **Coded** | ExplorationD |
 | `deeplearningprediction` | Deep Learning Image Prediction | **Coded** | ExplorationD |
 | `desctools` | Advanced Statistical Tests | **Coded** | ExplorationD |
 | `enhancedcrosstable` | Enhanced Cross Tables with danchaltiel/crosstable | **Coded** | ExplorationD |
@@ -119,28 +129,22 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `mixedmodelanova` | Mixed Model ANOVA | **Coded** | ExplorationD |
 | `nonparametric` | Non-Parametric Statistical Methods | **Coded** | ExplorationD |
 | `outbreakanalysis` | Outbreak Analysis & Epidemiological Investigation | **Coded** | ExplorationD |
-| `outlierdetection` | Outlier Detection | **Coded** | ExplorationD |
 | `patientreported` | Patient-Reported Outcomes & Quality of Life Analysis | **Coded** | ExplorationD |
 | `pcacomponenttest` | PCA Component Significance Test | **Coded** | ExplorationD |
 | `pcaloadingtest` | PCA Loading Significance Test | **Coded** | ExplorationD |
 | `qualityoflife` | Quality of Life Analysis & Patient-Centered Outcomes | **Coded** | ExplorationD |
-| `reportcat` | Summary of Categorical Variables | **Coded** | ExplorationD |
 | `reportcat2` | Enhanced Frequencies | **Coded** | ExplorationD |
 | `retracted` | Find Retracted Papers from DOI | **Coded** | ExplorationD |
 | `riverplot` | River Plots & Alluvial Diagrams | **Coded** | ExplorationD |
 | `samplingerror` | Sampling Error & Efficiency Calculator | **Coded** | ExplorationD |
 | `screeningevaluation` | Screening Program Evaluation & Performance Analysis | **Coded** | ExplorationD |
-| `summarydata` | Summary of Continuous Variables | **Coded** | ExplorationD |
 | `summarydata2` | Enhanced Descriptives | **Coded** | ExplorationD |
-| `tableone` | Table One | **Coded** | ExplorationD |
 | `tidydensity` | Statistical Distribution Generator | **Coded** | ExplorationD |
 | `tinytable` | Modern Table Formatting | **Coded** | ExplorationD |
 | `toolssummary` | Tools for data summary | **Coded** | ExplorationD |
 | `toxicityprofile` | Treatment Toxicity Profile | **Coded** | ExplorationD |
 | `treatmenteffects` | Causal Inference & Treatment Effects Analysis | **Coded** | ExplorationD |
 | `treatmentmeta` | Treatment Effect Meta-Analysis | **Coded** | ExplorationD |
-| `vartree` | Variable Tree | **Coded** | ExplorationD |
-| `venn` | Venn Diagram | **Coded** | ExplorationD |
 
 ## ExplorationExtra
 
@@ -152,18 +156,33 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 
 ## OncoPath
 
+### Stable Status
+
+| Function Name | Title | Implementation | Original Group |
+|---|---|---|---|
+| `diagnosticmeta` | Diagnostic Test Meta-Analysis for Pathology | **Coded** | OncoPath |
+| `ihcheterogeneity` | IHC Heterogeneity Analysis | **Coded** | OncoPath |
+| `swimmerplot` | Swimmer Plot | **Coded** | OncoPath |
+| `waterfall` | Treatment Response Analysis | **Coded** | OncoPath |
+
+### Test Status
+
+| Function Name | Title | Implementation | Original Group |
+|---|---|---|---|
+| `classification` | Clinical Classification | **Coded** | OncoPathT |
+| `clinicalcalculators` | Clinical Risk Calculators & Nomograms | **Coded** | OncoPathT |
+| `jjoncoplot` | Genomic Landscape Visualization | **Coded** | OncoPathT |
+
 ### Draft Status
 
 | Function Name | Title | Implementation | Original Group |
 |---|---|---|---|
 | `biomarkerresponse` | Biomarker Response Association | **Coded** | OncoPathD |
-| `classification` | Clinical Classification | **Coded** | OncoPathD |
 | `clinicalheatmap` | Clinical Heatmap | **Coded** | OncoPathD |
 | `condsurvival` | Conditional Survival Analysis | **Coded** | OncoPathD |
 | `consortdiagram` | CONSORT Flow Diagram | **Coded** | OncoPathD |
 | `curemodels` | Cure Models for Long-term Survivors | **Coded** | OncoPathD |
 | `dendrogram` | Dendrogram | **Coded** | OncoPathD |
-| `diagnosticmeta` | Diagnostic Test Meta-Analysis for Pathology | **Coded** | OncoPathD |
 | `digitalvalidation` | Digital Pathology Validation | **Coded** | OncoPathD |
 | `explainableai` | Explainable AI Analysis | **Coded** | OncoPathD |
 | `functionalsampling` | Functional Sampling - Rare Event Analysis | **Coded** | OncoPathD |
@@ -174,14 +193,12 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `ihcbasic` | Basic IHC Analysis | **Coded** | OncoPathD |
 | `ihccluster` | IHC Clustering Analysis | **Coded** | OncoPathD |
 | `ihcdiagnostic` | IHC Diagnostic Analysis | **Coded** | OncoPathD |
-| `ihcheterogeneity` | IHC Heterogeneity Analysis | **Coded** | OncoPathD |
 | `ihcimmune` | IHC Immune Analysis | **Coded** | OncoPathD |
 | `ihcpredict` | IHC Diagnostic Prediction | **Coded** | OncoPathD |
 | `ihcscoring` | IHC Scoring Standardization | **Coded** | OncoPathD |
 | `ihcsurvival` | IHC Survival Analysis | **Coded** | OncoPathD |
 | `ihcthreshold` | IHC Threshold Determination | **Coded** | OncoPathD |
 | `irecist` | iRECIST Analysis | **Coded** | OncoPathD |
-| `jjoncoplot` | Genomic Landscape Visualization | **Coded** | OncoPathD |
 | `mlpathology` | Classification Performance Metrics for Digital Pathology | **Coded** | OncoPathD |
 | `modelperformance` | Multi-Model Performance Comparison | **Coded** | OncoPathD |
 | `multiplexanalysis` | Multiplex Immunofluorescence Analysis | **Coded** | OncoPathD |
@@ -200,11 +217,9 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `stereology` | Stereology Analysis | **Coded** | OncoPathD |
 | `studydiagram` | Study Diagram | **Coded** | OncoPathD |
 | `survivalendpoints` | Survival Endpoint Derivation | **Coded** | OncoPathD |
-| `swimmerplot` | Swimmer Plot | **Coded** | OncoPathD |
 | `timeupdatesurvival` | Time-Updated Survival Estimates | **Coded** | OncoPathD |
 | `tumorgrowth` | Tumor Growth Models | **Coded** | OncoPathD |
 | `variablebiplot` | Variable Importance Biplot | **Coded** | OncoPathD |
-| `waterfall` | Treatment Response Analysis | **Coded** | OncoPathD |
 | `waterfallrecist` | RECIST v1.1 Compliant Response Analysis | **Coded** | OncoPathD |
 
 ## OncoPathExtra
@@ -226,12 +241,34 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 
 ## jjstatsplot
 
+### Stable Status
+
+| Function Name | Title | Implementation | Original Group |
+|---|---|---|---|
+| `advancedraincloud` | Advanced Raincloud Plot | **Coded** | JJStatsPlot |
+| `hullplot` | Hull Plot | **Coded** | JJStatsPlot |
+| `jjarcdiagram` | Arc Diagram | **Coded** | JJStatsPlot |
+| `jjbarstats` | Bar Charts | **Coded** | JJStatsPlot |
+| `jjbetweenstats` | Box-Violin Plots to Compare Between Groups | **Coded** | JJStatsPlot |
+| `jjcorrmat` | Correlation Matrix | **Coded** | JJStatsPlot |
+| `jjdotplotstats` | Dot Chart | **Coded** | JJStatsPlot |
+| `jjhistostats` | Histogram | **Coded** | JJStatsPlot |
+| `jjpiestats` | Pie Charts | **Coded** | JJStatsPlot |
+| `jjridges` | Ridge Plot | **Coded** | JJStatsPlot |
+| `jjscatterstats` | Scatter Plot | **Coded** | JJStatsPlot |
+| `jjsegmentedtotalbar` | Segmented Total Bar Charts | **Coded** | JJStatsPlot |
+| `jjwithinstats` | Box-Violin Plots to Compare Within Groups | **Coded** | JJStatsPlot |
+| `jwaffle` | Waffle Charts | **Coded** | JJStatsPlot |
+| `linechart` | Line Chart | **Coded** | JJStatsPlot |
+| `lollipop` | Lollipop Chart | **Coded** | JJStatsPlot |
+| `raincloud` | Raincloud Plot | **Coded** | JJStatsPlot |
+| `statsplot2` | Automatic Plot Selection | **Coded** | JJStatsPlot |
+
 ### Draft Status
 
 | Function Name | Title | Implementation | Original Group |
 |---|---|---|---|
 | `advancedbarplot` | Advanced Bar Charts | **Coded** | JJStatsPlotD |
-| `advancedraincloud` | Advanced Raincloud Plot | **Coded** | JJStatsPlotD |
 | `basegraphics` | Base Graphics Visualization | **Coded** | JJStatsPlotD |
 | `bbcplots` | BBC-Style Data Visualization | **Coded** | JJStatsPlotD |
 | `economistplots` | Economist-Style Distribution Plots | **Coded** | JJStatsPlotD |
@@ -239,42 +276,38 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `ggprism` | GraphPad Prism Style Plots | **Coded** | JJStatsPlotD |
 | `grafify` | Scientific Visualization with Grafify | **Coded** | JJStatsPlotD |
 | `groupedbar` | Grouped Bar Chart Comparison | **Coded** | JJStatsPlotD |
-| `hullplot` | Hull Plot | **Coded** | JJStatsPlotD |
 | `jcomplexupset` | Complex UpSet Plot Visualization | **Coded** | JJStatsPlotD |
 | `jextractggstats` | Statistical Data Extraction from ggstatsplot | **Coded** | JJStatsPlotD |
 | `jforester` | Forest Plot Visualization | **Coded** | JJStatsPlotD |
 | `jforestmodel` | Forest Plot Visualization | **Coded** | JJStatsPlotD |
 | `jggheatmap` | Advanced Heatmap Visualization | **Coded** | JJStatsPlotD |
 | `jggstats` | Enhanced Statistical Visualization | **Coded** | JJStatsPlotD |
-| `jjarcdiagram` | Arc Diagram | **Coded** | JJStatsPlotD |
-| `jjbarstats` | Bar Charts | **Coded** | JJStatsPlotD |
-| `jjbetweenstats` | Box-Violin Plots to Compare Between Groups | **Coded** | JJStatsPlotD |
 | `jjcoefstats` | Coefficient Forest Plot (ggcoefstats) | **Coded** | JJStatsPlotD |
-| `jjcorrmat` | Correlation Matrix | **Coded** | JJStatsPlotD |
-| `jjdotplotstats` | Dot Chart | **Coded** | JJStatsPlotD |
-| `jjhistostats` | Histogram | **Coded** | JJStatsPlotD |
-| `jjpiestats` | Pie Charts | **Coded** | JJStatsPlotD |
 | `jjpubr` | Publication-Ready Plots (ggpubr) | **Coded** | JJStatsPlotD |
 | `jjradarplot` | Radar Plot | **Coded** | JJStatsPlotD |
-| `jjridges` | Ridge Plot | **Coded** | JJStatsPlotD |
-| `jjscatterstats` | Scatter Plot | **Coded** | JJStatsPlotD |
-| `jjsegmentedtotalbar` | Segmented Total Bar Charts | **Coded** | JJStatsPlotD |
 | `jjsyndromicplot` | Syndromic Plot (PCA Loadings) | **Coded** | JJStatsPlotD |
 | `jjtreemap` | Treemap | **Coded** | JJStatsPlotD |
-| `jjwithinstats` | Box-Violin Plots to Compare Within Groups | **Coded** | JJStatsPlotD |
 | `jscattermore` | High-Performance Scatter Plots | **Coded** | JJStatsPlotD |
 | `jsjplot` | Social Science Statistical Visualization | **Coded** | JJStatsPlotD |
 | `jviolin` | Professional Violin Plot | **Coded** | JJStatsPlotD |
-| `jwaffle` | Waffle Charts | **Coded** | JJStatsPlotD |
-| `linechart` | Line Chart | **Coded** | JJStatsPlotD |
-| `lollipop` | Lollipop Chart | **Coded** | JJStatsPlotD |
 | `parallelplot` | Parallel Coordinates Plot | **Coded** | JJStatsPlotD |
 | `pcaloadingheatmap` | PCA Loading Heatmap & Barmap | **Coded** | JJStatsPlotD |
-| `raincloud` | Raincloud Plot | **Coded** | JJStatsPlotD |
-| `statsplot2` | Automatic Plot Selection | **Coded** | JJStatsPlotD |
 | `tidyplots` | Comprehensive Tidy Plots | **Coded** | JJStatsPlotD |
 
 ## jsurvival
+
+### Stable Status
+
+| Function Name | Title | Implementation | Original Group |
+|---|---|---|---|
+| `datetimeconverter` | DateTime Converter | **Coded** | Survival |
+| `multisurvival` | Multivariable Survival Analysis | **Coded** | Survival |
+| `oddsratio` | Odds Ratio Table and Plot | **Coded** | Survival |
+| `outcomeorganizer` | Outcome Organizer for Survival Analysis | **Coded** | Survival |
+| `singlearm` | Single Arm Survival | **Coded** | Survival |
+| `survival` | Survival Analysis | **Coded** | Survival |
+| `survivalcont` | Survival Analysis for Continuous Variable | **Coded** | Survival |
+| `timeinterval` | Comprehensive Time Interval Calculator | **Coded** | Survival |
 
 ### Draft Status
 
@@ -296,7 +329,6 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `conditionalsurvival` | Conditional Survival Estimation | **Coded** | SurvivalD |
 | `continuousmarkov` | Continuous-Time Markov Models | **Coded** | SurvivalD |
 | `coxdiagnostics` | Cox Proportional Hazards Model Diagnostics | **Coded** | SurvivalD |
-| `datetimeconverter` | DateTime Converter | **Coded** | SurvivalD |
 | `datevalidator` | Date/DateTime Validator | **Coded** | SurvivalD |
 | `directbinomial` | Direct Binomial Regression for Competing Risks | **Coded** | SurvivalD |
 | `emfrailty` | EM-Algorithm Frailty Models | **Coded** | SurvivalD |
@@ -324,11 +356,8 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `mixedcox` | Mixed-Effects Cox Regression | **Coded** | SurvivalD |
 | `mixedeffectscox` | Mixed-Effects Cox Models | **Coded** | SurvivalD |
 | `multistatesurvival` | Multistate Survival Models | **Coded** | SurvivalD |
-| `multisurvival` | Multivariable Survival Analysis | **Coded** | SurvivalD |
 | `ncvregcox` | Smoothly Clipped Absolute Deviation Cox Regression | **Coded** | SurvivalD |
-| `oddsratio` | Odds Ratio Table and Plot | **Coded** | SurvivalD |
 | `oneSurvival` | One Survival Outcome | **Coded** | SurvivalD |
-| `outcomeorganizer` | Outcome Organizer for Survival Analysis | **Coded** | SurvivalD |
 | `parametricfrailty` | Parametric Frailty Models | **Coded** | SurvivalD |
 | `pcacox` | Principal Component Cox Models | **Coded** | SurvivalD |
 | `penalizedcox` | Penalized Cox Regression | **Coded** | SurvivalD |
@@ -338,45 +367,46 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `semimarkov` | Semi-Markov Models | **Coded** | SurvivalD |
 | `simonmakuch` | Simon-Makuch Time-Dependent Survival Analysis | **Coded** | SurvivalD |
 | `simpleSurvivalPower` | Simple Survival Power Analysis (Basic) | **Coded** | SurvivalD |
-| `singlearm` | Single Arm Survival | **Coded** | SurvivalD |
 | `smoothhazard` | Smooth Hazard Estimation & Analysis | **Coded** | SurvivalD |
 | `spatialbayesiansurvival` | Spatial Bayesian Survival Analysis | **Coded** | SurvivalD |
 | `subgroupforest` | Subgroup Analysis Forest Plot | **Coded** | SurvivalD |
 | `superpc` | Supervised Principal Components Cox Regression | **Coded** | SurvivalD |
 | `surveysurvival` | Survey-Weighted Survival Analysis | **Coded** | SurvivalD |
-| `survival` | Survival Analysis | **Coded** | SurvivalD |
 | `survivalPower` | Survival Power Analysis | **Coded** | SurvivalD |
 | `survivalbart` | Bayesian Additive Regression Trees (BART) for Survival | **Coded** | SurvivalD |
 | `survivalcalibration` | Time-Dependent Survival Calibration | **Coded** | SurvivalD |
-| `survivalcont` | Survival Analysis for Continuous Variable | **Coded** | SurvivalD |
 | `survivalfeaturerank` | Survival Feature Ranking | **Coded** | SurvivalD |
 | `survivalmodelvalidation` | Enhanced Survival Model Validation | **Coded** | SurvivalD |
 | `timedependent` | Time-Dependent Covariates & ROC Analysis | **Coded** | SurvivalD |
-| `timeinterval` | Comprehensive Time Interval Calculator | **Coded** | SurvivalD |
 | `timeupdatedsurvival` | Time-Updated Survival Estimates | **Coded** | SurvivalD |
 | `timevarycox` | Time-Varying Covariates Cox Regression | **Coded** | SurvivalD |
 | `weightedlogrank` | Weighted Log-Rank Tests | **Coded** | SurvivalD |
 
 ## meddecide
 
+### Stable Status
+
+| Function Name | Title | Implementation | Original Group |
+|---|---|---|---|
+| `agreement` | Interrater Reliability | **Coded** | meddecide |
+| `cotest` | Co-Testing Analysis | **Coded** | meddecide |
+| `decision` | Medical Decision | **Coded** | meddecide |
+| `decisioncalculator` | Medical Decision Calculator | **Coded** | meddecide |
+| `decisioncombine` | Combine Medical Decision Tests | **Coded** | meddecide |
+| `decisioncompare` | Compare Medical Decision Tests | **Coded** | meddecide |
+| `enhancedROC` | Clinical ROC Analysis | **Coded** | meddecide |
+| `kappaSizeCI` | Confidence Interval Approach for the Number of Subjects Required | **Coded** | meddecide |
+| `kappaSizeFixedN` | Lowest Expected Value for a fixed sample size | **Coded** | meddecide |
+| `kappaSizePower` | Power Approach for the Number of Subjects Required | **Coded** | meddecide |
+| `nogoldstandard` | Analysis Without Gold Standard | **Coded** | meddecide |
+| `psychopdaROC` | Advanced ROC Analysis | **Coded** | meddecide |
+| `sequentialtests` | Sequential Testing Analysis | **Coded** | meddecide |
+
 ### Draft Status
 
 | Function Name | Title | Implementation | Original Group |
 |---|---|---|---|
-| `agreement` | Interrater Reliability | **Coded** | meddecideD |
-| `cotest` | Co-Testing Analysis | **Coded** | meddecideD |
-| `decision` | Medical Decision | **Coded** | meddecideD |
-| `decisioncalculator` | Medical Decision Calculator | **Coded** | meddecideD |
-| `decisioncombine` | Combine Medical Decision Tests | **Coded** | meddecideD |
-| `decisioncompare` | Compare Medical Decision Tests | **Coded** | meddecideD |
 | `decisioncurve` | Decision Curve Analysis | **Coded** | meddecideD |
-| `enhancedROC` | Clinical ROC Analysis | **Coded** | meddecideD |
-| `kappaSizeCI` | Confidence Interval Approach for the Number of Subjects Required | **Coded** | meddecideD |
-| `kappaSizeFixedN` | Lowest Expected Value for a fixed sample size | **Coded** | meddecideD |
-| `kappaSizePower` | Power Approach for the Number of Subjects Required | **Coded** | meddecideD |
-| `nogoldstandard` | Analysis Without Gold Standard | **Coded** | meddecideD |
-| `psychopdaROC` | Advanced ROC Analysis | **Coded** | meddecideD |
-| `sequentialtests` | Sequential Testing Analysis | **Coded** | meddecideD |
 | `timedependentdca` | Time-Dependent Decision Curve Analysis | **Coded** | meddecideD |
 | `trichotomousroc` | Trichotomous (Three-way) ROC Analysis | **Coded** | meddecideD |
 

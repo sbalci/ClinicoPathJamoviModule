@@ -1,5 +1,8 @@
-
-
+#' @title Contingency Tables Analysis Class
+#'
+#' @description R6 class for performing contingency table analysis.
+#' @name contTablesClass
+#' @importFrom R6 R6Class
 contTablesClass <- R6::R6Class(
     "contTablesClass",
     inherit=contTablesBase,

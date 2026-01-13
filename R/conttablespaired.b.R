@@ -1,4 +1,8 @@
-
+#' @title Paired Contingency Tables Analysis Class
+#'
+#' @description R6 class for performing paired contingency table analysis (McNemar test).
+#' @name contTablesPairedClass
+#' @importFrom R6 R6Class
 contTablesPairedClass <- R6::R6Class(
     "contTablesPairedClass",
     inherit = contTablesPairedBase,

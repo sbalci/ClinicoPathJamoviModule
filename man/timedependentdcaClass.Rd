@@ -2,11 +2,9 @@
 % Please edit documentation in R/timedependentdca.b.R
 \name{timedependentdcaClass}
 \alias{timedependentdcaClass}
-\title{Time-Dependent Decision Curve Analysis}
+\title{Time-Dependent Decision Curve Analysis Class}
 \description{
-Time-Dependent Decision Curve Analysis
-
-Time-Dependent Decision Curve Analysis
+R6 class for performing time-dependent decision curve analysis.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::timedependentdcaBase} -> \code{timedependentdcaClass}

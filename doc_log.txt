@@ -1,0 +1,587 @@
+ℹ Updating ClinicoPath documentation
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 method overwritten by 'partitions':
+  method            from
+  print.equivalence lava
+Registered S3 method overwritten by 'DoE.base':
+  method           from       
+  factorize.factor conf.design
+Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+Registered S3 methods overwritten by 'forecast':
+  method       from  
+  autoplot.acf useful
+  fortify.ts   useful
+Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+ℹ Loading ClinicoPath
+Registered S3 methods overwritten by 'FSA':
+  method       from
+  confint.boot car 
+  hist.boot    car 
+Registered S3 methods overwritten by 'tangram':
+  method               from 
+  [.impute             Hmisc
+  as.data.frame.impute Hmisc
+  print.impute         Hmisc
+Registered S3 methods overwritten by 'ggfortify':
+  method                 from    
+  autoplot.Arima         forecast
+  autoplot.acf           forecast
+  autoplot.ar            forecast
+  autoplot.bats          forecast
+  autoplot.decomposed.ts forecast
+  autoplot.ets           forecast
+  autoplot.forecast      forecast
+  autoplot.glmnet        parsnip 
+  autoplot.stl           forecast
+  autoplot.ts            forecast
+  fitted.ar              forecast
+  fortify.acf            useful  
+  fortify.kmeans         useful  
+  fortify.ts             forecast
+  residuals.ar           forecast
+Warning: 'rgl.init' failed, will use the null device.
+See '?rgl.useNULL' for ways to avoid this warning.
+Registered S3 method overwritten by 'vcdExtra':
+  method      from
+  print.Kappa vcd 
+Registered S3 method overwritten by 'spatstat.explore':
+  method   from
+  plot.roc pROC
+Registered S3 methods overwritten by 'logspline':
+  method               from     
+  plot.logspline       polspline
+  plot.oldlogspline    polspline
+  print.logspline      polspline
+  print.oldlogspline   polspline
+  summary.logspline    polspline
+  summary.oldlogspline polspline
+Registered S3 methods overwritten by 'huge':
+  method    from            
+  plot.roc  spatstat.explore
+  plot.sim  lava            
+  print.roc pROC            
+  print.sim lava            
+Registered S3 method overwritten by 'fit.models':
+  method       from 
+  vcov.default Hmisc
+Warning: replacing previous import ‘ComplexUpset::upset’ by ‘UpSetR::upset’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘caret::precision’ by ‘cutpointr::precision’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘caret::recall’ by ‘cutpointr::recall’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘caret::specificity’ by ‘cutpointr::specificity’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘caret::sensitivity’ by ‘cutpointr::sensitivity’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘caret::cluster’ by ‘frailtypack::cluster’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::as_data_frame’ by ‘igraph::as_data_frame’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘DiagrammeR::count_automorphisms’ by ‘igraph::count_automorphisms’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::groups’ by ‘igraph::groups’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘DiagrammeR::get_edge_ids’ by ‘igraph::get_edge_ids’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::union’ by ‘igraph::union’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::select’ by ‘jmvcore::select’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘finalfit::remove_labels’ by ‘labelled::remove_labels’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::union’ by ‘lubridate::union’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::%--%’ by ‘lubridate::%--%’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::fpr’ by ‘mada::fpr’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mada::forest’ by ‘metafor::forest’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::tnr’ by ‘mlr3measures::tnr’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::precision’ by ‘mlr3measures::precision’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::tn’ by ‘mlr3measures::tn’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::fnr’ by ‘mlr3measures::fnr’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::tp’ by ‘mlr3measures::tp’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::npv’ by ‘mlr3measures::npv’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::ppv’ by ‘mlr3measures::ppv’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::auc’ by ‘mlr3measures::auc’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::tpr’ by ‘mlr3measures::tpr’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::fn’ by ‘mlr3measures::fn’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::fp’ by ‘mlr3measures::fp’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mada::fpr’ by ‘mlr3measures::fpr’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::recall’ by ‘mlr3measures::recall’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::specificity’ by ‘mlr3measures::specificity’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘metafor::se’ by ‘mlr3measures::se’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::sensitivity’ by ‘mlr3measures::sensitivity’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘lme4::lmList’ by ‘nlme::lmList’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::collapse’ by ‘nlme::collapse’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::roc’ by ‘pROC::roc’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mlr3measures::auc’ by ‘pROC::auc’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mlr3measures::rmse’ by ‘performance::rmse’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mlr3measures::mse’ by ‘performance::mse’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mlr3measures::mae’ by ‘performance::mae’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘boot::logit’ by ‘pracma::logit’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘magrittr::mod’ by ‘pracma::mod’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘magrittr::or’ by ‘pracma::or’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘magrittr::and’ by ‘pracma::and’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘cutpointr::cutpoints’ by ‘pracma::cutpoints’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mlr3measures::phi’ by ‘psych::phi’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘ggswim::%+%’ by ‘psych::%+%’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘pracma::logit’ by ‘psych::logit’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘pracma::polar’ by ‘psych::polar’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mada::AUC’ by ‘psych::AUC’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘GPArotation::equamax’ by ‘psych::equamax’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘ggplot2::alpha’ by ‘psych::alpha’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘GPArotation::varimin’ by ‘psych::varimin’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘magrittr::set_names’ by ‘purrr::set_names’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::simplify’ by ‘purrr::simplify’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘caret::lift’ by ‘purrr::lift’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘pracma::cross’ by ‘purrr::cross’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::compose’ by ‘purrr::compose’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::flatten_lgl’ by ‘rlang::flatten_lgl’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::splice’ by ‘rlang::splice’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::flatten_chr’ by ‘rlang::flatten_chr’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::flatten_raw’ by ‘rlang::flatten_raw’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::is_named’ by ‘rlang::is_named’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::flatten’ by ‘rlang::flatten’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::flatten_dbl’ by ‘rlang::flatten_dbl’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::invoke’ by ‘rlang::invoke’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::flatten_int’ by ‘rlang::flatten_int’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘psych::alpha’ by ‘scales::alpha’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘purrr::discard’ by ‘scales::discard’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘psych::rescale’ by ‘scales::rescale’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘pROC::cov’ by ‘stats::cov’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::lag’ by ‘stats::lag’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::filter’ by ‘stats::filter’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘pROC::smooth’ by ‘stats::smooth’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::spectrum’ by ‘stats::spectrum’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘janitor::chisq.test’ by ‘stats::chisq.test’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘pROC::var’ by ‘stats::var’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::decompose’ by ‘stats::decompose’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘janitor::fisher.test’ by ‘stats::fisher.test’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘frailtypack::cluster’ by ‘survival::cluster’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::as_data_frame’ by ‘tibble::as_data_frame’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘ggVennDiagram::unite’ by ‘tidyr::unite’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::crossing’ by ‘tidyr::crossing’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘magrittr::extract’ by ‘tidyr::extract’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘igraph::compare’ by ‘timeROC::compare’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘metafor::vif’ by ‘VIF::vif’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘VIF::vif’ by ‘car::vif’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mlr3measures::sensitivity’ by ‘caret::sensitivity’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘mlr3measures::specificity’ by ‘caret::specificity’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘stats::filter’ by ‘dplyr::filter’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘stats::lag’ by ‘dplyr::lag’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘jmvcore::select’ by ‘dplyr::select’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘DataExplorer::plot_histogram’ by ‘grafify::plot_histogram’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘reReg::plot’ by ‘graphics::plot’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘dplyr::select’ by ‘jmvcore::select’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘metafor::regplot’ by ‘regplot::regplot’ when loading ‘ClinicoPath’
+Warning: replacing previous import ‘tibble::view’ by ‘summarytools::view’ when loading ‘ClinicoPath’
+Serdar Balci MD Pathologist 
+ https://www.serdarbalci.com/ 
+ 
+Warning: ── Conflicts ────────────────────────────────────────── ClinicoPath conflicts
+──
+✖ `calculateHScore` masks `ClinicoPath::calculateHScore()`.
+✖ `calculateIHCDistance` masks `ClinicoPath::calculateIHCDistance()`.
+✖ `calculateIHCMarkerSummary` masks `ClinicoPath::calculateIHCMarkerSummary()`.
+  … and more.
+ℹ Did you accidentally source a file rather than using `load_all()`?
+  Run `rm(list = c("calculateHScore", "calculateIHCDistance",
+  "calculateIHCMarkerSummary", "calculateIHCSilhouette",
+  "convertIHCMarkerToNumeric", "convertIHCToNumeric", "formatIHCPValue",
+  "getIHCColorPalette", "getIHCSignificanceStars", "getIHCTheme",
+  "showIHCDataRequirements", "validateIHCClustering", "validateIHCData"))` to
+  remove the conflicts.
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/agreement.Rd:642: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/agreement.Rd:729: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/agreement.Rd:732: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/agreement.Rd:737: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/biomarkerdiscovery.Rd:184: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/biomarkerdiscovery.Rd:226: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/biomarkerdiscovery.Rd:236: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/biomarkerdiscovery.Rd:249: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:19: unexpected section header '\source'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:26: unexpected section header '\usage'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:29: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:34: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:53: unexpected section header '\section'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:60: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:84: unexpected section header '\keyword'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/bujang_table2_validation.Rd:85: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinicalprediction.Rd:159: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinicalprediction.Rd:199: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinicalprediction.Rd:210: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinicalprediction.Rd:223: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinmon.Rd:84: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinmon.Rd:92: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinmon.Rd:99: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/clinmon.Rd:104: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/coefplot.Rd:120: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/coefplot.Rd:129: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/coefplot.Rd:137: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/coefplot.Rd:142: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/comprehensiveSurvivalPower.Rd:201: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/comprehensiveSurvivalPower.Rd:227: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/comprehensiveSurvivalPower.Rd:236: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/comprehensiveSurvivalPower.Rd:270: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/continuousrelationship.Rd:68: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/continuousrelationship.Rd:89: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/continuousrelationship.Rd:94: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/continuousrelationship.Rd:106: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/costeffectiveness.Rd:223: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/costeffectiveness.Rd:251: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/costeffectiveness.Rd:269: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/costeffectiveness.Rd:279: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/decisioncalculator.Rd:88: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/decisioncalculator.Rd:112: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/decisioncalculator.Rd:121: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/decisioncalculator.Rd:143: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/diagnostic_sample_size_examples.Rd:25: unexpected section header '\source'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/diagnostic_sample_size_examples.Rd:31: unexpected section header '\usage'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/diagnostic_sample_size_examples.Rd:34: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/diagnostic_sample_size_examples.Rd:39: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/diagnostic_sample_size_examples.Rd:90: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/diagnostic_sample_size_examples.Rd:111: unexpected section header '\keyword'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/diagnostic_sample_size_examples.Rd:112: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/enhancedtwowayfrequency.Rd:98: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/enhancedtwowayfrequency.Rd:126: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/enhancedtwowayfrequency.Rd:133: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/functionalsampling.Rd:59: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/functionalsampling.Rd:77: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/functionalsampling.Rd:80: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/geemodel.Rd:66: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/geemodel.Rd:86: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/geemodel.Rd:93: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/geemodel.Rd:112: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/geemodel.Rd:125: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/generalizedroc.Rd:99: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/generalizedroc.Rd:119: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/generalizedroc.Rd:124: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/generalizedroc.Rd:132: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/generalizedroc.Rd:148: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/groupedforest.Rd:83: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/groupedforest.Rd:95: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/groupedforest.Rd:106: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/groupedforest.Rd:117: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/idi.Rd:206: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/idi.Rd:233: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/idi.Rd:248: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/idi.Rd:259: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/ihcheterogeneity.Rd:97: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/ihcheterogeneity.Rd:124: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/ihcheterogeneity.Rd:127: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/ihcscoring.Rd:184: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/ihcscoring.Rd:235: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/ihcscoring.Rd:238: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jcorrelation.Rd:52: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jcorrelation.Rd:71: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jcorrelation.Rd:77: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jcorrelation.Rd:92: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jjsegmentedtotalbar.Rd:124: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jjsegmentedtotalbar.Rd:147: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jjsegmentedtotalbar.Rd:153: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/jjsegmentedtotalbar.Rd:160: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/missingdataexplorer.Rd:115: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/missingdataexplorer.Rd:132: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/missingdataexplorer.Rd:145: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/missingdataexplorer.Rd:157: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/multiclassroc.Rd:75: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/multiclassroc.Rd:94: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/multiclassroc.Rd:101: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/multiclassroc.Rd:106: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/multiclassroc.Rd:125: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/netreclassification.Rd:199: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/netreclassification.Rd:223: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/netreclassification.Rd:238: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/netreclassification.Rd:250: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/outlierdetection.Rd:80: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/outlierdetection.Rd:92: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/outlierdetection.Rd:103: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/outlierdetection.Rd:112: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathologyagreement.Rd:58: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathologyagreement.Rd:83: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathologyagreement.Rd:86: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathologycomposition.Rd:63: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathologycomposition.Rd:80: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathologycomposition.Rd:89: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathologycomposition.Rd:99: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathsampling.Rd:232: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathsampling.Rd:310: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pathsampling.Rd:313: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/patientreported.Rd:177: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/patientreported.Rd:220: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/patientreported.Rd:231: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/patientreported.Rd:244: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pcacomponenttest.Rd:90: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pcacomponenttest.Rd:109: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pcacomponenttest.Rd:116: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pcacomponenttest.Rd:134: unexpected section header '\section'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pcacomponenttest.Rd:141: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/pcacomponenttest.Rd:158: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/psychopdaROC.Rd:337: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/psychopdaROC.Rd:388: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/psychopdaROC.Rd:392: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qtwist.Rd:219: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qtwist.Rd:248: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qtwist.Rd:256: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qtwist.Rd:283: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qtwist.Rd:322: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qualityoflife.Rd:181: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qualityoflife.Rd:225: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qualityoflife.Rd:238: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/qualityoflife.Rd:252: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/recist.Rd:111: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/recist.Rd:137: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/recist.Rd:143: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/recist.Rd:162: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/samplingerror.Rd:71: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/samplingerror.Rd:88: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/samplingerror.Rd:92: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/samplingerror.Rd:95: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/segmentationmetrics.Rd:222: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/segmentationmetrics.Rd:249: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/segmentationmetrics.Rd:267: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/segmentationmetrics.Rd:277: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/stagemigration.Rd:1246: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/stagemigration.Rd:1437: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/stagemigration.Rd:1445: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/stagemigration.Rd:1452: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/stagemigration.Rd:1470: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/surveysurvival.Rd:129: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/surveysurvival.Rd:161: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/surveysurvival.Rd:166: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/surveysurvival.Rd:175: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/surveysurvival.Rd:221: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/survivalbart.Rd:190: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/survivalbart.Rd:216: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/survivalbart.Rd:221: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/survivalbart.Rd:238: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/survivalbart.Rd:251: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/timedependentdca.Rd:73: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/timedependentdca.Rd:92: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/timedependentdca.Rd:104: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/timedependentdca.Rd:119: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/treatmenteffects.Rd:156: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/treatmenteffects.Rd:182: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/treatmenteffects.Rd:195: unexpected section header '\examples'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/treatmenteffects.Rd:208: unexpected END_OF_INPUT '
+'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/waterfall.Rd:116: unexpected section header '\value'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/waterfall.Rd:147: unexpected section header '\description'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/waterfall.Rd:151: unexpected section header '\details'
+Warning in withCallingHandlers(.External2(C_parseRd, tcon, srcfile, "UTF-8",  :
+  /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/waterfall.Rd:156: unexpected END_OF_INPUT '
+'
+Warning message:
+In check_dep_version(dep_pkg = "TMB") : package version mismatch: 
+glmmTMB was built with TMB package version 1.9.17
+Current TMB package version is 1.9.19
+Please re-install glmmTMB from source or restore original ‘TMB’ package (see '?reinstalling' for more information)

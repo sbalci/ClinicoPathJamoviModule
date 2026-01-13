@@ -7920,18 +7920,13 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Advanced TNM Stage Migration Analysis
 #'
 #' Comprehensive analysis for validating TNM staging system improvements using 
-#' state-of-the-art 
-#' statistical methods. This analysis provides pathologists with robust tools 
-#' to evaluate whether 
-#' a new staging system provides superior prognostic discrimination compared 
-#' to existing systems.
-#' 
+#' state-of-the-art  statistical methods. This analysis provides pathologists 
+#' with robust tools to evaluate whether  a new staging system provides 
+#' superior prognostic discrimination compared to existing systems.
 #' Includes advanced metrics: Net Reclassification Improvement (NRI), 
-#' Integrated Discrimination 
-#' Improvement (IDI), time-dependent ROC analysis, decision curve analysis, 
-#' bootstrap validation, 
-#' and comprehensive clinical interpretation guidance.
-#' 
+#' Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis, 
+#' decision curve analysis, bootstrap validation,  and comprehensive clinical 
+#' interpretation guidance.
 #'
 #' @examples
 #' \donttest{
@@ -8010,7 +8005,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   Comprehensive analysis includes all available methods for thorough staging
 #'   system validation.
 #' @param confidenceLevel Confidence level for all confidence intervals and
-#'   hypothesis tests (default: 0.95 for 95\% CI).
+#'   hypothesis tests.
 #' @param calculateNRI Calculate Net Reclassification Improvement to quantify
 #'   improvement in  risk classification between staging systems. Essential for
 #'   staging validation.

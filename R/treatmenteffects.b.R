@@ -1,5 +1,7 @@
-
-
+#' @title Treatment Effects Analysis Class
+#' @description R6 class for performing causal treatment effects analysis.
+#' @name treatmenteffectsClass
+#' @importFrom R6 R6Class
 treatmenteffectsClass <- R6::R6Class(
     "treatmenteffectsClass",
     inherit = treatmenteffectsBase,

@@ -8353,9 +8353,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
     ),  # End of private list
 
     public = list(
-        #' @description
-        #' Generate R source code for Interrater Reliability analysis
-        #' @return Character string with R syntax for reproducible analysis outside jamovi
+        # #' @description
+        # #' Generate R source code for Interrater Reliability analysis
+        # #' @return Character string with R syntax for reproducible analysis outside jamovi
         # TEMPORARILY COMMENTED OUT TO PREVENT ERRORS
         # asSource = function() {
         #     vars <- self$options$vars

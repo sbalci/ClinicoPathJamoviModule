@@ -1,7 +1,8 @@
-
-# This file is a generated template, your changes will not be overwritten
-
+#' Clinical Calculators Class
+#' @name clinicalcalculatorsClass
+#' @importFrom R6 R6Class
 clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+
     "clinicalcalculatorsClass",
     inherit = clinicalcalculatorsBase,
     private = list(

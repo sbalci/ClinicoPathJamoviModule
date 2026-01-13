@@ -1,5 +1,6 @@
-
-#' @title Time-Dependent Decision Curve Analysis
+#' @title Time-Dependent Decision Curve Analysis Class
+#' @description R6 class for performing time-dependent decision curve analysis.
+#' @name timedependentdcaClass
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom stats qnorm quantile predict loess

@@ -159,6 +159,9 @@
     return(list(valid = TRUE, message = ""))
 }
 
+#' Venn Diagram Class
+#' @name vennClass
+#' @importFrom R6 R6Class
 vennClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "vennClass",

@@ -1,5 +1,8 @@
-
-
+#' @title Treatment Response Analysis (Waterfall) Class
+#'
+#' @description R6 class for performing treatment response analysis using waterfall plots.
+#' @name waterfallClass
+#' @importFrom R6 R6Class
 waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "waterfallClass",
     inherit = waterfallBase,

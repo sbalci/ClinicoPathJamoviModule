@@ -317,6 +317,11 @@
     return(summary)
 }
 
+#' @title Cross Tables Analysis Class
+#'
+#' @description R6 class for generating cross tables for clinicopathological comparisons.
+#' @name crosstableClass
+#' @importFrom R6 R6Class
 crosstableClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "crosstableClass",

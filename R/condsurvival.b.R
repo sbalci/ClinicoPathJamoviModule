@@ -1,4 +1,9 @@
+#' @title Conditional Survival Analysis Class
+#' @description R6 class for performing conditional survival analysis.
+#' @name condsurvivalClass
+#' @importFrom R6 R6Class
 condsurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+
     "condsurvivalClass",
     inherit = condsurvivalBase,
     private = list(
