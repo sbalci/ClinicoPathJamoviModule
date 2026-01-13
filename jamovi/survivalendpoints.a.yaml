@@ -1,7 +1,7 @@
 ---
 name: survivalendpoints
 title: Survival Endpoint Derivation
-menuGroup: OncoPathD
+menuGroup: OncoPathT
 menuSubgroup: Data Preparation
 menuSubtitle: Derive PFS, OS, TTP, DOR from Timeline Data
 version: '0.0.32'

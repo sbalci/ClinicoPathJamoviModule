@@ -1,7 +1,7 @@
 ---
 name: ihccluster
 title: IHC Clustering Analysis
-menuGroup: OncoPathD
+menuGroup: OncoPathT
 menuSubgroup: IHC Analysis
 menuSubtitle: 'Cluster cases by IHC expression patterns'
 version: '2.0.0'

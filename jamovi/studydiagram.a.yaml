@@ -1,7 +1,7 @@
 ---
 name: studydiagram
 title: Study Diagram
-menuGroup: OncoPathD
+menuGroup: OncoPathT
 menuSubgroup: Study Design
 version: '1.0.0'
 jas: '1.2'

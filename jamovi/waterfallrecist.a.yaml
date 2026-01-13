@@ -1,7 +1,7 @@
 ---
 name: waterfallrecist
 title: RECIST v1.1 Compliant Response Analysis
-menuGroup: OncoPathD
+menuGroup: OncoPathT
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Full RECIST v1.1 Waterfall Plot'
 version: '0.0.1'

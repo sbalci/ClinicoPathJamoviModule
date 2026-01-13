@@ -2,7 +2,7 @@
 
 name: tumorgrowth
 title: Tumor Growth Models
-menuGroup: OncoPathD
+menuGroup: OncoPathT
 menuSubgroup: Survival Analysis
 menuTitle: Tumor Growth Models
 

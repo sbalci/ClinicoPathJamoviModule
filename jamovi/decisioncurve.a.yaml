@@ -1,7 +1,7 @@
 ---
 name: decisioncurve
 title: Decision Curve Analysis
-menuGroup: meddecideD
+menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
 version: '0.0.32'
