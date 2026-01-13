@@ -1,7 +1,7 @@
 ---
 name: pathologyagreement
 title: Pathology Agreement Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPathD
 menuSubgroup: Agreement
 menuSubtitle: Agreement on Continuous Data
 version: '1.0.0'

@@ -1,7 +1,7 @@
 ---
 name: diagnosticsamplesize
 title: Diagnostic Test Sample Size Calculator
-menuGroup: meddecideExtraT
+menuGroup: meddecideExtraD
 menuSubgroup: Sample Size Planning
 menuTitle: Diagnostic Sample Size (CI Width)
 menuSubtitle: Clopper-Pearson precision-based planning (Bujang 2023)

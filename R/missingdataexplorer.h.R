@@ -287,14 +287,151 @@ missingdataexplorerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 missingdataexplorerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "missingdataexplorerResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        summary_statistics = function() private$.items[["summary_statistics"]],
+        mcar_test_results = function() private$.items[["mcar_test_results"]],
+        missing_patterns = function() private$.items[["missing_patterns"]],
+        correlation_matrix = function() private$.items[["correlation_matrix"]],
+        pattern_plot = function() private$.items[["pattern_plot"]],
+        upset_plot = function() private$.items[["upset_plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Missing Data Pattern Explorer")}))
+                title="Missing Data Pattern Explorer")
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary_statistics",
+                title="Missing Data Summary",
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="n_missing", 
+                        `title`="N Missing", 
+                        `type`="integer"),
+                    list(
+                        `name`="pct_missing", 
+                        `title`="% Missing", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="n_complete", 
+                        `title`="N Complete", 
+                        `type`="integer"),
+                    list(
+                        `name`="pct_complete", 
+                        `title`="% Complete", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "analysis_vars")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="mcar_test_results",
+                title="Little's MCAR Test",
+                visible="(mechanism_testing)",
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Chi-Square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "analysis_vars")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="missing_patterns",
+                title="Missing Data Patterns",
+                visible="(pattern_analysis)",
+                columns=list(
+                    list(
+                        `name`="pattern_id", 
+                        `title`="Pattern", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="N Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="pct_cases", 
+                        `title`="% Cases", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="n_vars_missing", 
+                        `title`="N Vars Missing", 
+                        `type`="integer"),
+                    list(
+                        `name`="variables_missing", 
+                        `title`="Variables Missing", 
+                        `type`="text")),
+                clearWith=list(
+                    "analysis_vars",
+                    "min_pattern_freq",
+                    "max_patterns_display")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="correlation_matrix",
+                title="Missingness Correlation Matrix",
+                visible="(correlation_analysis)",
+                columns=list(
+                    list(
+                        `name`="var1", 
+                        `title`="Variable 1", 
+                        `type`="text"),
+                    list(
+                        `name`="var2", 
+                        `title`="Variable 2", 
+                        `type`="text"),
+                    list(
+                        `name`="correlation", 
+                        `title`="Correlation", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "analysis_vars")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="pattern_plot",
+                title="Missing Data Pattern Plot",
+                width=600,
+                height=500,
+                visible="(pattern_plot)",
+                renderFun=".plotPatterns",
+                clearWith=list(
+                    "analysis_vars")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="upset_plot",
+                title="Missing Data UpSet Plot",
+                width=700,
+                height=500,
+                visible="(upset_plot)",
+                renderFun=".plotUpSet",
+                clearWith=list(
+                    "analysis_vars")))}))
 
 missingdataexplorerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "missingdataexplorerBase",
@@ -387,7 +524,19 @@ missingdataexplorerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param export_patterns Export missing data patterns for external analysis
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$summary_statistics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$mcar_test_results} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$missing_patterns} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$correlation_matrix} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pattern_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$upset_plot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary_statistics$asDF}
+#'
+#' \code{as.data.frame(results$summary_statistics)}
 #'
 #' @export
 missingdataexplorer <- function(

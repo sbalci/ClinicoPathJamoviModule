@@ -1,7 +1,7 @@
 ---
 name: timeroc
 title: Enhanced ROC Analysis
-menuGroup: SurvivalD
+menuGroup: SurvivalExtraD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Time-Dependent & Binary ROC'
 version: '1.1.0'

@@ -1093,7 +1093,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
@@ -1337,7 +1337,7 @@ analyses:
   - title: Enhanced ROC Analysis
     name: timeroc
     ns: ClinicoPath
-    menuGroup: SurvivalD
+    menuGroup: SurvivalExtraT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Enhanced ROC Analysis
     menuSubtitle: Time-Dependent & Binary ROC
@@ -2655,7 +2655,7 @@ analyses:
     name: treatmentmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: FrequenciesD
+    menuGroup: ExplorationD
     menuSubgroup: Meta-Analysis
     menuTitle: Treatment Effect Meta-Analysis
     menuSubtitle: Comprehensive meta-analysis for clinical interventions
@@ -3512,7 +3512,7 @@ analyses:
     name: conditionalinference
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalD
+    menuGroup: SurvivalD
     menuSubgroup: Machine Learning
     menuTitle: Conditional Inference Trees for Survival
     menuSubtitle: Unbiased recursive partitioning for survival data
@@ -3598,7 +3598,7 @@ analyses:
     name: grouplasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalD
+    menuGroup: SurvivalD
     menuSubgroup: Machine Learning
     menuTitle: Group LASSO for Survival Analysis
     menuSubtitle: Penalized regression with group-wise variable selection
@@ -3641,7 +3641,7 @@ analyses:
     name: illnessdeath
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalD
+    menuGroup: SurvivalD
     menuSubgroup: Multi-State Analysis
     menuTitle: Illness-Death Multi-State Models
     menuSubtitle: Three-state models for disease progression with recovery and mortality
@@ -3692,7 +3692,7 @@ analyses:
     name: survivalbart
     ns: ClinicoPath
     category: analyses
-    menuGroup: jsurvivalD
+    menuGroup: SurvivalD
     menuSubgroup: Machine Learning
     menuTitle: Bayesian Additive Regression Trees (BART) for Survival
     menuSubtitle: Nonparametric Bayesian ensemble learning for survival analysis

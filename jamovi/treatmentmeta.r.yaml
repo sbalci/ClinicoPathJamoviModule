@@ -173,7 +173,7 @@ items:
       title: Test for Subgroup Differences
       type: Table
       description: Statistical test for differences between subgroups
-      visible: (subgroup_var && subgroup_test)
+      visible: (subgroup_var)
       columns:
           - name: test
             title: Test
@@ -354,6 +354,79 @@ items:
       clearWith:
           - model_type
 
+    - name: bayesian_results
+      title: Bayesian Meta-Analysis Results
+      type: Table
+      description: Parameter estimates from Bayesian meta-analysis
+      visible: (bayesian_analysis)
+      columns:
+          - name: parameter
+            title: Parameter
+            type: text
+          - name: estimate
+            title: Estimate (Mean/Median)
+            type: number
+            format: zto
+          - name: sd
+            title: SD
+            type: number
+            format: zto
+          - name: hpd_lower
+            title: HPD Lower
+            type: number
+            format: zto
+          - name: hpd_upper
+            title: HPD Upper
+            type: number
+            format: zto
+          - name: r_hat
+            title: R-hat
+            type: number
+            format: zto
+      clearWith:
+          - bayesian_analysis
+
+    - name: pcurve_results
+      title: P-Curve Analysis
+      type: Table
+      description: Statistical tests for evidential value
+      visible: (pcurve)
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: text
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - pcurve
+
+    - name: quality_assessment
+      title: Quality Assessment Summary
+      type: Table
+      description: Impact of study quality on effect sizes
+      visible: (quality_score)
+      columns:
+          - name: metric
+            title: Quality Metric
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: details
+            title: Details
+            type: text
+      clearWith:
+          - quality_score
+          - weight_by_quality
+
     - name: forest_plot
       title: Forest Plot
       type: Image
@@ -403,17 +476,57 @@ items:
           - study_id
           - effect_measure
 
+    - name: cumulative_results
+      title: Cumulative Meta-Analysis Results
+      type: Table
+      description: Sequential pooled estimates as studies are added
+      visible: (cumulative_meta)
+      columns:
+          - name: study
+            title: Added Study
+            type: text
+          - name: effect_size
+            title: Cumulative Effect
+            type: number
+            format: zto
+          - name: ci_lower
+            title: CI Lower
+            type: number
+            format: zto
+          - name: ci_upper
+            title: CI Upper
+            type: number
+            format: zto
+          - name: i_squared
+            title: I² (%)
+            type: number
+            format: pc
+      clearWith:
+          - cumulative_meta
+          - year
+
     - name: cumulative_plot
       title: Cumulative Meta-Analysis
       type: Image
       width: 800
       height: 600
       description: Cumulative meta-analysis plot over time
-      visible: (cumulative_meta && year)
+      visible: (cumulative_meta)
       requiresData: true
       clearWith:
           - study_id
           - year
+
+    - name: pcurve_plot
+      title: P-Curve Plot
+      type: Image
+      width: 600
+      height: 450
+      description: Distribution of significant p-values
+      visible: (pcurve)
+      requiresData: true
+      clearWith:
+          - pcurve
 
     - name: clinical_interpretation
       title: Clinical Interpretation & Recommendations

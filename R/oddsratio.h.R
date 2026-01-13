@@ -10,6 +10,8 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             outcome = NULL,
             outcomeLevel = NULL,
             diagnosticPredictor = NULL,
+            predictorLevel = NULL,
+            usePenalized = FALSE,
             showNomogram = FALSE,
             showExplanations = FALSE, ...) {
 
@@ -48,6 +50,14 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..predictorLevel <- jmvcore::OptionLevel$new(
+                "predictorLevel",
+                predictorLevel,
+                variable="(diagnosticPredictor)")
+            private$..usePenalized <- jmvcore::OptionBool$new(
+                "usePenalized",
+                usePenalized,
+                default=FALSE)
             private$..showNomogram <- jmvcore::OptionBool$new(
                 "showNomogram",
                 showNomogram,
@@ -61,6 +71,8 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..diagnosticPredictor)
+            self$.addOption(private$..predictorLevel)
+            self$.addOption(private$..usePenalized)
             self$.addOption(private$..showNomogram)
             self$.addOption(private$..showExplanations)
         }),
@@ -69,6 +81,8 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
         diagnosticPredictor = function() private$..diagnosticPredictor$value,
+        predictorLevel = function() private$..predictorLevel$value,
+        usePenalized = function() private$..usePenalized$value,
         showNomogram = function() private$..showNomogram$value,
         showExplanations = function() private$..showExplanations$value),
     private = list(
@@ -76,6 +90,8 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..outcome = NA,
         ..outcomeLevel = NA,
         ..diagnosticPredictor = NA,
+        ..predictorLevel = NA,
+        ..usePenalized = NA,
         ..showNomogram = NA,
         ..showExplanations = NA)
 )
@@ -262,6 +278,11 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   use the second level alphabetically.
 #' @param diagnosticPredictor Specify the predictor to drive likelihood
 #'   ratios; must be binary. Defaults to the first explanatory variable.
+#' @param predictorLevel Specify which level of the diagnostic predictor
+#'   represents the positive case.
+#' @param usePenalized Use Firth penalized likelihood logistic regression.
+#'   This is recommended when there is separation (zero cells), small sample
+#'   sizes, or low events-per-variable.
 #' @param showNomogram Display an interactive nomogram for converting pre-test
 #'   to post-test probabilities using likelihood ratios calculated from the
 #'   data.
@@ -288,8 +309,10 @@ oddsratio <- function(
     data,
     explanatory,
     outcome,
-    outcomeLevel,
+    outcomeLevel = NULL,
     diagnosticPredictor = NULL,
+    predictorLevel = NULL,
+    usePenalized = FALSE,
     showNomogram = FALSE,
     showExplanations = FALSE) {
 
@@ -314,6 +337,8 @@ oddsratio <- function(
         outcome = outcome,
         outcomeLevel = outcomeLevel,
         diagnosticPredictor = diagnosticPredictor,
+        predictorLevel = predictorLevel,
+        usePenalized = usePenalized,
         showNomogram = showNomogram,
         showExplanations = showExplanations)
 

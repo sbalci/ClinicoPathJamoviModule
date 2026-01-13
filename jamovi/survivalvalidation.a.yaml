@@ -1,7 +1,7 @@
 ---
 name: survivalvalidation
 title: Survival Model Validation
-menuGroup: SurvivalExtraT
+menuGroup: SurvivalExtraD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Model Performance Assessment and Validation'
 version: '0.0.3'

@@ -1,7 +1,7 @@
 ---
 name: treatmentmeta
 title: Treatment Effect Meta-Analysis
-menuGroup: FrequenciesD
+menuGroup: ExplorationD
 menuSubgroup: Meta-Analysis
 menuTitle: Treatment Effect Meta-Analysis
 menuSubtitle: Comprehensive meta-analysis for clinical interventions
@@ -46,6 +46,7 @@ options:
       permitted:
           - factor
           - id
+      default: null
       description:
           R: Variable containing study names or identifiers
 
@@ -56,6 +57,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Year of publication for chronological analyses
 
@@ -86,6 +88,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Mean outcome in treatment group (continuous outcomes)
 
@@ -96,6 +99,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Standard deviation in treatment group
 
@@ -106,6 +110,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Sample size in treatment group
 
@@ -116,6 +121,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Mean outcome in control group (continuous outcomes)
 
@@ -126,6 +132,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Standard deviation in control group
 
@@ -136,6 +143,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Sample size in control group
 
@@ -147,6 +155,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Number of events in treatment group (binary outcomes)
 
@@ -157,6 +166,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Number of events in control group
 
@@ -168,6 +178,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Correlation coefficient (r) for correlation meta-analysis
 
@@ -178,6 +189,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Total sample size for correlation studies
 
@@ -189,6 +201,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Pre-calculated effect size (generic meta-analysis)
 
@@ -199,6 +212,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Standard error of effect size
 
@@ -209,6 +223,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Lower bound of confidence interval
 
@@ -219,6 +234,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Upper bound of confidence interval
 
@@ -230,6 +246,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Hazard ratio for survival outcomes
 
@@ -240,6 +257,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Standard error of log hazard ratio
 
@@ -309,6 +327,7 @@ options:
           - nominal
       permitted:
           - factor
+      default: null
       description:
           R: Categorical variable for subgroup analysis
 
@@ -329,6 +348,7 @@ options:
       permitted:
           - numeric
           - factor
+      default: null
       description:
           R: Variables for meta-regression analysis
 
@@ -391,6 +411,7 @@ options:
           - continuous
       permitted:
           - numeric
+      default: null
       description:
           R: Quality assessment score (e.g., Jadad, Cochrane RoB)
 

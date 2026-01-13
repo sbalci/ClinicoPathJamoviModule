@@ -1,7 +1,7 @@
 ---
 name:  predmodel
 title: Clinical Prediction Model
-menuGroup: meddecideExtraT
+menuGroup: meddecideExtraD
 menuSubgroup: Prediction Models
 version: '0.0.32'
 jas: '1.2'

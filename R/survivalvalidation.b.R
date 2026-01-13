@@ -109,7 +109,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 time_var <- self$options$time
                 status_var <- self$options$status
                 pred_risk_var <- self$options$predicted_risk
-                # external_data <- self$options$external_data
+                external_data <- self$options$external_data
                 
                 # Get main dataset
                 data <- self$data

@@ -142,6 +142,8 @@ A results object containing:
 \code{results$covariateROCPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$aucByCovPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$effectEstimatesPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$stratifiedSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$groupSpecificAUC} \tab \tab \tab \tab \tab a table \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 

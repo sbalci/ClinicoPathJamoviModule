@@ -1,7 +1,7 @@
 ---
 name: conditionalinference
 title: Conditional Inference Trees for Survival
-menuGroup: jsurvivalD
+menuGroup: SurvivalD
 menuSubgroup: Machine Learning
 menuSubtitle: Unbiased recursive partitioning for survival data
 version: '0.0.31'

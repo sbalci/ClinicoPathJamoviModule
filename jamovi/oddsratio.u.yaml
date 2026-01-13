@@ -24,7 +24,7 @@ children:
             fitToGrid: true
           - type: LevelSelector
             name: outcomeLevel
-            label: "Positive Level"
+            label: Positive Level
             enable: (outcome)
   - type: LayoutBox
     margin: large
@@ -51,3 +51,13 @@ children:
                 name: diagnosticPredictor
                 maxItemCount: 1
                 isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: predictorLevel
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: usePenalized

@@ -142,10 +142,11 @@ rocregClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         u_stat <- rank_sum - (n1 * (n1 + 1)) / 2
                         auc_values[i] <- u_stat / (n1 * n0)
 
-                        # SE approximation
-                        se_values[i] <- sqrt((auc_values[i] * (1 - auc_values[i]) +
-                                            (n1 - 1) * (auc_values[i]^2 - auc_values[i]^2) +
-                                            (n0 - 1) * (auc_values[i]^2 - auc_values[i]^2)) / (n1 * n0))
+                        # SE approximation (Hanley-McNeil)
+                        auc <- auc_values[i]
+                        Q1 <- auc / (2 - auc)
+                        Q2 <- (2 * auc^2) / (1 + auc)
+                        se_values[i] <- sqrt((auc * (1 - auc) + (n1 - 1) * (Q1 - auc^2) + (n0 - 1) * (Q2 - auc^2)) / (n1 * n0))
                     }
                 }
 

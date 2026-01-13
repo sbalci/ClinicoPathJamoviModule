@@ -2,7 +2,7 @@
 % Please edit documentation in R/decisiongraph_utils.R
 \name{performMonteCarloSimulation}
 \alias{performMonteCarloSimulation}
-\title{Perform Monte Carlo Simulation for PSA}
+\title{Perform Monte Carlo Simulation for PSA (Deprecated)}
 \usage{
 performMonteCarloSimulation(
   numSimulations,
@@ -12,17 +12,14 @@ performMonteCarloSimulation(
 )
 }
 \arguments{
-\item{numSimulations}{Integer number of simulations to run}
+\item{numSimulations}{Integer}
 
-\item{parameters}{List of parameter distributions}
+\item{parameters}{List}
 
-\item{baseResults}{Data frame with base case results}
+\item{baseResults}{Data frame}
 
-\item{distributionType}{Character string specifying distribution type}
-}
-\value{
-List containing simulation results and summary statistics
+\item{distributionType}{Character string}
 }
 \description{
-Executes probabilistic sensitivity analysis using Monte Carlo methods.
+This function is deprecated. PSA is now handled internally by decisiongraphClass.
 }

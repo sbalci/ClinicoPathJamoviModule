@@ -65,6 +65,8 @@ test_that('segmentationmetrics analysis works', {
       random_seed = 123
     )
 
+  expect_s3_class(model, "segmentationmetricsResults")
+  
   # Verify and Export OMV
   omv_path <- file.path('omv_output', 'segmentationmetrics.omv')
   if (!dir.exists('omv_output')) dir.create('omv_output')

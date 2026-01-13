@@ -1,0 +1,120 @@
+---
+name: missingdataexplorer
+title: Missing Data Pattern Explorer
+jrs: '1.1'
+
+items:
+    - name: summary_statistics
+      title: Missing Data Summary
+      type: Table
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: n_missing
+            title: N Missing
+            type: integer
+          - name: pct_missing
+            title: '% Missing'
+            type: number
+            format: zto
+          - name: n_complete
+            title: N Complete
+            type: integer
+          - name: pct_complete
+            title: '% Complete'
+            type: number
+            format: zto
+      clearWith:
+          - analysis_vars
+
+    - name: mcar_test_results
+      title: Little's MCAR Test
+      type: Table
+      visible: (mechanism_testing)
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Chi-Square
+            type: number
+            format: zto
+          - name: df
+            title: df
+            type: integer
+          - name: p_value
+            title: p-value
+            type: number
+            format: zto,pvalue
+          - name: interpretation
+            title: Interpretation
+            type: text
+      clearWith:
+          - analysis_vars
+
+    - name: missing_patterns
+      title: Missing Data Patterns
+      type: Table
+      visible: (pattern_analysis)
+      columns:
+          - name: pattern_id
+            title: Pattern
+            type: integer
+          - name: n_cases
+            title: N Cases
+            type: integer
+          - name: pct_cases
+            title: '% Cases'
+            type: number
+            format: zto
+          - name: n_vars_missing
+            title: N Vars Missing
+            type: integer
+          - name: variables_missing
+            title: Variables Missing
+            type: text
+      clearWith:
+          - analysis_vars
+          - min_pattern_freq
+          - max_patterns_display
+
+    - name: correlation_matrix
+      title: Missingness Correlation Matrix
+      type: Table
+      visible: (correlation_analysis)
+      columns:
+          - name: var1
+            title: Variable 1
+            type: text
+          - name: var2
+            title: Variable 2
+            type: text
+          - name: correlation
+            title: Correlation
+            type: number
+            format: zto
+      clearWith:
+          - analysis_vars
+
+    - name: pattern_plot
+      title: Missing Data Pattern Plot
+      type: Image
+      width: 600
+      height: 500
+      visible: (pattern_plot)
+      renderFun: .plotPatterns
+      clearWith:
+          - analysis_vars
+
+    - name: upset_plot
+      title: Missing Data UpSet Plot
+      type: Image
+      width: 700
+      height: 500
+      visible: (upset_plot)
+      renderFun: .plotUpSet
+      clearWith:
+          - analysis_vars
+
+...

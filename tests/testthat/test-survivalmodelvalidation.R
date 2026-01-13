@@ -8,7 +8,7 @@ test_that('survivalmodelvalidation analysis works', {
   n <- 50
   data <- data.frame(
     time_var = runif(n, 1, 100),
-    status_var = sample(c('A', 'B'), n, replace = TRUE),
+    status_var = sample(c(0, 1), n, replace = TRUE),
     risk_score = runif(n, 1, 100),
     covariates1 = sample(c('A', 'B'), n, replace = TRUE),
     covariates2 = sample(c('A', 'B'), n, replace = TRUE),
@@ -52,19 +52,13 @@ test_that('survivalmodelvalidation analysis works', {
     )
   })
 
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'survivalmodelvalidation.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
+  # Verify results are present and populated
+  expect_true(!is.null(model))
+  expect_true("performanceMetrics" %in% names(model))
+  
+  # Check tables are populated
+  expect_true(nrow(model$performanceMetrics$asDF) >= 1)
+  expect_true(nrow(model$calibrationMetrics$asDF) >= 1)
+  expect_true(nrow(model$validationResults$asDF) >= 1)
 })
 

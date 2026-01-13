@@ -30,7 +30,7 @@ test_that("kappaSizeFixedN works for binary outcomes (2 categories)", {
   
   # Explanation should contain key parameters
   content2 <- results$text2$content
-  expect_match(content2, "Number of outcome categories: 2", fixed = FALSE)
+  expect_match(content2, "Outcome categories: 2", fixed = FALSE)
   expect_match(content2, "Number of raters: 2", fixed = FALSE)
   expect_match(content2, "Sample size: 100", fixed = FALSE)
 })
@@ -46,33 +46,27 @@ test_that("kappaSizeFixedN works for 3 categories", {
   )
   
   expect_true(nchar(results$text1$content) > 0)
-  expect_match(results$text2$content, "Number of outcome categories: 3")
+  expect_match(results$text2$content, "Outcome categories: 3")
   expect_match(results$text2$content, "Number of raters: 3")
 })
 
-test_that("kappaSizeFixedN handles validation errors gracefully", {
-  # Invalid proportions (sum != 1)
-  results <- kappaSizeFixedN(
+test_that("kappaSizeFixedN handles validation errors: proportions", {
+  expect_error(kappaSizeFixedN(
       outcome = "2",
       props = "0.20, 0.20",
       n = 100
-  )
-  
-  # Should return an error message in text1
-  expect_match(results$text1$content, "Error|Proportions must sum to 1", perl = TRUE)
-  
-  # Mismatched outcome count and proportions
-  results2 <- kappaSizeFixedN(
+  ), "Proportions must sum to 1")
+})
+
+test_that("kappaSizeFixedN handles validation errors: matched categories", {
+  expect_error(kappaSizeFixedN(
       outcome = "3",
       props = "0.5, 0.5",
       n = 100
-  )
-  
-  expect_match(results2$text1$content, "Error|Expected 3 proportions", perl = TRUE)
+  ), "Expected 3 proportions")
 })
 
 test_that("kappaSizeFixedN integration with kappaSize package calculations", {
-    # We compare against a known result if possible, or just ensure it returns valid output
     results <- kappaSizeFixedN(
         outcome = "2",
         kappa0 = 0.6,
@@ -82,10 +76,7 @@ test_that("kappaSizeFixedN integration with kappaSize package calculations", {
         n = 100
     )
     
-    # Check that the output is valid (not an error message)
     output_str <- results$text1$content
     expect_true(nchar(output_str) > 0)
-    
-    # Verify explanation mentions study design
     expect_match(results$text2$content, "STUDY DESIGN ANALYSIS")
 })

@@ -1,7 +1,7 @@
 ---
 name: cohenskappa
 title: Cohen's Kappa Agreement
-menuGroup: meddecideExtraT
+menuGroup: meddecideExtraD
 menuSubgroup: Diagnostic Statistics
 menuSubtitle: 'Two-Rater Agreement Analysis'
 version: '0.0.31'

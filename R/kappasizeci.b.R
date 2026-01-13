@@ -292,9 +292,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             validation_errors <- private$.validateInputs()
             if (!is.null(validation_errors)) {
                 error_msg <- paste("Input validation failed:", paste(validation_errors, collapse = "; "))
-                self$results$text1$setContent(error_msg)
-                self$results$text2$setContent("Please correct the input parameters and try again.")
-                return()
+                jmvcore::reject(error_msg, code='validation_failed')
             }
             
             # Check for cached results

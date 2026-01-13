@@ -30,9 +30,8 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Extract and validate parameters
             validation_result <- private$.validateParameters()
             if (!validation_result$valid) {
-                self$results$text1$setContent(paste("Error:", validation_result$message))
-                self$results$text2$setContent(validation_result$explanation)
-                return()
+                error_msg <- paste("Input validation failed:", validation_result$message)
+                jmvcore::reject(error_msg, code='validation_failed')
             }
             
             # Get validated parameters
@@ -64,8 +63,19 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     n = n
                 )
                 
+                # Format formatting the result to string
+                if (is.list(result)) {
+                    if ("Lowest expected value of kappa" %in% names(result)) {
+                        formatted_result <- paste0("Lowest expected value of kappa: ", round(as.numeric(result[[1]]), 3))
+                    } else {
+                        formatted_result <- paste0("Lowest expected value of kappa: ", round(as.numeric(result[[1]]), 3))
+                    }
+                } else {
+                    formatted_result <- paste0("Lowest expected value of kappa: ", round(as.numeric(result), 3))
+                }
+                
                 # Set results
-                self$results$text1$setContent(result)
+                self$results$text1$setContent(formatted_result)
                 self$results$text2$setContent(explanation)
                 
             }, error = function(e) {
@@ -87,7 +97,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             n <- self$options$n
             
             # Validate outcome
-            if (!(outcome %in% c("2", "3", "4", "5"))) {
+            if (is.null(switch(as.character(outcome), "2"=TRUE, "3"=TRUE, "4"=TRUE, "5"=TRUE, NULL))) {
                 return(list(
                     valid = FALSE,
                     message = "Outcome must be 2, 3, 4, or 5 categories.",
@@ -229,7 +239,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         
         # Perform the actual calculation
         .calculateKappaFixedN = function(outcome, kappa0, props, raters, alpha, n) {
-            switch(outcome,
+            switch(as.character(outcome),
                 "2" = kappaSize::FixedNBinary(
                     kappa0 = kappa0,
                     n = n,

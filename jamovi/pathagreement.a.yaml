@@ -1,7 +1,7 @@
 ---
 name:  pathagreement
 title: Pathology Interrater Reliability
-menuGroup: OncoPathT
+menuGroup: OncoPathD
 menuSubgroup: Agreement
 menuSubtitle: Agreement on Categorical and Ordinal Data
 version: '0.0.31'

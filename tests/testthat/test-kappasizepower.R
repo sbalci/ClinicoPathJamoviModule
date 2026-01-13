@@ -47,46 +47,36 @@ test_that("kappaSizePower works for 3 categories", {
   )
   
   expect_true(nchar(results$text1$content) > 0)
-  expect_match(results$text2$content, "Number of outcome categories: 3")
+  expect_match(results$text2$content, "Outcome categories: 3")
   expect_match(results$text2$content, "Number of raters: 3")
 })
 
 test_that("kappaSizePower validates kappa1 > kappa0", {
-  # Invalid: kappa1 <= kappa0
-  results <- kappaSizePower(
+  expect_error(kappaSizePower(
       outcome = "2",
       kappa0 = 0.60,
-      kappa1 = 0.40,  # Less than kappa0
+      kappa1 = 0.40,
       props = "0.5, 0.5",
       power = 0.80
-  )
-  
-  # Should return an error message
-  expect_match(results$text1$content, "Error|kappa1 must be greater", perl = TRUE)
+  ), "kappa1 must be greater")
 })
 
 test_that("kappaSizePower handles proportion validation", {
-  # Invalid proportions (sum != 1)
-  results <- kappaSizePower(
+  expect_error(kappaSizePower(
       outcome = "2",
       kappa0 = 0.4,
       kappa1 = 0.6,
       props = "0.20, 0.20",
       power = 0.80
-  )
-  
-  expect_match(results$text1$content, "Error|Proportions must sum to 1", perl = TRUE)
+  ), "Proportions must sum to 1")
 })
 
 test_that("kappaSizePower validates power parameter", {
-  # Power too low
-  results <- kappaSizePower(
+  expect_error(kappaSizePower(
       outcome = "2",
       kappa0 = 0.4,
       kappa1 = 0.6,
       props = "0.5, 0.5",
-      power = 0.30  # Below 0.5 threshold
-  )
-  
-  expect_match(results$text1$content, "Error|Power should be at least 0.5", perl = TRUE)
+      power = 0.30
+  ), "Power should be at least 0.5")
 })

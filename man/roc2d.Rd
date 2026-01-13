@@ -42,16 +42,18 @@ roc2d(
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$combinedAUC} \tab \tab \tab \tab \tab a table \cr
+\code{results$individualAUCs} \tab \tab \tab \tab \tab a table \cr
+\code{results$combinationRules} \tab \tab \tab \tab \tab a table \cr
+\code{results$optimalCombination} \tab \tab \tab \tab \tab a table \cr
 \code{results$roc2dPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$combinedAUC$asDF}
+\code{results$individualAUCs$asDF}
 
-\code{as.data.frame(results$combinedAUC)}
+\code{as.data.frame(results$individualAUCs)}
 }
 \description{
 Two-dimensional ROC analysis for evaluating diagnostic accuracy of dual

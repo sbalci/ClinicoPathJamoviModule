@@ -1,7 +1,7 @@
 ---
 name: grouplasso
 title: Group LASSO for Survival Analysis
-menuGroup: jsurvivalD
+menuGroup: SurvivalD
 menuSubgroup: Machine Learning
 menuSubtitle: Penalized regression with group-wise variable selection
 version: '0.0.31'

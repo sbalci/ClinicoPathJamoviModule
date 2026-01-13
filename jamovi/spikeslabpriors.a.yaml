@@ -1,7 +1,7 @@
 ---
 name: spikeslabpriors
 title: Spike-and-Slab Variable Selection
-menuGroup: meddecideExtraT
+menuGroup: meddecideExtraD
 menuSubgroup: Advanced Bayesian Methods
 menuSubtitle: Bayesian variable selection for high-dimensional data
 version: '0.0.31'

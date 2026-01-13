@@ -1,7 +1,7 @@
 ---
 name:  singlearm
 title: Single Arm Survival
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Survival for whole group, no explanatory factor'
 version: '0.0.32'

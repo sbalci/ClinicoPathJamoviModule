@@ -1,7 +1,7 @@
 ---
 name: survivalbart
 title: Bayesian Additive Regression Trees (BART) for Survival
-menuGroup: jsurvivalD
+menuGroup: SurvivalD
 menuSubgroup: Machine Learning
 menuSubtitle: Nonparametric Bayesian ensemble learning for survival analysis
 version: '0.0.31'

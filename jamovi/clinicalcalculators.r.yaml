@@ -1,0 +1,107 @@
+---
+name: clinicalcalculators
+title: Clinical Risk Calculators & Nomograms
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: data_summary
+      title: 'Data Summary'
+      type: Table
+      rows: 1
+      clearWith:
+        - outcome_variable
+        - predictor_variables
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: model_summary
+      title: 'Statistical Model Summary'
+      type: Table
+      rows: 1
+      clearWith:
+        - outcome_variable
+        - predictor_variables
+        - model_type
+      columns:
+        - name: predictor
+          title: 'Predictor'
+          type: text
+        - name: estimate
+          title: 'Coefficient (β)'
+          type: number
+        - name: std_error
+          title: 'Std. Error'
+          type: number
+        - name: z_value
+          title: 'z'
+          type: number
+        - name: p_value
+          title: 'p-value'
+          type: number
+          format: zto:pvalue
+        - name: odds_ratio
+          title: 'Odds Ratio'
+          type: number
+
+    - name: risk_table
+      title: 'Clinical Risk Calculator Scores'
+      type: Table
+      rows: 1
+      clearWith:
+        - outcome_variable
+        - predictor_variables
+      columns:
+        - name: factor
+          title: 'Clinical Factor'
+          type: text
+        - name: level
+          title: 'Factor Level'
+          type: text
+        - name: points
+          title: 'Points'
+          type: number
+
+    - name: nomogram_plot
+      title: 'Clinical Nomogram'
+      type: Image
+      visible: (include_nomogram)
+      width: 800
+      height: 600
+      renderFun: .plotNomogram
+      clearWith:
+        - include_nomogram
+        - outcome_variable
+        - predictor_variables
+
+    - name: calibration_plot
+      title: 'Model Calibration'
+      type: Image
+      visible: (include_calibration)
+      width: 600
+      height: 500
+      renderFun: .plotCalibration
+      clearWith:
+        - include_calibration
+        - outcome_variable
+        - predictor_variables
+
+    - name: method_explanation
+      title: 'Method and Clinical Interpretation'
+      type: Html
+      visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+    - rms
+
+...

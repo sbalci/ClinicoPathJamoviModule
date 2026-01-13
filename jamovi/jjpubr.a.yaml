@@ -1,7 +1,7 @@
 ---
 name: jjpubr
 title: Publication-Ready Plots (ggpubr)
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlotD
 menuSubgroup: All-In-One
 menuTitle: ggpubr Plots
 menuSubtitle: Publication-ready visualizations

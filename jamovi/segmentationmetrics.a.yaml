@@ -1,7 +1,7 @@
 ---
 name: segmentationmetrics
 title: Segmentation Metrics (Dice, IoU, Hausdorff)
-menuGroup: meddecideExtraT
+menuGroup: meddecideExtraD
 menuSubgroup: AI & Machine Learning
 menuSubtitle: Image segmentation validation for digital pathology AI
 version: '0.0.32'

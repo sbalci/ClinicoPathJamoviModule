@@ -1,7 +1,7 @@
 ---
 name: datevalidator
 title: Date/DateTime Validator
-menuGroup: SurvivalT
+menuGroup: SurvivalD
 menuSubgroup: Data Preparation
 menuSubtitle: Validate and diagnose messy date/datetime formats
 version: '0.0.32'

@@ -1,7 +1,7 @@
 ---
 name: illnessdeath
 title: Illness-Death Multi-State Models
-menuGroup: jsurvivalD
+menuGroup: SurvivalD
 menuSubgroup: Multi-State Analysis
 menuSubtitle: Three-state models for disease progression with recovery and mortality
 version: '0.0.31'

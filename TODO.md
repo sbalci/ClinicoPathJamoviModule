@@ -32,11 +32,9 @@ source .venv/bin/activate
 marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf --output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/
 <https://github.com/datalab-to/marker>
 
-## Oncoplot follow-ups
-
-- Draft: expose a dedicated per-sample mutation burden result if users need TMB-like summaries outside the marginal plot.
-- Draft: add UI gating so `log10TransformTMB` is only available/active when `showTMB` is enabled.
-- Draft: penalized/Firth logistic fallback and manual positive-predictor level control for oddsratio LRs/nomogram
+- [x] Draft: expose a dedicated per-sample mutation burden result if users need TMB-like summaries outside the marginal plot.
+- [x] Draft: add UI gating so `log10TransformTMB` is only available/active when `showTMB` is enabled.
+- [x] Draft: penalized/Firth logistic fallback and manual positive-predictor level control for oddsratio LRs/nomogram
 
 > /review-article-stats '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.html'

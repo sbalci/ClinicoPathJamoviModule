@@ -46,6 +46,8 @@ test_that('rocreg analysis works', {
       random_seed = 123
     )
 
+  expect_s3_class(model, "rocregResults")
+  
   # Verify and Export OMV
   omv_path <- file.path('omv_output', 'rocreg.omv')
   if (!dir.exists('omv_output')) dir.create('omv_output')

@@ -83,9 +83,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Extract and validate parameters
             validation_result <- private$.validateParameters()
             if (!validation_result$valid) {
-                self$results$text1$setContent(paste("Error:", validation_result$message))
-                self$results$text2$setContent(validation_result$explanation)
-                return()
+                error_msg <- paste("Input validation failed:", validation_result$message)
+                jmvcore::reject(error_msg, code='validation_failed')
             }
             
             # Get validated parameters
@@ -120,8 +119,21 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     power = power
                 )
                 
+                # Format the result to string
+                if (is.list(result)) {
+                    if ("Total sample size" %in% names(result)) {
+                        formatted_result <- paste0("Required sample size: ", result$`Total sample size`)
+                    } else if ("n" %in% names(result)) {
+                        formatted_result <- paste0("Required sample size: ", result$n)
+                    } else {
+                        formatted_result <- paste0("Required sample size: ", result[[1]])
+                    }
+                } else {
+                    formatted_result <- paste0("Required sample size: ", result)
+                }
+                
                 # Set results
-                self$results$text1$setContent(result)
+                self$results$text1$setContent(formatted_result)
                 self$results$text2$setContent(explanation)
                 
             }, error = function(e) {
@@ -311,7 +323,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         
         # Perform the actual calculation
         .calculateSampleSize = function(outcome, kappa0, kappa1, props, raters, alpha, power) {
-            switch(outcome,
+            switch(as.character(outcome),
                 "2" = kappaSize::PowerBinary(
                     kappa0 = kappa0,
                     kappa1 = kappa1,

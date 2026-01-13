@@ -1,7 +1,7 @@
 ---
 name:  oddsratio
 title: Odds Ratio Table and Plot
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: General Statistics
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
 version: '0.0.32'
@@ -98,6 +98,26 @@ options:
               If left empty, the first explanatory variable is used. Ensure it has exactly two levels.
           R: >
               Specify the predictor to drive likelihood ratios; must be binary. Defaults to the first explanatory variable.
+
+    - name: predictorLevel
+      title: Predictor Positive Level
+      type: Level
+      variable: (diagnosticPredictor)
+      description:
+          main: >
+              Specify which level of the diagnostic predictor represents the positive case (e.g., "Present", "Test+", "Yes").
+              Required for correct sensitivity, specificity, and likelihood ratio calculations.
+          R: >
+              Specify which level of the diagnostic predictor represents the positive case.
+
+    - name: usePenalized
+      title: Use Firth Penalized Logistic Regression
+      type: Bool
+      default: false
+      description:
+          R: >
+              Use Firth penalized likelihood logistic regression. This is recommended
+              when there is separation (zero cells), small sample sizes, or low events-per-variable.
 
 
 # Nomogram ----

@@ -1,7 +1,7 @@
 ---
 name: datetimeconverter
 title: DateTime Converter
-menuGroup: Survival
+menuGroup: SurvivalD
 menuSubgroup: Data Preparation
 menuSubtitle: Convert datetime and extract components
 version: '0.0.32'

@@ -1,0 +1,82 @@
+---
+name: referenceintervals
+title: Reference Interval Establishment
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: summary
+      title: 'Data Summary'
+      type: Table
+      rows: 1
+      clearWith:
+        - measurement
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: riResults
+      title: 'Reference Interval Results'
+      type: Table
+      rows: 1
+      clearWith:
+        - measurement
+        - ri_method
+        - confidence_level
+        - reference_percentiles
+      columns:
+        - name: group
+          title: 'Group'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: lower_limit
+          title: 'Lower Limit'
+          type: number
+        - name: upper_limit
+          title: 'Upper Limit'
+          type: number
+        - name: method
+          title: 'Method'
+          type: text
+
+    - name: normalityTest
+      title: 'Normality Assessment'
+      type: Table
+      visible: (transformation_test)
+      rows: 1
+      clearWith:
+        - measurement
+      columns:
+          - name: test
+            title: 'Test'
+            type: text
+          - name: statistic
+            title: 'Statistic'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto:pvalue
+          - name: interpretation
+            title: 'Interpretation'
+            type: text
+
+    - name: referencePaths
+      title: 'References'
+      type: Html
+      visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

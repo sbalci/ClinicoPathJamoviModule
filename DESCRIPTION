@@ -303,5 +303,8 @@ Suggests:
     datefixR,
     covr,
     BoomSpikeSlab,
-    rstanarm
+    rstanarm,
+    logistf,
+    naniar,
+    UpSetR
 Config/testthat/edition: 3

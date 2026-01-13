@@ -1,0 +1,79 @@
+---
+name: measurementuncertainty
+title: Measurement Uncertainty Estimation
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: summary
+      title: 'Data Summary'
+      type: Table
+      rows: 1
+      clearWith:
+        - measurement
+      columns:
+        - name: characteristic
+          title: 'Characteristic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+
+    - name: uncertaintyResults
+      title: 'Uncertainty Evaluation Results'
+      type: Table
+      rows: 1
+      clearWith:
+        - measurement
+        - calibration_uncertainty
+        - reference_material_uncertainty
+      columns:
+        - name: parameter
+          title: 'Parameter'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+        - name: unit
+          title: 'Unit'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+
+    - name: budgetTable
+      title: 'Uncertainty Budget'
+      type: Table
+      rows: 1
+      clearWith:
+        - measurement
+      columns:
+        - name: source
+          title: 'Source of Uncertainty'
+          type: text
+        - name: type
+          title: 'Type'
+          type: text
+        - name: distribution
+          title: 'Distribution'
+          type: text
+        - name: value
+          title: 'Standard Uncertainty (u)'
+          type: number
+        - name: contribution
+          title: 'Contribution (%)'
+          type: number
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

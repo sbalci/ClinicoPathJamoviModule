@@ -2,7 +2,7 @@ title: Chi-Square Post-Hoc Tests
 name: chisqposttest
 jus: '3.0'
 stage: 0
-compilerMode: tame
+compilerMode: aggressive
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -29,63 +29,58 @@ children:
             name: counts
             maxItemCount: 1
             isTarget: true
-  - type: CollapseBox
-    label: Statistical Options
-    collapsed: true
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: ComboBox
-            name: posthoc
-          - type: TextBox
-            name: sig
-            format: number
-            suffix: α
-          - type: ComboBox
-            name: testSelection
-          - type: TextBox
-            name: residualsCutoff
-            format: number
-            suffix: σ
-          - type: CheckBox
-            name: excl
-          - type: CheckBox
-            name: exp
-  - type: CollapseBox
-    label: Clinical Interpretation
-    collapsed: false
+      - type: ComboBox
+        name: posthoc
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: showClinicalSummary
-          - type: CheckBox
-            name: copyReadySentences
-          - type: CheckBox
-            name: showAssumptionsCheck
-          - type: CheckBox
-            name: showGlossary
+      - type: TextBox
+        name: sig
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: excl
+      - type: CheckBox
+        name: exp
+      - type: CheckBox
+        name: plot
+      - type: CheckBox
+        name: showResiduals
+      - type: CheckBox
+        name: showEducational
+      - type: CheckBox
+        name: showDetailedTables
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: residualsCutoff
+        format: number
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
         name: phiCI
-  - type: CollapseBox
-    label: Display Options
-    collapsed: false
+  - type: LayoutBox
+    margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: showEducational
-          - type: CheckBox
-            name: showResiduals
-          - type: CheckBox
-            name: showDetailedTables
-          - type: CheckBox
-            name: plot
-          - type: CheckBox
-            name: exportResults
+      - type: ComboBox
+        name: testSelection
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: exportResults
+      - type: CheckBox
+        name: showClinicalSummary
+      - type: CheckBox
+        name: copyReadySentences
+      - type: CheckBox
+        name: showAssumptionsCheck
+      - type: CheckBox
+        name: showGlossary
