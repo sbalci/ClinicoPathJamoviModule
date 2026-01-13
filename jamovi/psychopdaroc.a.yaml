@@ -1,7 +1,7 @@
 ---
 name: psychopdaROC
 title: Advanced ROC Analysis
-menuGroup: meddecideD
+menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
 version: '0.0.32'

@@ -313,14 +313,101 @@ measurementuncertaintyOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
 measurementuncertaintyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "measurementuncertaintyResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        instructions = function() private$.items[["instructions"]],
+        summary = function() private$.items[["summary"]],
+        uncertaintyResults = function() private$.items[["uncertaintyResults"]],
+        budgetTable = function() private$.items[["budgetTable"]],
+        methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Measurement Uncertainty Estimation")}))
+                title="Measurement Uncertainty Estimation",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Analysis Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Data Summary",
+                rows=1,
+                clearWith=list(
+                    "measurement"),
+                columns=list(
+                    list(
+                        `name`="characteristic", 
+                        `title`="Characteristic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="uncertaintyResults",
+                title="Uncertainty Evaluation Results",
+                rows=1,
+                clearWith=list(
+                    "measurement",
+                    "calibration_uncertainty",
+                    "reference_material_uncertainty"),
+                columns=list(
+                    list(
+                        `name`="parameter", 
+                        `title`="Parameter", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="unit", 
+                        `title`="Unit", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="budgetTable",
+                title="Uncertainty Budget",
+                rows=1,
+                clearWith=list(
+                    "measurement"),
+                columns=list(
+                    list(
+                        `name`="source", 
+                        `title`="Source of Uncertainty", 
+                        `type`="text"),
+                    list(
+                        `name`="type", 
+                        `title`="Type", 
+                        `type`="text"),
+                    list(
+                        `name`="distribution", 
+                        `title`="Distribution", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Standard Uncertainty (u)", 
+                        `type`="number"),
+                    list(
+                        `name`="contribution", 
+                        `title`="Contribution (%)", 
+                        `type`="number"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodExplanation",
+                title="Method and Clinical Context",
+                visible=TRUE))}))
 
 measurementuncertaintyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "measurementuncertaintyBase",
@@ -403,7 +490,18 @@ measurementuncertaintyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' @param monte_carlo_plots Generate Monte Carlo simulation plots
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$uncertaintyResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$budgetTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 measurementuncertainty <- function(

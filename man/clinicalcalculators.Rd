@@ -155,7 +155,20 @@ guidelines}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$data_summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$model_summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$risk_table} \tab \tab \tab \tab \tab a table \cr
+\code{results$nomogram_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$calibration_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$method_explanation} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$data_summary$asDF}
+
+\code{as.data.frame(results$data_summary)}
 }
 \description{
 Clinical Risk Calculators & Nomograms

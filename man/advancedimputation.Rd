@@ -128,32 +128,19 @@ analysis report}
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$instructions} \tab \tab \tab \tab \tab Instructions for advanced multiple imputation and sensitivity analysis \cr
-\code{results$missing_summary} \tab \tab \tab \tab \tab Overview of missing data patterns and completeness \cr
-\code{results$convergence_assessment} \tab \tab \tab \tab \tab MICE convergence diagnostics and statistics \cr
-\code{results$imputation_summary} \tab \tab \tab \tab \tab Summary of completed imputations across methods \cr
-\code{results$sensitivity_results} \tab \tab \tab \tab \tab Results across different imputation methods and assumptions \cr
-\code{results$mnar_analysis} \tab \tab \tab \tab \tab Missing Not At Random sensitivity analysis results \cr
-\code{results$multilevel_results} \tab \tab \tab \tab \tab Results for nested/multilevel imputation \cr
-\code{results$quality_assessment} \tab \tab \tab \tab \tab Comprehensive quality evaluation of imputations \cr
-\code{results$cross_validation_results} \tab \tab \tab \tab \tab Cross-validation performance of imputation methods \cr
-\code{results$amputation_test_results} \tab \tab \tab \tab \tab Performance assessment using artificial missingness \cr
-\code{results$pooled_estimates} \tab \tab \tab \tab \tab Results pooled across imputations using Rubin's rules \cr
-\code{results$convergence_plot} \tab \tab \tab \tab \tab MICE convergence trace plots and diagnostics \cr
-\code{results$distribution_plot} \tab \tab \tab \tab \tab Comparison of observed and imputed value distributions \cr
-\code{results$pattern_plot} \tab \tab \tab \tab \tab Visual representation of missing data patterns \cr
-\code{results$sensitivity_plot} \tab \tab \tab \tab \tab Visualization of sensitivity analysis results \cr
-\code{results$quality_plot} \tab \tab \tab \tab \tab Quality assessment visualization across variables \cr
-\code{results$clinical_interpretation} \tab \tab \tab \tab \tab Clinical context and imputation recommendations \cr
-\code{results$regulatory_report} \tab \tab \tab \tab \tab Comprehensive report for regulatory submissions \cr
-\code{results$methods_documentation} \tab \tab \tab \tab \tab Detailed documentation of imputation methods and assumptions \cr
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$imputationMethodSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$pooledResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$diagnosticPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$missing_summary$asDF}
+\code{results$summary$asDF}
 
-\code{as.data.frame(results$missing_summary)}
+\code{as.data.frame(results$summary)}
 }
 \description{
 Advanced multiple imputation by chained equations (MICE) with comprehensive

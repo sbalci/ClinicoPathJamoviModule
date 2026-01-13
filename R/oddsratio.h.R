@@ -309,9 +309,9 @@ oddsratio <- function(
     data,
     explanatory,
     outcome,
-    outcomeLevel = NULL,
+    outcomeLevel,
     diagnosticPredictor = NULL,
-    predictorLevel = NULL,
+    predictorLevel,
     usePenalized = FALSE,
     showNomogram = FALSE,
     showExplanations = FALSE) {

@@ -10,6 +10,8 @@ oddsratio(
   outcome,
   outcomeLevel,
   diagnosticPredictor = NULL,
+  predictorLevel,
+  usePenalized = FALSE,
   showNomogram = FALSE,
   showExplanations = FALSE
 )
@@ -27,6 +29,13 @@ use the second level alphabetically.}
 
 \item{diagnosticPredictor}{Specify the predictor to drive likelihood
 ratios; must be binary. Defaults to the first explanatory variable.}
+
+\item{predictorLevel}{Specify which level of the diagnostic predictor
+represents the positive case.}
+
+\item{usePenalized}{Use Firth penalized likelihood logistic regression.
+This is recommended when there is separation (zero cells), small sample
+sizes, or low events-per-variable.}
 
 \item{showNomogram}{Display an interactive nomogram for converting pre-test
 to post-test probabilities using likelihood ratios calculated from the

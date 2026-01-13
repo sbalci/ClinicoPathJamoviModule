@@ -6,32 +6,32 @@
 \usage{
 treatmentmeta(
   data,
-  study_id,
-  year,
+  study_id = NULL,
+  year = NULL,
   outcome_type = "continuous",
-  mean_treatment,
-  sd_treatment,
-  n_treatment,
-  mean_control,
-  sd_control,
-  n_control,
-  events_treatment,
-  events_control,
-  correlation,
-  sample_size,
-  effect_size,
-  standard_error,
-  ci_lower,
-  ci_upper,
-  hazard_ratio,
-  log_hr_se,
+  mean_treatment = NULL,
+  sd_treatment = NULL,
+  n_treatment = NULL,
+  mean_control = NULL,
+  sd_control = NULL,
+  n_control = NULL,
+  events_treatment = NULL,
+  events_control = NULL,
+  correlation = NULL,
+  sample_size = NULL,
+  effect_size = NULL,
+  standard_error = NULL,
+  ci_lower = NULL,
+  ci_upper = NULL,
+  hazard_ratio = NULL,
+  log_hr_se = NULL,
   effect_measure = "SMD",
   model_type = "random",
   heterogeneity_test = TRUE,
   prediction_interval = TRUE,
-  subgroup_var,
+  subgroup_var = NULL,
   subgroup_test = TRUE,
-  moderator_vars,
+  moderator_vars = NULL,
   sensitivity_analysis = TRUE,
   influence_diagnostics = TRUE,
   publication_bias = TRUE,
@@ -39,7 +39,7 @@ treatmentmeta(
   eggers_test = TRUE,
   trim_fill = TRUE,
   pcurve = FALSE,
-  quality_score,
+  quality_score = NULL,
   weight_by_quality = FALSE,
   confidence_level = 0.95,
   small_study_correction = TRUE,
@@ -163,11 +163,16 @@ A results object containing:
 \code{results$influence} \tab \tab \tab \tab \tab Identification of influential studies and outliers \cr
 \code{results$publication_bias_tests} \tab \tab \tab \tab \tab Statistical tests for publication bias \cr
 \code{results$trim_fill_results} \tab \tab \tab \tab \tab Adjusted estimates after trim and fill correction \cr
+\code{results$bayesian_results} \tab \tab \tab \tab \tab Parameter estimates from Bayesian meta-analysis \cr
+\code{results$pcurve_results} \tab \tab \tab \tab \tab Statistical tests for evidential value \cr
+\code{results$quality_assessment} \tab \tab \tab \tab \tab Impact of study quality on effect sizes \cr
 \code{results$forest_plot} \tab \tab \tab \tab \tab Forest plot showing individual and pooled effect sizes \cr
 \code{results$funnel_plot} \tab \tab \tab \tab \tab Funnel plot for assessing publication bias \cr
 \code{results$baujat_plot} \tab \tab \tab \tab \tab Contribution to heterogeneity vs influence on pooled estimate \cr
 \code{results$radial_plot} \tab \tab \tab \tab \tab Galbraith radial plot for heterogeneity assessment \cr
+\code{results$cumulative_results} \tab \tab \tab \tab \tab Sequential pooled estimates as studies are added \cr
 \code{results$cumulative_plot} \tab \tab \tab \tab \tab Cumulative meta-analysis plot over time \cr
+\code{results$pcurve_plot} \tab \tab \tab \tab \tab Distribution of significant p-values \cr
 \code{results$clinical_interpretation} \tab \tab \tab \tab \tab Clinical context and evidence synthesis \cr
 \code{results$methods_section} \tab \tab \tab \tab \tab Template text for publication methods section \cr
 }

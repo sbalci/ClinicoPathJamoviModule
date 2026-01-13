@@ -255,14 +255,104 @@ referenceintervalsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 referenceintervalsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "referenceintervalsResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        instructions = function() private$.items[["instructions"]],
+        summary = function() private$.items[["summary"]],
+        riResults = function() private$.items[["riResults"]],
+        normalityTest = function() private$.items[["normalityTest"]],
+        referencePaths = function() private$.items[["referencePaths"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Reference Interval Establishment")}))
+                title="Reference Interval Establishment",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Analysis Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="summary",
+                title="Data Summary",
+                rows=1,
+                clearWith=list(
+                    "measurement"),
+                columns=list(
+                    list(
+                        `name`="characteristic", 
+                        `title`="Characteristic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="riResults",
+                title="Reference Interval Results",
+                rows=1,
+                clearWith=list(
+                    "measurement",
+                    "ri_method",
+                    "confidence_level",
+                    "reference_percentiles"),
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="lower_limit", 
+                        `title`="Lower Limit", 
+                        `type`="number"),
+                    list(
+                        `name`="upper_limit", 
+                        `title`="Upper Limit", 
+                        `type`="number"),
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="normalityTest",
+                title="Normality Assessment",
+                visible="(transformation_test)",
+                rows=1,
+                clearWith=list(
+                    "measurement"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="statistic", 
+                        `title`="Statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto:pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="referencePaths",
+                title="References",
+                visible=TRUE))}))
 
 referenceintervalsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "referenceintervalsBase",
@@ -337,7 +427,18 @@ referenceintervalsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param age_trend_plots Generate age-related trend visualizations
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$riResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$normalityTest} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$referencePaths} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$summary$asDF}
+#'
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 referenceintervals <- function(

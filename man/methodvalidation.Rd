@@ -101,30 +101,17 @@ evaluation}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$studyDesign} \tab \tab \tab \tab \tab a table \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$precisionResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$accuracyResults} \tab \tab \tab \tab \tab a table \cr
-\code{results$linearityResults} \tab \tab \tab \tab \tab a table \cr
-\code{results$linearityData} \tab \tab \tab \tab \tab a table \cr
-\code{results$detectionLimits} \tab \tab \tab \tab \tab a table \cr
-\code{results$uncertaintyBudget} \tab \tab \tab \tab \tab a table \cr
-\code{results$uncertaintySummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$validationSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$interferenceResults} \tab \tab \tab \tab \tab a table \cr
-\code{results$carryoverResults} \tab \tab \tab \tab \tab a table \cr
-\code{results$precisionPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$accuracyPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$linearityPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$methodComparisonPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$uncertaintyPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$studyDesign$asDF}
+\code{results$summary$asDF}
 
-\code{as.data.frame(results$studyDesign)}
+\code{as.data.frame(results$summary)}
 }
 \description{
 Comprehensive analytical method validation following CLSI EP15-A3, EP05-A3,

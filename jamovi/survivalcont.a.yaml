@@ -1,7 +1,7 @@
 ---
 name:  survivalcont
 title: Survival Analysis for Continuous Variable
-menuGroup: SurvivalD
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
 version: '0.0.32'

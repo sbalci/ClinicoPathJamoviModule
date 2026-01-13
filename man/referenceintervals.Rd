@@ -93,7 +93,18 @@ establishment}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$riResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$normalityTest} \tab \tab \tab \tab \tab a table \cr
+\code{results$referencePaths} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary$asDF}
+
+\code{as.data.frame(results$summary)}
 }
 \description{
 Robust statistical methods for establishing clinical reference intervals

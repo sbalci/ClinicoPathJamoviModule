@@ -481,14 +481,131 @@ clinicalcalculatorsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 clinicalcalculatorsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "clinicalcalculatorsResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        instructions = function() private$.items[["instructions"]],
+        data_summary = function() private$.items[["data_summary"]],
+        model_summary = function() private$.items[["model_summary"]],
+        risk_table = function() private$.items[["risk_table"]],
+        nomogram_plot = function() private$.items[["nomogram_plot"]],
+        calibration_plot = function() private$.items[["calibration_plot"]],
+        method_explanation = function() private$.items[["method_explanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Clinical Risk Calculators & Nomograms")}))
+                title="Clinical Risk Calculators & Nomograms",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "rms"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="instructions",
+                title="Analysis Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="data_summary",
+                title="Data Summary",
+                rows=1,
+                clearWith=list(
+                    "outcome_variable",
+                    "predictor_variables"),
+                columns=list(
+                    list(
+                        `name`="characteristic", 
+                        `title`="Characteristic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="model_summary",
+                title="Statistical Model Summary",
+                rows=1,
+                clearWith=list(
+                    "outcome_variable",
+                    "predictor_variables",
+                    "model_type"),
+                columns=list(
+                    list(
+                        `name`="predictor", 
+                        `title`="Predictor", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Coefficient (\u03B2)", 
+                        `type`="number"),
+                    list(
+                        `name`="std_error", 
+                        `title`="Std. Error", 
+                        `type`="number"),
+                    list(
+                        `name`="z_value", 
+                        `title`="z", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto:pvalue"),
+                    list(
+                        `name`="odds_ratio", 
+                        `title`="Odds Ratio", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="risk_table",
+                title="Clinical Risk Calculator Scores",
+                rows=1,
+                clearWith=list(
+                    "outcome_variable",
+                    "predictor_variables"),
+                columns=list(
+                    list(
+                        `name`="factor", 
+                        `title`="Clinical Factor", 
+                        `type`="text"),
+                    list(
+                        `name`="level", 
+                        `title`="Factor Level", 
+                        `type`="text"),
+                    list(
+                        `name`="points", 
+                        `title`="Points", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="nomogram_plot",
+                title="Clinical Nomogram",
+                visible="(include_nomogram)",
+                width=800,
+                height=600,
+                renderFun=".plotNomogram",
+                clearWith=list(
+                    "include_nomogram",
+                    "outcome_variable",
+                    "predictor_variables")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="calibration_plot",
+                title="Model Calibration",
+                visible="(include_calibration)",
+                width=600,
+                height=500,
+                renderFun=".plotCalibration",
+                clearWith=list(
+                    "include_calibration",
+                    "outcome_variable",
+                    "predictor_variables")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="method_explanation",
+                title="Method and Clinical Interpretation",
+                visible=TRUE))}))
 
 clinicalcalculatorsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "clinicalcalculatorsBase",
@@ -570,7 +687,20 @@ clinicalcalculatorsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   guidelines
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$data_summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$model_summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$risk_table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nomogram_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calibration_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$method_explanation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$data_summary$asDF}
+#'
+#' \code{as.data.frame(results$data_summary)}
 #'
 #' @export
 clinicalcalculators <- function(

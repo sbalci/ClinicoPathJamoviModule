@@ -342,24 +342,11 @@ advancedimputationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        missing_summary = function() private$.items[["missing_summary"]],
-        convergence_assessment = function() private$.items[["convergence_assessment"]],
-        imputation_summary = function() private$.items[["imputation_summary"]],
-        sensitivity_results = function() private$.items[["sensitivity_results"]],
-        mnar_analysis = function() private$.items[["mnar_analysis"]],
-        multilevel_results = function() private$.items[["multilevel_results"]],
-        quality_assessment = function() private$.items[["quality_assessment"]],
-        cross_validation_results = function() private$.items[["cross_validation_results"]],
-        amputation_test_results = function() private$.items[["amputation_test_results"]],
-        pooled_estimates = function() private$.items[["pooled_estimates"]],
-        convergence_plot = function() private$.items[["convergence_plot"]],
-        distribution_plot = function() private$.items[["distribution_plot"]],
-        pattern_plot = function() private$.items[["pattern_plot"]],
-        sensitivity_plot = function() private$.items[["sensitivity_plot"]],
-        quality_plot = function() private$.items[["quality_plot"]],
-        clinical_interpretation = function() private$.items[["clinical_interpretation"]],
-        regulatory_report = function() private$.items[["regulatory_report"]],
-        methods_documentation = function() private$.items[["methods_documentation"]]),
+        summary = function() private$.items[["summary"]],
+        imputationMethodSummary = function() private$.items[["imputationMethodSummary"]],
+        pooledResults = function() private$.items[["pooledResults"]],
+        diagnosticPlot = function() private$.items[["diagnosticPlot"]],
+        methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -368,16 +355,20 @@ advancedimputationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Advanced Multiple Imputation & Sensitivity Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "mice"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
-                title="Getting Started",
+                title="Analysis Instructions",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="missing_summary",
+                name="summary",
                 title="Missing Data Summary",
+                rows=1,
+                clearWith=list(
+                    "imputation_vars"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -385,463 +376,81 @@ advancedimputationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="text"),
                     list(
                         `name`="n_missing", 
-                        `title`="N Missing", 
+                        `title`="Missing", 
                         `type`="integer"),
                     list(
-                        `name`="pct_missing", 
-                        `title`="Missing %", 
+                        `name`="p_missing", 
+                        `title`="%", 
                         `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="pattern_id", 
-                        `title`="Pattern ID", 
-                        `type`="integer"),
-                    list(
-                        `name`="imputation_method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text")),
+                        `format`="zto:1"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="imputationMethodSummary",
+                title="Imputation Model Summary",
+                rows=1,
                 clearWith=list(
                     "imputation_vars",
-                    "auxiliary_vars")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="convergence_assessment",
-                title="Convergence Assessment",
-                visible="(convergence_check)",
+                    "imputation_method"),
                 columns=list(
                     list(
                         `name`="variable", 
                         `title`="Variable", 
                         `type`="text"),
-                    list(
-                        `name`="iteration", 
-                        `title`="Iteration", 
-                        `type`="integer"),
-                    list(
-                        `name`="between_variance", 
-                        `title`="Between Variance", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="within_variance", 
-                        `title`="Within Variance", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="total_variance", 
-                        `title`="Total Variance", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="rhat", 
-                        `title`="R-hat", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="convergence_status", 
-                        `title`="Status", 
-                        `type`="text")),
-                clearWith=list(
-                    "n_imputations",
-                    "n_iterations")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="imputation_summary",
-                title="Imputation Results Summary",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="n_imputations", 
-                        `title`="N Imputations", 
-                        `type`="integer"),
-                    list(
-                        `name`="mean_observed", 
-                        `title`="Mean (Observed)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="mean_imputed", 
-                        `title`="Mean (Imputed)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="sd_observed", 
-                        `title`="SD (Observed)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="sd_imputed", 
-                        `title`="SD (Imputed)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="quality_score", 
-                        `title`="Quality Score", 
-                        `type`="number", 
-                        `format`="zto")),
-                clearWith=list(
-                    "imputation_vars",
-                    "imputation_method")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="sensitivity_results",
-                title="Sensitivity Analysis Results",
-                visible="(sensitivity_analysis)",
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method/Assumption", 
-                        `type`="text"),
-                    list(
-                        `name`="scenario", 
-                        `title`="Scenario", 
-                        `type`="text"),
-                    list(
-                        `name`="n_complete", 
-                        `title`="N Complete", 
-                        `type`="integer"),
-                    list(
-                        `name`="primary_estimate", 
-                        `title`="Primary Estimate", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="standard_error", 
-                        `title`="SE", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="sensitivity_flag", 
-                        `title`="Sensitivity", 
-                        `type`="text")),
-                clearWith=list(
-                    "sensitivity_methods",
-                    "mnar_methods")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="mnar_analysis",
-                title="MNAR Sensitivity Analysis",
-                visible="(mnar_methods)",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="delta_value", 
-                        `title`="Delta Value", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="mnar_method", 
-                        `title`="MNAR Method", 
-                        `type`="text"),
-                    list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="change_pct", 
-                        `title`="Change (%)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "mnar_type",
-                    "delta_values")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="multilevel_results",
-                title="Multilevel Imputation Results",
-                visible="(multilevel_imputation)",
-                columns=list(
-                    list(
-                        `name`="level", 
-                        `title`="Level", 
-                        `type`="text"),
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="icc_observed", 
-                        `title`="ICC (Observed)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="icc_imputed", 
-                        `title`="ICC (Imputed)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="level_variance", 
-                        `title`="Level Variance", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="quality_assessment", 
-                        `title`="Quality", 
-                        `type`="text")),
-                clearWith=list(
-                    "cluster_var",
-                    "level1_vars",
-                    "level2_vars")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="quality_assessment",
-                title="Imputation Quality Assessment",
-                visible="(imputation_quality)",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="distributional_match", 
-                        `title`="Distribution Match", 
-                        `type`="text"),
-                    list(
-                        `name`="correlation_preservation", 
-                        `title`="Correlation Preservation", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="variance_ratio", 
-                        `title`="Variance Ratio", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="outlier_detection", 
-                        `title`="Outlier Count", 
-                        `type`="integer"),
-                    list(
-                        `name`="plausibility_score", 
-                        `title`="Plausibility Score", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="overall_quality", 
-                        `title`="Overall Quality", 
-                        `type`="text")),
-                clearWith=list(
-                    "imputation_vars")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="cross_validation_results",
-                title="Cross-Validation Results",
-                visible="(cross_validation)",
-                columns=list(
                     list(
                         `name`="method", 
                         `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="fold", 
-                        `title`="Fold", 
-                        `type`="integer"),
-                    list(
-                        `name`="rmse", 
-                        `title`="RMSE", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="mae", 
-                        `title`="MAE", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="correlation", 
-                        `title`="Correlation", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="rank", 
-                        `title`="Rank", 
-                        `type`="integer")),
-                clearWith=list(
-                    "imputation_method",
-                    "categorical_method")))
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="amputation_test_results",
-                title="Amputation Test Results",
-                visible="(ampute_test)",
-                columns=list(
-                    list(
-                        `name`="variable", 
-                        `title`="Variable", 
-                        `type`="text"),
-                    list(
-                        `name`="missingness_pct", 
-                        `title`="Missingness %", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="recovery_rate", 
-                        `title`="Recovery Rate", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="bias", 
-                        `title`="Bias", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="coverage", 
-                        `title`="Coverage", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="performance_grade", 
-                        `title`="Grade", 
-                        `type`="text")),
-                clearWith=list(
-                    "imputation_method")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="pooled_estimates",
-                title="Pooled Analysis Results",
+                name="pooledResults",
+                title="Pooled Parameter Estimates (Rubin's Rules)",
                 visible="(pool_results)",
+                rows=1,
+                clearWith=list(
+                    "imputation_vars",
+                    "n_imputations"),
                 columns=list(
                     list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
+                        `name`="variable", 
+                        `title`="Variable", 
                         `type`="text"),
                     list(
                         `name`="estimate", 
                         `title`="Estimate", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `name`="std_error", 
+                        `title`="Std. Error", 
+                        `type`="number"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `name`="statistic", 
+                        `title`="t", 
+                        `type`="number"),
                     list(
                         `name`="df", 
                         `title`="df", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
-                        `name`="fmi", 
-                        `title`="FMI", 
+                        `name`="p_value", 
+                        `title`="p-value", 
                         `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="lambda", 
-                        `title`="Lambda", 
-                        `type`="number", 
-                        `format`="zto")),
-                clearWith=list(
-                    "n_imputations")))
+                        `format`="zto:pvalue"))))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="convergence_plot",
-                title="Convergence Diagnostic Plots",
-                width=900,
-                height=600,
-                visible="(diagnostic_plots && convergence_check)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "n_iterations",
-                    "imputation_vars")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="distribution_plot",
-                title="Observed vs Imputed Distributions",
-                width=900,
-                height=600,
+                name="diagnosticPlot",
+                title="Imputation Diagnostics",
                 visible="(diagnostic_plots)",
-                requiresData=TRUE,
+                width=600,
+                height=400,
+                renderFun=".plotDiagnostics",
                 clearWith=list(
                     "imputation_vars",
-                    "imputation_method")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="pattern_plot",
-                title="Missing Data Pattern Plot",
-                width=800,
-                height=600,
-                visible="(diagnostic_plots)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "imputation_vars")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="sensitivity_plot",
-                title="Sensitivity Analysis Plot",
-                width=800,
-                height=600,
-                visible="(diagnostic_plots && sensitivity_analysis)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "sensitivity_methods",
-                    "mnar_methods")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="quality_plot",
-                title="Imputation Quality Plot",
-                width=800,
-                height=600,
-                visible="(diagnostic_plots && imputation_quality)",
-                requiresData=TRUE,
-                clearWith=list(
-                    "imputation_vars")))
+                    "n_imputations")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="clinical_interpretation",
-                title="Clinical Interpretation & Recommendations",
-                visible="(show_detailed_output)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="regulatory_report",
-                title="Regulatory Compliance Report",
-                visible="(regulatory_report)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="methods_documentation",
-                title="Methods Documentation",
-                visible="(show_detailed_output)"))}))
+                name="methodExplanation",
+                title="Method and Clinical Context",
+                visible=TRUE))}))
 
 advancedimputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "advancedimputationBase",
@@ -940,32 +549,19 @@ advancedimputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param random_seed Set random seed for reproducible results
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$instructions} \tab \tab \tab \tab \tab Instructions for advanced multiple imputation and sensitivity analysis \cr
-#'   \code{results$missing_summary} \tab \tab \tab \tab \tab Overview of missing data patterns and completeness \cr
-#'   \code{results$convergence_assessment} \tab \tab \tab \tab \tab MICE convergence diagnostics and statistics \cr
-#'   \code{results$imputation_summary} \tab \tab \tab \tab \tab Summary of completed imputations across methods \cr
-#'   \code{results$sensitivity_results} \tab \tab \tab \tab \tab Results across different imputation methods and assumptions \cr
-#'   \code{results$mnar_analysis} \tab \tab \tab \tab \tab Missing Not At Random sensitivity analysis results \cr
-#'   \code{results$multilevel_results} \tab \tab \tab \tab \tab Results for nested/multilevel imputation \cr
-#'   \code{results$quality_assessment} \tab \tab \tab \tab \tab Comprehensive quality evaluation of imputations \cr
-#'   \code{results$cross_validation_results} \tab \tab \tab \tab \tab Cross-validation performance of imputation methods \cr
-#'   \code{results$amputation_test_results} \tab \tab \tab \tab \tab Performance assessment using artificial missingness \cr
-#'   \code{results$pooled_estimates} \tab \tab \tab \tab \tab Results pooled across imputations using Rubin's rules \cr
-#'   \code{results$convergence_plot} \tab \tab \tab \tab \tab MICE convergence trace plots and diagnostics \cr
-#'   \code{results$distribution_plot} \tab \tab \tab \tab \tab Comparison of observed and imputed value distributions \cr
-#'   \code{results$pattern_plot} \tab \tab \tab \tab \tab Visual representation of missing data patterns \cr
-#'   \code{results$sensitivity_plot} \tab \tab \tab \tab \tab Visualization of sensitivity analysis results \cr
-#'   \code{results$quality_plot} \tab \tab \tab \tab \tab Quality assessment visualization across variables \cr
-#'   \code{results$clinical_interpretation} \tab \tab \tab \tab \tab Clinical context and imputation recommendations \cr
-#'   \code{results$regulatory_report} \tab \tab \tab \tab \tab Comprehensive report for regulatory submissions \cr
-#'   \code{results$methods_documentation} \tab \tab \tab \tab \tab Detailed documentation of imputation methods and assumptions \cr
+#'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$imputationMethodSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pooledResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$diagnosticPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$missing_summary$asDF}
+#' \code{results$summary$asDF}
 #'
-#' \code{as.data.frame(results$missing_summary)}
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 advancedimputation <- function(

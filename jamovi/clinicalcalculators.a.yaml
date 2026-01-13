@@ -1,7 +1,7 @@
 ---
 name:  clinicalcalculators
 title: Clinical Risk Calculators & Nomograms
-menuGroup: ClinicoPathD
+menuGroup: OncoPathT
 version: '1.0.0'
 jas: '1.2'
 

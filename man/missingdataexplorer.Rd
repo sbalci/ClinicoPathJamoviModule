@@ -115,7 +115,19 @@ recommendations}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$summary_statistics} \tab \tab \tab \tab \tab a table \cr
+\code{results$mcar_test_results} \tab \tab \tab \tab \tab a table \cr
+\code{results$missing_patterns} \tab \tab \tab \tab \tab a table \cr
+\code{results$correlation_matrix} \tab \tab \tab \tab \tab a table \cr
+\code{results$pattern_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$upset_plot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$summary_statistics$asDF}
+
+\code{as.data.frame(results$summary_statistics)}
 }
 \description{
 Comprehensive missing data pattern exploration and visualization for

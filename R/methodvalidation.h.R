@@ -298,22 +298,9 @@ methodvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        studyDesign = function() private$.items[["studyDesign"]],
+        summary = function() private$.items[["summary"]],
         precisionResults = function() private$.items[["precisionResults"]],
         accuracyResults = function() private$.items[["accuracyResults"]],
-        linearityResults = function() private$.items[["linearityResults"]],
-        linearityData = function() private$.items[["linearityData"]],
-        detectionLimits = function() private$.items[["detectionLimits"]],
-        uncertaintyBudget = function() private$.items[["uncertaintyBudget"]],
-        uncertaintySummary = function() private$.items[["uncertaintySummary"]],
-        validationSummary = function() private$.items[["validationSummary"]],
-        interferenceResults = function() private$.items[["interferenceResults"]],
-        carryoverResults = function() private$.items[["carryoverResults"]],
-        precisionPlot = function() private$.items[["precisionPlot"]],
-        accuracyPlot = function() private$.items[["accuracyPlot"]],
-        linearityPlot = function() private$.items[["linearityPlot"]],
-        methodComparisonPlot = function() private$.items[["methodComparisonPlot"]],
-        uncertaintyPlot = function() private$.items[["uncertaintyPlot"]],
         methodExplanation = function() private$.items[["methodExplanation"]]),
     private = list(),
     public=list(
@@ -331,17 +318,15 @@ methodvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="studyDesign",
-                title="Study Design Summary",
-                visible=TRUE,
+                name="summary",
+                title="Data Summary",
                 rows=1,
                 clearWith=list(
-                    "validation_type",
-                    "precision_design"),
+                    "measurement"),
                 columns=list(
                     list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
+                        `name`="characteristic", 
+                        `title`="Characteristic", 
                         `type`="text"),
                     list(
                         `name`="value", 
@@ -350,16 +335,15 @@ methodvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$add(jmvcore::Table$new(
                 options=options,
                 name="precisionResults",
-                title="Precision Evaluation Results",
-                visible="(precision_analysis)",
+                title="Precision Analysis",
                 rows=1,
+                visible="(precision_analysis)",
                 clearWith=list(
-                    "precision_analysis",
                     "measurement",
                     "concentration_level"),
                 columns=list(
                     list(
-                        `name`="concentration_level", 
+                        `name`="level", 
                         `title`="Concentration Level", 
                         `type`="text"),
                     list(
@@ -369,415 +353,57 @@ methodvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     list(
                         `name`="mean", 
                         `title`="Mean", 
-                        `type`="number", 
-                        `format`="zto:4"),
+                        `type`="number"),
                     list(
-                        `name`="repeatability_sd", 
-                        `title`="Repeatability SD", 
-                        `type`="number", 
-                        `format`="zto:4"),
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number"),
                     list(
-                        `name`="repeatability_cv", 
-                        `title`="Repeatability CV (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
+                        `name`="cv", 
+                        `title`="CV (%)", 
+                        `type`="number"),
                     list(
-                        `name`="intermediate_precision_sd", 
-                        `title`="Intermediate Precision SD", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="intermediate_precision_cv", 
-                        `title`="Intermediate Precision CV (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="acceptance_status", 
-                        `title`="Acceptance Status", 
+                        `name`="status", 
+                        `title`="Status", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="accuracyResults",
-                title="Accuracy and Bias Assessment",
-                visible="(accuracy_analysis)",
+                title="Accuracy (Bias) Analysis",
                 rows=1,
+                visible="(accuracy_analysis)",
                 clearWith=list(
-                    "accuracy_analysis",
                     "measurement",
                     "reference_value"),
                 columns=list(
                     list(
-                        `name`="concentration_level", 
+                        `name`="level", 
                         `title`="Concentration Level", 
                         `type`="text"),
                     list(
-                        `name`="target_value", 
-                        `title`="Target Value", 
-                        `type`="number", 
-                        `format`="zto:4"),
+                        `name`="target", 
+                        `title`="Target/Reference", 
+                        `type`="number"),
                     list(
-                        `name`="observed_mean", 
+                        `name`="observed", 
                         `title`="Observed Mean", 
-                        `type`="number", 
-                        `format`="zto:4"),
+                        `type`="number"),
                     list(
-                        `name`="bias", 
-                        `title`="Bias", 
-                        `type`="number", 
-                        `format`="zto:4"),
+                        `name`="bias_abs", 
+                        `title`="Bias (Abs)", 
+                        `type`="number"),
                     list(
-                        `name`="bias_percent", 
+                        `name`="bias_rel", 
                         `title`="Bias (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="bias_ci_lower", 
-                        `title`="Bias CI Lower", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="bias_ci_upper", 
-                        `title`="Bias CI Upper", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="recovery_percent", 
-                        `title`="Recovery (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="acceptance_status", 
-                        `title`="Acceptance Status", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="linearityResults",
-                title="Linearity Analysis Results",
-                visible="(linearity_analysis)",
-                rows=1,
-                clearWith=list(
-                    "linearity_analysis",
-                    "measurement",
-                    "reference_value"),
-                columns=list(
-                    list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number", 
-                        `format`="zto:6"),
-                    list(
-                        `name`="confidence_interval", 
-                        `title`="Confidence Interval", 
-                        `type`="text"),
-                    list(
-                        `name`="statistical_significance", 
-                        `title`="Statistical Significance", 
-                        `type`="text"),
-                    list(
-                        `name`="clinical_significance", 
-                        `title`="Clinical Significance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="linearityData",
-                title="Linearity Data Points",
-                visible="(linearity_analysis)",
-                rows=1,
-                clearWith=list(
-                    "linearity_analysis",
-                    "measurement"),
-                columns=list(
-                    list(
-                        `name`="expected_value", 
-                        `title`="Expected Value", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="observed_mean", 
-                        `title`="Observed Mean", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="difference", 
-                        `title`="Difference", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="percent_difference", 
-                        `title`="Difference (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="within_limits", 
-                        `title`="Within Limits", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="detectionLimits",
-                title="Detection and Quantitation Limits",
-                visible="(limit_of_detection || limit_of_quantitation)",
-                rows=1,
-                clearWith=list(
-                    "limit_of_detection",
-                    "limit_of_quantitation"),
-                columns=list(
-                    list(
-                        `name`="limit_type", 
-                        `title`="Limit Type", 
-                        `type`="text"),
-                    list(
-                        `name`="estimated_value", 
-                        `title`="Estimated Value", 
-                        `type`="number", 
-                        `format`="zto:6"),
-                    list(
-                        `name`="method_used", 
-                        `title`="Method Used", 
-                        `type`="text"),
-                    list(
-                        `name`="confidence_interval", 
-                        `title`="Confidence Interval", 
-                        `type`="text"),
-                    list(
-                        `name`="verification_status", 
-                        `title`="Verification Status", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="uncertaintyBudget",
-                title="Measurement Uncertainty Budget",
-                visible="(uncertainty_budget)",
-                rows=1,
-                clearWith=list(
-                    "uncertainty_budget",
-                    "measurement"),
-                columns=list(
-                    list(
-                        `name`="uncertainty_component", 
-                        `title`="Uncertainty Component", 
-                        `type`="text"),
-                    list(
-                        `name`="standard_uncertainty", 
-                        `title`="Standard Uncertainty", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="relative_uncertainty", 
-                        `title`="Relative Uncertainty (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="degrees_of_freedom", 
-                        `title`="Degrees of Freedom", 
-                        `type`="integer"),
-                    list(
-                        `name`="contribution_percent", 
-                        `title`="Contribution (%)", 
-                        `type`="number", 
-                        `format`="zto:1"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="uncertaintySummary",
-                title="Combined Uncertainty Summary",
-                visible="(uncertainty_budget)",
-                rows=1,
-                clearWith=list(
-                    "uncertainty_budget"),
-                columns=list(
-                    list(
-                        `name`="uncertainty_type", 
-                        `title`="Uncertainty Type", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="relative_value", 
-                        `title`="Relative Value (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="coverage_factor", 
-                        `title`="Coverage Factor", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="expanded_uncertainty", 
-                        `title`="Expanded Uncertainty", 
-                        `type`="number", 
-                        `format`="zto:4"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="validationSummary",
-                title="Method Validation Summary",
-                visible=TRUE,
-                rows=1,
-                clearWith=list(
-                    "validation_type",
-                    "measurement"),
-                columns=list(
-                    list(
-                        `name`="validation_parameter", 
-                        `title`="Validation Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="acceptance_criterion", 
-                        `title`="Acceptance Criterion", 
-                        `type`="text"),
-                    list(
-                        `name`="observed_result", 
-                        `title`="Observed Result", 
-                        `type`="text"),
+                        `type`="number"),
                     list(
                         `name`="status", 
                         `title`="Status", 
-                        `type`="text"),
-                    list(
-                        `name`="recommendation", 
-                        `title`="Recommendation", 
                         `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="interferenceResults",
-                title="Interference Testing Results",
-                visible="(interference_testing)",
-                rows=1,
-                clearWith=list(
-                    "interference_testing"),
-                columns=list(
-                    list(
-                        `name`="interfering_substance", 
-                        `title`="Interfering Substance", 
-                        `type`="text"),
-                    list(
-                        `name`="concentration_tested", 
-                        `title`="Concentration Tested", 
-                        `type`="text"),
-                    list(
-                        `name`="baseline_result", 
-                        `title`="Baseline Result", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="interference_result", 
-                        `title`="Interference Result", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="percent_interference", 
-                        `title`="Interference (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="clinical_significance", 
-                        `title`="Clinical Significance", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="carryoverResults",
-                title="Carryover Assessment Results",
-                visible="(carryover_assessment)",
-                rows=1,
-                clearWith=list(
-                    "carryover_assessment"),
-                columns=list(
-                    list(
-                        `name`="test_sequence", 
-                        `title`="Test Sequence", 
-                        `type`="text"),
-                    list(
-                        `name`="expected_result", 
-                        `title`="Expected Result", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="observed_result", 
-                        `title`="Observed Result", 
-                        `type`="number", 
-                        `format`="zto:4"),
-                    list(
-                        `name`="carryover_percent", 
-                        `title`="Carryover (%)", 
-                        `type`="number", 
-                        `format`="zto:2"),
-                    list(
-                        `name`="acceptance_status", 
-                        `title`="Acceptance Status", 
-                        `type`="text"))))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="precisionPlot",
-                title="Precision Study Visualization",
-                visible="(validation_plots && precision_analysis)",
-                requiresData=TRUE,
-                width=800,
-                height=600,
-                renderFun=".plotPrecision",
-                clearWith=list(
-                    "validation_plots",
-                    "measurement",
-                    "concentration_level")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="accuracyPlot",
-                title="Accuracy and Bias Visualization",
-                visible="(validation_plots && accuracy_analysis)",
-                requiresData=TRUE,
-                width=800,
-                height=600,
-                renderFun=".plotAccuracy",
-                clearWith=list(
-                    "validation_plots",
-                    "measurement",
-                    "reference_value")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="linearityPlot",
-                title="Linearity Assessment Plot",
-                visible="(validation_plots && linearity_analysis)",
-                requiresData=TRUE,
-                width=800,
-                height=600,
-                renderFun=".plotLinearity",
-                clearWith=list(
-                    "validation_plots",
-                    "measurement",
-                    "reference_value")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="methodComparisonPlot",
-                title="Method Comparison Analysis",
-                visible="(method_comparison_plot && validation_type == \"method_comparison\")",
-                requiresData=TRUE,
-                width=800,
-                height=600,
-                renderFun=".plotMethodComparison",
-                clearWith=list(
-                    "method_comparison_plot",
-                    "measurement",
-                    "reference_value")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="uncertaintyPlot",
-                title="Uncertainty Budget Visualization",
-                visible="(validation_plots && uncertainty_budget)",
-                requiresData=TRUE,
-                width=700,
-                height=500,
-                renderFun=".plotUncertaintyBudget",
-                clearWith=list(
-                    "validation_plots",
-                    "uncertainty_budget")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodExplanation",
-                title="Method and Regulatory Context",
+                title="Method and Clinical Context",
                 visible=TRUE))}))
 
 methodvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -854,30 +480,17 @@ methodvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$studyDesign} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$precisionResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$accuracyResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$linearityResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$linearityData} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$detectionLimits} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$uncertaintyBudget} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$uncertaintySummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$validationSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$interferenceResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$carryoverResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$precisionPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$accuracyPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$linearityPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$methodComparisonPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$uncertaintyPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$studyDesign$asDF}
+#' \code{results$summary$asDF}
 #'
-#' \code{as.data.frame(results$studyDesign)}
+#' \code{as.data.frame(results$summary)}
 #'
 #' @export
 methodvalidation <- function(
