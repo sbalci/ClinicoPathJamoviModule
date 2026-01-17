@@ -45,6 +45,7 @@ options:
       type: Variable
       suggested: [ordinal, nominal]
       permitted: [factor]
+      default: null
       description:
           R: >
             a string naming the binary outcome variable (gold standard) from `data`

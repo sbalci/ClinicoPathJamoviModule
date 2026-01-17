@@ -41,7 +41,8 @@ aivalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..positiveLevel <- jmvcore::OptionLevel$new(
                 "positiveLevel",
                 positiveLevel,
@@ -407,7 +408,7 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 aivalidation <- function(
     data,
     predictorVars,
-    outcomeVar,
+    outcomeVar = NULL,
     positiveLevel,
     compareModels = FALSE,
     youdensJ = FALSE,

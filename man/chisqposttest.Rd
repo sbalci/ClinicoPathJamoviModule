@@ -89,7 +89,29 @@ interpretations}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$assumptionsCheck} \tab \tab \tab \tab \tab a html \cr
+\code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
+\code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
+\code{results$residualsGuidance} \tab \tab \tab \tab \tab a html \cr
+\code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
+\code{results$exportTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+\code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$chisqTable$asDF}
+
+\code{as.data.frame(results$chisqTable)}
 }
 \description{
 Performs Chi-Square test and post-hoc pairwise comparisons. Post-hoc

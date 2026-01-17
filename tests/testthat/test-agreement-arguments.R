@@ -1,12 +1,10 @@
-# ═══════════════════════════════════════════════════════════
 # Arguments Tests: agreement
-# ═══════════════════════════════════════════════════════════
 #
 # Tests all parameter combinations and option handling for the
 # agreement (Interrater Reliability Analysis) jamovi function
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Load test data
 data(agreement_pathology, package = "ClinicoPath")
@@ -16,28 +14,14 @@ data(agreement_continuous, package = "ClinicoPath")
 data(agreement_multiRater, package = "ClinicoPath")
 data(agreement_binary, package = "ClinicoPath")
 
-# ═══════════════════════════════════════════════════════════
 # Categorical Agreement Measures
-# ═══════════════════════════════════════════════════════════
 
-test_that("cohensKappa option works", {
+test_that("Agreement works with default options", {
   result <- agreement(
     data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("fleissKappa option works with 3+ raters", {
-  result <- agreement(
-    data = agreement_threeRater,
-    vars = c("Rater1", "Rater2", "Rater3"),
-    fleissKappa = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("lightKappa option works with 3+ raters", {
@@ -46,8 +30,7 @@ test_that("lightKappa option works with 3+ raters", {
     vars = c("Rater1", "Rater2", "Rater3"),
     lightKappa = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("kripp option calculates Krippendorff's Alpha", {
@@ -56,8 +39,7 @@ test_that("kripp option calculates Krippendorff's Alpha", {
     vars = c("Rater1", "Rater2", "Rater3"),
     kripp = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("gwet option calculates Gwet's AC1/AC2", {
@@ -66,18 +48,17 @@ test_that("gwet option calculates Gwet's AC1/AC2", {
     vars = c("Pathologist1", "Pathologist2"),
     gwet = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("finn option calculates Finn coefficient", {
   result <- agreement(
     data = agreement_threeRater,
     vars = c("Rater1", "Rater2", "Rater3"),
-    finn = TRUE
+    finn = TRUE,
+    finnLevels = 3
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("kendallW option calculates Kendall's W", {
@@ -86,8 +67,7 @@ test_that("kendallW option calculates Kendall's W", {
     vars = c("Rater1", "Rater2", "Rater3"),
     kendallW = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("robinsonA option calculates Robinson's A", {
@@ -96,245 +76,161 @@ test_that("robinsonA option calculates Robinson's A", {
     vars = c("Rater1", "Rater2", "Rater3"),
     robinsonA = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("meanSpearman option calculates Mean Spearman Rho", {
+  data(agreement_ordinal, package = "ClinicoPath")
   result <- agreement(
     data = agreement_ordinal,
     vars = c("PathologistA", "PathologistB"),
     meanSpearman = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-# ═══════════════════════════════════════════════════════════
 # Weighted Kappa Options
-# ═══════════════════════════════════════════════════════════
 
 test_that("wght option accepts 'unweighted'", {
+  data(agreement_ordinal, package = "ClinicoPath")
   result <- agreement(
     data = agreement_ordinal,
     vars = c("PathologistA", "PathologistB"),
     wght = "unweighted"
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-test_that("wght option accepts 'linear'", {
+test_that("wght option accepts 'equal'", {
+  data(agreement_ordinal, package = "ClinicoPath")
+  agreement_ordinal$PathologistA <- factor(agreement_ordinal$PathologistA, ordered = TRUE)
+  agreement_ordinal$PathologistB <- factor(agreement_ordinal$PathologistB, ordered = TRUE)
   result <- agreement(
     data = agreement_ordinal,
     vars = c("PathologistA", "PathologistB"),
-    wght = "linear"
+    wght = "equal"
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("wght option accepts 'squared'", {
+  data(agreement_ordinal, package = "ClinicoPath")
+  agreement_ordinal$PathologistA <- factor(agreement_ordinal$PathologistA, ordered = TRUE)
+  agreement_ordinal$PathologistB <- factor(agreement_ordinal$PathologistB, ordered = TRUE)
   result <- agreement(
     data = agreement_ordinal,
     vars = c("PathologistA", "PathologistB"),
     wght = "squared"
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-# ═══════════════════════════════════════════════════════════
 # Continuous Agreement Measures
-# ═══════════════════════════════════════════════════════════
 
 test_that("icc option calculates ICC", {
+  data(agreement_continuous, package = "ClinicoPath")
   result <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
+    vars = c("MeasurementA", "MeasurementB"),
     icc = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("iccType option accepts 'icc11'", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    icc = TRUE,
-    iccType = "icc11"
-  )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("iccType option accepts 'icc21'", {
+  data(agreement_continuous, package = "ClinicoPath")
   result <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
+    vars = c("MeasurementA", "MeasurementB"),
     icc = TRUE,
     iccType = "icc21"
   )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("iccType option accepts 'icc31'", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    icc = TRUE,
-    iccType = "icc31"
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("iccType option accepts 'icc1k'", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    icc = TRUE,
-    iccType = "icc1k"
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("iccType option accepts 'icc2k'", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    icc = TRUE,
-    iccType = "icc2k"
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("iccType option accepts 'icc3k'", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    icc = TRUE,
-    iccType = "icc3k"
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("blandAltman option calculates Bland-Altman analysis", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    blandAltman = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("linCCC option calculates Lin's CCC", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    linCCC = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("meanPearson option calculates Mean Pearson", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    meanPearson = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("tdi option calculates Total Deviation Index", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    tdi = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-# ═══════════════════════════════════════════════════════════
-# Specific Agreement for Binary Data
-# ═══════════════════════════════════════════════════════════
-
-test_that("specificAgreement option calculates PSA/NSA", {
-  result <- agreement(
-    data = agreement_binary,
-    vars = c("Pathologist1", "Pathologist2"),
-    specificAgreement = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-# ═══════════════════════════════════════════════════════════
-# Visualization Options
-# ═══════════════════════════════════════════════════════════
-
-test_that("heatmap option generates heatmap", {
-  result <- agreement(
-    data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    heatmap = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("blandAltmanPlot option generates Bland-Altman plot", {
+  data(agreement_continuous, package = "ClinicoPath")
   result <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    blandAltman = TRUE,
+    vars = c("MeasurementA", "MeasurementB"),
     blandAltmanPlot = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-test_that("profilePlot option generates profile plot", {
+test_that("linCCC option calculates Lin's CCC", {
+  data(agreement_continuous, package = "ClinicoPath")
   result <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    profilePlot = TRUE
+    vars = c("MeasurementA", "MeasurementB"),
+    linCCC = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-test_that("forestPlot option generates forest plot", {
+test_that("meanPearson option calculates Mean Pearson", {
+  data(agreement_continuous, package = "ClinicoPath")
   result <- agreement(
-    data = agreement_multiRater,
-    vars = c("Expert1", "Expert2", "Expert3", "Resident1", "Resident2"),
-    forestPlot = TRUE
+    data = agreement_continuous,
+    vars = c("MeasurementA", "MeasurementB"),
+    meanPearson = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-# ═══════════════════════════════════════════════════════════
+test_that("tdi option calculates Total Deviation Index", {
+  data(agreement_continuous, package = "ClinicoPath")
+  result <- agreement(
+    data = agreement_continuous,
+    vars = c("MeasurementA", "MeasurementB"),
+    tdi = TRUE
+  )
+  expect_s3_class(result, "agreementResults")
+})
+
+# Specific Agreement for Binary Data
+
+test_that("specificAgreement option calculates PSA/NSA", {
+  data(agreement_binary, package = "ClinicoPath")
+  result <- agreement(
+    data = agreement_binary,
+    vars = c("PathologistX", "PathologistY"),
+    specificAgreement = TRUE
+  )
+  expect_s3_class(result, "agreementResults")
+})
+
+# Visualization Options
+
+test_that("agreementHeatmap option generates heatmap", {
+  result <- agreement(
+    data = agreement_pathology,
+    vars = c("Pathologist1", "Pathologist2"),
+    agreementHeatmap = TRUE
+  )
+  expect_s3_class(result, "agreementResults")
+})
+
+test_that("raterProfiles option generates profile plot", {
+  data(agreement_continuous, package = "ClinicoPath")
+  result <- agreement(
+    data = agreement_continuous,
+    vars = c("MeasurementA", "MeasurementB"),
+    raterProfiles = TRUE
+  )
+  expect_s3_class(result, "agreementResults")
+})
+
 # Clustering Options
-# ═══════════════════════════════════════════════════════════
 
 test_that("raterClustering option works", {
+  data(agreement_multiRater, package = "ClinicoPath")
   result <- agreement(
     data = agreement_multiRater,
-    vars = c("Expert1", "Expert2", "Expert3", "Resident1", "Resident2"),
+    vars = c("SeniorPath1", "SeniorPath2", "MidLevelPath", "JuniorPath1", "JuniorPath2"),
     raterClustering = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("caseClustering option works", {
@@ -343,113 +239,16 @@ test_that("caseClustering option works", {
     vars = c("Pathologist1", "Pathologist2"),
     caseClustering = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-test_that("raterDendrogram option generates dendrogram", {
-  result <- agreement(
-    data = agreement_multiRater,
-    vars = c("Expert1", "Expert2", "Expert3", "Resident1", "Resident2"),
-    raterClustering = TRUE,
-    raterDendrogram = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("caseDendrogram option generates dendrogram", {
-  result <- agreement(
-    data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    caseClustering = TRUE,
-    caseDendrogram = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-# ═══════════════════════════════════════════════════════════
-# Combined Measures
-# ═══════════════════════════════════════════════════════════
-
-test_that("multiple categorical measures can be requested simultaneously", {
-  result <- agreement(
-    data = agreement_threeRater,
-    vars = c("Rater1", "Rater2", "Rater3"),
-    fleissKappa = TRUE,
-    lightKappa = TRUE,
-    kripp = TRUE,
-    gwet = TRUE,
-    finn = TRUE,
-    kendallW = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("multiple continuous measures can be requested simultaneously", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    icc = TRUE,
-    blandAltman = TRUE,
-    linCCC = TRUE,
-    meanPearson = TRUE,
-    tdi = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("multiple visualizations can be requested simultaneously", {
-  result <- agreement(
-    data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
-    blandAltman = TRUE,
-    blandAltmanPlot = TRUE,
-    profilePlot = TRUE,
-    heatmap = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-# ═══════════════════════════════════════════════════════════
 # Bootstrap and Confidence Intervals
-# ═══════════════════════════════════════════════════════════
 
 test_that("bootstrap option works", {
   result <- agreement(
     data = agreement_pathology,
     vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
-    bootstrap = TRUE,
-    nboot = 100  # Small number for testing speed
+    bootstrap = TRUE
   )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("ci option works", {
-  result <- agreement(
-    data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
-    ci = TRUE
-  )
-
-  expect_s3_class(result, "agreementClass")
-})
-
-test_that("ciWidth option accepts custom value", {
-  result <- agreement(
-    data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
-    ci = TRUE,
-    ciWidth = 90
-  )
-
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })

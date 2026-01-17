@@ -1,7 +1,4 @@
-context("test-pathagreement")
-
-# Load required library
-devtools::load_all()
+# test_pathagreement.R
 
 # =============================================================================
 # Basic Functionality Tests
@@ -9,7 +6,6 @@ devtools::load_all()
 
 test_that("pathagreement works with two raters (Cohen's kappa)", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
 
   # Load test data
   data("pathagreement_two_raters", package = "ClinicoPath")
@@ -265,7 +261,7 @@ test_that("pathagreement works with diagnostic style clustering", {
   expect_error(
     pathagreement(
       data = pathagreement_clustering,
-      vars = rater_vars,
+      vars = LETTERS[1:12],
       performClustering = TRUE,
       nStyleGroups = 3,
       showClusteringHeatmap = TRUE
@@ -286,7 +282,7 @@ test_that("pathagreement works with different clustering methods", {
     expect_error(
       pathagreement(
         data = pathagreement_clustering,
-        vars = rater_vars,
+        vars = LETTERS[1:12],
         performClustering = TRUE,
         clusteringMethod = method,
         nStyleGroups = 3
@@ -307,7 +303,7 @@ test_that("pathagreement works with auto-select number of groups", {
   expect_error(
     pathagreement(
       data = pathagreement_clustering,
-      vars = rater_vars,
+      vars = LETTERS[1:12],
       performClustering = TRUE,
       autoSelectGroups = TRUE
     ),
@@ -325,7 +321,7 @@ test_that("pathagreement works with discordant case identification", {
   expect_error(
     pathagreement(
       data = pathagreement_clustering,
-      vars = rater_vars,
+      vars = LETTERS[1:12],
       performClustering = TRUE,
       identifyDiscordant = TRUE,
       discordantThreshold = 0.5
@@ -546,7 +542,7 @@ test_that("pathagreement works with comprehensive dataset - all features", {
   expect_error(
     pathagreement(
       data = pathagreement_comprehensive,
-      vars = rater_vars,
+      vars = paste0("Pathologist_", LETTERS[1:8]),
       multiraterMethod = "fleiss",
       fleissCI = TRUE,
       heatmap = TRUE,
@@ -574,7 +570,7 @@ test_that("pathagreement works with reference standard comparison", {
   expect_error(
     pathagreement(
       data = pathagreement_breast,
-      vars = rater_vars,
+      vars = paste0("Path_", 1:6),
       pathologyContext = TRUE
     ),
     NA

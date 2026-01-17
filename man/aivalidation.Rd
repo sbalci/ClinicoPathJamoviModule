@@ -7,7 +7,7 @@
 aivalidation(
   data,
   predictorVars,
-  outcomeVar,
+  outcomeVar = NULL,
   positiveLevel,
   compareModels = FALSE,
   youdensJ = FALSE,

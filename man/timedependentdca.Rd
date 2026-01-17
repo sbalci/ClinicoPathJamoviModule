@@ -6,9 +6,9 @@
 \usage{
 timedependentdca(
   data,
-  time,
-  event,
-  predictor,
+  time = NULL,
+  event = NULL,
+  predictors = list(),
   time_points = "365, 730, 1095",
   threshold_range_min = 0.01,
   threshold_range_max = 0.99,
@@ -32,7 +32,7 @@ timedependentdca(
 
 \item{event}{a string naming the event indicator (1=event, 0=censored)}
 
-\item{predictor}{a string naming the risk score or prediction variable}
+\item{predictors}{one or more risk score or prediction variables}
 
 \item{time_points}{comma-separated time points at which to calculate net
 benefit (e.g., "365, 730" for 1 and 2 years)}
@@ -78,6 +78,7 @@ A results object containing:
 \code{results$netBenefitTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$interventionsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$netBenefitPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interventionsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretationText} \tab \tab \tab \tab \tab a html \cr

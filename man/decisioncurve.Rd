@@ -6,7 +6,7 @@
 \usage{
 decisioncurve(
   data,
-  outcome,
+  outcome = NULL,
   outcomePositive,
   models,
   modelNames = "",
@@ -32,7 +32,7 @@ decisioncurve(
   compareModels = FALSE,
   weightedAUC = FALSE,
   clinicalDecisionRule = FALSE,
-  decisionRuleVar,
+  decisionRuleVar = NULL,
   decisionRulePositive,
   decisionRuleLabel = "Clinical Rule",
   showClinicalImpactPlot = FALSE,

@@ -77,6 +77,7 @@ items:
   - name: modelComparison
     title: Model Comparison
     type: Table
+    rows: 1
     visible: (modelType:hierarchical)
     columns:
       - name: model
@@ -95,6 +96,7 @@ items:
   - name: publicationBiasResults
     title: Publication Bias Assessment
     type: Table
+    rows: 1
     visible: (publicationBias)
     columns:
       - name: test

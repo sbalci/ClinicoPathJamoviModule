@@ -375,6 +375,13 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     return()
                 }
                 
+                # Check for aliased coefficients (perfect multicollinearity)
+                if (any(is.na(coef(private$.cox_model)))) {
+                    error_msg <- "Cannot calculate VIF because some coefficients are aliased (NA). This indicates perfect multicollinearity."
+                    self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    return()
+                }
+                
                 # Calculate VIF
                 vif_values <- car::vif(private$.cox_model)
                 

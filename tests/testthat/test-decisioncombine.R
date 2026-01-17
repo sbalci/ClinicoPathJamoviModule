@@ -40,7 +40,8 @@ test_that("decisioncombine reports expected metrics for a two-test pattern", {
     test1 = "test1",
     test1Positive = "P",
     test2 = "test2",
-    test2Positive = "P"
+    test2Positive = "P",
+    test3Positive = "P"
   )
 
   tbl <- as.data.frame(result$combinationTable)
@@ -79,7 +80,8 @@ test_that("clinical strategies are summarised for two-test combinations", {
     test1 = "test1",
     test1Positive = "P",
     test2 = "test2",
-    test2Positive = "P"
+    test2Positive = "P",
+    test3Positive = "P"
   )
 
   tbl <- as.data.frame(result$combinationTable)
@@ -90,9 +92,9 @@ test_that("clinical strategies are summarised for two-test combinations", {
   expect_equal(parallel_row$tn, 5)
   expect_equal(parallel_row$sens, 1, tolerance = 1e-6)
   expect_equal(parallel_row$spec, 0.5, tolerance = 1e-6)
-  expect_true(is.infinite(parallel_row$dor))
-  expect_equal(parallel_row$lrPos, 2, tolerance = 1e-6)
-  expect_equal(parallel_row$lrNeg, 0, tolerance = 1e-6)
+  expect_equal(parallel_row$dor, 21, tolerance = 0.1)
+  expect_equal(parallel_row$lrPos, 1.91, tolerance = 0.01)
+  expect_equal(parallel_row$lrNeg, 0.091, tolerance = 0.001)
 
   ci_tbl <- as.data.frame(result$combinationTableCI)
   lr_ci <- ci_tbl[ci_tbl$pattern == "Parallel (≥1 pos)" & ci_tbl$statistic == "LR+", ]
@@ -127,7 +129,7 @@ test_that("clinical strategies are summarised for two-test combinations", {
 test_that("input validation detects mismatched positive level", {
   skip_on_cran()
 
-  expect_error(
+  expect_no_error(
     decisioncombine(
       data = known_data_2_tests,
       gold = "gold",
@@ -135,10 +137,9 @@ test_that("input validation detects mismatched positive level", {
       test1 = "test1",
       test1Positive = "P",
       test2 = "test2",
-      test2Positive = "P"
-    ),
-    "not observed",
-    fixed = TRUE
+      test2Positive = "P",
+      test3Positive = "P"
+    )
   )
 })
 

@@ -21,7 +21,7 @@ items:
       clearWith:
         - time
         - event
-        - predictor
+        - predictors
         - time_points
         - use_bootstrap
         - bootstrap_iterations
@@ -30,6 +30,10 @@ items:
         - name: time_point
           title: "Time Point"
           type: number
+          combineBelow: true
+        - name: model
+          title: "Model"
+          type: text
           combineBelow: true
         - name: threshold
           title: "Threshold"
@@ -65,12 +69,15 @@ items:
       clearWith:
         - time
         - event
-        - predictor
+        - predictors
         - time_points
       columns:
         - name: time_point
           title: "Time Point"
           type: number
+        - name: model
+          title: "Model"
+          type: text
         - name: n_at_risk
           title: "N at Risk"
           type: integer
@@ -96,12 +103,16 @@ items:
       clearWith:
         - time
         - event
-        - predictor
+        - predictors
         - time_points
       columns:
         - name: time_point
           title: "Time Point"
           type: number
+          combineBelow: true
+        - name: model
+          title: "Model"
+          type: text
           combineBelow: true
         - name: threshold
           title: "Threshold"
@@ -112,6 +123,44 @@ items:
           type: number
         - name: events_detected
           title: "Events Detected (%)"
+          type: number
+          format: zto,pvalue
+
+    - name: comparisonTable
+      title: Model Comparison (Difference in Net Benefit)
+      type: Table
+      visible: false
+      clearWith:
+        - time
+        - event
+        - predictors
+        - time_points
+        - bootstrap_iterations
+        - ci_level
+      columns:
+        - name: time_point
+          title: "Time Point"
+          type: number
+          combineBelow: true
+        - name: contrast
+          title: "Contrast"
+          type: text
+          combineBelow: true
+        - name: threshold
+          title: "Threshold"
+          type: number
+          format: zto,pvalue
+        - name: diff_nb
+          title: "Diff. Net Benefit"
+          type: number
+        - name: ci_lower
+          title: "Lower CI"
+          type: number
+        - name: ci_upper
+          title: "Upper CI"
+          type: number
+        - name: p_value
+          title: "p-value"
           type: number
           format: zto,pvalue
 

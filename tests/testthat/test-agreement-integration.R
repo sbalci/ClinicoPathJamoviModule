@@ -6,7 +6,7 @@
 # and output consistency for the agreement jamovi function
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Load test data
 data(agreement_pathology, package = "ClinicoPath")
@@ -26,19 +26,17 @@ test_that("agreement produces consistent results across runs", {
   # Run the same analysis twice
   result1 <- agreement(
     data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
 
   result2 <- agreement(
     data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
 
   # Results should be identical (deterministic)
-  expect_s3_class(result1, "agreementClass")
-  expect_s3_class(result2, "agreementClass")
+  expect_s3_class(result1, "agreementResults")
+  expect_s3_class(result2, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -46,32 +44,29 @@ test_that("agreement produces consistent results across runs", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("workflow: basic pathology interrater reliability", {
-  # Step 1: Basic Cohen's kappa
+  # Step 1: Basic kappa
   basic <- agreement(
     data = agreement_pathology,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
-  expect_s3_class(basic, "agreementClass")
+  expect_s3_class(basic, "agreementResults")
 
   # Step 2: Add multiple measures
   comprehensive <- agreement(
     data = agreement_pathology,
     vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
     gwet = TRUE,
     specificAgreement = TRUE
   )
-  expect_s3_class(comprehensive, "agreementClass")
+  expect_s3_class(comprehensive, "agreementResults")
 
   # Step 3: Add visualizations
   with_viz <- agreement(
     data = agreement_pathology,
     vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
-    heatmap = TRUE
+    agreementHeatmap = TRUE
   )
-  expect_s3_class(with_viz, "agreementClass")
+  expect_s3_class(with_viz, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -82,17 +77,17 @@ test_that("workflow: multi-rater expert panel analysis", {
   # Complete expert panel workflow
   result <- agreement(
     data = agreement_multiRater,
-    vars = c("Expert1", "Expert2", "Expert3", "Resident1", "Resident2"),
-    fleissKappa = TRUE,
+    vars = c("SeniorPath1", "SeniorPath2", "MidLevelPath", "JuniorPath1", "JuniorPath2"),
     lightKappa = TRUE,
     kripp = TRUE,
     finn = TRUE,
     raterClustering = TRUE,
-    raterDendrogram = TRUE,
-    forestPlot = TRUE
+    showDendrogram = TRUE,
+    subgroupForestPlot = TRUE,
+    subgroupVariable = "difficulty"
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -101,15 +96,17 @@ test_that("workflow: multi-rater expert panel analysis", {
 
 test_that("workflow: ordinal grade agreement with weighted kappa", {
   # Compare unweighted vs weighted kappa
+  data_ordered <- agreement_ordinal
+  data_ordered$PathologistA <- factor(data_ordered$PathologistA, ordered = TRUE)
+  data_ordered$PathologistB <- factor(data_ordered$PathologistB, ordered = TRUE)
   result <- agreement(
-    data = agreement_ordinal,
+    data = data_ordered,
     vars = c("PathologistA", "PathologistB"),
-    cohensKappa = TRUE,
     wght = "squared",
-    heatmap = TRUE
+    agreementHeatmap = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -120,17 +117,16 @@ test_that("workflow: continuous measurement agreement (Bland-Altman + ICC)", {
   # Comprehensive continuous agreement analysis
   result <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
+    vars = c("MeasurementA", "MeasurementB"),
     icc = TRUE,
     iccType = "icc21",
-    blandAltman = TRUE,
     blandAltmanPlot = TRUE,
     linCCC = TRUE,
     meanPearson = TRUE,
-    profilePlot = TRUE
+    raterProfiles = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -148,7 +144,7 @@ test_that("workflow: test-retest reliability study", {
     iccType = "icc31"
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -162,11 +158,10 @@ test_that("workflow: hierarchical agreement (raters nested in institutions)", {
     vars = c("HospitalA_Rater1", "HospitalA_Rater2", "HospitalB_Rater1",
              "HospitalB_Rater2", "HospitalC_Rater1", "HospitalC_Rater2"),
     hierarchicalKappa = TRUE,
-    hierarchicalVariable = "institution",
-    fleissKappa = TRUE
+    clusterVariable = "institution"
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -177,13 +172,12 @@ test_that("workflow: binary diagnostic test agreement (PSA/NSA)", {
   # Positive and Negative Specific Agreement
   result <- agreement(
     data = agreement_binary,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
+    vars = c("PathologistX", "PathologistY"),
     specificAgreement = TRUE,
-    heatmap = TRUE
+    agreementHeatmap = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -204,11 +198,10 @@ test_that("workflow: data from CSV import", {
 
   result <- agreement(
     data = csv_data,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 
   # Clean up
   unlink(temp_csv)
@@ -229,11 +222,10 @@ test_that("workflow: data from Excel import", {
 
   result <- agreement(
     data = xlsx_data,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -246,22 +238,20 @@ test_that("workflow: handles different data structures consistently", {
 
   result_tibble <- agreement(
     data = tibble_data,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result_tibble, "agreementClass")
+  expect_s3_class(result_tibble, "agreementResults")
 
   # Test with data.frame
   df_data <- as.data.frame(agreement_pathology)
 
   result_df <- agreement(
     data = df_data,
-    vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE
+    vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result_df, "agreementClass")
+  expect_s3_class(result_df, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -273,34 +263,29 @@ test_that("workflow: complete publication-ready categorical analysis", {
   result <- agreement(
     data = agreement_pathology,
     vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
     gwet = TRUE,
     specificAgreement = TRUE,
-    ci = TRUE,
-    ciWidth = 95,
-    heatmap = TRUE,
+    agreementHeatmap = TRUE,
     caseClustering = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("workflow: complete publication-ready continuous analysis", {
   # Comprehensive continuous agreement analysis for publication
   result <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
+    vars = c("MeasurementA", "MeasurementB"),
     icc = TRUE,
     iccType = "icc21",
-    blandAltman = TRUE,
     blandAltmanPlot = TRUE,
     linCCC = TRUE,
     tdi = TRUE,
-    profilePlot = TRUE,
-    ci = TRUE
+    raterProfiles = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -311,65 +296,67 @@ test_that("workflow: compare 2-rater vs 3-rater reliability", {
   # Two raters
   two_rater <- agreement(
     data = agreement_threeRater,
-    vars = c("Rater1", "Rater2"),
-    cohensKappa = TRUE
+    vars = c("Rater1", "Rater2")
   )
-  expect_s3_class(two_rater, "agreementClass")
+  expect_s3_class(two_rater, "agreementResults")
 
   # Three raters
   three_rater <- agreement(
     data = agreement_threeRater,
     vars = c("Rater1", "Rater2", "Rater3"),
-    fleissKappa = TRUE,
     lightKappa = TRUE
   )
-  expect_s3_class(three_rater, "agreementClass")
+  expect_s3_class(three_rater, "agreementResults")
 })
 
 test_that("workflow: compare unweighted vs weighted kappa", {
+  data_ordered <- agreement_ordinal
+  data_ordered$PathologistA <- factor(data_ordered$PathologistA, ordered = TRUE)
+  data_ordered$PathologistB <- factor(data_ordered$PathologistB, ordered = TRUE)
+
   # Unweighted kappa
   unweighted <- agreement(
-    data = agreement_ordinal,
+    data = data_ordered,
     vars = c("PathologistA", "PathologistB"),
     wght = "unweighted"
   )
-  expect_s3_class(unweighted, "agreementClass")
+  expect_s3_class(unweighted, "agreementResults")
 
   # Linear weighted kappa
   linear <- agreement(
-    data = agreement_ordinal,
+    data = data_ordered,
     vars = c("PathologistA", "PathologistB"),
-    wght = "linear"
+    wght = "equal"
   )
-  expect_s3_class(linear, "agreementClass")
+  expect_s3_class(linear, "agreementResults")
 
   # Quadratic weighted kappa
   quadratic <- agreement(
-    data = agreement_ordinal,
+    data = data_ordered,
     vars = c("PathologistA", "PathologistB"),
     wght = "squared"
   )
-  expect_s3_class(quadratic, "agreementClass")
+  expect_s3_class(quadratic, "agreementResults")
 })
 
 test_that("workflow: compare different ICC models", {
   # ICC(2,1) - Two-way random effects, single measures
   icc21 <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
+    vars = c("MeasurementA", "MeasurementB"),
     icc = TRUE,
     iccType = "icc21"
   )
-  expect_s3_class(icc21, "agreementClass")
+  expect_s3_class(icc21, "agreementResults")
 
   # ICC(3,1) - Two-way mixed effects, single measures
   icc31 <- agreement(
     data = agreement_continuous,
-    vars = c("PathologistA", "PathologistB"),
+    vars = c("MeasurementA", "MeasurementB"),
     icc = TRUE,
     iccType = "icc31"
   )
-  expect_s3_class(icc31, "agreementClass")
+  expect_s3_class(icc31, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -381,13 +368,12 @@ test_that("workflow: agreement by subgroup (stratified analysis)", {
   result <- agreement(
     data = agreement_pathology,
     vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
     agreementBySubgroup = TRUE,
     subgroupVariable = "specimen_type",
-    forestPlot = TRUE
+    subgroupForestPlot = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -399,12 +385,10 @@ test_that("workflow: create consensus variable with majority rule", {
   result <- agreement(
     data = agreement_threeRater,
     vars = c("Rater1", "Rater2", "Rater3"),
-    fleissKappa = TRUE,
-    consensusVar = TRUE,
     consensusRule = "majority"
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("workflow: create consensus variable with unanimous rule", {
@@ -412,10 +396,8 @@ test_that("workflow: create consensus variable with unanimous rule", {
   result <- agreement(
     data = agreement_threeRater,
     vars = c("Rater1", "Rater2", "Rater3"),
-    fleissKappa = TRUE,
-    consensusVar = TRUE,
     consensusRule = "unanimous"
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })

@@ -3,7 +3,7 @@ name:  agreement
 title: Interrater Reliability
 menuGroup: meddecide
 menuSubgroup: Agreement
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:
@@ -593,6 +593,7 @@ options:
       type: Variable
       suggested: [ordinal, nominal]
       permitted: [factor, numeric]
+      default: NULL
       description:
           R: >
             Select the reference rater variable (e.g., consensus score, gold standard diagnosis, senior
@@ -626,6 +627,7 @@ options:
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
+      default: NULL
       description:
           R: >
             Variable defining clusters/institutions/centers. For example, hospital ID,
@@ -992,6 +994,7 @@ options:
         - ordinal
       permitted:
         - factor
+      default: NULL
       description:
           R: >
             Categorical variable defining subgroups for stratified analysis.

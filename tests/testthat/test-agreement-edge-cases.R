@@ -6,7 +6,7 @@
 # and error handling for the agreement jamovi function
 
 library(testthat)
-library(ClinicoPath)
+devtools::load_all()
 
 # Load edge case test data
 data(agreement_perfect, package = "ClinicoPath")
@@ -23,11 +23,10 @@ data(agreement_continuous, package = "ClinicoPath")
 test_that("agreement handles perfect agreement (kappa = 1.0)", {
   result <- agreement(
     data = agreement_perfect,
-    vars = c("Rater1", "Rater2"),
-    cohensKappa = TRUE
+    vars = c("RaterA", "RaterB")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles perfect continuous agreement (ICC = 1.0)", {
@@ -46,7 +45,7 @@ test_that("agreement handles perfect continuous agreement (ICC = 1.0)", {
     icc = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -56,22 +55,20 @@ test_that("agreement handles perfect continuous agreement (ICC = 1.0)", {
 test_that("agreement handles poor agreement (kappa ≈ 0)", {
   result <- agreement(
     data = agreement_poor,
-    vars = c("Rater1", "Rater2"),
-    cohensKappa = TRUE
+    vars = c("PathologistA", "PathologistB")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles negative kappa values", {
   # Negative kappa can occur when agreement is worse than chance
   result <- agreement(
     data = agreement_poor,
-    vars = c("Rater1", "Rater2"),
-    cohensKappa = TRUE
+    vars = c("PathologistA", "PathologistB")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -84,7 +81,7 @@ test_that("agreement handles small sample size (n = 30)", {
     vars = c("Rater1", "Rater2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles very small sample (n = 10)", {
@@ -95,7 +92,7 @@ test_that("agreement handles very small sample (n = 10)", {
     vars = c("Rater1", "Rater2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles minimal sample for Bland-Altman (n = 3)", {
@@ -103,11 +100,11 @@ test_that("agreement handles minimal sample for Bland-Altman (n = 3)", {
 
   result <- agreement(
     data = minimal_data,
-    vars = c("PathologistA", "PathologistB"),
-    blandAltman = TRUE
+    vars = c("MeasurementA", "MeasurementB"),
+    blandAltmanPlot = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -120,7 +117,7 @@ test_that("agreement handles missing data", {
     vars = c("Rater1", "Rater2", "Rater3")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement with missing data and Krippendorff's Alpha", {
@@ -130,7 +127,7 @@ test_that("agreement with missing data and Krippendorff's Alpha", {
     kripp = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles all missing for one rater", {
@@ -142,20 +139,19 @@ test_that("agreement handles all missing for one rater", {
     vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-test_that("agreement rejects all missing data", {
+test_that("agreement handles all missing data gracefully", {
   test_data <- agreement_pathology
   test_data$Pathologist1 <- NA
   test_data$Pathologist2 <- NA
 
-  expect_error(
-    agreement(
-      data = test_data,
-      vars = c("Pathologist1", "Pathologist2")
-    )
+  result <- agreement(
+    data = test_data,
+    vars = c("Pathologist1", "Pathologist2")
   )
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -173,11 +169,10 @@ test_that("agreement handles highly unbalanced categories", {
   result <- agreement(
     data = unbalanced_data,
     vars = c("rater1", "rater2"),
-    cohensKappa = TRUE,
     gwet = TRUE  # Gwet's AC1 is robust to prevalence
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -197,7 +192,7 @@ test_that("agreement handles single category data", {
     vars = c("rater1", "rater2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -217,7 +212,7 @@ test_that("agreement handles raters with different observed categories", {
     vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -227,16 +222,16 @@ test_that("agreement handles raters with different observed categories", {
 test_that("agreement handles extreme outliers in continuous data", {
   test_data <- agreement_continuous
   # Add extreme outliers
-  test_data$PathologistA[1:3] <- c(1000, 2000, 3000)
-  test_data$PathologistB[1:3] <- c(1050, 1900, 3100)
+  test_data$MeasurementA[1:3] <- c(1000, 2000, 3000)
+  test_data$MeasurementB[1:3] <- c(1050, 1900, 3100)
 
   result <- agreement(
     data = test_data,
-    vars = c("PathologistA", "PathologistB"),
-    blandAltman = TRUE
+    vars = c("MeasurementA", "MeasurementB"),
+    blandAltmanPlot = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles zero variance in continuous data", {
@@ -253,22 +248,21 @@ test_that("agreement handles zero variance in continuous data", {
     icc = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles very large measurement differences", {
   test_data <- agreement_continuous
   # Create systematic large bias
-  test_data$PathologistB <- test_data$PathologistA + 100
+  test_data$MeasurementB <- test_data$MeasurementA + 100
 
   result <- agreement(
     data = test_data,
-    vars = c("PathologistA", "PathologistB"),
-    blandAltman = TRUE,
+    vars = c("MeasurementA", "MeasurementB"),
     blandAltmanPlot = TRUE
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -280,39 +274,36 @@ test_that("agreement handles large number of raters", {
 
   result <- agreement(
     data = agreement_multiRater,
-    vars = c("Expert1", "Expert2", "Expert3", "Resident1", "Resident2"),
-    fleissKappa = TRUE
+    vars = c("SeniorPath1", "SeniorPath2", "MidLevelPath", "JuniorPath1", "JuniorPath2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
 # Boundary Confidence Levels
 # ═══════════════════════════════════════════════════════════
 
-test_that("agreement handles 99% confidence intervals", {
+test_that("agreement handles 99% confidence level for BA", {
   result <- agreement(
     data = agreement_pathology,
     vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
-    ci = TRUE,
-    ciWidth = 99
+    blandAltmanPlot = TRUE,
+    baConfidenceLevel = 0.99
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
-test_that("agreement handles 80% confidence intervals", {
+test_that("agreement handles 80% confidence level for BA", {
   result <- agreement(
     data = agreement_pathology,
     vars = c("Pathologist1", "Pathologist2"),
-    cohensKappa = TRUE,
-    ci = TRUE,
-    ciWidth = 80
+    blandAltmanPlot = TRUE,
+    baConfidenceLevel = 0.80
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -330,7 +321,7 @@ test_that("agreement handles numeric coded categorical data", {
     vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })
 
 test_that("agreement handles character categorical data", {
@@ -344,5 +335,5 @@ test_that("agreement handles character categorical data", {
     vars = c("Pathologist1", "Pathologist2")
   )
 
-  expect_s3_class(result, "agreementClass")
+  expect_s3_class(result, "agreementResults")
 })

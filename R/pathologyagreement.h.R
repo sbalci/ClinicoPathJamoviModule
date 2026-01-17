@@ -8,7 +8,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         initialize = function(
             dep1 = NULL,
             dep2 = NULL,
-            additional_methods = NULL,
+            additional_methods = list(),
             clinical_preset = "general",
             bootstrap_n = 1000,
             conf_level = 0.95,
@@ -32,21 +32,24 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..dep2 <- jmvcore::OptionVariable$new(
                 "dep2",
                 dep2,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..additional_methods <- jmvcore::OptionVariables$new(
                 "additional_methods",
                 additional_methods,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=list())
             private$..clinical_preset <- jmvcore::OptionList$new(
                 "clinical_preset",
                 clinical_preset,
@@ -422,9 +425,9 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @export
 pathologyagreement <- function(
     data,
-    dep1,
-    dep2,
-    additional_methods,
+    dep1 = NULL,
+    dep2 = NULL,
+    additional_methods = list(),
     clinical_preset = "general",
     bootstrap_n = 1000,
     conf_level = 0.95,

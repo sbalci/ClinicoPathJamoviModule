@@ -8,7 +8,7 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         initialize = function(
             time = NULL,
             event = NULL,
-            predictor = NULL,
+            predictors = list(),
             time_points = "365, 730, 1095",
             threshold_range_min = 0.01,
             threshold_range_max = 0.99,
@@ -36,7 +36,8 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..event <- jmvcore::OptionVariable$new(
                 "event",
                 event,
@@ -44,14 +45,16 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
-            private$..predictor <- jmvcore::OptionVariable$new(
-                "predictor",
-                predictor,
+                    "numeric"),
+                default=NULL)
+            private$..predictors <- jmvcore::OptionVariables$new(
+                "predictors",
+                predictors,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=list())
             private$..time_points <- jmvcore::OptionString$new(
                 "time_points",
                 time_points,
@@ -131,7 +134,7 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 
             self$.addOption(private$..time)
             self$.addOption(private$..event)
-            self$.addOption(private$..predictor)
+            self$.addOption(private$..predictors)
             self$.addOption(private$..time_points)
             self$.addOption(private$..threshold_range_min)
             self$.addOption(private$..threshold_range_max)
@@ -150,7 +153,7 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     active = list(
         time = function() private$..time$value,
         event = function() private$..event$value,
-        predictor = function() private$..predictor$value,
+        predictors = function() private$..predictors$value,
         time_points = function() private$..time_points$value,
         threshold_range_min = function() private$..threshold_range_min$value,
         threshold_range_max = function() private$..threshold_range_max$value,
@@ -168,7 +171,7 @@ timedependentdcaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     private = list(
         ..time = NA,
         ..event = NA,
-        ..predictor = NA,
+        ..predictors = NA,
         ..time_points = NA,
         ..threshold_range_min = NA,
         ..threshold_range_max = NA,
@@ -194,6 +197,7 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         netBenefitTable = function() private$.items[["netBenefitTable"]],
         summaryTable = function() private$.items[["summaryTable"]],
         interventionsTable = function() private$.items[["interventionsTable"]],
+        comparisonTable = function() private$.items[["comparisonTable"]],
         netBenefitPlot = function() private$.items[["netBenefitPlot"]],
         interventionsPlot = function() private$.items[["interventionsPlot"]],
         interpretationText = function() private$.items[["interpretationText"]]),
@@ -222,7 +226,7 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "time",
                     "event",
-                    "predictor",
+                    "predictors",
                     "time_points",
                     "use_bootstrap",
                     "bootstrap_iterations",
@@ -232,6 +236,11 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `name`="time_point", 
                         `title`="Time Point", 
                         `type`="number", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text", 
                         `combineBelow`=TRUE),
                     list(
                         `name`="threshold", 
@@ -274,13 +283,17 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "time",
                     "event",
-                    "predictor",
+                    "predictors",
                     "time_points"),
                 columns=list(
                     list(
                         `name`="time_point", 
                         `title`="Time Point", 
                         `type`="number"),
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
                     list(
                         `name`="n_at_risk", 
                         `title`="N at Risk", 
@@ -311,13 +324,18 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "time",
                     "event",
-                    "predictor",
+                    "predictors",
                     "time_points"),
                 columns=list(
                     list(
                         `name`="time_point", 
                         `title`="Time Point", 
                         `type`="number", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text", 
                         `combineBelow`=TRUE),
                     list(
                         `name`="threshold", 
@@ -331,6 +349,51 @@ timedependentdcaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     list(
                         `name`="events_detected", 
                         `title`="Events Detected (%)", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparisonTable",
+                title="Model Comparison (Difference in Net Benefit)",
+                visible=FALSE,
+                clearWith=list(
+                    "time",
+                    "event",
+                    "predictors",
+                    "time_points",
+                    "bootstrap_iterations",
+                    "ci_level"),
+                columns=list(
+                    list(
+                        `name`="time_point", 
+                        `title`="Time Point", 
+                        `type`="number", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="contrast", 
+                        `title`="Contrast", 
+                        `type`="text", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="diff_nb", 
+                        `title`="Diff. Net Benefit", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower CI", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper CI", 
+                        `type`="number"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Image$new(
@@ -427,7 +490,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param data the data as a data frame
 #' @param time a string naming the time-to-event variable
 #' @param event a string naming the event indicator (1=event, 0=censored)
-#' @param predictor a string naming the risk score or prediction variable
+#' @param predictors one or more risk score or prediction variables
 #' @param time_points comma-separated time points at which to calculate net
 #'   benefit (e.g., "365, 730" for 1 and 2 years)
 #' @param threshold_range_min minimum threshold probability for decision curve
@@ -457,6 +520,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$netBenefitTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interventionsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$netBenefitPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interventionsPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretationText} \tab \tab \tab \tab \tab a html \cr
@@ -471,9 +535,9 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @export
 timedependentdca <- function(
     data,
-    time,
-    event,
-    predictor,
+    time = NULL,
+    event = NULL,
+    predictors = list(),
     time_points = "365, 730, 1095",
     threshold_range_min = 0.01,
     threshold_range_max = 0.99,
@@ -494,19 +558,19 @@ timedependentdca <- function(
 
     if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
-    if ( ! missing(predictor)) predictor <- jmvcore::resolveQuo(jmvcore::enquo(predictor))
+    if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(time), time, NULL),
             `if`( ! missing(event), event, NULL),
-            `if`( ! missing(predictor), predictor, NULL))
+            `if`( ! missing(predictors), predictors, NULL))
 
 
     options <- timedependentdcaOptions$new(
         time = time,
         event = event,
-        predictor = predictor,
+        predictors = predictors,
         time_points = time_points,
         threshold_range_min = threshold_range_min,
         threshold_range_max = threshold_range_max,

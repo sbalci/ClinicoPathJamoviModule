@@ -389,9 +389,30 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         # - Log transformation: Standard approach for likelihood ratios (multiplicative scale)
         # These supplement epiR::epi.tests() for verification and methodological transparency
 
-        # Clopper-Pearson exact binomial CIs for sensitivity and specificity
-        sens_ci <- stats::binom.test(TP_cc, TP_cc + FN_cc, conf.level = 0.95)$conf.int
-        spec_ci <- stats::binom.test(TN_cc, TN_cc + FP_cc, conf.level = 0.95)$conf.int
+        # Clopper-Pearson exact binomial CIs for sensitivity and specificity (using raw counts)
+        # However, we supplement this with logic that respects the continuity correction if zero cells are present
+        if (zero_cell) {
+            # Use logit transformation with continuity correction (consistent with PPV/NPV)
+            # Sensitivity CI
+            sens_eps <- 1e-9
+            Sens_for_ci <- min(max(Sens, sens_eps), 1 - sens_eps)
+            sens_logit <- log(Sens_for_ci / (1 - Sens_for_ci))
+            sens_se <- sqrt((1/TP_cc) + (1/FN_cc))
+            sens_ci_logit <- sens_logit + c(-1.96, 1.96) * sens_se
+            sens_ci <- exp(sens_ci_logit) / (1 + exp(sens_ci_logit))
+            
+            # Specificity CI
+            spec_eps <- 1e-9
+            Spec_for_ci <- min(max(Spec, spec_eps), 1 - spec_eps)
+            spec_logit <- log(Spec_for_ci / (1 - Spec_for_ci))
+            spec_se <- sqrt((1/TN_cc) + (1/FP_cc))
+            spec_ci_logit <- spec_logit + c(-1.96, 1.96) * spec_se
+            spec_ci <- exp(spec_ci_logit) / (1 + exp(spec_ci_logit))
+        } else {
+            # Default to exact binomial CIs when no correction is needed
+            sens_ci <- stats::binom.test(round(TP), round(TP + FN), conf.level = 0.95)$conf.int
+            spec_ci <- stats::binom.test(round(TN), round(TN + FP), conf.level = 0.95)$conf.int
+        }
         
         # Logit transformation CIs for PPV and NPV (more accurate)
         # PPV CI using logit transformation

@@ -28,6 +28,7 @@ options:
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      default: null
       description:
           R: >
             Binary outcome variable (0/1 or FALSE/TRUE). This represents the
@@ -272,6 +273,7 @@ options:
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      default: null
       description:
           R: >
             Binary variable indicating whether the clinical rule recommends intervention (1/0 or yes/no).

@@ -35,6 +35,16 @@ children:
       - type: TextBox
         name: model_formula
         format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Covariates
+        children:
+          - type: VariablesListBox
+            name: covariates
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:

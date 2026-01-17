@@ -19,6 +19,7 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .time_points = NULL,
         .thresholds = NULL,
         .results_by_time = NULL,
+        .results_comparison = NULL,
 
         # Utility: Escape variable names
         .escapeVar = function(x) {
@@ -162,10 +163,12 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         #---------------------------------------------
         # BOOTSTRAP HELPER
         #---------------------------------------------
-        .calculateBootstrapNB = function(time, event, predictor, t_eval, thresholds, estimate_method, cox_fit_global = NULL) {
+        .calculateBootstrapNB = function(time, event, predictor, t_eval, thresholds, estimate_method, cox_fit_global = NULL, boot_idx = NULL) {
             # Perform one bootstrap iteration
             n <- length(time)
-            boot_idx <- sample(1:n, n, replace = TRUE)
+            if (is.null(boot_idx)) {
+                boot_idx <- sample(1:n, n, replace = TRUE)
+            }
 
             time_boot <- time[boot_idx]
             event_boot <- event[boot_idx]
@@ -284,11 +287,11 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Check requirements
             if (is.null(self$options$time) || self$options$time == "" ||
                 is.null(self$options$event) || self$options$event == "" ||
-                is.null(self$options$predictor) || self$options$predictor == "") {
+                is.null(self$options$predictors) || length(self$options$predictors) == 0) {
 
                 private$.addNotice(
                     type = jmvcore::NoticeType$ERROR,
-                    content = 'Time, Event, and Predictor variables are required. Please select all three variables to begin time-dependent decision curve analysis.',
+                    content = 'Time, Event, and at least one Predictor variable are required.',
                     name = 'missingVariables',
                     position = 1
                 )
@@ -329,6 +332,7 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.populateNetBenefitTable()
             private$.populateSummaryTable()
             private$.populateInterventionsTable()
+            private$.populateComparisonTable()
 
             # Methodological transparency notice
             private$.addNotice(
@@ -362,17 +366,23 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             data <- self$data
             time_var <- self$options$time
             event_var <- self$options$event
-            predictor_var <- self$options$predictor
+            predictor_vars <- self$options$predictors
 
             # Extract data
             time <- jmvcore::toNumeric(data[[time_var]])
             event <- jmvcore::toNumeric(data[[event_var]])
-            predictor <- jmvcore::toNumeric(data[[predictor_var]])
+            
+            # Extract all predictors into a list/df
+            predictors_data <- list()
+            for (p in predictor_vars) {
+                predictors_data[[p]] <- jmvcore::toNumeric(data[[p]])
+            }
 
             # Escape variable names for safe handling
             time_var_clean <- private$.escapeVar(time_var)
             event_var_clean <- private$.escapeVar(event_var)
-            predictor_var_clean <- private$.escapeVar(predictor_var)
+            # predictors cleaned names not strictly needed for logic but good for display if used
+
 
             # Validate time variable
             if (any(time <= 0, na.rm = TRUE)) {
@@ -399,12 +409,23 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             # Handle missing values
-            if (any(is.na(time)) || any(is.na(event)) || any(is.na(predictor))) {
-                n_missing <- sum(!complete.cases(data.frame(time, event, predictor)))
-                complete_cases <- !is.na(time) & !is.na(event) & !is.na(predictor)
+            # We need to filter based on time, event, AND all predictors
+            
+            non_na_predictors <- rep(TRUE, length(time))
+            for (p in predictor_vars) {
+                non_na_predictors <- non_na_predictors & !is.na(predictors_data[[p]])
+            }
+            
+            if (any(is.na(time)) || any(is.na(event)) || !all(non_na_predictors)) {
+                complete_cases <- !is.na(time) & !is.na(event) & non_na_predictors
+                
+                n_missing <- sum(!complete_cases)
                 time <- time[complete_cases]
                 event <- event[complete_cases]
-                predictor <- predictor[complete_cases]
+                
+                for (p in predictor_vars) {
+                    predictors_data[[p]] <- predictors_data[[p]][complete_cases]
+                }
 
                 private$.addNotice(
                     type = jmvcore::NoticeType$WARNING,
@@ -501,7 +522,7 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.data_prepared <- list(
                 time = time,
                 event = event,
-                predictor = predictor,
+                predictors = predictors_data,
                 n = length(time)
             )
 
@@ -516,44 +537,62 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             time <- private$.data_prepared$time
             event <- private$.data_prepared$event
-            predictor <- private$.data_prepared$predictor
+            predictors_data <- private$.data_prepared$predictors
             n <- private$.data_prepared$n
             time_points <- private$.time_points
             thresholds <- private$.thresholds
-
+            
+            predictor_vars <- names(predictors_data)
+            
             set.seed(self$options$random_seed)
 
             estimate_method <- self$options$estimate_survival
-            results_by_time <- list()
-            
-            # Optimization: Fit Cox model once if selected
-            cox_fit_global <- NULL
-            if (estimate_method == "cox") {
-                surv_obj <- Surv(time, event)
-                tryCatch({
-                    cox_fit_global <- coxph(surv_obj ~ predictor)
-                }, error = function(e) {
-                    private$.addNotice(
-                        type = jmvcore::NoticeType$WARNING,
-                        content = sprintf('Cox proportional hazards model fitting failed (%s). Falling back to Kaplan-Meier estimation. Check predictor variable for collinearity or zero variance.', e$message),
-                        name = 'coxFitFailed',
-                        position = 50
-                    )
-                })
+            # Generate consistent bootstrap indices if needed
+            boot_indices_list <- list()
+            if (self$options$use_bootstrap) {
+                n_boot <- self$options$bootstrap_iterations
+                for (b in 1:n_boot) {
+                    # Generate indices once per iteration, used for all models/timepoints
+                    # Note: We must re-seed or rely on RNG. To ensure reproducibility across runs, set.seed was called above.
+                    # But to ensuring consistency *across models* we need to store them or generate them in a deterministic loop.
+                    # We will store them.
+                    boot_indices_list[[b]] <- sample(1:n, n, replace = TRUE)
+                }
             }
 
-            # 1. Calculate risk scores (probabilities) for all patients
-            
-            for (t_eval in time_points) {
+            results_comparison <- list()
+            results_by_time <- list()
 
-                # --- Step A: Calculate Risk Scores (Probabilities) ---
+            # Loop over Time Points
+            for (t_eval in time_points) {
+                
+                results_by_time[[as.character(t_eval)]] <- list() # Store models for this time point
+                
+                # Loop over Predictors (Models)
+                for (model_name in predictor_vars) {
+                     
+                     predictor <- predictors_data[[model_name]]
+            
+                    # Optimization: Fit Cox model once if selected (per model)
+                    cox_fit_global <- NULL
+                    if (estimate_method == "cox") {
+                        surv_obj <- Surv(time, event)
+                        tryCatch({
+                            cox_fit_global <- coxph(surv_obj ~ predictor)
+                        }, error = function(e) {
+                            # Fallback handled in loop
+                        })
+                    }
+
+                    # --- Step A: Calculate Risk Scores (Probabilities) ---
+                    # (Logic reused from prior version, placed inside loops)
                 if (estimate_method == "direct") {
                     # CRITICAL SAFETY CHECK: Validate predictor is in [0,1] range
                     if (any(predictor < 0 | predictor > 1, na.rm = TRUE)) {
                         private$.addNotice(
                             type = jmvcore::NoticeType$ERROR,
-                            content = sprintf('Direct probability method requires predictor values in [0,1] range. Found values outside this range (min=%.3f, max=%.3f). Either transform predictor to probabilities or use Kaplan-Meier or Cox estimation method.', min(predictor, na.rm = TRUE), max(predictor, na.rm = TRUE)),
-                            name = 'directProbOutOfRange',
+                            content = sprintf('Direct probability method requires predictor values in [0,1] range for model %s. Found values outside this range (min=%.3f, max=%.3f).', model_name, min(predictor, na.rm = TRUE), max(predictor, na.rm = TRUE)),
+                            name = paste0('directProbOutOfRange_', model_name),
                             position = 1
                         )
                         return()
@@ -764,7 +803,8 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             t_eval = t_eval,
                             thresholds = thresholds,
                             estimate_method = estimate_method,
-                            cox_fit_global = cox_fit_global
+                            cox_fit_global = cox_fit_global,
+                            boot_idx = boot_indices_list[[b]]
                         )
                     }
 
@@ -780,8 +820,9 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     }
                 }
 
-                results_by_time[[as.character(t_eval)]] <- list(
+                results_by_time[[as.character(t_eval)]][[model_name]] <- list(
                     time_point = t_eval,
+                    model = model_name,
                     n_at_risk = n, # Total N is the denominator for rates
                     n_events = round(event_rate * n), # Estimated events
                     event_rate = event_rate,
@@ -794,11 +835,63 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     interventions_avoided = interventions_avoided,
                     events_detected = events_detected,
                     optimal_threshold = optimal_threshold,
-                    max_net_benefit = max_net_benefit
+                    max_net_benefit = max_net_benefit,
+                    boot_results = if (self$options$use_bootstrap) boot_results else NULL
                 )
+            } # End model loop
+            
+            # Perform Model Comparisons if multiple models and bootstrap enabled
+            if (length(predictor_vars) >= 2 && self$options$use_bootstrap) {
+                 # Compare all pairs
+                 combos <- combn(predictor_vars, 2, simplify = FALSE)
+                 for (pair in combos) {
+                     mod1 <- pair[1]
+                     mod2 <- pair[2]
+                     
+                     res1 <- results_by_time[[as.character(t_eval)]][[mod1]]$boot_results
+                     res2 <- results_by_time[[as.character(t_eval)]][[mod2]]$boot_results
+                     
+                     if (!is.null(res1) && !is.null(res2)) {
+                         diff_matrix <- res1 - res2
+                         
+                         # Calculate stats for the difference
+                         diff_mean <- colMeans(diff_matrix, na.rm = TRUE)
+                         alpha <- 1 - self$options$ci_level
+                         diff_lower <- apply(diff_matrix, 2, quantile, probs = alpha / 2, na.rm = TRUE)
+                         diff_upper <- apply(diff_matrix, 2, quantile, probs = 1 - alpha / 2, na.rm = TRUE)
+                         
+                         # P-value: 2 * min(prob(diff>0), prob(diff<0))
+                         # Since H0 is diff=0.
+                         p_vals <- numeric(length(thresholds))
+                         for (k in seq_along(thresholds)) {
+                              vals <- diff_matrix[, k]
+                              vals <- vals[!is.na(vals)]
+                              if (length(vals) > 0) {
+                                  p_pos <- mean(vals > 0)
+                                  p_neg <- mean(vals < 0)
+                                  p_vals[k] <- 2 * min(p_pos, p_neg)
+                              } else {
+                                  p_vals[k] <- NA
+                              }
+                         }
+                         
+                         results_comparison[[paste(t_eval, mod1, mod2, sep="_")]] <- list(
+                             time_point = t_eval,
+                             contrast = paste(mod1, "vs", mod2),
+                             thresholds = thresholds,
+                             diff_nb = diff_mean,
+                             ci_lower = diff_lower,
+                             ci_upper = diff_upper,
+                             p_value = p_vals
+                         )
+                     }
+                 }
             }
+            
+        } # End time point loop
 
             private$.results_by_time <- results_by_time
+            private$.results_comparison <- results_comparison
         },
 
         #---------------------------------------------
@@ -815,27 +908,32 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             threshold_indices <- seq(1, length(private$.thresholds), length.out = min(20, length(private$.thresholds)))
 
             for (tp_name in names(private$.results_by_time)) {
-                result <- private$.results_by_time[[tp_name]]
-
-                for (idx in threshold_indices) {
-                    idx <- round(idx)
-                    improvement <- result$nb_model[idx] - max(result$nb_treat_all[idx], result$nb_treat_none[idx])
-
-                    row <- list(
-                        time_point = result$time_point,
-                        threshold = result$thresholds[idx],
-                        net_benefit = result$nb_model[idx],
-                        nb_lower = if (!is.null(result$nb_model_lower)) result$nb_model_lower[idx] else NULL,
-                        nb_upper = if (!is.null(result$nb_model_upper)) result$nb_model_upper[idx] else NULL,
+                tp_results <- private$.results_by_time[[tp_name]]
+                
+                for (model_name in names(tp_results)) {
+                    result <- tp_results[[model_name]]
+                    
+                    for (idx in threshold_indices) {
+                        idx <- round(idx)
+                        improvement <- result$nb_model[idx] - max(result$nb_treat_all[idx], result$nb_treat_none[idx])
+    
+                        row <- list(
+                            time_point = result$time_point,
+                            model = result$model,
+                            threshold = result$thresholds[idx],
+                            net_benefit = result$nb_model[idx],
+                            nb_lower = if (!is.null(result$nb_model_lower)) result$nb_model_lower[idx] else NULL,
+                            nb_upper = if (!is.null(result$nb_model_upper)) result$nb_model_upper[idx] else NULL,
                         nb_treat_all = result$nb_treat_all[idx],
                         nb_treat_none = result$nb_treat_none[idx],
                         improvement = improvement
                     )
 
-                    row_key <- paste(tp_name, idx, sep = "_")
+                    row_key <- paste(tp_name, model_name, idx, sep = "_")
                     table$addRow(rowKey = row_key, values = row)
                 }
             }
+        }
         },
 
         #---------------------------------------------
@@ -848,18 +946,23 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             table <- self$results$summaryTable
 
             for (tp_name in names(private$.results_by_time)) {
-                result <- private$.results_by_time[[tp_name]]
-
-                row <- list(
-                    time_point = result$time_point,
-                    n_at_risk = result$n_at_risk,
-                    n_events = result$n_events,
-                    event_rate = result$event_rate,
-                    max_net_benefit = result$max_net_benefit,
-                    optimal_threshold = result$optimal_threshold
-                )
-
-                table$addRow(rowKey = tp_name, values = row)
+                tp_results <- private$.results_by_time[[tp_name]]
+                
+                for (model_name in names(tp_results)) {
+                    result <- tp_results[[model_name]]
+    
+                    row <- list(
+                        time_point = result$time_point,
+                        model = result$model,
+                        n_at_risk = result$n_at_risk,
+                        n_events = result$n_events,
+                        event_rate = result$event_rate,
+                        max_net_benefit = result$max_net_benefit,
+                        optimal_threshold = result$optimal_threshold
+                    )
+    
+                    table$addRow(rowKey = paste(tp_name, model_name, sep = "_"), values = row)
+                }
             }
         },
 
@@ -876,20 +979,25 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             threshold_indices <- seq(1, length(private$.thresholds), length.out = min(10, length(private$.thresholds)))
 
             for (tp_name in names(private$.results_by_time)) {
-                result <- private$.results_by_time[[tp_name]]
+                tp_results <- private$.results_by_time[[tp_name]]
+                
+                for (model_name in names(tp_results)) {
+                    result <- tp_results[[model_name]]
 
-                for (idx in threshold_indices) {
-                    idx <- round(idx)
-
-                    row <- list(
-                        time_point = result$time_point,
-                        threshold = result$thresholds[idx],
-                        interventions_avoided = result$interventions_avoided[idx],
-                        events_detected = result$events_detected[idx]
-                    )
-
-                    row_key <- paste(tp_name, "int", idx, sep = "_")
-                    table$addRow(rowKey = row_key, values = row)
+                    for (idx in threshold_indices) {
+                        idx <- round(idx)
+    
+                        row <- list(
+                            time_point = result$time_point,
+                            model = result$model,
+                            threshold = result$thresholds[idx],
+                            interventions_avoided = result$interventions_avoided[idx],
+                            events_detected = result$events_detected[idx]
+                        )
+    
+                        row_key <- paste(tp_name, model_name, "int", idx, sep = "_")
+                        table$addRow(rowKey = row_key, values = row)
+                    }
                 }
             }
         },
@@ -905,44 +1013,72 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             plot_by_tp <- self$options$plot_by_timepoint
 
             # Determine y-axis range (include CIs if present)
-            all_nb <- unlist(lapply(private$.results_by_time, function(r) {
-                c(r$nb_model, r$nb_treat_all, r$nb_treat_none,
-                  r$nb_model_lower, r$nb_model_upper)
-            }))
+            if (is.null(private$.results_by_time)) return()
+            
+            ref_strategy <- self$options$reference_strategy
+            plot_by_tp <- self$options$plot_by_timepoint
+
+            # Determine y-axis range (include CIs if present)
+            # Flatten results structure
+            all_nb <- numeric(0)
+            
+            for (tp in private$.results_by_time) {
+                for (mod in tp) {
+                    all_nb <- c(all_nb, mod$nb_model, mod$nb_treat_all, mod$nb_treat_none,
+                                mod$nb_model_lower, mod$nb_model_upper)
+                }
+            }
             y_min <- min(all_nb, -0.05, na.rm = TRUE)
             y_max <- max(all_nb, 0.05, na.rm = TRUE)
 
             thresholds <- private$.thresholds
 
             if (!plot_by_tp) {
-                # Overlay all time points
+                # Overlay all time points (Warning: This can be messy with multiple models)
+                # Strategy: Facet by Time is likely better, but if user requests overlay:
+                # We will assign colors to MODELS and Linetypes to TIMETYPES (or vice versa? No, usually Color=Model)
+                
+                # If multiple timepoints & multiple models, it's very messy.
+                # Let's stick to simple: Color = Model, line type = Time point?
+                # Or just default to: Color = Interaction(Time, Model)
+                
                 plot(NULL, xlim = c(min(thresholds), max(thresholds)),
                      ylim = c(y_min, y_max),
                      xlab = "Threshold Probability",
                      ylab = "Net Benefit",
-                     main = "Time-Dependent Decision Curves (All Time Points)")
+                     main = "Time-Dependent Decision Curves")
 
                 abline(h = 0, lty = 2, col = "gray")
                 grid()
 
-                colors <- rainbow(length(private$.results_by_time))
+                # Collect all combinations
+                combinations <- list()
+                for (tp_name in names(private$.results_by_time)) {
+                    for (model_name in names(private$.results_by_time[[tp_name]])) {
+                        combinations[[length(combinations)+1]] <- list(tp=tp_name, mod=model_name)
+                    }
+                }
+                
+                colors <- rainbow(length(combinations))
                 i <- 1
 
-                for (tp_name in names(private$.results_by_time)) {
-                    result <- private$.results_by_time[[tp_name]]
-
-                    # Add CI band if bootstrap enabled
-                    if (!is.null(result$nb_model_lower) && !is.null(result$nb_model_upper)) {
-                        polygon(c(result$thresholds, rev(result$thresholds)),
+                for (comb in combinations) {
+                    result <- private$.results_by_time[[comb$tp]][[comb$mod]]
+                    
+                    # Add CI band if bootstrap enabled (only if few lines, otherwise too messy)
+                    if (length(combinations) <= 3 && !is.null(result$nb_model_lower) && !is.null(result$nb_model_upper)) {
+                         polygon(c(result$thresholds, rev(result$thresholds)),
                                 c(result$nb_model_lower, rev(result$nb_model_upper)),
-                                col = adjustcolor(colors[i], alpha.f = 0.2),
+                                col = adjustcolor(colors[i], alpha.f = 0.1),
                                 border = NA)
                     }
 
                     # Main model line
                     lines(result$thresholds, result$nb_model, col = colors[i], lwd = 2)
 
-                    # Reference strategies
+                    # Reference strategies (Only plot once per timepoint? Or just for the first model?)
+                    # Plotting ref strategies for every model is redundant if they are same, but they might differ by time.
+                    # Let's plot "Treat All" for this timepoint (using a distinct style, maybe thin dashed same color)
                     if (ref_strategy %in% c("treat_all", "both")) {
                         lines(result$thresholds, result$nb_treat_all,
                               col = colors[i], lty = 3, lwd = 1)
@@ -952,75 +1088,84 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 }
 
                 legend("topright",
-                       legend = paste("t =", names(private$.results_by_time)),
-                       col = colors, lwd = 2, cex = 0.8)
+                       legend = sapply(combinations, function(x) paste0(x$mod, " (t=", x$tp, ")")),
+                       col = colors, lwd = 2, cex = 0.7)
 
             } else {
-                # Separate plot for each time point (FACETED LAYOUT)
+                # Separate plot for each time point (FACETED LAYOUT) - Preferred for Multi-Model
                 n_timepoints <- length(private$.results_by_time)
-
+                
                 # Setup multi-panel layout
                 n_cols <- ceiling(sqrt(n_timepoints))
                 n_rows <- ceiling(n_timepoints / n_cols)
                 old_par <- par(no.readonly = TRUE)
                 on.exit(par(old_par))
-                par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 2, 1))
+                par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1))
 
                 for (tp_name in names(private$.results_by_time)) {
-                    result <- private$.results_by_time[[tp_name]]
+                    tp_results <- private$.results_by_time[[tp_name]]
+                    model_names <- names(tp_results)
+                    
+                    # Assign colors to models
+                    cols <- rainbow(length(model_names))
+                    names(cols) <- model_names
+                    
+                    # Determine range for this plot (optional, or use global)
+                    # Global y_min/y_max used for consistency
 
                     # Individual plot for this time point
-                    plot(result$thresholds, result$nb_model,
-                         type = "n",
+                    plot(NULL,
                          xlim = c(min(thresholds), max(thresholds)),
                          ylim = c(y_min, y_max),
                          xlab = "Threshold Probability",
                          ylab = "Net Benefit",
-                         main = paste("t =", result$time_point))
+                         main = paste("Time =", tp_name))
 
                     abline(h = 0, lty = 2, col = "gray")
                     grid()
+                    
+                    # Loop models
+                    for (model_name in model_names) {
+                        result <- tp_results[[model_name]]
+                        col <- cols[model_name]
 
-                    # Add CI band if bootstrap enabled
-                    if (!is.null(result$nb_model_lower) && !is.null(result$nb_model_upper)) {
-                        polygon(c(result$thresholds, rev(result$thresholds)),
-                                c(result$nb_model_lower, rev(result$nb_model_upper)),
-                                col = adjustcolor("blue", alpha.f = 0.2),
-                                border = NA)
+                        # Add CI band if bootstrap enabled
+                        if (!is.null(result$nb_model_lower) && !is.null(result$nb_model_upper)) {
+                            polygon(c(result$thresholds, rev(result$thresholds)),
+                                    c(result$nb_model_lower, rev(result$nb_model_upper)),
+                                    col = adjustcolor(col, alpha.f = 0.2),
+                                    border = NA)
+                        }
+    
+                        # Main model line
+                        lines(result$thresholds, result$nb_model, col = col, lwd = 2)
                     }
 
-                    # Main model line
-                    lines(result$thresholds, result$nb_model, col = "blue", lwd = 2)
-
-                    # Reference strategies
+                    # Reference strategies (Plot from first model, they are same for cohort)
+                    first_res <- tp_results[[1]]
                     if (ref_strategy %in% c("treat_all", "both")) {
-                        lines(result$thresholds, result$nb_treat_all,
-                              col = "red", lty = 2, lwd = 1)
+                        lines(first_res$thresholds, first_res$nb_treat_all,
+                              col = "black", lty = 2, lwd = 1)
                     }
                     if (ref_strategy %in% c("treat_none", "both")) {
-                        lines(result$thresholds, result$nb_treat_none,
+                        lines(first_res$thresholds, first_res$nb_treat_none,
                               col = "gray", lty = 2, lwd = 1)
                     }
 
-                    # Add minimal legend
-                    legend_items <- c("Model")
-                    legend_col <- c("blue")
-                    legend_lty <- c(1)
-
+                    # Legend
+                    legend_items <- model_names
+                    legend_col <- cols
+                    legend_lty <- rep(1, length(model_names))
+                    
                     if (ref_strategy %in% c("treat_all", "both")) {
                         legend_items <- c(legend_items, "Treat All")
-                        legend_col <- c(legend_col, "red")
+                        legend_col <- c(legend_col, "black")
                         legend_lty <- c(legend_lty, 2)
                     }
-                    if (ref_strategy %in% c("treat_none", "both")) {
-                        legend_items <- c(legend_items, "Treat None")
-                        legend_col <- c(legend_col, "gray")
-                        legend_lty <- c(legend_lty, 2)
-                    }
-
+                    
                     legend("topright", legend = legend_items,
                            col = legend_col, lty = legend_lty,
-                           lwd = c(2, rep(1, length(legend_items)-1)),
+                           lwd = c(rep(2, length(model_names)), rep(1, length(legend_items)-length(model_names))),
                            cex = 0.7)
                 }
             }
@@ -1037,19 +1182,38 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             thresholds <- private$.thresholds
 
+            # Flatten results structure
+            all_avoided <- numeric(0)
+            for (tp_name in names(private$.results_by_time)) {
+                tp <- private$.results_by_time[[tp_name]]
+                for (mod in tp) {
+                    all_avoided <- c(all_avoided, mod$interventions_avoided)
+                }
+            }
+
             plot(NULL, xlim = c(min(thresholds), max(thresholds)),
-                 ylim = range(unlist(lapply(private$.results_by_time, function(r) r$interventions_avoided)), na.rm = TRUE),
+                 ylim = range(all_avoided, na.rm = TRUE),
                  xlab = "Threshold Probability",
                  ylab = "Net Reduction in Interventions (per 100 patients)",
                  main = "Interventions Avoided")
 
             grid()
 
-            colors <- rainbow(length(private$.results_by_time))
+            # For intervention plot, usually overlaying all is tolerable or we can facet.
+            # Let's keep overlay for now but use distinct colors for Model x Time
+            
+            combinations <- list()
+            for (tp_name in names(private$.results_by_time)) {
+                for (model_name in names(private$.results_by_time[[tp_name]])) {
+                    combinations[[length(combinations)+1]] <- list(tp=tp_name, mod=model_name)
+                }
+            }
+            
+            colors <- rainbow(length(combinations))
             i <- 1
 
-            for (tp_name in names(private$.results_by_time)) {
-                result <- private$.results_by_time[[tp_name]]
+            for (comb in combinations) {
+                result <- private$.results_by_time[[comb$tp]][[comb$mod]]
 
                 lines(result$thresholds, result$interventions_avoided,
                       col = colors[i], lwd = 2)
@@ -1058,10 +1222,42 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             legend("topright",
-                   legend = paste("t =", names(private$.results_by_time)),
+                   legend = sapply(combinations, function(x) paste0(x$mod, " (t=", x$tp, ")")),
                    col = colors, lwd = 2, cex = 0.8)
 
             TRUE
+        },
+
+        #---------------------------------------------
+        # POPULATE COMPARISON TABLE
+        #---------------------------------------------
+        .populateComparisonTable = function() {
+            if (is.null(private$.results_comparison) || length(private$.results_comparison) == 0) return()
+            
+            table <- self$results$comparisonTable
+            table$setVisible(TRUE)
+            
+            # Show representative thresholds (same as NB table)
+            threshold_indices <- seq(1, length(private$.thresholds), length.out = min(10, length(private$.thresholds)))
+            
+            for (key in names(private$.results_comparison)) {
+                res <- private$.results_comparison[[key]]
+                
+                for (idx in threshold_indices) {
+                    idx <- round(idx)
+                    row <- list(
+                        time_point = res$time_point,
+                        contrast = res$contrast,
+                        threshold = res$thresholds[idx],
+                        diff_nb = res$diff_nb[idx],
+                        ci_lower = res$ci_lower[idx],
+                        ci_upper = res$ci_upper[idx],
+                        p_value = res$p_value[idx]
+                    )
+                    
+                    table$addRow(rowKey = paste(key, idx, sep="_"), values = row)
+                }
+            }
         }
     )
 )

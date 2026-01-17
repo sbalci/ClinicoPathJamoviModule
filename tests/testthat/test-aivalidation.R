@@ -1,12 +1,5 @@
-# Tests for aivalidation function
-
 library(testthat)
 library(jmvcore)
-
-# Load the package
-if (requireNamespace("devtools", quietly = TRUE)) {
-  devtools::load_all()
-}
 
 test_that("aivalidation works with minimal inputs", {
   skip_if_not_installed('jmvReadWrite')

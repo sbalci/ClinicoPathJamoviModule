@@ -32,7 +32,8 @@ landmarkanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..status <- jmvcore::OptionVariable$new(
                 "status",
                 status,
@@ -41,7 +42,8 @@ landmarkanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
                 predictors,
@@ -51,7 +53,8 @@ landmarkanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "nominal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..landmark_times <- jmvcore::OptionString$new(
                 "landmark_times",
                 landmark_times,
@@ -147,6 +150,8 @@ landmarkanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        errors = function() private$.items[["errors"]],
+        warnings = function() private$.items[["warnings"]],
         summary = function() private$.items[["summary"]],
         baselineModel = function() private$.items[["baselineModel"]],
         landmarkResults = function() private$.items[["landmarkResults"]],
@@ -176,6 +181,16 @@ landmarkanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "time",
                     "status",
                     "predictors")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Errors",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -419,6 +434,8 @@ landmarkanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$baselineModel} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$landmarkResults} \tab \tab \tab \tab \tab a table \cr
@@ -441,9 +458,9 @@ landmarkanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @export
 landmarkanalysis <- function(
     data,
-    time,
-    status,
-    predictors,
+    time = NULL,
+    status = NULL,
+    predictors = NULL,
     landmark_times = "6, 12, 24",
     prediction_window = 12,
     min_events = 10,

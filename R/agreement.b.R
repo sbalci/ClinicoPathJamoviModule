@@ -4390,8 +4390,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     case_ids <- paste0("Case_", 1:n_cases)
                 }
 
-                if (n_cases < 3) {
-                    self$results$caseClusterTable$setNote("error", "Clustering requires at least 3 cases")
+                if (n_cases < 3 || n_raters < 2) {
+                    self$results$caseClusterTable$setNote("error", "Clustering requires at least 3 cases and 2 raters")
                     return()
                 }
 
@@ -4421,7 +4421,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     # For continuous: use correlation or Euclidean
                     if (distance_metric == "correlation") {
                         # Correlation between rating vectors across raters
-                        cor_matrix <- cor(t(ratings), use = "pairwise.complete.obs")
+                        cor_matrix <- tryCatch({
+                            stats::cor(t(as.matrix(ratings)), use = "pairwise.complete.obs")
+                        }, error = function(e) {
+                            matrix(0, n_cases, n_cases)
+                        })
+                        cor_matrix[is.na(cor_matrix)] <- 0
                         dist_matrix <- 1 - cor_matrix
                         dist_obj <- as.dist(dist_matrix)
                     } else if (distance_metric == "euclidean") {
@@ -4445,6 +4450,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                     # Cut tree to get cluster assignments
                     cluster_assign <- cutree(hc, k = k)
+
+                    if (any(is.na(cluster_assign))) {
+                        self$results$caseClusterTable$setNote("error", "Error: Missing values in cluster assignments. Try fewer clusters or check data.")
+                        return()
+                    }
 
                     # Store dendrogram state
                     if (self$options$showCaseDendrogram) {
@@ -4508,7 +4518,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         for (cl in unique(cluster_assign)) {
                             cl_idx <- which(cluster_assign == cl)
                             n_sample <- min(length(cl_idx), ceiling(200 * length(cl_idx) / n_cases))
-                            sample_idx <- c(sample_idx, sample(cl_idx, n_sample))
+                            sample_idx <- c(sample_idx, cl_idx[sample.int(length(cl_idx), n_sample)])
                         }
 
                         heatmap$setState(list(
@@ -7842,17 +7852,25 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
 
                 # irr::kappa2 ----
-                result2 <- irr::kappa2(ratings = ratings, weight = wght)
+                if (nrow(na.omit(ratings)) > 0) {
+                    result2 <- irr::kappa2(ratings = ratings, weight = wght)
+                } else {
+                    result2 <- list(value = NA, stat.name = "Kappa", statistic = NA, p.value = NA)
+                }
 
             # >=3 raters: Fleiss kappa ----
             } else if (length(self$options$vars) >= 3) {
-                result2 <- irr::kappam.fleiss(ratings = ratings, exact = exct, detail = TRUE)
+                if (nrow(na.omit(ratings)) > 0) {
+                    result2 <- irr::kappam.fleiss(ratings = ratings, exact = exct, detail = TRUE)
+                } else {
+                    result2 <- list(value = NA, stat.name = "Kappa", statistic = NA, p.value = NA)
+                }
             }
 
 
             # Percentage agreement ----
             result1 <- irr::agree(ratings)
-            if (result1[["value"]] > 100) {
+            if (!is.na(result1[["value"]]) && result1[["value"]] > 100) {
                 result1[["value"]] <- "Please check the data. It seems that observers do not agree on any cases"
             }
 

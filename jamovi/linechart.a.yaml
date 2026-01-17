@@ -4,7 +4,7 @@ title: Line Chart
 menuGroup: JJStatsPlot
 menuSubgroup: Lines
 menuSubtitle: 'Time Series and Trend Analysis'
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:

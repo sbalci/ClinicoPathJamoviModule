@@ -23,11 +23,10 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Risk Predictor (Continuous)
+        label: Risk Predictors (Models)
         children:
           - type: VariablesListBox
-            name: predictor
-            maxItemCount: 1
+            name: predictors
             isTarget: true
   - type: LayoutBox
     margin: large

@@ -16,7 +16,6 @@ bayesianmetaanalysis(
   mcmcChains = 4,
   mcmcIterations = 5000,
   warmupIterations = 2500,
-  credibleInterval = 0.95,
   publicationBias = FALSE,
   posteriorPredictive = TRUE,
   plotForest = TRUE,
@@ -46,8 +45,6 @@ ratio)}
 \item{mcmcIterations}{number of MCMC iterations per chain}
 
 \item{warmupIterations}{number of warmup (burn-in) iterations per chain}
-
-\item{credibleInterval}{credible interval probability}
 
 \item{publicationBias}{whether to assess and adjust for publication bias}
 

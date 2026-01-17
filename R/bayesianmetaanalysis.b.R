@@ -78,11 +78,17 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             # Perform the Bayesian meta-analysis based on model type
             tryCatch({
-                if (self$options$modelType == "fixed") {
+                print(paste("EffectSize len:", length(effectSize)))
+                print(paste("StudyId len:", length(studyId)))
+                if (length(effectSize) != length(studyId)) {
+                   print("LENGTH MISMATCH DETECTED")
+                }
+                
+                if (self$options$modelType == "fixed_effects") {
                     results <- private$.runFixedEffectsModel(
                         effectSize, standardError, studyId, covariates
                     )
-                } else if (self$options$modelType == "random") {
+                } else if (self$options$modelType == "random_effects") {
                     results <- private$.runRandomEffectsModel(
                         effectSize, standardError, studyId, covariates
                     )
@@ -241,6 +247,8 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             # Extract results
             summary_model <- summary(model)
             posterior <- brms::posterior_samples(model)
+            print("Posterior names:")
+            print(names(posterior))
             
             # Calculate pooled effect and credible interval
             ci_level <- self$options$credibleInterval / 100
@@ -289,16 +297,22 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             # Add covariate effects if present
             if (!is.null(covariates)) {
-                coef_names <- paste0("b_", names(covariates))
-                results$covariate_effects <- data.frame(
-                    covariate = names(covariates),
-                    estimate = sapply(coef_names, function(x) median(posterior[[x]])),
-                    se = sapply(coef_names, function(x) sd(posterior[[x]])),
-                    ci_lower = sapply(coef_names, function(x) 
-                        quantile(posterior[[x]], (1 - ci_level) / 2)),
-                    ci_upper = sapply(coef_names, function(x) 
-                        quantile(posterior[[x]], (1 + ci_level) / 2))
-                )
+                coef_names <- names(covariates)
+                results$covariate_effects <- do.call(rbind, lapply(coef_names, function(cov) {
+                    # Find columns in posterior that match b_covariate...
+                    pattern <- paste0("^b_", cov)
+                    matches <- grep(pattern, names(posterior), value = TRUE)
+                    
+                    if (length(matches) == 0) return(NULL)
+                    
+                    data.frame(
+                        covariate = matches,
+                        estimate = sapply(matches, function(x) median(posterior[[x]])),
+                        se = sapply(matches, function(x) sd(posterior[[x]])),
+                        ci_lower = sapply(matches, function(x) quantile(posterior[[x]], (1 - ci_level) / 2)),
+                        ci_upper = sapply(matches, function(x) quantile(posterior[[x]], (1 + ci_level) / 2))
+                    )
+                }))
             }
             
             return(results)
@@ -306,6 +320,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         
         .runMetaforModel = function(effectSize, standardError, studyId, covariates) {
             # Use metafor for frequentist random effects as fallback
+            print(paste("Metafor input lengths - Effect:", length(effectSize), "SE:", length(standardError), "StudyId:", length(studyId)))
             if (!is.null(covariates)) {
                 model <- metafor::rma(
                     yi = effectSize,
@@ -440,7 +455,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             table <- self$results$modelSummary
             
-            table$setRow(rowNo = 1, values = list(
+            table$addRow(rowKey = 1, values = list(
                 model = results$model_type,
                 pooledEffect = results$pooled_effect,
                 se = results$pooled_se,
@@ -480,7 +495,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             table <- self$results$mcmcDiagnostics
             
-            table$setRow(rowNo = 1, values = list(
+            table$addRow(rowKey = 1, values = list(
                 parameter = "Pooled Effect",
                 Rhat = results$convergence$Rhat,
                 nEff = results$convergence$n_eff,
@@ -490,7 +505,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             # Add model fit statistics
             if (!is.null(results$model)) {
                 table <- self$results$modelComparison
-                table$setRow(rowNo = 1, values = list(
+                table$addRow(rowKey = 1, values = list(
                     model = results$model_type,
                     DIC = results$DIC,
                     WAIC = results$WAIC,
@@ -507,16 +522,16 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         },
         
         .assessPublicationBias = function(effectSize, standardError) {
-            table <- self$results$publicationBias
+            table <- self$results$publicationBiasResults
             
             # Simple Egger's test
             precision <- 1 / standardError
             model <- lm(effectSize ~ precision, weights = 1/standardError^2)
             
-            table$setRow(rowNo = 1, values = list(
+            table$addRow(rowKey = 1, values = list(
                 test = "Egger's Test",
                 statistic = coef(model)[1] / summary(model)$coefficients[1, 2],
-                p = summary(model)$coefficients[1, 4]
+                p_value = summary(model)$coefficients[1, 4]
             ))
         },
         

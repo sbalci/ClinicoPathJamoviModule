@@ -48,8 +48,8 @@ test_that("Normality check warns for Pearson on non-normal data", {
     analysis$run()
     
     content <- analysis$results$warnings$content
-    expect_true(grepl("Pearson correlation assumes normality", content))
-    expect_true(grepl("Spearman rank correlation is recommended", content))
+    expect_true(grepl("Normality assumption violated", content))
+    expect_true(grepl("Spearman rank correlation recommended", content))
 })
 
 test_that("CCC interpretation is correct for high values", {
@@ -118,5 +118,5 @@ test_that("Listwise deletion message occurs", {
     
     content <- analysis$results$warnings$content
     expect_true(grepl("Listwise deletion", content))
-    expect_true(grepl("cases removed", content))
+    expect_true(grepl("removed .* cases", content))
 })

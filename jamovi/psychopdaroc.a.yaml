@@ -4,7 +4,7 @@ title: Advanced ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:

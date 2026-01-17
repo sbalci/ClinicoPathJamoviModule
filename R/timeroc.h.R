@@ -23,7 +23,7 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             smoothAUC = FALSE,
             analysisType = "timedep",
             compareROCs = FALSE,
-            markers = NULL,
+            markers = list(),
             rocComparison = "delong",
             youdenIndex = TRUE, ...) {
 
@@ -38,8 +38,7 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 elapsedtime,
                 suggested=list(
                     "continuous"),
-                permitted=list(
-                    "numeric"))
+                default=NULL)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -47,9 +46,7 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal",
                     "nominal",
                     "continuous"),
-                permitted=list(
-                    "factor",
-                    "numeric"))
+                default=NULL)
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
@@ -59,8 +56,7 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 marker,
                 suggested=list(
                     "continuous"),
-                permitted=list(
-                    "numeric"))
+                default=NULL)
             private$..timepoints <- jmvcore::OptionString$new(
                 "timepoints",
                 timepoints,
@@ -133,7 +129,8 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=list())
             private$..rocComparison <- jmvcore::OptionList$new(
                 "rocComparison",
                 rocComparison,
@@ -497,10 +494,10 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 timeroc <- function(
     data,
-    elapsedtime,
-    outcome,
+    elapsedtime = NULL,
+    outcome = NULL,
     outcomeLevel,
-    marker,
+    marker = NULL,
     timepoints = "12, 36, 60",
     method = "incident",
     bootstrapCI = FALSE,
@@ -514,7 +511,7 @@ timeroc <- function(
     smoothAUC = FALSE,
     analysisType = "timedep",
     compareROCs = FALSE,
-    markers,
+    markers = list(),
     rocComparison = "delong",
     youdenIndex = TRUE) {
 

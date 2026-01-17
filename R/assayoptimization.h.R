@@ -32,7 +32,7 @@ assayoptimizationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 package="ClinicoPath",
                 name="assayoptimization",
-                requiresData=FALSE,
+                requiresData=TRUE,
                 ...)
 
             private$..response_var <- jmvcore::OptionVariable$new(
@@ -421,7 +421,7 @@ assayoptimizationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'na')
+                weightsSupport = 'auto')
         }))
 
 #' Assay Optimization & Experimental Design
@@ -443,6 +443,7 @@ assayoptimizationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'     design_type = "factorial"
 #' )
 #'
+#' @param data .
 #' @param response_var Primary assay response variable for optimization
 #' @param factors List of experimental factors for optimization
 #' @param blocking_vars Variables for experimental blocking
@@ -486,6 +487,7 @@ assayoptimizationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'
 #' @export
 assayoptimization <- function(
+    data,
     response_var,
     factors,
     blocking_vars = NULL,
@@ -516,6 +518,15 @@ assayoptimization <- function(
     if ( ! missing(factors)) factors <- jmvcore::resolveQuo(jmvcore::enquo(factors))
     if ( ! missing(blocking_vars)) blocking_vars <- jmvcore::resolveQuo(jmvcore::enquo(blocking_vars))
     if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame(),
+            `if`( ! missing(response_var), response_var, NULL),
+            `if`( ! missing(factors), factors, NULL),
+            `if`( ! missing(blocking_vars), blocking_vars, NULL),
+            `if`( ! missing(covariates), covariates, NULL))
+
+    for (v in blocking_vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- assayoptimizationOptions$new(
         response_var = response_var,

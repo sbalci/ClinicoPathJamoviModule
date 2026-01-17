@@ -36,6 +36,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: null
       description:
           ui: >
             Follow-up time variable
@@ -47,6 +48,7 @@ options:
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor, numeric ]
+      default: null
       description:
           ui: >
             Event status (0 = censored, 1 = event)
@@ -58,11 +60,23 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
+      default: null
       description:
           ui: >
             Predicted risk score or linear predictor from survival model
           R: >
             Model predictions to validate
+
+    - name: covariates
+      title: 'Covariates'
+      type: Variables
+      suggested: [ continuous, nominal, ordinal ]
+      default: null
+      description:
+          ui: >
+            Select covariates for model formula
+          R: >
+            Covariates to include in the model formula
 
     - name: model_formula
       title: 'Model Formula'
@@ -300,6 +314,7 @@ options:
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
+      default: null
       description:
           ui: >
             Cause of failure for competing risks analysis

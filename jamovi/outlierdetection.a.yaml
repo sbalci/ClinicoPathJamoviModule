@@ -3,7 +3,7 @@ name: outlierdetection
 title: Outlier Detection
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:

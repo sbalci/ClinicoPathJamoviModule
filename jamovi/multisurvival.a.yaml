@@ -4,7 +4,7 @@ title: Multivariable Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:
@@ -126,7 +126,7 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
-      default: NULL
+      default: null
       description:
         R: >
           The numeric variable representing follow-up time until the event or last observation.
@@ -145,7 +145,7 @@ options:
     - name: dxdate
       title: 'Diagnosis Date'
       type: Variable
-      default: NULL
+      default: null
       suggested: [ continuous, nominal ]
       permitted: [ numeric, factor ]
       description:
@@ -157,7 +157,7 @@ options:
     - name: fudate
       title: 'Follow-up Date'
       type: Variable
-      default: NULL
+      default: null
       suggested: [ continuous, nominal ]
       permitted: [ numeric, factor ]
       description:
@@ -251,7 +251,7 @@ options:
       type: Variable
       suggested: [ ordinal, nominal, continuous ]
       permitted: [ factor, numeric ]
-      default: NULL
+      default: null
       description:
         R: >
           The outcome variable. Typically indicates event status (e.g., death, recurrence).
@@ -339,7 +339,7 @@ options:
       type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
-      default: NULL
+      default: null
       description:
         R: >
           Categorical explanatory (predictor) variables included in the Cox model.
@@ -351,7 +351,7 @@ options:
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
-      default: NULL
+      default: null
       description:
         R: >
           Continuous explanatory (predictor) variables included in the Cox model.
@@ -563,7 +563,7 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
-      default: NULL
+      default: null
 
     - name: ac_method
       title: Adjustment Method
@@ -760,7 +760,7 @@ options:
       type: Variables
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
-      default: NULL
+      default: null
       description:
         R: >
           Variables used for stratification. When proportional hazards are not met,
@@ -941,54 +941,54 @@ options:
     #       Display plots showing how model performance varies over follow-up time.
 
 # Decision Tree Options ---- (EXPERIMENTAL - will be implemented later)
-    # - name: use_tree
-    #   title: Use Survival Decision Tree
-    #   type: Bool
-    #   default: false
-    #   description:
-    #     R: >
-    #       If true, fits a survival decision tree to identify subgroups with different survival outcomes.
-    #       Decision trees provide an intuitive alternative to Cox regression for identifying risk factors.
+    - name: use_tree
+      title: Use Survival Decision Tree
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, fits a survival decision tree to identify subgroups with different survival outcomes.
+          Decision trees provide an intuitive alternative to Cox regression for identifying risk factors.
 
-    # - name: min_node
-    #   title: Minimum Node Size
-    #   type: Integer
-    #   min: 5
-    #   max: 100
-    #   default: 20
-    #   description:
-    #     R: >
-    #       The minimum number of observations required in a terminal node. Larger values create
-    #       simpler trees that may be more generalizable but potentially miss important subgroups.
+    - name: min_node
+      title: Minimum Node Size
+      type: Integer
+      min: 5
+      max: 100
+      default: 20
+      description:
+        R: >
+          The minimum number of observations required in a terminal node. Larger values create
+          simpler trees that may be more generalizable but potentially miss important subgroups.
 
-    # - name: complexity
-    #   title: Complexity Parameter
-    #   type: Number
-    #   min: 0.001
-    #   max: 0.1
-    #   default: 0.01
-    #   description:
-    #     R: >
-    #       The complexity parameter for tree pruning. Higher values result in smaller trees.
-    #       This parameter controls the trade-off between tree size and goodness of fit.
+    - name: complexity
+      title: Complexity Parameter
+      type: Number
+      min: 0.001
+      max: 0.1
+      default: 0.01
+      description:
+        R: >
+          The complexity parameter for tree pruning. Higher values result in smaller trees.
+          This parameter controls the trade-off between tree size and goodness of fit.
 
-    # - name: max_depth
-    #   title: Maximum Tree Depth
-    #   type: Integer
-    #   min: 1
-    #   max: 10
-    #   default: 5
-    #   description:
-    #     R: >
-    #       The maximum depth of the decision tree. Limits the complexity of the tree to avoid overfitting.
+    - name: max_depth
+      title: Maximum Tree Depth
+      type: Integer
+      min: 1
+      max: 10
+      default: 5
+      description:
+        R: >
+          The maximum depth of the decision tree. Limits the complexity of the tree to avoid overfitting.
 
-    # - name: show_terminal_nodes
-    #   title: Show Survival Curves for Terminal Nodes
-    #   type: Bool
-    #   default: false
-    #   description:
-    #     R: >
-    #       If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
+    - name: show_terminal_nodes
+      title: Show Survival Curves for Terminal Nodes
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
 
 # Time-Dependent Covariates ---- (EXPERIMENTAL - will be implemented later)
     # - name: use_time_dependent

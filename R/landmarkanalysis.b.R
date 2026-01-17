@@ -8,6 +8,15 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = landmarkanalysisBase,
     private = list(
         
+        # Internal data storage
+        clean_data = NULL,
+        landmark_times = NULL,
+        time_var = NULL,
+        status_var = NULL,
+        predictors = NULL,
+        baseline_model = NULL,
+        landmark_models = list(),
+
         .init = function() {
             # Check for required packages
             if (!requireNamespace('survival', quietly = TRUE)) {
@@ -27,7 +36,7 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             
             # Check if variables are selected
-            if (is.null(self$options$time) || is.null(self$options$status)) {
+            if (is.null(self$options$time) || is.null(self$options$status) || is.null(self$options$predictors) || length(self$options$predictors) == 0) {
                 self$results$todo$setContent(
                     "<h3>Welcome to Landmark Analysis</h3>
                     <p>Landmark analysis addresses immortal time bias in survival analysis 
@@ -71,6 +80,11 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Clean data
             analysis_vars <- c(time_var, status_var, predictors)
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
+            
+            # Ensure status is numeric (0/1) for calculations
+            if (is.factor(clean_data[[status_var]]) || is.character(clean_data[[status_var]])) {
+                clean_data[[status_var]] <- as.numeric(as.factor(clean_data[[status_var]])) - 1
+            }
             
             if (nrow(clean_data) < 50) {
                 stop("Insufficient data for landmark analysis (minimum 50 complete cases required)")

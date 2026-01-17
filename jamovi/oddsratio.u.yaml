@@ -30,6 +30,8 @@ children:
     margin: large
     children:
       - type: CheckBox
+        name: usePenalized
+      - type: CheckBox
         name: showExplanations
   - type: CollapseBox
     label: Nomogram Options
@@ -51,13 +53,7 @@ children:
                 name: diagnosticPredictor
                 maxItemCount: 1
                 isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LevelSelector
-        name: predictorLevel
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: usePenalized
+              - type: LevelSelector
+                name: predictorLevel
+                label: Predictor Positive Level
+                enable: (diagnosticPredictor)

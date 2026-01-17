@@ -199,14 +199,256 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "chisqposttestResults",
     inherit = jmvcore::Group,
-    active = list(),
+    active = list(
+        todo = function() private$.items[["todo"]],
+        chisqTable = function() private$.items[["chisqTable"]],
+        assumptionsCheck = function() private$.items[["assumptionsCheck"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
+        educationalOverview = function() private$.items[["educationalOverview"]],
+        weightedDataInfo = function() private$.items[["weightedDataInfo"]],
+        contingencyTable = function() private$.items[["contingencyTable"]],
+        residualsGuidance = function() private$.items[["residualsGuidance"]],
+        residualsAnalysis = function() private$.items[["residualsAnalysis"]],
+        multipleTestingInfo = function() private$.items[["multipleTestingInfo"]],
+        posthocTable = function() private$.items[["posthocTable"]],
+        detailedComparisons = function() private$.items[["detailedComparisons"]],
+        exportTable = function() private$.items[["exportTable"]],
+        reportSentences = function() private$.items[["reportSentences"]],
+        glossaryPanel = function() private$.items[["glossaryPanel"]],
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Chi-Square Post-Hoc Tests")}))
+                title="Chi-Square Post-Hoc Tests",
+                refs=list(
+                    "chisq.posthoc.test",
+                    "vcd",
+                    "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do",
+                clearWith=list(
+                    "rows",
+                    "cols")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="chisqTable",
+                title="Chi-Square Test Results",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="stat", 
+                        `title`="Statistic", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "excl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptionsCheck",
+                title="Assumptions Validation",
+                visible="(showAssumptionsCheck)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "showAssumptionsCheck")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title="Clinical Summary",
+                visible="(showClinicalSummary)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "showClinicalSummary")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="educationalOverview",
+                title="Analysis Guide",
+                visible="(showEducational)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "showEducational")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="weightedDataInfo",
+                title="Weighted Data Information",
+                visible="(counts)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="contingencyTable",
+                title="Contingency Table",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "excl",
+                    "exp")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="residualsGuidance",
+                title="Residuals Interpretation Guidance",
+                visible="(showResiduals)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "excl",
+                    "showResiduals",
+                    "residualsCutoff")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="residualsAnalysis",
+                title="Standardized Residuals Analysis",
+                visible="(showResiduals)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "excl",
+                    "showResiduals",
+                    "residualsCutoff")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="multipleTestingInfo",
+                title="Multiple Testing Information",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "posthoc")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="posthocTable",
+                title="Pairwise Comparison Results",
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="test_method", 
+                        `title`="Test Method", 
+                        `type`="text"),
+                    list(
+                        `name`="chi", 
+                        `title`="Chi-Square", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="padj", 
+                        `title`="Adj. p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="effect_size", 
+                        `title`="Effect Size (Phi)", 
+                        `type`="number"),
+                    list(
+                        `name`="phi_ci", 
+                        `title`="95% CI (Phi)", 
+                        `type`="text"),
+                    list(
+                        `name`="sig", 
+                        `title`="Significant", 
+                        `type`="text")),
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "posthoc",
+                    "sig",
+                    "excl")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="detailedComparisons",
+                title="Detailed Pairwise Comparison Tables",
+                visible="(showDetailedTables)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "posthoc",
+                    "sig",
+                    "excl",
+                    "showDetailedTables",
+                    "testSelection")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="exportTable",
+                title="Exported Results",
+                visible="(exportResults)",
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "exportResults")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentences",
+                title="Report-Ready Sentences",
+                visible="(copyReadySentences)",
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "copyReadySentences")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="glossaryPanel",
+                title="Statistical Glossary",
+                visible="(showGlossary)",
+                clearWith=list(
+                    "showGlossary")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Standardized Residuals",
+                width=600,
+                height=400,
+                renderFun=".plot",
+                visible="(plot)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "excl")))}))
 
 chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "chisqposttestBase",
@@ -285,7 +527,29 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   interpretations
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$chisqTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$assumptionsCheck} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$educationalOverview} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$weightedDataInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$residualsGuidance} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$residualsAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$multipleTestingInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$posthocTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$detailedComparisons} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$exportTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$chisqTable$asDF}
+#'
+#' \code{as.data.frame(results$chisqTable)}
 #'
 #' @export
 chisqposttest <- function(

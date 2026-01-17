@@ -6,9 +6,9 @@
 \usage{
 landmarkanalysis(
   data,
-  time,
-  status,
-  predictors,
+  time = NULL,
+  status = NULL,
+  predictors = NULL,
   landmark_times = "6, 12, 24",
   prediction_window = 12,
   min_events = 10,
@@ -54,6 +54,8 @@ landmarkanalysis(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$baselineModel} \tab \tab \tab \tab \tab a table \cr
 \code{results$landmarkResults} \tab \tab \tab \tab \tab a table \cr

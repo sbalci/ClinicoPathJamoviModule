@@ -3,7 +3,7 @@ name:  agepyramid
 title: Age Pyramid
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 options:

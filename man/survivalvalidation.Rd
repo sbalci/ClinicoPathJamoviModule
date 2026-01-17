@@ -6,9 +6,10 @@
 \usage{
 survivalvalidation(
   data,
-  time,
-  status,
-  predicted_risk,
+  time = NULL,
+  status = NULL,
+  predicted_risk = NULL,
+  covariates = NULL,
   model_formula = "",
   external_data,
   validation_method = "cv",
@@ -30,7 +31,7 @@ survivalvalidation(
   smoothing = TRUE,
   risk_groups = 4,
   competing_risks = FALSE,
-  cause_specific,
+  cause_specific = NULL,
   model_comparison = FALSE,
   model_names = "",
   net_benefit_thresholds = "0.01,0.05,0.1,0.2,0.3"
@@ -44,6 +45,8 @@ survivalvalidation(
 \item{status}{Event indicator variable}
 
 \item{predicted_risk}{Model predictions to validate}
+
+\item{covariates}{Covariates to include in the model formula}
 
 \item{model_formula}{Variables for Cox model if predictions not provided}
 

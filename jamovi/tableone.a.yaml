@@ -3,7 +3,7 @@ name: tableone
 title: "Table One"
 menuGroup: Exploration
 menuSubgroup: "ClinicoPath Descriptives"
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:

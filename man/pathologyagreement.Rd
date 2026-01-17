@@ -6,9 +6,9 @@
 \usage{
 pathologyagreement(
   data,
-  dep1,
-  dep2,
-  additional_methods,
+  dep1 = NULL,
+  dep2 = NULL,
+  additional_methods = list(),
   clinical_preset = "general",
   bootstrap_n = 1000,
   conf_level = 0.95,

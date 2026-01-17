@@ -16,7 +16,6 @@ bayesianmetaanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             mcmcChains = 4,
             mcmcIterations = 5000,
             warmupIterations = 2500,
-            credibleInterval = 0.95,
             publicationBias = FALSE,
             posteriorPredictive = TRUE,
             plotForest = TRUE,
@@ -104,12 +103,6 @@ bayesianmetaanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 min=500,
                 max=25000,
                 default=2500)
-            private$..credibleInterval <- jmvcore::OptionNumber$new(
-                "credibleInterval",
-                credibleInterval,
-                min=0.5,
-                max=0.99,
-                default=0.95)
             private$..publicationBias <- jmvcore::OptionBool$new(
                 "publicationBias",
                 publicationBias,
@@ -137,7 +130,6 @@ bayesianmetaanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             self$.addOption(private$..mcmcChains)
             self$.addOption(private$..mcmcIterations)
             self$.addOption(private$..warmupIterations)
-            self$.addOption(private$..credibleInterval)
             self$.addOption(private$..publicationBias)
             self$.addOption(private$..posteriorPredictive)
             self$.addOption(private$..plotForest)
@@ -154,7 +146,6 @@ bayesianmetaanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
         mcmcChains = function() private$..mcmcChains$value,
         mcmcIterations = function() private$..mcmcIterations$value,
         warmupIterations = function() private$..warmupIterations$value,
-        credibleInterval = function() private$..credibleInterval$value,
         publicationBias = function() private$..publicationBias$value,
         posteriorPredictive = function() private$..posteriorPredictive$value,
         plotForest = function() private$..plotForest$value,
@@ -170,7 +161,6 @@ bayesianmetaanalysisOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
         ..mcmcChains = NA,
         ..mcmcIterations = NA,
         ..warmupIterations = NA,
-        ..credibleInterval = NA,
         ..publicationBias = NA,
         ..posteriorPredictive = NA,
         ..plotForest = NA,
@@ -293,6 +283,7 @@ bayesianmetaanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 options=options,
                 name="modelComparison",
                 title="Model Comparison",
+                rows=1,
                 visible="(modelType:hierarchical)",
                 columns=list(
                     list(
@@ -315,6 +306,7 @@ bayesianmetaanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 options=options,
                 name="publicationBiasResults",
                 title="Publication Bias Assessment",
+                rows=1,
                 visible="(publicationBias)",
                 columns=list(
                     list(
@@ -417,7 +409,6 @@ bayesianmetaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' @param mcmcChains number of MCMC chains for posterior sampling
 #' @param mcmcIterations number of MCMC iterations per chain
 #' @param warmupIterations number of warmup (burn-in) iterations per chain
-#' @param credibleInterval credible interval probability
 #' @param publicationBias whether to assess and adjust for publication bias
 #' @param posteriorPredictive whether to perform posterior predictive model
 #'   checking
@@ -455,7 +446,6 @@ bayesianmetaanalysis <- function(
     mcmcChains = 4,
     mcmcIterations = 5000,
     warmupIterations = 2500,
-    credibleInterval = 0.95,
     publicationBias = FALSE,
     posteriorPredictive = TRUE,
     plotForest = TRUE,
@@ -488,7 +478,6 @@ bayesianmetaanalysis <- function(
         mcmcChains = mcmcChains,
         mcmcIterations = mcmcIterations,
         warmupIterations = warmupIterations,
-        credibleInterval = credibleInterval,
         publicationBias = publicationBias,
         posteriorPredictive = posteriorPredictive,
         plotForest = plotForest,

@@ -69,7 +69,6 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             private$.warnings[[length(private$.warnings) + 1]] <- list(
                 type = type,
-                message = message,
                 html = html
             )
         },
@@ -258,10 +257,16 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 }
             }
 
-            private$.generateInterpretation(method1, method2)
 
             # Generate copy-ready report, glossary, and ICC guide (if interpretation enabled)
             if (self$options$show_interpretation) {
+                # Generate interpretation with warnings
+                warnings_html <- ""
+                if (length(private$.warnings) > 0) {
+                     warnings_html <- private$.renderWarnings()
+                }
+                private$.generateInterpretation(method1, method2, warnings_html)
+                
                 private$.generateReportSentences(method1, method2)
                 private$.generateStatisticalGlossary()
                 private$.generateICCSelectionGuide()
@@ -293,7 +298,8 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 sprintf('Agreement analysis completed: %d methods compared, %d complete observations analyzed.', n_methods, n))
 
             # Render all collected warnings to HTML
-            self$results$warnings$setContent(private$.renderWarnings())
+            final_warnings <- private$.renderWarnings()
+            self$results$warnings$setContent(final_warnings)
         },
         
         
@@ -395,13 +401,24 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             loa_upper_ci_high <- loa_upper + ci_factor_loa * se_loa
 
             # FIX 2: Check for proportional bias (Bland-Altman regression)
-            ba_regression <- lm(differences ~ means)
-            prop_bias_slope <- coef(ba_regression)[2]
-            prop_bias_p <- summary(ba_regression)$coefficients[2, 4]
-
-            if (prop_bias_p < 0.05) {
-                private$.addWarning("WARNING",
-                    sprintf('Proportional bias detected (slope=%.3f, p=%.3f). Disagreement increases at higher values. Consider non-linear transformation or stratified analysis.', prop_bias_slope, prop_bias_p))
+            # Only perform if there is variation in differences
+            diff_var <- var(differences, na.rm=TRUE)
+            if (!is.na(diff_var) && diff_var > 1e-10) {
+                tryCatch({
+                    ba_regression <- lm(differences ~ means)
+                    coefs <- summary(ba_regression)$coefficients
+                    if (nrow(coefs) >= 2) {
+                        prop_bias_slope <- coefs[2, 1]
+                        prop_bias_p <- coefs[2, 4]
+                        
+                        if (!is.na(prop_bias_p) && !is.nan(prop_bias_p) && prop_bias_p < 0.05) {
+                            private$.addWarning("WARNING",
+                                sprintf('Proportional bias detected (slope=%.3f, p=%.3f). Disagreement increases at higher values. Consider non-linear transformation or stratified analysis.', prop_bias_slope, prop_bias_p))
+                        }
+                    }
+                }, error = function(e) {
+                    # Regression failed (e.g., perfect fit or other numerical issues), skip check
+                })
             }
 
             # Bias significance check

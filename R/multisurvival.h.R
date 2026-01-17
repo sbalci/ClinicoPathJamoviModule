@@ -48,6 +48,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             person_time = FALSE,
             time_intervals = "12, 36, 60",
             rate_multiplier = 100,
+            use_tree = FALSE,
+            min_node = 20,
+            complexity = 0.01,
+            max_depth = 5,
+            show_terminal_nodes = FALSE,
             showExplanations = FALSE,
             showSummaries = TRUE, ...) {
 
@@ -314,6 +319,32 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "rate_multiplier",
                 rate_multiplier,
                 default=100)
+            private$..use_tree <- jmvcore::OptionBool$new(
+                "use_tree",
+                use_tree,
+                default=FALSE)
+            private$..min_node <- jmvcore::OptionInteger$new(
+                "min_node",
+                min_node,
+                min=5,
+                max=100,
+                default=20)
+            private$..complexity <- jmvcore::OptionNumber$new(
+                "complexity",
+                complexity,
+                min=0.001,
+                max=0.1,
+                default=0.01)
+            private$..max_depth <- jmvcore::OptionInteger$new(
+                "max_depth",
+                max_depth,
+                min=1,
+                max=10,
+                default=5)
+            private$..show_terminal_nodes <- jmvcore::OptionBool$new(
+                "show_terminal_nodes",
+                show_terminal_nodes,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -369,6 +400,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..person_time)
             self$.addOption(private$..time_intervals)
             self$.addOption(private$..rate_multiplier)
+            self$.addOption(private$..use_tree)
+            self$.addOption(private$..min_node)
+            self$.addOption(private$..complexity)
+            self$.addOption(private$..max_depth)
+            self$.addOption(private$..show_terminal_nodes)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showSummaries)
         }),
@@ -419,6 +455,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         person_time = function() private$..person_time$value,
         time_intervals = function() private$..time_intervals$value,
         rate_multiplier = function() private$..rate_multiplier$value,
+        use_tree = function() private$..use_tree$value,
+        min_node = function() private$..min_node$value,
+        complexity = function() private$..complexity$value,
+        max_depth = function() private$..max_depth$value,
+        show_terminal_nodes = function() private$..show_terminal_nodes$value,
         showExplanations = function() private$..showExplanations$value,
         showSummaries = function() private$..showSummaries$value),
     private = list(
@@ -468,6 +509,11 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..person_time = NA,
         ..time_intervals = NA,
         ..rate_multiplier = NA,
+        ..use_tree = NA,
+        ..min_node = NA,
+        ..complexity = NA,
+        ..max_depth = NA,
+        ..show_terminal_nodes = NA,
         ..showExplanations = NA,
         ..showSummaries = NA)
 )
@@ -1381,6 +1427,19 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   60+.
 #' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
 #'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param use_tree If true, fits a survival decision tree to identify
+#'   subgroups with different survival outcomes. Decision trees provide an
+#'   intuitive alternative to Cox regression for identifying risk factors.
+#' @param min_node The minimum number of observations required in a terminal
+#'   node. Larger values create simpler trees that may be more generalizable but
+#'   potentially miss important subgroups.
+#' @param complexity The complexity parameter for tree pruning. Higher values
+#'   result in smaller trees. This parameter controls the trade-off between tree
+#'   size and goodness of fit.
+#' @param max_depth The maximum depth of the decision tree. Limits the
+#'   complexity of the tree to avoid overfitting.
+#' @param show_terminal_nodes If true, displays Kaplan-Meier survival curves
+#'   for each terminal node of the decision tree.
 #' @param showExplanations Display detailed explanations for each analysis
 #'   component to help interpret the statistical methods and results.
 #' @param showSummaries Display natural language summaries alongside tables
@@ -1491,6 +1550,11 @@ multisurvival <- function(
     person_time = FALSE,
     time_intervals = "12, 36, 60",
     rate_multiplier = 100,
+    use_tree = FALSE,
+    min_node = 20,
+    complexity = 0.01,
+    max_depth = 5,
+    show_terminal_nodes = FALSE,
     showExplanations = FALSE,
     showSummaries = TRUE) {
 
@@ -1564,6 +1628,11 @@ multisurvival <- function(
         person_time = person_time,
         time_intervals = time_intervals,
         rate_multiplier = rate_multiplier,
+        use_tree = use_tree,
+        min_node = min_node,
+        complexity = complexity,
+        max_depth = max_depth,
+        show_terminal_nodes = show_terminal_nodes,
         showExplanations = showExplanations,
         showSummaries = showSummaries)
 

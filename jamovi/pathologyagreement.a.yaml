@@ -20,6 +20,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: null
       description:
           R: >
             a vector of numbers (the first measurement method)
@@ -31,6 +32,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: null
       description:
           R: >
             a vector of numbers (the second measurement method)
@@ -42,6 +44,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: []
       description:
           R: >
             optional additional measurement methods for multi-method analysis (enables 3+ method comparison)

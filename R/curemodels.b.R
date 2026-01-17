@@ -8,6 +8,12 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = curemodelsBase,
     private = list(
 
+        cure_data = NULL,
+        cure_model = NULL,
+        nm_cure_model = NULL,
+        cure_cure_model = NULL,
+        npcure_model = NULL,
+
         # Variable name safety helper
         .escapeVar = function(varName) {
             if (is.null(varName) || length(varName) == 0) return(NULL)

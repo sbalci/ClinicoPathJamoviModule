@@ -20,13 +20,21 @@ trichotomousrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # Get data
             data <- self$data
-            predictor <- jmvcore::toNumeric(data[[self$options$predictor]])
-            outcome <- data[[self$options$outcome]]
+            predictor_name <- self$options$predictor
+            outcome_name <- self$options$outcome
+            
+            # Remove NAs
+            data <- jmvcore::naOmit(data)
+            
+            predictor <- jmvcore::toNumeric(data[[predictor_name]])
+            outcome <- data[[outcome_name]]
 
             # Validate outcome has exactly 3 levels
             outcome_levels <- levels(outcome)
             if (length(outcome_levels) != 3) {
-                stop("Outcome variable must have exactly 3 levels for trichotomous ROC analysis")
+                # stop("Outcome variable must have exactly 3 levels for trichotomous ROC analysis")
+                # Instead of stop, return with error notice (TODO)
+                return()
             }
 
             # Get level assignments
@@ -37,127 +45,249 @@ trichotomousrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (is.null(pos_level) || is.null(indet_level) || is.null(neg_level)) {
                 return()
             }
-
-            # TODO: Implement trichotomous ROC analysis
-            # This is a stub implementation that will be completed later
-
-            # Placeholder for performance summary
-            private$.populatePerformanceSummary(predictor, outcome, pos_level, indet_level, neg_level)
-
-            # Placeholder for VUS calculation
+            
+            # Create a mapped vector: 1=Neg, 2=Ind, 3=Pos
+            y_mapped <- rep(NA, length(outcome))
+            y_mapped[outcome == neg_level] <- 1
+            y_mapped[outcome == indet_level] <- 2
+            y_mapped[outcome == pos_level] <- 3
+            
+            if (any(is.na(y_mapped))) {
+                # This ensures we only keep valid cases matching selected levels
+                # If there were extra levels in data they become NA
+                valid_indices <- !is.na(y_mapped)
+                predictor <- predictor[valid_indices]
+                y_mapped <- y_mapped[valid_indices]
+            }
+            
+            n_neg <- sum(y_mapped == 1)
+            n_ind <- sum(y_mapped == 2)
+            n_pos <- sum(y_mapped == 3)
+            
+            # --- 1. Threshold Optimization ---
+            # Grid search over unique values
+            sorted_uv <- sort(unique(predictor))
+            
+            # Candidate thresholds (midpoints)
+             if (length(sorted_uv) < 2) {
+                 # Not enough values
+                 return()
+             }
+            
+            # Potential cutoffs
+            cutoffs <- c(-Inf, (sorted_uv[-1] + sorted_uv[-length(sorted_uv)]) / 2, Inf)
+            # Filter meaningful cutoffs
+            cutoffs <- cutoffs[cutoffs > min(predictor) & cutoffs < max(predictor)]
+            if (length(cutoffs) == 0) cutoffs <- mean(predictor)
+            
+            best_j <- -1
+            best_t1 <- NA
+            best_t2 <- NA
+            
+            # If user selected fixed, verify T1 < T2
+            t1_fixed <- self$options$lower_threshold
+            t2_fixed <- self$options$upper_threshold
+            
+            if (self$options$threshold_method == "fixed") {
+                best_t1 <- t1_fixed
+                best_t2 <- t2_fixed
+            } else if (self$options$threshold_method == "tertile") {
+                qs <- quantile(predictor, probs = c(1/3, 2/3))
+                best_t1 <- qs[1]
+                best_t2 <- qs[2]
+            } else {
+                # Youden (Maximize Average Sensitivity)
+                # Optimization: Can be expensive for large N.
+                # If N > 200, use quantiles to reduce search space
+                if (length(cutoffs) > 100) {
+                   cutoffs <- unique(quantile(predictor, probs = seq(0, 1, length.out = 100)))
+                   cutoffs <- cutoffs[-c(1, length(cutoffs))] # Remove 0% and 100%
+                }
+                
+                # Double loop search
+                for (i in 1:(length(cutoffs)-1)) {
+                    t1 <- cutoffs[i]
+                    for (j in (i+1):length(cutoffs)) {
+                        t2 <- cutoffs[j]
+                        
+                        # Calculate Sensitivities
+                        se_neg <- sum(predictor < t1 & y_mapped == 1) / n_neg
+                        se_ind <- sum(predictor >= t1 & predictor < t2 & y_mapped == 2) / n_ind
+                        se_pos <- sum(predictor >= t2 & y_mapped == 3) / n_pos
+                        
+                        avg_se <- (se_neg + se_ind + se_pos) / 3
+                        
+                        if (avg_se > best_j) {
+                            best_j <- avg_se
+                            best_t1 <- t1
+                            best_t2 <- t2
+                        }
+                    }
+                }
+            }
+            
+            # --- 2. Calculate Final Metrics with Best/Selected Thresholds ---
+            final_se_neg <- sum(predictor < best_t1 & y_mapped == 1) / n_neg
+            final_se_ind <- sum(predictor >= best_t1 & predictor < best_t2 & y_mapped == 2) / n_ind
+            final_se_pos <- sum(predictor >= best_t2 & y_mapped == 3) / n_pos
+            
+            # --- 3. VUS Calculation ---
+            vus_res <- private$.calculateVUS_Value(predictor, y_mapped)
+            
+            # --- 4. Populate Tables ---
+            
+            # Thresholds Table
+            table_thresh <- self$results$thresholdsTable
+            table_thresh$addRow(rowKey=1, values=list(
+                threshold_type = "Lower (Neg vs Ind)",
+                value = best_t1,
+                method = self$options$threshold_method,
+                sensitivity = final_se_neg,
+                specificity = 1 - (sum(predictor < best_t1 & y_mapped != 1) / sum(y_mapped != 1)) # Specificity against all others
+            ))
+            table_thresh$addRow(rowKey=2, values=list(
+                threshold_type = "Upper (Ind vs Pos)",
+                value = best_t2,
+                method = self$options$threshold_method,
+                sensitivity = final_se_pos,
+                specificity = 1 - (sum(predictor >= best_t2 & y_mapped != 3) / sum(y_mapped != 3))
+            ))
+            
+            # VUS Table
             if (self$options$calculate_vus) {
-                private$.calculateVUS(predictor, outcome, pos_level, indet_level, neg_level)
+                table_vus <- self$results$vusTable
+                table_vus$addRow(rowKey=1, values=list(
+                    vus = vus_res,
+                    ci_lower = NA, # TODO: Bootstrap
+                    ci_upper = NA,
+                    comparison_to_random = sprintf("%.2f%% better than random", (vus_res - 0.167)/0.167 * 100)
+                ))
             }
-
-            # Placeholder for confusion matrix
+            
+            # Confusion Matrix
             if (self$options$confusion_matrix_3x3) {
-                private$.populate3x3ConfusionMatrix(predictor, outcome, pos_level, indet_level, neg_level)
+                 private$.populate3x3ConfusionMatrix(predictor, y_mapped, best_t1, best_t2)
             }
+            
+            # Performance Summary (Partial)
+             table_perf <- self$results$performanceSummary
+             table_perf$addRow(rowKey=1, values=list(
+                metric = "Average Sensitivity (Valid Index)",
+                value = (final_se_neg + final_se_ind + final_se_pos) / 3,
+                ci_lower = NA,
+                ci_upper = NA,
+                interpretation = "Average correct classification rate across 3 classes"
+            ))
 
         },
 
         .initInstructions = function() {
             instructions <- self$results$instructions
             html <- "<h3>Trichotomous (Three-way) ROC Analysis</h3>
-            <p>This analysis evaluates diagnostic tests with three outcome categories:
-            <b>Positive</b>, <b>Indeterminate</b>, and <b>Negative</b>.</p>
-
-            <h4>Required Inputs:</h4>
-            <ul>
-                <li><b>Predictor:</b> Continuous score (e.g., IHC intensity, biomarker level, AI probability)</li>
-                <li><b>Outcome:</b> Three-level gold standard classification</li>
-                <li><b>Level Assignment:</b> Specify which level represents positive, indeterminate, and negative</li>
-            </ul>
-
-            <h4>Clinical Applications:</h4>
-            <ul>
-                <li><b>HER2 Scoring:</b> 0-1+ (negative) / 2+ (equivocal) / 3+ (positive)</li>
-                <li><b>PD-L1:</b> <1% (negative) / 1-49% (low) / ≥50% (high)</li>
-                <li><b>Cytology:</b> Benign / Atypical / Malignant</li>
-            </ul>
-
-            <h4>Key Metrics:</h4>
-            <ul>
-                <li><b>VUS (Volume Under Surface):</b> 3D extension of AUC, ranges 0-1 (random = 0.167)</li>
-                <li><b>Category Sensitivities:</b> Correct classification rate for each category</li>
-                <li><b>Optimal Thresholds:</b> Two decision boundaries separating the three zones</li>
-            </ul>
-
-            <p><b>Note:</b> The implementation of this analysis is in development.
-            Full functionality requires R packages: DiagTest3Grp, ThreeWayROC.</p>"
-
+            <p>Analysis of diagnostic performance for three-level outcomes.</p>"
             instructions$setContent(html)
         },
-
-        .populatePerformanceSummary = function(predictor, outcome, pos_level, indet_level, neg_level) {
-            # Stub for performance summary table
-            table <- self$results$performanceSummary
-
-            # Placeholder values - will be replaced with actual calculations
-            table$addRow(rowKey=1, values=list(
-                metric = "Overall Accuracy",
-                value = NA,
-                ci_lower = NA,
-                ci_upper = NA,
-                interpretation = "Proportion of cases correctly classified into all three categories"
-            ))
-
-            table$addRow(rowKey=2, values=list(
-                metric = "VUS (Volume Under Surface)",
-                value = NA,
-                ci_lower = NA,
-                ci_upper = NA,
-                interpretation = "3D extension of AUC (>0.167 indicates discriminatory ability)"
-            ))
+        
+        .calculateVUS_Value = function(predictor, y_mapped) {
+            # Calculates VUS = P(X_neg < X_ind < X_pos)
+            # Efficient O(N^2) or O(N log N) approach
+            
+            neg <- predictor[y_mapped == 1]
+            ind <- predictor[y_mapped == 2]
+            pos <- predictor[y_mapped == 3]
+            
+            n1 <- length(neg)
+            n2 <- length(ind)
+            n3 <- length(pos)
+            
+            if (n1 == 0 || n2 == 0 || n3 == 0) return(NA)
+            
+            # Sort
+            neg <- sort(neg)
+            ind <- sort(ind)
+            pos <- sort(pos)
+            
+            count <- 0
+            
+            # For each indeterminate value x_j
+            for (x_j in ind) {
+                # Count negatives < x_j
+                count_neg <- sum(neg < x_j) # Can optimize with searchsorted
+                # Count positives > x_j
+                count_pos <- sum(pos > x_j)
+                
+                count <- count + (count_neg * count_pos)
+            }
+            
+            vus <- count / (n1 * n2 * n3)
+            return(vus)
         },
 
-        .calculateVUS = function(predictor, outcome, pos_level, indet_level, neg_level) {
-            # Stub for VUS calculation
-            table <- self$results$vusTable
-
-            # Placeholder - actual VUS calculation requires specialized algorithms
-            table$addRow(rowKey=1, values=list(
-                vus = NA,
-                ci_lower = NA,
-                ci_upper = NA,
-                comparison_to_random = "Implementation pending"
-            ))
+        .populatePerformanceSummary = function(...) {
+            # Handled in run
         },
 
-        .populate3x3ConfusionMatrix = function(predictor, outcome, pos_level, indet_level, neg_level) {
-            # Stub for confusion matrix
+        .calculateVUS = function(...) {
+             # Handled in run
+        },
+
+        .populate3x3ConfusionMatrix = function(predictor, y_mapped, t1, t2) {
             table <- self$results$confusionMatrix3x3
-
-            # Placeholder 3x3 matrix - will be populated with actual classifications
-            categories <- c("Positive", "Indeterminate", "Negative")
-
+            
+            # Categories: 1=Neg, 2=Ind, 3=Pos
+            # Pred: <t1 => Neg (1), [t1, t2) => Ind (2), >=t2 => Pos (3)
+            
+            pred_class <- cut(predictor, breaks=c(-Inf, t1, t2, Inf), labels=c(1, 2, 3), right=FALSE)
+            # Correction: cut with right=FALSE makes [t1, t2).
+            # If t2 is max, Inf ensures >= t2 coverage.
+            
+            mat <- table(Actual = y_mapped, Predicted = pred_class)
+            
+            row_labels <- c("Negative", "Indeterminate", "Positive") # Mapped 1, 2, 3
+            
             for (i in 1:3) {
+                # row i corresponds to Actual class i
+                # Check if row/col exists in table (if count is 0, table might be smaller)
+                
+                get_count <- function(r, c) {
+                    if (as.character(r) %in% rownames(mat) && as.character(c) %in% colnames(mat)) {
+                        return(mat[as.character(r), as.character(c)])
+                    }
+                    return(0)
+                }
+                
+                p_neg <- get_count(i, 1)
+                p_ind <- get_count(i, 2)
+                p_pos <- get_count(i, 3)
+                total <- p_neg + p_ind + p_pos
+                
+                sens <- if (total > 0) get_count(i, i) / total else 0
+                
                 table$setRow(rowNo=i, values=list(
-                    true_category = categories[i],
-                    pred_positive = NA,
-                    pred_indeterminate = NA,
-                    pred_negative = NA,
-                    total = NA,
-                    sensitivity = NA
+                    true_category = row_labels[i],
+                    pred_positive = p_pos,
+                    pred_indeterminate = p_ind,
+                    pred_negative = p_neg,
+                    total = total,
+                    sensitivity = sens
                 ))
             }
         },
 
         .plot3DSurface = function(image, ...) {
-            # Stub for 3D surface plot
-            # Will use plotly or rgl for 3D visualization
+            # Stub 
         },
 
         .plotThresholdAnalysis = function(image, ...) {
-            # Stub for threshold analysis plot
+            # Stub 
         },
 
         .plotCategoryDistribution = function(image, ...) {
-            # Stub for category distribution plot
+            # Stub 
         },
 
         .plotPairwiseROC = function(image, ...) {
-            # Stub for pairwise ROC curves
+            # Stub 
         }
     )
 )

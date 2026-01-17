@@ -151,6 +151,11 @@ betabinomialdiagnosticClass <- R6::R6Class(
             }
             
             # Run analysis based on overdispersion model
+            print(paste("Running overdispersion model:", overdispersion_model))
+            study_data <- as.data.frame(study_data)
+            print(paste("Study data dims:", paste(dim(study_data), collapse="x")))
+            print(head(study_data))
+            
             if (overdispersion_model == "beta_binomial") {
                 private$.runBetaBinomialModel(study_data)
             } else if (overdispersion_model == "logit_normal") {
@@ -280,6 +285,8 @@ betabinomialdiagnosticClass <- R6::R6Class(
         },
         
         .runBetaBinomialModel = function(study_data) {
+            print(paste("Class of study_data:", class(study_data)))
+            print(str(study_data))
             # Simplified beta-binomial model implementation
             # In practice, would use specialized packages like metafor, meta, or mada
             

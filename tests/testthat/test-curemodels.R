@@ -89,8 +89,8 @@ test_that("Cure model requires time and status variables", {
 
   test_data <- setup_cure_test_data()
 
-  # Missing time variable should be handled
-  expect_error({
+  # Missing time variable should be handled gracefully (no error, just early return)
+  expect_no_error({
     result <- curemodels(
       data = test_data,
       time = NULL,
@@ -100,8 +100,8 @@ test_that("Cure model requires time and status variables", {
     )
   })
 
-  # Missing status variable should be handled
-  expect_error({
+  # Missing status variable should be handled gracefully
+  expect_no_error({
     result <- curemodels(
       data = test_data,
       time = "followup_time",

@@ -5,6 +5,7 @@
 \title{Assay Optimization & Experimental Design}
 \usage{
 assayoptimization(
+  data,
   response_var,
   factors,
   blocking_vars = NULL,
@@ -30,6 +31,8 @@ assayoptimization(
 )
 }
 \arguments{
+\item{data}{.}
+
 \item{response_var}{Primary assay response variable for optimization}
 
 \item{factors}{List of experimental factors for optimization}

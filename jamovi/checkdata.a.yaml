@@ -3,7 +3,7 @@ name:  checkdata
 title: Single Variable Quality Check
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 options:

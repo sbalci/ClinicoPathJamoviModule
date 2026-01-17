@@ -123,7 +123,9 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            self$results$dataInfo$setData(info_data)
+            for (i in 1:nrow(info_data)) {
+                self$results$dataInfo$addRow(rowKey = i, values = info_data[i, ])
+            }
         },
         
         .performBayesianCI = function(outcome_data) {
@@ -214,7 +216,9 @@ bayesianciClass <- R6::R6Class(
                 )
             }
             
-            self$results$priorSpecification$setData(prior_data)
+            for (i in 1:nrow(prior_data)) {
+                self$results$priorSpecification$addRow(rowKey = i, values = prior_data[i, ])
+            }
         },
         
         .analyzeBinaryOutcome = function(outcome_clean, n) {
@@ -270,7 +274,9 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            self$results$posteriorSummary$setData(summary_data)
+            for (i in 1:nrow(summary_data)) {
+                self$results$posteriorSummary$addRow(rowKey = i, values = summary_data[i, ])
+            }
             
             # Calculate credible intervals
             private$.calculateCredibleIntervals("Proportion", alpha_post, beta_post, "beta")
@@ -329,7 +335,9 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            self$results$posteriorSummary$setData(summary_data)
+            for (i in 1:nrow(summary_data)) {
+                self$results$posteriorSummary$addRow(rowKey = i, values = summary_data[i, ])
+            }
             
             # Calculate credible intervals (normal approximation)
             private$.calculateCredibleIntervalsNormal("Mean", posterior_mean, posterior_sd)
@@ -383,7 +391,9 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            self$results$posteriorSummary$setData(summary_data)
+            for (i in 1:nrow(summary_data)) {
+                self$results$posteriorSummary$addRow(rowKey = i, values = summary_data[i, ])
+            }
             
             # Calculate credible intervals
             private$.calculateCredibleIntervals("Rate", alpha_post, beta_post, "gamma")
@@ -433,7 +443,9 @@ bayesianciClass <- R6::R6Class(
                 ci_data <- rbind(ci_data, ci_row)
             }
             
-            self$results$credibleIntervals$setData(ci_data)
+            for (i in 1:nrow(ci_data)) {
+                self$results$credibleIntervals$addRow(rowKey = i, values = ci_data[i, ])
+            }
         },
         
         .calculateCredibleIntervalsNormal = function(param_name, mean, sd) {
@@ -474,7 +486,9 @@ bayesianciClass <- R6::R6Class(
                 ci_data <- rbind(ci_data, ci_row)
             }
             
-            self$results$credibleIntervals$setData(ci_data)
+            for (i in 1:nrow(ci_data)) {
+                self$results$credibleIntervals$addRow(rowKey = i, values = ci_data[i, ])
+            }
         },
         
         .calculateHPDIntervals = function(param_name, shape_param, scale_param, distribution) {
@@ -505,7 +519,9 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            self$results$hpdIntervals$setData(hpd_data)
+            for (i in 1:nrow(hpd_data)) {
+                self$results$hpdIntervals$addRow(rowKey = i, values = hpd_data[i, ])
+            }
         },
         
         .compareWithFrequentist = function(param_name, successes, n, alpha_post, beta_post, distribution) {
@@ -551,7 +567,9 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            self$results$comparisonTable$setData(comparison_data)
+            for (i in 1:nrow(comparison_data)) {
+                self$results$comparisonTable$addRow(rowKey = i, values = comparison_data[i, ])
+            }
         },
         
         .compareWithFrequentistNormal = function(param_name, sample_mean, sample_sd, n, post_mean, post_sd) {
@@ -591,7 +609,9 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            self$results$comparisonTable$setData(comparison_data)
+            for (i in 1:nrow(comparison_data)) {
+                self$results$comparisonTable$addRow(rowKey = i, values = comparison_data[i, ])
+            }
         },
         
         .performSensitivityAnalysis = function(outcome_clean) {
@@ -652,7 +672,9 @@ bayesianciClass <- R6::R6Class(
                     sens_data <- rbind(sens_data, sens_row)
                 }
                 
-                self$results$sensitivityAnalysis$setData(sens_data)
+                for (i in 1:nrow(sens_data)) {
+                    self$results$sensitivityAnalysis$addRow(rowKey = i, values = sens_data[i, ])
+                }
             }
         },
         
@@ -743,7 +765,9 @@ bayesianciClass <- R6::R6Class(
                 interpretation_data <- rbind(interpretation_data, interp_row)
             }
             
-            self$results$clinicalInterpretation$setData(interpretation_data)
+            for (i in 1:nrow(interpretation_data)) {
+                self$results$clinicalInterpretation$addRow(rowKey = i, values = interpretation_data[i, ])
+            }
         },
         
         .setMethodExplanation = function() {

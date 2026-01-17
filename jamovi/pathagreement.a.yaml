@@ -297,6 +297,7 @@ options:
       title: Experience Variable
       type: Variable
       suggested: [continuous, ordinal, nominal]
+      default: null
       description:
           R: >
             Optional variable containing rater experience information (years of experience, level of training, etc.)
@@ -305,6 +306,7 @@ options:
       title: Training Variable  
       type: Variable
       suggested: [nominal, ordinal]
+      default: null
       description:
           R: >
             Optional variable containing rater training institution or background information
@@ -313,6 +315,7 @@ options:
       title: Institution Variable
       type: Variable
       suggested: [nominal]
+      default: null
       description:
           R: >
             Optional variable containing rater current institution or location information
@@ -321,6 +324,7 @@ options:
       title: Specialty Variable
       type: Variable
       suggested: [nominal, ordinal]
+      default: null
       description:
           R: >
             Optional variable containing rater medical specialty or subspecialty information
@@ -337,6 +341,7 @@ options:
       title: Case ID Variable
       type: Variable
       suggested: [id, nominal]
+      default: null
       description:
           R: >
             Optional variable containing case identifiers. If not specified, cases will be numbered automatically.

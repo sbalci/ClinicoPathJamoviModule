@@ -9,6 +9,7 @@ survivalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             time = NULL,
             status = NULL,
             predicted_risk = NULL,
+            covariates = NULL,
             model_formula = "",
             validation_method = "cv",
             cv_folds = 10,
@@ -46,7 +47,8 @@ survivalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..status <- jmvcore::OptionVariable$new(
                 "status",
                 status,
@@ -54,14 +56,24 @@ survivalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..predicted_risk <- jmvcore::OptionVariable$new(
                 "predicted_risk",
                 predicted_risk,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
+            private$..covariates <- jmvcore::OptionVariables$new(
+                "covariates",
+                covariates,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                default=NULL)
             private$..model_formula <- jmvcore::OptionString$new(
                 "model_formula",
                 model_formula,
@@ -163,7 +175,8 @@ survivalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..model_comparison <- jmvcore::OptionBool$new(
                 "model_comparison",
                 model_comparison,
@@ -180,6 +193,7 @@ survivalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..time)
             self$.addOption(private$..status)
             self$.addOption(private$..predicted_risk)
+            self$.addOption(private$..covariates)
             self$.addOption(private$..model_formula)
             self$.addOption(private$..validation_method)
             self$.addOption(private$..cv_folds)
@@ -209,6 +223,7 @@ survivalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         time = function() private$..time$value,
         status = function() private$..status$value,
         predicted_risk = function() private$..predicted_risk$value,
+        covariates = function() private$..covariates$value,
         model_formula = function() private$..model_formula$value,
         validation_method = function() private$..validation_method$value,
         cv_folds = function() private$..cv_folds$value,
@@ -237,6 +252,7 @@ survivalvalidationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..time = NA,
         ..status = NA,
         ..predicted_risk = NA,
+        ..covariates = NA,
         ..model_formula = NA,
         ..validation_method = NA,
         ..cv_folds = NA,
@@ -689,6 +705,7 @@ survivalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param time Time to event or censoring
 #' @param status Event indicator variable
 #' @param predicted_risk Model predictions to validate
+#' @param covariates Covariates to include in the model formula
 #' @param model_formula Variables for Cox model if predictions not provided
 #' @param external_data Optional external dataset for validation
 #' @param validation_method Validation approach
@@ -745,9 +762,10 @@ survivalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @export
 survivalvalidation <- function(
     data,
-    time,
-    status,
-    predicted_risk,
+    time = NULL,
+    status = NULL,
+    predicted_risk = NULL,
+    covariates = NULL,
     model_formula = "",
     external_data,
     validation_method = "cv",
@@ -769,7 +787,7 @@ survivalvalidation <- function(
     smoothing = TRUE,
     risk_groups = 4,
     competing_risks = FALSE,
-    cause_specific,
+    cause_specific = NULL,
     model_comparison = FALSE,
     model_names = "",
     net_benefit_thresholds = "0.01,0.05,0.1,0.2,0.3") {
@@ -780,6 +798,7 @@ survivalvalidation <- function(
     if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
     if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if ( ! missing(predicted_risk)) predicted_risk <- jmvcore::resolveQuo(jmvcore::enquo(predicted_risk))
+    if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
     if ( ! missing(cause_specific)) cause_specific <- jmvcore::resolveQuo(jmvcore::enquo(cause_specific))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -787,6 +806,7 @@ survivalvalidation <- function(
             `if`( ! missing(time), time, NULL),
             `if`( ! missing(status), status, NULL),
             `if`( ! missing(predicted_risk), predicted_risk, NULL),
+            `if`( ! missing(covariates), covariates, NULL),
             `if`( ! missing(cause_specific), cause_specific, NULL))
 
     for (v in cause_specific) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -795,6 +815,7 @@ survivalvalidation <- function(
         time = time,
         status = status,
         predicted_risk = predicted_risk,
+        covariates = covariates,
         model_formula = model_formula,
         validation_method = validation_method,
         cv_folds = cv_folds,

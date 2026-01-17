@@ -36,9 +36,9 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 return()
             
             # Get variables
-            row_var <- self$options$row_var
-            col_var <- self$options$col_var
-            strata_var <- self$options$strata_var
+            row_var <- self$options$rows
+            col_var <- self$options$cols
+            strata_var <- self$options$stratify
             
             # Validate inputs
             if (is.null(row_var) || length(row_var) == 0) {
@@ -73,12 +73,10 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
             
             # Display contingency table if requested
-            if (self$options$show_contingency) {
-                private$.populateContingencyTable(contingency_table, analysisData)
-            }
+            private$.populateContingencyTable(contingency_table, analysisData)
             
             # Perform chi-square test
-            if (self$options$chi_square) {
+            if (self$options$test_type != 'stratified') {
                 private$.performChiSquareTest(contingency_table, analysisData)
             }
             
@@ -98,7 +96,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
             
             # Perform post hoc tests
-            if (self$options$posthoc_tests) {
+            if (self$options$posthoc_comparisons) {
                 private$.performPostHocTests(contingency_table, analysisData)
             }
             
@@ -115,9 +113,9 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .prepareData = function() {
             
             # Get variables
-            row_var <- self$options$row_var
-            col_var <- self$options$col_var
-            strata_var <- self$options$strata_var
+            row_var <- self$options$rows
+            col_var <- self$options$cols
+            strata_var <- self$options$stratify
             
             # Get data
             data <- self$data
@@ -150,9 +148,9 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         
         .createContingencyTable = function(data) {
             
-            row_var <- self$options$row_var
-            col_var <- self$options$col_var
-            strata_var <- self$options$strata_var
+            row_var <- self$options$rows
+            col_var <- self$options$cols
+            strata_var <- self$options$stratify
             
             tryCatch({
                 
@@ -176,10 +174,10 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         
         .populateContingencyTable = function(cont_table, data) {
             
-            table <- self$results$contingency
+            table <- self$results$contingencytable
             
-            row_var <- self$options$row_var
-            col_var <- self$options$col_var
+            row_var <- self$options$rows
+            col_var <- self$options$cols
             
             # Convert to 2-way table if stratified
             if (length(dim(cont_table)) > 2) {
@@ -232,7 +230,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         
         .performChiSquareTest = function(cont_table, data) {
             
-            table <- self$results$chisquare
+            table <- self$results$chisquaretest
             
             tryCatch({
                 
@@ -296,7 +294,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         
         .performFisherTest = function(cont_table, data) {
             
-            table <- self$results$fisher
+            table <- self$results$fishertest
             
             tryCatch({
                 
@@ -489,8 +487,8 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             
             table <- self$results$posthoc
             
-            row_var <- self$options$row_var
-            col_var <- self$options$col_var
+            row_var <- self$options$rows
+            col_var <- self$options$cols
             
             tryCatch({
                 
@@ -552,7 +550,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         
         .calculateAssociationMeasures = function(cont_table, data) {
             
-            table <- self$results$association
+            table <- self$results$associations
             
             tryCatch({
                 
@@ -719,8 +717,8 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .generateInterpretation = function() {
             
             # Generate clinical interpretation
-            row_var <- self$options$row_var
-            col_var <- self$options$col_var
+            row_var <- self$options$rows
+            col_var <- self$options$cols
             
             html <- ""
             
@@ -774,14 +772,14 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         },
         
         .initContingencyTable = function() {
-            table <- self$results$contingency
+            table <- self$results$contingencytable
             
             # Add row label column
             table$addColumn(name = 'row_label', title = '', type = 'text')
         },
         
         .initChiSquareTable = function() {
-            table <- self$results$chisquare
+            table <- self$results$chisquaretest
             
             table$addColumn(name = 'test', title = 'Test', type = 'text')
             table$addColumn(name = 'statistic', title = 'Statistic', type = 'number')
@@ -791,7 +789,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         },
         
         .initFisherTable = function() {
-            table <- self$results$fisher
+            table <- self$results$fishertest
             
             table$addColumn(name = 'test', title = 'Test', type = 'text')
             table$addColumn(name = 'odds_ratio', title = 'Odds Ratio', type = 'number')
@@ -835,7 +833,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         },
         
         .initAssociationTable = function() {
-            table <- self$results$association
+            table <- self$results$associations
             
             table$addColumn(name = 'measure', title = 'Measure', type = 'text')
             table$addColumn(name = 'value', title = 'Value', type = 'number')

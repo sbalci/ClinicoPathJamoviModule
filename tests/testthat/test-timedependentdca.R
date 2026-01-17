@@ -15,8 +15,6 @@ calculate_treat_all_nb <- function(n_events, n_total, threshold) {
 }
 
 test_that("Net benefit formula is mathematically correct", {
-  skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     # Simple case with known values
     tp <- 30
     fp <- 20

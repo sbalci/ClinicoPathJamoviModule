@@ -30,11 +30,16 @@ test_that('advancedanova analysis works: Tukey & Assumptions', {
   })
 
   # Check structure
-  expect_true(inherits(model, 'jmvcoreClass'))
+  expect_true(inherits(model, 'R6'))
   
   # Check ANOVA table
   anova_table <- model$anova$asDF
-  expect_equal(nrow(anova_table), 4) # Between, Within, Total, Effect Sizes
+  # If pwr is installed, we get an extra row for Power
+  if (requireNamespace('pwr', quietly=TRUE)) {
+      expect_equal(nrow(anova_table), 5) 
+  } else {
+      expect_equal(nrow(anova_table), 4)
+  }
   expect_true('Effect Sizes' %in% anova_table$source)
   
   # Check Assumption tables

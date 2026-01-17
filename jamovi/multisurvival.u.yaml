@@ -4,9 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-
-# Variable Supplier
-
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -41,9 +38,6 @@ children:
           - type: VariablesListBox
             name: contexpl
             isTarget: true
-
-# Advanced Elapsed Time Options
-
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -125,10 +119,6 @@ children:
               - type: Output
                 name: calculatedtime
                 enable: (tint)
-
-
-# Analysis with Multiple Outcomes
-
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
     collapsed: true
@@ -167,77 +157,6 @@ children:
         children:
           - type: Output
             name: outcomeredefined
-
-
-
-
-
-
-# AFT Model Options
-
-  # - type: CollapseBox
-  #   label: AFT Model Options (Accelerated Failure Time)
-  #   collapsed: true
-  #   stretchFactor: 1
-  #   children:
-  #     - type: Label
-  #       label: AFT Model Type
-  #       children:
-  #         - type: LayoutBox
-  #           margin: large
-  #           children:
-  #             - type: CheckBox
-  #               name: use_aft
-  #               label: Use AFT Model (instead of Cox PH)
-  #             - type: ComboBox
-  #               name: aft_distribution
-  #               label: Distribution
-  #               enable: (use_aft)
-  #             - type: CheckBox
-  #               name: aft_show_hr_equivalent
-  #               label: Show Hazard Ratio Equivalents (Weibull only)
-  #               enable: (use_aft)
-  #             - type: CheckBox
-  #               name: aft_show_interpretation
-  #               label: Show Interpretation Column
-  #               enable: (use_aft)
-
-
-# Model Performance Metrics
-
-  # - type: CollapseBox
-  #   label: Model Performance Metrics (SurvMetrics)
-  #   collapsed: true
-  #   stretchFactor: 1
-  #   children:
-  #     - type: Label
-  #       label: Enhanced Metrics
-  #       children:
-  #         - type: LayoutBox
-  #           margin: large
-  #           children:
-  #             - type: CheckBox
-  #               name: show_survmetrics
-  #               label: Show Model Performance Metrics
-  #             - type: TextBox
-  #               name: survmetrics_timepoints
-  #               format: string
-  #               label: Time Points for Brier Score
-  #               suffix: (comma-separated)
-  #               enable: (show_survmetrics)
-  #             - type: TextBox
-  #               name: survmetrics_ibs_points
-  #               format: number
-  #               label: Points for Integrated Brier Score
-  #               enable: (show_survmetrics)
-  #             - type: CheckBox
-  #               name: survmetrics_show_plots
-  #               label: Show Performance Plots
-  #               enable: (show_survmetrics)
-
-
-# Plots
-
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -276,10 +195,6 @@ children:
             children:
               - type: CheckBox
                 name: km
-
-
-# Plot Options
-
   - type: CollapseBox
     label: Plot Options
     collapsed: true
@@ -320,10 +235,6 @@ children:
                 name: cutp
                 format: string
                 width: large
-
-
-# Risk Score Grouping
-
   - type: CollapseBox
     label: Risk Score Grouping
     collapsed: true
@@ -355,39 +266,6 @@ children:
                       - type: Output
                         name: addRiskGroup
                         enable: (calculateRiskScore)
-
-
-# Model Selection
-
-  # - type: CollapseBox
-  #   label: Model Selection
-  #   collapsed: true
-  #   stretchFactor: 1
-  #   children:
-  #     - type: Label
-  #       label: Model Selection Options
-  #       children:
-  #         - type: ComboBox
-  #           name: modelSelection
-  #           enable: (use_modelSelection)
-  #         - type: ComboBox
-  #           name: selectionCriteria
-  #           enable: (use_modelSelection)
-  #         - type: TextBox
-  #           name: pEntry
-  #           format: number
-  #           enable: >-
-  #             (use_modelSelection && (modelSelection == 'forward' ||
-  #             modelSelection == 'both'))
-  #         - type: TextBox
-  #           name: pRemoval
-  #           format: number
-  #           enable: >-
-  #             (use_modelSelection && (modelSelection == 'backward' ||
-  #             modelSelection == 'both'))
-
-# Adjusted Survival Analysis
-
   - type: CollapseBox
     label: Adjusted Survival Analysis
     collapsed: true
@@ -433,10 +311,6 @@ children:
       - type: Label
         label: Advanced Options
         children: []
-
-
-# Stratification Variables
-
   - type: CollapseBox
     label: Stratification Variables
     collapsed: true
@@ -464,10 +338,6 @@ children:
                         isTarget: true
                         fitToGrid: true
                         stretchFactor: 1
-
-
-# Nomogram
-
   - type: CollapseBox
     label: Nomogram
     collapsed: true
@@ -494,10 +364,6 @@ children:
           - type: TextBox
             name: rate_multiplier
             format: number
-
-
-# Output and Display Options
-
   - type: CollapseBox
     label: Output and Display Options
     collapsed: true
@@ -512,17 +378,31 @@ children:
                 name: showExplanations
               - type: CheckBox
                 name: showSummaries
-
-  # Debug (disabled)
-  # - type: CollapseBox
-  #   label: Debug
-  #   collapsed: true
-  #   children:
-  #     - type: LayoutBox
-  #       margin: large
-  #       children:
-  #         - type: CheckBox
-  #           name: debug
-  #         - type: CheckBox
-  #           name: debug_dummy_plot
-  #           enable: (debug)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: use_tree
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: min_node
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: complexity
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: max_depth
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: show_terminal_nodes

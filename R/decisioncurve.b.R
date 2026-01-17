@@ -648,6 +648,74 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             return(auc / total_range)
         },
 
+        # Bootstrap comparison for Weighted AUC difference AND Mean NB difference
+        .calculateBootstrapComparison = function(pred1, pred2, outcomes, thresholds, positive_outcome, n_boot = 1000) {
+            
+            n <- length(outcomes)
+            
+            wauc_diff_results <- numeric(n_boot)
+            nb_diff_results <- numeric(n_boot)
+            
+            valid_boot <- 0
+            
+            for (i in 1:n_boot) {
+                # Bootstrap sample
+                boot_idx <- sample(n, n, replace = TRUE)
+                b_pred1 <- pred1[boot_idx]
+                b_pred2 <- pred2[boot_idx]
+                b_out <- outcomes[boot_idx]
+                
+                # Check variation
+                if (length(unique(b_out)) < 2) {
+                     next
+                }
+                
+                # Calculate Net Benefits (using vectorized method)
+                nb1_vals <- private$.calculateNetBenefitsVectorized(b_pred1, b_out, thresholds, positive_outcome)
+                nb2_vals <- private$.calculateNetBenefitsVectorized(b_pred2, b_out, thresholds, positive_outcome)
+                
+                # Calculate wAUC
+                wauc1 <- private$.calculateWeightedAUC(nb1_vals, thresholds)
+                wauc2 <- private$.calculateWeightedAUC(nb2_vals, thresholds)
+                
+                # Calculate Mean NB Difference
+                nb_diff_vals <- nb1_vals - nb2_vals
+                mean_nb_diff <- mean(nb_diff_vals, na.rm = TRUE)
+                
+                if (!is.na(wauc1) && !is.na(wauc2) && !is.na(mean_nb_diff)) {
+                    valid_boot <- valid_boot + 1
+                    wauc_diff_results[valid_boot] <- wauc1 - wauc2
+                    nb_diff_results[valid_boot] <- mean_nb_diff
+                }
+            }
+            
+            # Truncate to valid results
+            if (valid_boot < 50) return(list(
+                wauc = list(ci_lower=NA, ci_upper=NA, p_value=NA),
+                nb = list(ci_lower=NA, ci_upper=NA, p_value=NA)
+            ))
+            
+            wauc_diff_results <- wauc_diff_results[1:valid_boot]
+            nb_diff_results <- nb_diff_results[1:valid_boot]
+            
+            alpha <- 1 - self$options$ciLevel
+            
+            # Helper for stats
+            calc_stats <- function(vals) {
+                ci_l <- quantile(vals, probs = alpha / 2, na.rm = TRUE)
+                ci_u <- quantile(vals, probs = 1 - alpha / 2, na.rm = TRUE)
+                p_pos <- mean(vals > 0)
+                p_neg <- mean(vals < 0)
+                p_val <- min(p_pos, p_neg) * 2
+                return(list(ci_lower = ci_l, ci_upper = ci_u, p_value = p_val))
+            }
+            
+            return(list(
+                wauc = calc_stats(wauc_diff_results),
+                nb = calc_stats(nb_diff_results)
+            ))
+        },
+
         # Main analysis function
         .run = function() {
 
@@ -975,7 +1043,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
             )
 
-            plot_data <- rbind(plot_data, ref_data)
+            plot_data <- dplyr::bind_rows(plot_data, ref_data)
             
             # Add clinical decision rule if requested and provided
             if (self$options$clinicalDecisionRule && !is.null(rule_data)) {
@@ -1001,7 +1069,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     is_rule = TRUE
                 )
 
-                plot_data <- rbind(
+                plot_data <- dplyr::bind_rows(
                     plot_data,
                     data.frame(
                         threshold = thresholds,
@@ -1337,6 +1405,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .performEnhancedModelComparison = function() {
             table <- self$results$modelComparisonEnhanced
             model_names <- names(private$.dcaResults)
+            analysis_data <- private$.analysisData
+            outcomes <- private$.analysisOutcomes
+            thresholds <- private$.dcaResults[[1]]$thresholds
+            model_vars_map <- private$.parseModelNames()
             
             if (length(model_names) < 2) return()
             
@@ -1347,10 +1419,17 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 m1 <- pair[1]
                 m2 <- pair[2]
                 
-                # Calculate differences in Net Benefit across range
-                # Use the calculated thresholds from dcaResults
-                # Assuming same thresholds for both (which is true as we generate one sequence)
+                # Find corresponding variables
+                idx1 <- which(model_vars_map == m1)
+                idx2 <- which(model_vars_map == m2)
                 
+                if (length(idx1) == 0 || length(idx2) == 0) next
+                var1 <- self$options$models[idx1]
+                var2 <- self$options$models[idx2]
+                pred1 <- analysis_data[[var1]]
+                pred2 <- analysis_data[[var2]]
+                
+                # Calculate differences in Net Benefit across range
                 nb1 <- private$.dcaResults[[m1]]$net_benefits
                 nb2 <- private$.dcaResults[[m2]]$net_benefits
                 
@@ -1358,21 +1437,28 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 mean_diff <- mean(diff, na.rm = TRUE)
                 median_diff <- median(diff, na.rm = TRUE)
                 
-                # Statistical test (Bootstrap)
-                # This is computationally expensive, so we'll do a simple version
-                # Resample data, calculate NB diff, get CI and p-value
-                
                 p_value <- NA
-                conclusion <- "Inconclusive"
+                conclusion <- "Bootstrap required"
+                test_stat <- NA
                 
                 if (self$options$comparisonMethod == "bootstrap") {
-                    # Simple bootstrap for NB difference
-                    # Note: This should ideally be done during the main bootstrap loop for efficiency
-                    # But for now, we'll do a quick check if bootstrap results are available
-                    
-                    # If we didn't run bootstrap CIs, we can't easily get p-values without re-running
-                    # For now, we'll just report the differences
-                    conclusion <- "Bootstrap required"
+                     # Run bootstrap
+                     n_boot <- self$options$bootReps
+                     
+                     res_boot <- private$.calculateBootstrapComparison(
+                        pred1, pred2, outcomes, thresholds, self$options$outcomePositive, 
+                        n_boot = min(n_boot, 1000) # Cap for performance
+                     )
+                     
+                     p_value <- res_boot$nb$p_value
+                     
+                     if (!is.na(p_value)) {
+                         if (p_value < 0.05) {
+                             conclusion <- "Significant Difference"
+                         } else {
+                             conclusion <- "No Significant Difference"
+                         }
+                     }
                 }
                 
                 table$addRow(rowKey = paste0(m1, "_vs_", m2), values = list(
@@ -1380,8 +1466,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     model2 = m2,
                     nb_difference_mean = mean_diff,
                     nb_difference_median = median_diff,
-                    test_statistic = NA,
-                    p_value = NA,
+                    test_statistic = test_stat,
+                    p_value = p_value,
                     conclusion = conclusion
                 ))
             }
@@ -1511,40 +1597,77 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         .performModelComparison = function() {
-            # This would implement statistical tests for comparing models
-            # For now, implement a simple comparison based on weighted AUC
             comparison_table <- self$results$comparisonTable
             comparison_table$deleteRows()
 
             model_names <- names(private$.dcaResults)
+            analysis_data <- private$.analysisData
+            outcomes <- private$.analysisOutcomes
+            thresholds <- private$.dcaResults[[1]]$thresholds
+            
+            # Map model names to variable names
+            model_vars_map <- private$.parseModelNames()
 
             # Compare each pair of models
             row_counter <- 1
             for (i in 1:(length(model_names) - 1)) {
                 for (j in (i + 1):length(model_names)) {
-                    model1 <- model_names[i]
-                    model2 <- model_names[j]
+                    model1_name <- model_names[i]
+                    model2_name <- model_names[j]
 
-                    # Calculate weighted AUC difference
+                    # Find corresponding variables
+                    idx1 <- which(model_vars_map == model1_name)
+                    idx2 <- which(model_vars_map == model2_name)
+                    
+                    # Skip if mapping fails (e.g. Clinical Rule doesn't map to input var easily here)
+                    # For now, only compare main model variables
+                    if (length(idx1) == 0 || length(idx2) == 0) next
+                    
+                    var1 <- self$options$models[idx1]
+                    var2 <- self$options$models[idx2]
+                    
+                    pred1 <- analysis_data[[var1]]
+                    pred2 <- analysis_data[[var2]]
+
+                    # Calculate weighted AUC difference (observed)
                     wauc1 <- private$.calculateWeightedAUC(
-                        private$.dcaResults[[model1]]$net_benefits,
-                        private$.dcaResults[[model1]]$thresholds
+                        private$.dcaResults[[model1_name]]$net_benefits,
+                        thresholds
                     )
                     wauc2 <- private$.calculateWeightedAUC(
-                        private$.dcaResults[[model2]]$net_benefits,
-                        private$.dcaResults[[model2]]$thresholds
+                        private$.dcaResults[[model2_name]]$net_benefits,
+                        thresholds
                     )
-
                     wauc_diff <- wauc1 - wauc2
 
-                    # For now, set placeholder values for CI and p-value
-                    # In a full implementation, these would come from bootstrap testing
+                    # Bootstrap Testing
+                    ci_lower <- NA
+                    ci_upper <- NA
+                    p_value <- NA
+                    
+                    # Reuse bootReps from options
+                    n_boot <- self$options$bootReps
+                    
+                    # Provide feedback if this is going to be slow
+                    if (n_boot >= 1000) {
+                        message(sprintf("Comparing %s vs %s (%d bootstrap reps)...", model1_name, model2_name, n_boot))
+                    }
+                    
+                    res_boot <- private$.calculateBootstrapComparison(
+                        pred1, pred2, outcomes, thresholds, self$options$outcomePositive, 
+                        n_boot = n_boot
+                    )
+                    
+                    ci_lower <- res_boot$wauc$ci_lower
+                    ci_upper <- res_boot$wauc$ci_upper
+                    p_value <- res_boot$wauc$p_value
+
                     comparison_table$addRow(rowKey = row_counter, values = list(
-                        comparison = paste(model1, "vs", model2),
+                        comparison = paste(model1_name, "vs", model2_name),
                         weighted_auc_diff = wauc_diff,
-                        ci_lower = NA,  # Would implement bootstrap CI
-                        ci_upper = NA,  # Would implement bootstrap CI
-                        p_value = NA    # Would implement statistical test
+                        ci_lower = ci_lower,
+                        ci_upper = ci_upper,
+                        p_value = p_value
                     ))
 
                     row_counter <- row_counter + 1

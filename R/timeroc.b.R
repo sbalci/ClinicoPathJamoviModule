@@ -187,7 +187,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Populate table
             table <- self$results$markerStats
             for (i in 1:nrow(stats)) {
-                table$setRow(rowNo = i, values = list(
+                table$addRow(rowKey = i, values = list(
                     statistic = stats$statistic[i],
                     value = stats$value[i]
                 ))
@@ -452,11 +452,9 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     cause = 1,
                     times = timepoints,
                     iid = self$options$bootstrapCI,
-                    ROC = TRUE,  # Calculate full ROC curves
-                    method = self$options$method
+                    ROC = TRUE  # Calculate full ROC curves
                 )
 
-                # Validate timeROC results
                 if (is.null(fit) || is.null(fit$AUC)) {
                     stop("timeROC analysis failed to produce valid results")
                 }
@@ -471,31 +469,33 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 table <- self$results$aucTable
                 
                 for (i in seq_along(timepoints)) {
-                    if (i <= length(fit$AUC) && !is.na(fit$AUC[i])) {
-                        auc <- fit$AUC[i]
+                    # Find matching timepoint in fit results
+                    tp <- timepoints[i]
+                    idx <- which.min(abs(fit$times - tp))
+                    
+                    if (length(idx) > 0 && !is.na(fit$AUC[idx])) {
+                        auc <- fit$AUC[idx]
                         
-                        # Calculate standard error with bounds checking
-                        if (!is.null(fit$var.AUC) && i <= length(fit$var.AUC) && !is.na(fit$var.AUC[i])) {
-                            se <- sqrt(pmax(0, fit$var.AUC[i]))  # Ensure non-negative variance
-                        } else {
-                            se <- NA
-                        }
+                        # Calculate SE and CIs using correct index
+                        se <- ifelse(is.list(fit$inference) && !is.null(fit$inference$vect_sd_1), 
+                                   round(fit$inference$vect_sd_1[idx], 3), "N/A")
                         
-                        # Calculate confidence intervals with bounds
-                        if (!is.na(se)) {
-                            ci_lower <- pmax(0, auc - 1.96*se)  # AUC cannot be < 0
-                            ci_upper <- pmin(1, auc + 1.96*se)  # AUC cannot be > 1
+                        # Calculate CI logic handled in display
+                        if (se != "N/A") {
+                            se_val <- as.numeric(se)
+                            ci_lower <- round(pmax(0, auc - 1.96 * se_val), 3)
+                            ci_upper <- round(pmin(1, auc + 1.96 * se_val), 3)
                         } else {
-                            ci_lower <- NA
-                            ci_upper <- NA
+                            ci_lower <- "N/A"
+                            ci_upper <- "N/A"
                         }
                         
                         row <- list(
-                            timepoint = timepoints[i],
+                            timepoint = tp,
                             auc = round(auc, 3),
-                            se = ifelse(is.na(se), "N/A", round(se, 3)),
-                            ci_lower = ifelse(is.na(ci_lower), "N/A", round(ci_lower, 3)),
-                            ci_upper = ifelse(is.na(ci_upper), "N/A", round(ci_upper, 3))
+                            se = se,
+                            ci_lower = ci_lower,
+                            ci_upper = ci_upper
                         )
                         table$addRow(rowKey = i, values = row)
                     }
@@ -578,13 +578,36 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             text <- paste0(text, "<h4>AUC Interpretation by Timepoint:</h4>")
 
             # Add interpretation for each timepoint
+            # Add interpretation for each timepoint
             for (i in seq_along(timepoints)) {
-                auc <- fit$AUC[i]
-                se <- sqrt(fit$var.AUC[i])
-                ci_lower <- auc - 1.96*se
-                ci_upper <- auc + 1.96*se
-
-                # Interpret AUC value
+                tp <- timepoints[i]
+                idx <- which.min(abs(fit$times - tp))
+                
+                auc <- fit$AUC[idx]
+                
+                # Safe SE access
+                if (is.list(fit$inference) && !is.null(fit$inference$vect_sd_1)) {
+                    se <- fit$inference$vect_sd_1[idx]
+                } else if (!is.null(fit$var.AUC)) {
+                    se <- sqrt(fit$var.AUC[idx])
+                } else {
+                    se <- NA
+                }
+                
+                if (!is.na(se)) {
+                    ci_lower <- auc - 1.96*se
+                    ci_upper <- auc + 1.96*se
+                    
+                    # Statistical significance test
+                    p_value <- 2 * (1 - pnorm(abs((auc - 0.5) / se)))
+                    significance <- ifelse(p_value < 0.05, 
+                                         sprintf(" (p = %.3f, significantly better than chance)", p_value),
+                                         sprintf(" (p = %.3f, not significantly different from chance)", p_value))
+                } else {
+                    ci_lower <- NA
+                    ci_upper <- NA
+                    significance <- " (Significance not calculated: SE unavailable)"
+                }
                 performance <- dplyr::case_when(
                     auc >= 0.9 ~ "excellent (≥0.90)",
                     auc >= 0.8 ~ "good (0.80-0.89)",
@@ -593,11 +616,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     TRUE ~ "failed (<0.60)"
                 )
 
-                # Statistical significance test
-                p_value <- 2 * (1 - pnorm(abs((auc - 0.5) / se)))
-                significance <- ifelse(p_value < 0.05, 
-                                     sprintf(" (p = %.3f, significantly better than chance)", p_value),
-                                     sprintf(" (p = %.3f, not significantly different from chance)", p_value))
+
 
                 text <- paste0(text, sprintf(
                     "<p><b>At %d %s:</b><br>

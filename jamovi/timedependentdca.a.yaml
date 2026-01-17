@@ -50,6 +50,7 @@ options:
         - continuous
       permitted:
         - numeric
+      default: null
       description:
           R: >
             a string naming the time-to-event variable
@@ -62,20 +63,22 @@ options:
       permitted:
         - factor
         - numeric
+      default: null
       description:
           R: >
             a string naming the event indicator (1=event, 0=censored)
 
-    - name: predictor
-      title: Risk Predictor (Continuous)
-      type: Variable
+    - name: predictors
+      title: Risk Predictors (Models)
+      type: Variables
       suggested:
         - continuous
       permitted:
         - numeric
+      default: []
       description:
           R: >
-            a string naming the risk score or prediction variable
+            one or more risk score or prediction variables
 
     - name: time_points
       title: Time Points for Evaluation
@@ -129,6 +132,8 @@ options:
       description:
           R: >
             reference strategy for comparison
+
+
 
     - name: estimate_survival
       title: Estimate Survival Probabilities

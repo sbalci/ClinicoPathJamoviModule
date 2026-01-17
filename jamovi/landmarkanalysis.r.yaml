@@ -12,6 +12,16 @@ items:
           - status
           - predictors
 
+    - name: errors
+      title: Errors
+      type: Html
+      visible: true
+
+    - name: warnings
+      title: Warnings
+      type: Html
+      visible: true
+
     - name: summary
       title: Analysis Summary
       type: Html

@@ -4,7 +4,7 @@ title: Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:
@@ -50,6 +50,7 @@ options:
       description:
           R: >
             The time elapsed from the start of the study to the event or censoring.
+      default: null
 
 
     - name: tint
@@ -73,6 +74,7 @@ options:
             (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
             (3) Numeric datetime values from R. Time intervals will be automatically calculated as the
             difference between follow-up/event date and diagnosis date.
+      default: null
 
     - name: fudate
       title: 'Follow-up Date'
@@ -85,6 +87,7 @@ options:
             (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
             (3) Numeric datetime values from R. Must be in the same format as diagnosis date.
             Time intervals calculated as difference from diagnosis date.
+      default: null
 
 
     - name: calculatedtime
@@ -103,6 +106,7 @@ options:
       description:
           R: >
             The explanatory variable that will be used to compare the survival times of different groups.
+      default: null
 
 
     - name: outcome
@@ -113,11 +117,13 @@ options:
       description:
           R: >
             The outcome variable that will be used to compare the survival times of different groups.
+      default: null
 
     - name: outcomeLevel
       title: Event Level
       type: Level
       variable: (outcome)
+      allowNone: true
       description:
           R: >
             The level of the outcome variable that will be used as the event level.
@@ -127,21 +133,33 @@ options:
       type: Level
       variable: (outcome)
       allowNone: true
+      description:
+          R: >
+            The level of the outcome variable that indicates death from disease.
     - name: dooc
       title: Dead of Other
       type: Level
       variable: (outcome)
       allowNone: true
+      description:
+          R: >
+            The level of the outcome variable that indicates death from other causes.
     - name: awd
       title: Alive w Disease
       type: Level
       variable: (outcome)
       allowNone: true
+      description:
+          R: >
+            The level of the outcome variable that indicates alive with disease.
     - name: awod
       title: Alive w/o Disease
       type: Level
       variable: (outcome)
       allowNone: true
+      description:
+          R: >
+            The level of the outcome variable that indicates alive without disease.
 
     - name: analysistype
       title: 'Survival Type'
@@ -402,6 +420,7 @@ options:
       description: >-
         Variable to use for stratification in Cox regression. This variable should
         represent groups with different baseline hazards.
+      default: null
 
     - name: residual_diagnostics
       title: "Model Residual Diagnostics"
@@ -444,123 +463,124 @@ options:
         results. Turn off to reduce visual clutter when summaries are not needed.
 
     # Parametric Survival Models Section
-    # - name: use_parametric
-    #   title: "Enable Parametric Survival Models"
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Enable parametric survival modeling using flexsurv package. Provides
-    #     alternative to Cox regression with explicit hazard functions and
-    #     extrapolation capabilities beyond observed follow-up.
+    # Parametric Survival Models Section
+    - name: use_parametric
+      title: "Enable Parametric Survival Models"
+      type: Bool
+      default: false
+      description: >-
+        Enable parametric survival modeling using flexsurv package. Provides
+        alternative to Cox regression with explicit hazard functions and
+        extrapolation capabilities beyond observed follow-up.
 
-    # - name: parametric_distribution
-    #   title: "Parametric Distribution"
-    #   type: List
-    #   options:
-    #     - title: Exponential
-    #       name: exp
-    #     - title: Weibull
-    #       name: weibull
-    #     - title: Log-Normal
-    #       name: lnorm
-    #     - title: Log-Logistic
-    #       name: llogis
-    #     - title: Gamma
-    #       name: gamma
-    #     - title: Generalized Gamma
-    #       name: gengamma
-    #     - title: Gompertz
-    #       name: gompertz
-    #     - title: Spline (Royston-Parmar)
-    #       name: survspline
-    #   default: weibull
-    #   description: >-
-    #     Choose parametric distribution for survival modeling. Weibull is most common,
-    #     while splines provide flexible hazard shapes. Different distributions make
-    #     different assumptions about hazard function shape.
+    - name: parametric_distribution
+      title: "Parametric Distribution"
+      type: List
+      options:
+        - title: Exponential
+          name: exp
+        - title: Weibull
+          name: weibull
+        - title: Log-Normal
+          name: lnorm
+        - title: Log-Logistic
+          name: llogis
+        - title: Gamma
+          name: gamma
+        - title: Generalized Gamma
+          name: gengamma
+        - title: Gompertz
+          name: gompertz
+        - title: Spline (Royston-Parmar)
+          name: survspline
+      default: weibull
+      description: >-
+        Choose parametric distribution for survival modeling. Weibull is most common,
+        while splines provide flexible hazard shapes. Different distributions make
+        different assumptions about hazard function shape.
 
-    # - name: parametric_covariates
-    #   title: "Include Covariates in Parametric Model"
-    #   type: Bool
-    #   default: true
-    #   description: >-
-    #     Include explanatory variables as covariates in parametric models,
-    #     similar to Cox regression but with parametric baseline hazard.
+    - name: parametric_covariates
+      title: "Include Covariates in Parametric Model"
+      type: Bool
+      default: true
+      description: >-
+        Include explanatory variables as covariates in parametric models,
+        similar to Cox regression but with parametric baseline hazard.
 
-    # - name: spline_knots
-    #   title: "Number of Spline Knots"
-    #   type: Integer
-    #   min: 1
-    #   max: 10
-    #   default: 3
-    #   description: >-
-    #     Number of knots for spline-based models. More knots allow more flexible
-    #     hazard shapes but may lead to overfitting. Used only for Royston-Parmar splines.
+    - name: spline_knots
+      title: "Number of Spline Knots"
+      type: Integer
+      min: 1
+      max: 10
+      default: 3
+      description: >-
+        Number of knots for spline-based models. More knots allow more flexible
+        hazard shapes but may lead to overfitting. Used only for Royston-Parmar splines.
 
-    # - name: spline_scale
-    #   title: "Spline Scale"
-    #   type: List
-    #   options:
-    #     - title: Hazard Scale
-    #       name: hazard
-    #     - title: Odds Scale
-    #       name: odds
-    #     - title: Normal Scale
-    #       name: normal
-    #   default: hazard
-    #   description: >-
-    #     Scale for spline-based models. Hazard scale models log hazard function,
-    #     odds scale models log cumulative odds, normal scale models normal scores.
+    - name: spline_scale
+      title: "Spline Scale"
+      type: List
+      options:
+        - title: Hazard Scale
+          name: hazard
+        - title: Odds Scale
+          name: odds
+        - title: Normal Scale
+          name: normal
+      default: hazard
+      description: >-
+        Scale for spline-based models. Hazard scale models log hazard function,
+        odds scale models log cumulative odds, normal scale models normal scores.
 
-    # - name: parametric_extrapolation
-    #   title: "Extrapolation Analysis"
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Perform survival extrapolation beyond observed follow-up time using
-    #     fitted parametric models. Useful for health economic modeling and
-    #     long-term prognosis assessment.
+    - name: parametric_extrapolation
+      title: "Extrapolation Analysis"
+      type: Bool
+      default: false
+      description: >-
+        Perform survival extrapolation beyond observed follow-up time using
+        fitted parametric models. Useful for health economic modeling and
+        long-term prognosis assessment.
 
-    # - name: extrapolation_time
-    #   title: "Extrapolation Time Horizon"
-    #   type: Number
-    #   default: 0
-    #   description: >-
-    #     Maximum time for survival extrapolation (in same units as survival time).
-    #     If 0, uses 2x maximum observed time. Use with caution as extrapolation
-    #     relies on distributional assumptions.
+    - name: extrapolation_time
+      title: "Extrapolation Time Horizon"
+      type: Number
+      default: 0
+      description: >-
+        Maximum time for survival extrapolation (in same units as survival time).
+        If 0, uses 2x maximum observed time. Use with caution as extrapolation
+        relies on distributional assumptions.
 
-    # - name: parametric_diagnostics
-    #   title: "Model Diagnostics"
-    #   type: Bool
-    #   default: true
-    #   description: >-
-    #     Display model diagnostics including AIC/BIC for model comparison,
-    #     residual plots, and goodness-of-fit statistics for parametric models.
+    - name: parametric_diagnostics
+      title: "Model Diagnostics"
+      type: Bool
+      default: true
+      description: >-
+        Display model diagnostics including AIC/BIC for model comparison,
+        residual plots, and goodness-of-fit statistics for parametric models.
 
-    # - name: compare_distributions
-    #   title: "Compare Multiple Distributions"
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Fit and compare multiple parametric distributions using AIC/BIC criteria.
-    #     Helps select the best-fitting distribution for your data.
+    - name: compare_distributions
+      title: "Compare Multiple Distributions"
+      type: Bool
+      default: false
+      description: >-
+        Fit and compare multiple parametric distributions using AIC/BIC criteria.
+        Helps select the best-fitting distribution for your data.
 
-    # - name: parametric_survival_plots
-    #   title: "Parametric Survival Plots"
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Generate survival curves from fitted parametric models with confidence
-    #     intervals. Compare with Kaplan-Meier estimates for model validation.
+    - name: parametric_survival_plots
+      title: "Parametric Survival Plots"
+      type: Bool
+      default: false
+      description: >-
+        Generate survival curves from fitted parametric models with confidence
+        intervals. Compare with Kaplan-Meier estimates for model validation.
 
-    # - name: hazard_plots
-    #   title: "Hazard Function Plots"
-    #   type: Bool
-    #   default: false
-    #   description: >-
-    #     Plot estimated hazard functions from parametric models. Shows how
-    #     instantaneous risk changes over time for different distributions.
+    - name: hazard_plots
+      title: "Hazard Function Plots"
+      type: Bool
+      default: false
+      description: >-
+        Plot estimated hazard functions from parametric models. Shows how
+        instantaneous risk changes over time for different distributions.
 
 
 ...

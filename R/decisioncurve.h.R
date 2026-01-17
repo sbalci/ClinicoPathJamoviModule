@@ -61,7 +61,8 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..outcomePositive <- jmvcore::OptionLevel$new(
                 "outcomePositive",
                 outcomePositive,
@@ -196,7 +197,8 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..decisionRulePositive <- jmvcore::OptionLevel$new(
                 "decisionRulePositive",
                 decisionRulePositive,
@@ -1026,7 +1028,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 decisioncurve <- function(
     data,
-    outcome,
+    outcome = NULL,
     outcomePositive,
     models,
     modelNames = "",
@@ -1052,7 +1054,7 @@ decisioncurve <- function(
     compareModels = FALSE,
     weightedAUC = FALSE,
     clinicalDecisionRule = FALSE,
-    decisionRuleVar,
+    decisionRuleVar = NULL,
     decisionRulePositive,
     decisionRuleLabel = "Clinical Rule",
     showClinicalImpactPlot = FALSE,

@@ -3,7 +3,7 @@ name:  chisqposttest
 title: Chi-Square Post-Hoc Tests
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:

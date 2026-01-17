@@ -162,11 +162,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     private$.generateWeightedKappaGuide()
                 }
                 self$results$todo$setVisible(TRUE)
-                return()
+                stop("Agreement analysis requires at least 2 raters.")
             }
 
-            if (nrow(self$data) == 0) {
-                stop('Data contains no (complete) rows')
+            if (nrow(self$data) < 2) {
+                stop("Agreement analysis requires at least 2 cases (observations).")
             }
 
             # Enhanced data validation
@@ -2318,13 +2318,19 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 }
             }
             
-            # Check for single-category data
+            # Check for single-category data across all raters
+            all_data <- unlist(lapply(var_names, function(v) as.character(self$data[[v]])))
+            unique_total <- length(unique(na.omit(all_data)))
+            if (unique_total < 2) {
+                stop("Agreement analysis requires at least 2 categories across all raters.")
+            }
+            
+            # Warn if individual raters have single category
             for (var_name in var_names) {
                 var_data <- self$data[[var_name]]
                 unique_values <- length(unique(var_data[!is.na(var_data)]))
                 if (unique_values < 2) {
-                    stop(paste0("Variable '", var_name, "' has only ", unique_values, 
-                               " unique value(s). Agreement analysis requires at least 2 categories."))
+                    warning(paste0("Variable '", var_name, "' has only 1 unique value(s). Results for metrics requiring category variation may be unreliable."))
                 }
             }
         },

@@ -205,24 +205,28 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "continuous",
                     "ordinal",
-                    "nominal"))
+                    "nominal"),
+                default=NULL)
             private$..trainingVar <- jmvcore::OptionVariable$new(
                 "trainingVar",
                 trainingVar,
                 suggested=list(
                     "nominal",
-                    "ordinal"))
+                    "ordinal"),
+                default=NULL)
             private$..institutionVar <- jmvcore::OptionVariable$new(
                 "institutionVar",
                 institutionVar,
                 suggested=list(
-                    "nominal"))
+                    "nominal"),
+                default=NULL)
             private$..specialtyVar <- jmvcore::OptionVariable$new(
                 "specialtyVar",
                 specialtyVar,
                 suggested=list(
                     "nominal",
-                    "ordinal"))
+                    "ordinal"),
+                default=NULL)
             private$..identifyDiscordantCases <- jmvcore::OptionBool$new(
                 "identifyDiscordantCases",
                 identifyDiscordantCases,
@@ -232,7 +236,8 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 caseID,
                 suggested=list(
                     "id",
-                    "nominal"))
+                    "nominal"),
+                default=NULL)
             private$..icc <- jmvcore::OptionBool$new(
                 "icc",
                 icc,
@@ -1959,12 +1964,12 @@ pathagreement <- function(
     showStatisticalGlossary = FALSE,
     styleDistanceMetric = "agreement",
     raterCharacteristics = FALSE,
-    experienceVar,
-    trainingVar,
-    institutionVar,
-    specialtyVar,
+    experienceVar = NULL,
+    trainingVar = NULL,
+    institutionVar = NULL,
+    specialtyVar = NULL,
     identifyDiscordantCases = FALSE,
-    caseID,
+    caseID = NULL,
     icc = FALSE,
     bootstrap = FALSE,
     bootstrapSamples = 1000,

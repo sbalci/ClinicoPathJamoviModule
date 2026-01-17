@@ -69,7 +69,7 @@ clinicalalertsClass <- R6::R6Class(
         },
 
         .run = function() {
-            
+            print("Inside clinicalalerts .run")
             # Get options
             clinicalVars <- self$options$clinicalVars
             patientId <- self$options$patientId
@@ -878,6 +878,18 @@ clinicalalertsClass <- R6::R6Class(
             }, error = function(e) {
                 return(FALSE)
             })
+        },
+
+        .plotThresholdPlots = function(image, ...) {
+            if (!exists("results", envir = private) || is.null(private$results)) return(FALSE)
+            # Placeholder for threshold plots
+            return(TRUE)
+        },
+
+        .plotTrendPlots = function(image, ...) {
+            if (!exists("results", envir = private) || is.null(private$results)) return(FALSE)
+            # Placeholder for trend plots
+            return(TRUE)
         },
 
         # Store analysis results for plotting

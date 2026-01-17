@@ -4,7 +4,7 @@ title: Compare Medical Decision Tests
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:

@@ -1,0 +1,218 @@
+---
+name:  chisqposttest
+title: Chi-Square Post-Hoc Tests
+jrs:   '1.1'
+
+items:
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+
+    - name:  chisqTable
+      title: Chi-Square Test Results
+      type:  Table
+      rows:  1
+      columns:
+        - name: stat
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: number
+        - name: df
+          title: "df"
+          type: integer
+        - name: p
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - rows
+          - cols
+          - excl
+
+    - name:  assumptionsCheck
+      title: 'Assumptions Validation'
+      type:  Html
+      visible: (showAssumptionsCheck)
+      clearWith:
+          - rows
+          - cols
+          - showAssumptionsCheck
+          
+    - name:  clinicalSummary
+      title: 'Clinical Summary'
+      type:  Html
+      visible: (showClinicalSummary)
+      clearWith:
+          - rows
+          - cols
+          - showClinicalSummary
+          
+    - name:  educationalOverview
+      title: 'Analysis Guide'
+      type:  Html
+      visible: (showEducational)
+      clearWith:
+          - rows
+          - cols
+          - showEducational
+
+    - name:  weightedDataInfo
+      title: 'Weighted Data Information'
+      type:  Html
+      visible: (counts)
+      clearWith:
+          - rows
+          - cols
+          - counts
+
+    - name:  contingencyTable
+      title: 'Contingency Table'
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+          - excl
+          - exp
+
+    - name:  residualsGuidance
+      title: 'Residuals Interpretation Guidance'
+      type:  Html
+      visible: (showResiduals)
+      clearWith:
+          - rows
+          - cols
+          - excl
+          - showResiduals
+          - residualsCutoff
+
+    - name:  residualsAnalysis
+      title: 'Standardized Residuals Analysis'
+      type:  Html
+      visible: (showResiduals)
+      clearWith:
+          - rows
+          - cols
+          - excl
+          - showResiduals
+          - residualsCutoff
+
+    - name:  multipleTestingInfo
+      title: 'Multiple Testing Information'
+      type:  Html
+      clearWith:
+          - rows
+          - cols
+          - posthoc
+
+    - name:  posthocTable
+      title: 'Pairwise Comparison Results'
+      type:  Table
+      columns:
+        - name: comparison
+          title: "Comparison"
+          type: text
+        - name: test_method
+          title: "Test Method"
+          type: text
+        - name: chi
+          title: "Chi-Square"
+          type: number
+        - name: p
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: padj
+          title: "Adj. p-value"
+          type: number
+          format: zto,pvalue
+        - name: effect_size
+          title: "Effect Size (Phi)"
+          type: number
+        - name: phi_ci
+          title: "95% CI (Phi)"
+          type: text
+        - name: sig
+          title: "Significant"
+          type: text
+      clearWith:
+          - rows
+          - cols
+          - posthoc
+          - sig
+          - excl
+
+    - name:  detailedComparisons
+      title: 'Detailed Pairwise Comparison Tables'
+      type:  Html
+      visible: (showDetailedTables)
+      clearWith:
+          - rows
+          - cols
+          - posthoc
+          - sig
+          - excl
+          - showDetailedTables
+          - testSelection
+
+    - name:  exportTable
+      title: 'Exported Results'
+      type:  Table
+      visible: (exportResults)
+      columns:
+        - name: category
+          title: "Category"
+          type: text
+        - name: measure
+          title: "Measure"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - rows
+          - cols
+          - exportResults
+
+    - name:  reportSentences
+      title: 'Report-Ready Sentences'
+      type:  Html
+      visible: (copyReadySentences)
+      clearWith:
+          - rows
+          - cols
+          - copyReadySentences
+          
+    - name:  glossaryPanel
+      title: 'Statistical Glossary'
+      type:  Html
+      visible: (showGlossary)
+      clearWith:
+          - showGlossary
+
+    - name:  plot
+      title: 'Standardized Residuals'
+      type:  Image
+      width: 600
+      height: 400
+      renderFun: .plot
+      visible: (plot)
+      requiresData: true
+      clearWith:
+          - rows
+          - cols
+          - excl
+
+refs:
+    - chisq.posthoc.test
+    - vcd
+    - ClinicoPathJamoviModule
+
+...

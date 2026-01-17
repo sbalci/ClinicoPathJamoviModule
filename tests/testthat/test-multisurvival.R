@@ -1,8 +1,7 @@
 context("multisurvival")
 
 test_that("multisurvival works with basic Cox regression", {
-  skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
+
   # Load test data
   data("colon", package = "survival")
   
@@ -11,7 +10,7 @@ test_that("multisurvival works with basic Cox regression", {
     data = colon,
     elapsedtime = "time",
     outcome = "status", 
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("sex", "obstruct", "perfor"),
     contexpl = c("age", "nodes"),
     timetypeoutput = "days"
@@ -49,7 +48,7 @@ test_that("multisurvival handles date-based time calculation", {
     timetypedata = "ymd",
     timetypeoutput = "months",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("sex", "stage"),
     contexpl = "age"
   )
@@ -66,7 +65,7 @@ test_that("multisurvival risk score calculation works", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1", 
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL, 
     explanatory = c("sex", "obstruct"),
     contexpl = "age",
     calculateRiskScore = TRUE,
@@ -86,7 +85,7 @@ test_that("multisurvival handles stratification", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = "obstruct",
     contexpl = "age", 
     use_stratify = TRUE,
@@ -105,7 +104,7 @@ test_that("multisurvival model selection works", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("sex", "obstruct", "perfor"),
     contexpl = c("age", "nodes"),
     use_modelSelection = TRUE,
@@ -129,7 +128,7 @@ test_that("multisurvival handles missing data gracefully", {
       data = test_data,
       elapsedtime = "time",
       outcome = "status",
-      outcomeLevel = "1",
+      outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
       explanatory = "sex",
       contexpl = "age"
     ),
@@ -146,7 +145,7 @@ test_that("multisurvival produces plots when requested", {
     data = colon,
     elapsedtime = "time", 
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = "sex",
     contexpl = "age",
     hr = TRUE,
@@ -166,7 +165,7 @@ test_that("multisurvival person-time analysis works", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = "sex",
     contexpl = "age",
     person_time = TRUE,
@@ -186,7 +185,7 @@ test_that("multisurvival handles landmark analysis", {
     data = colon,
     elapsedtime = "time",
     outcome = "status", 
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = "sex",
     contexpl = "age",
     uselandmark = TRUE,
@@ -203,7 +202,7 @@ test_that("multisurvival adjusted survival curves work", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("obstruct", "perfor"),
     contexpl = "age",
     ac = TRUE,
@@ -223,7 +222,7 @@ test_that("multisurvival works with wide format time-dependent covariates", {
     data = test_wide_time_dependent,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("sex", "stage"),
     contexpl = "age",
     use_time_dependent = TRUE,
@@ -249,7 +248,7 @@ test_that("multisurvival works with long format time-dependent covariates", {
     start_time_var = "tstart",
     stop_time_var = "tstop",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     time_dep_vars = c("treatment"),
     explanatory = c("sex", "stage"),
     contexpl = "age",
@@ -270,7 +269,7 @@ test_that("multisurvival frailty models work", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("sex", "obstruct"),
     contexpl = "age",
     use_frailty = TRUE,
@@ -289,7 +288,7 @@ test_that("multisurvival splines for non-proportional hazards work", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("obstruct", "perfor"),
     contexpl = "age",
     use_splines = TRUE,
@@ -309,7 +308,7 @@ test_that("multisurvival decision tree analysis works", {
     data = colon,
     elapsedtime = "time",
     outcome = "status",
-    outcomeLevel = "1",
+    outcomeLevel = "1", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
     explanatory = c("sex", "obstruct"),
     contexpl = "age",
     use_tree = TRUE,

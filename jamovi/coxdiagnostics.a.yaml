@@ -64,7 +64,7 @@ options:
   - name: strata_var
     title: "Stratification Variable (Optional)"
     type: Variable
-    default: NULL
+    default: null
     suggested: [nominal, ordinal]
     permitted: [factor]
     description:

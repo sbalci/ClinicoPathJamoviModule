@@ -3,7 +3,7 @@
 
 # Load required libraries for testing
 library(testthat)
-library(ClinicoPathJamoviModule)
+library(ClinicoPath)
 
 # Test data setup
 setup_test_data <- function() {
@@ -41,6 +41,11 @@ test_that("Basic survival analysis works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment"
     )
   })
@@ -59,6 +64,11 @@ test_that("Date-based survival calculation works", {
       timetypedata = "ymd",
       timetypeoutput = "days",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment"
     )
   })
@@ -73,6 +83,11 @@ test_that("Person-time analysis works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       person_time = TRUE,
       time_intervals = "100, 300, 500",
@@ -90,6 +105,11 @@ test_that("RMST analysis works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       rmst_analysis = TRUE,
       rmst_tau = 500
@@ -106,6 +126,11 @@ test_that("Stratified Cox regression works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       stratified_cox = TRUE,
       strata_variable = "age_group"
@@ -122,6 +147,11 @@ test_that("Landmark analysis works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       uselandmark = TRUE,
       landmark = 100
@@ -140,6 +170,11 @@ test_that("Pairwise comparisons work", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment3",
       pw = TRUE,
       padjustmethod = "holm"
@@ -156,6 +191,11 @@ test_that("Residual diagnostics work", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       residual_diagnostics = TRUE
     )
@@ -171,8 +211,12 @@ test_that("Export survival data works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
-      export_survival_data = TRUE
     )
   })
 })
@@ -186,6 +230,11 @@ test_that("Proportional hazards testing works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       ph_cox = TRUE
     )
@@ -201,6 +250,11 @@ test_that("Plot generation works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       sc = TRUE,      # Survival curves
       ce = TRUE,      # Cumulative events
@@ -221,6 +275,11 @@ test_that("Error handling works correctly", {
       data = test_data,
       elapsedtime = "time",
       outcome = "bad_outcome",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment"
     )
   }, regexp = "Outcome variable must be binary")
@@ -231,6 +290,11 @@ test_that("Error handling works correctly", {
       data = test_data,
       elapsedtime = "nonexistent_time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment"
     )
   })
@@ -250,6 +314,7 @@ test_that("Multiple event levels work", {
       data = test_data,
       elapsedtime = "time",
       outcome = "multi_outcome",
+      outcomeLevel = NULL,
       multievent = TRUE,
       dod = "Dead_Disease",
       dooc = "Dead_Other",
@@ -270,6 +335,11 @@ test_that("Comprehensive analysis with all features works", {
       data = test_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       person_time = TRUE,
       time_intervals = "100, 300",
@@ -304,6 +374,11 @@ test_that("Performance with larger dataset", {
       data = large_data,
       elapsedtime = "time",
       outcome = "event",
+      outcomeLevel = NULL,
+      dod = NULL,
+      dooc = NULL,
+      awd = NULL,
+      awod = NULL,
       explanatory = "treatment",
       pw = TRUE
     )

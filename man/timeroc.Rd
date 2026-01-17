@@ -6,10 +6,10 @@
 \usage{
 timeroc(
   data,
-  elapsedtime,
-  outcome,
+  elapsedtime = NULL,
+  outcome = NULL,
   outcomeLevel,
-  marker,
+  marker = NULL,
   timepoints = "12, 36, 60",
   method = "incident",
   bootstrapCI = FALSE,
@@ -23,7 +23,7 @@ timeroc(
   smoothAUC = FALSE,
   analysisType = "timedep",
   compareROCs = FALSE,
-  markers,
+  markers = list(),
   rocComparison = "delong",
   youdenIndex = TRUE
 )

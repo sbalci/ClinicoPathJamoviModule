@@ -3,13 +3,13 @@ test_that('trichotomousroc analysis works', {
   skip_if_not_installed('jmvReadWrite')
   devtools::load_all()
 
-  # Synthetic data generation
+  # Synthetic data generation (Distinct distributions)
   set.seed(123)
   n <- 50
   data <- data.frame(
-    predictor = runif(n, 1, 100),
-    outcome = sample(c('Positive', 'Indeterminate', 'Negative'), n, replace = TRUE),
-    stratify_by = sample(c('A', 'B'), n, replace = TRUE)
+    predictor = c(rnorm(n, 0), rnorm(n, 2), rnorm(n, 4)),
+    outcome = factor(rep(c('Negative', 'Indeterminate', 'Positive'), each = n), 
+                     levels = c('Negative', 'Indeterminate', 'Positive'))
   )
 
   # Run analysis
@@ -17,50 +17,40 @@ test_that('trichotomousroc analysis works', {
       data = data,
       predictor = 'predictor',
       outcome = 'outcome',
-      positive_level = NULL,
-      indeterminate_level = NULL,
-      negative_level = NULL,
+      positive_level = 'Positive',
+      indeterminate_level = 'Indeterminate',
+      negative_level = 'Negative',
       threshold_method = 'youden',
-      lower_threshold = 0.33,
-      upper_threshold = 0.67,
-      cost_fn = 1,
-      cost_fp = 1,
-      cost_indeterminate = 0.5,
-      confidence_level = 0.95,
-      bootstrap_samples = 100,
-      bootstrap_method = 'bca',
       calculate_vus = TRUE,
-      category_sensitivities = TRUE,
-      pairwise_comparisons = TRUE,
       confusion_matrix_3x3 = TRUE,
-      plot_3d_surface = TRUE,
-      plot_threshold_analysis = TRUE,
-      plot_category_distributions = TRUE,
-      plot_pairwise_rocs = FALSE,
-      clinical_context = 'general',
-      show_clinical_interpretation = TRUE,
-      indeterminate_action = 'test',
-      stratified_analysis = FALSE,
-      stratify_by = 'stratify_by',
-      missing_handling = 'complete',
-      random_seed = 123
+      stratify_by = NULL
     )
 
-  # Verify and Export OMV
-  omv_path <- file.path('omv_output', 'trichotomousroc.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  tryCatch({
-    jmvReadWrite::write_omv(model, omv_path)
-  }, error = function(e){
-      message("OMV export failed: ", e$message)
-  })
+  # Verify Results directly
+  # Check VUS Table
+  vus_df <- model$vusTable$asDF
+  print("VUS Table:")
+  print(vus_df)
   
-  if (!file.exists(omv_path)) {
-     skip("OMV export failed, skipping file existence check")
-  }
+  expect_true(nrow(vus_df) > 0)
+  expect_true(!is.na(vus_df$vus[1]))
+  expect_true(vus_df$vus[1] > 0.167) # Should be better than random
+  
+  # Check Thresholds Table
+  thresh_df <- model$thresholdsTable$asDF
+  print("Thresholds Table:")
+  print(thresh_df)
+  
+  expect_true(nrow(thresh_df) == 2)
+  expect_true(thresh_df$value[2] > thresh_df$value[1]) # T2 > T1
+  
+  # Check Confusion Matrix
+  cm_df <- model$confusionMatrix3x3$asDF
+  print("Confusion Matrix:")
+  print(cm_df)
+  expect_true(nrow(cm_df) == 3)
+  
+  # Export OMV (Optional, can fail)
 
-  expect_true(file.exists(omv_path))
 })
 

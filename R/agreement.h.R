@@ -356,7 +356,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..rankRaters <- jmvcore::OptionBool$new(
                 "rankRaters",
                 rankRaters,
@@ -373,7 +374,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..iccHierarchical <- jmvcore::OptionBool$new(
                 "iccHierarchical",
                 iccHierarchical,
@@ -525,7 +527,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal",
                     "ordinal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..subgroupForestPlot <- jmvcore::OptionBool$new(
                 "subgroupForestPlot",
                 subgroupForestPlot,
@@ -3198,10 +3201,10 @@ agreement <- function(
     interIntraSeparator = "_",
     showInterIntraRaterGuide = FALSE,
     pairwiseKappa = FALSE,
-    referenceRater,
+    referenceRater = NULL,
     rankRaters = FALSE,
     hierarchicalKappa = FALSE,
-    clusterVariable,
+    clusterVariable = NULL,
     iccHierarchical = FALSE,
     clusterSpecificKappa = TRUE,
     varianceDecomposition = TRUE,
@@ -3231,7 +3234,7 @@ agreement <- function(
     raterProfileShowPoints = FALSE,
     showRaterProfileGuide = FALSE,
     agreementBySubgroup = FALSE,
-    subgroupVariable,
+    subgroupVariable = NULL,
     subgroupForestPlot = TRUE,
     subgroupMinCases = 10,
     showSubgroupGuide = FALSE,

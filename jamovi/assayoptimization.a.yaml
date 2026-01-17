@@ -22,6 +22,9 @@ description:
             )
 
 options:
+    - name: data
+      type: Data
+
     - name: response_var
       title: Response Variable
       type: Variable
