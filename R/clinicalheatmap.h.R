@@ -80,6 +80,7 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..annotationCols <- jmvcore::OptionVariables$new(
                 "annotationCols",
                 annotationCols,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -88,6 +89,7 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..annotationRows <- jmvcore::OptionVariables$new(
                 "annotationRows",
                 annotationRows,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -255,6 +257,7 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..survivalTime <- jmvcore::OptionVariable$new(
                 "survivalTime",
                 survivalTime,
+                default=NULL,
                 suggested=list(
                     "continuous"),
                 permitted=list(
@@ -262,6 +265,7 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..survivalEvent <- jmvcore::OptionVariable$new(
                 "survivalEvent",
                 survivalEvent,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -279,6 +283,7 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..comparisonVars <- jmvcore::OptionVariables$new(
                 "comparisonVars",
                 comparisonVars,
+                default=NULL,
                 suggested=list(
                     "continuous",
                     "nominal"),
@@ -906,8 +911,8 @@ clinicalheatmap <- function(
     rowVar,
     colVar,
     valueVar,
-    annotationCols,
-    annotationRows,
+    annotationCols = NULL,
+    annotationRows = NULL,
     scaleMethod = "none",
     clusterRows = FALSE,
     clusterCols = FALSE,
@@ -935,11 +940,11 @@ clinicalheatmap <- function(
     rowClusterPrefix = "RowCluster",
     colClusterPrefix = "ColCluster",
     survivalAnalysis = FALSE,
-    survivalTime,
-    survivalEvent,
+    survivalTime = NULL,
+    survivalEvent = NULL,
     survivalEventLevel,
     clusterComparison = FALSE,
-    comparisonVars) {
+    comparisonVars = NULL) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("clinicalheatmap requires jmvcore to be installed (restart may be required)")

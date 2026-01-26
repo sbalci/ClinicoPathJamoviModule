@@ -213,6 +213,11 @@ items:
       type:  Html
       visible: true
 
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: true
+
 
 refs:
     - ClinicoPathJamoviModule

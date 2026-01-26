@@ -183,7 +183,27 @@ options:
         Uses chunked processing and optimized algorithms to reduce memory usage 
         and improve performance while maintaining statistical accuracy.
 
-    # Analysis Type and Core Options  
+    # Analysis Complexity Mode (Progressive Disclosure)
+    - name: complexityMode
+      title: 'Analysis Complexity Mode'
+      type: List
+      options:
+        - title: "Quick Clinical Check (5-10 min)"
+          name: quick
+        - title: "Standard Analysis (30-60 min)"
+          name: standard
+        - title: "Comprehensive Analysis (1-2 hours)"
+          name: comprehensive
+        - title: "Custom Configuration"
+          name: custom
+      default: quick
+      description: >-
+        Controls UI complexity and feature availability. Quick mode shows essential
+        outputs only (migration matrix, C-index, simple recommendation). Standard adds
+        common validation metrics (NRI, survival curves, Will Rogers). Comprehensive
+        enables all methods (bootstrap, ROC, DCA). Custom allows manual control of all options.
+
+    # Analysis Type and Core Options
     - name: analysisType
       title: 'Analysis Scope'
       type: List
@@ -191,7 +211,7 @@ options:
         - title: "Basic Migration Analysis"
           name: basic
         - title: "Standard Validation (includes C-index, NRI)"
-          name: standard  
+          name: standard
         - title: "Comprehensive Analysis (all methods)"
           name: comprehensive
         - title: "Publication Ready (optimized for manuscripts)"

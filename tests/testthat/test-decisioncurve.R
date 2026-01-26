@@ -3,10 +3,17 @@
 # Test main decisioncurve() function
 test_that("decisioncurve function works with basic parameters", {
   skip_if_not_installed('jmvReadWrite')
+  devtools::load_all()
   testthat::skip_on_cran()
   
   # Load test data
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   # Create predicted probabilities for testing
   test_data <- histopathology
@@ -48,7 +55,13 @@ test_that("decisioncurve function works with basic parameters", {
 test_that("decisioncurve function works with multiple models", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   # Create multiple predicted probabilities
   test_data <- histopathology
@@ -86,7 +99,13 @@ test_that("decisioncurve function works with multiple models", {
 test_that("decisioncurve function works with confidence intervals", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -109,7 +128,13 @@ test_that("decisioncurve function works with confidence intervals", {
 test_that("decisioncurve function works with clinical impact analysis", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -146,7 +171,13 @@ test_that("decisioncurve function works with clinical impact analysis", {
 test_that("decisioncurve function works with optimal threshold analysis", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -181,7 +212,13 @@ test_that("decisioncurve function works with optimal threshold analysis", {
 test_that("decisioncurve function works with weighted AUC", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -287,7 +324,13 @@ test_that("clinical decision rule participates in complete-case filtering", {
 test_that("decisioncurve function works with custom threshold ranges", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -312,7 +355,13 @@ test_that("decisioncurve function works with custom threshold ranges", {
 test_that("decisioncurve function works with interventions avoided plot", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -347,7 +396,13 @@ test_that("decisioncurve function works with interventions avoided plot", {
 test_that("decisioncurve function validates parameters correctly", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -371,7 +426,13 @@ test_that("decisioncurve function validates parameters correctly", {
 test_that("decisioncurve function handles missing data appropriately", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   # Create dataset with some missing values
   test_data <- histopathology
@@ -394,7 +455,13 @@ test_that("decisioncurve function handles missing data appropriately", {
 test_that("decisioncurve function works with model comparison", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -430,7 +497,13 @@ test_that("decisioncurve function works with model comparison", {
 test_that("decisioncurve function output structure is complete", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -465,7 +538,13 @@ test_that("decisioncurve function output structure is complete", {
 test_that("decisioncurve function works with different plot styles", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])
@@ -491,7 +570,13 @@ test_that("decisioncurve function works with different plot styles", {
 test_that("decisioncurve function produces correct summary text", {
   testthat::skip_on_cran()
   
-  data("histopathology", package = "ClinicoPath")
+  # Load test data
+  if (exists("histopathology")) {
+    test_data <- histopathology
+  } else {
+    data("histopathology")
+    test_data <- histopathology
+  }
   
   test_data <- histopathology
   test_data$age_prob <- plogis(scale(test_data$Age)[,1])

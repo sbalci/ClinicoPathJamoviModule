@@ -600,7 +600,7 @@ private = list(
         resampling$instantiate(task)
         rr <- resample(task, learner, resampling, store_models = TRUE)
 
-        private$.setOutput(rr$prediction(), rr, learner$model)
+        private$.setOutput(rr$prediction(), rr, learner$model, task)
 
         return (rr)
     },
@@ -661,7 +661,7 @@ private = list(
         }
     },
 
-    .setOutput = function(prediction, resampledPrediction, model = NULL) {
+    .setOutput = function(prediction, resampledPrediction, model = NULL, task = NULL) {
         generalTable <- self$results$classificationMetrics$general
         classTable <- self$results$classificationMetrics$class
 

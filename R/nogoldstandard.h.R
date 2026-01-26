@@ -375,7 +375,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "nogoldstandard",
-                version = c(0,0,32),
+                version = c(0,0,33),
                 options = options,
                 results = nogoldstandardResults$new(options=options),
                 data = data,

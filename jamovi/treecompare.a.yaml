@@ -283,6 +283,20 @@ options:
       description: >
                   Display box plots comparing algorithm performance.
 
+    - name: plot_parttree
+      title: Show Partition Tree (2D)
+      type: Bool
+      default: false
+      description: >
+                  Display 2D partition plot for CART or Conditional Trees (if enabled).
+
+    - name: plot_parttree
+      title: Show Partition Tree (2D)
+      type: Bool
+      default: false
+      description: >
+                  Display 2D partition plot for CART or Conditional Trees (if enabled).
+
     - name: show_roc_comparison
       title: Show ROC Comparison
       type: Bool

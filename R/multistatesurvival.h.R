@@ -280,7 +280,8 @@ multistatesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         individualPredictions = function() private$.items[["individualPredictions"]],
         modelFit = function() private$.items[["modelFit"]],
         stratifiedResults = function() private$.items[["stratifiedResults"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        warnings = function() private$.items[["warnings"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -531,6 +532,11 @@ multistatesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
                 visible=TRUE))}))
 
 multistatesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -617,6 +623,7 @@ multistatesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   \code{results$modelFit} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stratifiedResults} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

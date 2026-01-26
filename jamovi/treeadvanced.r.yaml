@@ -131,6 +131,22 @@ items:
         - max_depth_range
         - cp_range
 
+    - name: parttreeplot
+      title: Partition Tree Plot (2D)
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .parttree_plot
+      visible: (plot_parttree)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - hyperparameter_tuning
+        - max_depth_range
+        - cp_range
+
     - name: importanceplot
       title: Variable Importance Plot
       type: Image

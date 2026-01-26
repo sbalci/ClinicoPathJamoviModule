@@ -20,10 +20,10 @@ test_data <- data.frame(
 # Clinical data with potential outliers for reference range testing
 clinical_outlier_data <- data.frame(
   patient_id = 1:20,
-  age = c(rnorm(15, 65, 15), 150, 200, -5, 250, 300),  # Some impossible ages
-  weight = c(rnorm(15, 70, 15), 600, 700, -10, 0.1, 800),  # Impossible weights
-  systolic_bp = c(rnorm(15, 120, 20), 300, 400, 20, 500),  # Impossible BP
-  temperature = c(rnorm(15, 36.5, 0.5), 50, 60, 10, 70),  # Impossible temp
+  age = c(rnorm(15, 65, 15), 150, 200, -5, 250, 300),  # 15 + 5 = 20
+  weight = c(rnorm(15, 70, 15), 600, 700, -10, 0.1, 800),  # 15 + 5 = 20 (was 6 inputs? no, 6 inputs: 600, 700, -10, 0.1, 800 is 5 items)
+  systolic_bp = c(rnorm(15, 120, 20), 300, 400, 20, 500, 600),  # 15 + 5 = 20 (need 5 outliers) -> 300, 400, 20, 500 is 4. Added 600.
+  temperature = c(rnorm(15, 36.5, 0.5), 50, 60, 10, 70, 0),  # 15 + 5 = 20 (need 5 outliers) -> 50, 60, 10, 70 is 4. Added 0.
   diagnosis = factor(rep(c("Normal", "Abnormal"), 10))
 )
 

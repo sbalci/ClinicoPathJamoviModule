@@ -217,9 +217,19 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: ComboBox
+        name: plot_palette
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: mdg_threshold
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: plot_parttree
   - type: LayoutBox
     margin: large
     children:

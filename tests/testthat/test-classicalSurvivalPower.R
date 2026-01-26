@@ -13,7 +13,6 @@ test_that('classicalSurvivalPower analysis works', {
   # Run analysis
   expect_no_error({
     model <- classicalSurvivalPower(
-      data = data,
     calculation_type = 'sample_size',
     method = 'lachin_foulkes',
     hazard_control = 0.083,

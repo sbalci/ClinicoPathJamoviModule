@@ -1615,6 +1615,70 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 return(FALSE)
             })
+        },
+
+        .parttree_plot = function(image, ggtheme, ...) {
+            if (length(private$.algorithms) == 0) {
+                return(FALSE)
+            }
+            
+            # Check if parttree package is available
+            if (!requireNamespace("parttree", quietly = TRUE)) {
+                plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+                text(x = 0.5, y = 0.5, paste("parttree package is required for this plot.\nPlease install it with:\nremotes::install_github('grantmcdermott/parttree')"), 
+                     cex = 1.0, col = "black")
+                return(TRUE)
+            }
+            
+            # Find a compatible model (rpart or party)
+            compatible_alg <- NULL
+            for (alg_name in names(private$.algorithms)) {
+                alg <- private$.algorithms[[alg_name]]
+                if (alg$package %in% c("rpart", "party")) {
+                    compatible_alg <- alg
+                    break
+                }
+            }
+            
+            if (is.null(compatible_alg)) {
+                plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+                text(x = 0.5, y = 0.5, "No compatible model (CART or Conditional Trees) available for parttree visualization.", 
+                     cex = 1.0, col = "black")
+                return(TRUE)
+            }
+
+            tryCatch({
+                # Ensure we have data
+                if (is.null(private$.training_data)) {
+                    return(FALSE)
+                }
+
+                # Try to get predictors safely
+                predictors <- tryCatch({
+                    attr(terms(compatible_alg$model), "term.labels")
+                }, error = function(e) {
+                     # Fallback if standard terms() fails
+                     self$options$vars
+                })
+
+                if (length(predictors) < 1) predictors <- self$options$vars
+                if (length(predictors) < 2) predictors <- c(predictors, self$options$vars[2])
+
+                p <- ggplot2::ggplot(data = private$.training_data, ggplot2::aes(x = .data[[predictors[1]]], y = .data[[predictors[2]]])) +
+                     parttree::geom_parttree(data = compatible_alg$model, alpha = 0.1) +
+                     ggplot2::geom_count(ggplot2::aes(col = .data[[self$options$target]])) +
+                     ggplot2::theme_minimal() +
+                     ggplot2::labs(title = paste("Partition Tree:", compatible_alg$name)) +
+                     ggtheme
+                
+                print(p)
+                return(TRUE)
+            }, error = function(e) {
+                plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+                text(x = 0.5, y = 0.5, paste("Error generating parttree plot:\n", e$message), 
+                     cex = 1.0, col = "red")
+                return(TRUE)
+            })
         }
     )
 )

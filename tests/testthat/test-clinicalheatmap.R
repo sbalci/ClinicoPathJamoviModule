@@ -41,7 +41,8 @@ test_that("Basic heatmap creation works without errors", {
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
-            valueVar = "expression"
+            valueVar = "expression",
+            survivalEventLevel = NULL
         )
     )
 
@@ -64,7 +65,8 @@ test_that("Data preparation retains annotation columns", {
             colVar = "biomarker",
             valueVar = "expression",
             annotationCols = "tumor_type",
-            annotationRows = "stage"
+            annotationRows = "stage",
+            survivalEventLevel = NULL
         )
     )
 
@@ -87,7 +89,8 @@ test_that("Input validation catches missing required variables", {
             data = data,
             rowVar = NULL,
             colVar = "biomarker",
-            valueVar = "expression"
+            valueVar = "expression",
+            survivalEventLevel = NULL
         )
     )
 
@@ -110,7 +113,8 @@ test_that("Different scaling methods work correctly", {
                 rowVar = "patient_id",
                 colVar = "biomarker",
                 valueVar = "expression",
-                scaleMethod = method
+                scaleMethod = method,
+                survivalEventLevel = NULL
             )
         )
 
@@ -132,7 +136,8 @@ test_that("Clustering options work correctly", {
             colVar = "biomarker",
             valueVar = "expression",
             clusterRows = TRUE,
-            clusterCols = TRUE
+            clusterCols = TRUE,
+            survivalEventLevel = NULL
         )
     )
 
@@ -157,7 +162,8 @@ test_that("Missing data handling strategies work", {
                 rowVar = "patient_id",
                 colVar = "biomarker",
                 valueVar = "expression",
-                naHandling = method
+                naHandling = method,
+                survivalEventLevel = NULL
             )
         )
 
@@ -178,7 +184,8 @@ test_that("Empty dataset is handled gracefully", {
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
-            valueVar = "expression"
+            valueVar = "expression",
+            survivalEventLevel = NULL
         )
     )
 
@@ -198,7 +205,8 @@ test_that("Non-numeric value variable is caught by validation", {
             data = data,
             rowVar = "patient_id",
             colVar = "biomarker",
-            valueVar = "expression"
+            valueVar = "expression",
+            survivalEventLevel = NULL
         ),
         "Argument 'valueVar' requires a numeric variable"
     )
@@ -219,7 +227,8 @@ test_that("Different color palettes work", {
                 rowVar = "patient_id",
                 colVar = "biomarker",
                 valueVar = "expression",
-                colorPalette = palette
+                colorPalette = palette,
+                survivalEventLevel = NULL
             )
         )
 
@@ -241,7 +250,8 @@ test_that("Display options (row/col names) work", {
             colVar = "biomarker",
             valueVar = "expression",
             showRownames = TRUE,
-            showColnames = TRUE
+            showColnames = TRUE,
+            survivalEventLevel = NULL
         )
     )
 
@@ -255,7 +265,8 @@ test_that("Display options (row/col names) work", {
             colVar = "biomarker",
             valueVar = "expression",
             showRownames = FALSE,
-            showColnames = FALSE
+            showColnames = FALSE,
+            survivalEventLevel = NULL
         )
     )
 
@@ -283,7 +294,8 @@ test_that("Larger dataset is handled correctly", {
             valueVar = "expression",
             scaleMethod = "row",
             clusterRows = TRUE,
-            clusterCols = TRUE
+            clusterCols = TRUE,
+            survivalEventLevel = NULL
         )
     )
 

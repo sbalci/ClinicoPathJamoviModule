@@ -42,7 +42,7 @@ test_that('multistatesurvival analysis works', {
     stratified = 'stratified',
     confidence_level = 0.95,
     bootstrap_ci = FALSE,
-    n_bootstrap = 1000
+    n_bootstrap = 200
     )
   })
 

@@ -1,0 +1,1236 @@
+title: Advanced TNM Stage Migration Analysis
+name: stagemigration
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Original Staging System
+        children:
+          - type: VariablesListBox
+            name: oldStage
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: New Staging System
+        children:
+          - type: VariablesListBox
+            name: newStage
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Survival Time (months)
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event Indicator
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: eventLevel
+      - type: TargetLayoutBox
+        label: Continuous Covariates (Optional)
+        children:
+          - type: VariablesListBox
+            name: continuousCovariates
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Categorical Covariates (Optional)
+        children:
+          - type: VariablesListBox
+            name: categoricalCovariates
+            isTarget: true
+  - type: CollapseBox
+    label: 🏥 Clinical Analysis Setup
+    collapsed: false
+    children:
+      - type: Label
+        label: Choose Your Clinical Workflow
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: clinicalPreset
+                label: Clinical Analysis Preset
+              - type: CheckBox
+                name: enableGuidedMode
+                label: 🧭 Guided Analysis Mode
+              - type: CheckBox
+                name: generateCopyReadyReport
+                label: 📄 Generate Copy-Ready Clinical Summary
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: enableAccessibilityFeatures
+                label: ♿ Accessibility Features
+              - type: ComboBox
+                name: preferredLanguage
+                label: 🌐 Output Language
+              - type: CheckBox
+                name: enableProgressIndicators
+                label: ⏱️ Show Progress Indicators
+              - type: CheckBox
+                name: optimizeForLargeDatasets
+                label: 🚀 Large Dataset Optimization
+  - type: CollapseBox
+    label: Main Analysis
+    collapsed: false
+    children:
+      - type: Label
+        label: Main Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMigrationOverview
+                label: Migration Overview
+              - type: CheckBox
+                name: showMigrationMatrix
+                label: Migration Matrix
+              - type: CheckBox
+                name: showStageDistribution
+                label: Stage Distribution Comparison
+              - type: CheckBox
+                name: showMigrationSummary
+                label: Migration Summary
+              - type: CheckBox
+                name: showStatisticalComparison
+                label: Statistical Comparison
+              - type: CheckBox
+                name: showConcordanceComparison
+                label: Concordance Comparison
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showExplanations
+                label: Show Explanations for Results
+              - type: CheckBox
+                name: showAbbreviationGlossary
+              - type: CheckBox
+                name: calculateSME
+              - type: CheckBox
+                name: calculateRMST
+              - type: CheckBox
+                name: performCompetingRisks
+  - type: CollapseBox
+    label: Analysis Configuration
+    collapsed: false
+    children:
+      - type: Label
+        label: Analysis Scope and Type
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: analysisType
+                label: Analysis Scope
+              - type: ComboBox
+                name: cancerType
+                label: Cancer Type (Optional)
+              - type: TextBox
+                name: confidenceLevel
+                label: Confidence Level
+                format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Competing Event Variable
+        children:
+          - type: VariablesListBox
+            name: competingEventVar
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Advanced Statistical Methods
+    collapsed: false
+    children:
+      - type: Label
+        label: Discrimination and Reclassification
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: calculateNRI
+                label: Net Reclassification Improvement (NRI)
+              - type: TextBox
+                name: nriTimePoints
+                label: NRI Time Points (months)
+                format: string
+                enable: (calculateNRI)
+              - type: TextBox
+                name: nriClinicalThreshold
+                label: NRI Clinical Threshold
+                format: number
+                enable: (calculateNRI)
+              - type: CheckBox
+                name: calculateIDI
+                label: Integrated Discrimination Improvement (IDI)
+      - type: Label
+        label: ROC and Discrimination Analysis
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performROCAnalysis
+                label: Time-dependent ROC Analysis
+              - type: TextBox
+                name: rocTimePoints
+                label: ROC Time Points (months)
+                format: string
+                enable: (performROCAnalysis)
+      - type: Label
+        label: Clinical Utility Assessment
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performDCA
+                label: Decision Curve Analysis
+              - type: CheckBox
+                name: performCalibration
+                label: Calibration Analysis
+              - type: TextBox
+                name: clinicalSignificanceThreshold
+                label: Clinical Significance Threshold
+                format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: performOptimalCutpoint
+  - type: CollapseBox
+    label: Validation and Bootstrap
+    collapsed: false
+    children:
+      - type: Label
+        label: Internal Validation
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performBootstrap
+                label: Bootstrap Validation
+              - type: TextBox
+                name: bootstrapReps
+                label: Bootstrap Repetitions
+                format: number
+                enable: (performBootstrap)
+              - type: CheckBox
+                name: useOptimismCorrection
+                label: Apply Optimism Correction
+                enable: (performBootstrap)
+      - type: Label
+        label: Cross-Validation (Optional)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performCrossValidation
+                label: Cross-Validation
+              - type: TextBox
+                name: cvFolds
+                label: CV Folds
+                format: number
+                enable: (performCrossValidation)
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Continuous Variable for Cut-point Analysis
+        children:
+          - type: VariablesListBox
+            name: continuousStageVariable
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Model Comparison Tests
+    collapsed: false
+    children:
+      - type: Label
+        label: Statistical Testing
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performLikelihoodTests
+                label: Likelihood Ratio Tests
+              - type: CheckBox
+                name: calculatePseudoR2
+                label: Pseudo R-squared Measures
+      - type: Label
+        label: Stage Validation Tests
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performHomogeneityTests
+                label: Stage Homogeneity Tests
+              - type: CheckBox
+                name: performTrendTests
+                label: Stage Trend Analysis
+              - type: CheckBox
+                name: showWillRogersAnalysis
+                label: Will Rogers Phenomenon Analysis
+              - type: CheckBox
+                name: showWillRogersVisualization
+              - type: CheckBox
+                name: showMigrationSurvivalComparison
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cutpointMethod
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Institution Variable
+        children:
+          - type: VariablesListBox
+            name: institutionVariable
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cutpointRange
+        format: string
+  - type: CollapseBox
+    label: Multifactorial Analysis
+    collapsed: false
+    children:
+      - type: Label
+        label: Multifactorial Analysis Configuration
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: enableMultifactorialAnalysis
+                label: Enable Multifactorial Analysis
+              - type: ComboBox
+                name: multifactorialComparisonType
+                label: Multifactorial Comparison Type
+                enable: (enableMultifactorialAnalysis)
+              - type: ComboBox
+                name: baselineModel
+                label: Baseline Model
+                enable: (enableMultifactorialAnalysis)
+      - type: Label
+        label: Advanced Multifactorial Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: performInteractionTests
+                label: Test Stage-Covariate Interactions
+                enable: (enableMultifactorialAnalysis)
+              - type: CheckBox
+                name: stratifiedAnalysis
+                label: Stratified Analysis
+                enable: (enableMultifactorialAnalysis)
+      - type: Label
+        label: Multifactorial Results Display
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMultifactorialTables
+                label: Show Multifactorial Tables
+                enable: (enableMultifactorialAnalysis)
+              - type: CheckBox
+                name: showAdjustedCIndexComparison
+                label: Show Adjusted C-index Comparison
+                enable: (enableMultifactorialAnalysis)
+              - type: CheckBox
+                name: showNestedModelTests
+                label: Show Nested Model Tests
+                enable: (enableMultifactorialAnalysis)
+              - type: CheckBox
+                name: showStepwiseResults
+                label: Show Stepwise Selection Results
+                enable: >-
+                  (enableMultifactorialAnalysis &&
+                  (multifactorialComparisonType:stepwise ||
+                  multifactorialComparisonType:comprehensive))
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: multipleTestingCorrection
+  - type: CollapseBox
+    label: Visualization Options
+    collapsed: false
+    children:
+      - type: Label
+        label: Primary Visualizations
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMigrationHeatmap
+                label: Migration Heatmap
+              - type: CheckBox
+                name: showSankeyDiagram
+                label: Sankey Diagram
+              - type: CheckBox
+                name: showROCComparison
+                label: ROC Curve Comparison
+                enable: (performROCAnalysis)
+              - type: CheckBox
+                name: showForestPlot
+                label: Hazard Ratio Forest Plot
+      - type: Label
+        label: Advanced Plots
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showDecisionCurves
+                label: Decision Curves
+                enable: (performDCA)
+              - type: CheckBox
+                name: showCalibrationPlots
+                label: Calibration Plots
+                enable: (performCalibration || advancedMigrationAnalysis)
+      - type: Label
+        label: Survival Curve Options
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showSurvivalCurves
+                label: Show Survival Curves
+              - type: ComboBox
+                name: survivalPlotType
+                label: Survival Plot Display
+                enable: (showSurvivalCurves)
+              - type: CheckBox
+                name: showConfidenceIntervals
+                label: Show Confidence Intervals
+                enable: (showSurvivalCurves)
+              - type: CheckBox
+                name: showRiskTables
+                label: Show Risk Tables
+                enable: (showSurvivalCurves)
+              - type: TextBox
+                name: plotTimeRange
+                label: Plot Time Range (months)
+                format: string
+                enable: (showSurvivalCurves)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: validateCutpoint
+      - type: CheckBox
+        name: cutpointBootstrap
+  - type: CollapseBox
+    label: Output and Reporting
+    collapsed: false
+    children:
+      - type: Label
+        label: Clinical Interpretation
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showClinicalInterpretation
+                label: Clinical Interpretation Guide
+              - type: CheckBox
+                name: generateExecutiveSummary
+                label: Executive Summary
+              - type: CheckBox
+                name: includeEffectSizes
+                label: Include Effect Sizes
+              - type: CheckBox
+                name: advancedMigrationAnalysis
+      - type: Label
+        label: Technical Details
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showStatisticalSummary
+                label: Statistical Summary Table
+              - type: CheckBox
+                name: showMethodologyNotes
+                label: Methodology Notes
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cutpointBootstrapReps
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: generateStagingSystem
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: stagingSystemLevels
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: performSHAPAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: shapAnalysisType
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variables for SHAP Analysis
+        children:
+          - type: VariablesListBox
+            name: shapCovariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: shapSampleSize
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: shapBackgroundSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: shapExplanationType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: generateSHAPPlots
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: shapPatientProfiles
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: shapInteractionAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: shapClinicalThresholds
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: performCompetingRisksAdvanced
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: competingRisksMethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cifTimePoints
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: competingEventLevels
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: primaryEventLevel
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: generateCIFPlots
+      - type: CheckBox
+        name: performGrayTest
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cifConfidenceLevel
+        format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Competing Risks Covariates
+        children:
+          - type: VariablesListBox
+            name: competingRisksCovariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: stratifyByStaging
+      - type: CheckBox
+        name: calculateCRCIndex
+      - type: CheckBox
+        name: generateCRSummary
+      - type: CheckBox
+        name: performMultiStateAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: multiStateModel
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Disease State Variable
+        children:
+          - type: VariablesListBox
+            name: stateVariable
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Transition Time Variable
+        children:
+          - type: VariablesListBox
+            name: transitionTimeVariable
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: multiStateStates
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: absorptionStates
+        format: string
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Multi-State Covariates
+        children:
+          - type: VariablesListBox
+            name: multiStateCovariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: calculateTransitionProbabilities
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: multiStateTimePoints
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: generateTransitionMatrix
+      - type: CheckBox
+        name: multiStateGraphics
+      - type: CheckBox
+        name: msStratifyByStaging
+      - type: CheckBox
+        name: multiStateValidation
+      - type: CheckBox
+        name: generateMSMSummary
+      - type: CheckBox
+        name: performRandomForestAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: forestModelType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: forestNTrees
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: forestMTry
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: forestMinNodeSize
+        format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Forest Covariates
+        children:
+          - type: VariablesListBox
+            name: forestCovariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: calculateVariableImportance
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: forestImportanceType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: performForestValidation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: forestPredictionTimePoints
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: generateSurvivalPredictions
+      - type: CheckBox
+        name: forestDiscriminationMetrics
+      - type: CheckBox
+        name: forestStagingComparison
+      - type: CheckBox
+        name: forestBootstrap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: forestBootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: generateForestSummary
+      - type: CheckBox
+        name: performCureModelAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cureModelType
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cureDistribution
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: cureAnalyzeOldStage
+      - type: CheckBox
+        name: cureAnalyzeNewStage
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: cureFractionEstimation
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cureConfidenceLevel
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: cureBootstrapCI
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cureBootstrapReps
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: cureTimeHorizon
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: curePlateauThreshold
+        format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Cure Model Covariates
+        children:
+          - type: VariablesListBox
+            name: cureCovariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: cureModelComparison
+      - type: CheckBox
+        name: cureStageSpecificAnalysis
+      - type: CheckBox
+        name: cureGoodnessOfFit
+      - type: CheckBox
+        name: generateCureSummary
+      - type: CheckBox
+        name: performIntervalCensoringAnalysis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Left Interval Time Variable
+        children:
+          - type: VariablesListBox
+            name: intervalCensoringLeftTime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Right Interval Time Variable
+        children:
+          - type: VariablesListBox
+            name: intervalCensoringRightTime
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: intervalCensoringDistribution
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: intervalCensoringModel
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: intervalCensoringBootstrap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: intervalCensoringBootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: intervalCensoringCompareStages
+      - type: CheckBox
+        name: intervalCensoringPlots
+      - type: CheckBox
+        name: intervalCensoringDiagnostics
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: intervalCensoringPredictionTime
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: intervalCensoringConfidenceLevel
+        format: number
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Adjustment Variables
+        children:
+          - type: VariablesListBox
+            name: intervalCensoringAdjustVariables
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: performInformativeCensoringAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: informativeCensoringTestMethod
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Censoring Mechanism Covariates
+        children:
+          - type: VariablesListBox
+            name: informativeCensoringCovariates
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: informativeCensoringLandmarkTimes
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: informativeCensoringAdjustmentMethod
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: IPW Model Variables
+        children:
+          - type: VariablesListBox
+            name: informativeCensoringIPWVariables
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: informativeCensoringSensitivityRange
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: informativeCensoringBootstrap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: informativeCensoringBootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: informativeCensoringAlpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: informativeCensoringPlots
+      - type: CheckBox
+        name: informativeCensoringCompareStages
+      - type: CheckBox
+        name: performConcordanceProbabilityAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: concordanceProbabilityMethods
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: concordanceProbabilityTimePoints
+        format: string
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: concordanceProbabilityWeighting
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: concordanceProbabilityBootstrap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: concordanceProbabilityBootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: concordanceProbabilityConfidenceLevel
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: concordanceProbabilityCompareStages
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Adjustment Variables
+        children:
+          - type: VariablesListBox
+            name: concordanceProbabilityAdjustVariables
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: concordanceProbabilityRobustnessAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: concordanceProbabilityAlpha
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: concordanceProbabilityDiagnostics
+      - type: CheckBox
+        name: performWinRatioAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: winRatioEndpoints
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Death/Primary Endpoint Variable
+        children:
+          - type: VariablesListBox
+            name: winRatioDeathVariable
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Secondary Endpoint Variable
+        children:
+          - type: VariablesListBox
+            name: winRatioSecondaryEndpoint
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Tertiary Endpoint Variable
+        children:
+          - type: VariablesListBox
+            name: winRatioTertiaryEndpoint
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time Variables for Endpoints
+        children:
+          - type: VariablesListBox
+            name: winRatioTimeVariables
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: winRatioMatchingStrategy
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: winRatioConfidenceMethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: winRatioBootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: winRatioConfidenceLevel
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: winRatioHandleTies
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: winRatioSensitivityAnalysis
+      - type: CheckBox
+        name: winRatioGeneralizedPairwise
+      - type: CheckBox
+        name: performFrailtyModelsAnalysis
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Cluster Variable
+        children:
+          - type: VariablesListBox
+            name: frailtyClusterVariable
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: frailtyDistribution
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: frailtyBootstrap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: frailtyBootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: frailtyVarianceComponents
+      - type: CheckBox
+        name: frailtyHeterogeneityTest
+      - type: CheckBox
+        name: frailtyClusterComparison
+      - type: CheckBox
+        name: frailtyModelSelection
+      - type: CheckBox
+        name: frailtyPredictiveAccuracy
+      - type: CheckBox
+        name: frailtyDiagnostics
+      - type: CheckBox
+        name: frailtyAdvancedInference
+      - type: CheckBox
+        name: performClinicalUtilityAnalysis
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: clinicalUtilityPrevalence
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: clinicalUtilityTimePoint
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: clinicalUtilityThresholds
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: clinicalUtilityNNT
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: clinicalUtilityTreatmentEffect
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: clinicalUtilityComparison
+      - type: CheckBox
+        name: clinicalUtilityCostEffectiveness
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: clinicalUtilityCostPerIntervention
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: clinicalUtilityBootstrap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: clinicalUtilityBootstrapSamples
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: clinicalUtilityTimeVarying

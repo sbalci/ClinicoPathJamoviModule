@@ -1,4 +1,7 @@
-ℹ Loading ClinicoPath
+
+══ Testing test-ihccluster-sterlacci-features.R ════════════════════════════════
+
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 0 ]i Loading ClinicoPath
 Registered S3 methods overwritten by 'car':
   method       from
   hist.boot    FSA 
@@ -12,14 +15,17 @@ Registered S3 methods overwritten by 'ggpp':
   method                  from   
   heightDetails.titleGrob ggplot2
   widthDetails.titleGrob  ggplot2
-Registered S3 methods overwritten by 'ggfortify':
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]Registered S3 methods overwritten by 'ggfortify':
   method          from   
   autoplot.acf    useful 
   autoplot.glmnet parsnip
   fortify.acf     useful 
   fortify.kmeans  useful 
   fortify.ts      useful 
-Registered S3 method overwritten by 'vcdExtra':
+
+[ FAIL 0 | WARN 2 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 3 | SKIP 0 | PASS 0 ]Registered S3 method overwritten by 'vcdExtra':
   method      from
   print.Kappa vcd 
 Registered S3 method overwritten by 'spatstat.explore':
@@ -65,21 +71,7 @@ Registered S3 methods overwritten by 'huge':
 Registered S3 method overwritten by 'fit.models':
   method       from 
   vcov.default Hmisc
-Registered S3 method overwritten by 'riskRegression':
-  method        from 
-  nobs.multinom broom
-Serdar Balci MD Pathologist 
- https://www.serdarbalci.com/ 
- 
-There were 50 or more warnings (use warnings() to see the first 50)
 
-══ Testing test-agreement.R ════════════════════════════════════════════════════
-
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 0 ]i Loading ClinicoPath
-
-[ FAIL 0 | WARN 1 | SKIP 0 | PASS 0 ]
-[ FAIL 0 | WARN 2 | SKIP 0 | PASS 0 ]
-[ FAIL 0 | WARN 3 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 4 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 5 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 6 | SKIP 0 | PASS 0 ]
@@ -137,7 +129,10 @@ There were 50 or more warnings (use warnings() to see the first 50)
 [ FAIL 0 | WARN 58 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 59 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 60 | SKIP 0 | PASS 0 ]
-[ FAIL 0 | WARN 61 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 61 | SKIP 0 | PASS 0 ]Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+
 [ FAIL 0 | WARN 62 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 63 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 64 | SKIP 0 | PASS 0 ]
@@ -173,72 +168,153 @@ There were 50 or more warnings (use warnings() to see the first 50)
 [ FAIL 0 | WARN 94 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 95 | SKIP 0 | PASS 0 ]
 [ FAIL 0 | WARN 96 | SKIP 0 | PASS 0 ]
-[ FAIL 0 | WARN 97 | SKIP 0 | PASS 0 ]Serdar Balci MD Pathologist 
+[ FAIL 0 | WARN 97 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 98 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 99 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 100 | SKIP 0 | PASS 0 ]Serdar Balci MD Pathologist 
  https://www.serdarbalci.com/ 
  
 
-[ FAIL 0 | WARN 98 | SKIP 0 | PASS 0 ]
-[ FAIL 0 | WARN 98 | SKIP 0 | PASS 1 ]
-[ FAIL 0 | WARN 98 | SKIP 0 | PASS 2 ]
-[ FAIL 1 | WARN 98 | SKIP 0 | PASS 2 ]
-[ FAIL 1 | WARN 98 | SKIP 0 | PASS 3 ]
-[ FAIL 1 | WARN 98 | SKIP 0 | PASS 4 ]
-[ FAIL 1 | WARN 98 | SKIP 0 | PASS 5 ]
-[ FAIL 1 | WARN 98 | SKIP 0 | PASS 6 ]
-[ FAIL 1 | WARN 98 | SKIP 0 | PASS 7 ]
-[ FAIL 2 | WARN 98 | SKIP 0 | PASS 7 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 7 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 8 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 9 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 10 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 11 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 12 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 13 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 14 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 15 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 16 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 17 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 18 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 19 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 20 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 21 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 22 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 23 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 24 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 25 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 26 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 27 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 28 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 29 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 30 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 31 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 32 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 33 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 34 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 35 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 36 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 37 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 38 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 39 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 40 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 41 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 42 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 43 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 44 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 45 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 46 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 47 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 48 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 49 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 50 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 51 ]
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 52 ]
+[ FAIL 0 | WARN 101 | SKIP 0 | PASS 0 ]
+[ FAIL 0 | WARN 101 | SKIP 0 | PASS 1 ]
+[ FAIL 1 | WARN 101 | SKIP 0 | PASS 1 ]
+[ FAIL 2 | WARN 101 | SKIP 0 | PASS 1 ]
+[ FAIL 2 | WARN 101 | SKIP 0 | PASS 2 ]
+[ FAIL 2 | WARN 101 | SKIP 0 | PASS 3 ]
+[ FAIL 3 | WARN 101 | SKIP 0 | PASS 3 ]
+[ FAIL 3 | WARN 102 | SKIP 0 | PASS 3 ]
+[ FAIL 3 | WARN 103 | SKIP 0 | PASS 3 ]
+[ FAIL 3 | WARN 104 | SKIP 0 | PASS 3 ]
+[ FAIL 3 | WARN 105 | SKIP 0 | PASS 3 ]
+[ FAIL 3 | WARN 106 | SKIP 0 | PASS 3 ]
+[ FAIL 3 | WARN 107 | SKIP 0 | PASS 3 ]
+[ FAIL 4 | WARN 107 | SKIP 0 | PASS 3 ]
+[ FAIL 4 | WARN 108 | SKIP 0 | PASS 3 ]
+[ FAIL 4 | WARN 108 | SKIP 0 | PASS 4 ]
+[ FAIL 5 | WARN 108 | SKIP 0 | PASS 4 ]
+[ FAIL 5 | WARN 109 | SKIP 0 | PASS 4 ]
+[ FAIL 5 | WARN 110 | SKIP 0 | PASS 4 ]
+[ FAIL 5 | WARN 110 | SKIP 0 | PASS 5 ]
+[ FAIL 5 | WARN 111 | SKIP 0 | PASS 5 ]
+[ FAIL 5 | WARN 112 | SKIP 0 | PASS 5 ]
+[ FAIL 5 | WARN 112 | SKIP 0 | PASS 6 ]
+[ FAIL 5 | WARN 113 | SKIP 0 | PASS 6 ]
+[ FAIL 5 | WARN 114 | SKIP 0 | PASS 6 ]
+[ FAIL 5 | WARN 114 | SKIP 0 | PASS 7 ]
+[ FAIL 5 | WARN 115 | SKIP 0 | PASS 7 ]
+[ FAIL 5 | WARN 116 | SKIP 0 | PASS 7 ]
+[ FAIL 5 | WARN 116 | SKIP 0 | PASS 8 ]
+[ FAIL 5 | WARN 116 | SKIP 0 | PASS 9 ]
+[ FAIL 5 | WARN 116 | SKIP 0 | PASS 10 ]
+[ FAIL 5 | WARN 116 | SKIP 0 | PASS 11 ]
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
+package version mismatch: 
+glmmTMB was built with TMB package version 1.9.17
+Current TMB package version is 1.9.19
+Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::deps_check_installed(path, imports)
+  5.         └─rlang::check_installed(pkg, action = action, call = call)
+  6.           └─rlang:::detect_installed(info)
+  7.             ├─rlang:::list_c(...)
+  8.             │ └─rlang::inject(c(!!!x))
+  9.             │   └─rlang::enexpr(expr)
+ 10.             └─rlang:::pmap(...)
+ 11.               ├─base::do.call(...)
+ 12.               └─base::mapply(...)
+ 13.                 └─rlang (local) `<fn>`(pkg = dots[[1L]][[230L]], cmp = dots[[2L]][[230L]], ver = dots[[3L]][[230L]])
+ 14.                   └─base::requireNamespace(pkg, quietly = TRUE)
+ 15.                     ├─base::tryCatch(loadNamespace(package, ...), error = function(e) e)
+ 16.                     │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 17.                     │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 18.                     │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 19.                     └─base::loadNamespace(package, ...)
+ 20.                       └─base (local) runHook(".onLoad", env, package.lib, package)
+ 21.                         ├─base::tryCatch(fun(libname, pkgname), error = identity)
+ 22.                         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 23.                         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 24.                         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 25.                         └─glmmTMB (local) fun(libname, pkgname)
+ 26.                           └─glmmTMB:::check_dep_version(dep_pkg = "TMB")
+
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
+X11 error: GLXBadContext
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::deps_check_installed(path, imports)
+  5.         └─rlang::check_installed(pkg, action = action, call = call)
+  6.           └─rlang:::detect_installed(info)
+  7.             ├─rlang:::list_c(...)
+  8.             │ └─rlang::inject(c(!!!x))
+  9.             │   └─rlang::enexpr(expr)
+ 10.             └─rlang:::pmap(...)
+ 11.               ├─base::do.call(...)
+ 12.               └─base::mapply(...)
+ 13.                 └─rlang (local) `<fn>`(pkg = dots[[1L]][[230L]], cmp = dots[[2L]][[230L]], ver = dots[[3L]][[230L]])
+ 14.                   └─base::requireNamespace(pkg, quietly = TRUE)
+ 15.                     ├─base::tryCatch(loadNamespace(package, ...), error = function(e) e)
+ 16.                     │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 17.                     │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 18.                     │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 19.                     └─base::loadNamespace(package, ...)
+ 20.                       ├─base::namespaceImportFrom(...)
+ 21.                       │ └─base::asNamespace(ns)
+ 22.                       └─base::loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]])
+ 23.                         └─base (local) runHook(".onLoad", env, package.lib, package)
+ 24.                           ├─base::tryCatch(fun(libname, pkgname), error = identity)
+ 25.                           │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 26.                           │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 27.                           │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 28.                           └─rgl (local) fun(libname, pkgname)
+ 29.                             └─rgl:::rgl.init(initValue, onlyNULL)
+
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
+'rgl.init' failed, will use the null device.
+See '?rgl.useNULL' for ways to avoid this warning.
+Backtrace:
+     ▆
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
+  2.   └─pkgload::load_all(...)
+  3.     └─pkgload:::load_imports(path)
+  4.       └─pkgload:::deps_check_installed(path, imports)
+  5.         └─rlang::check_installed(pkg, action = action, call = call)
+  6.           └─rlang:::detect_installed(info)
+  7.             ├─rlang:::list_c(...)
+  8.             │ └─rlang::inject(c(!!!x))
+  9.             │   └─rlang::enexpr(expr)
+ 10.             └─rlang:::pmap(...)
+ 11.               ├─base::do.call(...)
+ 12.               └─base::mapply(...)
+ 13.                 └─rlang (local) `<fn>`(pkg = dots[[1L]][[230L]], cmp = dots[[2L]][[230L]], ver = dots[[3L]][[230L]])
+ 14.                   └─base::requireNamespace(pkg, quietly = TRUE)
+ 15.                     ├─base::tryCatch(loadNamespace(package, ...), error = function(e) e)
+ 16.                     │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 17.                     │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 18.                     │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 19.                     └─base::loadNamespace(package, ...)
+ 20.                       ├─base::namespaceImportFrom(...)
+ 21.                       │ └─base::asNamespace(ns)
+ 22.                       └─base::loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]])
+ 23.                         └─base (local) runHook(".onLoad", env, package.lib, package)
+ 24.                           ├─base::tryCatch(fun(libname, pkgname), error = identity)
+ 25.                           │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 26.                           │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 27.                           │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 28.                           └─rgl (local) fun(libname, pkgname)
+
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'ComplexUpset::upset' by 'UpSetR::upset' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -249,11 +325,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'caret::precision' by 'cutpointr::precision' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -264,11 +340,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'caret::recall' by 'cutpointr::recall' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -279,11 +355,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'caret::specificity' by 'cutpointr::specificity' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -294,11 +370,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'caret::sensitivity' by 'cutpointr::sensitivity' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -309,11 +385,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'caret::cluster' by 'frailtypack::cluster' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -324,11 +400,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::as_data_frame' by 'igraph::as_data_frame' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -339,11 +415,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'DiagrammeR::count_automorphisms' by 'igraph::count_automorphisms' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -354,11 +430,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::groups' by 'igraph::groups' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -369,11 +445,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'DiagrammeR::get_edge_ids' by 'igraph::get_edge_ids' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -384,11 +460,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::union' by 'igraph::union' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -399,11 +475,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::select' by 'jmvcore::select' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -414,11 +490,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'finalfit::remove_labels' by 'labelled::remove_labels' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -429,11 +505,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::union' by 'lubridate::union' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -444,11 +520,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::%--%' by 'lubridate::%--%' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -459,11 +535,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::fpr' by 'mada::fpr' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -474,11 +550,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mada::forest' by 'metafor::forest' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -489,11 +565,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::tnr' by 'mlr3measures::tnr' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -504,11 +580,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::precision' by 'mlr3measures::precision' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -519,11 +595,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::tn' by 'mlr3measures::tn' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -534,11 +610,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::fnr' by 'mlr3measures::fnr' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -549,11 +625,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::tp' by 'mlr3measures::tp' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -564,11 +640,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::npv' by 'mlr3measures::npv' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -579,11 +655,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::ppv' by 'mlr3measures::ppv' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -594,11 +670,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::auc' by 'mlr3measures::auc' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -609,11 +685,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::tpr' by 'mlr3measures::tpr' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -624,11 +700,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::fn' by 'mlr3measures::fn' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -639,11 +715,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::fp' by 'mlr3measures::fp' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -654,11 +730,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mada::fpr' by 'mlr3measures::fpr' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -669,11 +745,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::recall' by 'mlr3measures::recall' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -684,11 +760,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::specificity' by 'mlr3measures::specificity' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -699,11 +775,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'metafor::se' by 'mlr3measures::se' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -714,11 +790,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::sensitivity' by 'mlr3measures::sensitivity' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -729,11 +805,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'lme4::lmList' by 'nlme::lmList' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -744,11 +820,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::collapse' by 'nlme::collapse' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -759,11 +835,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::roc' by 'pROC::roc' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -774,11 +850,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mlr3measures::auc' by 'pROC::auc' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -789,11 +865,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mlr3measures::rmse' by 'performance::rmse' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -804,11 +880,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mlr3measures::mse' by 'performance::mse' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -819,11 +895,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mlr3measures::mae' by 'performance::mae' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -834,11 +910,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'boot::logit' by 'pracma::logit' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -849,11 +925,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'magrittr::mod' by 'pracma::mod' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -864,11 +940,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'magrittr::or' by 'pracma::or' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -879,11 +955,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'magrittr::and' by 'pracma::and' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -894,11 +970,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'cutpointr::cutpoints' by 'pracma::cutpoints' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -909,11 +985,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mlr3measures::phi' by 'psych::phi' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -924,11 +1000,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'ggswim::%+%' by 'psych::%+%' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -939,11 +1015,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'pracma::logit' by 'psych::logit' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -954,11 +1030,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'pracma::polar' by 'psych::polar' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -969,11 +1045,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mada::AUC' by 'psych::AUC' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -984,11 +1060,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'GPArotation::equamax' by 'psych::equamax' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -999,11 +1075,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'ggplot2::alpha' by 'psych::alpha' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1014,11 +1090,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'GPArotation::varimin' by 'psych::varimin' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1029,11 +1105,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'magrittr::set_names' by 'purrr::set_names' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1044,11 +1120,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::simplify' by 'purrr::simplify' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1059,11 +1135,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'caret::lift' by 'purrr::lift' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1074,11 +1150,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'pracma::cross' by 'purrr::cross' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1089,11 +1165,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::compose' by 'purrr::compose' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1104,11 +1180,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::flatten_lgl' by 'rlang::flatten_lgl' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1119,11 +1195,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::splice' by 'rlang::splice' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1134,11 +1210,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::flatten_chr' by 'rlang::flatten_chr' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1149,11 +1225,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::flatten_raw' by 'rlang::flatten_raw' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1164,11 +1240,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::is_named' by 'rlang::is_named' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1179,11 +1255,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::flatten' by 'rlang::flatten' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1194,11 +1270,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::flatten_dbl' by 'rlang::flatten_dbl' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1209,11 +1285,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::invoke' by 'rlang::invoke' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1224,11 +1300,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::flatten_int' by 'rlang::flatten_int' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1239,11 +1315,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'psych::alpha' by 'scales::alpha' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1254,11 +1330,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'purrr::discard' by 'scales::discard' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1269,11 +1345,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'psych::rescale' by 'scales::rescale' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1284,11 +1360,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'pROC::cov' by 'stats::cov' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1299,11 +1375,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::lag' by 'stats::lag' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1314,11 +1390,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::filter' by 'stats::filter' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1329,11 +1405,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'pROC::smooth' by 'stats::smooth' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1344,11 +1420,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::spectrum' by 'stats::spectrum' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1359,11 +1435,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'janitor::chisq.test' by 'stats::chisq.test' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1374,11 +1450,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'pROC::var' by 'stats::var' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1389,11 +1465,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::decompose' by 'stats::decompose' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1404,11 +1480,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'janitor::fisher.test' by 'stats::fisher.test' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1419,11 +1495,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'frailtypack::cluster' by 'survival::cluster' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1434,11 +1510,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::as_data_frame' by 'tibble::as_data_frame' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1449,11 +1525,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'ggVennDiagram::unite' by 'tidyr::unite' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1464,11 +1540,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::crossing' by 'tidyr::crossing' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1479,11 +1555,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'magrittr::extract' by 'tidyr::extract' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1494,11 +1570,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'igraph::compare' by 'timeROC::compare' when loading 'ClinicoPath'
 Backtrace:
      ▆
-  1. └─devtools::load_all() at test-agreement.R:3:3
+  1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
   2.   └─pkgload::load_all(...)
   3.     └─pkgload:::load_imports(path)
   4.       └─pkgload:::process_imports(path)
@@ -1509,11 +1585,11 @@ Backtrace:
   9.         └─base::namespaceImport(...)
  10.           └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'metafor::vif' by 'VIF::vif' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1523,11 +1599,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'VIF::vif' by 'car::vif' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1537,11 +1613,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mlr3measures::sensitivity' by 'caret::sensitivity' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1551,11 +1627,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'mlr3measures::specificity' by 'caret::specificity' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1565,11 +1641,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'stats::filter' by 'dplyr::filter' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1579,11 +1655,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'stats::lag' by 'dplyr::lag' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1593,11 +1669,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'jmvcore::select' by 'dplyr::select' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1607,11 +1683,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'DataExplorer::plot_histogram' by 'grafify::plot_histogram' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1621,11 +1697,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'reReg::plot' by 'graphics::plot' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1635,11 +1711,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'dplyr::select' by 'jmvcore::select' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1649,11 +1725,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'metafor::regplot' by 'regplot::regplot' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1663,11 +1739,11 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 replacing previous import 'tibble::view' by 'summarytools::view' when loading 'ClinicoPath'
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::load_imports(path)
  4.       └─pkgload:::process_imports(path)
@@ -1677,7 +1753,7 @@ Backtrace:
  8.         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
  9.         └─base::namespaceImportFrom(...)
 
-── Warning ('test-agreement.R:3:3'): agreement module loads correctly ──────────
+── Warning ('test-ihccluster-sterlacci-features.R:6:3'): Jaccard distance option works with binary data ──
 -- Conflicts ------------------------------------------ ClinicoPath conflicts --
 x `calculateHScore` masks `ClinicoPath::calculateHScore()`.
 x `calculateIHCDistance` masks `ClinicoPath::calculateIHCDistance()`.
@@ -1687,66 +1763,223 @@ i Did you accidentally source a file rather than using `load_all()`?
   Run `rm(list = c("calculateHScore", "calculateIHCDistance", "calculateIHCMarkerSummary", "calculateIHCSilhouette", "convertIHCMarkerToNumeric", "convertIHCToNumeric", "formatIHCPValue", "getIHCColorPalette", "getIHCSignificanceStars", "getIHCTheme", "showIHCDataRequirements", "validateIHCClustering", "validateIHCData"))` to remove the conflicts.
 Backtrace:
     ▆
- 1. └─devtools::load_all() at test-agreement.R:3:3
+ 1. └─devtools::load_all() at test-ihccluster-sterlacci-features.R:6:3
  2.   └─pkgload::load_all(...)
  3.     └─pkgload:::warn_if_conflicts(package, out$env, globalenv())
  4.       └─cli::cli_warn(c(header, bullets, directions), class = "pkgload::conflict")
 
-── Failure ('test-agreement.R:16:3'): agreement handles basic input validation ──
-Expected `agreement(data = histopathology, vars = NULL)` not to throw any errors.
-Actually got a <simpleError> with message:
-  'names' attribute [38] must be the same length as the vector [0]
-Backtrace:
-     ▆
-  1. ├─testthat::expect_error(...) at test-agreement.R:16:3
-  2. │ └─testthat:::expect_condition_matching_(...)
-  3. │   └─testthat:::quasi_capture(...)
-  4. │     ├─testthat (local) .capture(...)
-  5. │     │ └─base::withCallingHandlers(...)
-  6. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
-  7. └─ClinicoPath::agreement(data = histopathology, vars = NULL)
-  8.   └─analysis$run() at ClinicoPathJamoviModule/R/agreement.h.R:3380:5
-  9.     └─self$init()
- 10.       ├─jmvcore (local) try(...)
- 11.       │ └─base::eval(expr)
- 12.       └─jmvcore::select(private$.data, self$options$varsRequired)
+── Failure ('test-ihccluster-sterlacci-features.R:31:5'): Jaccard distance option works with binary data ──
+Expected `"clusters" %in% names(result)` to be TRUE.
+Differences:
+`actual`:   FALSE
+`expected`: TRUE 
 
-── Failure ('test-agreement.R:61:5'): agreement weighted kappa options work correctly ──
-Expected `{ ... }` not to throw any errors.
-Actually got a <simpleError> with message:
-  Weighted kappa requires ordinal variables. Please select ordinal data or choose 'Unweighted'.
-weight: squared
-Backtrace:
-     ▆
-  1. ├─testthat::expect_error(...) at test-agreement.R:61:5
-  2. │ └─testthat:::expect_condition_matching_(...)
-  3. │   └─testthat:::quasi_capture(...)
-  4. │     ├─testthat (local) .capture(...)
-  5. │     │ └─base::withCallingHandlers(...)
-  6. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
-  7. └─ClinicoPath::agreement(...) at test-agreement.R:62:7
-  8.   └─analysis$run() at ClinicoPathJamoviModule/R/agreement.h.R:3380:5
-  9.     ├─jmvcore (local) try(...)
- 10.     │ └─base::eval(expr)
- 11.     └─private$.run()
 
-── Failure ('test-agreement.R:61:5'): agreement weighted kappa options work correctly ──
-Expected `{ ... }` not to throw any errors.
-Actually got a <simpleError> with message:
-  Weighted kappa requires ordinal variables. Please select ordinal data or choose 'Unweighted'.
-weight: equal
+── Error ('test-ihccluster-sterlacci-features.R:32:5'): Jaccard distance option works with binary data ──
+Error: 'clusters' does not exist in this results element
 Backtrace:
-     ▆
-  1. ├─testthat::expect_error(...) at test-agreement.R:61:5
-  2. │ └─testthat:::expect_condition_matching_(...)
-  3. │   └─testthat:::quasi_capture(...)
-  4. │     ├─testthat (local) .capture(...)
-  5. │     │ └─base::withCallingHandlers(...)
-  6. │     └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
-  7. └─ClinicoPath::agreement(...) at test-agreement.R:62:7
-  8.   └─analysis$run() at ClinicoPathJamoviModule/R/agreement.h.R:3380:5
-  9.     ├─jmvcore (local) try(...)
- 10.     │ └─base::eval(expr)
- 11.     └─private$.run()
+    ▆
+ 1. ├─testthat::expect_equal(length(result$clusters), 30) at test-ihccluster-sterlacci-features.R:32:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─result$clusters
+ 5. └─jmvcore:::`$.ResultsElement`(result, clusters)
 
-[ FAIL 3 | WARN 98 | SKIP 0 | PASS 52 ]
+── Error ('test-ihccluster-sterlacci-features.R:71:5'): Complete linkage produces different results than Ward ──
+Error: 'clusters' does not exist in this results element
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_false(all(result_ward$clusters == result_complete$clusters)) at test-ihccluster-sterlacci-features.R:71:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─result_ward$clusters
+ 5. └─jmvcore:::`$.ResultsElement`(result_ward, clusters)
+
+── Warning ('test-ihccluster-sterlacci-features.R:98:5'): Bonferroni correction adjusts p-values correctly ──
+Variable 'Marker6' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:98:5
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:98:5'): Bonferroni correction adjusts p-values correctly ──
+Variable 'Marker7' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:98:5
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:98:5'): Bonferroni correction adjusts p-values correctly ──
+Variable 'Marker8' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:98:5
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:110:5'): Bonferroni correction adjusts p-values correctly ──
+Variable 'Marker6' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:110:5
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:110:5'): Bonferroni correction adjusts p-values correctly ──
+Variable 'Marker7' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:110:5
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:110:5'): Bonferroni correction adjusts p-values correctly ──
+Variable 'Marker8' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:110:5
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Error ('test-ihccluster-sterlacci-features.R:122:5'): Bonferroni correction adjusts p-values correctly ──
+Error: 'association_p_adjusted' does not exist in this results element
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(...) at test-ihccluster-sterlacci-features.R:122:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─result_bonf$association_p_adjusted
+ 5. └─jmvcore:::`$.ResultsElement`(result_bonf, association_p_adjusted)
+
+── Warning ('test-ihccluster-sterlacci-features.R:140:9'): All linkage methods work without errors ──
+Variable 'M3' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:140:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Error ('test-ihccluster-sterlacci-features.R:152:9'): All linkage methods work without errors ──
+Error: 'clusters' does not exist in this results element
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_equal(...) at test-ihccluster-sterlacci-features.R:152:9
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─result$clusters
+ 5. └─jmvcore:::`$.ResultsElement`(result, clusters)
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M3' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M4' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M3' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M4' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M3' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M4' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M3' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+── Warning ('test-ihccluster-sterlacci-features.R:168:9'): Multiple testing correction methods all work ──
+Variable 'M4' shows extreme spread and may influence clustering disproportionately
+Backtrace:
+    ▆
+ 1. └─ClinicoPath::ihccluster(...) at test-ihccluster-sterlacci-features.R:168:9
+ 2.   └─analysis$run() at ClinicoPathJamoviModule/R/ihccluster.h.R:2212:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─private$.prepareData(data, catVars, contVars, opts) at ClinicoPathJamoviModule/R/ihccluster.b.R:1151:17
+
+[ FAIL 5 | WARN 116 | SKIP 0 | PASS 11 ]
+Warning message:
+package ‘testthat’ was built under R version 4.5.2 

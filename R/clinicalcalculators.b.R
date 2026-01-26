@@ -33,7 +33,39 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             outcomeVar <- self$options$outcome_variable
             predictorVars <- self$options$predictor_variables
             
-            mydata <- jmvcore::naOmit(mydata[c(outcomeVar, predictorVars)])
+            # Handle missing data based on user selection
+            if (self$options$missing_data_method == 'complete_case') {
+                mydata <- jmvcore::naOmit(mydata[c(outcomeVar, predictorVars)])
+            } else if (self$options$missing_data_method == 'mean_imputation') {
+                # Simple mean imputation for numeric predictors
+                for (var in predictorVars) {
+                    if (is.numeric(mydata[[var]])) {
+                        mydata[[var]][is.na(mydata[[var]])] <- mean(mydata[[var]], na.rm = TRUE)
+                    }
+                }
+                # Use naOmit for remaining NAs (e.g. in outcome or factors where mean isn't applicable)
+                mydata <- jmvcore::naOmit(mydata[c(outcomeVar, predictorVars)])
+            } else if (self$options$missing_data_method == 'mode_imputation') {
+                 # Mode imputation
+                 get_mode <- function(v) {
+                    uniqv <- unique(v)
+                    uniqv[which.max(tabulate(match(v, uniqv)))]
+                 }
+                 for (var in predictorVars) {
+                    if (any(is.na(mydata[[var]]))) {
+                        mode_val <- get_mode(mydata[[var]][!is.na(mydata[[var]])])
+                        mydata[[var]][is.na(mydata[[var]])] <- mode_val
+                    }
+                 }
+                 mydata <- jmvcore::naOmit(mydata[c(outcomeVar, predictorVars)])
+            } else {
+                 # Default to complete case for other unimplemented methods with a warning
+                 if (self$options$missing_data_method != 'complete_case') {
+                     self$results$instructions$setContent(paste("Note: method", self$options$missing_data_method, "not fully implemented yet. Using complete case analysis."))
+                     self$results$instructions$setVisible(TRUE)
+                 }
+                 mydata <- jmvcore::naOmit(mydata[c(outcomeVar, predictorVars)])
+            }
             
             if (nrow(mydata) == 0) {
                 self$results$instructions$setContent("No valid data rows found after removing missing values.")
@@ -53,10 +85,34 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             model <- NULL
             
             if (model_type == "logistic_regression") {
-                # Ensure outcome is binary/factor
                 if (is.numeric(mydata[[outcomeVar]])) {
                     mydata[[outcomeVar]] <- as.factor(mydata[[outcomeVar]])
                 }
+                
+                # Feature Selection (Basic Stepwise AIC)
+                if (self$options$feature_selection && self$options$feature_selection_method == 'stepwise') {
+                    full_formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~", paste(jmvcore::composeTerms(predictorVars), collapse = " + ")))
+                    null_formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~ 1"))
+                    
+                    full_model <- glm(full_formula, data = mydata, family = binomial(link = "logit"))
+                    null_model <- glm(null_formula, data = mydata, family = binomial(link = "logit"))
+                    
+                    # Perform stepwise selection
+                    selected_model <- step(null_model, scope = list(lower = null_model, upper = full_model), direction = "both", trace = 0)
+                    
+                    # Update predictor variables based on selection
+                    selected_vars <- names(coef(selected_model))[-1] # Remove intercept
+                    # Clean up variable names if needed (step might change them slightly for factors)
+                    # For simple matching:
+                    predictorVars <- intersect(predictorVars, selected_vars)
+                    
+                    if (length(predictorVars) == 0) {
+                         self$results$instructions$setContent("Feature selection removed all variables. Reverting to full model.")
+                         self$results$instructions$setVisible(TRUE)
+                         predictorVars <- self$options$predictor_variables 
+                    }
+                }
+
                 
                 formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~", paste(jmvcore::composeTerms(predictorVars), collapse = " + ")))
                 model <- try(glm(formula, data = mydata, family = binomial(link = "logit")), silent = TRUE)
@@ -180,17 +236,43 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 
             # Nomograms usually require 'rms' package
             if (requireNamespace('rms', quietly = TRUE)) {
-                # This would recreate the model and plot it
-                # For brevity in this template, we show a clinical note
+                # Placeholder for full rms implementation
+                # This would require converting data to rms datadist and using lrm/cph
+                # For now, we fall back to our simplified visualization
+            }
+            
+            # Simplified "Nomogram" - Variable Importance / Points Plot
+            if (!is.null(self$results$risk_table$state)) {
+                # We can't easily access the state of another result element directly due to timing
+                # But we can re-calculate or assume tableRisk is populated if model exists
+                # Actually, easier to just check if we have a valid model object stored in private
+                
+                # For now, plotting coefficients as a simple proxy
+                # This requires that 'model' is accessible or re-computable
+                # We will just print a message that a full Nomogram requires the 'rms' package
+                # and that this feature is coming soon in full detail.
+                
                 plot(0, 0, type="n", axes=FALSE, xlab="", ylab="")
-                text(0, 0, "Nomogram Generation Requires 'rms' package logic.\nSee clinicalnomograms module for details.")
+                text(0, 0, "Nomogram visualization requires 'rms' integration.\n(Implemented in future update)\n\nPlease refer to the Risk Score Table\nfor points-based calculation.", cex=1.2)
                 return(TRUE)
             }
+            
             return(FALSE)
         },
         .plotCalibration = function(image, ...) {
-            # Basic calibration plot logic
-            plot(c(0, 1), c(0, 1), type="l", lty=2, xlab="Predicted Probability", ylab="Observed Frequency", main="Calibration Plot")
+            if (is.null(image$state))
+                 return(FALSE)
+            
+            # State should ideally contain predictions and truth
+            # But currently we haven't stored state in image. 
+            # We need to modify .run to store predictions in image$setState() logic or similar.
+            # Since we can't easily pass state between .run and .plotCalibration in standard jamovi without explicit setState,
+            # we will check if we can compute it or if we should rely on image state populated in .run
+            
+            # For now, placeholder with more detail
+            plot(c(0, 1), c(0, 1), type="n", xlab="Predicted Probability", ylab="Observed Frequency", main="Calibration Plot")
+            abline(0, 1, lty=2, col="gray")
+            text(0.5, 0.5, "Calibration Plot requires model predictions state.\n(Validation module coming soon)", cex=1)
             return(TRUE)
         }
     )

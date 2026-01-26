@@ -148,6 +148,8 @@ children:
       - type: CheckBox
         name: show_roc_comparison
       - type: CheckBox
+        name: plot_parttree
+      - type: CheckBox
         name: show_statistical_tests
       - type: CheckBox
         name: show_ranking_table

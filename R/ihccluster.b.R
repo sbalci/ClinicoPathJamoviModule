@@ -1858,9 +1858,15 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.performConsensus(df, clusterResult, catVars, contVars, weights)
             }
 
+            dist_method_str <- switch(self$options$distanceMethod,
+                "gower" = "Gower distance",
+                "jaccard" = "Jaccard distance",
+                self$options$distanceMethod
+            )
+            
             method_names <- list(
-                "pam" = "PAM (k-medoids) with Gower distance",
-                "hierarchical" = "Hierarchical clustering (Ward) with Gower distance",
+                "pam" = paste0("PAM (k-medoids) with ", dist_method_str),
+                "hierarchical" = paste0("Hierarchical clustering (", self$options$linkageMethod, ") with ", dist_method_str),
                 "dimreduce" = "Dimension reduction (FAMD/MCA/PCA) + k-means",
                 "kmodes" = "k-modes (categorical only)",
                 "mca_kmeans" = "MCA + k-means (categorical only)"
@@ -6131,4 +6137,4 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     )
 )
 
-ihccluster <- function(jmvcore) ihcclusterClass
+

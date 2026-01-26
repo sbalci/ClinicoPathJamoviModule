@@ -53,6 +53,7 @@ options:
     - name: annotationCols
       title: 'Column Annotations (Optional)'
       type: Variables
+      default: null
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -64,6 +65,7 @@ options:
     - name: annotationRows
       title: 'Row Annotations (Optional)'
       type: Variables
+      default: null
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:
@@ -408,12 +410,14 @@ options:
     - name: survivalTime
       title: 'Survival Time Variable'
       type: Variable
+      default: null
       suggested: [ continuous ]
       permitted: [ numeric ]
 
     - name: survivalEvent
       title: 'Event Variable'
       type: Variable
+      default: null
       suggested: [ nominal, ordinal ]
       permitted: [ factor, numeric ]
 
@@ -433,6 +437,7 @@ options:
     - name: comparisonVars
       title: 'Variables for Cluster Comparison'
       type: Variables
+      default: null
       suggested: [ continuous, nominal ]
       permitted: [ numeric, factor ]
 

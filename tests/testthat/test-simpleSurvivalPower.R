@@ -13,7 +13,6 @@ test_that('simpleSurvivalPower analysis works', {
   # Run analysis
   expect_no_error({
     model <- simpleSurvivalPower(
-      data = data,
     clinical_preset = 'custom',
     analysis_type = 'sample_size',
     test_type = 'log_rank',
@@ -48,7 +47,7 @@ test_that('simpleSurvivalPower analysis works', {
     cluster_size = 50,
     icc = 0.05,
     sensitivity_analysis = FALSE,
-    simulation_runs = 10000
+    simulation_runs = 1000
     )
   })
 

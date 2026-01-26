@@ -41,6 +41,8 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             feature_selection_method = "rfe",
             max_features = 10,
             show_tree_plot = TRUE,
+            plot_palette = "auto",
+            plot_parttree = FALSE,
             show_performance_metrics = TRUE,
             show_confusion_matrix = TRUE,
             show_importance_plot = TRUE,
@@ -274,6 +276,22 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "show_tree_plot",
                 show_tree_plot,
                 default=TRUE)
+            private$..plot_palette <- jmvcore::OptionList$new(
+                "plot_palette",
+                plot_palette,
+                options=list(
+                    "auto",
+                    "Greens",
+                    "Blues",
+                    "Greys",
+                    "Spectral",
+                    "RdBu",
+                    "OrBu"),
+                default="auto")
+            private$..plot_parttree <- jmvcore::OptionBool$new(
+                "plot_parttree",
+                plot_parttree,
+                default=FALSE)
             private$..show_performance_metrics <- jmvcore::OptionBool$new(
                 "show_performance_metrics",
                 show_performance_metrics,
@@ -387,6 +405,8 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..feature_selection_method)
             self$.addOption(private$..max_features)
             self$.addOption(private$..show_tree_plot)
+            self$.addOption(private$..plot_palette)
+            self$.addOption(private$..plot_parttree)
             self$.addOption(private$..show_performance_metrics)
             self$.addOption(private$..show_confusion_matrix)
             self$.addOption(private$..show_importance_plot)
@@ -440,6 +460,8 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         feature_selection_method = function() private$..feature_selection_method$value,
         max_features = function() private$..max_features$value,
         show_tree_plot = function() private$..show_tree_plot$value,
+        plot_palette = function() private$..plot_palette$value,
+        plot_parttree = function() private$..plot_parttree$value,
         show_performance_metrics = function() private$..show_performance_metrics$value,
         show_confusion_matrix = function() private$..show_confusion_matrix$value,
         show_importance_plot = function() private$..show_importance_plot$value,
@@ -492,6 +514,8 @@ treeadvancedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..feature_selection_method = NA,
         ..max_features = NA,
         ..show_tree_plot = NA,
+        ..plot_palette = NA,
+        ..plot_parttree = NA,
         ..show_performance_metrics = NA,
         ..show_confusion_matrix = NA,
         ..show_importance_plot = NA,
@@ -521,6 +545,7 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         confusionmatrix = function() private$.items[["confusionmatrix"]],
         variableimportance = function() private$.items[["variableimportance"]],
         treeplot = function() private$.items[["treeplot"]],
+        parttreeplot = function() private$.items[["parttreeplot"]],
         importanceplot = function() private$.items[["importanceplot"]],
         validationcurves = function() private$.items[["validationcurves"]],
         calibrationplot = function() private$.items[["calibrationplot"]],
@@ -676,6 +701,22 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 height=700,
                 renderFun=".tree_plot",
                 visible="(show_tree_plot)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "hyperparameter_tuning",
+                    "max_depth_range",
+                    "cp_range")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="parttreeplot",
+                title="Partition Tree Plot (2D)",
+                width=700,
+                height=500,
+                renderFun=".parttree_plot",
+                visible="(plot_parttree)",
                 clearWith=list(
                     "vars",
                     "facs",
@@ -894,7 +935,9 @@ treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param feature_selection .
 #' @param feature_selection_method .
 #' @param max_features .
-#' @param show_tree_plot .
+#' @param show_tree_plot Display visual representation of the decision tree.
+#' @param plot_palette Color palette for the decision tree plot.
+#' @param plot_parttree .
 #' @param show_performance_metrics .
 #' @param show_confusion_matrix .
 #' @param show_importance_plot .
@@ -920,6 +963,7 @@ treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$confusionmatrix} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$variableimportance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$treeplot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$parttreeplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$importanceplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$validationcurves} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calibrationplot} \tab \tab \tab \tab \tab an image \cr
@@ -974,6 +1018,8 @@ treeadvanced <- function(
     feature_selection_method = "rfe",
     max_features = 10,
     show_tree_plot = TRUE,
+    plot_palette = "auto",
+    plot_parttree = FALSE,
     show_performance_metrics = TRUE,
     show_confusion_matrix = TRUE,
     show_importance_plot = TRUE,
@@ -1046,6 +1092,8 @@ treeadvanced <- function(
         feature_selection_method = feature_selection_method,
         max_features = max_features,
         show_tree_plot = show_tree_plot,
+        plot_palette = plot_palette,
+        plot_parttree = plot_parttree,
         show_performance_metrics = show_performance_metrics,
         show_confusion_matrix = show_confusion_matrix,
         show_importance_plot = show_importance_plot,

@@ -722,6 +722,10 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
 
             tryCatch({
                 if (requireNamespace("rpart.plot", quietly = TRUE)) {
+                    # Get palette
+                    box_palette <- self$options$plot_palette
+                    if (box_palette == "auto") box_palette <- "auto"
+                    
                     rpart.plot::rpart.plot(
                         private$.model,
                         type = 3,
@@ -729,14 +733,12 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
                         fallen.leaves = TRUE,
                         main = "Medical Decision Tree",
                         cex = 0.8,
-                        box.palette = "auto"
+                        box.palette = box_palette,
+                        shadow.col = "gray"
                     )
                 } else {
-                    # Fallback to base plotting if rpart.plot not available
                     plot(private$.model, main = "Medical Decision Tree")
                     text(private$.model, cex = 0.8)
-                    
-                    # Add a note about enhanced plotting
                     mtext("Note: Install 'rpart.plot' package for enhanced tree visualization", 
                           side = 1, line = 4, cex = 0.8, col = "gray50")
                 }
@@ -744,8 +746,110 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
                 return(TRUE)
                 
             }, error = function(e) {
-                # Log error for debugging
                 cat("Tree plot error:", e$message, "\n")
+                return(FALSE)
+            })
+        },
+
+        .roc_plot = function(image, ggtheme, ...) {
+            if (is.null(private$.predictions) || is.null(private$.predictions$probabilities)) {
+                return(FALSE)
+            }
+
+            tryCatch({
+                actual <- private$.predictions$actual
+                target_level <- self$options$targetLevel
+                
+                if (!target_level %in% colnames(private$.predictions$probabilities)) {
+                    return(FALSE)
+                }
+                
+                prob_positive <- private$.predictions$probabilities[, target_level]
+                actual_binary <- ifelse(actual == target_level, 1, 0)
+                
+                # Calculate ROC curve
+                if (requireNamespace("pROC", quietly = TRUE)) {
+                    roc_obj <- pROC::roc(actual_binary, prob_positive, quiet = TRUE)
+                    auc_value <- as.numeric(pROC::auc(roc_obj))
+                    
+                    roc_data <- data.frame(
+                        tpr = roc_obj$sensitivities,
+                        fpr = 1 - roc_obj$specificities
+                    )
+                } else {
+                    return(FALSE)
+                }
+                
+                # Add reference line
+                diagonal <- data.frame(x = c(0, 1), y = c(0, 1))
+                
+                p <- ggplot2::ggplot(roc_data, ggplot2::aes(x = fpr, y = tpr)) +
+                    ggplot2::geom_line(data = diagonal, ggplot2::aes(x = x, y = y), 
+                                     color = "gray", linetype = "dashed") +
+                    ggplot2::geom_line(color = "blue", size = 1) +
+                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                    ggplot2::labs(
+                        title = paste0("ROC Curve (AUC = ", round(auc_value, 3), ")"),
+                        x = "False Positive Rate (1 - Specificity)",
+                        y = "True Positive Rate (Sensitivity)"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggtheme
+                
+                print(p)
+                return(TRUE)
+                
+            }, error = function(e) {
+                return(FALSE)
+            })
+        },
+
+        .calibration_plot = function(image, ggtheme, ...) {
+            if (is.null(private$.predictions) || is.null(private$.predictions$probabilities)) {
+                return(FALSE)
+            }
+
+            tryCatch({
+                actual <- private$.predictions$actual
+                target_level <- self$options$targetLevel
+                
+                if (!target_level %in% colnames(private$.predictions$probabilities)) {
+                    return(FALSE)
+                }
+                
+                prob_positive <- private$.predictions$probabilities[, target_level]
+                actual_binary <- ifelse(actual == target_level, 1, 0)
+                
+                # Create calibration bins (using 10 bins)
+                bins <- cut(prob_positive, breaks = seq(0, 1, 0.1), include.lowest = TRUE)
+                
+                calib_data <- aggregate(
+                    list(observed = actual_binary, predicted = prob_positive), 
+                    by = list(bin = bins),
+                    FUN = mean, na.rm = TRUE
+                )
+                
+                # Perfect calibration line
+                perfect_line <- data.frame(x = c(0, 1), y = c(0, 1))
+                
+                p <- ggplot2::ggplot(calib_data, ggplot2::aes(x = predicted, y = observed)) +
+                    ggplot2::geom_line(data = perfect_line, ggplot2::aes(x = x, y = y), 
+                                     color = "gray", linetype = "dashed") +
+                    ggplot2::geom_point(color = "darkblue", size = 3) +
+                    ggplot2::geom_line(color = "blue", size = 1) +
+                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
+                    ggplot2::labs(
+                        title = "Calibration Plot",
+                        x = "Mean Predicted Probability",
+                        y = "Observed Proportion"
+                    ) +
+                    ggplot2::theme_minimal() +
+                    ggtheme
+                
+                print(p)
+                return(TRUE)
+                
+            }, error = function(e) {
                 return(FALSE)
             })
         },
@@ -830,6 +934,47 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
                 
             }, error = function(e) {
                 return(NA)
+            })
+        },
+
+        .parttree_plot = function(image, ggtheme, ...) {
+            if (is.null(private$.model)) {
+                return(FALSE)
+            }
+            
+            # Check if parttree package is available
+            if (!requireNamespace("parttree", quietly = TRUE)) {
+                plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+                text(x = 0.5, y = 0.5, paste("parttree package is required for this plot.\nPlease install it with:\nremotes::install_github('grantmcdermott/parttree')"), 
+                     cex = 1.0, col = "black")
+                return(TRUE)
+            }
+            
+            # Check number of predictors
+            predictors <- attr(private$.model$terms, "term.labels")
+            if (length(predictors) > 2) {
+                 # Warning is handled by notice or just proceed
+            }
+            
+            tryCatch({
+                # Ensure we have data
+                if (is.null(private$.training_data)) {
+                    return(FALSE)
+                }
+
+                p <- ggplot2::ggplot(data = private$.training_data, ggplot2::aes(x = .data[[predictors[1]]], y = .data[[predictors[2]]])) +
+                     parttree::geom_parttree(data = private$.model, alpha = 0.1) +
+                     ggplot2::geom_count(ggplot2::aes(col = .data[[self$options$target]])) +
+                     ggplot2::theme_minimal() +
+                     ggtheme
+                
+                print(p)
+                return(TRUE)
+            }, error = function(e) {
+                plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+                text(x = 0.5, y = 0.5, paste("Error generating parttree plot:\n", e$message), 
+                     cex = 1.0, col = "red")
+                return(TRUE)
             })
         }
     )

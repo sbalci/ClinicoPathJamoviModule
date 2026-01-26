@@ -91,7 +91,7 @@ classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
         
         .run = function() {
             # Clear instructions when parameters are set
-            if (self$options$calculation_type != "" && self$options$method != "") {
+            if (isTRUE(self$options$calculation_type != "") && isTRUE(self$options$method != "")) {
                 self$results$instructions$setContent("")
             }
             

@@ -1377,6 +1377,10 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
 
             tryCatch({
                 if (requireNamespace("rpart.plot", quietly = TRUE)) {
+                    # Get palette
+                    box_palette <- self$options$plot_palette
+                    if (box_palette == "auto") box_palette <- "auto"
+                    
                     rpart.plot::rpart.plot(
                         private$.model,
                         type = 4,
@@ -1384,7 +1388,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
                         fallen.leaves = TRUE,
                         main = "Advanced Clinical Decision Tree",
                         cex = 0.7,
-                        box.palette = "auto",
+                        box.palette = box_palette,
                         shadow.col = "gray"
                     )
                 } else {
@@ -1674,6 +1678,47 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
             }
             
             return(probabilities)
+        },
+
+        .parttree_plot = function(image, ggtheme, ...) {
+            if (is.null(private$.model)) {
+                return(FALSE)
+            }
+            
+            # Check if parttree package is available
+            if (!requireNamespace("parttree", quietly = TRUE)) {
+                plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+                text(x = 0.5, y = 0.5, paste("parttree package is required for this plot.\nPlease install it with:\nremotes::install_github('grantmcdermott/parttree')"), 
+                     cex = 1.0, col = "black")
+                return(TRUE)
+            }
+            
+            # Check number of predictors
+            predictors <- attr(private$.model$terms, "term.labels")
+            if (length(predictors) > 2) {
+                 # Warning is handled by notice or just proceed
+            }
+            
+            tryCatch({
+                # Ensure we have data
+                if (is.null(private$.training_data)) {
+                    return(FALSE)
+                }
+
+                p <- ggplot2::ggplot(data = private$.training_data, ggplot2::aes(x = .data[[predictors[1]]], y = .data[[predictors[2]]])) +
+                     parttree::geom_parttree(data = private$.model, alpha = 0.1) +
+                     ggplot2::geom_count(ggplot2::aes(col = .data[[self$options$target]])) +
+                     ggplot2::theme_minimal() +
+                     ggtheme
+                
+                print(p)
+                return(TRUE)
+            }, error = function(e) {
+                plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+                text(x = 0.5, y = 0.5, paste("Error generating parttree plot:\n", e$message), 
+                     cex = 1.0, col = "red")
+                return(TRUE)
+            })
         }
     )
 )

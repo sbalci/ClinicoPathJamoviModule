@@ -7,7 +7,7 @@ test_that("classification works", {
     data("histopathology", package = "ClinicoPath")
     
     # Test 1: Basic functionality with decision tree
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -22,7 +22,7 @@ test_that("classification works", {
     })
     
     # Test 2: Random Forest classifier
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -36,7 +36,7 @@ test_that("classification works", {
     })
     
     # Test 3: KNN classifier
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -50,7 +50,7 @@ test_that("classification works", {
     })
     
     # Test 4: Logistic Regression
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -62,7 +62,7 @@ test_that("classification works", {
     })
     
     # Test 5: Naive Bayes
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -74,7 +74,7 @@ test_that("classification works", {
     })
     
     # Test 6: SVM classifier
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -88,7 +88,7 @@ test_that("classification works", {
     })
     
     # Test 7: Clinical metrics with confidence intervals
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -102,7 +102,7 @@ test_that("classification works", {
     })
     
     # Test 8: Class imbalance handling - upsampling
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -114,7 +114,7 @@ test_that("classification works", {
     })
     
     # Test 9: Class imbalance handling - downsampling
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -148,14 +148,14 @@ test_that("classification handles edge cases", {
     data("BreastCancer", package = "ClinicoPath")
     
     # Test 1: Empty variable selection should not crash
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer
         )
     })
     
     # Test 2: Single predictor
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -167,7 +167,7 @@ test_that("classification handles edge cases", {
     
     # Test 3: Small dataset
     small_data <- BreastCancer[1:20, ]
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = small_data,
             dep = "Class",
@@ -199,7 +199,7 @@ test_that("classification handles edge cases", {
     test_data$Cl.thickness[1:5] <- NA
     test_data$Cell.size[6:10] <- NA
     
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = test_data,
             dep = "Class",
@@ -215,7 +215,7 @@ test_that("classification parameter validation", {
     data("BreastCancer", package = "ClinicoPath")
     
     # Test different tree parameters
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -231,7 +231,7 @@ test_that("classification parameter validation", {
     })
     
     # Test different random forest parameters
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -309,7 +309,7 @@ test_that("classification reporting options", {
     }
     
     # Test clinical metrics reporting
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -322,7 +322,7 @@ test_that("classification reporting options", {
     })
     
     # Test with confidence intervals
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -341,7 +341,7 @@ test_that("classification plotting functionality", {
     data("BreastCancer", package = "ClinicoPath")
     
     # Test decision tree plotting
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -353,7 +353,7 @@ test_that("classification plotting functionality", {
     })
     
     # Test predicted frequencies
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -365,7 +365,7 @@ test_that("classification plotting functionality", {
     })
     
     # Test random forest model printing
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -377,7 +377,7 @@ test_that("classification plotting functionality", {
     })
     
     # Test random forest predicted frequencies
-    testthat::expect_silent({
+    testthat::expect_no_error({
         results <- ClinicoPath::classification(
             data = BreastCancer,
             dep = "Class",
@@ -397,7 +397,7 @@ test_that("classification with different test sizes", {
     test_sizes <- c(0.1, 0.2, 0.3, 0.4, 0.5)
     
     for (size in test_sizes) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::classification(
                 data = BreastCancer,
                 dep = "Class",
@@ -413,7 +413,7 @@ test_that("classification with different test sizes", {
     fold_numbers <- c(3, 5, 10)
     
     for (folds in fold_numbers) {
-        testthat::expect_silent({
+        testthat::expect_no_error({
             results <- ClinicoPath::classification(
                 data = BreastCancer,
                 dep = "Class",

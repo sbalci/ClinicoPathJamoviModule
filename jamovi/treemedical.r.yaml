@@ -125,7 +125,23 @@ items:
         - cost_sensitive
         - use_1se_rule
 
-    - name: importance_plot
+        - cost_sensitive
+        - use_1se_rule
+
+    - name: parttree_plot
+      title: Partition Tree Plot (2D)
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .parttree_plot
+      visible: (plot_parttree)
+      clearWith:
+        - vars
+        - facs
+        - target
+        - targetLevel
+        - handle_missing
+        - cost_sensitive
       title: Variable Importance Plot
       type: Image
       width: 600

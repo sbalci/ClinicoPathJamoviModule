@@ -208,6 +208,35 @@ options:
       description: >
                   Display visual representation of the decision tree.
 
+    - name: plot_palette
+      title: Plot Palette
+      type: List
+      options:
+        - title: "Standard (Auto)"
+          name: auto
+        - title: "Greens"
+          name: Greens
+        - title: "Blues"
+          name: Blues
+        - title: "Greys"
+          name: Greys
+        - title: "Spectral"
+          name: Spectral
+        - title: "Red-Blue"
+          name: RdBu
+        - title: "Orange-Blue"
+          name: OrBu
+      default: auto
+      description: >
+                  Color palette for the decision tree plot.
+
+    - name: plot_parttree
+      title: Show Partition Tree (2D)
+      type: Bool
+      default: false
+      description: >
+                  Display 2D partition plot of the decision tree.
+
     - name: show_performance_metrics
       title: Show Performance Metrics
       type: Bool
@@ -228,6 +257,20 @@ options:
       default: true
       description: >
                   Display ranking of most important clinical variables.
+
+    - name: show_roc_plot
+      title: Show ROC Curve
+      type: Bool
+      default: true
+      description: >
+                  Display Receiver Operating Characteristic curve.
+
+    - name: show_calibration_plot
+      title: Show Calibration Plot
+      type: Bool
+      default: true
+      description: >
+                  Display calibration plot (observed vs predicted probability).
 
     - name: show_clinical_interpretation
       title: Show Clinical Guidelines

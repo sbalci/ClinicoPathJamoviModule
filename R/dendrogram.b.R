@@ -163,6 +163,10 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 groupLevels <- levels(groupData)
                 groupData <- groupData[completeCases]
                 names(groupData) <- rownames(clusterData)
+                
+                if (anyNA(groupData)) {
+                    warning("Group variable contains missing values and could not be matched for some observations used in clustering. These will be colored neutrally.")
+                }
             }
             
             # Fill summary table

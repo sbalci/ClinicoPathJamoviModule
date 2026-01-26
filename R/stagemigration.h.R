@@ -18,6 +18,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             preferredLanguage = "en",
             enableProgressIndicators = FALSE,
             optimizeForLargeDatasets = FALSE,
+            complexityMode = "quick",
             analysisType = "comprehensive",
             confidenceLevel = 0.95,
             calculateNRI = FALSE,
@@ -319,6 +320,15 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "optimizeForLargeDatasets",
                 optimizeForLargeDatasets,
                 default=FALSE)
+            private$..complexityMode <- jmvcore::OptionList$new(
+                "complexityMode",
+                complexityMode,
+                options=list(
+                    "quick",
+                    "standard",
+                    "comprehensive",
+                    "custom"),
+                default="quick")
             private$..analysisType <- jmvcore::OptionList$new(
                 "analysisType",
                 analysisType,
@@ -1539,6 +1549,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..preferredLanguage)
             self$.addOption(private$..enableProgressIndicators)
             self$.addOption(private$..optimizeForLargeDatasets)
+            self$.addOption(private$..complexityMode)
             self$.addOption(private$..analysisType)
             self$.addOption(private$..confidenceLevel)
             self$.addOption(private$..calculateNRI)
@@ -1770,6 +1781,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         preferredLanguage = function() private$..preferredLanguage$value,
         enableProgressIndicators = function() private$..enableProgressIndicators$value,
         optimizeForLargeDatasets = function() private$..optimizeForLargeDatasets$value,
+        complexityMode = function() private$..complexityMode$value,
         analysisType = function() private$..analysisType$value,
         confidenceLevel = function() private$..confidenceLevel$value,
         calculateNRI = function() private$..calculateNRI$value,
@@ -2000,6 +2012,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..preferredLanguage = NA,
         ..enableProgressIndicators = NA,
         ..optimizeForLargeDatasets = NA,
+        ..complexityMode = NA,
         ..analysisType = NA,
         ..confidenceLevel = NA,
         ..calculateNRI = NA,
@@ -2439,6 +2452,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ggalluvial",
                     "patchwork",
                     "cmprsk",
+                    "survRM2",
+                    "maxstat",
+                    "haven",
                     "randomForestSRC",
                     "flexsurv",
                     "icenReg"))
@@ -8001,6 +8017,11 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   large datasets (>10,000 patients).  Uses chunked processing and optimized
 #'   algorithms to reduce memory usage  and improve performance while
 #'   maintaining statistical accuracy.
+#' @param complexityMode Controls UI complexity and feature availability.
+#'   Quick mode shows essential outputs only (migration matrix, C-index, simple
+#'   recommendation). Standard adds common validation metrics (NRI, survival
+#'   curves, Will Rogers). Comprehensive enables all methods (bootstrap, ROC,
+#'   DCA). Custom allows manual control of all options.
 #' @param analysisType Determines the scope of statistical analysis performed.
 #'   Comprehensive analysis includes all available methods for thorough staging
 #'   system validation.
@@ -8925,6 +8946,7 @@ stagemigration <- function(
     preferredLanguage = "en",
     enableProgressIndicators = FALSE,
     optimizeForLargeDatasets = FALSE,
+    complexityMode = "quick",
     analysisType = "comprehensive",
     confidenceLevel = 0.95,
     calculateNRI = FALSE,
@@ -9221,6 +9243,7 @@ stagemigration <- function(
         preferredLanguage = preferredLanguage,
         enableProgressIndicators = enableProgressIndicators,
         optimizeForLargeDatasets = optimizeForLargeDatasets,
+        complexityMode = complexityMode,
         analysisType = analysisType,
         confidenceLevel = confidenceLevel,
         calculateNRI = calculateNRI,

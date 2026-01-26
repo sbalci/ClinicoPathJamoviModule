@@ -13,7 +13,6 @@ test_that('comprehensiveSurvivalPower analysis works', {
   # Run analysis
   expect_no_error({
     model <- comprehensiveSurvivalPower(
-      data = data,
     method_category = 'standard',
     calculation_type = 'sample_size',
     statistical_method = 'log_rank_schoenfeld',

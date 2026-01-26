@@ -34,6 +34,8 @@ treecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             interpretability_weight = 0.3,
             show_comparison_table = TRUE,
             show_performance_plot = TRUE,
+            plot_parttree = FALSE,
+            plot_parttree = FALSE,
             show_roc_comparison = TRUE,
             show_statistical_tests = TRUE,
             show_ranking_table = TRUE,
@@ -224,6 +226,14 @@ treecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "show_performance_plot",
                 show_performance_plot,
                 default=TRUE)
+            private$..plot_parttree <- jmvcore::OptionBool$new(
+                "plot_parttree",
+                plot_parttree,
+                default=FALSE)
+            private$..plot_parttree <- jmvcore::OptionBool$new(
+                "plot_parttree",
+                plot_parttree,
+                default=FALSE)
             private$..show_roc_comparison <- jmvcore::OptionBool$new(
                 "show_roc_comparison",
                 show_roc_comparison,
@@ -303,6 +313,8 @@ treecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..interpretability_weight)
             self$.addOption(private$..show_comparison_table)
             self$.addOption(private$..show_performance_plot)
+            self$.addOption(private$..plot_parttree)
+            self$.addOption(private$..plot_parttree)
             self$.addOption(private$..show_roc_comparison)
             self$.addOption(private$..show_statistical_tests)
             self$.addOption(private$..show_ranking_table)
@@ -345,6 +357,8 @@ treecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         interpretability_weight = function() private$..interpretability_weight$value,
         show_comparison_table = function() private$..show_comparison_table$value,
         show_performance_plot = function() private$..show_performance_plot$value,
+        plot_parttree = function() private$..plot_parttree$value,
+        plot_parttree = function() private$..plot_parttree$value,
         show_roc_comparison = function() private$..show_roc_comparison$value,
         show_statistical_tests = function() private$..show_statistical_tests$value,
         show_ranking_table = function() private$..show_ranking_table$value,
@@ -386,6 +400,8 @@ treecompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..interpretability_weight = NA,
         ..show_comparison_table = NA,
         ..show_performance_plot = NA,
+        ..plot_parttree = NA,
+        ..plot_parttree = NA,
         ..show_roc_comparison = NA,
         ..show_statistical_tests = NA,
         ..show_ranking_table = NA,
@@ -674,6 +690,10 @@ treecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   all metrics.
 #' @param show_performance_plot Display box plots comparing algorithm
 #'   performance.
+#' @param plot_parttree Display 2D partition plot for CART or Conditional
+#'   Trees (if enabled).
+#' @param plot_parttree Display 2D partition plot for CART or Conditional
+#'   Trees (if enabled).
 #' @param show_roc_comparison Display overlaid ROC curves for all algorithms.
 #' @param show_statistical_tests Display pairwise statistical test results.
 #' @param show_ranking_table Display final algorithm ranking with
@@ -740,6 +760,8 @@ treecompare <- function(
     interpretability_weight = 0.3,
     show_comparison_table = TRUE,
     show_performance_plot = TRUE,
+    plot_parttree = FALSE,
+    plot_parttree = FALSE,
     show_roc_comparison = TRUE,
     show_statistical_tests = TRUE,
     show_ranking_table = TRUE,
@@ -798,6 +820,8 @@ treecompare <- function(
         interpretability_weight = interpretability_weight,
         show_comparison_table = show_comparison_table,
         show_performance_plot = show_performance_plot,
+        plot_parttree = plot_parttree,
+        plot_parttree = plot_parttree,
         show_roc_comparison = show_roc_comparison,
         show_statistical_tests = show_statistical_tests,
         show_ranking_table = show_ranking_table,

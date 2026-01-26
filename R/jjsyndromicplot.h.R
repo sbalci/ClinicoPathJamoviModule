@@ -323,7 +323,7 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjsyndromicplot",
-                version = c(0,0,32),
+                version = c(0,0,33),
                 options = options,
                 results = jjsyndromicplotResults$new(options=options),
                 data = data,

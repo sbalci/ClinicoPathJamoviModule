@@ -503,12 +503,24 @@ test_that("clustering matrix state matches standardization flag", {
     mat_raw <- res_raw$plot$state$clusteringMatrix
 
     # Standardized columns should have mean 0 and sd 1
-    expect_equal(round(colMeans(mat_std), 6), c(0, 0))
-    expect_equal(round(apply(mat_std, 2, sd), 6), c(1, 1))
+    expect_equal(
+        round(unname(colMeans(mat_std)), 6),
+        c(0, 0)
+    )
+    expect_equal(
+        round(unname(apply(mat_std, 2, sd)), 6),
+        c(1, 1)
+    )
 
     # Raw matrix should preserve original scale
-    expect_equal(mat_raw[, "x"], testData$x)
-    expect_equal(mat_raw[, "y"], testData$y)
+    expect_equal(
+        unname(mat_raw[, "x"]),
+        testData$x
+    )
+    expect_equal(
+        unname(mat_raw[, "y"]),
+        testData$y
+    )
 })
 
 test_that("heatmap plot uses precomputed clustering and row dendrogram", {

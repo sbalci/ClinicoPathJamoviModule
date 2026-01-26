@@ -13,7 +13,6 @@ test_that('advancedSurvivalPower analysis works', {
   # Run analysis
   expect_no_error({
     model <- advancedSurvivalPower(
-      data = data,
     calc_type = 'sample_size',
     study_design = 'simple',
     hazard_ratio = 0.7,

@@ -4908,6 +4908,9 @@ refs:
     - ggalluvial
     - patchwork
     - cmprsk
+    - survRM2
+    - maxstat
+    - haven
     - randomForestSRC
     - flexsurv
     - icenReg

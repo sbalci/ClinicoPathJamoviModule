@@ -5,7 +5,7 @@ menuGroup: JJStatsPlotT
 menuSubgroup: All-In-One
 menuTitle: ggpubr Plots
 menuSubtitle: Publication-ready visualizations
-version: '0.0.32'
+version: '0.0.33'
 jas: '1.2'
 
 description:

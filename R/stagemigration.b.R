@@ -194,6 +194,11 @@
 #' @importFrom mgcv gam s
 #' @importFrom rms val.prob calibrate rcs
 #' @importFrom Hmisc rcorr.cens
+#' @include stagemigration-utils.R
+#' @include stagemigration-validation.R
+#' @include stagemigration-discrimination.R
+#' @include stagemigration-competing-risks.R
+#' @include stagemigration_helpers.R
 
 stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "stagemigrationClass",
@@ -839,156 +844,70 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         },
 
         .validateData = function() {
-            # Comprehensive data validation for staging analysis
-            if (is.null(self$data) || nrow(self$data) == 0) {
-                stop("Dataset is empty or not loaded")
-            }
+            # Comprehensive data validation using utility functions
 
-            # Check required variables
-            required_vars <- c(self$options$oldStage, self$options$newStage,
-                             self$options$survivalTime, self$options$event)
+            # Prepare options object with all necessary fields
+            validation_options <- self$options
+
+            # Add any additional variables needed for this analysis
+            additional_vars <- character(0)
 
             # Include covariates if multifactorial analysis is enabled
-            all_vars <- required_vars
-            if (self$options$enableMultifactorialAnalysis) {
+            if (isTRUE(self$options$enableMultifactorialAnalysis)) {
                 continuous_vars <- self$options$continuousCovariates
                 categorical_vars <- self$options$categoricalCovariates
                 covariate_vars <- c(continuous_vars, categorical_vars)
-                
+
                 # Remove any NULL or empty values
                 covariate_vars <- covariate_vars[!is.null(covariate_vars) & covariate_vars != ""]
-                
+
                 if (length(covariate_vars) > 0) {
-                    all_vars <- c(all_vars, covariate_vars)
+                    additional_vars <- c(additional_vars, covariate_vars)
                 }
             }
-            
+
             # Also include institution variable if specified for cross-validation
             if (!is.null(self$options$institutionVariable) && self$options$institutionVariable != "") {
-                all_vars <- c(all_vars, self$options$institutionVariable)
-            }
-            
-            # Remove duplicates
-            all_vars <- unique(all_vars)
-
-            missing_vars <- setdiff(all_vars, names(self$data))
-            if (length(missing_vars) > 0) {
-                # Check if missing vars are only covariates (allow analysis to continue with warning)
-                missing_required <- intersect(missing_vars, required_vars)
-                missing_covariates <- intersect(missing_vars, setdiff(all_vars, required_vars))
-                
-                if (length(missing_required) > 0) {
-                    stop(paste("Missing required variables:", paste(missing_required, collapse = ", ")))
-                }
-                
-                if (length(missing_covariates) > 0) {
-                    warning(paste("Missing covariates (multifactorial analysis will be skipped):", paste(missing_covariates, collapse = ", ")))
-                    # Remove missing covariates from all_vars and continue
-                    all_vars <- setdiff(all_vars, missing_covariates)
-                }
+                additional_vars <- c(additional_vars, self$options$institutionVariable)
             }
 
-            # Extract and validate data (including covariates)
-            data <- self$data[all_vars]
+            # Call utility validation function with checkpoint callback
+            validation_result <- stagemigration_validateData(
+                data = self$data,
+                options = validation_options,
+                additional_vars = additional_vars,
+                checkpoint_callback = private$.checkpoint
+            )
 
-            # Check for rows with invalid data before removing them
-            incomplete_rows <- which(!complete.cases(data))
-            if (length(incomplete_rows) > 0) {
-                warning(paste("Removing", length(incomplete_rows), "rows with missing values."))
-            }
+            # Handle validation errors
+            if (!validation_result$valid) {
+                # Create formatted error HTML
+                error_html <- "<div style='color: #d32f2f; padding: 15px; background-color: #ffebee; border-left: 4px solid #d32f2f;'>"
+                error_html <- paste0(error_html, "<h3 style='margin-top: 0;'>Validation Errors:</h3><ul>")
 
-            data <- data[complete.cases(data), ]
-
-            # Drop unused factor levels to prevent errors with empty groups
-            data <- droplevels(data)
-
-            if (nrow(data) < 30) {
-                warning("Small sample size (n < 30). Results may be unreliable for staging validation.")
-            }
-
-            if (nrow(data) < 100) {
-                warning("Sample size < 100. Consider larger cohort for robust staging validation.")
-            }
-
-            # Validate staging variables
-            old_stages <- unique(data[[self$options$oldStage]])
-            new_stages <- unique(data[[self$options$newStage]])
-
-            if (length(old_stages) < 2 || length(new_stages) < 2) {
-                stop("Staging variables must have at least 2 stages for comparison")
-            }
-
-            if (length(old_stages) > 10 || length(new_stages) > 10) {
-                warning("Many staging levels detected. Consider grouping stages for clearer analysis.")
-            }
-
-            # Validate survival variables
-            survival_times <- data[[self$options$survivalTime]]
-            if (any(is.na(survival_times))) {
-                stop("Survival time contains missing values after data cleaning")
-            }
-            if (any(survival_times <= 0)) {
-                stop("Survival time must be positive")
-            }
-            if (!is.numeric(survival_times)) {
-                stop("Survival time must be numeric")
-            }
-
-            # Handle event variable with improved validation
-            event_var <- data[[self$options$event]]
-
-            if (is.factor(event_var) || is.character(event_var)) {
-                if (is.null(self$options$eventLevel) || self$options$eventLevel == "") {
-                    stop("Event level must be specified for factor/character event variables")
+                for (error in validation_result$errors) {
+                    error_html <- paste0(error_html, "<li>", error, "</li>")
                 }
 
-                # Get unique event values (excluding NA)
-                unique_events_raw <- unique(event_var[!is.na(event_var)])
+                error_html <- paste0(error_html, "</ul></div>")
 
-                if (!self$options$eventLevel %in% unique_events_raw) {
-                    stop(paste("Event level '", self$options$eventLevel, "' not found in event variable. ",
-                              "Available values: ", paste(unique_events_raw, collapse=", "), sep=""))
+                # Display in welcome message
+                self$results$welcomeMessage$setContent(error_html)
+                self$results$welcomeMessage$setVisible(TRUE)
+
+                # Stop execution
+                stop(paste("Data validation failed:", paste(validation_result$errors, collapse = "; ")))
+            }
+
+            # Show warnings if any
+            if (length(validation_result$warnings) > 0) {
+                for (warning_msg in validation_result$warnings) {
+                    warning(warning_msg, call. = FALSE)
                 }
-
-                # Create binary event variable
-                data[["event_binary"]] <- ifelse(event_var == self$options$eventLevel, 1, 0)
-            } else {
-                # Convert numeric event variable
-                data[["event_binary"]] <- as.numeric(event_var)
             }
 
-            # Check for NA values in event_binary
-            if (any(is.na(data[["event_binary"]]))) {
-                stop("Event variable contains values that could not be converted to binary (0/1)")
-            }
-
-            # Stage-level event counts (for instability warning)
-            stage_event_counts <- tapply(data[["event_binary"]], data[[self$options$oldStage]], sum, na.rm = TRUE)
-            if (any(stage_event_counts < 5)) {
-                warning("Some original stages have fewer than 5 events; migration and survival comparisons may be unstable for those stages.")
-            }
-
-            # Ensure binary event coding
-            unique_events <- unique(data[["event_binary"]])
-            if (length(unique_events) == 0) {
-                stop("No valid event values found")
-            }
-            if (!all(unique_events %in% c(0, 1))) {
-                stop(paste("Event variable must be binary (0/1). Found values:", paste(unique_events, collapse=", ")))
-            }
-            if (length(unique_events) < 2) {
-                stop("Event variable must have both event and non-event cases (0 and 1)")
-            }
-
-            # Check event frequency
-            event_rate <- mean(data[["event_binary"]], na.rm = TRUE)
-            if (event_rate < 0.05) {
-                warning("Very low event rate (< 5%). Results may be unreliable.")
-            } else if (event_rate > 0.95) {
-                warning("Very high event rate (> 95%). Consider different endpoint or longer follow-up.")
-            }
-
-            return(data)
+            # Return validated data with event_binary column
+            return(validation_result$data)
         },
 
         .calculateBasicMigration = function(data) {
@@ -2980,11 +2899,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Validate and prepare data
             private$.showProgressIndicator("Validating and preparing data", 2, 5)
             data <- private$.validateData()
-
-            if (isTRUE(self$options$performCompetingRisks)) {
-                self$results$migrationOverview$setNote("competingRisks",
-                              "Competing risks option is currently not supported in stage migration workflow; proceeding with standard survival analysis.")
-            }
 
             # Clinical safety validation: Check event count for survival analysis adequacy
             total_events <- sum(data[["event_binary"]], na.rm = TRUE)
