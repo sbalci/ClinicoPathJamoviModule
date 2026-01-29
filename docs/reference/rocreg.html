@@ -35,7 +35,7 @@ accuracy estimates."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -278,7 +278,7 @@ recommendations.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedAUC</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$covariateEffects</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$covariateSpecificAUC</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$covariateROCPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$aucByCovPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$effectEstimatesPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$adjustedAUC</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$covariateEffects</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$covariateSpecificAUC</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$covariateROCPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$aucByCovPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$effectEstimatesPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stratifiedSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$groupSpecificAUC</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$adjustedAUC$asDF</code></p>
 <p><code>as.data.frame(results$adjustedAUC)</code></p>
     </div>

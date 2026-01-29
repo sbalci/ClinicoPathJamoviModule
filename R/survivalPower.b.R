@@ -20,6 +20,7 @@ survivalPowerClass <- R6::R6Class(
         DEFAULT_CENSORING_RATE = 0.3,    # Default censoring proportion (30%) if not otherwise estimable
         STRATIFICATION_EFFICIENCY = 0.95, # Efficiency gain per stratification factor
         effect_hr_info = NULL,
+        calculated_sample_size = NULL,
 
         .init = function() {
             # Initialize the analysis with comprehensive checks
@@ -48,15 +49,9 @@ survivalPowerClass <- R6::R6Class(
 
             # Insert notices in priority order: ERROR → STRONG_WARNING → WARNING → INFO
             if (length(validation_result$notices) > 0) {
-                # Sort by priority
-                priority_map <- c(ERROR = 1, STRONG_WARNING = 2, WARNING = 3, INFO = 4)
-
-                sorted_notices <- validation_result$notices[order(sapply(validation_result$notices, function(n) {
-                    priority_map[n$type]
-                }))]
-
-                # Insert at top positions (extract notice object from list)
+                sorted_notices <- private$.sort_notices(validation_result$notices)
                 for (i in seq_along(sorted_notices)) {
+                    # Insert at top (index i)
                     self$results$insert(i, sorted_notices[[i]]$notice)
                 }
             }
@@ -74,6 +69,7 @@ survivalPowerClass <- R6::R6Class(
             # Perform analysis
             private$.populate_power_summary()
             private$.perform_power_analysis()
+            private$.populate_simulation_comparison()  # New: simulation validation
             private$.populate_assumptions()
             private$.populate_regulatory_considerations()
             private$.create_visualizations()
@@ -97,6 +93,11 @@ survivalPowerClass <- R6::R6Class(
             private$.update_instructions()
         },
         
+        .sort_notices = function(notices) {
+            priority_map <- c(ERROR = 1, STRONG_WARNING = 2, WARNING = 3, INFO = 4)
+            notices[order(sapply(notices, function(n) priority_map[n$type]))]
+        },
+
         .validate_inputs = function() {
             # Comprehensive input validation - returns list(valid, notices)
             # Store notices as list(notice = notice_obj, type = type_name) for sorting
@@ -218,18 +219,84 @@ survivalPowerClass <- R6::R6Class(
 
             # Validate survival distribution
             distribution <- self$options$survival_distribution
-            if (!is.null(distribution) && distribution != "exponential") {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'unsupportedDistribution',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
-                    'Current version supports exponential survival only (selected: %s) • Please set to "exponential" for validated calculations',
-                    distribution
-                ))
-                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
-                valid <- FALSE
+            if (!is.null(distribution)) {
+                if (distribution == "weibull") {
+                    # Weibull distribution - validate shape parameter
+                    weibull_shape <- self$options$weibull_shape
+                    if (is.null(weibull_shape) || weibull_shape <= 0) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'invalidWeibullShape',
+                            type = jmvcore::NoticeType$ERROR
+                        )
+                        notice$setContent('Weibull distribution requires positive shape parameter (set Weibull Shape \u003e 0)')
+                        notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                        valid <- FALSE
+                    } else if (weibull_shape == 1.0) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'weibullIsExponential',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent('Weibull shape = 1.0 is equivalent to exponential distribution')
+                        notices <- append(notices, list(list(notice = notice, type = "INFO")))
+                    } else if (weibull_shape < 1.0) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'weibullDecreasingHazard',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(sprintf(
+                            'Weibull shape \u003c 1.0 (%.2f) indicates decreasing hazard over time • Common in early mortality scenarios',
+                            weibull_shape
+                        ))
+                        notices <- append(notices, list(list(notice = notice, type = "INFO")))
+                    } else if (weibull_shape > 1.0) {
+                        notice <- jmvcore::Notice$new(
+                            options = self$options,
+                            name = 'weibullIncreasingHazard',
+                            type = jmvcore::NoticeType$INFO
+                        )
+                        notice$setContent(sprintf(
+                            'Weibull shape \u003e 1.0 (%.2f) indicates increasing hazard over time • Common in aging/wear-out scenarios',
+                            weibull_shape
+                        ))
+                        notices <- append(notices, list(list(notice = notice, type = "INFO")))
+                    }
+                } else if (distribution == "log_normal") {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'lognormalDistribution',
+                        type = jmvcore::NoticeType$INFO
+                    )
+                    notice$setContent(
+                        'Log-normal distribution selected • Proportional hazards assumption may not hold exactly • Consider sensitivity analysis'
+                    )
+                    notices <- append(notices, list(list(notice = notice, type = "INFO")))
+                } else if (distribution == "piecewise_exponential") {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'piecewiseNotImplemented',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(
+                        'Piecewise exponential distribution not yet implemented • Use exponential or Weibull for now'
+                    )
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                    valid <- FALSE
+                } else if (!distribution %in% c("exponential", "weibull", "log_normal", "piecewise_exponential")) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'unsupportedDistribution',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(sprintf(
+                        'Unknown distribution: %s • Supported: exponential, weibull, log_normal',
+                        distribution
+                    ))
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                    valid <- FALSE
+                }
             }
 
             # Validate allocation ratio
@@ -280,14 +347,15 @@ survivalPowerClass <- R6::R6Class(
             notices <- private$.validate_parameter_combinations(notices)
 
             # Multiplicity handling
-            if (!isTRUE(self$options$multiple_comparisons %in% c("none", "bonferroni"))) {
+            # Multiplicity handling
+            if (!isTRUE(self$options$multiple_comparisons %in% c("none", "bonferroni", "holm", "dunnett"))) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
                     name = 'unsupportedMultiplicity',
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf(
-                    'Multiplicity adjustment "%s" not yet supported • Please select "none" or "bonferroni"',
+                    'Multiplicity adjustment "%s" not yet supported • Please select "none", "bonferroni", "holm", or "dunnett"',
                     self$options$multiple_comparisons
                 ))
                 notices <- append(notices, list(list(notice = notice, type = "ERROR")))
@@ -668,6 +736,7 @@ survivalPowerClass <- R6::R6Class(
             )
 
             n_final <- private$.apply_sample_size_adjustments(n_base, params)
+            private$calculated_sample_size <- n_final
 
             adjustments <- private$.build_adjustment_string(params)
             return(paste("Total Sample Size:", n_final, "subjects", adjustments))
@@ -1270,6 +1339,325 @@ survivalPowerClass <- R6::R6Class(
             
             # Populate specialized tables based on test type
             private$.populate_specialized_tables()
+            
+            # Run simulation validation if requested
+            private$.performSimulationValidation()
+        },
+        
+        .performSimulationValidation = function() {
+            # Only run if requested
+            if (!self$options$run_simulation_validation) {
+                return()
+            }
+            
+            # Only validate for sample size and power calculations
+            if (!(self$options$analysis_type %in% c("sample_size", "power"))) {
+                return()
+            }
+            
+            # Only for log-rank test (others not yet supported)
+            if (self$options$test_type != "log_rank") {
+                return()
+            }
+            
+            # Get current calculation results
+            analytical_power <- if (self$options$analysis_type == "sample_size") {
+                self$options$power_level
+            } else {
+                # Calculate power for the given sample size
+                n_total <- self$options$sample_size_input
+                hr <- private$.get_effect_hr()
+                alpha <- self$options$alpha_level
+                control_median <- self$options$control_median_survival
+                lambda_control <- log(2) / control_median
+                
+                expected_events <- private$.expected_events_from_sample(
+                    n_total = n_total,
+                    lambda_control = lambda_control,
+                    hr = hr,
+                    allocation_ratio = self$options$allocation_ratio,
+                    accrual_period = self$options$accrual_period,
+                    follow_up_period = self$options$follow_up_period,
+                    dropout_rate = self$options$dropout_rate
+                )$total
+                
+                private$.power_from_events(
+                    events = expected_events,
+                    hr = hr,
+                    alpha = alpha,
+                    allocation_ratio = self$options$allocation_ratio
+                )
+            }
+            
+            analytical_sample_size <- if (self$options$analysis_type == "sample_size") {
+                # Use stored numeric result if available
+                if (!is.null(private$calculated_sample_size)) {
+                    private$calculated_sample_size
+                } else {
+                    # Fallback to extracting from table
+                    summary_table <- self$results$power_summary
+                    if (summary_table$rowCount > 0 && summary_table$isFilled(rowNo=1)) {
+                        calc_value <- summary_table$asDF[1, "calculated_value"]
+                        as.numeric(gsub("[^0-9]", "", calc_value))
+                    } else {
+                        NULL
+                    }
+                }
+            } else {
+                self$options$sample_size_input
+            }
+            
+            if (is.null(analytical_sample_size)) {
+                return()
+            }
+            
+            # Prepare parameters for simulation
+            dist_params <- private$.get_distribution_parameters(
+                median_control = self$options$control_median_survival,
+                hr = private$.get_effect_hr()
+            )
+            
+            sim_params <- list(
+                sample_size = analytical_sample_size,
+                distribution = self$options$survival_distribution,
+                dist_params = dist_params,
+                hr = private$.get_effect_hr(),
+                allocation_ratio = self$options$allocation_ratio,
+                accrual_period = self$options$accrual_period,
+                follow_up = self$options$follow_up_period,
+                dropout_rate = self$options$dropout_rate,
+                alpha = self$options$alpha_level
+            )
+            
+            # Run simulation
+            sim_results <- tryCatch({
+                .validate_power_by_simulation(
+                    params = sim_params,
+                    n_sims = self$options$simulation_runs
+                )
+            }, error = function(e) {
+                return(NULL)
+            })
+            
+            if (is.null(sim_results)) {
+                return()
+            }
+            
+            # Populate results table
+            table <- self$results$simulation_validation_table
+            try({ table$deleteRows() }, silent = TRUE)
+            
+            # Power comparison
+            table$addRow(rowKey = "power", values = list(
+                metric = "Statistical Power",
+                analytical = analytical_power,
+                simulated = sim_results$simulated_power,
+                ci_lower = sim_results$ci_lower,
+                ci_upper = sim_results$ci_upper,
+                agreement = private$.assess_agreement(
+                    analytical_power, 
+                    sim_results$simulated_power,
+                    sim_results$ci_lower,
+                    sim_results$ci_upper
+                )
+            ))
+            
+            # Add interpretation note if needed
+            diff_pct <- abs(analytical_power - sim_results$simulated_power) / analytical_power * 100
+            if (diff_pct > 5) {
+                table$addRow(rowKey = "note", values = list(
+                    metric = sprintf("Note (based on %d simulations)", sim_results$n_sims),
+                    analytical = NA,
+                    simulated = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    agreement = sprintf(
+                        "Difference > 5%% suggests analytical approximation may be less accurate for this scenario"
+                    )
+                ))
+            }
+        },
+        
+        .assess_agreement = function(analytical, simulated, ci_lower, ci_upper) {
+            # Check if analytical value falls within simulation CI
+            if (analytical >= ci_lower && analytical <= ci_upper) {
+                diff_pct <- abs(analytical - simulated) / analytical * 100
+                if (diff_pct < 2) {
+                    return("Excellent (< 2%)")
+                } else if (diff_pct < 5) {
+                    return("Good (< 5%)")
+                } else {
+                    return("Acceptable (within CI)")
+                }
+            } else {
+                return("⚠️ Outside CI - Review assumptions")
+            }
+        },
+        
+        .populate_simulation_comparison = function() {
+            # Populate simulation validation comparison table
+            if (!self$options$run_simulation_validation) {
+                return()
+            }
+            
+            # Run simulation analysis
+            sim_results <- private$.run_simulation_analysis()
+            
+            if (is.null(sim_results)) {
+                return()
+            }
+            
+            # Get analytical power for comparison
+            analytical_power <- if (self$options$analysis_type == "sample_size") {
+                self$options$power_level
+            } else if (self$options$analysis_type == "power") {
+                # Calculate analytical power
+                n_total <- self$options$sample_size_input
+                hr <- private$.get_effect_hr()
+                alpha <- self$options$alpha_level
+                control_median <- self$options$control_median_survival
+                lambda_control <- log(2) / control_median
+                
+                expected_events <- private$.expected_events_from_sample(
+                    n_total = n_total,
+                    lambda_control = lambda_control,
+                    hr = hr,
+                    allocation_ratio = self$options$allocation_ratio,
+                    accrual_period = self$options$accrual_period,
+                    follow_up_period = self$options$follow_up_period,
+                    dropout_rate = self$options$dropout_rate
+                )$total
+                
+                private$.power_from_events(
+                    events = expected_events,
+                    hr = hr,
+                    alpha = alpha,
+                    allocation_ratio = self$options$allocation_ratio
+                )
+            } else {
+                return()  # Only support sample_size and power analysis types
+            }
+            
+            # Populate comparison table
+            table <- self$results$simulation_validation_table
+            
+            # Clear existing rows
+            tryCatch({
+                table$deleteRows()
+            }, error = function(e) {
+                # Table might be empty
+            })
+            
+            # Calculate agreement status
+            diff <- abs(analytical_power - sim_results$empirical_power)
+            agreement <- if (diff < 0.02) {
+                "Excellent (< 2%)"
+            } else if (diff < 0.05) {
+                "Good (< 5%)"
+            } else if (diff < 0.10) {
+                "Fair (< 10%)"
+            } else {
+                "Poor (≥ 10%)"
+            }
+            
+            # Add power comparison row
+            table$addRow(rowKey = "power", values = list(
+                metric = "Statistical Power",
+                analytical = analytical_power,
+                simulated = sim_results$empirical_power,
+                ci_lower = sim_results$ci_lower,
+                ci_upper = sim_results$ci_upper,
+                agreement = agreement
+            ))
+            
+            # Add expected events comparison
+            # Calculate analytical expected events
+            n_total <- if (self$options$analysis_type == "sample_size") {
+                # Use stored result if available
+                if (!is.null(private$calculated_sample_size)) {
+                     private$calculated_sample_size
+                } else {
+                    # Extract from power summary
+                    summary_table <- self$results$power_summary
+                    if (summary_table$rowCount > 0 && summary_table$isFilled(rowNo=1)) {
+                        calc_value <- summary_table$asDF[1, "calculated_value"]
+                        as.numeric(gsub("[^0-9]", "", calc_value))
+                    } else {
+                        NULL
+                    }
+                }
+            } else {
+                self$options$sample_size_input
+            }
+            
+            if (!is.null(n_total)) {
+                hr <- private$.get_effect_hr()
+                control_median <- self$options$control_median_survival
+                lambda_control <- log(2) / control_median
+                
+                analytical_events <- private$.expected_events_from_sample(
+                    n_total = n_total,
+                    lambda_control = lambda_control,
+                    hr = hr,
+                    allocation_ratio = self$options$allocation_ratio,
+                    accrual_period = self$options$accrual_period,
+                    follow_up_period = self$options$follow_up_period,
+                    dropout_rate = self$options$dropout_rate
+                )$total
+                
+                # Calculate agreement for events
+                events_diff <- abs(analytical_events - sim_results$avg_events)
+                events_pct_diff <- events_diff / analytical_events
+                
+                events_agreement <- if (events_pct_diff < 0.05) {
+                    "Excellent (< 5%)"
+                } else if (events_pct_diff < 0.10) {
+                    "Good (< 10%)"
+                } else if (events_pct_diff < 0.15) {
+                    "Fair (< 15%)"
+                } else {
+                    "Poor (≥ 15%)"
+                }
+                
+                table$addRow(rowKey = "events", values = list(
+                    metric = "Expected Events",
+                    analytical = analytical_events,
+                    simulated = sim_results$avg_events,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    agreement = events_agreement
+                ))
+            }
+            
+            # Add table notes with convergence diagnostics
+            convergence_note <- sprintf(
+                "Simulation Diagnostics:\n• Monte Carlo SE: %.4f (target: %.4f)\n• %d simulations completed\n• %s\n• Recommendation: %s",
+                sim_results$convergence$mc_se,
+                sim_results$convergence$target_mc_se,
+                sim_results$n_sims,
+                sim_results$convergence$message,
+                sim_results$convergence$recommendation
+            )
+            
+            table$setNote("convergence", convergence_note)
+            
+            # Add distribution note
+            dist_note <- sprintf(
+                "Distribution: %s | Validation Method: Monte Carlo simulation with log-rank test",
+                private$.format_distribution(self$options$survival_distribution)
+            )
+            
+            table$setNote("distribution", dist_note)
+        },
+        
+        .format_distribution = function(dist) {
+            switch(dist,
+                "exponential" = "Exponential",
+                "weibull" = sprintf("Weibull (shape = %.2f)", self$options$weibull_shape),
+                "log_normal" = sprintf("Log-normal (sigma = %.2f)", self$options$weibull_shape),
+                "piecewise_exponential" = "Piecewise Exponential",
+                dist
+            )
         },
 
         .populate_sample_size_results = function() {
@@ -3176,15 +3564,86 @@ survivalPowerClass <- R6::R6Class(
         .get_distribution_parameters = function(median_control, hr) {
             distribution <- self$options$survival_distribution
             weibull_shape <- self$options$weibull_shape
-
-            if (distribution != "exponential") {
-                stop("Only exponential survival distribution supported in validated release")
+            
+            if (distribution == "exponential") {
+                # Exponential distribution (original implementation)
+                lambda_control <- log(2) / median_control
+                lambda_treatment <- lambda_control * hr
+                
+                return(list(
+                    distribution = "exponential",
+                    lambda_control = lambda_control,
+                    lambda_treatment = lambda_treatment,
+                    median_control = median_control,
+                    median_treatment = median_control / hr
+                ))
+                
+            } else if (distribution == "weibull") {
+                # Weibull distribution support
+                # S(t) = exp(-(lambda*t)^shape)
+                # Median: m = (log(2)/lambda)^(1/shape)
+                # Under PH: lambda_treatment = lambda_control * hr^(1/shape)
+                
+                if (is.null(weibull_shape) || weibull_shape <= 0) {
+                    stop("Weibull shape parameter must be positive (default: 1.0 for exponential)")
+                }
+                
+                # Calculate scale parameter from median
+                lambda_control <- (log(2) / median_control)^(1 / weibull_shape)
+                
+                # Treatment group scale under proportional hazards
+                lambda_treatment <- lambda_control * hr^(1 / weibull_shape)
+                
+                # Calculate treatment median
+                median_treatment <- (log(2) / lambda_treatment)^(1 / weibull_shape)
+                
+                return(list(
+                    distribution = "weibull",
+                    lambda_control = lambda_control,
+                    lambda_treatment = lambda_treatment,
+                    shape = weibull_shape,
+                    median_control = median_control,
+                    median_treatment = median_treatment
+                ))
+                
+            } else if (distribution == "log_normal") {
+                # Log-normal distribution support
+                # log(T) ~ N(mu, sigma^2)
+                # Median: m = exp(mu)
+                # Approximate HR effect: mu_treatment = mu_control - log(hr)
+                
+                # Use weibull_shape parameter as sigma for log-normal
+                sigma <- if (!is.null(weibull_shape) && weibull_shape > 0) weibull_shape else 1.0
+                
+                mu_control <- log(median_control)
+                mu_treatment <- mu_control - log(hr)
+                median_treatment <- exp(mu_treatment)
+                
+                return(list(
+                    distribution = "lognormal",
+                    mu_control = mu_control,
+                    mu_treatment = mu_treatment,
+                    sigma = sigma,
+                    median_control = median_control,
+                    median_treatment = median_treatment
+                ))
+                
+            } else if (distribution == "piecewise_exponential") {
+                # Piecewise exponential - requires custom specification
+                # For now, return error with guidance
+                stop(paste(
+                    "Piecewise exponential distribution requires custom interval specification.",
+                    "Please use exponential or Weibull distribution, or contact package maintainer",
+                    "for guidance on implementing piecewise exponential models."
+                ))
+                
+            } else {
+                stop(paste(
+                    "Unsupported distribution:", distribution,
+                    "• Supported: exponential, weibull, log_normal",
+                    "• For piecewise exponential, contact package maintainer"
+                ))
             }
-
-            lambda_control <- log(2) / median_control
-            lambda_treatment <- lambda_control * hr
-
-            return(list(lambda_control = lambda_control, lambda_treatment = lambda_treatment))
         },
 
         .adjust_alpha_for_multiplicity = function(alpha) {
@@ -3439,12 +3898,12 @@ survivalPowerClass <- R6::R6Class(
         },
 
         .run_simulation_analysis = function() {
-            # Enhanced simulation-based power analysis
-            if (!self$options$sensitivity_analysis) return(NULL)
+            # Enhanced simulation-based power analysis with convergence diagnostics
+            if (!self$options$run_simulation_validation) return(NULL)
 
             n_sims <- self$options$simulation_runs
-            if (is.null(n_sims) || n_sims < 100) n_sims <- 100
-            if (n_sims > 2000) n_sims <- 2000  # Limit for UI responsiveness
+            if (is.null(n_sims) || n_sims < 100) n_sims <- 1000  # Increased default
+            if (n_sims > 100000) n_sims <- 100000  # Allow more simulations
 
             tryCatch({
                 # Get base parameters
@@ -3452,13 +3911,21 @@ survivalPowerClass <- R6::R6Class(
                 alpha <- self$options$alpha_level
                 
                 # Determine sample size
+                # Determine sample size
                 n_total <- if (self$options$analysis_type == "sample_size") {
-                    # Extract from calculated result
-                    result <- private$.calculate_primary_result()
-                    if (grepl("([0-9,]+)", result)) {
-                        as.numeric(gsub("[^0-9]", "", regmatches(result, regexpr("[0-9,]+", result))))
+                    # Use stored numeric result if available
+                    if (!is.null(private$calculated_sample_size)) {
+                        private$calculated_sample_size
                     } else {
-                        200  # fallback
+                        # Try to recalculate/extract
+                        result <- private$.calculate_primary_result()
+                        if (!is.null(private$calculated_sample_size)) {
+                            private$calculated_sample_size
+                        } else if (grepl("([0-9,]+)", result)) {
+                            as.numeric(gsub("[^0-9]", "", regmatches(result, regexpr("[0-9,]+", result))))
+                        } else {
+                            200  # fallback
+                        }
                     }
                 } else {
                     self$options$sample_size_input
@@ -3466,72 +3933,190 @@ survivalPowerClass <- R6::R6Class(
                 
                 if (is.na(n_total) || n_total < 10) n_total <- 200
 
-                lambda_control <- log(2) / self$options$control_median_survival
-                lambda_treatment <- lambda_control * hr_true
+                # Get distribution parameters
+                dist_params <- private$.get_distribution_parameters(
+                    median_control = self$options$control_median_survival,
+                    hr = hr_true
+                )
                 
                 accrual <- self$options$accrual_period
                 follow_up <- self$options$follow_up_period
-                total_study_time <- accrual + follow_up
-                n_per_group <- ceiling(n_total / 2)
+                dropout_rate <- self$options$dropout_rate
+                allocation_ratio <- self$options$allocation_ratio
+                
+                # Allocation
+                props <- private$.allocation_props(allocation_ratio)
+                n_control <- round(n_total * props$control)
+                n_treatment <- n_total - n_control
 
                 p_values <- numeric(n_sims)
+                event_counts <- numeric(n_sims)
 
                 # Monte Carlo Simulation
                 for (i in 1:n_sims) {
-                    # Generate Event Times (Exponential)
-                    t_event_c <- rexp(n_per_group, lambda_control)
-                    t_event_t <- rexp(n_per_group, lambda_treatment)
-                    
-                    # Generate Accrual Times (Uniform)
-                    t_entry_c <- runif(n_per_group, 0, accrual)
-                    t_entry_t <- runif(n_per_group, 0, accrual)
-                    
-                    # Calculate Administrative Censoring Time
-                    # Time from entry until end of study
-                    t_censor_c <- total_study_time - t_entry_c
-                    t_censor_t <- total_study_time - t_entry_t
-                    
-                    # Observed Time & Event Indicator
-                    time_c <- pmin(t_event_c, t_censor_c)
-                    status_c <- as.numeric(t_event_c <= t_censor_c)
-                    
-                    time_t <- pmin(t_event_t, t_censor_t)
-                    status_t <- as.numeric(t_event_t <= t_censor_t)
-                    
-                    # Combine for Log-rank Test
-                    times <- c(time_c, time_t)
-                    status <- c(status_c, status_t)
-                    group <- c(rep(0, n_per_group), rep(1, n_per_group))
+                    # Simulate trial data using distribution-specific function
+                    sim_data <- private$.simulate_trial_data(
+                        n_control = n_control,
+                        n_treatment = n_treatment,
+                        dist_params = dist_params,
+                        accrual_period = accrual,
+                        follow_up_period = follow_up,
+                        dropout_rate = dropout_rate
+                    )
                     
                     # Perform Log-rank test
-                    # Using tryCatch to handle cases with 0 events
                     tryCatch({
-                        sdf <- survival::survdiff(survival::Surv(times, status) ~ group)
-                        p_values[i] <- 1 - pchisq(sdf$chisq, df=1)
+                        sdf <- survival::survdiff(
+                            survival::Surv(sim_data$time, sim_data$event) ~ sim_data$group
+                        )
+                        p_values[i] <- 1 - pchisq(sdf$chisq, df = 1)
+                        event_counts[i] <- sum(sim_data$event)
                     }, error = function(e) {
-                        p_values[i] <- 1.0 # Non-significant if test fails (e.g. no events)
+                        p_values[i] <- 1.0  # Non-significant if test fails
+                        event_counts[i] <- 0
                     })
                 }
 
                 # Calculate empirical power
                 empirical_power <- mean(p_values < alpha, na.rm = TRUE)
-
-                # Add simulation note to assumptions table
-                assumptions_note <- sprintf(
-                    "Simulation-based power estimate: %.1f%% (based on %d simulations)",
-                    empirical_power * 100, n_sims
+                
+                # Calculate Monte Carlo standard error
+                mc_se <- sqrt(empirical_power * (1 - empirical_power) / n_sims)
+                
+                # 95% Confidence interval for simulated power
+                ci_lower <- max(0, empirical_power - 1.96 * mc_se)
+                ci_upper <- min(1, empirical_power + 1.96 * mc_se)
+                
+                # Calculate average number of events
+                avg_events <- mean(event_counts, na.rm = TRUE)
+                
+                # Convergence diagnostics
+                convergence <- private$.assess_simulation_convergence(
+                    power_estimate = empirical_power,
+                    n_sims = n_sims,
+                    mc_se = mc_se
                 )
 
                 return(list(
                     empirical_power = empirical_power,
-                    note = assumptions_note,
-                    p_values = p_values
+                    mc_se = mc_se,
+                    ci_lower = ci_lower,
+                    ci_upper = ci_upper,
+                    n_sims = n_sims,
+                    avg_events = avg_events,
+                    convergence = convergence,
+                    p_values = p_values,
+                    event_counts = event_counts
                 ))
 
             }, error = function(e) {
                 warning(paste("Simulation analysis failed:", e$message))
                 return(NULL)
             })
+        },
+        
+        .simulate_trial_data = function(n_control, n_treatment, dist_params, 
+                                       accrual_period, follow_up_period, dropout_rate) {
+            # Simulate a single trial dataset based on distribution
+            
+            total_study_time <- accrual_period + follow_up_period
+            n_total <- n_control + n_treatment
+            
+            # Generate accrual times (uniform)
+            accrual_time <- runif(n_total, 0, accrual_period)
+            
+            # Generate event times based on distribution
+            if (dist_params$distribution == "exponential") {
+                event_time_control <- rexp(n_control, rate = dist_params$lambda_control)
+                event_time_treatment <- rexp(n_treatment, rate = dist_params$lambda_treatment)
+                
+            } else if (dist_params$distribution == "weibull") {
+                # Weibull random generation
+                lambda_c <- dist_params$lambda_control
+                lambda_t <- dist_params$lambda_treatment
+                shape <- dist_params$shape
+                
+                event_time_control <- (-log(runif(n_control)) / lambda_c)^(1 / shape)
+                event_time_treatment <- (-log(runif(n_treatment)) / lambda_t)^(1 / shape)
+                
+            } else if (dist_params$distribution == "lognormal") {
+                # Log-normal random generation
+                event_time_control <- rlnorm(n_control, 
+                                            meanlog = dist_params$mu_control, 
+                                            sdlog = dist_params$sigma)
+                event_time_treatment <- rlnorm(n_treatment, 
+                                              meanlog = dist_params$mu_treatment, 
+                                              sdlog = dist_params$sigma)
+            } else {
+                stop("Unsupported distribution for simulation")
+            }
+            
+            event_time <- c(event_time_control, event_time_treatment)
+            
+            # Generate dropout times (exponential)
+            dropout_hazard <- -log(1 - dropout_rate) / 12  # Annual to monthly
+            dropout_time <- rexp(n_total, rate = dropout_hazard)
+            
+            # Administrative censoring time
+            admin_censor_time <- total_study_time - accrual_time
+            
+            # Observed time = minimum of event, dropout, admin censoring
+            observed_time <- pmin(event_time, dropout_time, admin_censor_time)
+            event <- (event_time <= dropout_time) & (event_time <= admin_censor_time)
+            
+            # Create dataset
+            data.frame(
+                group = c(rep(0, n_control), rep(1, n_treatment)),
+                time = observed_time,
+                event = as.numeric(event),
+                accrual_time = accrual_time
+            )
+        },
+        
+        .assess_simulation_convergence = function(power_estimate, n_sims, mc_se) {
+            # Assess whether simulation has converged
+            
+            # Target MC SE: aim for < 0.01 (1 percentage point)
+            target_mc_se <- 0.01
+            
+            # Calculate recommended number of simulations for target precision
+            if (power_estimate > 0 && power_estimate < 1) {
+                recommended_n_sims <- ceiling(
+                    power_estimate * (1 - power_estimate) / (target_mc_se^2)
+                )
+            } else {
+                recommended_n_sims <- n_sims
+            }
+            
+            # Determine convergence status
+            converged <- mc_se <= target_mc_se
+            
+            # Generate convergence message
+            if (converged) {
+                message <- sprintf(
+                    "Simulation converged (MC SE = %.4f, target = %.4f)",
+                    mc_se, target_mc_se
+                )
+                recommendation <- "Simulation precision is adequate"
+            } else {
+                message <- sprintf(
+                    "Simulation may need more runs (MC SE = %.4f, target = %.4f)",
+                    mc_se, target_mc_se
+                )
+                recommendation <- sprintf(
+                    "Consider increasing to %d simulations for better precision",
+                    recommended_n_sims
+                )
+            }
+            
+            list(
+                converged = converged,
+                mc_se = mc_se,
+                target_mc_se = target_mc_se,
+                recommended_n_sims = recommended_n_sims,
+                message = message,
+                recommendation = recommendation
+            )
         },
 
         .apply_clinical_preset = function() {

@@ -39,6 +39,8 @@ within jamovi for a wide range of functions. Key features include:
   - **Oncological Analysis:** Specialized methods for Progression-Free
     Survival (PFS), treatment switching (IPCW), and tumor growth
     kinetics.
+  - **Validation & Reliability:** Simulation-based validation for power 
+    analysis to verify analytical results against Monte Carlo simulations.
 - **Clinical Trial Design & Evaluation:**
   - **Modern Designs:** Group sequential, adaptive, platform, and master
     (umbrella, basket) protocols.

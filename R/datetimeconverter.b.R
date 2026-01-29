@@ -36,6 +36,57 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             isTRUE(private$.rOutputRequests[[name]])
         },
 
+        # Initialize notice collection list
+        .noticeList = list(),
+
+        # Add a notice to the collection
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+        },
+
+        # Render collected notices as HTML
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                return()
+            }
+
+            # Map notice types to colors and icons
+            typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+            )
+
+            html <- "<div style='margin: 10px 0;'>"
+
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+
+                # Sanitize content for HTML
+                safe_title <- gsub("<", "&lt;", gsub(">", "&gt;", notice$title))
+                safe_content <- gsub("<", "&lt;", gsub(">", "&gt;", notice$content))
+
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    style$icon, " ", safe_title, "</strong><br>",
+                    "<span style='color: #374151;'>", safe_content, "</span>",
+                    "</div>"
+                )
+            }
+
+            html <- paste0(html, "</div>")
+
+            self$results$notices$setContent(html)
+        },
+
         # ===================================================================
         # DATETIME FORMAT DETECTION
         # ===================================================================
@@ -49,13 +100,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             format_warnings <- character()
             sample_dates <- datetime_vector[!is.na(datetime_vector)]
             if (length(sample_dates) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noValidDates',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "No Valid Datetime Values Found",
+                    content = "All values in the selected variable are missing (NA). • Select a different variable or check your data source."
                 )
-                notice$setContent('No valid datetime values found for format detection. • All values in the selected variable are missing (NA). • Select a different variable or check your data source.')
-                self$results$insert(999, notice)
                 return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
             }
 
@@ -86,13 +135,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(format = top_fmt, warnings = format_warnings))
             }
 
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'formatDetectionFailed',
-                type = jmvcore::NoticeType$WARNING
+            private$.addNotice(
+                type = "WARNING",
+                title = "Format Detection Failed",
+                content = "Could not reliably detect datetime format. • Format remains UNSURE; parsing will not proceed without manual selection. • Review preview and specify the correct format (e.g., DMY, MDY)."
             )
-            notice$setContent('Could not reliably detect datetime format. • Format remains UNSURE; parsing will not proceed without manual selection. • Review preview and specify the correct format (e.g., DMY, MDY).')
-            self$results$insert(2, notice)
 
             return(list(format = "unsure", warnings = c(format_warnings, 'Auto-detection failed; specify format manually.')))
         },
@@ -142,13 +189,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.formatLabel(alt_fmt),
                 private$.formatLabel(primary_fmt))
 
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'ambiguousFormatDetected',
-                type = jmvcore::NoticeType$WARNING
+            private$.addNotice(
+                type = "WARNING",
+                title = "Ambiguous Format Detected",
+                content = msg
             )
-            notice$setContent(msg)
-            self$results$insert(999, notice)
 
             return(msg)
         },
@@ -463,26 +508,22 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Plausibility check: flag years out of range
                     yrs <- suppressWarnings(as.integer(format(parsed_dates, "%Y")))
                     if (any(!is.na(yrs) & (yrs < 1900 | yrs > as.integer(format(Sys.Date() + 365, "%Y"))))) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'implausibleDates',
-                            type = jmvcore::NoticeType$WARNING
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = "Implausible Dates Detected",
+                            content = "Detected parsed dates outside plausible range (<1900 or >1 year in future). Review preview to confirm correct parsing."
                         )
-                        notice$setContent("Detected parsed dates outside plausible range (<1900 or >1 year in future). Review preview to confirm correct parsing.")
-                        self$results$insert(2, notice)
                     }
                     return(parsed_dates)
                 }, error = function(e) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'parsingError',
-                        type = jmvcore::NoticeType$ERROR
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Parsing Error",
+                        content = sprintf(
+                            'Error parsing datetimes with format "%s". • Parser error: %s • Try selecting a different format. • Check that your data matches the selected format.',
+                            format, e$message
+                        )
                     )
-                    notice$setContent(sprintf(
-                        'Error parsing datetimes with format "%s". • Parser error: %s • Try selecting a different format. • Check that your data matches the selected format.',
-                        format, e$message
-                    ))
-                    self$results$insert(999, notice)
                     # Return NA vector to allow analysis to continue
                     return(rep(as.POSIXct(NA), length(datetime_vector)))
                 })
@@ -513,17 +554,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (! tz_option %in% OlsonNames()) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'invalidTimezone',
-                    type = jmvcore::NoticeType$WARNING
+                private$.addNotice(
+                    type = "WARNING",
+                    title = "Invalid Timezone",
+                    content = sprintf(
+                        "Timezone '%s' is not a recognised Olson timezone. Falling back to system default (%s).",
+                        tz_option,
+                        system_label
+                    )
                 )
-                notice$setContent(sprintf(
-                    "Timezone '%s' is not a recognised Olson timezone. Falling back to system default (%s).",
-                    tz_option,
-                    system_label
-                ))
-                self$results$insert(2, notice)
                 return(list(
                     tz = "",
                     note = sprintf("Requested timezone '%s' was invalid; reverted to system default (%s).", tz_option, system_label),
@@ -1238,13 +1277,12 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Validate datetime variable is selected
             if (is.null(datetime_var) || length(datetime_var) == 0 || datetime_var == "") {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noVariableSelected',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "No Variable Selected",
+                    content = 'No datetime variable selected. • Please select a variable containing datetime information from the left panel. • Use the "DateTime Variable" dropdown to choose a column.'
                 )
-                notice$setContent('No datetime variable selected. • Please select a variable containing datetime information from the left panel. • Use the "DateTime Variable" dropdown to choose a column.')
-                self$results$insert(999, notice)
+                private$.renderNotices()
                 return()
             }
 
@@ -1257,28 +1295,26 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste(available_vars, collapse = ", ")
                 }
 
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'variableNotFound',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Variable Not Found",
+                    content = sprintf(
+                        'Selected variable "%s" not found in dataset. • The column may have been renamed or removed. • Please select a different variable from the left panel. • Available variables: %s',
+                        datetime_var,
+                        available_preview
+                    )
                 )
-                notice$setContent(sprintf(
-                    'Selected variable "%s" not found in dataset. • The column may have been renamed or removed. • Please select a different variable from the left panel. • Available variables: %s',
-                    datetime_var,
-                    available_preview
-                ))
-                self$results$insert(999, notice)
+                private$.renderNotices()
                 return()
             }
 
             if (nrow(data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'emptyDataset',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Empty Dataset",
+                    content = 'Dataset contains no rows. • Please ensure your dataset has at least one observation. • Check for data loading or filtering issues.'
                 )
-                notice$setContent('Dataset contains no rows. • Please ensure your dataset has at least one observation. • Check for data loading or filtering issues.')
-                self$results$insert(999, notice)
+                private$.renderNotices()
                 return()
             }
 
@@ -1289,16 +1325,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Prepare datetime values for parsing
             datetime_vector <- data[[datetime_var]]
             if (all(is.na(datetime_vector))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'allValuesMissing',
-                    type = jmvcore::NoticeType$ERROR
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "All Values Missing",
+                    content = sprintf(
+                        "All values in '%s' are missing (NA). • Please select a column with valid datetime entries before proceeding.",
+                        datetime_var
+                    )
                 )
-                notice$setContent(sprintf(
-                    "All values in '%s' are missing (NA). • Please select a column with valid datetime entries before proceeding.",
-                    datetime_var
-                ))
-                self$results$insert(999, notice)
+                private$.renderNotices()
                 return()
             }
 
@@ -1344,48 +1379,44 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add quality threshold notices
             if (!is.na(quality$success_rate) && quality$success_rate < 85) {
                 severity <- if (quality$success_rate < 70) {
-                    jmvcore::NoticeType$STRONG_WARNING
+                    "STRONG_WARNING"
                 } else {
-                    jmvcore::NoticeType$WARNING
+                    "WARNING"
                 }
-
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'lowSuccessRate',
-                    type = severity
-                )
 
                 if (quality$success_rate < 70) {
-                    notice$setContent(sprintf(
-                        'Low datetime parsing success rate: %.1f%% • Only %d of %d non-missing values were successfully parsed. • This may indicate incorrect format selection or data quality issues. • Recommendations: Try a different datetime format, Review failed samples in Quality Assessment, Check data source for systematic errors, Clinical analysis may be unreliable with <70%% success rate.',
-                        quality$success_rate,
-                        quality$successfully_parsed,
-                        (quality$total_observations - quality$original_missing)
-                    ))
+                    private$.addNotice(
+                        type = severity,
+                        title = "Low Parsing Success Rate",
+                        content = sprintf(
+                            'Low datetime parsing success rate: %.1f%% • Only %d of %d non-missing values were successfully parsed. • This may indicate incorrect format selection or data quality issues. • Recommendations: Try a different datetime format, Review failed samples in Quality Assessment, Check data source for systematic errors, Clinical analysis may be unreliable with <70%% success rate.',
+                            quality$success_rate,
+                            quality$successfully_parsed,
+                            (quality$total_observations - quality$original_missing)
+                        )
+                    )
                 } else {
-                    notice$setContent(sprintf(
-                        'Moderate datetime parsing success rate: %.1f%% • %d of %d non-missing values were successfully parsed. • Review failed samples in Quality Assessment panel. • Consider manually specifying format if auto-detection is incorrect.',
-                        quality$success_rate,
-                        quality$successfully_parsed,
-                        (quality$total_observations - quality$original_missing)
-                    ))
+                    private$.addNotice(
+                        type = severity,
+                        title = "Moderate Parsing Success Rate",
+                        content = sprintf(
+                            'Moderate datetime parsing success rate: %.1f%% • %d of %d non-missing values were successfully parsed. • Review failed samples in Quality Assessment panel. • Consider manually specifying format if auto-detection is incorrect.',
+                            quality$success_rate,
+                            quality$successfully_parsed,
+                            (quality$total_observations - quality$original_missing)
+                        )
+                    )
                 }
-                self$results$insert(2, notice)
             }
 
             # Add misuse warnings as INFO notices
             misuse_warnings <- private$.detectMisuse(parsed_dates)
             if (length(misuse_warnings) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'misuseWarnings',
-                    type = jmvcore::NoticeType$INFO
+                private$.addNotice(
+                    type = "INFO",
+                    title = "Potential Data Quality Issues",
+                    content = paste(misuse_warnings, collapse = ' • ')
                 )
-                notice$setContent(paste0(
-                    'Potential data quality issues detected: • ',
-                    paste(misuse_warnings, collapse = ' • ')
-                ))
-                self$results$insert(3, notice)
             }
 
             # Generate format info
@@ -1597,12 +1628,6 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add completion notice
             if (quality$successfully_parsed > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-
                 components_added <- sum(c(
                     self$options$year_out, self$options$month_out, self$options$monthname_out,
                     self$options$day_out, self$options$hour_out, self$options$minute_out,
@@ -1610,13 +1635,16 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$options$quarter_out, self$options$dayofyear_out
                 ))
 
-                notice$setContent(sprintf(
-                    'DateTime conversion completed. • Processed %d observations from variable "%s". • Successfully parsed %d datetimes (%.1f%%). • Added %d component column(s) to dataset. • Review preview tables before proceeding with analysis.',
-                    quality$total_observations, datetime_var,
-                    quality$successfully_parsed, quality$success_rate,
-                    components_added
-                ))
-                self$results$insert(999, notice)
+                private$.addNotice(
+                    type = "INFO",
+                    title = "Conversion Completed",
+                    content = sprintf(
+                        'DateTime conversion completed. • Processed %d observations from variable "%s". • Successfully parsed %d datetimes (%.1f%%). • Added %d component column(s) to dataset. • Review preview tables before proceeding with analysis.',
+                        quality$total_observations, datetime_var,
+                        quality$successfully_parsed, quality$success_rate,
+                        components_added
+                    )
+                )
             }
 
             # Populate new clinician-friendly panels
@@ -1625,6 +1653,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                      quality, components, tz_summary)
             private$.populateExplanatoryPanels()
             private$.populateGlossary()
+
+            # Render all collected notices
+            private$.renderNotices()
         }
     )
 )

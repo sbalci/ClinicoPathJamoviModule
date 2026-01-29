@@ -39,6 +39,7 @@ survivalPower(
   cluster_size = 50,
   icc = 0.05,
   sensitivity_analysis = FALSE,
+  run_simulation_validation = FALSE,
   simulation_runs = 10000,
   show_summary = FALSE,
   show_explanations = FALSE,
@@ -119,6 +120,11 @@ effect size, or duration}
 \item{sensitivity_analysis}{Perform sensitivity analysis across parameter
 ranges}
 
+\item{run_simulation_validation}{Validate analytical power calculations
+using Monte Carlo simulation. Useful for verifying complex scenarios
+(Weibull, log-normal distributions). May take 10-60 seconds depending on
+simulation_runs setting.}
+
 \item{simulation_runs}{Number of simulation runs for complex calculations}
 
 \item{show_summary}{Display plain-language summary of results}
@@ -134,6 +140,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$power_summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$simulation_validation_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$sample_size_results} \tab \tab \tab \tab \tab a table \cr
 \code{results$power_results} \tab \tab \tab \tab \tab a table \cr
 \code{results$effect_size_results} \tab \tab \tab \tab \tab a table \cr

@@ -1,15 +1,3 @@
-- [ ] **Resolve Architecture Mismatch**: Debug and fix the `arm64` vs `x86_64` error encountered during module installation in jamovi. Ensure build environment consistency.
-- [ ] **Namespace Synchronization**: Ensure `NAMESPACE` and `DESCRIPTION` are perfectly synced, potentially using the `sync_namespace_description` mode in `_updateModules.R`.
-
-
-- [ ] **Build pkgdown Site**: Successfully build and deploy the `pkgdown` site, ensuring all vignettes are correctly included and examples are functional.
-
-
-### 🧪 Stabilization & Testing
-- [ ] **Promote 'To be Tested' Functions**: Prioritize unit testing for functions in the "To be Tested" category (e.g., `decisioncurve`, `stagemigration`) to move them to "Stable".
-- [ ] **Smoke Test Suite**: Create a minimal CI smoke suite that runs a basic analysis for each "Stable" function to prevent regressions during the massive dependency updates.
-- [ ] **Data Reproducibility**: Verify `data-raw` regen scripts for all `.rda` files in `data/` to ensure datasets are reproducible.
-
 ## check articles
 
 source .venv/bin/activate
@@ -31,10 +19,6 @@ source .venv/bin/activate
 > marker_single /path/to/file.pdf --output_dir
 marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf --output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/
 <https://github.com/datalab-to/marker>
-
-- [x] Draft: expose a dedicated per-sample mutation burden result if users need TMB-like summaries outside the marginal plot.
-- [x] Draft: add UI gating so `log10TransformTMB` is only available/active when `showTMB` is enabled.
-- [x] Draft: penalized/Firth logistic fallback and manual positive-predictor level control for oddsratio LRs/nomogram
 
 > /review-article-stats '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md'
 '/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.html'
@@ -183,7 +167,7 @@ Use these skills to update text and analysis in the project:
 
 
 
-update DECSRIPTION, NEWS, README, and function Roxygen documentations.
+update DESCRIPTION, NEWS, README, and function Roxygen documentations after each implementation or daily. 
 
 ! Rscript -e "pkgdown::build_site()"
 ! Rscript -e "pkgdown::build_site(examples = FALSE, lazy = TRUE, preview = FALSE)"

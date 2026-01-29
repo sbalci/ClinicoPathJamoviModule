@@ -17,7 +17,7 @@ characteristics."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -218,9 +218,9 @@ evaluation</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$studyDesign</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$precisionResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$accuracyResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$linearityResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$linearityData</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$detectionLimits</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$uncertaintyBudget</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$uncertaintySummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$validationSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interferenceResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$carryoverResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$precisionPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$accuracyPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$linearityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$methodComparisonPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$uncertaintyPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$methodExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
-<p><code>results$studyDesign$asDF</code></p>
-<p><code>as.data.frame(results$studyDesign)</code></p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$precisionResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$accuracyResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$methodExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+<p><code>results$summary$asDF</code></p>
+<p><code>as.data.frame(results$summary)</code></p>
     </div>
 
     <div class="section level2">

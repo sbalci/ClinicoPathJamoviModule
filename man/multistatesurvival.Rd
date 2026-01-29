@@ -105,6 +105,7 @@ A results object containing:
 \code{results$modelFit} \tab \tab \tab \tab \tab a table \cr
 \code{results$stratifiedResults} \tab \tab \tab \tab \tab a html \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

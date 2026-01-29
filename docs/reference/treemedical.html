@@ -15,7 +15,7 @@ guidelines."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,9 +78,13 @@ guidelines.</p>
 <span>  cost_sensitive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  fn_fp_ratio <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  show_tree_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  plot_palette <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  plot_parttree <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  show_performance_metrics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_confusion_matrix <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_importance_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_roc_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_calibration_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_clinical_interpretation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  set_seed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  seed_value <span class="op">=</span> <span class="fl">42</span></span>
@@ -179,6 +183,14 @@ negatives.</p></dd>
 <dd><p>Display visual representation of the decision tree.</p></dd>
 
 
+<dt id="arg-plot-palette">plot_palette<a class="anchor" aria-label="anchor" href="#arg-plot-palette"></a></dt>
+<dd><p>Color palette for the decision tree plot.</p></dd>
+
+
+<dt id="arg-plot-parttree">plot_parttree<a class="anchor" aria-label="anchor" href="#arg-plot-parttree"></a></dt>
+<dd><p>Display 2D partition plot of the decision tree.</p></dd>
+
+
 <dt id="arg-show-performance-metrics">show_performance_metrics<a class="anchor" aria-label="anchor" href="#arg-show-performance-metrics"></a></dt>
 <dd><p>Display accuracy, sensitivity, specificity,
 AUC, and clinical metrics.</p></dd>
@@ -192,6 +204,15 @@ interpretations.</p></dd>
 <dt id="arg-show-importance-plot">show_importance_plot<a class="anchor" aria-label="anchor" href="#arg-show-importance-plot"></a></dt>
 <dd><p>Display ranking of most important clinical
 variables.</p></dd>
+
+
+<dt id="arg-show-roc-plot">show_roc_plot<a class="anchor" aria-label="anchor" href="#arg-show-roc-plot"></a></dt>
+<dd><p>Display Receiver Operating Characteristic curve.</p></dd>
+
+
+<dt id="arg-show-calibration-plot">show_calibration_plot<a class="anchor" aria-label="anchor" href="#arg-show-calibration-plot"></a></dt>
+<dd><p>Display calibration plot (observed vs
+predicted probability).</p></dd>
 
 
 <dt id="arg-show-clinical-interpretation">show_clinical_interpretation<a class="anchor" aria-label="anchor" href="#arg-show-clinical-interpretation"></a></dt>
@@ -209,7 +230,7 @@ usage guidelines.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$model_summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$performance_table</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$confusion_matrix</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$variable_importance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tree_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$importance_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$clinical_interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$model_summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$performance_table</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$confusion_matrix</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$variable_importance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tree_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$parttree_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$importance_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$clinical_interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$performance_table$asDF</code></p>
 <p><code>as.data.frame(results$performance_table)</code></p>
     </div>

@@ -442,6 +442,16 @@ options:
       description:
           R: Perform sensitivity analysis across parameter ranges
 
+    - name: run_simulation_validation
+      title: Run Simulation Validation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Validate analytical power calculations using Monte Carlo simulation.
+            Useful for verifying complex scenarios (Weibull, log-normal distributions).
+            May take 10-60 seconds depending on simulation_runs setting.
+
     - name: simulation_runs
       title: Simulation Runs
       type: Number

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,15 +40,6 @@
     </div>
 
 
-<ul class="task-list"><li><p><label><input type="checkbox"><strong>Resolve Architecture Mismatch</strong>: Debug and fix the <code>arm64</code> vs <code>x86_64</code> error encountered during module installation in jamovi. Ensure build environment consistency.</label></p></li>
-<li><p><label><input type="checkbox"><strong>Namespace Synchronization</strong>: Ensure <code>NAMESPACE</code> and <code>DESCRIPTION</code> are perfectly synced, potentially using the <code>sync_namespace_description</code> mode in <code>_updateModules.R</code>.</label></p></li>
-<li><p><label><input type="checkbox"><strong>Build pkgdown Site</strong>: Successfully build and deploy the <code>pkgdown</code> site, ensuring all vignettes are correctly included and examples are functional.</label></p></li>
-</ul><div class="section level3">
-<h3 id="test_tube-stabilization--testing">🧪 Stabilization &amp; Testing<a class="anchor" aria-label="anchor" href="#test_tube-stabilization--testing"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox"><strong>Promote ‘To be Tested’ Functions</strong>: Prioritize unit testing for functions in the “To be Tested” category (e.g., <code>decisioncurve</code>, <code>stagemigration</code>) to move them to “Stable”.</label></li>
-<li><label><input type="checkbox"><strong>Smoke Test Suite</strong>: Create a minimal CI smoke suite that runs a basic analysis for each “Stable” function to prevent regressions during the massive dependency updates.</label></li>
-<li><label><input type="checkbox"><strong>Data Reproducibility</strong>: Verify <code>data-raw</code> regen scripts for all <code>.rda</code> files in <code>data/</code> to ensure datasets are reproducible.</label></li>
-</ul></div>
 <div class="section level2">
 <h2 id="check-articles">check articles<a class="anchor" aria-label="anchor" href="#check-articles"></a></h2>
 <p>source .venv/bin/activate</p>
@@ -67,13 +58,7 @@
 <blockquote>
 <p>marker_single /path/to/file.pdf –output_dir marker_single /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/carvalho2011.pdf –output_dir /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/vignettes-OncoPath/literature/cluster-ihc/ <a href="https://github.com/datalab-to/marker" class="external-link uri">https://github.com/datalab-to/marker</a></p>
 </blockquote>
-</div>
-<div class="section level2">
-<h2 id="oncoplot-follow-ups">Oncoplot follow-ups<a class="anchor" aria-label="anchor" href="#oncoplot-follow-ups"></a></h2>
-<ul><li>Draft: expose a dedicated per-sample mutation burden result if users need TMB-like summaries outside the marginal plot.</li>
-<li>Draft: add UI gating so <code>log10TransformTMB</code> is only available/active when <code>showTMB</code> is enabled.</li>
-<li>Draft: penalized/Firth logistic fallback and manual positive-predictor level control for oddsratio LRs/nomogram</li>
-</ul><blockquote>
+<blockquote>
 <p>/review-article-stats ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.md’ ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/Multi-modal convolutional neural network-based thyroid cytology classification and diagnosis - ScienceDirect.html’ ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.pdf’ ‘/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/temp/untitled folder/1-s2.0-S0046817725001558-main.md’</p>
 </blockquote>
 <p>claude –no-mcp –no-tools “/review-article-stats Deep-Learning-Based-Prediction”<br>
@@ -91,7 +76,7 @@
 <p>(menuGroup:.*?)(T3|T2|T1|T)$</p>
 <p>gemini: /chat share log.json gemini: ctrl+s copy mode</p>
 <p>use gemini to make Readiness for Clinicians and Pathologists assessment and Use Case Example Generation for each function.</p>
-<p>You are an expert R-package and jamovi developer. You are an expert in biostatistics working with pathologists and clinicians. Critically evaluate multisurvival function. Is it mathematically and statistically accurate? Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options. Is it ready to be used by clinicians and pathologists? Is it ready for release? Do not focus just on testing. Focus on functionality and accuracy. After you are satisfied with function then update and use tests. Suggest improvements. Do not remove functionality.</p>
+<p>You are an expert R-package and jamovi developer. You are an expert in biostatistics working with pathologists and clinicians. Critically evaluate the next function. Is it mathematically and statistically accurate? Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options. Is it ready to be used by clinicians and pathologists? Is it ready for release? Suggest improvements. Do not remove functionality.</p>
 <blockquote>
 <p>fix issues and implement recommendations. favor functionality over explanations and guidence parts.</p>
 </blockquote>
@@ -110,7 +95,7 @@
 <p>! Rscript -e “jmvtools::prepare()” ! Rscript -e “devtools::document()” ! Rscript -e “devtools::load_all()”</p>
 <p>Rscript _updateModules.R</p>
 <p>Always use available ‘skills’ when possible. Keep the output organized. Use these skills to update text and analysis in the project: pubmed-database biopython biorxiv-database openalex-database citation-management scholar-evaluation clinical-decision-support clinical-reports exploratory-data-analysis hypogenic hypothesis-generation literature-review peer-review scientific-brainstorming scientific-critical-thinking scientific-visualization scientific-schematics generate-image scientific-slides scientific-writing research-grants statistical-analysis statsmodels paper-2-web matplotlib scikit-learn scikit-survival plotly seaborn aeon docx xlsx pptx latex-posters pdf markitdown histolab pathml shap omero-integration pydicom pytorch-lightning</p>
-<p>update DECSRIPTION, NEWS, README, and function Roxygen documentations.</p>
+<p>update DESCRIPTION, NEWS, README, and function Roxygen documentations after each implementation or daily.</p>
 <p>! Rscript -e “pkgdown::build_site()” ! Rscript -e “pkgdown::build_site(examples = FALSE, lazy = TRUE, preview = FALSE)”</p>
 <p>run jmvtools::prepare() to see if there are any errors run devtools::document() to see if there are any errors</p>
 <p>prepare a realistic data to test the features in detail move csv files under data folder. move data generation files under data-raw folder. move documentation files under module specific vignettes folder.</p>
@@ -1914,7 +1899,7 @@ Proposed:
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">.aggregateLargeData</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">dt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
+<span>  <span class="va">dt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span>  <span class="va">dt</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">group</span><span class="op">]</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </li>

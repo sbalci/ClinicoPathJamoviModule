@@ -34,6 +34,7 @@ treecompare(
   interpretability_weight = 0.3,
   show_comparison_table = TRUE,
   show_performance_plot = TRUE,
+  plot_parttree = FALSE,
   show_roc_comparison = TRUE,
   show_statistical_tests = TRUE,
   show_ranking_table = TRUE,
@@ -116,6 +117,9 @@ all metrics.}
 
 \item{show_performance_plot}{Display box plots comparing algorithm
 performance.}
+
+\item{plot_parttree}{Display 2D partition plot for CART or Conditional
+Trees (if enabled).}
 
 \item{show_roc_comparison}{Display overlaid ROC curves for all algorithms.}
 

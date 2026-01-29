@@ -33,7 +33,6 @@ children:
             name: facs
             isTarget: true
             height: small
-
   - type: CollapseBox
     label: Analysis Settings
     collapsed: false
@@ -58,7 +57,6 @@ children:
             name: stratified_sampling
           - type: ComboBox
             name: handle_missing
-
   - type: CollapseBox
     label: Tree Parameters
     collapsed: true
@@ -76,7 +74,6 @@ children:
             format: number
           - type: CheckBox
             name: use_1se_rule
-
   - type: CollapseBox
     label: Clinical Context
     collapsed: true
@@ -91,7 +88,6 @@ children:
             name: fn_fp_ratio
             format: number
             enable: (cost_sensitive)
-
   - type: CollapseBox
     label: Display Options
     collapsed: false
@@ -108,7 +104,10 @@ children:
             name: show_importance_plot
           - type: CheckBox
             name: show_clinical_interpretation
-
+          - type: CheckBox
+            name: show_roc_plot
+          - type: CheckBox
+            name: show_calibration_plot
   - type: CollapseBox
     label: Reproducibility
     collapsed: true
@@ -121,3 +120,13 @@ children:
             name: seed_value
             format: number
             enable: (set_seed)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: plot_palette
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: plot_parttree

@@ -4,6 +4,13 @@ title: DateTime Converter
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+         - datetime_var
+         - datetime_format
+
     - name: welcome
       title: 'Getting Started'
       type: Html

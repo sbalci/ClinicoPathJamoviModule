@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,9 +47,9 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">timedependentdca</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">time</span>,</span>
-<span>  <span class="va">event</span>,</span>
-<span>  <span class="va">predictor</span>,</span>
+<span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  event <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  time_points <span class="op">=</span> <span class="st">"365, 730, 1095"</span>,</span>
 <span>  threshold_range_min <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  threshold_range_max <span class="op">=</span> <span class="fl">0.99</span>,</span>
@@ -83,8 +83,8 @@
 <dd><p>a string naming the event indicator (1=event, 0=censored)</p></dd>
 
 
-<dt id="arg-predictor">predictor<a class="anchor" aria-label="anchor" href="#arg-predictor"></a></dt>
-<dd><p>a string naming the risk score or prediction variable</p></dd>
+<dt id="arg-predictors">predictors<a class="anchor" aria-label="anchor" href="#arg-predictors"></a></dt>
+<dd><p>one or more risk score or prediction variables</p></dd>
 
 
 <dt id="arg-time-points">time_points<a class="anchor" aria-label="anchor" href="#arg-time-points"></a></dt>
@@ -139,7 +139,7 @@ overlay)</p>
 <p>random_seedrandom seed for reproducible bootstrap sampling</p></dd>
 
 </dl><p>A results object containing:
-</p><table class="table table"><tr><td><code>results$instructionsText</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$netBenefitTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$summaryTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interventionsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$netBenefitPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$interventionsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$interpretationText</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:<code>results$netBenefitTable$asDF</code><code>as.data.frame(results$netBenefitTable)</code>
+</p><table class="table table"><tr><td><code>results$instructionsText</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$netBenefitTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$summaryTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$interventionsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$comparisonTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$netBenefitPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$interventionsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$interpretationText</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:<code>results$netBenefitTable$asDF</code><code>as.data.frame(results$netBenefitTable)</code>
 
 
 Perform time-dependent Decision Curve Analysis (DCA) for survival data

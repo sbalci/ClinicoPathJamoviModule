@@ -24,9 +24,13 @@ treemedical(
   cost_sensitive = FALSE,
   fn_fp_ratio = 2,
   show_tree_plot = TRUE,
+  plot_palette = "auto",
+  plot_parttree = FALSE,
   show_performance_metrics = TRUE,
   show_confusion_matrix = TRUE,
   show_importance_plot = TRUE,
+  show_roc_plot = TRUE,
+  show_calibration_plot = TRUE,
   show_clinical_interpretation = TRUE,
   set_seed = TRUE,
   seed_value = 42
@@ -83,6 +87,10 @@ negatives.}
 
 \item{show_tree_plot}{Display visual representation of the decision tree.}
 
+\item{plot_palette}{Color palette for the decision tree plot.}
+
+\item{plot_parttree}{Display 2D partition plot of the decision tree.}
+
 \item{show_performance_metrics}{Display accuracy, sensitivity, specificity,
 AUC, and clinical metrics.}
 
@@ -91,6 +99,11 @@ interpretations.}
 
 \item{show_importance_plot}{Display ranking of most important clinical
 variables.}
+
+\item{show_roc_plot}{Display Receiver Operating Characteristic curve.}
+
+\item{show_calibration_plot}{Display calibration plot (observed vs
+predicted probability).}
 
 \item{show_clinical_interpretation}{Display clinical interpretation and
 usage guidelines.}
@@ -108,6 +121,7 @@ A results object containing:
 \code{results$confusion_matrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$variable_importance} \tab \tab \tab \tab \tab a table \cr
 \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$parttree_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$importance_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$clinical_interpretation} \tab \tab \tab \tab \tab a html \cr
 }

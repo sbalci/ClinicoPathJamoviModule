@@ -263,6 +263,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     "datetimeconverterResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
         formatInfo = function() private$.items[["formatInfo"]],
         qualityMetrics = function() private$.items[["qualityMetrics"]],
@@ -296,6 +297,13 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "lubridate"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -559,6 +567,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   serial dates, Unix epoch, timezones, etc.) to aid interpretation.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$formatInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qualityMetrics} \tab \tab \tab \tab \tab a html \cr

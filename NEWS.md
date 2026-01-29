@@ -1,5 +1,30 @@
 # ClinicoPath News
 
+## Version 0.0.33.05
+
+### 🗓️ **January 27, 2026 - Simulation Validation & Stability**
+
+---
+
+## 🏥 **SURVIVAL ANALYSIS**
+
+### **Simulation-Based Validation**
+*   **New Feature**: `survivalPower` now includes a rigorous simulation-based validation framework.
+*   **Verification**: Users can verify analytical power calculations against Monte Carlo simulations (up to 100,000 runs).
+*   **Diagnostics**: Comprehensive comparison table shows analytical vs. simulated power with agreement classification (Excellent/Good/Fair/Poor).
+*   **Robustness**: Improved handling of multiple comparisons (`dunnett`, `holm`, `bonferroni`) and distribution parameters.
+
+---
+
+## 📉 **RELIABILITY & AGREEMENT**
+
+### **Fixes & Improvements**
+*   **Agreement Module**: Fixed critical bugs in `agreement` function regarding weighted kappa for ordinal variables.
+*   **Stability**: Resolved `rowIndex` and `rowCount` errors in results table population.
+
+---
+
+
 ## Version 0.0.32.60
 
 ### 🗓️ **December 28, 2025 - Comprehensive Analysis Enhancements**

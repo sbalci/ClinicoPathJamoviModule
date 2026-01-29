@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -154,7 +154,8 @@ recommendationsexport_patternsExport missing data patterns for external analysis
 
 
 A results object containing:
-</p><table class="table table"><tr><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
+</p><table class="table table"><tr><td><code>results$summary_statistics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$mcar_test_results</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$missing_patterns</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$correlation_matrix</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pattern_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$upset_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:<code>results$summary_statistics$asDF</code><code>as.data.frame(results$summary_statistics)</code>
+
 
 Comprehensive missing data pattern exploration and visualization for
 clinical research.

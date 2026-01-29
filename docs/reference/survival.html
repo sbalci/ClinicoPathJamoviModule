@@ -19,7 +19,7 @@ person-time."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,12 +66,12 @@ person-time.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">survival</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">elapsedtime</span>,</span>
+<span>  elapsedtime <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tint <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">dxdate</span>,</span>
-<span>  <span class="va">fudate</span>,</span>
-<span>  <span class="va">explanatory</span>,</span>
-<span>  <span class="va">outcome</span>,</span>
+<span>  dxdate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fudate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  explanatory <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">outcomeLevel</span>,</span>
 <span>  <span class="va">dod</span>,</span>
 <span>  <span class="va">dooc</span>,</span>
@@ -106,11 +106,22 @@ person-time.</p>
 <span>  rmst_analysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  rmst_tau <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  stratified_cox <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">strata_variable</span>,</span>
+<span>  strata_variable <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  residual_diagnostics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  loglog <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  showSummaries <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  showSummaries <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  use_parametric <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  parametric_distribution <span class="op">=</span> <span class="st">"weibull"</span>,</span>
+<span>  parametric_covariates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  spline_knots <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  spline_scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
+<span>  parametric_extrapolation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  extrapolation_time <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  parametric_diagnostics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  compare_distributions <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  parametric_survival_plots <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  hazard_plots <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -167,19 +178,23 @@ the event level.</p></dd>
 
 
 <dt id="arg-dod">dod<a class="anchor" aria-label="anchor" href="#arg-dod"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>The level of the outcome variable that indicates death from
+disease.</p></dd>
 
 
 <dt id="arg-dooc">dooc<a class="anchor" aria-label="anchor" href="#arg-dooc"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>The level of the outcome variable that indicates death from
+other causes.</p></dd>
 
 
 <dt id="arg-awd">awd<a class="anchor" aria-label="anchor" href="#arg-awd"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>The level of the outcome variable that indicates alive with
+disease.</p></dd>
 
 
 <dt id="arg-awod">awod<a class="anchor" aria-label="anchor" href="#arg-awod"></a></dt>
-<dd><p>.</p></dd>
+<dd><p>The level of the outcome variable that indicates alive without
+disease.</p></dd>
 
 
 <dt id="arg-analysistype">analysistype<a class="anchor" aria-label="anchor" href="#arg-analysistype"></a></dt>
@@ -341,10 +356,76 @@ and plots. These summaries provide plain-language interpretations of the
 statistical results. Turn off to reduce visual clutter when summaries are
 not needed.</p></dd>
 
+
+<dt id="arg-use-parametric">use_parametric<a class="anchor" aria-label="anchor" href="#arg-use-parametric"></a></dt>
+<dd><p>Enable parametric survival modeling using flexsurv
+package. Provides alternative to Cox regression with explicit hazard
+functions and extrapolation capabilities beyond observed follow-up.</p></dd>
+
+
+<dt id="arg-parametric-distribution">parametric_distribution<a class="anchor" aria-label="anchor" href="#arg-parametric-distribution"></a></dt>
+<dd><p>Choose parametric distribution for survival
+modeling. Weibull is most common, while splines provide flexible hazard
+shapes. Different distributions make different assumptions about hazard
+function shape.</p></dd>
+
+
+<dt id="arg-parametric-covariates">parametric_covariates<a class="anchor" aria-label="anchor" href="#arg-parametric-covariates"></a></dt>
+<dd><p>Include explanatory variables as covariates in
+parametric models, similar to Cox regression but with parametric baseline
+hazard.</p></dd>
+
+
+<dt id="arg-spline-knots">spline_knots<a class="anchor" aria-label="anchor" href="#arg-spline-knots"></a></dt>
+<dd><p>Number of knots for spline-based models. More knots
+allow more flexible hazard shapes but may lead to overfitting. Used only
+for Royston-Parmar splines.</p></dd>
+
+
+<dt id="arg-spline-scale">spline_scale<a class="anchor" aria-label="anchor" href="#arg-spline-scale"></a></dt>
+<dd><p>Scale for spline-based models. Hazard scale models log
+hazard function, odds scale models log cumulative odds, normal scale models
+normal scores.</p></dd>
+
+
+<dt id="arg-parametric-extrapolation">parametric_extrapolation<a class="anchor" aria-label="anchor" href="#arg-parametric-extrapolation"></a></dt>
+<dd><p>Perform survival extrapolation beyond
+observed follow-up time using fitted parametric models. Useful for health
+economic modeling and long-term prognosis assessment.</p></dd>
+
+
+<dt id="arg-extrapolation-time">extrapolation_time<a class="anchor" aria-label="anchor" href="#arg-extrapolation-time"></a></dt>
+<dd><p>Maximum time for survival extrapolation (in same
+units as survival time). If 0, uses 2x maximum observed time. Use with
+caution as extrapolation relies on distributional assumptions.</p></dd>
+
+
+<dt id="arg-parametric-diagnostics">parametric_diagnostics<a class="anchor" aria-label="anchor" href="#arg-parametric-diagnostics"></a></dt>
+<dd><p>Display model diagnostics including AIC/BIC
+for model comparison, residual plots, and goodness-of-fit statistics for
+parametric models.</p></dd>
+
+
+<dt id="arg-compare-distributions">compare_distributions<a class="anchor" aria-label="anchor" href="#arg-compare-distributions"></a></dt>
+<dd><p>Fit and compare multiple parametric
+distributions using AIC/BIC criteria. Helps select the best-fitting
+distribution for your data.</p></dd>
+
+
+<dt id="arg-parametric-survival-plots">parametric_survival_plots<a class="anchor" aria-label="anchor" href="#arg-parametric-survival-plots"></a></dt>
+<dd><p>Generate survival curves from fitted
+parametric models with confidence intervals. Compare with Kaplan-Meier
+estimates for model validation.</p></dd>
+
+
+<dt id="arg-hazard-plots">hazard_plots<a class="anchor" aria-label="anchor" href="#arg-hazard-plots"></a></dt>
+<dd><p>Plot estimated hazard functions from parametric models.
+Shows how instantaneous risk changes over time for different distributions.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$subtitle</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$medianSurvivalHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$medianSurvivalHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxRegressionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$phInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalTablesHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalTablesHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalTablesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rmstHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualDiagnosticsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalExport</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$survivalExportSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$pairwiseComparisonHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$pairwiseTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pairwiseSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot7</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$residualsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$clinicalGlossaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalInterpretationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$copyReadySentencesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$subtitle</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$medianSurvivalHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$medianSurvivalHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxRegressionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$phInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalTablesHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalTablesHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalTablesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rmstHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualDiagnosticsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalExport</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$survivalExportSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$pairwiseComparisonHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$pairwiseTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pairwiseSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot7</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$residualsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$parametricModelComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricModelSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricDiagnostics</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$parametricSurvivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$hazardFunctionPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$extrapolationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$extrapolationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricModelsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalGlossaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalInterpretationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$copyReadySentencesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$medianTable$asDF</code></p>
 <p><code>as.data.frame(results$medianTable)</code></p>
     </div>

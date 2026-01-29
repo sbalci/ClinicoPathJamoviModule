@@ -41,6 +41,8 @@ treeadvanced(
   feature_selection_method = "rfe",
   max_features = 10,
   show_tree_plot = TRUE,
+  plot_palette = "auto",
+  plot_parttree = FALSE,
   show_performance_metrics = TRUE,
   show_confusion_matrix = TRUE,
   show_importance_plot = TRUE,
@@ -130,7 +132,11 @@ treeadvanced(
 
 \item{max_features}{.}
 
-\item{show_tree_plot}{.}
+\item{show_tree_plot}{Display visual representation of the decision tree.}
+
+\item{plot_palette}{Color palette for the decision tree plot.}
+
+\item{plot_parttree}{.}
 
 \item{show_performance_metrics}{.}
 
@@ -174,6 +180,7 @@ A results object containing:
 \code{results$confusionmatrix} \tab \tab \tab \tab \tab a table \cr
 \code{results$variableimportance} \tab \tab \tab \tab \tab a table \cr
 \code{results$treeplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$parttreeplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$importanceplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$validationcurves} \tab \tab \tab \tab \tab an image \cr
 \code{results$calibrationplot} \tab \tab \tab \tab \tab an image \cr

@@ -125,9 +125,6 @@ items:
         - cost_sensitive
         - use_1se_rule
 
-        - cost_sensitive
-        - use_1se_rule
-
     - name: parttree_plot
       title: Partition Tree Plot (2D)
       type: Image
@@ -142,6 +139,8 @@ items:
         - targetLevel
         - handle_missing
         - cost_sensitive
+
+    - name: importance_plot
       title: Variable Importance Plot
       type: Image
       width: 600

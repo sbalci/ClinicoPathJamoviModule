@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.32.72</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -290,7 +290,10 @@ guidelines</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td></td><td></td><td></td><td></td><td></td><td></td></tr></table></div>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$data_summary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$model_summary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$risk_table</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$nomogram_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calibration_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$method_explanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+<p><code>results$data_summary$asDF</code></p>
+<p><code>as.data.frame(results$data_summary)</code></p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

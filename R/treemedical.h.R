@@ -24,9 +24,13 @@ treemedicalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             cost_sensitive = FALSE,
             fn_fp_ratio = 2,
             show_tree_plot = TRUE,
+            plot_palette = "auto",
+            plot_parttree = FALSE,
             show_performance_metrics = TRUE,
             show_confusion_matrix = TRUE,
             show_importance_plot = TRUE,
+            show_roc_plot = TRUE,
+            show_calibration_plot = TRUE,
             show_clinical_interpretation = TRUE,
             set_seed = TRUE,
             seed_value = 42, ...) {
@@ -148,6 +152,22 @@ treemedicalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "show_tree_plot",
                 show_tree_plot,
                 default=TRUE)
+            private$..plot_palette <- jmvcore::OptionList$new(
+                "plot_palette",
+                plot_palette,
+                options=list(
+                    "auto",
+                    "Greens",
+                    "Blues",
+                    "Greys",
+                    "Spectral",
+                    "RdBu",
+                    "OrBu"),
+                default="auto")
+            private$..plot_parttree <- jmvcore::OptionBool$new(
+                "plot_parttree",
+                plot_parttree,
+                default=FALSE)
             private$..show_performance_metrics <- jmvcore::OptionBool$new(
                 "show_performance_metrics",
                 show_performance_metrics,
@@ -159,6 +179,14 @@ treemedicalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..show_importance_plot <- jmvcore::OptionBool$new(
                 "show_importance_plot",
                 show_importance_plot,
+                default=TRUE)
+            private$..show_roc_plot <- jmvcore::OptionBool$new(
+                "show_roc_plot",
+                show_roc_plot,
+                default=TRUE)
+            private$..show_calibration_plot <- jmvcore::OptionBool$new(
+                "show_calibration_plot",
+                show_calibration_plot,
                 default=TRUE)
             private$..show_clinical_interpretation <- jmvcore::OptionBool$new(
                 "show_clinical_interpretation",
@@ -193,9 +221,13 @@ treemedicalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..cost_sensitive)
             self$.addOption(private$..fn_fp_ratio)
             self$.addOption(private$..show_tree_plot)
+            self$.addOption(private$..plot_palette)
+            self$.addOption(private$..plot_parttree)
             self$.addOption(private$..show_performance_metrics)
             self$.addOption(private$..show_confusion_matrix)
             self$.addOption(private$..show_importance_plot)
+            self$.addOption(private$..show_roc_plot)
+            self$.addOption(private$..show_calibration_plot)
             self$.addOption(private$..show_clinical_interpretation)
             self$.addOption(private$..set_seed)
             self$.addOption(private$..seed_value)
@@ -219,9 +251,13 @@ treemedicalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         cost_sensitive = function() private$..cost_sensitive$value,
         fn_fp_ratio = function() private$..fn_fp_ratio$value,
         show_tree_plot = function() private$..show_tree_plot$value,
+        plot_palette = function() private$..plot_palette$value,
+        plot_parttree = function() private$..plot_parttree$value,
         show_performance_metrics = function() private$..show_performance_metrics$value,
         show_confusion_matrix = function() private$..show_confusion_matrix$value,
         show_importance_plot = function() private$..show_importance_plot$value,
+        show_roc_plot = function() private$..show_roc_plot$value,
+        show_calibration_plot = function() private$..show_calibration_plot$value,
         show_clinical_interpretation = function() private$..show_clinical_interpretation$value,
         set_seed = function() private$..set_seed$value,
         seed_value = function() private$..seed_value$value),
@@ -244,9 +280,13 @@ treemedicalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..cost_sensitive = NA,
         ..fn_fp_ratio = NA,
         ..show_tree_plot = NA,
+        ..plot_palette = NA,
+        ..plot_parttree = NA,
         ..show_performance_metrics = NA,
         ..show_confusion_matrix = NA,
         ..show_importance_plot = NA,
+        ..show_roc_plot = NA,
+        ..show_calibration_plot = NA,
         ..show_clinical_interpretation = NA,
         ..set_seed = NA,
         ..seed_value = NA)
@@ -262,6 +302,7 @@ treemedicalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         confusion_matrix = function() private$.items[["confusion_matrix"]],
         variable_importance = function() private$.items[["variable_importance"]],
         tree_plot = function() private$.items[["tree_plot"]],
+        parttree_plot = function() private$.items[["parttree_plot"]],
         importance_plot = function() private$.items[["importance_plot"]],
         clinical_interpretation = function() private$.items[["clinical_interpretation"]]),
     private = list(),
@@ -412,6 +453,21 @@ treemedicalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "use_1se_rule")))
             self$add(jmvcore::Image$new(
                 options=options,
+                name="parttree_plot",
+                title="Partition Tree Plot (2D)",
+                width=700,
+                height=500,
+                renderFun=".parttree_plot",
+                visible="(plot_parttree)",
+                clearWith=list(
+                    "vars",
+                    "facs",
+                    "target",
+                    "targetLevel",
+                    "handle_missing",
+                    "cost_sensitive")))
+            self$add(jmvcore::Image$new(
+                options=options,
                 name="importance_plot",
                 title="Variable Importance Plot",
                 width=600,
@@ -509,12 +565,17 @@ treemedicalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   negatives.
 #' @param fn_fp_ratio Relative cost of missing positive case vs false alarm.
 #' @param show_tree_plot Display visual representation of the decision tree.
+#' @param plot_palette Color palette for the decision tree plot.
+#' @param plot_parttree Display 2D partition plot of the decision tree.
 #' @param show_performance_metrics Display accuracy, sensitivity, specificity,
 #'   AUC, and clinical metrics.
 #' @param show_confusion_matrix Display confusion matrix with clinical
 #'   interpretations.
 #' @param show_importance_plot Display ranking of most important clinical
 #'   variables.
+#' @param show_roc_plot Display Receiver Operating Characteristic curve.
+#' @param show_calibration_plot Display calibration plot (observed vs
+#'   predicted probability).
 #' @param show_clinical_interpretation Display clinical interpretation and
 #'   usage guidelines.
 #' @param set_seed Set random seed for reproducible results.
@@ -527,6 +588,7 @@ treemedicalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$confusion_matrix} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$variable_importance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tree_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$parttree_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$importance_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$clinical_interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -558,9 +620,13 @@ treemedical <- function(
     cost_sensitive = FALSE,
     fn_fp_ratio = 2,
     show_tree_plot = TRUE,
+    plot_palette = "auto",
+    plot_parttree = FALSE,
     show_performance_metrics = TRUE,
     show_confusion_matrix = TRUE,
     show_importance_plot = TRUE,
+    show_roc_plot = TRUE,
+    show_calibration_plot = TRUE,
     show_clinical_interpretation = TRUE,
     set_seed = TRUE,
     seed_value = 42) {
@@ -600,9 +666,13 @@ treemedical <- function(
         cost_sensitive = cost_sensitive,
         fn_fp_ratio = fn_fp_ratio,
         show_tree_plot = show_tree_plot,
+        plot_palette = plot_palette,
+        plot_parttree = plot_parttree,
         show_performance_metrics = show_performance_metrics,
         show_confusion_matrix = show_confusion_matrix,
         show_importance_plot = show_importance_plot,
+        show_roc_plot = show_roc_plot,
+        show_calibration_plot = show_calibration_plot,
         show_clinical_interpretation = show_clinical_interpretation,
         set_seed = set_seed,
         seed_value = seed_value)

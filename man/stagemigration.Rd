@@ -18,6 +18,7 @@ stagemigration(
   preferredLanguage = "en",
   enableProgressIndicators = FALSE,
   optimizeForLargeDatasets = FALSE,
+  complexityMode = "quick",
   analysisType = "comprehensive",
   confidenceLevel = 0.95,
   calculateNRI = FALSE,
@@ -306,6 +307,12 @@ Helps users track analysis progress.}
 large datasets (>10,000 patients).  Uses chunked processing and optimized
 algorithms to reduce memory usage  and improve performance while
 maintaining statistical accuracy.}
+
+\item{complexityMode}{Controls UI complexity and feature availability.
+Quick mode shows essential outputs only (migration matrix, C-index, simple
+recommendation). Standard adds common validation metrics (NRI, survival
+curves, Will Rogers). Comprehensive enables all methods (bootstrap, ROC,
+DCA). Custom allows manual control of all options.}
 
 \item{analysisType}{Determines the scope of statistical analysis performed.
 Comprehensive analysis includes all available methods for thorough staging

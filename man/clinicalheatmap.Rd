@@ -9,8 +9,8 @@ clinicalheatmap(
   rowVar,
   colVar,
   valueVar,
-  annotationCols,
-  annotationRows,
+  annotationCols = NULL,
+  annotationRows = NULL,
   scaleMethod = "none",
   clusterRows = FALSE,
   clusterCols = FALSE,
@@ -38,11 +38,11 @@ clinicalheatmap(
   rowClusterPrefix = "RowCluster",
   colClusterPrefix = "ColCluster",
   survivalAnalysis = FALSE,
-  survivalTime,
-  survivalEvent,
+  survivalTime = NULL,
+  survivalEvent = NULL,
   survivalEventLevel,
   clusterComparison = FALSE,
-  comparisonVars
+  comparisonVars = NULL
 )
 }
 \arguments{

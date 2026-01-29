@@ -109,6 +109,48 @@ items:
             title: 'Confidence Level'
             type: text
 
+    - name: simulation_validation_table
+      title: 'Simulation-Based Validation'
+      type: Table
+      rows: 0
+      visible: (run_simulation_validation)
+      clearWith:
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - survival_distribution
+          - weibull_shape
+          - effect_size
+          - alpha_level
+          - power_level
+          - sample_size_input
+          - control_median_survival
+          - accrual_period
+          - follow_up_period
+          - dropout_rate
+          - allocation_ratio
+          - simulation_runs
+          - run_simulation_validation
+      columns:
+          - name: metric
+            title: 'Metric'
+            type: text
+          - name: analytical
+            title: 'Analytical'
+            type: number
+          - name: simulated
+            title: 'Simulated'
+            type: number
+          - name: ci_lower
+            title: '95% CI Lower'
+            type: number
+          - name: ci_upper
+            title: '95% CI Upper'
+            type: number
+          - name: agreement
+            title: 'Agreement'
+            type: text
+
     - name: sample_size_results
       title: 'Sample Size Calculations'
       type: Table

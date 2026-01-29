@@ -40,6 +40,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             cluster_size = 50,
             icc = 0.05,
             sensitivity_analysis = FALSE,
+            run_simulation_validation = FALSE,
             simulation_runs = 10000,
             show_summary = FALSE,
             show_explanations = FALSE,
@@ -294,6 +295,10 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "sensitivity_analysis",
                 sensitivity_analysis,
                 default=FALSE)
+            private$..run_simulation_validation <- jmvcore::OptionBool$new(
+                "run_simulation_validation",
+                run_simulation_validation,
+                default=FALSE)
             private$..simulation_runs <- jmvcore::OptionNumber$new(
                 "simulation_runs",
                 simulation_runs,
@@ -351,6 +356,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..cluster_size)
             self$.addOption(private$..icc)
             self$.addOption(private$..sensitivity_analysis)
+            self$.addOption(private$..run_simulation_validation)
             self$.addOption(private$..simulation_runs)
             self$.addOption(private$..show_summary)
             self$.addOption(private$..show_explanations)
@@ -392,6 +398,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         cluster_size = function() private$..cluster_size$value,
         icc = function() private$..icc$value,
         sensitivity_analysis = function() private$..sensitivity_analysis$value,
+        run_simulation_validation = function() private$..run_simulation_validation$value,
         simulation_runs = function() private$..simulation_runs$value,
         show_summary = function() private$..show_summary$value,
         show_explanations = function() private$..show_explanations$value,
@@ -432,6 +439,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..cluster_size = NA,
         ..icc = NA,
         ..sensitivity_analysis = NA,
+        ..run_simulation_validation = NA,
         ..simulation_runs = NA,
         ..show_summary = NA,
         ..show_explanations = NA,
@@ -445,6 +453,7 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         instructions = function() private$.items[["instructions"]],
         power_summary = function() private$.items[["power_summary"]],
+        simulation_validation_table = function() private$.items[["simulation_validation_table"]],
         sample_size_results = function() private$.items[["sample_size_results"]],
         power_results = function() private$.items[["power_results"]],
         effect_size_results = function() private$.items[["effect_size_results"]],
@@ -593,6 +602,54 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="confidence_level", 
                         `title`="Confidence Level", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="simulation_validation_table",
+                title="Simulation-Based Validation",
+                rows=0,
+                visible="(run_simulation_validation)",
+                clearWith=list(
+                    "clinical_preset",
+                    "analysis_type",
+                    "test_type",
+                    "survival_distribution",
+                    "weibull_shape",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "sample_size_input",
+                    "control_median_survival",
+                    "accrual_period",
+                    "follow_up_period",
+                    "dropout_rate",
+                    "allocation_ratio",
+                    "simulation_runs",
+                    "run_simulation_validation"),
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="analytical", 
+                        `title`="Analytical", 
+                        `type`="number"),
+                    list(
+                        `name`="simulated", 
+                        `title`="Simulated", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="agreement", 
+                        `title`="Agreement", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -1385,6 +1442,10 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param icc ICC for cluster randomized trials
 #' @param sensitivity_analysis Perform sensitivity analysis across parameter
 #'   ranges
+#' @param run_simulation_validation Validate analytical power calculations
+#'   using Monte Carlo simulation. Useful for verifying complex scenarios
+#'   (Weibull, log-normal distributions). May take 10-60 seconds depending on
+#'   simulation_runs setting.
 #' @param simulation_runs Number of simulation runs for complex calculations
 #' @param show_summary Display plain-language summary of results
 #' @param show_explanations Display educational notes and guidance
@@ -1394,6 +1455,7 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$power_summary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$simulation_validation_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sample_size_results} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$power_results} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$effect_size_results} \tab \tab \tab \tab \tab a table \cr
@@ -1461,6 +1523,7 @@ survivalPower <- function(
     cluster_size = 50,
     icc = 0.05,
     sensitivity_analysis = FALSE,
+    run_simulation_validation = FALSE,
     simulation_runs = 10000,
     show_summary = FALSE,
     show_explanations = FALSE,
@@ -1506,6 +1569,7 @@ survivalPower <- function(
         cluster_size = cluster_size,
         icc = icc,
         sensitivity_analysis = sensitivity_analysis,
+        run_simulation_validation = run_simulation_validation,
         simulation_runs = simulation_runs,
         show_summary = show_summary,
         show_explanations = show_explanations,
