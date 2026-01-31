@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.33.05
-Date: 2026-01-29
+Version: 0.0.33.06
+Date: 2026-01-31
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -46,6 +46,7 @@ Imports:
     explore,
     FSA,
     finalfit,
+    fmsb,
     forcats,
     glue,
     gt,
@@ -478,10 +479,12 @@ Collate:
     'data_decision_docs.R'
     'data_decisioncompare_docs.R'
     'data_diagnosticmeta_docs.R'
+    'data_groomecompare_docs.R'
     'data_nogoldstandard_docs.R'
     'data_oddsratio_docs.R'
     'data_outcomeorganizer_docs.R'
     'data_psychopdaROC_docs.R'
+    'data_rpasurvival_docs.R'
     'data_singlearm_docs.R'
     'data_survivalcont_docs.R'
     'data_swimmer_unified_docs.R'
@@ -616,6 +619,8 @@ Collate:
     'grafify.h.R'
     'greyzoneroc.b.R'
     'greyzoneroc.h.R'
+    'groomecompare.b.R'
+    'groomecompare.h.R'
     'groupedbar.b.R'
     'groupedbar.h.R'
     'groupedforest.b.R'
@@ -942,6 +947,8 @@ Collate:
     'roc2d.h.R'
     'rocreg.b.R'
     'rocreg.h.R'
+    'rpasurvival.b.R'
+    'rpasurvival.h.R'
     'samplingerror.b.R'
     'samplingerror.h.R'
     'screeningcalculator.b.R'

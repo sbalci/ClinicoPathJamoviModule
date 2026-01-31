@@ -1,5 +1,92 @@
 # ClinicoPath News
 
+## Version 0.0.34
+
+### 🗓️ **January 31, 2026 - RPA Survival Staging & Groome Comparison**
+
+---
+
+## 🐛 **BUG FIXES**
+
+### **rpasurvival**
+*   **Fixed:** Replaced invalid `setRows()` method with proper `addRow()` loops for all 5 output tables (risk group, Cox model, log-rank test, variable importance, complexity parameter)
+*   **Fixed:** Added required `data` parameter to `survminer::ggsurvplot()` to prevent "data argument should be provided" error
+*   **Fixed:** Created and stored `kmData` data frame in plot state for proper Kaplan-Meier curve rendering
+*   **Impact**: Function now works correctly in jamovi UI without serialization or method errors
+
+---
+
+## 📊 **TEST DATA & DOCUMENTATION**
+
+### **rpasurvival Test Data**
+*   **Created:** Comprehensive test datasets (7 datasets × 4 formats = 28 files)
+    *   `rpasurvival_test` (n=200): Standard clinical dataset with 11 variables
+    *   `rpasurvival_small` (n=50): Minimal viable sample size
+    *   `rpasurvival_large` (n=500): Complex tree development
+    *   Edge case datasets: TRUE/FALSE coding, 1/2 coding, days/years time units
+*   **Test Suite:** 44 comprehensive tests (basic, arguments, edge cases)
+*   **Documentation:** Complete roxygen2 documentation with usage examples and validation notes
+
+### **groomecompare Test Data**
+*   **Created:** Comprehensive test datasets (9 datasets × 4 formats = 36 files)
+    *   `groomecompare_test` (n=150): Standard ypTNM vs RPA comparison
+    *   `groomecompare_small` (n=60): Small sample testing
+    *   `groomecompare_large` (n=300): AJCC8 vs RPA5 comparison
+    *   Special datasets: unbalanced, tied times, identical systems, clear winner scenarios
+*   **Test Suite:** 47 comprehensive tests covering all Groome criteria
+*   **Documentation:** Complete roxygen2 documentation with Groome method references
+
+### **Data Organization**
+*   **Structure:** Implemented R package convention
+    *   RDA files → `data/` (872 files, for `data()` command)
+    *   CSV/XLSX/OMV → `data/nonrda/` (21 files, for cross-platform use)
+*   **Documentation:** Created `DATA_ORGANIZATION.md` and test data summary files
+*   **Generation Scripts:** Updated `data-raw/rpasurvival_test_data.R` and `data-raw/groomecompare_test_data.R`
+
+---
+
+## 🏥 **SURVIVAL ANALYSIS**
+
+### **New Features**
+
+#### **1. `rpasurvival` - Recursive Partitioning Analysis for Survival**
+*   **Purpose**: Develop risk stratification groups using binary tree partitioning (CART for survival data).
+*   **Key Features**:
+    *   Automatic binary tree splitting with log-rank or likelihood criterion
+    *   Cross-validation with automatic pruning (10-fold default)
+    *   Configurable complexity parameters (minbucket, cp, maxdepth)
+    *   Multiple risk group labeling schemes (Stage I-II-III, Low-High Risk, Numeric)
+    *   Decision tree visualization with rpart.plot
+    *   Kaplan-Meier curves by risk group with survminer
+    *   Hazard ratio table with Cox regression
+    *   Variable importance scores
+    *   Creates new variable with RPA stage assignments
+*   **Use Case**: Integrate multiple predictors (e.g., LVI + ypTNM stage) to create improved prognostic staging systems.
+
+#### **2. `groomecompare` - Groome Staging System Comparison**
+*   **Purpose**: Compare two staging systems using well-accepted Groome criteria (Groome et al., 2001).
+*   **Key Features**:
+    *   Four Groome Criteria: Hazard Consistency, Hazard Discrimination, Sample Balance, Outcome Prediction
+    *   Overall Rank determination (smaller = better)
+    *   Winner identification with percentage improvement
+    *   Detailed hazard ratio tables for both systems
+    *   Sample size distribution analysis
+    *   C-index comparison with 95% CI
+    *   Radar chart visualization (fmsb package)
+    *   Bar chart and side-by-side Kaplan-Meier curves
+    *   Optional bootstrap validation (1000 replicates)
+*   **Use Case**: Demonstrate that a new staging system (e.g., RPA) is superior to an existing system (e.g., ypTNM).
+
+### **Integration**
+*   Complete workflow documented: `rpasurvival` → `groomecompare` → `stagemigration`
+*   Publication-ready statistical reporting templates provided
+*   Based on Liu et al., British Journal of Cancer 2026 (DOI: 10.1038/s41416-025-03314-9)
+
+### **Dependencies Added**
+*   Added `fmsb` package for radar chart visualization
+
+---
+
 ## Version 0.0.33.05
 
 ### 🗓️ **January 27, 2026 - Simulation Validation & Stability**

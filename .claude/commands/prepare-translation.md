@@ -56,7 +56,13 @@ If missing, add it and include a minimal rationale:
 
 ## 2) Wrap translatable strings (jamovi patterns)
 
-Use the `` `.` `` wrapper for all user‑visible strings in `R/*.b.R`. YAML strings are extracted automatically (no wrapper needed).
+Use the `` `.` `` wrapper for all user‑visible strings in `R/*.b.R`. YAML strings (.a.yaml, .r.yaml, .u.yaml) are extracted automatically (no wrapper needed).
+
+**IMPORTANT:** The `.()` function serves dual purposes:
+1. **Development time**: Signals to jmvtools that strings need extraction into .po catalogs
+2. **Runtime**: Performs translation lookup based on current language setting
+
+**Reference:** See `vignettes/jamovi_i18n_guide.md` for comprehensive i18n patterns and best practices.
 
 ### 2.1 Error & warning messages
 
@@ -72,6 +78,11 @@ perfectFitErrorMessage <- .("Residual sum of squares and/or degrees of freedom a
 ```r
 stop(.("Please select at least one variable"))
 warning(.("Some groups have zero counts; results may be unstable"))
+
+# With context
+if (n < 10) {
+    stop(.("Sample size too small: at least 10 observations required"))
+}
 ```
 
 ### 2.2 Titles with placeholders (use `{name}` tokens)
@@ -82,12 +93,32 @@ From jmv **ancova.b.R**:
 postHocTableTitle <- .('Post Hoc Comparisons - {term}')
 ```
 
-When you need dynamic text, mark the string and later format the placeholder (either via `jmvcore::format()` or by supplying `{term}` where the table renderer replaces it):
+When you need dynamic text, mark the string and later format the placeholder:
 
 ```r
+# Define template with placeholder
 title <- .('Pairwise Comparisons - {grp}')
-# later: title <- jmvcore::format(title, list(grp = groupName))
+
+# Format at runtime
+title <- jmvcore::format(title, list(grp = groupName))
+
+# Multiple placeholders
+template <- .('Analysis of {n} observations in {k} groups')
+msg <- jmvcore::format(template, list(n = nrow(data), k = nlevels(groups)))
+
+# Statistical results
+template <- .('Chi-square: χ² = {chi2}, df = {df}, p = {p}')
+result <- jmvcore::format(template, list(
+    chi2 = round(chisq$statistic, 2),
+    df = chisq$parameter,
+    p = format.pval(chisq$p.value)
+))
 ```
+
+**Why `{}`?**
+- Translators can reorder placeholders for grammar
+- Clear separation between structure and content
+- Compatible with gettext standards
 
 ### 2.3 Table labels & group rows
 
@@ -120,15 +151,94 @@ Wrap `` and `` when they are human‑readable:
 table$addColumn(name='md', title=.('Mean Difference'), type='number')
 ```
 
-> **Rules of thumb**: wrap complete phrases/sentences; keep variable names/IDs **outside**. Prefer single quotes inside `.()` when the string contains `{}` placeholders.
+> **Rules of thumb**:
+> - Wrap complete phrases/sentences (not fragments)
+> - Keep variable names/IDs **outside** (not translated)
+> - No leading/trailing spaces in translatable strings
+> - Prefer single quotes inside `.()` when string contains `{}` placeholders
+> - Use complete alternatives for conditional text (not concatenation)
 
-### 2.5 Don’t wrap programmatic tokens
+### 2.5 Don't wrap programmatic tokens
 
 Do **not** wrap column **names**, keys, or machine‑only identifiers:
 
 ```r
-name='p_value'        # not wrapped
-superTitle=.('P-values')  # wrapped
+# CORRECT
+table$addColumn(
+    name = 'p_value',           # NOT wrapped - identifier
+    title = .('P-value'),       # Wrapped - display text
+    type = 'number',
+    superTitle = .('P-values')  # Wrapped - display text
+)
+
+# INCORRECT
+table$addColumn(
+    name = .('p_value'),        # Wrong! Breaks code
+    title = .('P-value'),
+    type = 'number'
+)
+```
+
+### 2.6 Best practices for translatable strings
+
+**✅ DO:**
+```r
+# Complete sentences
+.('Analysis completed successfully')
+
+# Complete alternatives for conditionals
+if (std) {
+    resids <- .('Standardized Residuals')
+} else {
+    resids <- .('Residuals')
+}
+
+# Descriptive with context
+.('Mean Difference')
+.('Confidence Interval (95%)')
+```
+
+**❌ DON'T:**
+```r
+# Leading/trailing spaces
+.(' Analysis completed ')  # Bad
+
+# Fragmented sentences (translators can't reorder)
+.('Analysis') + ' ' + .('completed')  # Bad
+
+# Concatenation
+if (std) {
+    resids <- .('Standardized ') + .('Residuals')  # Bad!
+}
+```
+
+### 2.7 Strings requiring `self` context
+
+**IMPORTANT:** The `.()` function requires access to `self` (the analysis object).
+
+**In main methods (works automatically):**
+```r
+private$.run <- function() {
+    message <- .('Running analysis...')  # self in scope
+}
+```
+
+**In utility functions (must pass self):**
+```r
+# PROBLEM: self not in scope
+makeMessage <- function(data) {
+    return .('Processing data')  # Fails! No self
+}
+
+# SOLUTION: Pass self as parameter
+makeMessage <- function(data, self) {
+    return .('Processing data')  # Works!
+}
+
+# Call with self
+private$.run <- function() {
+    msg <- makeMessage(self$data, self)
+}
 ```
 
 ---

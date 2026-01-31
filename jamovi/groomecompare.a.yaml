@@ -1,0 +1,195 @@
+---
+name: groomecompare
+title: Groome Staging System Comparison
+menuGroup: SurvivalT
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'Compare Staging Systems Using Groome Criteria'
+version: '0.0.34'
+jas: '1.2'
+
+description:
+    main: >-
+        Compare two staging systems using Groome criteria (Groome et al., 2001).
+        Calculates four key metrics: hazard consistency, hazard discrimination,
+        sample balance, and outcome prediction. Provides overall rank to determine
+        which staging system performs better. Includes C-index comparison,
+        radar charts, and side-by-side Kaplan-Meier curves.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Compare ypTNM vs RPA staging systems
+            # Generate sample survival data with two staging systems
+            set.seed(12345)
+            n <- 150
+
+            survData <- data.frame(
+                time = rexp(n, 0.05),
+                event = rbinom(n, 1, 0.6),
+                ypTNM = factor(sample(c("Stage I", "Stage II", "Stage III", "Stage IV"),
+                                     n, replace = TRUE, prob = c(0.3, 0.3, 0.25, 0.15))),
+                RPA = factor(sample(c("Low Risk", "Intermediate", "High Risk"),
+                                   n, replace = TRUE, prob = c(0.4, 0.35, 0.25)))
+            )
+
+            # Compare staging systems using Groome criteria
+            groomecompare(
+                data = survData,
+                time = "time",
+                event = "event",
+                stage1 = "ypTNM",
+                stage2 = "RPA",
+                stage1name = "ypTNM Staging",
+                stage2name = "RPA Classification",
+                eventValue = "1",
+                radarplot = TRUE,
+                kmplots = TRUE,
+                detailedmetrics = TRUE,
+                cindexcompare = TRUE,
+                bootstrap = FALSE
+            )
+
+            # With bootstrap validation (smaller nboot for speed)
+            groomecompare(
+                data = survData,
+                time = "time",
+                event = "event",
+                stage1 = "ypTNM",
+                stage2 = "RPA",
+                stage1name = "ypTNM Staging",
+                stage2name = "RPA Classification",
+                bootstrap = TRUE,
+                nboot = 100,
+                seed = 12345
+            )
+
+options:
+    - name: data
+      type: Data
+
+    - name: time
+      title: Survival Time
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            a (non-negative valued) vector of survival times
+
+    - name: event
+      title: Event Status
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            the status indicator (0=censored, 1=event)
+
+    - name: stage1
+      title: Staging System 1
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            first staging system to compare (e.g., ypTNM stage)
+
+    - name: stage2
+      title: Staging System 2
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            second staging system to compare (e.g., RPA stage)
+
+    - name: eventValue
+      title: Event Value
+      type: List
+      options:
+        - name: '1'
+          title: '1'
+        - name: '2'
+          title: '2'
+        - name: 'TRUE'
+          title: 'TRUE'
+      default: '1'
+      description:
+          R: the value representing an event
+
+    - name: stage1name
+      title: System 1 Name
+      type: String
+      default: "Staging System 1"
+      description:
+          R: descriptive name for first staging system
+
+    - name: stage2name
+      title: System 2 Name
+      type: String
+      default: "Staging System 2"
+      description:
+          R: descriptive name for second staging system
+
+    - name: radarplot
+      title: Show Radar Chart
+      type: Bool
+      default: true
+
+    - name: barplot
+      title: Show Bar Chart Comparison
+      type: Bool
+      default: false
+
+    - name: kmplots
+      title: Show Kaplan-Meier Curves
+      type: Bool
+      default: true
+
+    - name: detailedmetrics
+      title: Show Detailed Metrics
+      type: Bool
+      default: true
+
+    - name: hazardratios
+      title: Show Hazard Ratios
+      type: Bool
+      default: true
+
+    - name: samplesize
+      title: Show Sample Size Distribution
+      type: Bool
+      default: true
+
+    - name: cindexcompare
+      title: Compare C-Index
+      type: Bool
+      default: true
+
+    - name: bootstrap
+      title: Bootstrap Validation
+      type: Bool
+      default: false
+
+    - name: nboot
+      title: Bootstrap Samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+
+    - name: seed
+      title: Random Seed
+      type: Integer
+      default: 12345
+...

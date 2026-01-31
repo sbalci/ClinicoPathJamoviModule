@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.33.05
+version: 0.0.33.06
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-01-29'
+date: '2026-01-31'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -5761,6 +5761,34 @@ analyses:
 
       Perfect for clinical research data quality control and database audit
       workflows.
+  - title: Groome Staging System Comparison
+    name: groomecompare
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Groome Staging System Comparison
+    menuSubtitle: Compare Staging Systems Using Groome Criteria
+    description: >-
+      Compare two staging systems using Groome criteria (Groome et al., 2001).
+      Calculates four key metrics: hazard consistency, hazard discrimination,
+      sample balance, and outcome prediction. Provides overall rank to determine
+      which staging system performs better. Includes C-index comparison, radar
+      charts, and side-by-side Kaplan-Meier curves.
+  - title: Recursive Partitioning Analysis for Survival
+    name: rpasurvival
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Recursive Partitioning Analysis for Survival
+    menuSubtitle: RPA/CART for Survival Data - Develop Risk Stratification
+    description: >-
+      Recursive Partitioning Analysis (RPA) for survival data using CART
+      methodology. Builds a decision tree to identify optimal cut-points for
+      risk stratification. Automatically performs cross-validation and tree
+      pruning. Creates new variable with risk group assignments. Useful for
+      developing prognostic staging systems by integrating multiple predictors.
 usesNative: true
 minApp: 1.8.0
 

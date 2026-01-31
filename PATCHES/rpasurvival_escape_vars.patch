@@ -1,0 +1,41 @@
+--- R/rpasurvival.b.R (original)
++++ R/rpasurvival.b.R (fixed)
+@@ -1,6 +1,15 @@
+
+ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+     "rpasurvivalClass",
+     inherit = rpasurvivalBase,
+     private = list(
++        # Escape variable names for safe formula construction
++        .escapeVar = function(x) {
++            # Use backticks for names with spaces/special chars
++            # jmvcore::composeTerm() is the recommended approach
++            jmvcore::composeTerm(x)
++        },
++
+         # Initialize notice list
+         .noticeList = list(),
+
+@@ -123,8 +132,11 @@
+
+             # Build predictor data frame
+-            predictorData <- data.frame(lapply(self$options$predictors, function(varName) {
+-                self$data[[varName]]
++            # Use original names for data extraction, escaped names for formula
++            predictorData <- data.frame(lapply(seq_along(self$options$predictors), function(i) {
++                varName <- self$options$predictors[i]
++                col <- self$data[[varName]]
++                col
+             }))
+-            names(predictorData) <- self$options$predictors
++            # Use escaped names for safe formula construction
++            escapedNames <- sapply(self$options$predictors, private$.escapeVar)
++            names(predictorData) <- escapedNames
+
+@@ -144,7 +156,7 @@
+
+             # Build formula
+-            formula <- as.formula(paste("survObj ~", paste(self$options$predictors, collapse = " + ")))
++            formula <- as.formula(paste("survObj ~", paste(escapedNames, collapse = " + ")))
+
+             # Combine data

@@ -87,6 +87,7 @@ serial dates, Unix epoch, timezones, etc.) to aid interpretation.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$formatInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$qualityMetrics} \tab \tab \tab \tab \tab a html \cr

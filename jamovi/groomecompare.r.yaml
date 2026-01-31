@@ -1,0 +1,282 @@
+---
+name: groomecompare
+title: Groome Staging System Comparison
+jrs: '1.1'
+refs: survival
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Comparison Summary
+      type: Table
+      rows: 0
+      columns:
+        - name: criterion
+          title: Criterion
+          type: text
+          combineBelow: false
+
+        - name: system1
+          title: (stage1name)
+          type: number
+          format: zto
+
+        - name: system2
+          title: (stage2name)
+          type: number
+          format: zto
+
+        - name: better
+          title: Better System
+          type: text
+
+    - name: detailedmetrics
+      title: Detailed Metrics
+      type: Group
+      visible: (detailedmetrics)
+      items:
+        - name: consistency
+          title: Hazard Consistency Details
+          type: Table
+          rows: 0
+          columns:
+            - name: system
+              title: System
+              type: text
+
+            - name: comparison
+              title: Adjacent Stages
+              type: text
+
+            - name: hr1
+              title: HR (lower)
+              type: number
+              format: zto
+
+            - name: hr2
+              title: HR (upper)
+              type: number
+              format: zto
+
+            - name: logdiff
+              title: '|log(HR1/HR2)|'
+              type: number
+              format: zto
+
+        - name: discrimination
+          title: Hazard Discrimination Details
+          type: Table
+          rows: 0
+          columns:
+            - name: system
+              title: System
+              type: text
+
+            - name: stage
+              title: Stage
+              type: text
+
+            - name: hr
+              title: HR
+              type: number
+              format: zto
+
+            - name: loghr
+              title: log(HR)
+              type: number
+              format: zto
+
+    - name: hazardratios
+      title: Hazard Ratios by Stage
+      type: Group
+      visible: (hazardratios)
+      items:
+        - name: hrs1
+          title: (stage1name)
+          type: Table
+          rows: 0
+          columns:
+            - name: stage
+              title: Stage
+              type: text
+
+            - name: n
+              title: N
+              type: integer
+
+            - name: events
+              title: Events
+              type: integer
+
+            - name: hr
+              title: HR
+              type: number
+              format: zto
+
+            - name: ci95
+              title: 95% CI
+              type: text
+
+            - name: pvalue
+              title: p
+              type: number
+              format: zto,pvalue
+
+        - name: hrs2
+          title: (stage2name)
+          type: Table
+          rows: 0
+          columns:
+            - name: stage
+              title: Stage
+              type: text
+
+            - name: n
+              title: N
+              type: integer
+
+            - name: events
+              title: Events
+              type: integer
+
+            - name: hr
+              title: HR
+              type: number
+              format: zto
+
+            - name: ci95
+              title: 95% CI
+              type: text
+
+            - name: pvalue
+              title: p
+              type: number
+              format: zto,pvalue
+
+    - name: samplesize
+      title: Sample Size Distribution
+      type: Table
+      visible: (samplesize)
+      rows: 0
+      columns:
+        - name: system
+          title: System
+          type: text
+
+        - name: stage
+          title: Stage
+          type: text
+
+        - name: n
+          title: N
+          type: integer
+
+        - name: percent
+          title: "%"
+          type: number
+          format: zto
+
+        - name: ratio
+          title: Max/Min Ratio
+          type: number
+          format: zto
+
+    - name: cindexcompare
+      title: C-Index Comparison
+      type: Table
+      visible: (cindexcompare)
+      rows: 0
+      columns:
+        - name: system
+          title: System
+          type: text
+
+        - name: cindex
+          title: C-Index
+          type: number
+          format: zto
+
+        - name: se
+          title: SE
+          type: number
+          format: zto
+
+        - name: ci95
+          title: 95% CI
+          type: text
+
+    - name: radarplot
+      title: Groome Criteria Radar Chart
+      type: Image
+      width: 700
+      height: 700
+      renderFun: .plotRadar
+      visible: (radarplot)
+
+    - name: barplot
+      title: Metric Comparison
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotBar
+      visible: (barplot)
+
+    - name: kmplot1
+      title: 'Kaplan-Meier Curves - {stage1name}'
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotKM1
+      visible: (kmplots)
+
+    - name: kmplot2
+      title: Kaplan-Meier Curves - (stage2name)
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotKM2
+      visible: (kmplots)
+
+    - name: bootstrap
+      title: Bootstrap Validation
+      type: Table
+      visible: (bootstrap)
+      rows: 0
+      columns:
+        - name: system
+          title: System
+          type: text
+
+        - name: metric
+          title: Metric
+          type: text
+
+        - name: apparent
+          title: Apparent
+          type: number
+          format: zto
+
+        - name: bootstrap_mean
+          title: Bootstrap Mean
+          type: number
+          format: zto
+
+        - name: optimism
+          title: Optimism
+          type: number
+          format: zto
+
+        - name: corrected
+          title: Corrected
+          type: number
+          format: zto
+
+    - name: notices
+      title: Notices
+      type: Html
+      visible: true
+...

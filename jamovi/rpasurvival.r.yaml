@@ -1,0 +1,291 @@
+---
+name: rpasurvival
+title: Recursive Partitioning Analysis for Survival
+jrs: '1.1'
+refs: survival, rpart
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+        - riskgrouplabels
+
+    - name: interpretation
+      title: How to Interpret Results
+      type: Html
+      visible: (showInterpretation)
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+
+    - name: report
+      title: Report Sentence (Copy-Ready)
+      type: Html
+      visible: (showReport)
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+        - riskgrouplabels
+
+    - name: treeplot
+      title: Recursive Partitioning Tree
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotTree
+      visible: (treeplot)
+      description: Decision tree showing recursive partitioning splits for survival risk stratification
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+
+    - name: riskgrouptable
+      title: Risk Group Summary
+      type: Table
+      visible: (riskgrouptable)
+      rows: 0
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+        - time_unit
+        - riskgrouplabels
+      columns:
+        - name: stage
+          title: Risk Group
+          type: text
+          combineBelow: false
+
+        - name: n
+          title: N
+          type: integer
+
+        - name: events
+          title: Events
+          type: integer
+
+        - name: censored
+          title: Censored
+          type: integer
+
+        - name: medianos
+          title: Median OS
+          type: number
+          format: zto
+
+        - name: os_5yr
+          title: 5-yr OS (%)
+          type: number
+          format: zto
+
+        - name: os_95ci
+          title: 95% CI
+          type: text
+
+    - name: kmplot
+      title: Kaplan-Meier Curves by Risk Group
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plotKM
+      visible: (kmplot)
+      description: Kaplan-Meier survival curves stratified by RPA-derived risk groups
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+        - riskgrouplabels
+        - kmci
+        - risktable
+        - pval
+
+    - name: logranktest
+      title: Log-Rank Test
+      type: Table
+      visible: (kmplot)
+      rows: 0
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+      columns:
+        - name: chisq
+          title: χ²
+          type: number
+          format: zto
+
+        - name: df
+          title: df
+          type: integer
+
+        - name: pvalue
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: cptable
+      title: Complexity Parameter Table
+      type: Table
+      visible: (cptable)
+      rows: 0
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+      columns:
+        - name: cp
+          title: CP
+          type: number
+          format: zto
+
+        - name: nsplit
+          title: Splits
+          type: integer
+
+        - name: relerror
+          title: Rel Error
+          type: number
+          format: zto
+
+        - name: xerror
+          title: X-val Error
+          type: number
+          format: zto
+
+        - name: xstd
+          title: X-val SD
+          type: number
+          format: zto
+
+    - name: varimp
+      title: Variable Importance
+      type: Table
+      visible: (variableimportance)
+      rows: 0
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+
+        - name: importance
+          title: Importance
+          type: number
+          format: zto
+
+        - name: relimportance
+          title: Relative %
+          type: number
+          format: zto
+
+    - name: coxmodel
+      title: Cox Regression by Risk Group
+      type: Table
+      visible: (riskgrouptable)
+      rows: 0
+      clearWith:
+        - time
+        - event
+        - predictors
+        - eventValue
+        - minbucket
+        - cp
+        - maxdepth
+        - nfolds
+        - prunetree
+        - riskgrouplabels
+      columns:
+        - name: comparison
+          title: Comparison
+          type: text
+
+        - name: hr
+          title: Hazard Ratio
+          type: number
+          format: zto
+
+        - name: ci95
+          title: 95% CI
+          type: text
+
+        - name: pvalue
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name: notices
+      title: Notices
+      type: Html
+      visible: true
+      refs: []
+...

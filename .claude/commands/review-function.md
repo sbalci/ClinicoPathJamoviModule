@@ -92,7 +92,15 @@ Function: **`$ARGUMENTS`**
 - One‑click report sentences (auto‑generated paragraphs with placeholders filled from results; copy to clipboard).
 - Defaults tuned to common clinical scenarios; show ‘Recommended’ badges.
 - Accessibility & readability: larger font option, color‑blind‑safe palettes, avoid red‑green only.
-- Internationalization hooks (TR/EN) for labels, help, and report templates.
+- **Internationalization (i18n)**: Turkish/English support for labels, messages, help text, and report templates.
+  - All user-visible strings wrapped with `.()` in R code
+  - NAMESPACE imports `importFrom(jmvcore, .)`
+  - Translation catalogs (.po files) exist and are complete
+  - Medical terminology follows Turkish pathology standards
+  - No hardcoded English-only messages
+  - Placeholders use `{name}` format for translator flexibility
+  - Complete phrases (not fragmented strings)
+  - Reference: `vignettes/jamovi_i18n_guide.md`
 
 ### Clinician‑Friendly UX & Explanations
 
@@ -107,11 +115,52 @@ Function: **`$ARGUMENTS`**
 | Report sentence templates | ☐ | |
 | Sensible defaults & presets | ☐ | |
 | Accessibility (CB‑safe, font) | ☐ | |
-| i18n (TR/EN) coverage | ☐ | |
+| **i18n (TR/EN) coverage** | ☐ | **See detailed checklist below** |
 | Natural‑language summary in output | ☐ | |
 | About/How‑to section present | ☐ | |
 | Caveats & assumptions panel | ☐ | |
 | Guidance links/examples | ☐ | |
+
+### Internationalization (i18n) Detailed Checklist
+
+**Reference:** See `vignettes/jamovi_i18n_guide.md` for comprehensive patterns and best practices.
+
+| Area | Status | Notes |
+|---|---:|---|
+| **Setup** | | |
+| NAMESPACE imports `importFrom(jmvcore, .)` | ☐ | Required for `.()` function |
+| Translation catalogs exist (en.po, tr.po) | ☐ | In `jamovi/i18n/` |
+| catalog.pot template created | ☐ | For Weblate integration |
+| **Backend (.b.R files)** | | |
+| Error messages wrapped with `.()` | ☐ | `stop(.("message"))` |
+| Warning messages wrapped with `.()` | ☐ | `warning(.("message"))` |
+| Table notes/labels wrapped with `.()` | ☐ | `table$setNote('key', .("text"))` |
+| Dynamic messages use placeholders | ☐ | `.("Found {n} errors")` + `jmvcore::format()` |
+| Complete phrases (not fragments) | ☐ | No string concatenation |
+| No leading/trailing spaces | ☐ | `.("Message")` not `.(" Message ")` |
+| Conditional text uses alternatives | ☐ | Not `.("Std ") + .("Residuals")` |
+| Utility functions pass `self` | ☐ | `.()` needs `self` context |
+| **YAML files (.a, .r, .u)** | | |
+| User-facing strings in YAML | ☐ | Auto-extracted (no `.()` needed) |
+| Column titles translatable | ☐ | `title` fields in .r.yaml |
+| Option labels translatable | ☐ | `label` fields in .a.yaml |
+| UI section labels translatable | ☐ | `label` fields in .u.yaml |
+| **Content Quality** | | |
+| Medical terms use TR standards | ☐ | Güven Aralığı, Tehlike Oranı, etc. |
+| Statistical terms consistent | ☐ | Same term throughout module |
+| Clinical terminology correct | ☐ | Matches Turkish pathology texts |
+| Abbreviations introduced properly | ☐ | "Güven Aralığı (GA)" then "GA" |
+| **Translation Files** | | |
+| tr.po translations complete | ☐ | No empty `msgstr` |
+| en.po up to date | ☐ | Reflects current code |
+| Placeholders match in msgid/msgstr | ☐ | `{n}` in both |
+| No fuzzy entries | ☐ | Review `#, fuzzy` markers |
+| UTF-8 encoding | ☐ | Turkish characters display |
+| **Testing** | | |
+| Tested with Turkish language | ☐ | Change jamovi language setting |
+| Translations display correctly | ☐ | No � characters |
+| Placeholders fill correctly | ☐ | {n} replaced with values |
+| Medical terms appropriate | ☐ | For Turkish pathologists |
 
 ## Review Response Format
 

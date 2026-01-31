@@ -1,0 +1,290 @@
+---
+name: rpasurvival
+title: Recursive Partitioning Analysis for Survival
+menuGroup: SurvivalT
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: 'RPA/CART for Survival Data - Develop Risk Stratification'
+version: '0.0.34'
+jas: '1.2'
+
+description:
+    main: >-
+        Recursive Partitioning Analysis (RPA) for survival data using CART methodology.
+        Builds a decision tree to identify optimal cut-points for risk stratification.
+        Automatically performs cross-validation and tree pruning. Creates new variable
+        with risk group assignments. Useful for developing prognostic staging systems
+        by integrating multiple predictors.
+    R:
+        dontrun: false
+        usage: |
+            # Example: Develop RPA staging system for survival data
+            # Generate example survival data with multiple predictors
+            set.seed(12345)
+            n <- 200
+
+            survData <- data.frame(
+                time = rexp(n, rate = 0.02),
+                event = rbinom(n, 1, 0.65),
+                age = rnorm(n, 60, 15),
+                stage = factor(sample(c("I", "II", "III", "IV"), n, replace = TRUE,
+                                     prob = c(0.3, 0.3, 0.25, 0.15))),
+                grade = factor(sample(c("G1", "G2", "G3"), n, replace = TRUE,
+                                     prob = c(0.2, 0.5, 0.3))),
+                LVI = factor(sample(c("Absent", "Present"), n, replace = TRUE,
+                                   prob = c(0.6, 0.4)))
+            )
+
+            # Basic RPA analysis
+            rpasurvival(
+                data = survData,
+                time = "time",
+                event = "event",
+                predictors = c("age", "stage", "grade", "LVI"),
+                eventValue = "1",
+                time_unit = "months",
+                minbucket = 20,
+                cp = 0.01,
+                maxdepth = 3,
+                prunetree = TRUE,
+                treeplot = TRUE,
+                kmplot = TRUE,
+                riskgrouptable = TRUE,
+                variableimportance = TRUE,
+                riskgrouplabels = "auto",
+                showSummary = TRUE,
+                showReport = TRUE
+            )
+
+            # Create and save risk groups as new variable
+            rpasurvival(
+                data = survData,
+                time = "time",
+                event = "event",
+                predictors = c("stage", "LVI"),
+                createnewvar = TRUE,
+                newvarname = "rpa_risk_group",
+                riskgrouplabels = "risk"
+            )
+
+            # Conservative settings for external validation
+            rpasurvival(
+                data = survData,
+                time = "time",
+                event = "event",
+                predictors = c("age", "stage", "grade"),
+                minbucket = 30,      # Larger minimum node size
+                cp = 0.02,           # More conservative pruning
+                maxdepth = 2,        # Simpler tree
+                nfolds = 10,         # 10-fold cross-validation
+                prunetree = TRUE,
+                cptable = TRUE       # Show complexity parameter table
+            )
+
+options:
+    - name: data
+      type: Data
+
+    - name: time
+      title: Survival Time
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+            a (non-negative valued) vector of survival times containing the
+            (possibly censored) time to the event or time of last observation
+
+    - name: event
+      title: Event Status
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            the status indicator; normally 0=alive/censored, 1=dead/event.
+            Other choices are TRUE/FALSE (TRUE = death/event) or 1/2 (2=death/event)
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested:
+        - nominal
+        - ordinal
+        - continuous
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            variables to use in recursive partitioning analysis for developing
+            risk stratification groups
+
+    - name: eventValue
+      title: Event Value
+      type: List
+      options:
+        - name: '1'
+          title: '1'
+        - name: '2'
+          title: '2'
+        - name: 'TRUE'
+          title: 'TRUE'
+      default: '1'
+      description:
+          R: the value in the event variable that represents an event (death/failure)
+
+    - name: time_unit
+      title: Time Unit
+      type: List
+      options:
+        - name: months
+          title: Months
+        - name: years
+          title: Years
+        - name: days
+          title: Days
+      default: months
+      description:
+          R: >
+            unit of measurement for survival time. Used for calculating
+            5-year survival estimates in the risk group summary table.
+
+    - name: minbucket
+      title: Minimum Terminal Node Size
+      type: Integer
+      default: 20
+      min: 5
+      max: 1000
+      description:
+          R: >
+            the minimum number of observations in any terminal (leaf) node.
+            Smaller values create more detailed trees but may overfit.
+
+    - name: cp
+      title: Complexity Parameter
+      type: Number
+      default: 0.01
+      min: 0.0001
+      max: 1.0
+      description:
+          R: >
+            any split that does not decrease overall lack of fit by a factor
+            of cp is not attempted. Smaller values grow larger trees.
+
+    - name: maxdepth
+      title: Maximum Tree Depth
+      type: Integer
+      default: 3
+      min: 1
+      max: 10
+      description:
+          R: >
+            maximum depth of any node of the final tree, with the root node
+            counted as depth 0. Values greater than 30 are unlikely.
+
+    - name: nfolds
+      title: Cross-Validation Folds
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description:
+          R: >
+            number of cross-validation folds for pruning the tree. Use 0 to
+            suppress cross-validation.
+
+    - name: prunetree
+      title: Prune Tree
+      type: Bool
+      default: true
+      description:
+          R: >
+            prune the tree using cross-validation to select optimal complexity
+            parameter
+
+    - name: riskgrouplabels
+      title: Risk Group Labels
+      type: List
+      options:
+        - name: auto
+          title: Automatic (Stage I, II, III...)
+        - name: risk
+          title: Risk-based (Low, Intermediate, High)
+        - name: numeric
+          title: Numeric (Group 1, 2, 3...)
+      default: auto
+      description:
+          R: labeling scheme for terminal nodes (risk groups)
+
+    - name: treeplot
+      title: Show Decision Tree
+      type: Bool
+      default: true
+
+    - name: kmplot
+      title: Show Kaplan-Meier Curves by Risk Group
+      type: Bool
+      default: true
+
+    - name: kmci
+      title: Show Confidence Intervals on KM Plot
+      type: Bool
+      default: false
+
+    - name: risktable
+      title: Show Risk Table Below KM Plot
+      type: Bool
+      default: true
+
+    - name: pval
+      title: Show P-value on KM Plot
+      type: Bool
+      default: true
+
+    - name: riskgrouptable
+      title: Risk Group Summary Table
+      type: Bool
+      default: true
+
+    - name: cptable
+      title: Complexity Parameter Table
+      type: Bool
+      default: false
+
+    - name: variableimportance
+      title: Variable Importance
+      type: Bool
+      default: true
+
+    - name: createnewvar
+      title: Create New Variable with Risk Groups
+      type: Bool
+      default: false
+
+    - name: newvarname
+      title: New Variable Name
+      type: String
+      default: rpa_stage
+      description:
+          R: name for the new variable containing RPA stage assignments
+
+    - name: showSummary
+      title: Show Plain-Language Summary
+      type: Bool
+      default: true
+
+    - name: showInterpretation
+      title: Show Interpretation Guide
+      type: Bool
+      default: false
+
+    - name: showReport
+      title: Show Report Sentence (Copy-Ready)
+      type: Bool
+      default: true
+...

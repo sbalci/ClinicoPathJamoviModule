@@ -107,6 +107,26 @@ This directory contains comprehensive guides for jamovi module development in th
 - Conditional option visibility
 - Custom validation
 
+#### `jamovi_i18n_guide.md` - Internationalization (i18n)
+- **Created:** 2026-01-31
+- **Source:** jamovi i18n API documentation (dev.jamovi.org)
+- Translation architecture and workflow
+- Marking strings with `.()` function
+- Working with .po and .pot files
+- jmvtools translation commands
+- Turkish medical terminology glossary
+- Clinical pathology translation guidelines
+- Weblate integration for collaborative translation
+- Complete i18n implementation examples
+
+**Use this guide for:**
+- Adding multilingual support to jamovi modules
+- Preparing Turkish translations for clinical users
+- Setting up translation catalogs (.po files)
+- Implementing gettext best practices
+- Translating medical and statistical terminology
+- Integrating with Weblate translation platform
+
 ---
 
 ## How to Use These Guides
@@ -151,6 +171,9 @@ This directory contains comprehensive guides for jamovi module development in th
 | Notice content with line breaks | `jamovi_notices_guide.md` | Content Rules |
 | Table not populating | `jamovi_tables_guide.md` | Populate section |
 | UI options not appearing | `jamovi_u_yaml_guide.md` | Control Types |
+| Translations not appearing | `jamovi_i18n_guide.md` | Troubleshooting |
+| Strings not being extracted to .po | `jamovi_i18n_guide.md` | Marking Strings |
+| `self` scope issues with `.()` | `jamovi_i18n_guide.md` | Advanced Patterns |
 
 ---
 
@@ -212,4 +235,7 @@ New guides should follow this structure:
 
 ---
 
-**Last Updated:** 2025-01-17
+**Last Updated:** 2026-01-31
+
+**Recent additions:**
+- 2026-01-31: Added `jamovi_i18n_guide.md` - Comprehensive internationalization guide

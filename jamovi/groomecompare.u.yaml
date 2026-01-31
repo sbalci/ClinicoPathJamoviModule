@@ -1,0 +1,137 @@
+---
+name: groomecompare
+title: Groome Staging Comparison
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Survival Time
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Event Status
+        children:
+          - type: VariablesListBox
+            name: event
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Staging System 1
+        children:
+          - type: VariablesListBox
+            name: stage1
+            maxItemCount: 1
+            isTarget: true
+
+      - type: TargetLayoutBox
+        label: Staging System 2
+        children:
+          - type: VariablesListBox
+            name: stage2
+            maxItemCount: 1
+            isTarget: true
+
+  - type: CollapseBox
+    label: Staging System Names
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: System 1 Name
+            children:
+              - type: TextBox
+                name: stage1name
+                format: string
+                width: largest
+
+          - type: Label
+            label: System 2 Name
+            children:
+              - type: TextBox
+                name: stage2name
+                format: string
+                width: largest
+
+          - type: Label
+            label: Event Value
+            children:
+              - type: ComboBox
+                name: eventValue
+
+  - type: CollapseBox
+    label: Plot Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: radarplot
+
+          - type: CheckBox
+            name: barplot
+
+          - type: CheckBox
+            name: kmplots
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: detailedmetrics
+
+          - type: CheckBox
+            name: hazardratios
+
+          - type: CheckBox
+            name: samplesize
+
+          - type: CheckBox
+            name: cindexcompare
+
+  - type: CollapseBox
+    label: Bootstrap Validation
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap
+
+          - type: Label
+            label: Number of Bootstrap Samples
+            children:
+              - type: TextBox
+                name: nboot
+                format: number
+                enable: (bootstrap)
+
+          - type: Label
+            label: Random Seed
+            children:
+              - type: TextBox
+                name: seed
+                format: number
+                enable: (bootstrap)
+...
