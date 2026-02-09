@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
@@ -215,7 +218,9 @@
       "Bash(if Rscript -e \"parse\\(''$file''\\)\")",
       "Bash(__NEW_LINE__ echo \"\n═══════════════════════════════════════════════════════════\nNEXT STEPS:\n═══════════════════════════════════════════════════════════\n1. devtools::document\\(\\)\n2. devtools::test\\(filter = ''timeinterval''\\)\n3. covr::package_coverage\\(\\)\n\")",
       "Bash(if [ -f \"$f\" ])",
-      "Bash(if Rscript -e \"parse\\(''$f''\\)\")"
+      "Bash(if Rscript -e \"parse\\(''$f''\\)\")",
+      "Skill(peer-review)",
+      "Skill(clinical-decision-support)"
     ],
     "deny": [],
     "ask": [],

@@ -282,6 +282,34 @@ items:
           - method1
           - method2
 
+    - name: calibrationTable
+      title: Calibration Analysis
+      type: Table
+      visible: (calibration_analysis)
+      rows: 0
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: ideal
+          title: 'Ideal Value'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - method1
+          - method2
+
     - name: methodGuidance
       title: Method Comparison Guidelines
       type: Html

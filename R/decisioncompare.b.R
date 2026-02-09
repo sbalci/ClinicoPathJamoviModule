@@ -30,6 +30,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Cache for test results to avoid redundant calculations
             .cached_test_results = NULL,
+            # Cache for processed data (needed by heatmap)
+            .cached_processed_data = NULL,
 
             # Escape variable names for safe display and table keys
             .escapeVar = function(x) {
@@ -236,11 +238,22 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         # Step 4: Process each test and calculate metrics
                         test_results <- private$.processAllTests(processed_data)
 
-                        # Cache test results to avoid redundant calculations
+                        # Cache test results and processed data to avoid redundant calculations
                         private$.cached_test_results <- test_results
+                        private$.cached_processed_data <- processed_data
 
                         # Step 5: Populate comparison table
                         private$.populateComparisonTable(test_results)
+
+                        # Step 5b: Populate OPA table if requested
+                        if (self$options$opa) {
+                            private$.populateOPATable(test_results)
+                        }
+
+                        # Step 5c: Populate stratified table if requested
+                        if (!is.null(self$options$stratify) && self$options$stratify != "") {
+                            private$.populateStratifiedTable(processed_data)
+                        }
 
                         # Step 6: Handle original data display if requested
                         if (self$options$od) {
@@ -268,7 +281,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         # Step 8: Setup visualizations if requested
-                        if (self$options$plot || self$options$radarplot) {
+                        if (self$options$plot || self$options$radarplot || self$options$heatmap) {
                             private$.setupVisualizations(test_results)
                         }
 
@@ -850,6 +863,189 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
             },
 
+            # Compute confidence interval for a proportion (Wilson, logit, or exact)
+            .proportionCI = function(x, n, method = "wilson", alpha = 0.05) {
+                if (n == 0) return(list(est = NA_real_, lower = NA_real_, upper = NA_real_))
+                p_hat <- x / n
+                z <- qnorm(1 - alpha / 2)
+
+                if (method == "logit") {
+                    if (p_hat == 0 || p_hat == 1) {
+                        # Boundary: fall back to exact (Clopper-Pearson)
+                        bt <- binom.test(x, n, conf.level = 1 - alpha)
+                        return(list(est = p_hat, lower = bt$conf.int[1], upper = bt$conf.int[2]))
+                    }
+                    logit_p <- log(p_hat / (1 - p_hat))
+                    se_logit <- sqrt(1 / (n * p_hat * (1 - p_hat)))
+                    logit_lower <- logit_p - z * se_logit
+                    logit_upper <- logit_p + z * se_logit
+                    lower <- 1 / (1 + exp(-logit_lower))
+                    upper <- 1 / (1 + exp(-logit_upper))
+                } else if (method == "exact") {
+                    bt <- binom.test(x, n, conf.level = 1 - alpha)
+                    lower <- bt$conf.int[1]
+                    upper <- bt$conf.int[2]
+                } else {
+                    # Wilson score (default)
+                    denom <- 1 + z^2 / n
+                    center <- (p_hat + z^2 / (2 * n)) / denom
+                    margin <- z * sqrt((p_hat * (1 - p_hat) + z^2 / (4 * n)) / n) / denom
+                    lower <- max(0, center - margin)
+                    upper <- min(1, center + margin)
+                }
+                list(est = p_hat, lower = lower, upper = upper)
+            },
+
+            # Populate OPA table with confidence intervals and noninferiority result
+            .populateOPATable = function(test_results) {
+                opaTable <- self$results$opaTable
+                try(opaTable$clearRows(), silent = TRUE)
+
+                ci_method <- self$options$ciMethod
+                ni_margin <- self$options$niMargin / 100  # Convert % to proportion
+
+                # Update table note to reflect CI method
+                method_label <- switch(ci_method,
+                    wilson = "Wilson score",
+                    logit = "Logit",
+                    exact = "Clopper-Pearson (exact)",
+                    "Wilson score"
+                )
+                opaTable$setNote(
+                    "note",
+                    paste0(
+                        "OPA = (TP + TN) / Total. ", method_label, " 95% confidence intervals. ",
+                        "Noninferiority margin: ", self$options$niMargin, "%. ",
+                        "OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance."
+                    )
+                )
+
+                for (test_name in names(test_results)) {
+                    result <- test_results[[test_name]]
+                    concordant <- result$TP + result$TN
+                    total <- result$TP + result$FP + result$FN + result$TN
+
+                    ci <- private$.proportionCI(concordant, total, method = ci_method)
+
+                    # Noninferiority conclusion
+                    ni_result <- if (is.na(ci$lower)) {
+                        "N/A"
+                    } else if (ci$lower > ni_margin) {
+                        "Yes"
+                    } else {
+                        "No"
+                    }
+
+                    opaTable$addRow(
+                        rowKey = private$.escapeVar(test_name),
+                        values = list(
+                            test = test_name,
+                            concordant = as.integer(concordant),
+                            total = as.integer(total),
+                            opa = ci$est,
+                            lower = ci$lower,
+                            upper = ci$upper,
+                            niMargin = ni_margin,
+                            niResult = ni_result
+                        )
+                    )
+                }
+            },
+
+            # Populate stratified comparison table
+            .populateStratifiedTable = function(processed_data) {
+                stratTable <- self$results$stratifiedTable
+                try(stratTable$clearRows(), silent = TRUE)
+
+                strat_var <- self$options$stratify
+                mydata <- processed_data$data
+                goldVariable <- processed_data$goldVariable
+                goldPLevel <- processed_data$goldPLevel
+
+                # Include stratification variable in data if not already present
+                if (!strat_var %in% colnames(mydata)) {
+                    # Re-fetch from original data with the strat column
+                    strat_col <- self$data[[strat_var]]
+                    if (is.null(strat_col)) return()
+                    # Align by row — processed_data may have dropped NA rows
+                    # Rebuild from self$data
+                    testVariables <- private$.getTestVariables()
+                    all_vars <- c(goldVariable, testVariables, strat_var)
+                    mydata <- self$data[, all_vars, drop = FALSE]
+                    mydata <- na.omit(mydata)
+                    mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
+                }
+
+                strata <- levels(forcats::as_factor(mydata[[strat_var]]))
+                if (is.null(strata) || length(strata) == 0) {
+                    strata <- unique(as.character(mydata[[strat_var]]))
+                }
+
+                testVariables <- private$.getTestVariables()
+                testPositives <- private$.getTestPositives()
+
+                row_idx <- 0
+                for (stratum in strata) {
+                    subset_data <- mydata[as.character(mydata[[strat_var]]) == stratum, , drop = FALSE]
+                    n_stratum <- nrow(subset_data)
+                    if (n_stratum == 0) next
+
+                    for (tv in testVariables) {
+                        tp <- testPositives[[tv]]
+                        row_idx <- row_idx + 1
+
+                        # Binarize
+                        test_bin <- ifelse(as.character(subset_data[[tv]]) == tp, "Positive", "Negative")
+                        gold_bin <- ifelse(as.character(subset_data[[goldVariable]]) == goldPLevel, "Positive", "Negative")
+
+                        test_f <- factor(test_bin, levels = c("Positive", "Negative"))
+                        gold_f <- factor(gold_bin, levels = c("Positive", "Negative"))
+
+                        conf <- private$.buildConfusionMatrix(test_f, gold_f)
+                        TP <- conf["Positive", "Positive"]
+                        FP <- conf["Positive", "Negative"]
+                        FN <- conf["Negative", "Positive"]
+                        TN <- conf["Negative", "Negative"]
+                        total <- TP + FP + FN + TN
+
+                        DiseaseP <- TP + FN
+                        DiseaseN <- TN + FP
+                        TestP <- TP + FP
+                        TestN <- TN + FN
+
+                        Sens <- if (DiseaseP > 0) TP / DiseaseP else NA_real_
+                        Spec <- if (DiseaseN > 0) TN / DiseaseN else NA_real_
+                        AccurT <- if (total > 0) (TP + TN) / total else NA_real_
+                        PPV <- if (TestP > 0) TP / TestP else NA_real_
+                        NPV <- if (TestN > 0) TN / TestN else NA_real_
+                        opa_val <- if (total > 0) (TP + TN) / total else NA_real_
+
+                        stratTable$addRow(
+                            rowKey = row_idx,
+                            values = list(
+                                stratum = stratum,
+                                n = as.integer(n_stratum),
+                                test = tv,
+                                Sens = Sens,
+                                Spec = Spec,
+                                AccurT = AccurT,
+                                PPV = PPV,
+                                NPV = NPV,
+                                opa = opa_val
+                            )
+                        )
+                    }
+                }
+
+                if (row_idx == 0) {
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = "Stratification Empty",
+                        content = paste0("No complete cases found for any stratum of '", strat_var, "'. Check for missing data in the stratification variable.")
+                    )
+                }
+            },
+
             # Generate clinical interpretation for test performance
             .generateClinicalInterpretation = function(metrics) {
                 sens_pct <- metrics$Sens * 100
@@ -1374,6 +1570,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$radarplot) {
                     self$results$plotRadar$setState(plotData)
                 }
+
+                if (self$options$heatmap) {
+                    heatmapState <- private$.buildHeatmapData()
+                    if (!is.null(heatmapState)) {
+                        self$results$plotHeatmap$setState(heatmapState)
+                    }
+                }
             },
 
             # Optimized bar plot data building - eliminates inefficient rbind operations
@@ -1846,6 +2049,106 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     )
 
                 print(plot)
+                TRUE
+            },
+
+            # Build per-case heatmap data from cached processed data
+            # Returns a plain data.frame suitable for setState (protobuf-safe)
+            .buildHeatmapData = function() {
+                pd <- private$.cached_processed_data
+                if (is.null(pd)) return(NULL)
+
+                mydata <- pd$data
+                goldVariable <- pd$goldVariable
+                goldPLevel <- pd$goldPLevel
+
+                testVariables <- private$.getTestVariables()
+                testPositives <- private$.getTestPositives()
+
+                # Binarize gold standard: 1 = positive, 0 = negative
+                gold_binary <- as.integer(mydata[[goldVariable]] == goldPLevel)
+
+                # Sort cases: negatives first, positives second
+                sort_order <- order(gold_binary)
+                gold_sorted <- gold_binary[sort_order]
+
+                n_cases <- length(gold_sorted)
+
+                # Build long-format data.frame: (case_order, source, value)
+                sources <- c("Gold Standard", testVariables)
+                n_sources <- length(sources)
+                total_rows <- n_cases * n_sources
+
+                case_order_vec <- integer(total_rows)
+                source_vec <- character(total_rows)
+                value_vec <- integer(total_rows)
+
+                idx <- 1
+                # Gold standard row
+                for (j in seq_len(n_cases)) {
+                    case_order_vec[idx] <- j
+                    source_vec[idx] <- "Gold Standard"
+                    value_vec[idx] <- gold_sorted[j]
+                    idx <- idx + 1
+                }
+
+                # Test rows
+                for (tv in testVariables) {
+                    tp <- testPositives[[tv]]
+                    test_binary <- as.integer(mydata[[tv]] == tp)
+                    test_sorted <- test_binary[sort_order]
+
+                    for (j in seq_len(n_cases)) {
+                        case_order_vec[idx] <- j
+                        source_vec[idx] <- tv
+                        value_vec[idx] <- test_sorted[j]
+                        idx <- idx + 1
+                    }
+                }
+
+                # Return plain data.frame (protobuf-safe for setState)
+                return(as.data.frame(list(
+                    case_order = case_order_vec,
+                    source = source_vec,
+                    value = value_vec
+                ), stringsAsFactors = FALSE))
+            },
+
+            # Render concordance heatmap
+            .plotHeatmap = function(imageHeatmap, ggtheme, ...) {
+                df_long <- imageHeatmap$state
+                if (is.null(df_long) || nrow(df_long) == 0) return(FALSE)
+
+                # Identify test names (everything that isn't "Gold Standard")
+                all_sources <- unique(df_long$source)
+                test_names <- setdiff(all_sources, "Gold Standard")
+                n_cases <- max(df_long$case_order)
+
+                # Order: Gold Standard at top, then tests below
+                df_long$source <- factor(df_long$source,
+                    levels = rev(c("Gold Standard", test_names)))
+
+                p <- ggplot2::ggplot(df_long, ggplot2::aes(
+                        x = case_order, y = source, fill = factor(value))) +
+                    ggplot2::geom_tile(color = "grey90", linewidth = 0.1) +
+                    ggplot2::scale_fill_manual(
+                        values = c("0" = "white", "1" = "black"),
+                        labels = c("Negative", "Positive"),
+                        name = "Result") +
+                    ggplot2::labs(
+                        title = jmvcore::.("Concordance Heatmap: Per-Case Test Results vs Gold Standard"),
+                        subtitle = paste0(jmvcore::.("Cases sorted by gold standard result"), " (n=", n_cases, ")"),
+                        x = jmvcore::.("Sample"),
+                        y = "") +
+                    ggtheme +
+                    ggplot2::theme(
+                        panel.grid = ggplot2::element_blank(),
+                        axis.text.x = ggplot2::element_blank(),
+                        axis.ticks.x = ggplot2::element_blank(),
+                        plot.title = ggplot2::element_text(hjust = 0.5),
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 9))
+
+                print(p)
                 TRUE
             },
 

@@ -22,6 +22,11 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             plot = FALSE,
             excludeIndeterminate = FALSE,
             radarplot = FALSE,
+            heatmap = FALSE,
+            opa = FALSE,
+            niMargin = 75,
+            ciMethod = "wilson",
+            stratify = NULL,
             statComp = FALSE,
             showSummary = FALSE,
             showExplanations = FALSE,
@@ -112,6 +117,36 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "radarplot",
                 radarplot,
                 default=FALSE)
+            private$..heatmap <- jmvcore::OptionBool$new(
+                "heatmap",
+                heatmap,
+                default=FALSE)
+            private$..opa <- jmvcore::OptionBool$new(
+                "opa",
+                opa,
+                default=FALSE)
+            private$..niMargin <- jmvcore::OptionNumber$new(
+                "niMargin",
+                niMargin,
+                default=75,
+                min=50,
+                max=99)
+            private$..ciMethod <- jmvcore::OptionList$new(
+                "ciMethod",
+                ciMethod,
+                options=list(
+                    "wilson",
+                    "logit",
+                    "exact"),
+                default="wilson")
+            private$..stratify <- jmvcore::OptionVariable$new(
+                "stratify",
+                stratify,
+                default=NULL,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..statComp <- jmvcore::OptionBool$new(
                 "statComp",
                 statComp,
@@ -145,6 +180,11 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..plot)
             self$.addOption(private$..excludeIndeterminate)
             self$.addOption(private$..radarplot)
+            self$.addOption(private$..heatmap)
+            self$.addOption(private$..opa)
+            self$.addOption(private$..niMargin)
+            self$.addOption(private$..ciMethod)
+            self$.addOption(private$..stratify)
             self$.addOption(private$..statComp)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showExplanations)
@@ -167,6 +207,11 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         plot = function() private$..plot$value,
         excludeIndeterminate = function() private$..excludeIndeterminate$value,
         radarplot = function() private$..radarplot$value,
+        heatmap = function() private$..heatmap$value,
+        opa = function() private$..opa$value,
+        niMargin = function() private$..niMargin$value,
+        ciMethod = function() private$..ciMethod$value,
+        stratify = function() private$..stratify$value,
         statComp = function() private$..statComp$value,
         showSummary = function() private$..showSummary$value,
         showExplanations = function() private$..showExplanations$value,
@@ -188,6 +233,11 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..plot = NA,
         ..excludeIndeterminate = NA,
         ..radarplot = NA,
+        ..heatmap = NA,
+        ..opa = NA,
+        ..niMargin = NA,
+        ..ciMethod = NA,
+        ..stratify = NA,
         ..statComp = NA,
         ..showSummary = NA,
         ..showExplanations = NA,
@@ -207,10 +257,13 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         cTable3 = function() private$.items[["cTable3"]],
         epirTable3 = function() private$.items[["epirTable3"]],
         comparisonTable = function() private$.items[["comparisonTable"]],
+        opaTable = function() private$.items[["opaTable"]],
+        stratifiedTable = function() private$.items[["stratifiedTable"]],
         mcnemarTable = function() private$.items[["mcnemarTable"]],
         diffTable = function() private$.items[["diffTable"]],
         plot1 = function() private$.items[["plot1"]],
         plotRadar = function() private$.items[["plotRadar"]],
+        plotHeatmap = function() private$.items[["plotHeatmap"]],
         summaryReport = function() private$.items[["summaryReport"]],
         reportSentence = function() private$.items[["reportSentence"]],
         explanationsContent = function() private$.items[["explanationsContent"]],
@@ -439,6 +492,125 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "pprob")))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="opaTable",
+                title="Overall Percent Agreement (OPA)",
+                visible="(opa)",
+                rows=0,
+                notes=list(
+                    `note`="OPA = (TP + TN) / Total. OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance. Noninferiority: lower CI bound must exceed margin to declare noninferior.\n"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="concordant", 
+                        `title`="Concordant", 
+                        `type`="integer"),
+                    list(
+                        `name`="total", 
+                        `title`="Total", 
+                        `type`="integer"),
+                    list(
+                        `name`="opa", 
+                        `title`="OPA", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="niMargin", 
+                        `title`="NI Margin", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="niResult", 
+                        `title`="Noninferior?", 
+                        `type`="text")),
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "excludeIndeterminate",
+                    "niMargin",
+                    "ciMethod")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stratifiedTable",
+                title="Stratified Diagnostic Accuracy",
+                visible="(!is.null(stratify) && stratify != \"\")",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="stratum", 
+                        `title`="Subgroup", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="Sens", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="Spec", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="AccurT", 
+                        `title`="Accuracy", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="PPV", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="NPV", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="opa", 
+                        `title`="OPA", 
+                        `type`="number", 
+                        `format`="pc")),
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "stratify",
+                    "excludeIndeterminate")))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="mcnemarTable",
                 title="Statistical Comparison of Test Accuracy",
                 visible="(statComp)",
@@ -523,6 +695,19 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible="(radarplot)",
                 clearWith=list(
                     "radarplot"),
+                refs=list(
+                    "ggplot2")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotHeatmap",
+                title="Concordance Heatmap",
+                width=800,
+                height=400,
+                renderFun=".plotHeatmap",
+                requiresData=TRUE,
+                visible="(heatmap)",
+                clearWith=list(
+                    "heatmap"),
                 refs=list(
                     "ggplot2")))
             self$add(jmvcore::Html$new(
@@ -673,6 +858,15 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   inflating specificity/NPV from equivocal results.
 #' @param radarplot Generate radar plot for comprehensive test comparison
 #'   visualization.
+#' @param heatmap Generate concordance heatmap comparing per-case test results
+#'   against gold standard.
+#' @param opa Show overall percent agreement with 95\% confidence intervals
+#'   for each test.
+#' @param niMargin Noninferiority margin as percentage (default 75). Used when
+#'   OPA is enabled.
+#' @param ciMethod CI method: wilson, logit, or exact (Clopper-Pearson).
+#' @param stratify Optional stratification variable for subgroup-specific
+#'   diagnostic accuracy analysis.
 #' @param statComp Perform statistical comparison between tests (McNemar's
 #'   test and confidence intervals for differences).
 #' @param showSummary Boolean to show natural language summary of statistical
@@ -691,10 +885,13 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$cTable3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$opaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$mcnemarTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotHeatmap} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summaryReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
@@ -728,6 +925,11 @@ decisioncompare <- function(
     plot = FALSE,
     excludeIndeterminate = FALSE,
     radarplot = FALSE,
+    heatmap = FALSE,
+    opa = FALSE,
+    niMargin = 75,
+    ciMethod = "wilson",
+    stratify = NULL,
     statComp = FALSE,
     showSummary = FALSE,
     showExplanations = FALSE,
@@ -740,18 +942,21 @@ decisioncompare <- function(
     if ( ! missing(test1)) test1 <- jmvcore::resolveQuo(jmvcore::enquo(test1))
     if ( ! missing(test2)) test2 <- jmvcore::resolveQuo(jmvcore::enquo(test2))
     if ( ! missing(test3)) test3 <- jmvcore::resolveQuo(jmvcore::enquo(test3))
+    if ( ! missing(stratify)) stratify <- jmvcore::resolveQuo(jmvcore::enquo(stratify))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(gold), gold, NULL),
             `if`( ! missing(test1), test1, NULL),
             `if`( ! missing(test2), test2, NULL),
-            `if`( ! missing(test3), test3, NULL))
+            `if`( ! missing(test3), test3, NULL),
+            `if`( ! missing(stratify), stratify, NULL))
 
     for (v in gold) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in test1) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in test2) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in test3) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in stratify) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- decisioncompareOptions$new(
         gold = gold,
@@ -770,6 +975,11 @@ decisioncompare <- function(
         plot = plot,
         excludeIndeterminate = excludeIndeterminate,
         radarplot = radarplot,
+        heatmap = heatmap,
+        opa = opa,
+        niMargin = niMargin,
+        ciMethod = ciMethod,
+        stratify = stratify,
         statComp = statComp,
         showSummary = showSummary,
         showExplanations = showExplanations,

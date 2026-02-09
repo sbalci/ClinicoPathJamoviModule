@@ -148,6 +148,26 @@ options:
             correlation is robust to outliers and non-normal distributions. Both (default) provides
             comprehensive assessment for most digital pathology studies.
     
+    - name: ba_method
+      title: Bland-Altman Limits Method
+      type: List
+      options:
+        - name: standard
+          title: 'Standard (Fixed LoA)'
+        - name: regression
+          title: 'Regression-Based LoA'
+      default: standard
+      description:
+          R: >
+            Method for calculating limits of agreement in Bland-Altman analysis.
+            Standard uses fixed limits (mean +/- 1.96*SD). Regression-based limits
+            account for proportional bias where disagreement varies with magnitude.
+          ui: >
+            Standard: Fixed limits of agreement (mean +/- 1.96*SD). Assumes constant
+            spread across the measurement range. Regression-Based: Limits that widen
+            or narrow depending on the measurement magnitude. Use when proportional
+            bias is detected or when Bland-Altman shows funnel-shaped spread.
+
     - name: missing_data
       title: Missing Data Handling
       type: List

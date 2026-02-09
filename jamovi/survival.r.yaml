@@ -633,6 +633,54 @@ items:
           - tint
           - multievent
 
+    - name: weightedLogRankTable
+      title: '`Weighted Log-Rank Tests - ${explanatory}`'
+      type: Table
+      rows: 0
+      columns:
+        - name: test
+          title: "Test"
+          type: text
+        - name: rho
+          title: "rho"
+          type: number
+        - name: chisq
+          title: "Chi-Square"
+          type: number
+        - name: df
+          title: "df"
+          type: integer
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+        - name: weighting
+          title: "Weighting"
+          type: text
+      visible: (weightedLogRank)
+      clearWith:
+          - weightedLogRank
+          - survivalTestType
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+      refs:
+          - survival
+
+    - name: weightedLogRankExplanation
+      title: 'Weighted Log-Rank Test Interpretation'
+      type: Html
+      visible: (weightedLogRank && showSummaries)
+      clearWith:
+          - weightedLogRank
+          - survivalTestType
+          - explanatory
+          - outcome
 
 
 
@@ -840,6 +888,151 @@ items:
           - multievent
           - explanatory
           - outcomeLevel
+
+    # Calibration Curves Results
+    - name: calibrationTable
+      title: 'Calibration Assessment'
+      type: Table
+      visible: (calibration_curves)
+      rows: 0
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: ideal
+          title: 'Ideal'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+        - calibration_curves
+        - calibration_timepoint
+        - calibration_ngroups
+        - explanatory
+        - outcome
+
+    - name: calibrationGroupTable
+      title: 'Calibration by Risk Group'
+      type: Table
+      visible: (calibration_curves)
+      rows: 0
+      columns:
+        - name: group
+          title: 'Risk Group'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: events
+          title: 'Events'
+          type: integer
+        - name: predicted
+          title: 'Predicted Survival'
+          type: number
+        - name: observed
+          title: 'Observed (KM)'
+          type: number
+        - name: observed_lower
+          title: 'KM Lower CI'
+          type: number
+        - name: observed_upper
+          title: 'KM Upper CI'
+          type: number
+      clearWith:
+        - calibration_curves
+        - calibration_timepoint
+        - calibration_ngroups
+        - explanatory
+        - outcome
+
+    - name: calibrationPlot
+      title: 'Calibration Plot'
+      type: Image
+      width: 600
+      height: 500
+      renderFun: .plotCalibration
+      visible: (calibration_curves)
+      requiresData: true
+      clearWith:
+        - calibration_curves
+        - calibration_timepoint
+        - calibration_ngroups
+        - explanatory
+        - outcome
+
+    - name: calibrationInterpretation
+      title: 'Calibration Assessment Interpretation'
+      type: Html
+      visible: (calibration_curves && showExplanations)
+
+    # RCS Non-Linearity Assessment Results
+    - name: rcsTestTable
+      title: 'Non-Linearity Test (Likelihood Ratio)'
+      type: Table
+      visible: (rcs_analysis)
+      rows: 0
+      columns:
+        - name: model
+          title: 'Model'
+          type: text
+        - name: df
+          title: 'df'
+          type: integer
+        - name: loglik
+          title: 'Log-Likelihood'
+          type: number
+        - name: aic
+          title: 'AIC'
+          type: number
+        - name: lr_chisq
+          title: 'LR Chi-sq'
+          type: number
+        - name: lr_df
+          title: 'LR df'
+          type: integer
+        - name: p_value
+          title: 'p'
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+      clearWith:
+        - rcs_analysis
+        - rcs_variable
+        - rcs_knots
+        - explanatory
+        - outcome
+
+    - name: rcsPlot
+      title: 'Hazard Ratio Curve (Spline Effect)'
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .plotRCS
+      visible: (rcs_analysis)
+      requiresData: true
+      clearWith:
+        - rcs_analysis
+        - rcs_variable
+        - rcs_knots
+        - explanatory
+        - outcome
+
+    - name: rcsInterpretation
+      title: 'Non-Linearity Assessment Interpretation'
+      type: Html
+      visible: (rcs_analysis && showExplanations)
 
     # Parametric Survival Models Results Section
     # COMMENTED OUT: Parametric options are disabled in .a.yaml

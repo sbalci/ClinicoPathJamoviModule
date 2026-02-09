@@ -15,6 +15,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             show_plots = TRUE,
             icc_type = "consistency",
             correlation_method = "both",
+            ba_method = "standard",
             missing_data = "listwise",
             show_interpretation = TRUE,
             show_summary = FALSE,
@@ -90,6 +91,13 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "pearson",
                     "spearman"),
                 default="both")
+            private$..ba_method <- jmvcore::OptionList$new(
+                "ba_method",
+                ba_method,
+                options=list(
+                    "standard",
+                    "regression"),
+                default="standard")
             private$..missing_data <- jmvcore::OptionList$new(
                 "missing_data",
                 missing_data,
@@ -119,6 +127,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..show_plots)
             self$.addOption(private$..icc_type)
             self$.addOption(private$..correlation_method)
+            self$.addOption(private$..ba_method)
             self$.addOption(private$..missing_data)
             self$.addOption(private$..show_interpretation)
             self$.addOption(private$..show_summary)
@@ -134,6 +143,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         show_plots = function() private$..show_plots$value,
         icc_type = function() private$..icc_type$value,
         correlation_method = function() private$..correlation_method$value,
+        ba_method = function() private$..ba_method$value,
         missing_data = function() private$..missing_data$value,
         show_interpretation = function() private$..show_interpretation$value,
         show_summary = function() private$..show_summary$value,
@@ -148,6 +158,7 @@ pathologyagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..show_plots = NA,
         ..icc_type = NA,
         ..correlation_method = NA,
+        ..ba_method = NA,
         ..missing_data = NA,
         ..show_interpretation = NA,
         ..show_summary = NA,
@@ -280,7 +291,12 @@ pathologyagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 width=600,
                 height=450,
                 visible="(show_plots)",
-                renderFun=".blandaltmanplot"))
+                renderFun=".blandaltmanplot",
+                clearWith=list(
+                    "dep1",
+                    "dep2",
+                    "ba_method",
+                    "conf_level")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="multimethod_summary",
@@ -391,6 +407,10 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param show_plots show scatter plot and Bland-Altman plot
 #' @param icc_type type of intraclass correlation coefficient to calculate
 #' @param correlation_method correlation method(s) to calculate
+#' @param ba_method Method for calculating limits of agreement in Bland-Altman
+#'   analysis. Standard uses fixed limits (mean +/- 1.96*SD). Regression-based
+#'   limits account for proportional bias where disagreement varies with
+#'   magnitude.
 #' @param missing_data method for handling missing values
 #' @param show_interpretation provide clinical interpretation of agreement
 #'   statistics
@@ -434,6 +454,7 @@ pathologyagreement <- function(
     show_plots = TRUE,
     icc_type = "consistency",
     correlation_method = "both",
+    ba_method = "standard",
     missing_data = "listwise",
     show_interpretation = TRUE,
     show_summary = FALSE,
@@ -463,6 +484,7 @@ pathologyagreement <- function(
         show_plots = show_plots,
         icc_type = icc_type,
         correlation_method = correlation_method,
+        ba_method = ba_method,
         missing_data = missing_data,
         show_interpretation = show_interpretation,
         show_summary = show_summary,

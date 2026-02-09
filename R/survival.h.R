@@ -25,6 +25,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             landmark = 3,
             pw = FALSE,
             padjustmethod = "holm",
+            weightedLogRank = FALSE,
+            survivalTestType = "logrank",
             ph_cox = FALSE,
             sc = FALSE,
             kmunicate = FALSE,
@@ -61,7 +63,13 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             parametric_diagnostics = TRUE,
             compare_distributions = FALSE,
             parametric_survival_plots = FALSE,
-            hazard_plots = FALSE, ...) {
+            hazard_plots = FALSE,
+            calibration_curves = FALSE,
+            calibration_timepoint = 0,
+            calibration_ngroups = 5,
+            rcs_analysis = FALSE,
+            rcs_variable = NULL,
+            rcs_knots = 4, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -208,6 +216,20 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fdr",
                     "none"),
                 default="holm")
+            private$..weightedLogRank <- jmvcore::OptionBool$new(
+                "weightedLogRank",
+                weightedLogRank,
+                default=FALSE)
+            private$..survivalTestType <- jmvcore::OptionList$new(
+                "survivalTestType",
+                survivalTestType,
+                options=list(
+                    "logrank",
+                    "gehan_breslow",
+                    "tarone_ware",
+                    "peto_peto",
+                    "fleming_harrington"),
+                default="logrank")
             private$..ph_cox <- jmvcore::OptionBool$new(
                 "ph_cox",
                 ph_cox,
@@ -383,6 +405,38 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "hazard_plots",
                 hazard_plots,
                 default=FALSE)
+            private$..calibration_curves <- jmvcore::OptionBool$new(
+                "calibration_curves",
+                calibration_curves,
+                default=FALSE)
+            private$..calibration_timepoint <- jmvcore::OptionNumber$new(
+                "calibration_timepoint",
+                calibration_timepoint,
+                default=0)
+            private$..calibration_ngroups <- jmvcore::OptionInteger$new(
+                "calibration_ngroups",
+                calibration_ngroups,
+                default=5,
+                min=3,
+                max=10)
+            private$..rcs_analysis <- jmvcore::OptionBool$new(
+                "rcs_analysis",
+                rcs_analysis,
+                default=FALSE)
+            private$..rcs_variable <- jmvcore::OptionVariable$new(
+                "rcs_variable",
+                rcs_variable,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..rcs_knots <- jmvcore::OptionInteger$new(
+                "rcs_knots",
+                rcs_knots,
+                default=4,
+                min=3,
+                max=7)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -405,6 +459,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..landmark)
             self$.addOption(private$..pw)
             self$.addOption(private$..padjustmethod)
+            self$.addOption(private$..weightedLogRank)
+            self$.addOption(private$..survivalTestType)
             self$.addOption(private$..ph_cox)
             self$.addOption(private$..sc)
             self$.addOption(private$..kmunicate)
@@ -443,6 +499,12 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..compare_distributions)
             self$.addOption(private$..parametric_survival_plots)
             self$.addOption(private$..hazard_plots)
+            self$.addOption(private$..calibration_curves)
+            self$.addOption(private$..calibration_timepoint)
+            self$.addOption(private$..calibration_ngroups)
+            self$.addOption(private$..rcs_analysis)
+            self$.addOption(private$..rcs_variable)
+            self$.addOption(private$..rcs_knots)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -466,6 +528,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         landmark = function() private$..landmark$value,
         pw = function() private$..pw$value,
         padjustmethod = function() private$..padjustmethod$value,
+        weightedLogRank = function() private$..weightedLogRank$value,
+        survivalTestType = function() private$..survivalTestType$value,
         ph_cox = function() private$..ph_cox$value,
         sc = function() private$..sc$value,
         kmunicate = function() private$..kmunicate$value,
@@ -503,7 +567,13 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         parametric_diagnostics = function() private$..parametric_diagnostics$value,
         compare_distributions = function() private$..compare_distributions$value,
         parametric_survival_plots = function() private$..parametric_survival_plots$value,
-        hazard_plots = function() private$..hazard_plots$value),
+        hazard_plots = function() private$..hazard_plots$value,
+        calibration_curves = function() private$..calibration_curves$value,
+        calibration_timepoint = function() private$..calibration_timepoint$value,
+        calibration_ngroups = function() private$..calibration_ngroups$value,
+        rcs_analysis = function() private$..rcs_analysis$value,
+        rcs_variable = function() private$..rcs_variable$value,
+        rcs_knots = function() private$..rcs_knots$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -526,6 +596,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..landmark = NA,
         ..pw = NA,
         ..padjustmethod = NA,
+        ..weightedLogRank = NA,
+        ..survivalTestType = NA,
         ..ph_cox = NA,
         ..sc = NA,
         ..kmunicate = NA,
@@ -563,7 +635,13 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..parametric_diagnostics = NA,
         ..compare_distributions = NA,
         ..parametric_survival_plots = NA,
-        ..hazard_plots = NA)
+        ..hazard_plots = NA,
+        ..calibration_curves = NA,
+        ..calibration_timepoint = NA,
+        ..calibration_ngroups = NA,
+        ..rcs_analysis = NA,
+        ..rcs_variable = NA,
+        ..rcs_knots = NA)
 )
 
 survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -606,6 +684,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pairwiseComparisonHeading = function() private$.items[["pairwiseComparisonHeading"]],
         pairwiseTable = function() private$.items[["pairwiseTable"]],
         pairwiseSummary = function() private$.items[["pairwiseSummary"]],
+        weightedLogRankTable = function() private$.items[["weightedLogRankTable"]],
+        weightedLogRankExplanation = function() private$.items[["weightedLogRankExplanation"]],
         plot = function() private$.items[["plot"]],
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
@@ -616,6 +696,13 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         residualsPlot = function() private$.items[["residualsPlot"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredefined = function() private$.items[["outcomeredefined"]],
+        calibrationTable = function() private$.items[["calibrationTable"]],
+        calibrationGroupTable = function() private$.items[["calibrationGroupTable"]],
+        calibrationPlot = function() private$.items[["calibrationPlot"]],
+        calibrationInterpretation = function() private$.items[["calibrationInterpretation"]],
+        rcsTestTable = function() private$.items[["rcsTestTable"]],
+        rcsPlot = function() private$.items[["rcsPlot"]],
+        rcsInterpretation = function() private$.items[["rcsInterpretation"]],
         parametricModelComparison = function() private$.items[["parametricModelComparison"]],
         parametricModelSummary = function() private$.items[["parametricModelSummary"]],
         parametricDiagnostics = function() private$.items[["parametricDiagnostics"]],
@@ -1221,6 +1308,61 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="weightedLogRankTable",
+                title="`Weighted Log-Rank Tests - ${explanatory}`",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="rho", 
+                        `title`="rho", 
+                        `type`="number"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-Square", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="weighting", 
+                        `title`="Weighting", 
+                        `type`="text")),
+                visible="(weightedLogRank)",
+                clearWith=list(
+                    "weightedLogRank",
+                    "survivalTestType",
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent"),
+                refs=list(
+                    "survival")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="weightedLogRankExplanation",
+                title="Weighted Log-Rank Test Interpretation",
+                visible="(weightedLogRank && showSummaries)",
+                clearWith=list(
+                    "weightedLogRank",
+                    "survivalTestType",
+                    "explanatory",
+                    "outcome")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -1405,6 +1547,170 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "multievent",
                     "explanatory",
                     "outcomeLevel")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="calibrationTable",
+                title="Calibration Assessment",
+                visible="(calibration_curves)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="ideal", 
+                        `title`="Ideal", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "calibration_curves",
+                    "calibration_timepoint",
+                    "calibration_ngroups",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="calibrationGroupTable",
+                title="Calibration by Risk Group",
+                visible="(calibration_curves)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Risk Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="predicted", 
+                        `title`="Predicted Survival", 
+                        `type`="number"),
+                    list(
+                        `name`="observed", 
+                        `title`="Observed (KM)", 
+                        `type`="number"),
+                    list(
+                        `name`="observed_lower", 
+                        `title`="KM Lower CI", 
+                        `type`="number"),
+                    list(
+                        `name`="observed_upper", 
+                        `title`="KM Upper CI", 
+                        `type`="number")),
+                clearWith=list(
+                    "calibration_curves",
+                    "calibration_timepoint",
+                    "calibration_ngroups",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="calibrationPlot",
+                title="Calibration Plot",
+                width=600,
+                height=500,
+                renderFun=".plotCalibration",
+                visible="(calibration_curves)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "calibration_curves",
+                    "calibration_timepoint",
+                    "calibration_ngroups",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="calibrationInterpretation",
+                title="Calibration Assessment Interpretation",
+                visible="(calibration_curves && showExplanations)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="rcsTestTable",
+                title="Non-Linearity Test (Likelihood Ratio)",
+                visible="(rcs_analysis)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="loglik", 
+                        `title`="Log-Likelihood", 
+                        `type`="number"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number"),
+                    list(
+                        `name`="lr_chisq", 
+                        `title`="LR Chi-sq", 
+                        `type`="number"),
+                    list(
+                        `name`="lr_df", 
+                        `title`="LR df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p_value", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="conclusion", 
+                        `title`="Conclusion", 
+                        `type`="text")),
+                clearWith=list(
+                    "rcs_analysis",
+                    "rcs_variable",
+                    "rcs_knots",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="rcsPlot",
+                title="Hazard Ratio Curve (Spline Effect)",
+                width=600,
+                height=450,
+                renderFun=".plotRCS",
+                visible="(rcs_analysis)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "rcs_analysis",
+                    "rcs_variable",
+                    "rcs_knots",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="rcsInterpretation",
+                title="Non-Linearity Assessment Interpretation",
+                visible="(rcs_analysis && showExplanations)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="parametricModelComparison",
@@ -1684,6 +1990,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param landmark .
 #' @param pw .
 #' @param padjustmethod .
+#' @param weightedLogRank .
+#' @param survivalTestType .
 #' @param ph_cox .
 #' @param sc .
 #' @param kmunicate .
@@ -1767,6 +2075,33 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   estimates for model validation.
 #' @param hazard_plots Plot estimated hazard functions from parametric models.
 #'   Shows how instantaneous risk changes over time for different distributions.
+#' @param calibration_curves Assess calibration of the Cox model by comparing
+#'   predicted versus observed survival at specified time points. Groups
+#'   patients by predicted risk quintiles and computes Kaplan-Meier survival per
+#'   group. Includes calibration slope, calibration-in-the-large, and
+#'   calibration plot. Requires Cox model to be fitted.
+#' @param calibration_timepoint Time point for calibration assessment (e.g.,
+#'   60 for 5-year OS in months). If 0, uses the median observed time. The
+#'   calibration plot compares predicted vs observed survival probability at
+#'   this time point.
+#' @param calibration_ngroups Number of risk groups (quantiles) for
+#'   calibration assessment. Default is 5 (quintiles). More groups provide finer
+#'   resolution but require larger sample sizes. Each group should have at least
+#'   20-30 patients.
+#' @param rcs_analysis Assess non-linear effects of continuous predictors
+#'   using restricted cubic splines (natural splines). Fits Cox model with
+#'   spline-transformed predictor, tests for non-linearity via likelihood ratio
+#'   test, and plots hazard ratio curve. Important for variables like age and
+#'   tumor size where the relationship with outcome may not be linear.
+#' @param rcs_variable Select a continuous predictor variable to assess for
+#'   non-linear effects. The variable will be modeled with restricted cubic
+#'   splines and compared to a linear model. Common candidates include age,
+#'   tumor size, biomarker levels, and follow-up duration.
+#' @param rcs_knots Number of knots for restricted cubic splines. 3 knots = 2
+#'   df (simplest), 4 knots = 3 df (recommended default), 5 knots = 4 df (more
+#'   flexible). Knots are placed at Harrell-recommended percentiles. More knots
+#'   allow detection of complex non-linear patterns but may overfit with small
+#'   samples.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1805,6 +2140,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$pairwiseComparisonHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$weightedLogRankTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$weightedLogRankExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
@@ -1815,6 +2152,13 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$calibrationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$calibrationGroupTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$calibrationPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calibrationInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$rcsTestTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rcsPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$rcsInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$parametricModelComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$parametricModelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$parametricDiagnostics} \tab \tab \tab \tab \tab a html \cr
@@ -1856,6 +2200,8 @@ survival <- function(
     landmark = 3,
     pw = FALSE,
     padjustmethod = "holm",
+    weightedLogRank = FALSE,
+    survivalTestType = "logrank",
     ph_cox = FALSE,
     sc = FALSE,
     kmunicate = FALSE,
@@ -1892,7 +2238,13 @@ survival <- function(
     parametric_diagnostics = TRUE,
     compare_distributions = FALSE,
     parametric_survival_plots = FALSE,
-    hazard_plots = FALSE) {
+    hazard_plots = FALSE,
+    calibration_curves = FALSE,
+    calibration_timepoint = 0,
+    calibration_ngroups = 5,
+    rcs_analysis = FALSE,
+    rcs_variable = NULL,
+    rcs_knots = 4) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survival requires jmvcore to be installed (restart may be required)")
@@ -1903,6 +2255,7 @@ survival <- function(
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(strata_variable)) strata_variable <- jmvcore::resolveQuo(jmvcore::enquo(strata_variable))
+    if ( ! missing(rcs_variable)) rcs_variable <- jmvcore::resolveQuo(jmvcore::enquo(rcs_variable))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -1911,7 +2264,8 @@ survival <- function(
             `if`( ! missing(fudate), fudate, NULL),
             `if`( ! missing(explanatory), explanatory, NULL),
             `if`( ! missing(outcome), outcome, NULL),
-            `if`( ! missing(strata_variable), strata_variable, NULL))
+            `if`( ! missing(strata_variable), strata_variable, NULL),
+            `if`( ! missing(rcs_variable), rcs_variable, NULL))
 
     for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in strata_variable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -1936,6 +2290,8 @@ survival <- function(
         landmark = landmark,
         pw = pw,
         padjustmethod = padjustmethod,
+        weightedLogRank = weightedLogRank,
+        survivalTestType = survivalTestType,
         ph_cox = ph_cox,
         sc = sc,
         kmunicate = kmunicate,
@@ -1972,7 +2328,13 @@ survival <- function(
         parametric_diagnostics = parametric_diagnostics,
         compare_distributions = compare_distributions,
         parametric_survival_plots = parametric_survival_plots,
-        hazard_plots = hazard_plots)
+        hazard_plots = hazard_plots,
+        calibration_curves = calibration_curves,
+        calibration_timepoint = calibration_timepoint,
+        calibration_ngroups = calibration_ngroups,
+        rcs_analysis = rcs_analysis,
+        rcs_variable = rcs_variable,
+        rcs_knots = rcs_knots)
 
     analysis <- survivalClass$new(
         options = options,

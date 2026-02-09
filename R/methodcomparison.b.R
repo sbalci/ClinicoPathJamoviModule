@@ -141,6 +141,11 @@ methodcomparisonClass <- R6::R6Class(
                 private$.populateClinicalAssessment(method1, method2)
             }
 
+            # Calibration analysis
+            if (self$options$calibration_analysis) {
+                private$.populateCalibrationAnalysis(method1, method2)
+            }
+
             # Guidance content
             private$.populateMethodGuidance()
             private$.populateTechnicalNotes()
@@ -615,6 +620,125 @@ methodcomparisonClass <- R6::R6Class(
                     "Clinically acceptable agreement" else 
                     "Clinical agreement may be insufficient"
             ))
+        },
+
+        .populateCalibrationAnalysis = function(method1, method2) {
+            # Calibration analysis: how well does test method (method2) track
+            # the reference method (method1)?
+            # Calibration-in-the-large: intercept (ideal = 0)
+            # Calibration slope: (ideal = 1)
+            # R-squared: proportion of variance explained
+
+            table <- self$results$calibrationTable
+
+            tryCatch({
+                # Fit calibration model: test = a + b * reference
+                cal_model <- lm(method2 ~ method1)
+                cal_summary <- summary(cal_model)
+                cal_coefs <- coef(cal_model)
+                cal_ci <- confint(cal_model)
+
+                intercept <- cal_coefs[1]
+                slope <- cal_coefs[2]
+                r_squared <- cal_summary$r.squared
+
+                # Interpretation helpers
+                interpret_intercept <- function(val, ci) {
+                    if (ci[1] <= 0 && ci[2] >= 0) {
+                        return("No significant systematic bias (CI includes 0)")
+                    } else if (val > 0) {
+                        return(paste0("Systematic overestimation by ~", round(abs(val), 2), " units"))
+                    } else {
+                        return(paste0("Systematic underestimation by ~", round(abs(val), 2), " units"))
+                    }
+                }
+
+                interpret_slope <- function(val, ci) {
+                    if (ci[1] <= 1 && ci[2] >= 1) {
+                        return("Good calibration (CI includes 1)")
+                    } else if (val > 1) {
+                        return("Test overestimates at higher values (overshoot)")
+                    } else {
+                        return("Test underestimates at higher values (undershoot)")
+                    }
+                }
+
+                interpret_r2 <- function(val) {
+                    if (val >= 0.9) return("Excellent tracking of reference method")
+                    if (val >= 0.7) return("Good tracking")
+                    if (val >= 0.5) return("Moderate tracking")
+                    return("Poor tracking; methods may measure different constructs")
+                }
+
+                # Calibration-in-the-large (intercept)
+                table$addRow(rowKey = 1, values = list(
+                    metric = "Calibration-in-the-large (Intercept)",
+                    value = intercept,
+                    ci_lower = cal_ci["(Intercept)", 1],
+                    ci_upper = cal_ci["(Intercept)", 2],
+                    ideal = "0",
+                    interpretation = interpret_intercept(intercept, cal_ci["(Intercept)", ])
+                ))
+
+                # Calibration slope
+                table$addRow(rowKey = 2, values = list(
+                    metric = "Calibration Slope",
+                    value = slope,
+                    ci_lower = cal_ci["method1", 1],
+                    ci_upper = cal_ci["method1", 2],
+                    ideal = "1",
+                    interpretation = interpret_slope(slope, cal_ci["method1", ])
+                ))
+
+                # R-squared
+                table$addRow(rowKey = 3, values = list(
+                    metric = "R-squared",
+                    value = r_squared,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    ideal = "1",
+                    interpretation = interpret_r2(r_squared)
+                ))
+
+                # Mean absolute error
+                mae <- mean(abs(method2 - method1), na.rm = TRUE)
+                table$addRow(rowKey = 4, values = list(
+                    metric = "Mean Absolute Error",
+                    value = mae,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    ideal = "0",
+                    interpretation = paste0("Average deviation from reference: ", round(mae, 2), " units")
+                ))
+
+                # Root mean squared error
+                rmse <- sqrt(mean((method2 - method1)^2, na.rm = TRUE))
+                table$addRow(rowKey = 5, values = list(
+                    metric = "Root Mean Squared Error (RMSE)",
+                    value = rmse,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    ideal = "0",
+                    interpretation = paste0("RMS deviation: ", round(rmse, 2), " units")
+                ))
+
+                table$setNote(
+                    "info",
+                    paste0("Calibration model: Test = ", round(intercept, 3),
+                           " + ", round(slope, 3), " x Reference. ",
+                           "Perfect calibration: intercept = 0, slope = 1, R² = 1. ",
+                           "N = ", length(method1), " paired observations.")
+                )
+            }, error = function(e) {
+                table$addRow(rowKey = 1, values = list(
+                    metric = "Error",
+                    value = NA,
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    ideal = "",
+                    interpretation = paste0("Calibration analysis failed: ", e$message)
+                ))
+            })
         },
 
         .populateMethodGuidance = function() {

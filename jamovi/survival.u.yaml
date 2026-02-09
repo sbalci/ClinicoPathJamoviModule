@@ -186,6 +186,51 @@ children:
                         maxItemCount: 1
                         isTarget: true
       - type: Label
+        label: Model Validation
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: calibration_curves
+                label: Calibration Curves
+              - type: TextBox
+                name: calibration_timepoint
+                format: number
+                label: Time Point (0 = median)
+                enable: (calibration_curves)
+              - type: TextBox
+                name: calibration_ngroups
+                format: number
+                label: Number of Risk Groups
+                enable: (calibration_curves)
+      - type: Label
+        label: Non-Linearity Assessment
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: rcs_analysis
+                label: Restricted Cubic Splines (RCS)
+              - type: VariableSupplier
+                persistentItems: false
+                stretchFactor: 1
+                children:
+                  - type: TargetLayoutBox
+                    label: Continuous Variable for Spline
+                    children:
+                      - type: VariablesListBox
+                        name: rcs_variable
+                        maxItemCount: 1
+                        isTarget: true
+                        enable: (rcs_analysis)
+              - type: TextBox
+                name: rcs_knots
+                format: number
+                label: Number of Knots (3-7)
+                enable: (rcs_analysis)
+      - type: Label
         label: Pairwise Comparisons
         children:
           - type: LayoutBox
@@ -198,6 +243,19 @@ children:
                 name: padjustmethod
                 enable: (pw)
                 label: P-value Adjustment Method
+      - type: Label
+        label: Weighted Log-Rank Tests
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: weightedLogRank
+                label: Perform Weighted Log-Rank Tests
+              - type: ComboBox
+                name: survivalTestType
+                enable: (weightedLogRank)
+                label: Test Type for Pairwise Comparisons
       - type: Label
         label: Restricted Mean Survival Time
         children:

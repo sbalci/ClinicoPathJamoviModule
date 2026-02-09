@@ -5,31 +5,1200 @@ segmentationmetricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
     "segmentationmetricsClass",
     inherit = segmentationmetricsBase,
     private = list(
+
+        # ── Initialization ──────────────────────────────────────────────
         .init = function() {
-            private$.initInstructions()
+            if (is.null(self$options$prediction_mask) ||
+                is.null(self$options$ground_truth_mask)) {
+                private$.initInstructions()
+            }
         },
 
+        # ── Main run method ─────────────────────────────────────────────
         .run = function() {
-            # Check for required inputs
-            if (is.null(self$options$prediction_mask) || is.null(self$options$ground_truth_mask)) {
+            # Guard: require both masks
+            if (is.null(self$options$prediction_mask) ||
+                is.null(self$options$ground_truth_mask)) {
                 return()
             }
 
-            # Get data
+            # Extract data
             data <- self$data
-            pred <- data[[self$options$prediction_mask]]
-            truth <- data[[self$options$ground_truth_mask]]
+            pred_raw <- data[[self$options$prediction_mask]]
+            truth_raw <- data[[self$options$ground_truth_mask]]
 
-            # Validate matching encoding
-            if (!identical(levels(pred), levels(truth))) {
-                warning("Prediction and ground truth have different levels/classes")
+            # Handle missing data
+            if (self$options$missing_handling == "complete") {
+                cc <- complete.cases(pred_raw, truth_raw)
+                if (!is.null(self$options$image_id)) {
+                    img_raw <- data[[self$options$image_id]]
+                    cc <- cc & complete.cases(img_raw)
+                }
+                pred_raw <- pred_raw[cc]
+                truth_raw <- truth_raw[cc]
+                if (!is.null(self$options$image_id)) {
+                    img_raw <- img_raw[cc]
+                }
+                data <- data[cc, , drop = FALSE]
             }
 
-            # TODO: Implement segmentation metrics
-            # This is a stub implementation
+            if (length(pred_raw) == 0) {
+                return()
+            }
 
-            private$.populateOverallSummary(pred, truth)
+            # Convert to factor if numeric (treat as class labels)
+            if (is.numeric(pred_raw))  pred_raw  <- as.factor(pred_raw)
+            if (is.numeric(truth_raw)) truth_raw <- as.factor(truth_raw)
+
+            # Ensure consistent levels
+            all_levels <- union(levels(pred_raw), levels(truth_raw))
+            pred  <- factor(pred_raw, levels = all_levels)
+            truth <- factor(truth_raw, levels = all_levels)
+
+            # Image IDs for per-image analysis
+            has_image_id <- !is.null(self$options$image_id)
+            if (has_image_id) {
+                image_ids <- as.factor(data[[self$options$image_id]])
+            } else {
+                image_ids <- factor(rep("All", length(pred)))
+            }
+
+            # Determine positive class for binary
+            seg_type <- self$options$segmentation_type
+            pos_class <- NULL
+            if (seg_type == "binary") {
+                pos_class <- self$options$positive_class
+                if (is.null(pos_class) || pos_class == "") {
+                    pos_class <- all_levels[1]
+                }
+            }
+
+            # ── Compute per-image metrics ──
+            img_levels <- levels(image_ids)
+            per_image <- lapply(img_levels, function(img) {
+                idx <- which(image_ids == img)
+                p <- pred[idx]
+                t <- truth[idx]
+                private$.computeImageMetrics(p, t, seg_type, pos_class, all_levels)
+            })
+            names(per_image) <- img_levels
+
+            # Store for plots
+            private$.perImageMetrics <- per_image
+            private$.imageIds <- img_levels
+            private$.pred <- pred
+            private$.truth <- truth
+            private$.imageIdsVec <- image_ids
+            private$.allLevels <- all_levels
+            private$.posClass <- pos_class
+            private$.segType <- seg_type
+
+            # ── Populate tables ──
+            private$.populateOverlapTable(per_image, img_levels)
+            private$.populateOverallSummary(per_image)
+
+            if (self$options$hausdorff_distance || self$options$surface_distance) {
+                private$.populateDistanceTable(per_image, img_levels)
+            }
+
+            if (seg_type == "multiclass" && self$options$class_specific_metrics) {
+                private$.populateMulticlassTable(pred, truth, all_levels)
+            }
+
+            if (seg_type == "instance" && self$options$object_detection_metrics) {
+                private$.populateInstanceTable(pred, truth, image_ids, img_levels)
+            }
+
+            if (self$options$quality_thresholds) {
+                private$.populateQualityAssessment(per_image, img_levels)
+            }
+
+            if (self$options$outlier_detection) {
+                private$.populateOutlierTable(per_image, img_levels)
+            }
+
+            if (self$options$stratified_analysis && !is.null(self$options$stratify_by)) {
+                private$.populateStratifiedTable(data, pred, truth, image_ids)
+            }
+
+            if (self$options$paired_analysis && !is.null(self$options$comparison_method)) {
+                private$.populateComparisonTable(data, pred, truth, image_ids)
+            }
+
+            # ── Set plot states ──
+            private$.setPlotStates(per_image, img_levels)
+
+            # ── Clinical interpretation ──
+            if (self$options$show_interpretation) {
+                private$.generateInterpretation(per_image)
+            }
         },
+
+        # ── Storage fields ──
+        .perImageMetrics = NULL,
+        .imageIds = NULL,
+        .pred = NULL,
+        .truth = NULL,
+        .imageIdsVec = NULL,
+        .allLevels = NULL,
+        .posClass = NULL,
+        .segType = NULL,
+
+        # ════════════════════════════════════════════════════════════════
+        # Core metric computation helpers
+        # ════════════════════════════════════════════════════════════════
+
+        .confusionElements = function(pred, truth, pos_class) {
+            p <- as.character(pred) == pos_class
+            t <- as.character(truth) == pos_class
+            TP <- sum(p & t)
+            TN <- sum(!p & !t)
+            FP <- sum(p & !t)
+            FN <- sum(!p & t)
+            list(TP = TP, TN = TN, FP = FP, FN = FN)
+        },
+
+        .calcDice = function(TP, FP, FN) {
+            denom <- 2 * TP + FP + FN
+            if (denom == 0) return(1)
+            2 * TP / denom
+        },
+
+        .calcIoU = function(TP, FP, FN) {
+            denom <- TP + FP + FN
+            if (denom == 0) return(1)
+            TP / denom
+        },
+
+        .calcVolSimilarity = function(TP, FP, FN) {
+            denom <- 2 * TP + FP + FN
+            if (denom == 0) return(1)
+            1 - abs(FN - FP) / denom
+        },
+
+        .calcSensitivity = function(TP, FN) {
+            denom <- TP + FN
+            if (denom == 0) return(NA_real_)
+            TP / denom
+        },
+
+        .calcSpecificity = function(TN, FP) {
+            denom <- TN + FP
+            if (denom == 0) return(NA_real_)
+            TN / denom
+        },
+
+        # Boundary detection: find positions where transitions occur (1D)
+        .findBoundaryPositions = function(mask_logical) {
+            n <- length(mask_logical)
+            if (n <= 1) return(integer(0))
+            diffs <- mask_logical[-1] != mask_logical[-n]
+            which(diffs)
+        },
+
+        # Hausdorff and surface distance from boundary positions
+        .calcBoundaryDistances = function(pred, truth, pos_class) {
+            p <- as.character(pred) == pos_class
+            t <- as.character(truth) == pos_class
+
+            pred_boundary <- private$.findBoundaryPositions(p)
+            truth_boundary <- private$.findBoundaryPositions(t)
+
+            # Scale factor for physical units
+            scale <- 1.0
+            if (self$options$pixel_size_provided) {
+                scale <- mean(c(self$options$pixel_size_x, self$options$pixel_size_y))
+            }
+
+            # If either boundary set is empty, distances are undefined
+            if (length(pred_boundary) == 0 && length(truth_boundary) == 0) {
+                return(list(
+                    hausdorff_max = 0,
+                    hausdorff_95 = 0,
+                    avg_surface_dist = 0,
+                    surface_dice = 1
+                ))
+            }
+            if (length(pred_boundary) == 0 || length(truth_boundary) == 0) {
+                return(list(
+                    hausdorff_max = NA_real_,
+                    hausdorff_95 = NA_real_,
+                    avg_surface_dist = NA_real_,
+                    surface_dice = 0
+                ))
+            }
+
+            # Directed distances: from each pred boundary point to nearest truth boundary point
+            d_pred_to_truth <- vapply(pred_boundary, function(bp) {
+                min(abs(bp - truth_boundary))
+            }, numeric(1))
+
+            d_truth_to_pred <- vapply(truth_boundary, function(tp) {
+                min(abs(tp - pred_boundary))
+            }, numeric(1))
+
+            all_dists <- c(d_pred_to_truth, d_truth_to_pred)
+
+            hausdorff_max <- max(all_dists) * scale
+            hausdorff_95 <- as.numeric(quantile(all_dists, 0.95)) * scale
+            avg_surface_dist <- mean(all_dists) * scale
+
+            # Surface Dice: fraction of boundary points within tolerance
+            tol <- self$options$boundary_tolerance
+            within_tol_pred <- sum(d_pred_to_truth <= tol)
+            within_tol_truth <- sum(d_truth_to_pred <= tol)
+            surface_dice <- (within_tol_pred + within_tol_truth) /
+                            (length(pred_boundary) + length(truth_boundary))
+
+            list(
+                hausdorff_max = hausdorff_max,
+                hausdorff_95 = hausdorff_95,
+                avg_surface_dist = avg_surface_dist,
+                surface_dice = surface_dice
+            )
+        },
+
+        # Compute all metrics for one image
+        .computeImageMetrics = function(pred, truth, seg_type, pos_class, all_levels) {
+            result <- list()
+
+            if (seg_type == "binary") {
+                cm <- private$.confusionElements(pred, truth, pos_class)
+                result$dice <- private$.calcDice(cm$TP, cm$FP, cm$FN)
+                result$iou <- private$.calcIoU(cm$TP, cm$FP, cm$FN)
+                result$volumetric_similarity <- private$.calcVolSimilarity(cm$TP, cm$FP, cm$FN)
+                result$sensitivity <- private$.calcSensitivity(cm$TP, cm$FN)
+                result$specificity <- private$.calcSpecificity(cm$TN, cm$FP)
+
+                # Distance metrics
+                bd <- private$.calcBoundaryDistances(pred, truth, pos_class)
+                result$hausdorff_max <- bd$hausdorff_max
+                result$hausdorff_95 <- bd$hausdorff_95
+                result$avg_surface_dist <- bd$avg_surface_dist
+                result$surface_dice <- bd$surface_dice
+
+            } else if (seg_type == "multiclass") {
+                # Macro-average across classes (one-vs-rest)
+                class_dice <- numeric(length(all_levels))
+                class_iou <- numeric(length(all_levels))
+                class_sens <- numeric(length(all_levels))
+                class_spec <- numeric(length(all_levels))
+                class_n <- numeric(length(all_levels))
+
+                for (k in seq_along(all_levels)) {
+                    cls <- all_levels[k]
+                    cm <- private$.confusionElements(pred, truth, cls)
+                    class_dice[k] <- private$.calcDice(cm$TP, cm$FP, cm$FN)
+                    class_iou[k] <- private$.calcIoU(cm$TP, cm$FP, cm$FN)
+                    class_sens[k] <- private$.calcSensitivity(cm$TP, cm$FN)
+                    class_spec[k] <- private$.calcSpecificity(cm$TN, cm$FP)
+                    class_n[k] <- cm$TP + cm$FN  # actual positives for this class
+                }
+
+                result$dice <- mean(class_dice, na.rm = TRUE)
+                result$iou <- mean(class_iou, na.rm = TRUE)
+                result$sensitivity <- mean(class_sens, na.rm = TRUE)
+                result$specificity <- mean(class_spec, na.rm = TRUE)
+                result$volumetric_similarity <- NA_real_
+
+                # Weighted average
+                total_n <- sum(class_n)
+                if (total_n > 0) {
+                    w <- class_n / total_n
+                    result$weighted_dice <- sum(class_dice * w, na.rm = TRUE)
+                    result$weighted_iou <- sum(class_iou * w, na.rm = TRUE)
+                } else {
+                    result$weighted_dice <- NA_real_
+                    result$weighted_iou <- NA_real_
+                }
+
+                # Distance: average across classes
+                all_hd <- numeric(0)
+                all_hd95 <- numeric(0)
+                all_asd <- numeric(0)
+                all_sd <- numeric(0)
+                for (cls in all_levels) {
+                    bd <- private$.calcBoundaryDistances(pred, truth, cls)
+                    if (!is.na(bd$hausdorff_max)) {
+                        all_hd <- c(all_hd, bd$hausdorff_max)
+                        all_hd95 <- c(all_hd95, bd$hausdorff_95)
+                        all_asd <- c(all_asd, bd$avg_surface_dist)
+                        all_sd <- c(all_sd, bd$surface_dice)
+                    }
+                }
+                result$hausdorff_max <- if (length(all_hd) > 0) mean(all_hd) else NA_real_
+                result$hausdorff_95 <- if (length(all_hd95) > 0) mean(all_hd95) else NA_real_
+                result$avg_surface_dist <- if (length(all_asd) > 0) mean(all_asd) else NA_real_
+                result$surface_dice <- if (length(all_sd) > 0) mean(all_sd) else NA_real_
+
+            } else {
+                # Instance: treat as binary for basic metrics (class labels as IDs)
+                # Instance-level matching is handled separately
+                matched <- as.character(pred) == as.character(truth)
+                result$dice <- mean(matched)
+                result$iou <- sum(matched) / (length(matched))
+                result$sensitivity <- NA_real_
+                result$specificity <- NA_real_
+                result$volumetric_similarity <- NA_real_
+                result$hausdorff_max <- NA_real_
+                result$hausdorff_95 <- NA_real_
+                result$avg_surface_dist <- NA_real_
+                result$surface_dice <- NA_real_
+            }
+
+            result
+        },
+
+        # ════════════════════════════════════════════════════════════════
+        # Table population methods
+        # ════════════════════════════════════════════════════════════════
+
+        .populateOverlapTable = function(per_image, img_levels) {
+            table <- self$results$overlapMetricsTable
+
+            for (i in seq_along(img_levels)) {
+                m <- per_image[[i]]
+                quality <- private$.classifyQuality(m$dice)
+
+                table$addRow(rowKey = i, values = list(
+                    image_id = img_levels[i],
+                    dice = m$dice,
+                    iou = m$iou,
+                    sensitivity = m$sensitivity,
+                    specificity = m$specificity,
+                    quality_category = quality
+                ))
+            }
+        },
+
+        .populateOverallSummary = function(per_image) {
+            table <- self$results$overallSummary
+
+            dice_vals <- vapply(per_image, function(m) m$dice, numeric(1))
+            iou_vals <- vapply(per_image, function(m) m$iou, numeric(1))
+            sens_vals <- vapply(per_image, function(m) {
+                if (is.null(m$sensitivity)) NA_real_ else m$sensitivity
+            }, numeric(1))
+            spec_vals <- vapply(per_image, function(m) {
+                if (is.null(m$specificity)) NA_real_ else m$specificity
+            }, numeric(1))
+
+            metrics <- list(
+                list(name = "Dice Coefficient", vals = dice_vals),
+                list(name = "IoU (Jaccard Index)", vals = iou_vals)
+            )
+
+            if (self$options$sensitivity_specificity) {
+                metrics <- c(metrics, list(
+                    list(name = "Sensitivity", vals = sens_vals),
+                    list(name = "Specificity", vals = spec_vals)
+                ))
+            }
+
+            if (self$options$volumetric_similarity) {
+                vs_vals <- vapply(per_image, function(m) {
+                    if (is.null(m$volumetric_similarity)) NA_real_ else m$volumetric_similarity
+                }, numeric(1))
+                metrics <- c(metrics, list(
+                    list(name = "Volumetric Similarity", vals = vs_vals)
+                ))
+            }
+
+            # Distance metrics in summary
+            if (self$options$hausdorff_distance) {
+                hd_vals <- vapply(per_image, function(m) {
+                    if (is.null(m$hausdorff_max)) NA_real_ else m$hausdorff_max
+                }, numeric(1))
+                metrics <- c(metrics, list(
+                    list(name = "Hausdorff Distance (max)", vals = hd_vals)
+                ))
+            }
+            if (self$options$average_hausdorff) {
+                hd95_vals <- vapply(per_image, function(m) {
+                    if (is.null(m$hausdorff_95)) NA_real_ else m$hausdorff_95
+                }, numeric(1))
+                metrics <- c(metrics, list(
+                    list(name = "Hausdorff Distance (95%)", vals = hd95_vals)
+                ))
+            }
+            if (self$options$surface_distance) {
+                asd_vals <- vapply(per_image, function(m) {
+                    if (is.null(m$avg_surface_dist)) NA_real_ else m$avg_surface_dist
+                }, numeric(1))
+                metrics <- c(metrics, list(
+                    list(name = "Avg Surface Distance", vals = asd_vals)
+                ))
+            }
+
+            for (i in seq_along(metrics)) {
+                mi <- metrics[[i]]
+                vals <- mi$vals
+                valid <- vals[!is.na(vals)]
+
+                ci <- private$.calculateCI(valid)
+
+                table$addRow(rowKey = i, values = list(
+                    metric = mi$name,
+                    mean = if (length(valid) > 0) mean(valid) else NA_real_,
+                    sd = if (length(valid) > 1) sd(valid) else NA_real_,
+                    median = if (length(valid) > 0) median(valid) else NA_real_,
+                    ci_lower = ci$lower,
+                    ci_upper = ci$upper,
+                    min = if (length(valid) > 0) min(valid) else NA_real_,
+                    max = if (length(valid) > 0) max(valid) else NA_real_
+                ))
+            }
+        },
+
+        .populateDistanceTable = function(per_image, img_levels) {
+            table <- self$results$distanceMetricsTable
+
+            units <- if (self$options$pixel_size_provided) "\u00b5m" else "pixels"
+
+            for (i in seq_along(img_levels)) {
+                m <- per_image[[i]]
+                table$addRow(rowKey = i, values = list(
+                    image_id = img_levels[i],
+                    hausdorff_max = m$hausdorff_max,
+                    hausdorff_95 = m$hausdorff_95,
+                    avg_surface_dist = m$avg_surface_dist,
+                    surface_dice = m$surface_dice,
+                    units = units
+                ))
+            }
+        },
+
+        .populateMulticlassTable = function(pred, truth, all_levels) {
+            table <- self$results$multiclassMetricsTable
+
+            for (i in seq_along(all_levels)) {
+                cls <- all_levels[i]
+                cm <- private$.confusionElements(pred, truth, cls)
+                n_truth <- cm$TP + cm$FN
+
+                table$addRow(rowKey = i, values = list(
+                    class = cls,
+                    n_pixels = n_truth,
+                    dice = private$.calcDice(cm$TP, cm$FP, cm$FN),
+                    iou = private$.calcIoU(cm$TP, cm$FP, cm$FN),
+                    sensitivity = private$.calcSensitivity(cm$TP, cm$FN),
+                    specificity = private$.calcSpecificity(cm$TN, cm$FP)
+                ))
+            }
+
+            # Add macro/weighted average rows
+            if (self$options$macro_average) {
+                class_metrics <- lapply(all_levels, function(cls) {
+                    cm <- private$.confusionElements(pred, truth, cls)
+                    list(
+                        dice = private$.calcDice(cm$TP, cm$FP, cm$FN),
+                        iou = private$.calcIoU(cm$TP, cm$FP, cm$FN),
+                        sens = private$.calcSensitivity(cm$TP, cm$FN),
+                        spec = private$.calcSpecificity(cm$TN, cm$FP)
+                    )
+                })
+                table$addRow(rowKey = length(all_levels) + 1, values = list(
+                    class = "Macro Average",
+                    n_pixels = length(truth),
+                    dice = mean(vapply(class_metrics, `[[`, numeric(1), "dice")),
+                    iou = mean(vapply(class_metrics, `[[`, numeric(1), "iou")),
+                    sensitivity = mean(vapply(class_metrics, `[[`, numeric(1), "sens"), na.rm = TRUE),
+                    specificity = mean(vapply(class_metrics, `[[`, numeric(1), "spec"), na.rm = TRUE)
+                ))
+            }
+
+            if (self$options$weighted_average) {
+                class_n <- vapply(all_levels, function(cls) {
+                    cm <- private$.confusionElements(pred, truth, cls)
+                    cm$TP + cm$FN
+                }, numeric(1))
+                total_n <- sum(class_n)
+                if (total_n > 0) {
+                    w <- class_n / total_n
+                    class_metrics2 <- lapply(all_levels, function(cls) {
+                        cm <- private$.confusionElements(pred, truth, cls)
+                        list(
+                            dice = private$.calcDice(cm$TP, cm$FP, cm$FN),
+                            iou = private$.calcIoU(cm$TP, cm$FP, cm$FN),
+                            sens = private$.calcSensitivity(cm$TP, cm$FN),
+                            spec = private$.calcSpecificity(cm$TN, cm$FP)
+                        )
+                    })
+                    row_idx <- length(all_levels) + (if (self$options$macro_average) 2 else 1)
+                    table$addRow(rowKey = row_idx, values = list(
+                        class = "Weighted Average",
+                        n_pixels = length(truth),
+                        dice = sum(vapply(class_metrics2, `[[`, numeric(1), "dice") * w),
+                        iou = sum(vapply(class_metrics2, `[[`, numeric(1), "iou") * w),
+                        sensitivity = sum(vapply(class_metrics2, `[[`, numeric(1), "sens") * w, na.rm = TRUE),
+                        specificity = sum(vapply(class_metrics2, `[[`, numeric(1), "spec") * w, na.rm = TRUE)
+                    ))
+                }
+            }
+        },
+
+        .populateInstanceTable = function(pred, truth, image_ids, img_levels) {
+            table <- self$results$instanceMetricsTable
+            iou_thresh <- self$options$iou_threshold
+
+            for (i in seq_along(img_levels)) {
+                idx <- which(image_ids == img_levels[i])
+                p <- as.character(pred[idx])
+                t <- as.character(truth[idx])
+
+                # Unique object IDs (excluding background "0" or "background")
+                pred_objects <- unique(p[!p %in% c("0", "background", "Background")])
+                true_objects <- unique(t[!t %in% c("0", "background", "Background")])
+
+                n_pred <- length(pred_objects)
+                n_true <- length(true_objects)
+
+                # Match objects by IoU
+                tp <- 0
+                matched_true <- character(0)
+
+                for (po in pred_objects) {
+                    pred_mask <- p == po
+                    best_iou <- 0
+                    best_match <- NULL
+
+                    for (to in true_objects) {
+                        if (to %in% matched_true) next
+                        truth_mask <- t == to
+                        intersection <- sum(pred_mask & truth_mask)
+                        union_count <- sum(pred_mask | truth_mask)
+                        if (union_count > 0) {
+                            iou_val <- intersection / union_count
+                            if (iou_val > best_iou) {
+                                best_iou <- iou_val
+                                best_match <- to
+                            }
+                        }
+                    }
+
+                    if (best_iou >= iou_thresh && !is.null(best_match)) {
+                        tp <- tp + 1
+                        matched_true <- c(matched_true, best_match)
+                    }
+                }
+
+                fp <- n_pred - tp
+                fn <- n_true - tp
+                precision <- if (n_pred > 0) tp / n_pred else NA_real_
+                recall <- if (n_true > 0) tp / n_true else NA_real_
+                f1 <- if (!is.na(precision) && !is.na(recall) && (precision + recall) > 0) {
+                    2 * precision * recall / (precision + recall)
+                } else {
+                    NA_real_
+                }
+
+                table$addRow(rowKey = i, values = list(
+                    image_id = img_levels[i],
+                    n_true_objects = n_true,
+                    n_pred_objects = n_pred,
+                    true_positives = tp,
+                    false_positives = fp,
+                    false_negatives = fn,
+                    precision = precision,
+                    recall = recall,
+                    f1_score = f1
+                ))
+            }
+        },
+
+        .populateQualityAssessment = function(per_image, img_levels) {
+            table <- self$results$qualityAssessmentTable
+            dice_vals <- vapply(per_image, function(m) m$dice, numeric(1))
+
+            t_exc <- self$options$dice_threshold_excellent
+            t_good <- self$options$dice_threshold_good
+            t_acc <- self$options$dice_threshold_acceptable
+
+            categories <- list(
+                list(name = "Excellent", test = function(d) d >= t_exc),
+                list(name = "Good", test = function(d) d >= t_good & d < t_exc),
+                list(name = "Acceptable", test = function(d) d >= t_acc & d < t_good),
+                list(name = "Poor", test = function(d) d < t_acc)
+            )
+
+            n_total <- length(dice_vals)
+
+            for (i in seq_along(categories)) {
+                cat <- categories[[i]]
+                in_cat <- cat$test(dice_vals)
+                n_cat <- sum(in_cat, na.rm = TRUE)
+                cat_vals <- dice_vals[in_cat & !is.na(in_cat)]
+
+                dice_range <- if (length(cat_vals) > 0) {
+                    paste0(sprintf("%.3f", min(cat_vals)), " - ", sprintf("%.3f", max(cat_vals)))
+                } else {
+                    "-"
+                }
+
+                table$addRow(rowKey = i, values = list(
+                    quality_category = cat$name,
+                    n_images = n_cat,
+                    percentage = if (n_total > 0) n_cat / n_total else 0,
+                    dice_range = dice_range
+                ))
+            }
+        },
+
+        .populateOutlierTable = function(per_image, img_levels) {
+            table <- self$results$outlierImagesTable
+            dice_vals <- vapply(per_image, function(m) m$dice, numeric(1))
+            iou_vals <- vapply(per_image, function(m) m$iou, numeric(1))
+
+            outlier_idx <- private$.detectOutliers(dice_vals, self$options$outlier_method)
+
+            if (length(outlier_idx) == 0) {
+                table$addRow(rowKey = 1, values = list(
+                    image_id = "No outliers detected",
+                    dice = NA_real_,
+                    iou = NA_real_,
+                    outlier_score = NA_real_,
+                    reason = "-"
+                ))
+                return()
+            }
+
+            for (j in seq_along(outlier_idx)) {
+                i <- outlier_idx[j]
+                score <- private$.outlierScore(dice_vals[i], dice_vals, self$options$outlier_method)
+                table$addRow(rowKey = j, values = list(
+                    image_id = img_levels[i],
+                    dice = dice_vals[i],
+                    iou = iou_vals[i],
+                    outlier_score = score,
+                    reason = paste0("Low Dice (", self$options$outlier_method, " outlier)")
+                ))
+            }
+        },
+
+        .populateStratifiedTable = function(data, pred, truth, image_ids) {
+            table <- self$results$stratifiedAnalysisTable
+
+            strat_var <- data[[self$options$stratify_by]]
+            if (is.null(strat_var)) return()
+
+            strat_levels <- levels(as.factor(strat_var))
+            img_levels <- levels(image_ids)
+            seg_type <- self$options$segmentation_type
+            pos_class <- private$.posClass
+
+            for (i in seq_along(strat_levels)) {
+                sl <- strat_levels[i]
+                idx <- which(strat_var == sl)
+                if (length(idx) == 0) next
+
+                sub_pred <- pred[idx]
+                sub_truth <- truth[idx]
+                sub_img <- image_ids[idx]
+                sub_img_levels <- unique(as.character(sub_img))
+
+                sub_metrics <- lapply(sub_img_levels, function(img) {
+                    ii <- which(sub_img == img)
+                    private$.computeImageMetrics(
+                        sub_pred[ii], sub_truth[ii],
+                        seg_type, pos_class, private$.allLevels
+                    )
+                })
+
+                dice_vals <- vapply(sub_metrics, function(m) m$dice, numeric(1))
+                iou_vals <- vapply(sub_metrics, function(m) m$iou, numeric(1))
+
+                table$addRow(rowKey = i, values = list(
+                    stratum = sl,
+                    n_images = length(sub_img_levels),
+                    mean_dice = mean(dice_vals, na.rm = TRUE),
+                    mean_iou = mean(iou_vals, na.rm = TRUE),
+                    sd_dice = if (length(dice_vals) > 1) sd(dice_vals, na.rm = TRUE) else NA_real_
+                ))
+            }
+        },
+
+        .populateComparisonTable = function(data, pred, truth, image_ids) {
+            table <- self$results$comparisonTable
+
+            method_var <- data[[self$options$comparison_method]]
+            if (is.null(method_var)) return()
+
+            method_levels <- levels(as.factor(method_var))
+            if (length(method_levels) < 2) return()
+
+            seg_type <- self$options$segmentation_type
+            pos_class <- private$.posClass
+            img_levels <- levels(image_ids)
+
+            # Compute per-image Dice for each method
+            method_dice <- list()
+            for (ml in method_levels) {
+                idx <- which(method_var == ml)
+                sub_pred <- pred[idx]
+                sub_truth <- truth[idx]
+                sub_img <- image_ids[idx]
+                sub_img_levels <- unique(as.character(sub_img))
+
+                dice_by_img <- vapply(sub_img_levels, function(img) {
+                    ii <- which(sub_img == img)
+                    m <- private$.computeImageMetrics(
+                        sub_pred[ii], sub_truth[ii],
+                        seg_type, pos_class, private$.allLevels
+                    )
+                    m$dice
+                }, numeric(1))
+
+                method_dice[[ml]] <- dice_by_img
+            }
+
+            # Pairwise comparisons
+            row_key <- 1
+            for (a in seq_len(length(method_levels) - 1)) {
+                for (b in (a + 1):length(method_levels)) {
+                    m1 <- method_levels[a]
+                    m2 <- method_levels[b]
+                    d1 <- method_dice[[m1]]
+                    d2 <- method_dice[[m2]]
+
+                    # Align by shared images
+                    shared <- intersect(names(d1), names(d2))
+                    if (length(shared) < 2) {
+                        table$addRow(rowKey = row_key, values = list(
+                            comparison = paste(m1, "vs", m2),
+                            mean_diff_dice = NA_real_,
+                            ci_lower = NA_real_,
+                            ci_upper = NA_real_,
+                            p_value = NA_real_,
+                            conclusion = "Insufficient paired data"
+                        ))
+                        row_key <- row_key + 1
+                        next
+                    }
+
+                    paired_d1 <- d1[shared]
+                    paired_d2 <- d2[shared]
+                    diffs <- paired_d1 - paired_d2
+                    mean_diff <- mean(diffs)
+
+                    # Paired t-test if n >= 3, Wilcoxon otherwise
+                    if (length(diffs) >= 3) {
+                        tt <- tryCatch(t.test(paired_d1, paired_d2, paired = TRUE),
+                                       error = function(e) NULL)
+                        if (!is.null(tt)) {
+                            table$addRow(rowKey = row_key, values = list(
+                                comparison = paste(m1, "vs", m2),
+                                mean_diff_dice = mean_diff,
+                                ci_lower = tt$conf.int[1],
+                                ci_upper = tt$conf.int[2],
+                                p_value = tt$p.value,
+                                conclusion = if (tt$p.value < 0.05) {
+                                    if (mean_diff > 0) paste(m1, "is better") else paste(m2, "is better")
+                                } else {
+                                    "No significant difference"
+                                }
+                            ))
+                        }
+                    } else {
+                        table$addRow(rowKey = row_key, values = list(
+                            comparison = paste(m1, "vs", m2),
+                            mean_diff_dice = mean_diff,
+                            ci_lower = NA_real_,
+                            ci_upper = NA_real_,
+                            p_value = NA_real_,
+                            conclusion = "Too few paired observations"
+                        ))
+                    }
+                    row_key <- row_key + 1
+                }
+            }
+        },
+
+        # ════════════════════════════════════════════════════════════════
+        # Statistical helpers
+        # ════════════════════════════════════════════════════════════════
+
+        .calculateCI = function(vals) {
+            if (length(vals) < 2) {
+                return(list(lower = NA_real_, upper = NA_real_))
+            }
+
+            cl <- self$options$confidence_level
+            z <- qnorm(1 - (1 - cl) / 2)
+
+            if (self$options$bootstrap_ci && self$options$confidence_intervals) {
+                set.seed(self$options$random_seed)
+                n <- length(vals)
+                n_boot <- self$options$bootstrap_samples
+                boot_means <- vapply(seq_len(n_boot), function(b) {
+                    mean(sample(vals, n, replace = TRUE))
+                }, numeric(1))
+                alpha <- 1 - cl
+                lower <- as.numeric(quantile(boot_means, alpha / 2))
+                upper <- as.numeric(quantile(boot_means, 1 - alpha / 2))
+            } else if (self$options$confidence_intervals) {
+                m <- mean(vals)
+                se <- sd(vals) / sqrt(length(vals))
+                lower <- m - z * se
+                upper <- m + z * se
+            } else {
+                lower <- NA_real_
+                upper <- NA_real_
+            }
+
+            list(lower = lower, upper = upper)
+        },
+
+        .detectOutliers = function(vals, method) {
+            if (length(vals) < 4) return(integer(0))
+
+            valid_idx <- which(!is.na(vals))
+            valid_vals <- vals[valid_idx]
+
+            if (length(valid_vals) < 4) return(integer(0))
+
+            outlier_flags <- rep(FALSE, length(valid_vals))
+
+            if (method == "iqr") {
+                q1 <- quantile(valid_vals, 0.25)
+                q3 <- quantile(valid_vals, 0.75)
+                iqr <- q3 - q1
+                lower <- q1 - 1.5 * iqr
+                outlier_flags <- valid_vals < lower  # Only flag low outliers for Dice
+            } else if (method == "zscore") {
+                z <- (valid_vals - mean(valid_vals)) / sd(valid_vals)
+                outlier_flags <- z < -3  # Only flag low outliers
+            } else if (method == "modified_zscore") {
+                med <- median(valid_vals)
+                mad_val <- median(abs(valid_vals - med))
+                if (mad_val > 0) {
+                    mz <- 0.6745 * (valid_vals - med) / mad_val
+                    outlier_flags <- mz < -3.5
+                }
+            }
+
+            valid_idx[which(outlier_flags)]
+        },
+
+        .outlierScore = function(val, all_vals, method) {
+            valid <- all_vals[!is.na(all_vals)]
+            if (method == "iqr") {
+                q1 <- quantile(valid, 0.25)
+                q3 <- quantile(valid, 0.75)
+                iqr <- q3 - q1
+                if (iqr > 0) return((q1 - val) / iqr)
+                return(0)
+            } else if (method == "zscore") {
+                if (sd(valid) > 0) return((mean(valid) - val) / sd(valid))
+                return(0)
+            } else if (method == "modified_zscore") {
+                med <- median(valid)
+                mad_val <- median(abs(valid - med))
+                if (mad_val > 0) return(0.6745 * (med - val) / mad_val)
+                return(0)
+            }
+            0
+        },
+
+        .classifyQuality = function(dice) {
+            if (is.na(dice)) return("N/A")
+            t_exc <- self$options$dice_threshold_excellent
+            t_good <- self$options$dice_threshold_good
+            t_acc <- self$options$dice_threshold_acceptable
+            if (dice >= t_exc) return("Excellent")
+            if (dice >= t_good) return("Good")
+            if (dice >= t_acc) return("Acceptable")
+            "Poor"
+        },
+
+        # ════════════════════════════════════════════════════════════════
+        # Plot state and rendering
+        # ════════════════════════════════════════════════════════════════
+
+        .setPlotStates = function(per_image, img_levels) {
+            dice_vals <- vapply(per_image, function(m) m$dice, numeric(1))
+            iou_vals <- vapply(per_image, function(m) m$iou, numeric(1))
+
+            # Metric distribution plot
+            if (self$options$plot_metric_distribution) {
+                plot_data <- data.frame(
+                    image_id = img_levels,
+                    dice = dice_vals,
+                    iou = iou_vals,
+                    stringsAsFactors = FALSE
+                )
+                self$results$metricDistributionPlot$setState(as.data.frame(plot_data))
+            }
+
+            # Scatter comparison plot
+            if (self$options$plot_scatter_comparison) {
+                plot_data <- data.frame(
+                    dice = dice_vals,
+                    iou = iou_vals,
+                    stringsAsFactors = FALSE
+                )
+                self$results$scatterComparisonPlot$setState(as.data.frame(plot_data))
+            }
+
+            # Boundary error plot
+            if (self$options$plot_boundary_error &&
+                (self$options$hausdorff_distance || self$options$surface_distance)) {
+                hd_vals <- vapply(per_image, function(m) {
+                    if (is.null(m$hausdorff_max)) NA_real_ else m$hausdorff_max
+                }, numeric(1))
+                hd95_vals <- vapply(per_image, function(m) {
+                    if (is.null(m$hausdorff_95)) NA_real_ else m$hausdorff_95
+                }, numeric(1))
+                asd_vals <- vapply(per_image, function(m) {
+                    if (is.null(m$avg_surface_dist)) NA_real_ else m$avg_surface_dist
+                }, numeric(1))
+                plot_data <- data.frame(
+                    image_id = img_levels,
+                    hausdorff_max = hd_vals,
+                    hausdorff_95 = hd95_vals,
+                    avg_surface_dist = asd_vals,
+                    stringsAsFactors = FALSE
+                )
+                units <- if (self$options$pixel_size_provided) "\u00b5m" else "pixels"
+                self$results$boundaryErrorPlot$setState(list(
+                    data = as.data.frame(plot_data),
+                    units = units
+                ))
+            }
+
+            # Confusion matrix plot (multiclass)
+            if (self$options$plot_confusion_matrix) {
+                pred <- private$.pred
+                truth <- private$.truth
+                cm <- table(Truth = as.character(truth), Predicted = as.character(pred))
+                cm_df <- as.data.frame(cm)
+                self$results$confusionMatrixPlot$setState(as.data.frame(cm_df))
+            }
+
+            # Performance by class plot
+            if (self$options$plot_performance_by_class && private$.segType == "multiclass") {
+                pred <- private$.pred
+                truth <- private$.truth
+                all_levels <- private$.allLevels
+
+                class_data <- do.call(rbind, lapply(all_levels, function(cls) {
+                    cm <- private$.confusionElements(pred, truth, cls)
+                    data.frame(
+                        class = cls,
+                        metric = c("Dice", "IoU", "Sensitivity", "Specificity"),
+                        value = c(
+                            private$.calcDice(cm$TP, cm$FP, cm$FN),
+                            private$.calcIoU(cm$TP, cm$FP, cm$FN),
+                            private$.calcSensitivity(cm$TP, cm$FN),
+                            private$.calcSpecificity(cm$TN, cm$FP)
+                        ),
+                        stringsAsFactors = FALSE
+                    )
+                }))
+                self$results$performanceByClassPlot$setState(as.data.frame(class_data))
+            }
+        },
+
+        .plotMetricDistribution = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+
+            plot_data <- image$state
+            if (is.data.frame(plot_data)) {
+                df <- plot_data
+            } else if (is.list(plot_data) && !is.null(plot_data$data)) {
+                df <- plot_data$data
+            } else {
+                return(FALSE)
+            }
+
+            if (nrow(df) == 0) return(FALSE)
+
+            # Reshape for plotting
+            plot_df <- data.frame(
+                value = c(df$dice, df$iou),
+                metric = rep(c("Dice Coefficient", "IoU (Jaccard)"),
+                             each = nrow(df)),
+                stringsAsFactors = FALSE
+            )
+
+            p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = value, fill = metric)) +
+                ggplot2::geom_histogram(
+                    bins = max(5, min(30, nrow(df))),
+                    alpha = 0.7,
+                    position = "identity"
+                ) +
+                ggplot2::facet_wrap(~ metric, scales = "free_y") +
+                ggplot2::labs(
+                    x = "Metric Value",
+                    y = "Count",
+                    title = "Distribution of Segmentation Metrics Across Images"
+                ) +
+                ggplot2::scale_fill_manual(
+                    values = c("Dice Coefficient" = "#2196F3",
+                               "IoU (Jaccard)" = "#FF9800")
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(legend.position = "none")
+
+            # Add density overlay if enough data
+            if (nrow(df) >= 5) {
+                p <- p + ggplot2::geom_density(
+                    ggplot2::aes(y = ggplot2::after_stat(count)),
+                    alpha = 0.3
+                )
+            }
+
+            print(p)
+            TRUE
+        },
+
+        .plotScatterComparison = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+
+            df <- image$state
+            if (nrow(df) == 0 || !all(c("dice", "iou") %in% names(df))) return(FALSE)
+
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = dice, y = iou)) +
+                ggplot2::geom_point(size = 3, alpha = 0.7, color = "#2196F3") +
+                ggplot2::geom_abline(
+                    intercept = 0, slope = 1,
+                    linetype = "dashed", color = "gray50"
+                ) +
+                ggplot2::labs(
+                    x = "Dice Coefficient",
+                    y = "IoU (Jaccard Index)",
+                    title = "Dice vs IoU Comparison"
+                ) +
+                ggplot2::coord_equal(xlim = c(0, 1), ylim = c(0, 1)) +
+                ggplot2::theme_minimal()
+
+            # Add theoretical relationship curve: IoU = Dice / (2 - Dice)
+            dice_seq <- seq(0, 1, by = 0.01)
+            theory_df <- data.frame(
+                dice = dice_seq,
+                iou = dice_seq / (2 - dice_seq)
+            )
+            p <- p + ggplot2::geom_line(
+                data = theory_df,
+                ggplot2::aes(x = dice, y = iou),
+                color = "#FF5722", linetype = "solid", linewidth = 0.8
+            )
+
+            print(p)
+            TRUE
+        },
+
+        .plotBoundaryError = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+
+            state <- image$state
+            df <- if (is.data.frame(state)) state else state$data
+            units <- if (is.list(state) && !is.null(state$units)) state$units else "pixels"
+
+            if (is.null(df) || nrow(df) == 0) return(FALSE)
+
+            # Reshape to long format
+            plot_df <- data.frame(
+                value = numeric(0),
+                metric = character(0),
+                stringsAsFactors = FALSE
+            )
+
+            if ("hausdorff_max" %in% names(df)) {
+                plot_df <- rbind(plot_df, data.frame(
+                    value = df$hausdorff_max,
+                    metric = "Hausdorff (max)",
+                    stringsAsFactors = FALSE
+                ))
+            }
+            if ("hausdorff_95" %in% names(df)) {
+                plot_df <- rbind(plot_df, data.frame(
+                    value = df$hausdorff_95,
+                    metric = "Hausdorff (95%)",
+                    stringsAsFactors = FALSE
+                ))
+            }
+            if ("avg_surface_dist" %in% names(df)) {
+                plot_df <- rbind(plot_df, data.frame(
+                    value = df$avg_surface_dist,
+                    metric = "Avg Surface Dist",
+                    stringsAsFactors = FALSE
+                ))
+            }
+
+            plot_df <- plot_df[!is.na(plot_df$value), , drop = FALSE]
+            if (nrow(plot_df) == 0) return(FALSE)
+
+            p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = metric, y = value, fill = metric)) +
+                ggplot2::geom_boxplot(alpha = 0.7, show.legend = FALSE) +
+                ggplot2::labs(
+                    x = "Metric",
+                    y = paste0("Distance (", units, ")"),
+                    title = "Boundary Error Analysis"
+                ) +
+                ggplot2::scale_fill_brewer(palette = "Set2") +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 15, hjust = 1))
+
+            # Add individual points if few images
+            if (nrow(df) <= 20) {
+                p <- p + ggplot2::geom_jitter(width = 0.1, alpha = 0.5, size = 2)
+            }
+
+            print(p)
+            TRUE
+        },
+
+        .plotConfusionMatrix = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+
+            cm_df <- image$state
+            if (nrow(cm_df) == 0) return(FALSE)
+
+            p <- ggplot2::ggplot(cm_df, ggplot2::aes(
+                x = Predicted, y = Truth, fill = Freq
+            )) +
+                ggplot2::geom_tile(color = "white") +
+                ggplot2::geom_text(ggplot2::aes(label = Freq), size = 5) +
+                ggplot2::scale_fill_gradient(low = "white", high = "#2196F3") +
+                ggplot2::labs(
+                    x = "Predicted Class",
+                    y = "True Class",
+                    title = "Pixel-wise Confusion Matrix",
+                    fill = "Count"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::coord_equal()
+
+            print(p)
+            TRUE
+        },
+
+        .plotPerformanceByClass = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+
+            df <- image$state
+            if (is.null(df) || nrow(df) == 0) return(FALSE)
+
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = class, y = value, fill = metric)) +
+                ggplot2::geom_bar(stat = "identity", position = "dodge", alpha = 0.85) +
+                ggplot2::labs(
+                    x = "Class",
+                    y = "Value",
+                    title = "Segmentation Performance by Class",
+                    fill = "Metric"
+                ) +
+                ggplot2::scale_fill_brewer(palette = "Set1") +
+                ggplot2::theme_minimal() +
+                ggplot2::ylim(0, 1) +
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1))
+
+            print(p)
+            TRUE
+        },
+
+        # ════════════════════════════════════════════════════════════════
+        # HTML outputs
+        # ════════════════════════════════════════════════════════════════
 
         .initInstructions = function() {
             instructions <- self$results$instructions
@@ -40,90 +1209,126 @@ segmentationmetricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             <ul>
                 <li><b>Predicted Segmentation:</b> AI-generated segmentation mask</li>
                 <li><b>Ground Truth:</b> Expert-annotated reference segmentation</li>
-                <li><b>Image ID:</b> Identifier for aggregating metrics per image</li>
+                <li><b>Image ID:</b> Identifier for aggregating metrics per image (optional)</li>
             </ul>
 
             <h4>Key Metrics:</h4>
             <ul>
-                <li><b>Dice Coefficient:</b> 2|A∩B|/(|A|+|B|) - Most common metric (range 0-1)</li>
-                <li><b>IoU (Jaccard Index):</b> |A∩B|/|A∪B| - Standard in computer vision</li>
-                <li><b>Hausdorff Distance:</b> Maximum boundary deviation (pixels or μm)</li>
+                <li><b>Dice Coefficient:</b> 2|A&cap;B|/(|A|+|B|) - Most common metric (range 0-1)</li>
+                <li><b>IoU (Jaccard Index):</b> |A&cap;B|/|A&cup;B| - Standard in computer vision</li>
+                <li><b>Hausdorff Distance:</b> Maximum boundary deviation (pixels or &micro;m)</li>
                 <li><b>Surface Distance:</b> Average boundary error</li>
             </ul>
 
-            <h4>Applications:</h4>
-            <ul>
-                <li><b>Tumor Boundaries:</b> Validate AI tumor delineation (Dice ≥0.85 typical)</li>
-                <li><b>Gland Segmentation:</b> Colorectal/prostate gland detection (Dice ≥0.80)</li>
-                <li><b>Nuclei Detection:</b> Cell counting and morphometry (IoU ≥0.70)</li>
-                <li><b>Tissue Regions:</b> Multi-class tissue classification</li>
-            </ul>
+            <h4>Data Format:</h4>
+            <p>Each row represents a pixel, region, or observation. Columns contain predicted
+            class labels and ground truth class labels. Optionally include an Image ID column
+            to group by images and compute per-image metrics.</p>
 
             <h4>Quality Benchmarks:</h4>
             <ul>
-                <li><b>Excellent:</b> Dice ≥0.90 - Ready for clinical deployment</li>
+                <li><b>Excellent:</b> Dice &ge;0.90 - Ready for clinical deployment</li>
                 <li><b>Good:</b> Dice 0.80-0.89 - Acceptable with monitoring</li>
                 <li><b>Acceptable:</b> Dice 0.70-0.79 - Requires human review</li>
-                <li><b>Poor:</b> Dice <0.70 - Needs improvement</li>
-            </ul>
-
-            <h4>Interpretation Tips:</h4>
-            <ul>
-                <li><b>High Dice, High Hausdorff:</b> Good overlap but rough boundaries</li>
-                <li><b>Low Sensitivity, High Specificity:</b> Under-segmentation</li>
-                <li><b>High Sensitivity, Low Specificity:</b> Over-segmentation</li>
-            </ul>
-
-            <p><b>Note:</b> Implementation in development. Full functionality requires spatial/image processing algorithms.</p>"
+                <li><b>Poor:</b> Dice &lt;0.70 - Needs improvement</li>
+            </ul>"
 
             instructions$setContent(html)
         },
 
-        .populateOverallSummary = function(pred, truth) {
-            table <- self$results$overallSummary
+        .generateInterpretation = function(per_image) {
+            dice_vals <- vapply(per_image, function(m) m$dice, numeric(1))
+            iou_vals <- vapply(per_image, function(m) m$iou, numeric(1))
+            sens_vals <- vapply(per_image, function(m) {
+                if (is.null(m$sensitivity)) NA_real_ else m$sensitivity
+            }, numeric(1))
 
-            # Placeholders - actual implementation requires spatial overlap calculations
-            table$addRow(rowKey=1, values=list(
-                metric = "Dice Coefficient",
-                mean = NA,
-                sd = NA,
-                median = NA,
-                ci_lower = NA,
-                ci_upper = NA,
-                min = NA,
-                max = NA
-            ))
+            mean_dice <- mean(dice_vals, na.rm = TRUE)
+            mean_iou <- mean(iou_vals, na.rm = TRUE)
+            mean_sens <- mean(sens_vals, na.rm = TRUE)
+            n_images <- length(dice_vals)
 
-            table$addRow(rowKey=2, values=list(
-                metric = "IoU (Jaccard Index)",
-                mean = NA,
-                sd = NA,
-                median = NA,
-                ci_lower = NA,
-                ci_upper = NA,
-                min = NA,
-                max = NA
-            ))
-        },
+            # Quality verdict
+            quality <- private$.classifyQuality(mean_dice)
 
-        .plotMetricDistribution = function(image, ...) {
-            # Stub for metric distribution plot
-        },
+            # Context-specific interpretation
+            ctx <- self$options$application_context
+            context_text <- switch(ctx,
+                "tumor" = "tumor boundary delineation",
+                "gland" = "gland segmentation",
+                "nuclei" = "cell nuclei detection",
+                "tissue" = "tissue region classification",
+                "stain" = "stain separation/deconvolution",
+                "general segmentation"
+            )
 
-        .plotScatterComparison = function(image, ...) {
-            # Stub for Dice vs IoU scatter
-        },
+            context_threshold <- switch(ctx,
+                "tumor" = "For tumor boundary delineation, Dice &ge;0.85 is typically required for clinical use.",
+                "gland" = "For gland segmentation, Dice &ge;0.80 is generally considered acceptable.",
+                "nuclei" = "For nuclei detection, IoU &ge;0.70 combined with high detection F1 is the standard benchmark.",
+                "tissue" = "For tissue classification, macro-averaged Dice &ge;0.80 across classes indicates good performance.",
+                "stain" = "For stain separation, high Dice on each stain channel (&ge;0.85) is expected.",
+                "General segmentation benchmarks: Dice &ge;0.80 is considered good."
+            )
 
-        .plotBoundaryError = function(image, ...) {
-            # Stub for boundary error plot
-        },
+            # Segmentation bias analysis
+            bias_text <- ""
+            if (!is.na(mean_sens)) {
+                mean_spec <- mean(vapply(per_image, function(m) {
+                    if (is.null(m$specificity)) NA_real_ else m$specificity
+                }, numeric(1)), na.rm = TRUE)
 
-        .plotConfusionMatrix = function(image, ...) {
-            # Stub for confusion matrix
-        },
+                if (!is.na(mean_spec)) {
+                    if (mean_sens > mean_spec + 0.1) {
+                        bias_text <- "<li><b>Segmentation Bias:</b> Over-segmentation tendency detected (high sensitivity, lower specificity). The model tends to include extra regions.</li>"
+                    } else if (mean_spec > mean_sens + 0.1) {
+                        bias_text <- "<li><b>Segmentation Bias:</b> Under-segmentation tendency detected (high specificity, lower sensitivity). The model may miss parts of the target structure.</li>"
+                    } else {
+                        bias_text <- "<li><b>Segmentation Bias:</b> Balanced segmentation (sensitivity and specificity are similar).</li>"
+                    }
+                }
+            }
 
-        .plotPerformanceByClass = function(image, ...) {
-            # Stub for multi-class performance
+            # Variability assessment
+            var_text <- ""
+            if (n_images > 1 && sd(dice_vals, na.rm = TRUE) > 0.1) {
+                var_text <- "<li><b>Consistency:</b> High variability in Dice scores across images (SD > 0.10). Some images have substantially worse performance. Consider investigating outlier images.</li>"
+            } else if (n_images > 1) {
+                var_text <- "<li><b>Consistency:</b> Segmentation performance is relatively consistent across images.</li>"
+            }
+
+            # Deployment recommendation
+            deploy_text <- switch(quality,
+                "Excellent" = "<span style='color: #4CAF50; font-weight: bold;'>READY for clinical deployment</span> with standard quality monitoring.",
+                "Good" = "<span style='color: #FF9800; font-weight: bold;'>ACCEPTABLE for clinical use</span> with enhanced monitoring and periodic expert review.",
+                "Acceptable" = "<span style='color: #FF5722; font-weight: bold;'>REQUIRES human review</span> for all cases. Not suitable for autonomous use.",
+                "<span style='color: #F44336; font-weight: bold;'>NOT READY for clinical deployment</span>. Significant improvement needed before clinical use."
+            )
+
+            html <- paste0(
+                "<h4>Clinical Interpretation for ", context_text, "</h4>",
+                "<p><b>Overall Quality: ", quality, "</b></p>",
+                "<ul>",
+                "<li><b>Mean Dice Coefficient:</b> ", sprintf("%.4f", mean_dice),
+                " (across ", n_images, " image", if (n_images != 1) "s" else "", ")</li>",
+                "<li><b>Mean IoU:</b> ", sprintf("%.4f", mean_iou), "</li>",
+                bias_text,
+                var_text,
+                "</ul>",
+                "<h4>Context-Specific Benchmark</h4>",
+                "<p>", context_threshold, "</p>",
+                "<h4>Deployment Recommendation</h4>",
+                "<p>", deploy_text, "</p>",
+                "<h4>Interpretation Tips</h4>",
+                "<ul>",
+                "<li><b>High Dice, High Hausdorff:</b> Good overall overlap but rough/jagged boundaries</li>",
+                "<li><b>Low Sensitivity, High Specificity:</b> Under-segmentation (missing parts of the structure)</li>",
+                "<li><b>High Sensitivity, Low Specificity:</b> Over-segmentation (including extra regions)</li>",
+                "<li><b>High Dice Variability:</b> Model performance is inconsistent; investigate failure cases</li>",
+                "</ul>"
+            )
+
+            self$results$clinicalInterpretation$setContent(html)
         }
     )
 )

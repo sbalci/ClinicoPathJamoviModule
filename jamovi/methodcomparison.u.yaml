@@ -86,6 +86,8 @@ children:
       - type: CheckBox
         name: regression_comparison
       - type: CheckBox
+        name: calibration_analysis
+      - type: CheckBox
         name: clinical_limits
   - type: LayoutBox
     margin: large

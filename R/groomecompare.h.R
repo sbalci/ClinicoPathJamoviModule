@@ -444,7 +444,7 @@ groomecompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Image$new(
                 options=options,
                 name="kmplot1",
-                title="Kaplan-Meier Curves - (stage1name)",
+                title="Kaplan-Meier Curves - {stage1name}",
                 width=700,
                 height=600,
                 renderFun=".plotKM1",

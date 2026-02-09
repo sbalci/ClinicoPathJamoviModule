@@ -145,6 +145,17 @@ options:
       default: true
       description: 'Compare ordinary least squares vs method comparison regressions'
 
+    - name: calibration_analysis
+      title: 'Calibration Analysis'
+      type: Bool
+      default: false
+      description: >
+        Compute calibration metrics assessing how well the test method tracks the
+        reference method. Includes calibration-in-the-large (intercept; ideal = 0),
+        calibration slope (ideal = 1), and R-squared. A well-calibrated method has
+        slope near 1 and intercept near 0. Useful for validating AI scoring tools,
+        automated assays, and new measurement methods against gold standards.
+
     - name: clinical_limits
       title: 'Clinical Acceptability Limits'
       type: Bool

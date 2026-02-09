@@ -185,6 +185,113 @@ items:
           - pp
           - pprob
 
+    # Overall Percent Agreement Table
+    - name: opaTable
+      title: 'Overall Percent Agreement (OPA)'
+      type: Table
+      visible: (opa)
+      rows: 0
+      notes:
+        note: >
+          OPA = (TP + TN) / Total.
+          OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance.
+          Noninferiority: lower CI bound must exceed margin to declare noninferior.
+      columns:
+        - name: test
+          title: 'Test'
+          type: text
+        - name: concordant
+          title: 'Concordant'
+          type: integer
+        - name: total
+          title: 'Total'
+          type: integer
+        - name: opa
+          title: 'OPA'
+          type: number
+          format: pc
+        - name: lower
+          title: 'Lower'
+          superTitle: '95% CI'
+          type: number
+          format: pc
+        - name: upper
+          title: 'Upper'
+          superTitle: '95% CI'
+          type: number
+          format: pc
+        - name: niMargin
+          title: 'NI Margin'
+          type: number
+          format: pc
+        - name: niResult
+          title: 'Noninferior?'
+          type: text
+      clearWith:
+          - gold
+          - goldPositive
+          - test1
+          - test1Positive
+          - test2
+          - test2Positive
+          - test3
+          - test3Positive
+          - excludeIndeterminate
+          - niMargin
+          - ciMethod
+
+    # Stratified Comparison Table
+    - name: stratifiedTable
+      title: 'Stratified Diagnostic Accuracy'
+      type: Table
+      visible: (!is.null(stratify) && stratify != "")
+      rows: 0
+      columns:
+        - name: stratum
+          title: 'Subgroup'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: test
+          title: 'Test'
+          type: text
+        - name: Sens
+          title: 'Sensitivity'
+          type: number
+          format: pc
+        - name: Spec
+          title: 'Specificity'
+          type: number
+          format: pc
+        - name: AccurT
+          title: 'Accuracy'
+          type: number
+          format: pc
+        - name: PPV
+          title: 'PPV'
+          type: number
+          format: pc
+        - name: NPV
+          title: 'NPV'
+          type: number
+          format: pc
+        - name: opa
+          title: 'OPA'
+          type: number
+          format: pc
+      clearWith:
+          - gold
+          - goldPositive
+          - test1
+          - test1Positive
+          - test2
+          - test2Positive
+          - test3
+          - test3Positive
+          - stratify
+          - excludeIndeterminate
+
     # Statistical Comparison Tables
     - name: mcnemarTable
       title: "Statistical Comparison of Test Accuracy"
@@ -266,6 +373,20 @@ items:
       visible: (radarplot)
       clearWith:
           - radarplot
+      refs:
+          - ggplot2
+
+    # Concordance Heatmap
+    - name: plotHeatmap
+      title: 'Concordance Heatmap'
+      type: Image
+      width: 800
+      height: 400
+      renderFun: .plotHeatmap
+      requiresData: true
+      visible: (heatmap)
+      clearWith:
+          - heatmap
       refs:
           - ggplot2
 

@@ -415,7 +415,7 @@ rpasurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="logranktest",
                 title="Log-Rank Test",
                 visible="(kmplot)",
-                rows=1,
+                rows=0,
                 clearWith=list(
                     "time",
                     "event",

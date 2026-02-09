@@ -107,7 +107,18 @@ survivalPowerClass <- R6::R6Class(
             # Validate effect size (hazard ratio)
             hr <- private$.get_effect_hr()
             if (!is.null(hr)) {
-                if (hr <= 0 || hr > 5) {
+                if (!is.finite(hr)) {
+                    notice <- jmvcore::Notice$new(
+                        options = self$options,
+                        name = 'invalidEffectSize',
+                        type = jmvcore::NoticeType$ERROR
+                    )
+                    notice$setContent(
+                        'Unable to derive a valid hazard ratio from the selected effect size inputs • Check effect size type and related parameters'
+                    )
+                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                    valid <- FALSE
+                } else if (hr <= 0 || hr > 5) {
                     notice <- jmvcore::Notice$new(
                         options = self$options,
                         name = 'invalidHazardRatio',
@@ -219,84 +230,17 @@ survivalPowerClass <- R6::R6Class(
 
             # Validate survival distribution
             distribution <- self$options$survival_distribution
-            if (!is.null(distribution)) {
-                if (distribution == "weibull") {
-                    # Weibull distribution - validate shape parameter
-                    weibull_shape <- self$options$weibull_shape
-                    if (is.null(weibull_shape) || weibull_shape <= 0) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'invalidWeibullShape',
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent('Weibull distribution requires positive shape parameter (set Weibull Shape \u003e 0)')
-                        notices <- append(notices, list(list(notice = notice, type = "ERROR")))
-                        valid <- FALSE
-                    } else if (weibull_shape == 1.0) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'weibullIsExponential',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent('Weibull shape = 1.0 is equivalent to exponential distribution')
-                        notices <- append(notices, list(list(notice = notice, type = "INFO")))
-                    } else if (weibull_shape < 1.0) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'weibullDecreasingHazard',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent(sprintf(
-                            'Weibull shape \u003c 1.0 (%.2f) indicates decreasing hazard over time • Common in early mortality scenarios',
-                            weibull_shape
-                        ))
-                        notices <- append(notices, list(list(notice = notice, type = "INFO")))
-                    } else if (weibull_shape > 1.0) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'weibullIncreasingHazard',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent(sprintf(
-                            'Weibull shape \u003e 1.0 (%.2f) indicates increasing hazard over time • Common in aging/wear-out scenarios',
-                            weibull_shape
-                        ))
-                        notices <- append(notices, list(list(notice = notice, type = "INFO")))
-                    }
-                } else if (distribution == "log_normal") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'lognormalDistribution',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(
-                        'Log-normal distribution selected • Proportional hazards assumption may not hold exactly • Consider sensitivity analysis'
-                    )
-                    notices <- append(notices, list(list(notice = notice, type = "INFO")))
-                } else if (distribution == "piecewise_exponential") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'piecewiseNotImplemented',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(
-                        'Piecewise exponential distribution not yet implemented • Use exponential or Weibull for now'
-                    )
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
-                    valid <- FALSE
-                } else if (!distribution %in% c("exponential", "weibull", "log_normal", "piecewise_exponential")) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'unsupportedDistribution',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
-                        'Unknown distribution: %s • Supported: exponential, weibull, log_normal',
-                        distribution
-                    ))
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
-                    valid <- FALSE
-                }
+            if (!is.null(distribution) && distribution != "exponential") {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'distributionNotSupported',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(
+                    'Only exponential survival distribution is validated in this release • Select "Exponential" to proceed'
+                )
+                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                valid <- FALSE
             }
 
             # Validate allocation ratio
@@ -362,6 +306,19 @@ survivalPowerClass <- R6::R6Class(
                 valid <- FALSE
             }
 
+            if (isTRUE(self$options$study_design == "multi_arm") &&
+                isTRUE(self$options$multiple_comparisons %in% c("holm", "dunnett"))) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'multiplicityApproximation',
+                    type = jmvcore::NoticeType$WARNING
+                )
+                notice$setContent(
+                    'Holm/Dunnett adjustments are approximated conservatively using Bonferroni in current calculations'
+                )
+                notices <- append(notices, list(list(notice = notice, type = "WARNING")))
+            }
+
             # Stratification info
             if (!is.null(self$options$stratification_factors) && self$options$stratification_factors > 0) {
                 notice <- jmvcore::Notice$new(
@@ -374,6 +331,21 @@ survivalPowerClass <- R6::R6Class(
                     self$options$stratification_factors
                 ))
                 notices <- append(notices, list(list(notice = notice, type = "INFO")))
+            }
+
+            # Non-inferiority margin type validation
+            if (isTRUE(self$options$test_type == "non_inferiority") &&
+                !isTRUE(self$options$ni_type %in% c("relative_margin"))) {
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = 'niTypeNotSupported',
+                    type = jmvcore::NoticeType$ERROR
+                )
+                notice$setContent(
+                    'Non-inferiority calculations currently support only relative hazard-ratio margins'
+                )
+                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                valid <- FALSE
             }
 
             # Unsupported tests
@@ -397,7 +369,13 @@ survivalPowerClass <- R6::R6Class(
 
         .validate_parameter_combinations = function(notices_list) {
             # Check for unrealistic parameter combinations - appends to notices list
-            hr <- self$options$effect_size
+            hr <- private$.get_effect_hr()
+            if (!is.finite(hr)) {
+                hr <- self$options$effect_size
+            }
+            if (!is.finite(hr)) {
+                hr <- 1
+            }
             power <- self$options$power_level
             alpha <- self$options$alpha_level
             accrual <- self$options$accrual_period
@@ -526,7 +504,7 @@ survivalPowerClass <- R6::R6Class(
                 "<ul style='margin-bottom: 10px;'>",
                 "<li><strong>✅ WORKING:</strong> Log-rank test, Cox regression, Non-inferiority designs</li>",
                 "<li><strong>⛔ NOT AVAILABLE:</strong> Competing risks, RMST-based tests, SNP survival, Weighted log-rank</li>",
-                "&lt;li&gt;&lt;strong&gt;⛔ DISTRIBUTION:&lt;/strong&gt; Only exponential survival distribution supported (other distributions will be blocked)&lt;/li&gt;",
+                "<li><strong>⛔ DISTRIBUTION:</strong> Only exponential survival distribution supported (other distributions will be blocked)</li>",
                 "<li><strong>⛔ ACCRUAL:</strong> Only uniform accrual pattern fully validated</li>",
                 "</ul>",
                 "<p style='margin-bottom: 0;'><strong>Important:</strong> This is a beta version with core features functional but incomplete. ",
@@ -794,7 +772,12 @@ survivalPowerClass <- R6::R6Class(
             n_total <- params$sample_size_input
 
             target_power <- params$power
-            alpha <- params$alpha
+            alpha <- params$alpha_adjusted
+            direction_hr <- params$hr
+            if (!is.finite(direction_hr)) {
+                direction_hr <- 0.75
+            }
+            interval <- if (direction_hr < 1) c(0.1, 0.99) else c(1.01, 5.0)
 
             hr_solution <- tryCatch({
                 objective <- function(hr_candidate) {
@@ -817,7 +800,12 @@ survivalPowerClass <- R6::R6Class(
                     power_candidate
                 }
 
-                uniroot(objective, interval = c(0.1, 0.99))$root
+                f_lower <- objective(interval[1])
+                f_upper <- objective(interval[2])
+                if (!is.finite(f_lower) || !is.finite(f_upper) || (f_lower * f_upper > 0)) {
+                    return(NA_real_)
+                }
+                uniroot(objective, interval = interval)$root
             }, error = function(e) {
                 NA_real_
             })
@@ -842,7 +830,7 @@ survivalPowerClass <- R6::R6Class(
             n_total <- params$sample_size_input
             required_events <- private$.events_needed_log_rank(
                 hr = params$hr,
-                alpha = params$alpha,
+                alpha = params$alpha_adjusted,
                 power = params$power,
                 ratio = params$allocation_ratio
             )
@@ -1174,11 +1162,11 @@ survivalPowerClass <- R6::R6Class(
             ni_margin <- self$options$ni_margin
             ni_type <- self$options$ni_type
 
-            if (is.null(hr_true) || hr_true <= 0) {
+            if (is.null(hr_true) || !is.finite(hr_true) || hr_true <= 0) {
                 return("Hazard ratio must be specified and positive for non-inferiority calculations")
             }
 
-            if (!isTRUE(ni_type %in% c("relative_margin", "retention_fraction"))) {
+            if (!isTRUE(ni_type %in% c("relative_margin"))) {
                 return("Only relative hazard-ratio margins are supported in the validated implementation")
             }
 
@@ -1340,8 +1328,7 @@ survivalPowerClass <- R6::R6Class(
             # Populate specialized tables based on test type
             private$.populate_specialized_tables()
             
-            # Run simulation validation if requested
-            private$.performSimulationValidation()
+            # Simulation validation is handled in .populate_simulation_comparison()
         },
         
         .performSimulationValidation = function() {
@@ -2632,7 +2619,10 @@ survivalPowerClass <- R6::R6Class(
             # Generate study design and parameter summary
             analysis_type <- self$options$analysis_type
             test_type <- self$options$test_type
-            hr <- self$options$effect_size
+            hr <- private$.get_effect_hr()
+            if (!is.finite(hr)) {
+                hr <- self$options$effect_size
+            }
             alpha <- self$options$alpha_level
             power <- self$options$power_level
             accrual <- self$options$accrual_period
@@ -2659,7 +2649,9 @@ survivalPowerClass <- R6::R6Class(
 
                 "<p><strong>Population Characteristics:</strong><br>",
                 "• Control Median Survival: ", median_survival, " months<br>",
-                "• Expected Treatment Median: ", round(median_survival / hr, 1), " months<br>",
+                "• Expected Treatment Median: ",
+                if (is.finite(hr) && hr > 0) round(median_survival / hr, 1) else "NA",
+                " months<br>",
                 "• Accrual Period: ", accrual, " months<br>",
                 "• Follow-up Period: ", follow_up, " months<br>",
                 "• Annual Dropout Rate: ", round(dropout * 100, 1), "%</p>",
@@ -2675,7 +2667,10 @@ survivalPowerClass <- R6::R6Class(
         .generate_objective_text = function() {
             # Generate objective text based on analysis type
             analysis_type <- self$options$analysis_type
-            hr <- self$options$effect_size
+            hr <- private$.get_effect_hr()
+            if (!is.finite(hr)) {
+                hr <- self$options$effect_size
+            }
             alpha <- self$options$alpha_level
             power <- self$options$power_level
 
@@ -2717,7 +2712,10 @@ survivalPowerClass <- R6::R6Class(
 
         .generate_sample_size_interpretation = function(result_text) {
             # Generate sample size specific interpretation
-            hr <- self$options$effect_size
+            hr <- private$.get_effect_hr()
+            if (!is.finite(hr)) {
+                hr <- self$options$effect_size
+            }
             alpha <- self$options$alpha_level
             power <- self$options$power_level
 
@@ -3110,9 +3108,26 @@ survivalPowerClass <- R6::R6Class(
         .generate_power_curve_data = function() {
             # Generate data for power curve plot
             tryCatch({
-                hr_values <- seq(0.5, 0.95, by = 0.05)
+                base_hr <- private$.get_effect_hr()
+                if (!is.finite(base_hr)) {
+                    base_hr <- 0.75
+                }
+                hr_values <- if (base_hr >= 1) {
+                    seq(1.05, min(3, base_hr + 0.5), by = 0.05)
+                } else {
+                    seq(0.5, 0.95, by = 0.05)
+                }
+                n_total <- if (isTRUE(self$options$analysis_type == "sample_size") &&
+                    !is.null(private$calculated_sample_size)) {
+                    private$calculated_sample_size
+                } else {
+                    self$options$sample_size_input
+                }
+                if (is.null(n_total) || !is.finite(n_total) || n_total <= 0) {
+                    n_total <- 200
+                }
                 power_values <- sapply(hr_values, function(hr) {
-                    private$.basic_power_calc(100, hr, self$options$alpha_level)
+                    private$.basic_power_calc(n_total, hr, self$options$alpha_level)
                 })
 
                 return(data.frame(
@@ -3128,7 +3143,15 @@ survivalPowerClass <- R6::R6Class(
         .generate_sample_size_curve_data = function() {
             # Generate data for sample size curve plot
             tryCatch({
-                hr_values <- seq(0.5, 0.95, by = 0.05)
+                base_hr <- private$.get_effect_hr()
+                if (!is.finite(base_hr)) {
+                    base_hr <- 0.75
+                }
+                hr_values <- if (base_hr >= 1) {
+                    seq(1.05, min(3, base_hr + 0.5), by = 0.05)
+                } else {
+                    seq(0.5, 0.95, by = 0.05)
+                }
                 sample_sizes <- sapply(hr_values, function(hr) {
                     private$.basic_sample_size_calc(self$options$power_level, hr, self$options$alpha_level)
                 })
@@ -3276,15 +3299,21 @@ survivalPowerClass <- R6::R6Class(
 
             # Convert from median ratio (treatment/control)
             if (type == "median_ratio") {
-                if (is.null(es) || es <= 0)
-                    es <- 1.333333
+                if (is.null(es) || es <= 0) {
+                    private$effect_hr_info <- list(
+                        type = "median_ratio",
+                        hr = NA_real_,
+                        note = "Median survival ratio must be positive to derive a hazard ratio."
+                    )
+                    return(NA_real_)
+                }
                 # Under exponential assumption: median_t/median_c = 1/HR
                 hr <- 1 / es
                 private$effect_hr_info <- list(type = "median_ratio", hr = hr,
                     note = paste0("Converted from median survival ratio (treatment/control) = ",
                                   sprintf("%.3f", es),
                                   "; assuming exponential survival, HR = 1 / ratio."))
-                return(max(0.1, min(5, hr)))
+                return(hr)
             }
 
             # Convert from RMST difference at tau via numerical solve under exponential assumption
@@ -3292,12 +3321,14 @@ survivalPowerClass <- R6::R6Class(
                 delta <- self$options$rmst_difference
                 tau <- self$options$rmst_tau
                 mc <- self$options$control_median_survival
-                if (is.null(delta) || is.null(tau) || is.null(mc) || tau <= 0 || mc <= 0)
-                    {
-                        private$effect_hr_info <- list(type = "rmst_difference", hr = es,
-                            note = "RMST parameters incomplete; using provided effect size as HR.")
-                        return(es)
-                    }
+                if (is.null(delta) || is.null(tau) || is.null(mc) || tau <= 0 || mc <= 0) {
+                    private$effect_hr_info <- list(
+                        type = "rmst_difference",
+                        hr = NA_real_,
+                        note = "RMST parameters incomplete; unable to derive hazard ratio."
+                    )
+                    return(NA_real_)
+                }
                 lambda_c <- log(2) / mc
                 rmst_diff_fn <- function(hr) {
                     lambda_t <- lambda_c * hr
@@ -3314,16 +3345,17 @@ survivalPowerClass <- R6::R6Class(
                             note = paste0("Derived HR from RMST difference ", sprintf("%.3f", delta),
                                           " at tau = ", sprintf("%.1f", tau),
                                           " months under exponential assumption."))
-                        return(max(0.1, min(5, hr)))
+                        return(hr)
                     }
                 }
-                # Fallback: approximate small difference mapping
-                hr <- 0.75
-                private$effect_hr_info <- list(type = "rmst_difference", hr = hr,
-                    note = paste0("Could not uniquely solve HR from RMST difference (inputs: Δ=", 
-                                   sprintf("%.3f", delta), ", tau=", sprintf("%.1f", tau), 
-                                   ", median_c=", sprintf("%.1f", mc), "). Using fallback HR=0.75 for calculation."))
-                return(max(0.1, min(5, hr)))
+                private$effect_hr_info <- list(
+                    type = "rmst_difference",
+                    hr = NA_real_,
+                    note = paste0("Could not solve HR from RMST difference (inputs: Δ=",
+                                   sprintf("%.3f", delta), ", tau=", sprintf("%.1f", tau),
+                                   ", median_c=", sprintf("%.1f", mc), ").")
+                )
+                return(NA_real_)
             }
 
             # Convert from survival probability difference at follow-up
@@ -3331,13 +3363,14 @@ survivalPowerClass <- R6::R6Class(
                 delta <- es
                 T <- self$options$follow_up_period
                 mc <- self$options$control_median_survival
-                if (is.null(delta) || is.null(T) || is.null(mc) || T <= 0 || mc <= 0)
-                    {
-                        hr <- 0.75
-                        private$effect_hr_info <- list(type = "survival_difference", hr = hr,
-                            note = "Survival difference parameters incomplete; using fallback HR=0.75.")
-                        return(hr)
-                    }
+                if (is.null(delta) || is.null(T) || is.null(mc) || T <= 0 || mc <= 0) {
+                    private$effect_hr_info <- list(
+                        type = "survival_difference",
+                        hr = NA_real_,
+                        note = "Survival difference parameters incomplete; unable to derive hazard ratio."
+                    )
+                    return(NA_real_)
+                }
                 lambda_c <- log(2) / mc
                 s_c <- function(t) exp(-lambda_c * t)
                 target_fn <- function(hr) {
@@ -3353,15 +3386,17 @@ survivalPowerClass <- R6::R6Class(
                             note = paste0("Derived HR from survival difference ", sprintf("%.3f", delta),
                                           " at follow-up = ", sprintf("%.1f", T),
                                           " months under exponential assumption."))
-                        return(max(0.1, min(5, hr)))
+                        return(hr)
                     }
                 }
-                hr <- 0.75
-                private$effect_hr_info <- list(type = "survival_difference", hr = hr,
-                    note = paste0("Could not uniquely solve HR from survival difference (inputs: Δ=",
+                private$effect_hr_info <- list(
+                    type = "survival_difference",
+                    hr = NA_real_,
+                    note = paste0("Could not solve HR from survival difference (inputs: Δ=",
                                    sprintf("%.3f", delta), ", follow-up=", sprintf("%.1f", T),
-                                   ", median_c=", sprintf("%.1f", mc), "). Using fallback HR=0.75 for calculation."))
-                return(max(0.1, min(5, hr)))
+                                   ", median_c=", sprintf("%.1f", mc), ").")
+                )
+                return(NA_real_)
             }
 
             # Unknown type — return provided value
@@ -3654,10 +3689,16 @@ survivalPowerClass <- R6::R6Class(
             if (study_design == "multi_arm" && number_of_arms > 2) {
                 if (multiple_comparisons == "bonferroni") {
                     alpha_adjusted <- alpha / (number_of_arms - 1)
+                } else if (multiple_comparisons == "holm") {
+                    # Conservative Holm approximation
+                    alpha_adjusted <- alpha / (number_of_arms - 1)
+                } else if (multiple_comparisons == "dunnett") {
+                    # Conservative Dunnett approximation
+                    alpha_adjusted <- alpha / (number_of_arms - 1)
                 } else if (multiple_comparisons == "none" || is.null(multiple_comparisons)) {
                     alpha_adjusted <- alpha
                 } else {
-                    stop("Unsupported multiplicity adjustment requested")
+                    alpha_adjusted <- alpha
                 }
             } else {
                 alpha_adjusted <- alpha
@@ -3887,7 +3928,12 @@ survivalPowerClass <- R6::R6Class(
                     prob_event_control <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
                     expected_events <- n_total * prob_event_control
 
-                    power_calc <- private$.basic_power_calc(expected_events, hr, alpha)
+                    power_calc <- private$.power_from_events(
+                        events = expected_events,
+                        hr = hr,
+                        alpha = alpha,
+                        allocation_ratio = self$options$allocation_ratio
+                    )
                     return(paste("Statistical Power:", round(power_calc * 100, 1), "%"))
                 }, error = function(e) {
                     return("Calculation error")

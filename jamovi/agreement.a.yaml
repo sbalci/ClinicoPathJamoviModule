@@ -1,7 +1,7 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Agreement
 version: '0.0.33'
 jas: '1.2'
@@ -693,9 +693,134 @@ options:
             Identifies best and worst performing sites. Use cautiously to avoid
             unfair comparisons when cluster sizes differ substantially.
 
+    # Mixed-Effects Condition Comparison
+    - name: conditionVariable
+      title: "Condition/Method Variable"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Variable distinguishing measurement conditions (e.g., AI-assisted vs. conventional,
+            pre-training vs. post-training). Enables mixed-effects comparison that accounts for
+            rater and case random effects. Each case-rater pair should have one observation
+            per condition level.
 
+    - name: mixedEffectsComparison
+      title: "Mixed-Effects Condition Comparison"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Fit a linear mixed model to compare measurement conditions while accounting
+            for rater and case random effects. Model: score ~ condition + (1|rater) + (1|case).
+            Provides condition effect estimate with CI, variance components, and ICC.
+            More powerful than paired t-tests or Wilcoxon tests when data has a crossed
+            rater x case x condition design (e.g., Dy et al. 2024 Ki-67 AI study).
 
+    - name: multipleTestCorrection
+      title: "Multiple Testing Correction"
+      type: List
+      options:
+        - title: "None"
+          name: none
+        - title: "Bonferroni"
+          name: bonferroni
+        - title: "Benjamini-Hochberg (FDR)"
+          name: bh
+        - title: "Holm"
+          name: holm
+      default: none
+      description:
+          R: >
+            Correction method for multiple comparisons when testing agreement
+            across multiple strata or clusters. Applied to cluster-specific
+            p-values in the hierarchical analysis and to per-condition
+            comparisons when multiple conditions are present.
 
+    # Multi-Class Confusion Matrix
+    - name: confusionMatrix
+      title: "Confusion Matrix Table"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a formal N×N confusion matrix comparing first two raters
+            (or reference vs predicted). Includes row/column normalization options
+            and per-class precision, recall, and F1 scores. Essential for
+            multi-category classification studies (e.g., HER2 0/1+/2+/3+ scoring).
+
+    - name: confusionNormalize
+      title: "Normalization"
+      type: List
+      options:
+        - title: "None (counts)"
+          name: none
+        - title: "Row-normalized (recall)"
+          name: row
+        - title: "Column-normalized (precision)"
+          name: column
+      default: none
+      description:
+          R: >
+            How to normalize the confusion matrix. None shows raw counts.
+            Row-normalized shows proportions within each reference category
+            (equivalent to recall/sensitivity per class). Column-normalized
+            shows proportions within each predicted category (equivalent to
+            precision/PPV per class).
+
+    # Bootstrap Confidence Intervals
+    - name: bootstrapCI
+      title: "Bootstrap Confidence Intervals"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Calculate bootstrap confidence intervals for agreement metrics
+            (kappa, Fleiss kappa, Krippendorff alpha, ICC, percent agreement).
+            Uses case resampling with BCa (bias-corrected and accelerated) method.
+            Recommended when analytical CIs are unavailable or when distributions
+            may be non-normal (e.g., skewed kappa distributions with few categories).
+
+    - name: nBoot
+      title: "Number of Bootstrap Samples"
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap resamples for confidence interval estimation.
+            1000 is adequate for 95% CIs. Use 5000-10000 for publication-quality
+            99% CIs or when metrics are near boundary values (0 or 1).
+
+    # Multi-Annotator Concordance F1
+    - name: multiAnnotatorConcordance
+      title: "Multi-Annotator Concordance"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute concordance metrics where a prediction is considered correct
+            if it matches ANY of the reference annotators. Useful for AI validation
+            studies where multiple pathologists annotate the same cases and no single
+            ground truth exists (e.g., Ottl et al. 2025 HER2 scoring). Reports
+            concordance accuracy, per-class concordance F1, and comparison to
+            strict consensus-based evaluation.
+
+    - name: predictionColumn
+      title: "Prediction Column (First Rater)"
+      type: Integer
+      default: 1
+      min: 1
+      max: 100
+      description:
+          R: >
+            Which rater column contains the predictions to evaluate. Default is
+            column 1 (first rater). Remaining columns are treated as reference
+            annotators. For AI validation, set this to the column containing AI
+            predictions.
 
     - name: specificAgreement
       title: "Specific Agreement Indices (Category-Focused)"
@@ -1237,7 +1362,126 @@ options:
       description:
           R: Show educational guide about case clustering analysis.
 
+    # ============================================================
+    # PAIRED AGREEMENT COMPARISON (Gap from Krishnamurthy 2024)
+    # ============================================================
 
+    - name: pairedAgreementTest
+      title: Compare Agreement Between Two Conditions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Perform a bootstrap test comparing interobserver agreement
+            (kappa and percent agreement) between two conditions
+            (e.g., manual vs AI-assisted scoring of the same cases).
+
+    - name: conditionBVars
+      title: Condition B Raters
+      type: Variables
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            Rater columns for the second condition (e.g., AI-assisted).
+            The main rater variables serve as Condition A.
+
+    - name: pairedBootN
+      title: Bootstrap Replications
+      type: Integer
+      min: 500
+      max: 10000
+      default: 2000
+      description:
+          R: Number of bootstrap replications for paired comparison test.
+
+    # ============================================================
+    # SAMPLE SIZE FOR AGREEMENT STUDIES (Gap from Krishnamurthy 2024)
+    # ============================================================
+
+    - name: agreementSampleSize
+      title: Calculate Sample Size for Agreement Study
+      type: Bool
+      default: false
+      description:
+          R: >
+            Compute the required sample size (number of subjects)
+            for a prospective agreement study based on kappa or ICC.
+
+    - name: ssMetric
+      title: Agreement Metric
+      type: List
+      options:
+        - title: "Cohen's Kappa (2 raters)"
+          name: kappa
+        - title: "Fleiss' Kappa (3+ raters)"
+          name: fleiss
+        - title: ICC
+          name: icc
+      default: kappa
+      description:
+          R: The agreement metric to power the study for.
+
+    - name: ssKappaNull
+      title: Null Kappa (H0)
+      type: Number
+      min: 0
+      max: 0.99
+      default: 0.4
+      description:
+          R: >
+            The kappa (or ICC) value under the null hypothesis.
+            Common choices - 0.4 (moderate), 0.6 (substantial).
+
+    - name: ssKappaAlt
+      title: Expected Kappa (H1)
+      type: Number
+      min: 0.01
+      max: 1
+      default: 0.7
+      description:
+          R: >
+            The kappa (or ICC) value under the alternative hypothesis.
+            This is the minimum clinically meaningful agreement.
+
+    - name: ssNRaters
+      title: Number of Raters
+      type: Integer
+      min: 2
+      max: 100
+      default: 2
+      description:
+          R: Planned number of raters in the study.
+
+    - name: ssNCategories
+      title: Number of Categories
+      type: Integer
+      min: 2
+      max: 20
+      default: 4
+      description:
+          R: Number of rating categories (e.g., 4 for HER2 0/1+/2+/3+).
+
+    - name: ssAlpha
+      title: Significance Level
+      type: Number
+      min: 0.001
+      max: 0.2
+      default: 0.05
+      description:
+          R: Type I error rate (two-sided).
+
+    - name: ssPower
+      title: Desired Power
+      type: Number
+      min: 0.5
+      max: 0.999
+      default: 0.80
+      description:
+          R: Target power (1 - Type II error rate).
 
 
 

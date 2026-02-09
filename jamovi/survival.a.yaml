@@ -1,7 +1,7 @@
 ---
 name:  survival
 title: Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
 version: '0.0.33'
@@ -265,6 +265,27 @@ options:
         - title: none
           name: none
       default: holm
+
+    - name: weightedLogRank
+      title: Weighted Log-Rank Tests
+      type: Bool
+      default: false
+
+    - name: survivalTestType
+      title: 'Survival Test Type'
+      type: List
+      options:
+        - title: 'Log-Rank (standard)'
+          name: logrank
+        - title: 'Gehan-Breslow-Wilcoxon'
+          name: gehan_breslow
+        - title: 'Tarone-Ware'
+          name: tarone_ware
+        - title: 'Peto-Peto'
+          name: peto_peto
+        - title: 'Fleming-Harrington'
+          name: fleming_harrington
+      default: logrank
 
 
     - name: ph_cox
@@ -581,6 +602,73 @@ options:
       description: >-
         Plot estimated hazard functions from parametric models. Shows how
         instantaneous risk changes over time for different distributions.
+
+    # Calibration Curves for Survival Models
+    - name: calibration_curves
+      title: "Calibration Curves"
+      type: Bool
+      default: false
+      description: >-
+        Assess calibration of the Cox model by comparing predicted versus observed
+        survival at specified time points. Groups patients by predicted risk quintiles
+        and computes Kaplan-Meier survival per group. Includes calibration slope,
+        calibration-in-the-large, and calibration plot. Requires Cox model to be fitted.
+
+    - name: calibration_timepoint
+      title: "Calibration Time Point"
+      type: Number
+      default: 0
+      description: >-
+        Time point for calibration assessment (e.g., 60 for 5-year OS in months).
+        If 0, uses the median observed time. The calibration plot compares predicted
+        vs observed survival probability at this time point.
+
+    - name: calibration_ngroups
+      title: "Number of Risk Groups"
+      type: Integer
+      default: 5
+      min: 3
+      max: 10
+      description: >-
+        Number of risk groups (quantiles) for calibration assessment. Default is 5
+        (quintiles). More groups provide finer resolution but require larger sample sizes.
+        Each group should have at least 20-30 patients.
+
+    # Restricted Cubic Splines for Non-Linear Effects
+    - name: rcs_analysis
+      title: "Non-Linearity Assessment (RCS)"
+      type: Bool
+      default: false
+      description: >-
+        Assess non-linear effects of continuous predictors using restricted cubic
+        splines (natural splines). Fits Cox model with spline-transformed predictor,
+        tests for non-linearity via likelihood ratio test, and plots hazard ratio
+        curve. Important for variables like age and tumor size where the relationship
+        with outcome may not be linear.
+
+    - name: rcs_variable
+      title: "Continuous Variable for Spline"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description: >-
+        Select a continuous predictor variable to assess for non-linear effects.
+        The variable will be modeled with restricted cubic splines and compared
+        to a linear model. Common candidates include age, tumor size, biomarker
+        levels, and follow-up duration.
+
+    - name: rcs_knots
+      title: "Number of Knots"
+      type: Integer
+      default: 4
+      min: 3
+      max: 7
+      description: >-
+        Number of knots for restricted cubic splines. 3 knots = 2 df (simplest),
+        4 knots = 3 df (recommended default), 5 knots = 4 df (more flexible).
+        Knots are placed at Harrell-recommended percentiles. More knots allow
+        detection of complex non-linear patterns but may overfit with small samples.
 
 
 ...

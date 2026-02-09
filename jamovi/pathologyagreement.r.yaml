@@ -97,6 +97,11 @@ items:
       height: 450
       visible: (show_plots)
       renderFun: .blandaltmanplot
+      clearWith:
+          - dep1
+          - dep2
+          - ba_method
+          - conf_level
 
     - name: multimethod_summary
       title: Multi-Method Analysis Summary

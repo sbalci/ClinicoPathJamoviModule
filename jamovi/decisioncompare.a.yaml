@@ -1,7 +1,7 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
 version: '0.0.33'
@@ -234,10 +234,84 @@ options:
       default: false
       description:
           ui: >
-            Generate radar (spider) plot showing all performance metrics on a circular scale. 
+            Generate radar (spider) plot showing all performance metrics on a circular scale.
             Excellent for comprehensive visual comparison and identifying test strengths/weaknesses.
           R: >
             Generate radar plot for comprehensive test comparison visualization.
+
+    - name: heatmap
+      title: 'Concordance Heatmap'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Generate a per-case heatmap showing each test's result versus the gold standard
+            for every sample. Samples are sorted by gold standard result. Reveals agreement
+            patterns and identifies cases where specific tests disagree.
+          R: >
+            Generate concordance heatmap comparing per-case test results against gold standard.
+
+    - name: opa
+      title: 'Overall Percent Agreement with CI'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Show overall percent agreement (OPA) between each test and the gold standard
+            with 95% confidence intervals. OPA is the proportion of cases where
+            the test and gold standard agree. Unlike kappa, OPA does not correct for
+            chance agreement.
+          R: >
+            Show overall percent agreement with 95% confidence intervals for each test.
+
+    - name: niMargin
+      title: Noninferiority Margin (%)
+      type: Number
+      default: 75
+      min: 50
+      max: 99
+      description:
+          ui: >
+            Noninferiority margin for agreement rate. The test is noninferior if the
+            lower bound of the confidence interval exceeds this margin. Default 75%
+            follows regulatory convention for AI diagnostic tool validation
+            (e.g., FDA 510(k) submissions).
+          R: >
+            Noninferiority margin as percentage (default 75). Used when OPA is enabled.
+
+    - name: ciMethod
+      title: CI Method for Agreement
+      type: List
+      options:
+        - title: Wilson Score
+          name: wilson
+        - title: Logit
+          name: logit
+        - title: Clopper-Pearson (Exact)
+          name: exact
+      default: wilson
+      description:
+          ui: >
+            Method for computing confidence intervals for agreement proportions.
+            Wilson score is recommended for most cases. Logit is preferred when
+            proportions are near 0 or 1 (common in high-agreement studies).
+            Clopper-Pearson (Exact) is the most conservative.
+          R: >
+            CI method: wilson, logit, or exact (Clopper-Pearson).
+
+    - name: stratify
+      title: Stratification Variable
+      type: Variable
+      default: NULL
+      suggested: [ nominal ]
+      permitted: [ factor ]
+      description:
+          ui: >
+            Optional variable to stratify comparison metrics by subgroup (e.g.,
+            specimen type, histologic type, site). Computes separate sensitivity,
+            specificity, accuracy, and OPA within each subgroup level.
+          R: >
+            Optional stratification variable for subgroup-specific diagnostic accuracy analysis.
 
     - name: statComp
       title: 'Statistical Comparison'

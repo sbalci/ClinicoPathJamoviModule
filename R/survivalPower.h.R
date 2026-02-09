@@ -1397,8 +1397,8 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' survivalPower(
 #'     test_type = "log_rank",
 #'     effect_size = 0.75,
-#'     alpha = 0.05,
-#'     power = 0.80,
+#'     alpha_level = 0.05,
+#'     power_level = 0.80,
 #'     allocation_ratio = 1,
 #'     accrual_period = 24,
 #'     follow_up_period = 36
@@ -1443,9 +1443,8 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sensitivity_analysis Perform sensitivity analysis across parameter
 #'   ranges
 #' @param run_simulation_validation Validate analytical power calculations
-#'   using Monte Carlo simulation. Useful for verifying complex scenarios
-#'   (Weibull, log-normal distributions). May take 10-60 seconds depending on
-#'   simulation_runs setting.
+#'   using Monte Carlo simulation. Currently validated for exponential log-rank
+#'   settings only. May take 10-60 seconds depending on simulation_runs setting.
 #' @param simulation_runs Number of simulation runs for complex calculations
 #' @param show_summary Display plain-language summary of results
 #' @param show_explanations Display educational notes and guidance

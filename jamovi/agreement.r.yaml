@@ -690,6 +690,219 @@ items:
       type: Html
       visible: (hierarchicalKappa && showAbout)
 
+    - name: mixedEffectsTable
+      title: "Mixed-Effects Condition Comparison"
+      type: Table
+      visible: (mixedEffectsComparison)
+      rows: 0
+      columns:
+        - name: term
+          title: 'Term'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: se
+          title: 'SE'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: t_value
+          title: 't'
+          type: number
+        - name: df
+          title: 'df'
+          type: number
+        - name: p_value
+          title: 'p'
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - vars
+          - conditionVariable
+
+    - name: mixedEffectsVarianceTable
+      title: "Mixed-Effects Variance Components"
+      type: Table
+      visible: (mixedEffectsComparison)
+      rows: 0
+      columns:
+        - name: component
+          title: 'Component'
+          type: text
+        - name: variance
+          title: 'Variance'
+          type: number
+        - name: sd
+          title: 'SD'
+          type: number
+        - name: proportion
+          title: 'Proportion'
+          type: number
+          format: pc
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - conditionVariable
+
+    - name: mixedEffectsExplanation
+      title: "About Mixed-Effects Condition Comparison"
+      type: Html
+      visible: (mixedEffectsComparison && showAbout)
+
+    - name: confusionMatrixTable
+      title: "Confusion Matrix"
+      type: Table
+      visible: (confusionMatrix)
+      rows: 0
+      columns:
+        - name: reference_class
+          title: 'Reference'
+          type: text
+        - name: predicted_class
+          title: 'Predicted'
+          type: text
+        - name: count
+          title: 'Count'
+          type: integer
+        - name: proportion
+          title: 'Proportion'
+          type: number
+      clearWith:
+          - vars
+          - confusionNormalize
+
+    - name: perClassMetricsTable
+      title: "Per-Class Classification Metrics"
+      type: Table
+      visible: (confusionMatrix)
+      rows: 0
+      columns:
+        - name: class_label
+          title: 'Class'
+          type: text
+        - name: n
+          title: 'N'
+          type: integer
+        - name: precision
+          title: 'Precision (PPV)'
+          type: number
+        - name: recall
+          title: 'Recall (Sensitivity)'
+          type: number
+        - name: f1
+          title: 'F1 Score'
+          type: number
+        - name: support
+          title: 'Support'
+          type: integer
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - confusionNormalize
+
+    - name: confusionMatrixExplanation
+      title: "About Confusion Matrix"
+      type: Html
+      visible: (confusionMatrix && showAbout)
+
+    - name: bootstrapCITable
+      title: "Bootstrap Confidence Intervals for Agreement Metrics"
+      type: Table
+      visible: (bootstrapCI)
+      rows: 0
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: boot_se
+          title: 'Boot SE'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+        - name: boot_bias
+          title: 'Bias'
+          type: number
+        - name: ci_method
+          title: 'CI Method'
+          type: text
+      clearWith:
+          - vars
+          - nBoot
+
+    - name: bootstrapCIExplanation
+      title: "About Bootstrap Confidence Intervals"
+      type: Html
+      visible: (bootstrapCI && showAbout)
+
+    - name: concordanceF1Table
+      title: "Multi-Annotator Concordance Metrics"
+      type: Table
+      visible: (multiAnnotatorConcordance)
+      rows: 0
+      columns:
+        - name: metric
+          title: 'Metric'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+        - name: comparison
+          title: 'Comparison'
+          type: text
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - predictionColumn
+
+    - name: concordanceF1PerClassTable
+      title: "Per-Class Concordance F1"
+      type: Table
+      visible: (multiAnnotatorConcordance)
+      rows: 0
+      columns:
+        - name: class_label
+          title: 'Class'
+          type: text
+        - name: concordance_f1
+          title: 'Concordance F1'
+          type: number
+        - name: strict_f1
+          title: 'Strict F1'
+          type: number
+        - name: improvement
+          title: 'Improvement'
+          type: number
+          format: pc
+        - name: n_cases
+          title: 'N Cases'
+          type: integer
+      clearWith:
+          - vars
+          - predictionColumn
+
+    - name: concordanceF1Explanation
+      title: "About Multi-Annotator Concordance"
+      type: Html
+      visible: (multiAnnotatorConcordance && showAbout)
+
     - name: gwetTable
       title: "Gwet's AC1/AC2 Results"
       type: Table
@@ -1418,6 +1631,72 @@ items:
       title: "About Case Clustering"
       type: Html
       visible: ((caseClustering || showCaseClusterGuide) && showAbout)
+
+    # ============================================================
+    # PAIRED AGREEMENT COMPARISON
+    # ============================================================
+
+    - name: pairedAgreementTable
+      title: "Paired Agreement Comparison"
+      type: Table
+      visible: (pairedAgreementTest)
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: condition_a
+          title: "Condition A"
+          type: number
+          format: zto
+        - name: condition_b
+          title: "Condition B"
+          type: number
+          format: zto
+        - name: difference
+          title: "Difference (B - A)"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+        - name: p_value
+          title: "p"
+          type: number
+          format: zto,pvalue
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+
+    - name: pairedAgreementExplanation
+      title: "About Paired Agreement Comparison"
+      type: Html
+      visible: (pairedAgreementTest && showAbout)
+
+    # ============================================================
+    # SAMPLE SIZE FOR AGREEMENT STUDIES
+    # ============================================================
+
+    - name: agreementSampleSizeTable
+      title: "Sample Size for Agreement Study"
+      type: Table
+      visible: (agreementSampleSize)
+      columns:
+        - name: parameter
+          title: "Parameter"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+
+    - name: agreementSampleSizeExplanation
+      title: "About Agreement Sample Size"
+      type: Html
+      visible: (agreementSampleSize && showAbout)
 
 refs:
     - irr

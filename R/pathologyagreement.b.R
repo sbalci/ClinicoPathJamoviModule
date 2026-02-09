@@ -467,6 +467,37 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 ci_upper = loa_upper_ci_high,
                 interpretation = "95% of differences fall within limits"
             ))
+
+            # Add proportional bias row when regression-based method is selected
+            if (self$options$ba_method == "regression") {
+                reg_slope <- NA_real_
+                reg_p <- NA_real_
+                reg_interp <- "Insufficient variation"
+                if (!is.na(diff_var) && diff_var > 1e-10) {
+                    tryCatch({
+                        ba_reg <- lm(differences ~ means)
+                        reg_coefs <- summary(ba_reg)$coefficients
+                        if (nrow(reg_coefs) >= 2) {
+                            reg_slope <- reg_coefs[2, 1]
+                            reg_p <- reg_coefs[2, 4]
+                            reg_interp <- if (!is.na(reg_p) && reg_p < 0.05) {
+                                sprintf("Significant proportional bias (p=%.4f); regression-based LoA shown in plot", reg_p)
+                            } else {
+                                sprintf("No significant proportional bias (p=%.3f); fixed LoA may suffice", reg_p)
+                            }
+                        }
+                    }, error = function(e) {
+                        reg_interp <- "Regression failed"
+                    })
+                }
+                table$addRow(rowKey = 6, values = list(
+                    metric = "Proportional Bias Slope",
+                    value = reg_slope,
+                    ci_lower = NA_real_,
+                    ci_upper = NA_real_,
+                    interpretation = reg_interp
+                ))
+            }
         },
         
         .performCorrelationAnalysis = function(method1, method2) {
@@ -563,14 +594,46 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             means <- (method1 + method2) / 2
             mean_diff <- mean(differences)
             sd_diff <- sd(differences)
-            
-            ba_data <- data.frame(
-                Means = means,
-                Differences = differences,
-                MeanDiff = mean_diff,
-                LoA_Lower = mean_diff - 1.96 * sd_diff,
-                LoA_Upper = mean_diff + 1.96 * sd_diff
-            )
+
+            ba_method <- self$options$ba_method
+
+            if (ba_method == "regression" && length(means) >= 5) {
+                # Regression-based limits of agreement (Bland & Altman 1999)
+                # Regress differences on means for bias trend
+                bias_fit <- lm(differences ~ means)
+                fitted_bias <- predict(bias_fit, newdata = data.frame(means = means))
+                residuals_abs <- abs(residuals(bias_fit))
+                # Regress absolute residuals on means for spread trend
+                spread_fit <- lm(residuals_abs ~ means)
+                fitted_spread <- predict(spread_fit, newdata = data.frame(means = means))
+                # LoA: fitted_bias +/- 1.96 * (fitted_spread * sqrt(pi/2))
+                # absolute residuals have E[|e|] = sigma*sqrt(2/pi), so sigma = |e|*sqrt(pi/2)
+                fitted_sd <- fitted_spread * sqrt(pi / 2)
+
+                ba_data <- data.frame(
+                    Means = means,
+                    Differences = differences,
+                    MeanDiff = mean_diff,
+                    LoA_Lower = mean_diff - 1.96 * sd_diff,
+                    LoA_Upper = mean_diff + 1.96 * sd_diff,
+                    FittedBias = fitted_bias,
+                    RegLoA_Lower = fitted_bias - 1.96 * fitted_sd,
+                    RegLoA_Upper = fitted_bias + 1.96 * fitted_sd,
+                    UseRegression = TRUE
+                )
+            } else {
+                ba_data <- data.frame(
+                    Means = means,
+                    Differences = differences,
+                    MeanDiff = mean_diff,
+                    LoA_Lower = mean_diff - 1.96 * sd_diff,
+                    LoA_Upper = mean_diff + 1.96 * sd_diff,
+                    FittedBias = mean_diff,
+                    RegLoA_Lower = mean_diff - 1.96 * sd_diff,
+                    RegLoA_Upper = mean_diff + 1.96 * sd_diff,
+                    UseRegression = FALSE
+                )
+            }
             
             # Store data for plots
             image1 <- self$results$scatterplot
@@ -606,24 +669,49 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         .blandaltmanplot = function(image, ggtheme, theme, ...) {
             if (is.null(image$state))
                 return(FALSE)
-                
+
             data <- image$state
-            
-            # Create Bland-Altman plot
-            p <- ggplot2::ggplot(data, ggplot2::aes(x = Means, y = Differences)) +
-                ggplot2::geom_point(alpha = 0.6, color = "steelblue") +
-                ggplot2::geom_hline(yintercept = unique(data$MeanDiff), color = "black", linewidth = 1) +
-                ggplot2::geom_hline(yintercept = unique(data$LoA_Lower), color = "red", linetype = "dashed") +
-                ggplot2::geom_hline(yintercept = unique(data$LoA_Upper), color = "red", linetype = "dashed") +
-                ggplot2::geom_smooth(method = "lm", se = TRUE, color = "blue", alpha = 0.3) +
-                ggplot2::labs(
-                    title = "Bland-Altman Agreement Plot",
-                    subtitle = "Black line = mean difference, Red dashed = limits of agreement",
-                    x = "Mean of Methods",
-                    y = "Difference (Method1 - Method2)"
-                ) +
-                ggtheme
-                
+            use_regression <- isTRUE(data$UseRegression[1])
+
+            if (use_regression) {
+                # Sort by Means for smooth line rendering
+                data <- data[order(data$Means), ]
+
+                p <- ggplot2::ggplot(data, ggplot2::aes(x = Means, y = Differences)) +
+                    ggplot2::geom_point(alpha = 0.6, color = "steelblue") +
+                    ggplot2::geom_line(ggplot2::aes(y = FittedBias),
+                        color = "black", linewidth = 1) +
+                    ggplot2::geom_line(ggplot2::aes(y = RegLoA_Lower),
+                        color = "red", linetype = "dashed", linewidth = 0.8) +
+                    ggplot2::geom_line(ggplot2::aes(y = RegLoA_Upper),
+                        color = "red", linetype = "dashed", linewidth = 0.8) +
+                    ggplot2::labs(
+                        title = "Bland-Altman Plot (Regression-Based Limits)",
+                        subtitle = "Black = regression bias, Red dashed = regression limits of agreement",
+                        x = "Mean of Methods",
+                        y = "Difference (Method1 - Method2)"
+                    ) +
+                    ggtheme
+            } else {
+                p <- ggplot2::ggplot(data, ggplot2::aes(x = Means, y = Differences)) +
+                    ggplot2::geom_point(alpha = 0.6, color = "steelblue") +
+                    ggplot2::geom_hline(yintercept = unique(data$MeanDiff),
+                        color = "black", linewidth = 1) +
+                    ggplot2::geom_hline(yintercept = unique(data$LoA_Lower),
+                        color = "red", linetype = "dashed") +
+                    ggplot2::geom_hline(yintercept = unique(data$LoA_Upper),
+                        color = "red", linetype = "dashed") +
+                    ggplot2::geom_smooth(method = "lm", se = TRUE,
+                        color = "blue", alpha = 0.3) +
+                    ggplot2::labs(
+                        title = "Bland-Altman Agreement Plot",
+                        subtitle = "Black line = mean difference, Red dashed = limits of agreement",
+                        x = "Mean of Methods",
+                        y = "Difference (Method1 - Method2)"
+                    ) +
+                    ggtheme
+            }
+
             print(p)
             TRUE
         },

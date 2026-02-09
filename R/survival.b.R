@@ -1357,6 +1357,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # }
                 private$.checkpoint()  # Add checkpoint here
 
+                ## Calibration Curves ----
+                if (self$options$calibration_curves) {
+                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                        private$.calculateCalibration(results)
+                    }
+                }
+                private$.checkpoint()
+
+                ## Non-Linearity Assessment (RCS) ----
+                if (self$options$rcs_analysis && !is.null(self$options$rcs_variable)) {
+                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                        private$.calculateRCS(results)
+                    }
+                }
+                private$.checkpoint()
+
                 ## Pairwise ----
                 if (self$options$pw) {
                     if (!(self$options$multievent && self$options$analysistype == "compete")) {
@@ -1365,6 +1381,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Notice already added above for competing risk limitations
                 }
 
+                ## Weighted Log-Rank Tests ----
+                if (self$options$weightedLogRank) {
+                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                        private$.calculateWeightedLogRank(results)
+                    }
+                }
+                private$.checkpoint()
 
                 ## Add the person-time analysis ----
                 private$.checkpoint()  # Add checkpoint here
@@ -2323,10 +2346,26 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 private$.checkpoint()
 
+                # Determine rho for weighted log-rank (0 = standard log-rank)
+                pw_rho <- 0
+                if (self$options$weightedLogRank) {
+                    test_type <- self$options$survivalTestType
+                    if (test_type == "gehan_breslow") {
+                        pw_rho <- 1
+                    } else if (test_type == "tarone_ware") {
+                        pw_rho <- 0.5
+                    } else if (test_type == "peto_peto") {
+                        pw_rho <- 1
+                    } else if (test_type == "fleming_harrington") {
+                        pw_rho <- 1
+                    }
+                }
+
                 results_pairwise <-
                     survminer::pairwise_survdiff(formula = formula_p,
                                                  data = mydata,
-                                                 p.adjust.method = padjustmethod)
+                                                 p.adjust.method = padjustmethod,
+                                                 rho = pw_rho)
 
 
                 mypairwise2 <-
@@ -2382,7 +2421,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 " between {rowname} and {name}",
                                 " has a p-value of {format.pval(value, digits = 3, eps = 0.001)}.",
 
-                                "The survival difference between {rowname} and {name} groups was tested using a log-rank test. The p-value of {format.pval(value, digits = 3, eps = 0.001)} {ifelse(value < 0.05, 'indicates a statistically significant difference', 'suggests no statistically significant difference')} in survival between these groups (using {padjustmethod} adjustment for multiple comparisons)."
+                                "The survival difference between {rowname} and {name} groups was tested using a {ifelse(pw_rho == 0, 'log-rank', ifelse(pw_rho == 1, 'Gehan-Breslow-Wilcoxon (rho=1)', paste0('weighted log-rank (rho=', pw_rho, ')')))} test. The p-value of {format.pval(value, digits = 3, eps = 0.001)} {ifelse(value < 0.05, 'indicates a statistically significant difference', 'suggests no statistically significant difference')} in survival between these groups (using {padjustmethod} adjustment for multiple comparisons)."
 
 
 
@@ -2406,6 +2445,146 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
 
 
+            }
+
+
+            ,
+            # Weighted Log-Rank Tests Function ----
+            .calculateWeightedLogRank = function(results) {
+                if (!self$options$weightedLogRank) {
+                    return()
+                }
+
+                # Skip if competing risk analysis
+                if (private$.isCompetingRisk()) {
+                    return()
+                }
+
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                myfactor <- results$name3explanatory
+                mydata <- results$cleanData
+
+                mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+
+                # Check that there is an explanatory variable with >1 level
+                if (is.null(self$options$explanatory) || length(unique(mydata[[myfactor]])) < 2) {
+                    return()
+                }
+
+                formula_str <- paste0('survival::Surv(', mytime, ', ', myoutcome, ') ~ ', myfactor)
+                formula_obj <- as.formula(formula_str)
+
+                # Define the tests to run
+                tests <- list(
+                    list(name = "Log-Rank (standard)", rho = 0,
+                         weighting = "Equal weighting across all time points"),
+                    list(name = "Gehan-Breslow-Wilcoxon", rho = 1,
+                         weighting = "Weights early events more heavily (n at risk)"),
+                    list(name = "Tarone-Ware", rho = 0.5,
+                         weighting = "Intermediate weighting (sqrt of n at risk)"),
+                    list(name = "Peto-Peto", rho = 1,
+                         weighting = "Weights early events; uses Kaplan-Meier estimate")
+                )
+
+                table <- self$results$weightedLogRankTable
+
+                for (i in seq_along(tests)) {
+                    test_info <- tests[[i]]
+
+                    tryCatch({
+                        sd_result <- survival::survdiff(formula_obj,
+                                                        data = mydata,
+                                                        rho = test_info$rho)
+
+                        chisq_val <- sd_result$chisq
+                        df_val <- length(sd_result$n) - 1
+                        p_val <- stats::pchisq(chisq_val, df = df_val, lower.tail = FALSE)
+
+                        table$addRow(rowKey = i, values = list(
+                            test = test_info$name,
+                            rho = test_info$rho,
+                            chisq = chisq_val,
+                            df = df_val,
+                            pvalue = p_val,
+                            weighting = test_info$weighting
+                        ))
+                    }, error = function(e) {
+                        table$addRow(rowKey = i, values = list(
+                            test = test_info$name,
+                            rho = test_info$rho,
+                            weighting = paste("Error:", e$message)
+                        ))
+                    })
+                }
+
+                # Get display name for title
+                labelled_data <- private$.getData()
+                original_names_mapping <- labelled_data$original_names_mapping
+                title2 <- .getDisplayName(self$options$explanatory, original_names_mapping)
+                table$setTitle(paste0("Weighted Log-Rank Tests - ", title2))
+
+                table$setNote("tests", paste0(
+                    "All tests compare survival distributions across levels of ",
+                    title2, ". ",
+                    "rho controls the weighting: rho=0 (standard log-rank) weights all ",
+                    "time points equally; rho=1 (Gehan-Breslow-Wilcoxon) weights early ",
+                    "events more heavily. When survival curves cross or the proportional ",
+                    "hazards assumption is violated, different tests may yield different conclusions."
+                ))
+
+                # Populate explanation if summaries enabled
+                if (self$options$showSummaries) {
+                    private$.populateWeightedLogRankExplanation()
+                }
+            }
+
+
+            ,
+            .populateWeightedLogRankExplanation = function() {
+                html <- paste0(
+                    "<h3>Weighted Log-Rank Tests</h3>",
+                    "<p>The Fleming-Harrington family of weighted log-rank tests ",
+                    "generalizes the standard log-rank test by applying different ",
+                    "weights to events at different time points. The weighting is ",
+                    "controlled by the parameter <b>rho (&#961;)</b>:</p>",
+                    "<table border='1' cellpadding='5' style='border-collapse:collapse;'>",
+                    "<tr><th>Test</th><th>&#961;</th><th>Weighting</th><th>Best For</th></tr>",
+                    "<tr><td>Log-Rank (standard)</td><td>0</td>",
+                    "<td>Equal weight at all time points</td>",
+                    "<td>General use; optimal under proportional hazards</td></tr>",
+                    "<tr><td>Gehan-Breslow-Wilcoxon</td><td>1</td>",
+                    "<td>Weights proportional to number at risk</td>",
+                    "<td>Detecting early differences; perioperative mortality</td></tr>",
+                    "<tr><td>Tarone-Ware</td><td>0.5</td>",
+                    "<td>Weights proportional to sqrt(number at risk)</td>",
+                    "<td>Compromise between log-rank and Wilcoxon</td></tr>",
+                    "<tr><td>Peto-Peto</td><td>1</td>",
+                    "<td>Uses Kaplan-Meier survival estimate as weight</td>",
+                    "<td>Robust to late censoring patterns</td></tr>",
+                    "</table>",
+                    "<h4>When to Use Weighted Tests</h4>",
+                    "<ul>",
+                    "<li><b>If curves cross:</b> The standard log-rank test may miss ",
+                    "differences when survival curves cross. Weighted tests can detect ",
+                    "early or late divergence that the standard test misses.</li>",
+                    "<li><b>If early events matter more:</b> Use Gehan-Breslow-Wilcoxon ",
+                    "(&#961;=1) when early mortality is of primary clinical interest ",
+                    "(e.g., perioperative outcomes, acute treatment toxicity).</li>",
+                    "<li><b>Sensitivity analysis:</b> Running multiple weighted tests ",
+                    "can reveal whether conclusions depend on the time horizon of interest.</li>",
+                    "</ul>",
+                    "<h4>Interpreting Discordant Results</h4>",
+                    "<p>If the standard log-rank test is significant but ",
+                    "Gehan-Breslow-Wilcoxon is not (or vice versa), this suggests ",
+                    "the survival difference is concentrated in a specific part of the ",
+                    "curve. Reporting both tests provides a more complete picture of ",
+                    "the survival comparison.</p>",
+                    "<p><i>Reference: Harrington DP, Fleming TR (1982). ",
+                    "A class of rank test procedures for censored survival data. ",
+                    "Biometrika, 69(3), 553-566.</i></p>"
+                )
+                self$results$weightedLogRankExplanation$setContent(html)
             }
 
 
@@ -3948,6 +4127,497 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     
                     private$.setExplanationContent("copyReadySentencesExplanation", copy_html)
                 }
+            }
+
+            # ================================================================
+            # Calibration Curves for Survival Models (Gap 5)
+            # ================================================================
+            ,
+            .calculateCalibration = function(results) {
+                tryCatch({
+                    mytime <- results$name1time
+                    myoutcome <- results$name2outcome
+                    myfactor <- results$name3explanatory
+                    mydata <- results$cleanData
+
+                    # Optionally include RCS variable for richer calibration
+                    rcs_var <- self$options$rcs_variable
+                    extra_term <- NULL
+                    if (!is.null(rcs_var) && rcs_var %in% names(self$data)) {
+                        rcs_col <- jmvcore::toNumeric(self$data[[rcs_var]])
+                        mydata[[rcs_var]] <- rcs_col[as.integer(rownames(mydata))]
+                        mydata <- mydata[!is.na(mydata[[rcs_var]]), , drop = FALSE]
+                        extra_term <- jmvcore::composeTerm(rcs_var)
+                    }
+
+                    # Need Cox model — fit it
+                    rhs <- myfactor
+                    if (!is.null(extra_term)) {
+                        rhs <- paste0(myfactor, ' + ', extra_term)
+                    }
+                    formula_str <- paste0('survival::Surv(', mytime, ', ', myoutcome, ') ~ ', rhs)
+                    formula <- as.formula(formula_str)
+                    cox_model <- survival::coxph(formula, data = mydata)
+
+                    # Determine calibration time point
+                    time_col <- mydata[[mytime]]
+                    event_col <- mydata[[myoutcome]]
+                    cal_time <- self$options$calibration_timepoint
+                    if (is.null(cal_time) || cal_time <= 0) {
+                        cal_time <- median(time_col, na.rm = TRUE)
+                    }
+
+                    n_groups <- self$options$calibration_ngroups
+
+                    # Predicted survival at calibration time point
+                    surv_fit <- survival::survfit(cox_model)
+                    # Get linear predictor for risk scoring
+                    lp <- predict(cox_model, type = "lp")
+
+                    # Predicted survival probability at cal_time for each patient
+                    baseline_surv <- summary(surv_fit, times = cal_time)$surv
+                    if (length(baseline_surv) == 0) {
+                        # cal_time beyond observed data
+                        self$results$calibrationTable$setNote("error",
+                            paste0("Calibration time point (", round(cal_time, 1),
+                                   ") exceeds maximum observed time. Choose a smaller value."))
+                        return()
+                    }
+                    pred_surv <- baseline_surv ^ exp(lp)
+
+                    # Create risk groups by quantiles of predicted survival
+                    n_unique_pred <- length(unique(round(pred_surv, 8)))
+                    # Reduce groups if too few unique predicted values
+                    effective_groups <- min(n_groups, n_unique_pred)
+                    if (effective_groups < 2) {
+                        self$results$calibrationTable$setNote("error",
+                            "Cannot create risk groups — too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
+                        return()
+                    }
+                    breaks <- quantile(pred_surv, probs = seq(0, 1, length.out = effective_groups + 1),
+                                       na.rm = TRUE)
+                    # Handle duplicated breaks
+                    breaks <- unique(breaks)
+                    if (length(breaks) < 3) {
+                        self$results$calibrationTable$setNote("error",
+                            "Cannot create risk groups — too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
+                        return()
+                    }
+                    breaks[1] <- breaks[1] - 0.001
+                    breaks[length(breaks)] <- breaks[length(breaks)] + 0.001
+                    risk_group <- cut(pred_surv, breaks = breaks, include.lowest = TRUE,
+                                      labels = paste0("Q", seq_len(length(breaks) - 1)))
+
+                    # Observed survival per group via KM
+                    group_table <- self$results$calibrationGroupTable
+                    group_pred <- c()
+                    group_obs <- c()
+
+                    surv_obj <- survival::Surv(time_col, event_col)
+
+                    for (g in levels(risk_group)) {
+                        idx <- which(risk_group == g)
+                        if (length(idx) < 5) next
+
+                        n_g <- length(idx)
+                        events_g <- sum(event_col[idx], na.rm = TRUE)
+                        mean_pred <- mean(pred_surv[idx], na.rm = TRUE)
+
+                        # KM estimate at cal_time
+                        km_g <- survival::survfit(surv_obj[idx] ~ 1)
+                        km_summary <- summary(km_g, times = cal_time)
+
+                        obs_surv <- if (length(km_summary$surv) > 0) km_summary$surv else NA
+                        obs_lower <- if (length(km_summary$lower) > 0) km_summary$lower else NA
+                        obs_upper <- if (length(km_summary$upper) > 0) km_summary$upper else NA
+
+                        group_table$addRow(rowKey = g, values = list(
+                            group = g,
+                            n = as.integer(n_g),
+                            events = as.integer(events_g),
+                            predicted = mean_pred,
+                            observed = obs_surv,
+                            observed_lower = obs_lower,
+                            observed_upper = obs_upper
+                        ))
+
+                        if (!is.na(obs_surv)) {
+                            group_pred <- c(group_pred, mean_pred)
+                            group_obs <- c(group_obs, obs_surv)
+                        }
+                    }
+
+                    # Calibration metrics
+                    cal_table <- self$results$calibrationTable
+                    if (length(group_pred) >= 3) {
+                        # Calibration slope (linear regression of observed on predicted)
+                        cal_lm <- lm(group_obs ~ group_pred)
+                        cal_slope <- coef(cal_lm)[2]
+                        cal_intercept <- coef(cal_lm)[1]
+                        cal_ci <- confint(cal_lm)
+
+                        # Calibration slope
+                        slope_interp <- if (abs(cal_slope - 1) < 0.1) "Well calibrated"
+                                        else if (cal_slope < 0.9) "Overfitting (shrink predictions)"
+                                        else if (cal_slope > 1.1) "Underfitting"
+                                        else "Acceptable"
+
+                        cal_table$addRow(rowKey = "slope", values = list(
+                            metric = "Calibration Slope",
+                            value = cal_slope,
+                            ci_lower = cal_ci[2, 1],
+                            ci_upper = cal_ci[2, 2],
+                            ideal = "1.0",
+                            interpretation = slope_interp
+                        ))
+
+                        # Calibration-in-the-large (intercept)
+                        int_interp <- if (abs(cal_intercept) < 0.05) "No systematic bias"
+                                      else if (cal_intercept > 0) "Under-prediction"
+                                      else "Over-prediction"
+
+                        cal_table$addRow(rowKey = "intercept", values = list(
+                            metric = "Calibration-in-the-Large",
+                            value = cal_intercept,
+                            ci_lower = cal_ci[1, 1],
+                            ci_upper = cal_ci[1, 2],
+                            ideal = "0.0",
+                            interpretation = int_interp
+                        ))
+
+                        # R-squared
+                        r_sq <- summary(cal_lm)$r.squared
+                        cal_table$addRow(rowKey = "r2", values = list(
+                            metric = "R-squared",
+                            value = r_sq,
+                            ci_lower = NA,
+                            ci_upper = NA,
+                            ideal = "1.0",
+                            interpretation = if (r_sq >= 0.9) "Excellent" else if (r_sq >= 0.7) "Good" else "Poor"
+                        ))
+
+                        # Mean absolute error
+                        mae <- mean(abs(group_obs - group_pred))
+                        cal_table$addRow(rowKey = "mae", values = list(
+                            metric = "Mean Absolute Error",
+                            value = mae,
+                            ci_lower = NA,
+                            ci_upper = NA,
+                            ideal = "0.0",
+                            interpretation = if (mae < 0.05) "Excellent" else if (mae < 0.1) "Good" else "Needs improvement"
+                        ))
+
+                        # C-index (discrimination)
+                        c_index <- tryCatch({
+                            survival::concordance(cox_model)$concordance
+                        }, error = function(e) NA)
+
+                        if (!is.na(c_index)) {
+                            c_se <- tryCatch({
+                                sqrt(survival::concordance(cox_model)$var)
+                            }, error = function(e) NA)
+
+                            cal_table$addRow(rowKey = "cindex", values = list(
+                                metric = "C-index (Discrimination)",
+                                value = c_index,
+                                ci_lower = if (!is.na(c_se)) c_index - 1.96 * c_se else NA,
+                                ci_upper = if (!is.na(c_se)) c_index + 1.96 * c_se else NA,
+                                ideal = "1.0",
+                                interpretation = if (c_index >= 0.8) "Excellent" else if (c_index >= 0.7) "Good"
+                                                 else if (c_index >= 0.6) "Moderate" else "Poor"
+                            ))
+                        }
+                    }
+
+                    cal_table$setNote("time",
+                        paste0("Calibration assessed at t = ", round(cal_time, 1),
+                               ". N = ", sum(!is.na(pred_surv)), " patients in ", length(group_pred), " risk groups."))
+
+                    # Store data for plot
+                    self$results$calibrationPlot$setState(list(
+                        group_pred = group_pred,
+                        group_obs = group_obs,
+                        cal_time = cal_time
+                    ))
+
+                    # Calibration interpretation
+                    if (self$options$showExplanations && length(group_pred) >= 3) {
+                        html <- paste0(
+                            "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
+                            "<h3>Calibration Assessment</h3>",
+                            "<p>Calibration measures how well the model's predicted survival probabilities ",
+                            "match observed outcomes. Points near the 45-degree line indicate good calibration.</p>",
+                            "<ul>",
+                            "<li><strong>Calibration slope</strong>: Values near 1.0 indicate well-calibrated predictions. ",
+                            "Slope < 1 suggests overfitting (predictions too extreme); slope > 1 suggests underfitting.</li>",
+                            "<li><strong>Calibration-in-the-large</strong>: Intercept near 0 means no systematic over/under-prediction.</li>",
+                            "<li><strong>C-index</strong>: Discrimination ability (0.5 = random, 1.0 = perfect). ",
+                            "Note: good discrimination does not guarantee good calibration.</li>",
+                            "</ul>",
+                            "<div style='background-color: #E8F5E9; padding: 12px; border-left: 4px solid #4CAF50; margin-top: 15px;'>",
+                            "<strong>Clinical note:</strong> For survival models used to guide treatment decisions, ",
+                            "calibration is as important as discrimination. A well-discriminating model that is ",
+                            "poorly calibrated may systematically over- or under-estimate risk, leading to inappropriate ",
+                            "treatment allocation.</div></div>")
+                        self$results$calibrationInterpretation$setContent(html)
+                    }
+
+                }, error = function(e) {
+                    self$results$calibrationTable$setNote("error",
+                        paste("Calibration error:", e$message))
+                })
+            }
+
+            ,
+            .plotCalibration = function(image, ggtheme, theme, ...) {
+                state <- image$state
+                if (is.null(state) || length(state$group_pred) < 3) return(FALSE)
+
+                plot_df <- data.frame(
+                    predicted = state$group_pred,
+                    observed = state$group_obs
+                )
+
+                p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = predicted, y = observed)) +
+                    ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed",
+                                         color = "gray50", linewidth = 0.8) +
+                    ggplot2::geom_point(size = 4, color = "#2196F3") +
+                    ggplot2::geom_smooth(method = "lm", se = TRUE, color = "#F44336",
+                                         fill = "#FFCDD2", linewidth = 0.8) +
+                    ggplot2::labs(
+                        title = paste0("Calibration Plot (t = ", round(state$cal_time, 1), ")"),
+                        x = "Predicted Survival Probability",
+                        y = "Observed Survival Probability (KM)"
+                    ) +
+                    ggplot2::coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+                    ggtheme
+
+                print(p)
+                TRUE
+            }
+
+            # ================================================================
+            # Restricted Cubic Splines — Non-Linearity Assessment (Gap 8)
+            # ================================================================
+            ,
+            .calculateRCS = function(results) {
+                tryCatch({
+                    mytime <- results$name1time
+                    myoutcome <- results$name2outcome
+                    myfactor <- results$name3explanatory
+                    mydata <- results$cleanData
+
+                    rcs_var <- self$options$rcs_variable
+                    n_knots <- self$options$rcs_knots
+
+                    # The rcs_variable is not in cleanData (which only has time/outcome/explanatory)
+                    # Pull it from the original data and add it to mydata
+                    if (is.null(rcs_var) || !(rcs_var %in% names(self$data))) {
+                        self$results$rcsTestTable$setNote("error",
+                            "Selected variable not found in the data.")
+                        return()
+                    }
+
+                    rcs_col <- jmvcore::toNumeric(self$data[[rcs_var]])
+                    # Align with cleanData rows (cleanData has row_names or is naOmit'd)
+                    # Add the variable to mydata using original row indices
+                    mydata[[rcs_var]] <- rcs_col[as.integer(rownames(mydata))]
+                    # Remove rows where RCS variable is NA
+                    mydata <- mydata[!is.na(mydata[[rcs_var]]), , drop = FALSE]
+
+                    rcs_values <- mydata[[rcs_var]]
+                    if (all(is.na(rcs_values))) {
+                        self$results$rcsTestTable$setNote("error",
+                            "Selected variable contains no numeric values.")
+                        return()
+                    }
+
+                    n_unique <- length(unique(na.omit(rcs_values)))
+                    if (n_unique < n_knots + 2) {
+                        self$results$rcsTestTable$setNote("error",
+                            paste0("Too few unique values (", n_unique,
+                                   ") for ", n_knots, " knots. Need at least ", n_knots + 2, "."))
+                        return()
+                    }
+
+                    # Build formulas
+                    surv_part <- paste0('survival::Surv(', mytime, ', ', myoutcome, ')')
+
+                    # Linear model
+                    rcs_var_safe <- jmvcore::composeTerm(rcs_var)
+                    if (!is.null(myfactor) && nchar(myfactor) > 0) {
+                        formula_linear <- as.formula(paste0(surv_part, ' ~ ', rcs_var_safe, ' + ', myfactor))
+                        formula_spline <- as.formula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
+                                                            ', df = ', n_knots - 1, ') + ', myfactor))
+                    } else {
+                        formula_linear <- as.formula(paste0(surv_part, ' ~ ', rcs_var_safe))
+                        formula_spline <- as.formula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
+                                                            ', df = ', n_knots - 1, ')'))
+                    }
+
+                    # Fit both models
+                    cox_linear <- survival::coxph(formula_linear, data = mydata)
+                    cox_spline <- survival::coxph(formula_spline, data = mydata)
+
+                    # Likelihood ratio test for non-linearity
+                    lr_test <- anova(cox_linear, cox_spline)
+
+                    # Extract test results
+                    loglik_linear <- cox_linear$loglik[2]
+                    loglik_spline <- cox_spline$loglik[2]
+                    df_linear <- length(coef(cox_linear))
+                    df_spline <- length(coef(cox_spline))
+                    lr_chisq <- 2 * (loglik_spline - loglik_linear)
+                    lr_df <- df_spline - df_linear
+                    lr_p <- pchisq(lr_chisq, df = lr_df, lower.tail = FALSE)
+
+                    # Populate test table
+                    table <- self$results$rcsTestTable
+
+                    table$addRow(rowKey = "linear", values = list(
+                        model = paste0("Linear (", rcs_var, ")"),
+                        df = as.integer(df_linear),
+                        loglik = loglik_linear,
+                        aic = AIC(cox_linear),
+                        lr_chisq = NA,
+                        lr_df = NA,
+                        p_value = NA,
+                        conclusion = ""
+                    ))
+
+                    conclusion <- if (lr_p < 0.05) {
+                        paste0("Significant non-linearity (p = ", format.pval(lr_p, digits = 3),
+                               "). Use spline model.")
+                    } else {
+                        paste0("No significant non-linearity (p = ", format.pval(lr_p, digits = 3),
+                               "). Linear term adequate.")
+                    }
+
+                    table$addRow(rowKey = "spline", values = list(
+                        model = paste0("Spline (", rcs_var, ", ", n_knots, " knots)"),
+                        df = as.integer(df_spline),
+                        loglik = loglik_spline,
+                        aic = AIC(cox_spline),
+                        lr_chisq = lr_chisq,
+                        lr_df = as.integer(lr_df),
+                        p_value = lr_p,
+                        conclusion = conclusion
+                    ))
+
+                    table$setNote("info",
+                        paste0("Null hypothesis: linear effect of ", rcs_var,
+                               ". Natural splines with ", n_knots - 1, " degrees of freedom."))
+
+                    # Prepare HR curve data for plot
+                    var_range <- range(rcs_values, na.rm = TRUE)
+                    var_seq <- seq(var_range[1], var_range[2], length.out = 100)
+                    var_median <- median(rcs_values, na.rm = TRUE)
+
+                    # Build prediction data
+                    # For plotting, we need to extract the spline HR relative to median
+                    spline_basis <- splines::ns(var_seq, df = n_knots - 1,
+                                                knots = attr(splines::ns(rcs_values, df = n_knots - 1), "knots"),
+                                                Boundary.knots = attr(splines::ns(rcs_values, df = n_knots - 1), "Boundary.knots"))
+                    ref_basis <- splines::ns(var_median, df = n_knots - 1,
+                                             knots = attr(splines::ns(rcs_values, df = n_knots - 1), "knots"),
+                                             Boundary.knots = attr(splines::ns(rcs_values, df = n_knots - 1), "Boundary.knots"))
+
+                    # Get spline coefficients from Cox model
+                    spline_coef_names <- grep("splines::ns", names(coef(cox_spline)), value = TRUE)
+                    spline_coefs <- coef(cox_spline)[spline_coef_names]
+
+                    if (length(spline_coefs) > 0 && ncol(spline_basis) == length(spline_coefs)) {
+                        lp_curve <- as.numeric(spline_basis %*% spline_coefs)
+                        lp_ref <- as.numeric(ref_basis %*% spline_coefs)
+                        hr_curve <- exp(lp_curve - lp_ref)
+
+                        # Approximate CIs using variance-covariance matrix
+                        vcov_spline <- vcov(cox_spline)
+                        spline_vcov <- vcov_spline[spline_coef_names, spline_coef_names]
+                        se_curve <- sqrt(rowSums((spline_basis - matrix(ref_basis, nrow = nrow(spline_basis),
+                                                                        ncol = ncol(ref_basis), byrow = TRUE)) %*%
+                                                  spline_vcov *
+                                                  (spline_basis - matrix(ref_basis, nrow = nrow(spline_basis),
+                                                                         ncol = ncol(ref_basis), byrow = TRUE))))
+                        hr_lower <- exp(lp_curve - lp_ref - 1.96 * se_curve)
+                        hr_upper <- exp(lp_curve - lp_ref + 1.96 * se_curve)
+
+                        self$results$rcsPlot$setState(list(
+                            var_seq = var_seq,
+                            hr_curve = hr_curve,
+                            hr_lower = hr_lower,
+                            hr_upper = hr_upper,
+                            var_name = rcs_var,
+                            var_median = var_median,
+                            n_knots = n_knots,
+                            p_value = lr_p
+                        ))
+                    }
+
+                    # Interpretation
+                    if (self$options$showExplanations) {
+                        html <- paste0(
+                            "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
+                            "<h3>Non-Linearity Assessment (Restricted Cubic Splines)</h3>",
+                            "<p>This analysis tests whether the effect of <strong>", rcs_var,
+                            "</strong> on survival follows a linear pattern or a more complex non-linear curve.</p>",
+                            "<h4>Likelihood Ratio Test</h4>",
+                            "<p>The LR test compares a Cox model with a linear term for ", rcs_var,
+                            " against a model with natural splines (", n_knots, " knots, ", n_knots - 1,
+                            " df). A significant p-value (< 0.05) indicates non-linearity.</p>",
+                            "<h4>HR Curve Plot</h4>",
+                            "<p>The hazard ratio curve shows how the relative risk changes across values of ", rcs_var,
+                            ", with the reference point at the median value (", round(var_median, 1),
+                            "). A flat line would indicate a constant HR (linear on log-HR scale).</p>",
+                            "<div style='background-color: #FFF3E0; padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px;'>",
+                            "<strong>Clinical note:</strong> Non-linear effects are common for continuous variables ",
+                            "like age (J-shaped mortality), tumor size (threshold effects), and biomarker levels. ",
+                            "If non-linearity is significant, reporting only a single HR per unit increase is misleading. ",
+                            "Instead, report the HR curve or use meaningful cut-points.</div></div>")
+                        self$results$rcsInterpretation$setContent(html)
+                    }
+
+                }, error = function(e) {
+                    self$results$rcsTestTable$setNote("error",
+                        paste("RCS analysis error:", e$message))
+                })
+            }
+
+            ,
+            .plotRCS = function(image, ggtheme, theme, ...) {
+                state <- image$state
+                if (is.null(state) || is.null(state$hr_curve)) return(FALSE)
+
+                plot_df <- data.frame(
+                    x = state$var_seq,
+                    hr = state$hr_curve,
+                    lower = state$hr_lower,
+                    upper = state$hr_upper
+                )
+
+                p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = x, y = hr)) +
+                    ggplot2::geom_hline(yintercept = 1, linetype = "dashed",
+                                         color = "gray50", linewidth = 0.5) +
+                    ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper),
+                                         fill = "#BBDEFB", alpha = 0.5) +
+                    ggplot2::geom_line(color = "#1565C0", linewidth = 1.2) +
+                    ggplot2::geom_vline(xintercept = state$var_median, linetype = "dotted",
+                                         color = "#F44336", linewidth = 0.5) +
+                    ggplot2::labs(
+                        title = paste0("Hazard Ratio Curve: ", state$var_name,
+                                       " (", state$n_knots, " knots)"),
+                        subtitle = paste0("Reference: median = ", round(state$var_median, 1),
+                                          " | Non-linearity p = ",
+                                          format.pval(state$p_value, digits = 3)),
+                        x = state$var_name,
+                        y = "Hazard Ratio"
+                    ) +
+                    ggplot2::scale_y_continuous(trans = "log2",
+                        breaks = c(0.25, 0.5, 1, 2, 4, 8)) +
+                    ggtheme
+
+                print(p)
+                TRUE
             }
 
             # Parametric Survival Analysis Methods ----

@@ -64,6 +64,15 @@ children:
         margin: large
         children:
           - type: Label
+            label: Bland-Altman Limits Method
+            children:
+              - type: ComboBox
+                name: ba_method
+
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
             label: Missing Data Handling
             children:
               - type: ComboBox

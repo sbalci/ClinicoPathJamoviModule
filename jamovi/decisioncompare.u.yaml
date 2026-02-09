@@ -48,6 +48,13 @@ children:
           - type: LevelSelector
             name: test3Positive
             enable: (test3)
+      - type: TargetLayoutBox
+        label: Stratification (Optional)
+        children:
+          - type: VariablesListBox
+            name: stratify
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Statistical Options
     collapsed: true
@@ -55,6 +62,16 @@ children:
       - type: CheckBox
         name: ci
         enable: (!pp)
+      - type: CheckBox
+        name: opa
+      - type: TextBox
+        name: niMargin
+        label: Noninferiority Margin (%)
+        format: number
+        enable: (opa)
+      - type: ComboBox
+        name: ciMethod
+        enable: (opa)
       - type: CheckBox
         name: statComp
   - type: CollapseBox
@@ -77,6 +94,8 @@ children:
         name: plot
       - type: CheckBox
         name: radarplot
+      - type: CheckBox
+        name: heatmap
   - type: CollapseBox
     label: Display Options
     collapsed: true

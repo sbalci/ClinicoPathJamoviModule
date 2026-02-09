@@ -21,8 +21,8 @@ description:
             survivalPower(
                 test_type = "log_rank",
                 effect_size = 0.75,
-                alpha = 0.05,
-                power = 0.80,
+                alpha_level = 0.05,
+                power_level = 0.80,
                 allocation_ratio = 1,
                 accrual_period = 24,
                 follow_up_period = 36
@@ -449,7 +449,7 @@ options:
       description:
           R: >
             Validate analytical power calculations using Monte Carlo simulation.
-            Useful for verifying complex scenarios (Weibull, log-normal distributions).
+            Currently validated for exponential log-rank settings only.
             May take 10-60 seconds depending on simulation_runs setting.
 
     - name: simulation_runs

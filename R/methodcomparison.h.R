@@ -22,6 +22,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             correlation_analysis = TRUE,
             concordance_correlation = TRUE,
             regression_comparison = TRUE,
+            calibration_analysis = FALSE,
             clinical_limits = FALSE,
             clinical_lower = -10,
             clinical_upper = 10,
@@ -129,6 +130,10 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "regression_comparison",
                 regression_comparison,
                 default=TRUE)
+            private$..calibration_analysis <- jmvcore::OptionBool$new(
+                "calibration_analysis",
+                calibration_analysis,
+                default=FALSE)
             private$..clinical_limits <- jmvcore::OptionBool$new(
                 "clinical_limits",
                 clinical_limits,
@@ -200,6 +205,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..correlation_analysis)
             self$.addOption(private$..concordance_correlation)
             self$.addOption(private$..regression_comparison)
+            self$.addOption(private$..calibration_analysis)
             self$.addOption(private$..clinical_limits)
             self$.addOption(private$..clinical_lower)
             self$.addOption(private$..clinical_upper)
@@ -229,6 +235,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         correlation_analysis = function() private$..correlation_analysis$value,
         concordance_correlation = function() private$..concordance_correlation$value,
         regression_comparison = function() private$..regression_comparison$value,
+        calibration_analysis = function() private$..calibration_analysis$value,
         clinical_limits = function() private$..clinical_limits$value,
         clinical_lower = function() private$..clinical_lower$value,
         clinical_upper = function() private$..clinical_upper$value,
@@ -257,6 +264,7 @@ methodcomparisonOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..correlation_analysis = NA,
         ..concordance_correlation = NA,
         ..regression_comparison = NA,
+        ..calibration_analysis = NA,
         ..clinical_limits = NA,
         ..clinical_lower = NA,
         ..clinical_upper = NA,
@@ -290,6 +298,7 @@ methodcomparisonResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         scatterPlot = function() private$.items[["scatterPlot"]],
         residualPlots = function() private$.items[["residualPlots"]],
         mountainPlot = function() private$.items[["mountainPlot"]],
+        calibrationTable = function() private$.items[["calibrationTable"]],
         methodGuidance = function() private$.items[["methodGuidance"]],
         technicalNotes = function() private$.items[["technicalNotes"]]),
     private = list(),
@@ -635,6 +644,40 @@ methodcomparisonResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "method1",
                     "method2")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="calibrationTable",
+                title="Calibration Analysis",
+                visible="(calibration_analysis)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="ideal", 
+                        `title`="Ideal Value", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "method1",
+                    "method2")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodGuidance",
@@ -695,6 +738,12 @@ methodcomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   coefficient for agreement assessment
 #' @param regression_comparison Compare ordinary least squares vs method
 #'   comparison regressions
+#' @param calibration_analysis Compute calibration metrics assessing how well
+#'   the test method tracks the reference method. Includes
+#'   calibration-in-the-large (intercept; ideal = 0), calibration slope (ideal =
+#'   1), and R-squared. A well-calibrated method has slope near 1 and intercept
+#'   near 0. Useful for validating AI scoring tools, automated assays, and new
+#'   measurement methods against gold standards.
 #' @param clinical_limits Specify clinical acceptability criteria
 #' @param clinical_lower Lower bound for clinically acceptable difference
 #' @param clinical_upper Upper bound for clinically acceptable difference
@@ -726,6 +775,7 @@ methodcomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$scatterPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$residualPlots} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$mountainPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$calibrationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$methodGuidance} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -755,6 +805,7 @@ methodcomparison <- function(
     correlation_analysis = TRUE,
     concordance_correlation = TRUE,
     regression_comparison = TRUE,
+    calibration_analysis = FALSE,
     clinical_limits = FALSE,
     clinical_lower = -10,
     clinical_upper = 10,
@@ -799,6 +850,7 @@ methodcomparison <- function(
         correlation_analysis = correlation_analysis,
         concordance_correlation = concordance_correlation,
         regression_comparison = regression_comparison,
+        calibration_analysis = calibration_analysis,
         clinical_limits = clinical_limits,
         clinical_lower = clinical_lower,
         clinical_upper = clinical_upper,
