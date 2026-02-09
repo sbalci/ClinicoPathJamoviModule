@@ -7793,7 +7793,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             ci_lower <- NA
             ci_upper <- NA
             tryCatch({
-                ci <- confint(model, parm = "(Intercept)", method = "profile", oldNames = FALSE)
+                ci <- confint(model, parm = "(Intercept)", method = "profile")
                 ci_lower <- ci[1, 1]
                 ci_upper <- ci[1, 2]
             }, error = function(e) {
@@ -7919,7 +7919,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 )
 
                 tryCatch({
-                    vc_ci <- confint(model, parm = "theta_", method = "profile", oldNames = FALSE)
+                    vc_ci <- confint(model, parm = "theta_", method = "profile")
                     # vc_ci rows correspond to variance parameters
                     # We compute approximate CIs using delta method on ratios
                     # For simplicity, use parametric bootstrap if available
@@ -8273,7 +8273,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # Get confidence intervals
             ci_vals <- tryCatch(
-                confint(model, parm = "beta_", method = "profile", oldNames = FALSE),
+                confint(model, parm = "beta_", method = "profile"),
                 error = function(e) {
                     tryCatch(
                         confint(model, parm = "beta_", method = "Wald"),

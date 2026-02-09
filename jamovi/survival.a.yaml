@@ -670,5 +670,17 @@ options:
         Knots are placed at Harrell-recommended percentiles. More knots allow
         detection of complex non-linear patterns but may overfit with small samples.
 
+    - name: bootstrapValidation
+      title: Bootstrap Internal Validation
+      type: Bool
+      default: false
+
+    - name: bootstrapValN
+      title: "Number of Bootstrap Resamples"
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+
 
 ...

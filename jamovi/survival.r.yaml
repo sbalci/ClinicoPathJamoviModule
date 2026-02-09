@@ -1034,6 +1034,49 @@ items:
       type: Html
       visible: (rcs_analysis && showExplanations)
 
+    # Bootstrap Internal Validation Results
+    - name: bootstrapValidationTable
+      title: 'Bootstrap Internal Validation'
+      type: Table
+      visible: (bootstrapValidation)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: apparent
+          title: "Apparent"
+          type: number
+          format: zto
+        - name: optimism
+          title: "Optimism"
+          type: number
+          format: zto
+        - name: corrected
+          title: "Corrected"
+          type: number
+          format: zto
+        - name: n_bootstrap
+          title: "n Bootstrap"
+          type: integer
+      clearWith:
+        - bootstrapValidation
+        - bootstrapValN
+        - explanatory
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+
+    - name: bootstrapValidationExplanation
+      title: 'Bootstrap Validation Interpretation'
+      type: Html
+      visible: (bootstrapValidation && showSummaries)
+      clearWith:
+        - bootstrapValidation
+        - bootstrapValN
+        - explanatory
+        - outcome
+
     # Parametric Survival Models Results Section
     # COMMENTED OUT: Parametric options are disabled in .a.yaml
     # Uncomment these sections when parametric options are enabled

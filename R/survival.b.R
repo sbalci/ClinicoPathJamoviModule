@@ -1389,6 +1389,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 }
                 private$.checkpoint()
 
+                ## Bootstrap Internal Validation ----
+                if (self$options$bootstrapValidation) {
+                    if (!(self$options$multievent && self$options$analysistype == "compete")) {
+                        private$.calculateBootstrapValidation(results)
+                    }
+                }
+                private$.checkpoint()
+
                 ## Add the person-time analysis ----
                 private$.checkpoint()  # Add checkpoint here
 
@@ -2585,6 +2593,285 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "Biometrika, 69(3), 553-566.</i></p>"
                 )
                 self$results$weightedLogRankExplanation$setContent(html)
+            }
+
+
+            ,
+            # Bootstrap Internal Validation Function ----
+            .calculateBootstrapValidation = function(results) {
+                if (!self$options$bootstrapValidation) {
+                    return()
+                }
+
+                # Skip if competing risk analysis
+                if (private$.isCompetingRisk()) {
+                    return()
+                }
+
+                mytime <- results$name1time
+                myoutcome <- results$name2outcome
+                mydata <- results$cleanData
+
+                mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
+
+                # Need at least an explanatory variable for a meaningful model
+                if (is.null(self$options$explanatory)) {
+                    self$results$bootstrapValidationTable$setNote(
+                        "info",
+                        "Bootstrap validation requires an explanatory variable in the Cox model."
+                    )
+                    return()
+                }
+
+                myfactor <- results$name3explanatory
+                n_boot <- self$options$bootstrapValN
+
+                # Need sufficient events for validation
+                n_events <- sum(mydata[[myoutcome]] == 1, na.rm = TRUE)
+                if (n_events < 10) {
+                    self$results$bootstrapValidationTable$setNote(
+                        "warning",
+                        paste0("Only ", n_events, " events observed. Bootstrap validation ",
+                               "requires adequate events (recommended: >= 10) for stable estimates.")
+                    )
+                    return()
+                }
+
+                table <- self$results$bootstrapValidationTable
+
+                tryCatch({
+                    # Build formula for Cox model
+                    formula_str <- paste0(
+                        'survival::Surv(', mytime, ', ', myoutcome, ') ~ ', myfactor
+                    )
+                    formula_obj <- as.formula(formula_str)
+
+                    # Fit standard Cox model and get apparent C-index
+                    cox_fit <- survival::coxph(formula_obj, data = mydata)
+                    apparent_concordance <- survival::concordance(cox_fit)
+                    c_apparent <- apparent_concordance$concordance
+
+                    # Bootstrap internal validation (Harrell's optimism approach)
+                    set.seed(42)
+                    optimism_values <- numeric(n_boot)
+                    slope_values <- numeric(n_boot)
+                    successful_boots <- 0
+
+                    for (b in seq_len(n_boot)) {
+                        tryCatch({
+                            # Draw bootstrap sample (with replacement)
+                            boot_idx <- sample(nrow(mydata), replace = TRUE)
+                            boot_data <- mydata[boot_idx, , drop = FALSE]
+
+                            # Fit model on bootstrap sample
+                            boot_fit <- survival::coxph(formula_obj, data = boot_data)
+
+                            # Apparent performance on bootstrap sample
+                            boot_concordance <- survival::concordance(boot_fit)
+                            c_boot <- boot_concordance$concordance
+
+                            # Performance of bootstrap model on ORIGINAL data
+                            # Use linear predictor from boot model applied to original data
+                            lp_orig <- tryCatch(
+                                predict(boot_fit, newdata = mydata, type = "lp"),
+                                error = function(e) NULL
+                            )
+
+                            if (!is.null(lp_orig)) {
+                                # Compute concordance of bootstrap LP on original data
+                                # Note: concordance(Surv ~ x) treats higher x as better prognosis
+                                # but Cox LP has higher = worse prognosis, so use reverse=TRUE
+                                surv_obj <- survival::Surv(mydata[[mytime]], mydata[[myoutcome]])
+                                test_concordance <- survival::concordance(
+                                    surv_obj ~ lp_orig, reverse = TRUE
+                                )
+                                c_test <- test_concordance$concordance
+
+                                optimism_values[b] <- c_boot - c_test
+                                successful_boots <- successful_boots + 1
+
+                                # Calibration slope: regress original outcome on bootstrap LP
+                                slope_fit <- tryCatch(
+                                    survival::coxph(surv_obj ~ lp_orig),
+                                    error = function(e) NULL
+                                )
+                                if (!is.null(slope_fit)) {
+                                    slope_values[b] <- coef(slope_fit)[1]
+                                } else {
+                                    slope_values[b] <- NA
+                                }
+                            } else {
+                                optimism_values[b] <- NA
+                                slope_values[b] <- NA
+                            }
+                        }, error = function(e) {
+                            optimism_values[b] <<- NA
+                            slope_values[b] <<- NA
+                        })
+                    }
+
+                    # Compute corrected metrics
+                    valid_optimism <- optimism_values[!is.na(optimism_values)]
+                    valid_slopes <- slope_values[!is.na(slope_values)]
+
+                    if (length(valid_optimism) < 10) {
+                        self$results$bootstrapValidationTable$setNote(
+                            "warning",
+                            paste0("Only ", length(valid_optimism),
+                                   " successful bootstrap resamples. Results may be unreliable.")
+                        )
+                        return()
+                    }
+
+                    mean_optimism <- mean(valid_optimism)
+                    c_corrected <- c_apparent - mean_optimism
+                    mean_slope <- mean(valid_slopes, na.rm = TRUE)
+
+                    # Somers' Dxy = 2 * (C - 0.5)
+                    dxy_apparent <- 2 * (c_apparent - 0.5)
+                    dxy_corrected <- 2 * (c_corrected - 0.5)
+                    dxy_optimism <- dxy_apparent - dxy_corrected
+
+                    # Populate table
+                    table$addRow(rowKey = 1, values = list(
+                        metric = "C-index (Harrell's concordance)",
+                        apparent = round(c_apparent, 4),
+                        optimism = round(mean_optimism, 4),
+                        corrected = round(c_corrected, 4),
+                        n_bootstrap = as.integer(length(valid_optimism))
+                    ))
+
+                    table$addRow(rowKey = 2, values = list(
+                        metric = "Somers' Dxy",
+                        apparent = round(dxy_apparent, 4),
+                        optimism = round(dxy_optimism, 4),
+                        corrected = round(dxy_corrected, 4),
+                        n_bootstrap = as.integer(length(valid_optimism))
+                    ))
+
+                    table$addRow(rowKey = 3, values = list(
+                        metric = "Calibration slope",
+                        apparent = 1.0000,
+                        optimism = round(1 - mean_slope, 4),
+                        corrected = round(mean_slope, 4),
+                        n_bootstrap = as.integer(length(valid_slopes))
+                    ))
+
+                    # Get display name
+                    labelled_data <- private$.getData()
+                    original_names_mapping <- labelled_data$original_names_mapping
+                    title2 <- .getDisplayName(self$options$explanatory, original_names_mapping)
+
+                    table$setTitle(paste0("Bootstrap Internal Validation - ", title2))
+
+                    # Interpretation note
+                    interp <- ifelse(
+                        mean_optimism > 0.05,
+                        "Substantial optimism detected; the apparent C-index overestimates the model's true discriminative ability.",
+                        ifelse(mean_optimism > 0.02,
+                               "Moderate optimism detected; the corrected C-index provides a more realistic estimate.",
+                               "Minimal optimism; the apparent performance is close to the internally validated estimate."
+                        )
+                    )
+
+                    slope_interp <- ifelse(
+                        mean_slope < 0.8,
+                        " Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting).",
+                        ifelse(mean_slope < 0.9,
+                               " Calibration slope slightly below 1 indicates mild overfitting.",
+                               " Calibration slope near 1 indicates good calibration."
+                        )
+                    )
+
+                    table$setNote("interpretation", paste0(
+                        interp, slope_interp,
+                        " Based on ", length(valid_optimism), " successful bootstrap resamples."
+                    ))
+
+                    # Populate explanation if summaries enabled
+                    if (self$options$showSummaries) {
+                        private$.populateBootstrapValidationExplanation(
+                            c_apparent, c_corrected, mean_optimism, mean_slope,
+                            length(valid_optimism), n_events
+                        )
+                    }
+
+                }, error = function(e) {
+                    table$setNote("error", paste0(
+                        "Bootstrap validation failed: ", e$message
+                    ))
+                })
+            }
+
+
+            ,
+            .populateBootstrapValidationExplanation = function(
+                c_apparent, c_corrected, optimism, cal_slope,
+                n_successful, n_events
+            ) {
+
+                # C-index quality rating
+                c_rating <- if (c_corrected >= 0.8) "excellent"
+                            else if (c_corrected >= 0.7) "good"
+                            else if (c_corrected >= 0.6) "moderate"
+                            else "poor"
+
+                html <- paste0(
+                    "<h3>Bootstrap Internal Validation</h3>",
+                    "<p>Internal validation assesses whether a Cox model's apparent ",
+                    "performance is optimistic due to overfitting. The bootstrap method ",
+                    "(Harrell 1996) estimates the <b>optimism</b>: the amount by which ",
+                    "the apparent C-index overestimates the model's true discriminative ",
+                    "ability on new data.</p>",
+
+                    "<h4>Results Summary</h4>",
+                    "<ul>",
+                    "<li><b>Apparent C-index:</b> ", round(c_apparent, 3),
+                    " (performance on the data used to build the model)</li>",
+                    "<li><b>Optimism:</b> ", round(optimism, 3),
+                    " (average over-estimation from ", n_successful, " bootstrap resamples)</li>",
+                    "<li><b>Corrected C-index:</b> ", round(c_corrected, 3),
+                    " (realistic estimate of model performance; rated as <b>", c_rating, "</b>)</li>",
+                    "<li><b>Calibration slope:</b> ", round(cal_slope, 3),
+                    " (ideal = 1.0; values &lt; 1 indicate overfitting)</li>",
+                    "</ul>",
+
+                    "<h4>Interpretation Guide</h4>",
+                    "<table border='1' cellpadding='5' style='border-collapse:collapse;'>",
+                    "<tr><th>Metric</th><th>Ideal Value</th><th>Concern Threshold</th></tr>",
+                    "<tr><td>C-index</td><td>&ge; 0.7</td><td>&lt; 0.6 (poor discrimination)</td></tr>",
+                    "<tr><td>Optimism</td><td>&lt; 0.02</td><td>&gt; 0.05 (overfitting)</td></tr>",
+                    "<tr><td>Calibration slope</td><td>1.0</td><td>&lt; 0.8 (predictions too extreme)</td></tr>",
+                    "</table>",
+
+                    "<h4>How It Works</h4>",
+                    "<p>For each of ", n_successful, " bootstrap resamples:</p>",
+                    "<ol>",
+                    "<li>A bootstrap sample (same size, with replacement) is drawn</li>",
+                    "<li>The Cox model is fit on the bootstrap sample (apparent performance)</li>",
+                    "<li>The bootstrap model is tested on the ORIGINAL data (test performance)</li>",
+                    "<li>Optimism = apparent - test performance</li>",
+                    "</ol>",
+                    "<p>The corrected C-index = apparent C-index minus average optimism.</p>",
+
+                    "<h4>Clinical Context</h4>",
+                    "<p>This model was built on ", n_events, " events. ",
+                    if (n_events < 20) {
+                        "With fewer than 20 events, the model is at high risk of overfitting. "
+                    } else if (n_events < 50) {
+                        "With 20-50 events, moderate caution is warranted. "
+                    } else {
+                        "With 50+ events, the model has reasonable stability. "
+                    },
+                    "External validation on independent data is always recommended before ",
+                    "clinical use.</p>",
+
+                    "<p><i>Reference: Harrell FE Jr, Lee KL, Mark DB (1996). ",
+                    "Multivariable prognostic models: issues in developing models, ",
+                    "evaluating assumptions and adequacy, and measuring and reducing errors. ",
+                    "Statistics in Medicine, 15(4), 361-387.</i></p>"
+                )
+                self$results$bootstrapValidationExplanation$setContent(html)
             }
 
 

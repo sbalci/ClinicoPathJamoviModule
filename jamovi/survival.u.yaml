@@ -204,6 +204,14 @@ children:
                 format: number
                 label: Number of Risk Groups
                 enable: (calibration_curves)
+              - type: CheckBox
+                name: bootstrapValidation
+                label: Bootstrap Internal Validation (C-index)
+              - type: TextBox
+                name: bootstrapValN
+                format: number
+                label: Bootstrap Resamples (50-1000)
+                enable: (bootstrapValidation)
       - type: Label
         label: Non-Linearity Assessment
         children:

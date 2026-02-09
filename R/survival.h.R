@@ -69,7 +69,9 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             calibration_ngroups = 5,
             rcs_analysis = FALSE,
             rcs_variable = NULL,
-            rcs_knots = 4, ...) {
+            rcs_knots = 4,
+            bootstrapValidation = FALSE,
+            bootstrapValN = 200, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -437,6 +439,16 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=4,
                 min=3,
                 max=7)
+            private$..bootstrapValidation <- jmvcore::OptionBool$new(
+                "bootstrapValidation",
+                bootstrapValidation,
+                default=FALSE)
+            private$..bootstrapValN <- jmvcore::OptionInteger$new(
+                "bootstrapValN",
+                bootstrapValN,
+                default=200,
+                min=50,
+                max=1000)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -505,6 +517,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..rcs_analysis)
             self$.addOption(private$..rcs_variable)
             self$.addOption(private$..rcs_knots)
+            self$.addOption(private$..bootstrapValidation)
+            self$.addOption(private$..bootstrapValN)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -573,7 +587,9 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         calibration_ngroups = function() private$..calibration_ngroups$value,
         rcs_analysis = function() private$..rcs_analysis$value,
         rcs_variable = function() private$..rcs_variable$value,
-        rcs_knots = function() private$..rcs_knots$value),
+        rcs_knots = function() private$..rcs_knots$value,
+        bootstrapValidation = function() private$..bootstrapValidation$value,
+        bootstrapValN = function() private$..bootstrapValN$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -641,7 +657,9 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..calibration_ngroups = NA,
         ..rcs_analysis = NA,
         ..rcs_variable = NA,
-        ..rcs_knots = NA)
+        ..rcs_knots = NA,
+        ..bootstrapValidation = NA,
+        ..bootstrapValN = NA)
 )
 
 survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -703,6 +721,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rcsTestTable = function() private$.items[["rcsTestTable"]],
         rcsPlot = function() private$.items[["rcsPlot"]],
         rcsInterpretation = function() private$.items[["rcsInterpretation"]],
+        bootstrapValidationTable = function() private$.items[["bootstrapValidationTable"]],
+        bootstrapValidationExplanation = function() private$.items[["bootstrapValidationExplanation"]],
         parametricModelComparison = function() private$.items[["parametricModelComparison"]],
         parametricModelSummary = function() private$.items[["parametricModelSummary"]],
         parametricDiagnostics = function() private$.items[["parametricDiagnostics"]],
@@ -1713,6 +1733,53 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(rcs_analysis && showExplanations)"))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="bootstrapValidationTable",
+                title="Bootstrap Internal Validation",
+                visible="(bootstrapValidation)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="apparent", 
+                        `title`="Apparent", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="optimism", 
+                        `title`="Optimism", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="corrected", 
+                        `title`="Corrected", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="n_bootstrap", 
+                        `title`="n Bootstrap", 
+                        `type`="integer")),
+                clearWith=list(
+                    "bootstrapValidation",
+                    "bootstrapValN",
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="bootstrapValidationExplanation",
+                title="Bootstrap Validation Interpretation",
+                visible="(bootstrapValidation && showSummaries)",
+                clearWith=list(
+                    "bootstrapValidation",
+                    "bootstrapValN",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="parametricModelComparison",
                 title="Parametric Model Comparison",
                 visible="(use_parametric && compare_distributions)",
@@ -2102,6 +2169,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   flexible). Knots are placed at Harrell-recommended percentiles. More knots
 #'   allow detection of complex non-linear patterns but may overfit with small
 #'   samples.
+#' @param bootstrapValidation .
+#' @param bootstrapValN .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -2159,6 +2228,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$rcsTestTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rcsPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$rcsInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$bootstrapValidationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$bootstrapValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$parametricModelComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$parametricModelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$parametricDiagnostics} \tab \tab \tab \tab \tab a html \cr
@@ -2244,7 +2315,9 @@ survival <- function(
     calibration_ngroups = 5,
     rcs_analysis = FALSE,
     rcs_variable = NULL,
-    rcs_knots = 4) {
+    rcs_knots = 4,
+    bootstrapValidation = FALSE,
+    bootstrapValN = 200) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survival requires jmvcore to be installed (restart may be required)")
@@ -2334,7 +2407,9 @@ survival <- function(
         calibration_ngroups = calibration_ngroups,
         rcs_analysis = rcs_analysis,
         rcs_variable = rcs_variable,
-        rcs_knots = rcs_knots)
+        rcs_knots = rcs_knots,
+        bootstrapValidation = bootstrapValidation,
+        bootstrapValN = bootstrapValN)
 
     analysis <- survivalClass$new(
         options = options,
