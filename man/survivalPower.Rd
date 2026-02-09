@@ -121,9 +121,8 @@ effect size, or duration}
 ranges}
 
 \item{run_simulation_validation}{Validate analytical power calculations
-using Monte Carlo simulation. Useful for verifying complex scenarios
-(Weibull, log-normal distributions). May take 10-60 seconds depending on
-simulation_runs setting.}
+using Monte Carlo simulation. Currently validated for exponential log-rank
+settings only. May take 10-60 seconds depending on simulation_runs setting.}
 
 \item{simulation_runs}{Number of simulation runs for complex calculations}
 
@@ -187,8 +186,8 @@ Advanced, or Comprehensive.
 survivalPower(
     test_type = "log_rank",
     effect_size = 0.75,
-    alpha = 0.05,
-    power = 0.80,
+    alpha_level = 0.05,
+    power_level = 0.80,
     allocation_ratio = 1,
     accrual_period = 24,
     follow_up_period = 36

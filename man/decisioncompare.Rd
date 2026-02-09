@@ -22,6 +22,11 @@ decisioncompare(
   plot = FALSE,
   excludeIndeterminate = FALSE,
   radarplot = FALSE,
+  heatmap = FALSE,
+  opa = FALSE,
+  niMargin = 75,
+  ciMethod = "wilson",
+  stratify = NULL,
   statComp = FALSE,
   showSummary = FALSE,
   showExplanations = FALSE,
@@ -73,6 +78,20 @@ inflating specificity/NPV from equivocal results.}
 \item{radarplot}{Generate radar plot for comprehensive test comparison
 visualization.}
 
+\item{heatmap}{Generate concordance heatmap comparing per-case test results
+against gold standard.}
+
+\item{opa}{Show overall percent agreement with 95\\% confidence intervals
+for each test.}
+
+\item{niMargin}{Noninferiority margin as percentage (default 75). Used when
+OPA is enabled.}
+
+\item{ciMethod}{CI method: wilson, logit, or exact (Clopper-Pearson).}
+
+\item{stratify}{Optional stratification variable for subgroup-specific
+diagnostic accuracy analysis.}
+
 \item{statComp}{Perform statistical comparison between tests (McNemar's
 test and confidence intervals for differences).}
 
@@ -96,10 +115,13 @@ A results object containing:
 \code{results$cTable3} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable3} \tab \tab \tab \tab \tab a table \cr
 \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$opaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$mcnemarTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$diffTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotRadar} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotHeatmap} \tab \tab \tab \tab \tab an image \cr
 \code{results$summaryReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr

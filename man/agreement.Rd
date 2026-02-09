@@ -65,6 +65,15 @@ agreement(
   shrinkageEstimates = FALSE,
   testClusterHomogeneity = TRUE,
   clusterRankings = FALSE,
+  conditionVariable = NULL,
+  mixedEffectsComparison = FALSE,
+  multipleTestCorrection = "none",
+  confusionMatrix = FALSE,
+  confusionNormalize = "none",
+  bootstrapCI = FALSE,
+  nBoot = 1000,
+  multiAnnotatorConcordance = FALSE,
+  predictionColumn = 1,
   specificAgreement = FALSE,
   specificPositiveCategory = "",
   specificAllCategories = TRUE,
@@ -107,7 +116,18 @@ agreement(
   nCaseClusters = 3,
   showCaseDendrogram = TRUE,
   showCaseClusterHeatmap = TRUE,
-  showCaseClusterGuide = FALSE
+  showCaseClusterGuide = FALSE,
+  pairedAgreementTest = FALSE,
+  conditionBVars,
+  pairedBootN = 2000,
+  agreementSampleSize = FALSE,
+  ssMetric = "kappa",
+  ssKappaNull = 0.4,
+  ssKappaAlt = 0.7,
+  ssNRaters = 2,
+  ssNCategories = 4,
+  ssAlpha = 0.05,
+  ssPower = 0.8
 )
 }
 \arguments{
@@ -426,6 +446,59 @@ with confidence intervals. Identifies best and worst performing sites. Use
 cautiously to avoid unfair comparisons when cluster sizes differ
 substantially.}
 
+\item{conditionVariable}{Variable distinguishing measurement conditions
+(e.g., AI-assisted vs. conventional, pre-training vs. post-training).
+Enables mixed-effects comparison that accounts for rater and case random
+effects. Each case-rater pair should have one observation per condition
+level.}
+
+\item{mixedEffectsComparison}{Fit a linear mixed model to compare
+measurement conditions while accounting for rater and case random effects.
+Model: score ~ condition + (1|rater) + (1|case). Provides condition effect
+estimate with CI, variance components, and ICC. More powerful than paired
+t-tests or Wilcoxon tests when data has a crossed rater x case x condition
+design (e.g., Dy et al. 2024 Ki-67 AI study).}
+
+\item{multipleTestCorrection}{Correction method for multiple comparisons
+when testing agreement across multiple strata or clusters. Applied to
+cluster-specific p-values in the hierarchical analysis and to per-condition
+comparisons when multiple conditions are present.}
+
+\item{confusionMatrix}{Display a formal N×N confusion matrix comparing
+first two raters (or reference vs predicted). Includes row/column
+normalization options and per-class precision, recall, and F1 scores.
+Essential for multi-category classification studies (e.g., HER2 0/1+/2+/3+
+scoring).}
+
+\item{confusionNormalize}{How to normalize the confusion matrix. None shows
+raw counts. Row-normalized shows proportions within each reference category
+(equivalent to recall/sensitivity per class). Column-normalized shows
+proportions within each predicted category (equivalent to precision/PPV per
+class).}
+
+\item{bootstrapCI}{Calculate bootstrap confidence intervals for agreement
+metrics (kappa, Fleiss kappa, Krippendorff alpha, ICC, percent agreement).
+Uses case resampling with BCa (bias-corrected and accelerated) method.
+Recommended when analytical CIs are unavailable or when distributions may
+be non-normal (e.g., skewed kappa distributions with few categories).}
+
+\item{nBoot}{Number of bootstrap resamples for confidence interval
+estimation. 1000 is adequate for 95\\% CIs. Use 5000-10000 for
+publication-quality 99\\% CIs or when metrics are near boundary values (0 or
+1).}
+
+\item{multiAnnotatorConcordance}{Compute concordance metrics where a
+prediction is considered correct if it matches ANY of the reference
+annotators. Useful for AI validation studies where multiple pathologists
+annotate the same cases and no single ground truth exists (e.g., Ottl et
+al. 2025 HER2 scoring). Reports concordance accuracy, per-class concordance
+F1, and comparison to strict consensus-based evaluation.}
+
+\item{predictionColumn}{Which rater column contains the predictions to
+evaluate. Default is column 1 (first rater). Remaining columns are treated
+as reference annotators. For AI validation, set this to the column
+containing AI predictions.}
+
 \item{specificAgreement}{Calculate category-specific agreement indices for
 binary or multi-category data. For binary data: Positive Specific Agreement
 (PSA) and Negative Specific Agreement (NSA). For multi-category data:
@@ -638,6 +711,36 @@ cluster boundaries.}
 
 \item{showCaseClusterGuide}{Show educational guide about case clustering
 analysis.}
+
+\item{pairedAgreementTest}{Perform a bootstrap test comparing interobserver
+agreement (kappa and percent agreement) between two conditions (e.g.,
+manual vs AI-assisted scoring of the same cases).}
+
+\item{conditionBVars}{Rater columns for the second condition (e.g.,
+AI-assisted). The main rater variables serve as Condition A.}
+
+\item{pairedBootN}{Number of bootstrap replications for paired comparison
+test.}
+
+\item{agreementSampleSize}{Compute the required sample size (number of
+subjects) for a prospective agreement study based on kappa or ICC.}
+
+\item{ssMetric}{The agreement metric to power the study for.}
+
+\item{ssKappaNull}{The kappa (or ICC) value under the null hypothesis.
+Common choices - 0.4 (moderate), 0.6 (substantial).}
+
+\item{ssKappaAlt}{The kappa (or ICC) value under the alternative
+hypothesis. This is the minimum clinically meaningful agreement.}
+
+\item{ssNRaters}{Planned number of raters in the study.}
+
+\item{ssNCategories}{Number of rating categories (e.g., 4 for HER2
+0/1+/2+/3+).}
+
+\item{ssAlpha}{Type I error rate (two-sided).}
+
+\item{ssPower}{Target power (1 - Type II error rate).}
 }
 \value{
 A results object containing:
@@ -675,6 +778,17 @@ A results object containing:
 \code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$homogeneityTestTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$hierarchicalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$mixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$mixedEffectsVarianceTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$mixedEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$confusionMatrixTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$perClassMetricsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$confusionMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapCIExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$concordanceF1Table} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceF1PerClassTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceF1Explanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
@@ -718,6 +832,10 @@ A results object containing:
 \code{results$caseDendrogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$caseClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
 \code{results$caseClusterExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$pairedAgreementTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairedAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$agreementSampleSizeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$agreementSampleSizeExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

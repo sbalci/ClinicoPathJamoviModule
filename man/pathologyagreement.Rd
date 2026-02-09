@@ -15,6 +15,7 @@ pathologyagreement(
   show_plots = TRUE,
   icc_type = "consistency",
   correlation_method = "both",
+  ba_method = "standard",
   missing_data = "listwise",
   show_interpretation = TRUE,
   show_summary = FALSE,
@@ -43,6 +44,11 @@ pathology scenarios}
 \item{icc_type}{type of intraclass correlation coefficient to calculate}
 
 \item{correlation_method}{correlation method(s) to calculate}
+
+\item{ba_method}{Method for calculating limits of agreement in Bland-Altman
+analysis. Standard uses fixed limits (mean +/- 1.96*SD). Regression-based
+limits account for proportional bias where disagreement varies with
+magnitude.}
 
 \item{missing_data}{method for handling missing values}
 

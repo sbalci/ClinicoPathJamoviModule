@@ -25,6 +25,8 @@ survival(
   landmark = 3,
   pw = FALSE,
   padjustmethod = "holm",
+  weightedLogRank = FALSE,
+  survivalTestType = "logrank",
   ph_cox = FALSE,
   sc = FALSE,
   kmunicate = FALSE,
@@ -61,7 +63,15 @@ survival(
   parametric_diagnostics = TRUE,
   compare_distributions = FALSE,
   parametric_survival_plots = FALSE,
-  hazard_plots = FALSE
+  hazard_plots = FALSE,
+  calibration_curves = FALSE,
+  calibration_timepoint = 0,
+  calibration_ngroups = 5,
+  rcs_analysis = FALSE,
+  rcs_variable = NULL,
+  rcs_knots = 4,
+  bootstrapValidation = FALSE,
+  bootstrapValN = 200
 )
 }
 \arguments{
@@ -124,6 +134,10 @@ disease.}
 \item{pw}{.}
 
 \item{padjustmethod}{.}
+
+\item{weightedLogRank}{.}
+
+\item{survivalTestType}{.}
 
 \item{ph_cox}{.}
 
@@ -244,6 +258,43 @@ estimates for model validation.}
 
 \item{hazard_plots}{Plot estimated hazard functions from parametric models.
 Shows how instantaneous risk changes over time for different distributions.}
+
+\item{calibration_curves}{Assess calibration of the Cox model by comparing
+predicted versus observed survival at specified time points. Groups
+patients by predicted risk quintiles and computes Kaplan-Meier survival per
+group. Includes calibration slope, calibration-in-the-large, and
+calibration plot. Requires Cox model to be fitted.}
+
+\item{calibration_timepoint}{Time point for calibration assessment (e.g.,
+60 for 5-year OS in months). If 0, uses the median observed time. The
+calibration plot compares predicted vs observed survival probability at
+this time point.}
+
+\item{calibration_ngroups}{Number of risk groups (quantiles) for
+calibration assessment. Default is 5 (quintiles). More groups provide finer
+resolution but require larger sample sizes. Each group should have at least
+20-30 patients.}
+
+\item{rcs_analysis}{Assess non-linear effects of continuous predictors
+using restricted cubic splines (natural splines). Fits Cox model with
+spline-transformed predictor, tests for non-linearity via likelihood ratio
+test, and plots hazard ratio curve. Important for variables like age and
+tumor size where the relationship with outcome may not be linear.}
+
+\item{rcs_variable}{Select a continuous predictor variable to assess for
+non-linear effects. The variable will be modeled with restricted cubic
+splines and compared to a linear model. Common candidates include age,
+tumor size, biomarker levels, and follow-up duration.}
+
+\item{rcs_knots}{Number of knots for restricted cubic splines. 3 knots = 2
+df (simplest), 4 knots = 3 df (recommended default), 5 knots = 4 df (more
+flexible). Knots are placed at Harrell-recommended percentiles. More knots
+allow detection of complex non-linear patterns but may overfit with small
+samples.}
+
+\item{bootstrapValidation}{.}
+
+\item{bootstrapValN}{.}
 }
 \value{
 A results object containing:
@@ -284,6 +335,8 @@ A results object containing:
 \code{results$pairwiseComparisonHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$weightedLogRankTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$weightedLogRankExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
@@ -294,6 +347,15 @@ A results object containing:
 \code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
+\code{results$calibrationTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$calibrationGroupTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$calibrationPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$calibrationInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$rcsTestTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$rcsPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$rcsInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$bootstrapValidationTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$bootstrapValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$parametricModelComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$parametricModelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$parametricDiagnostics} \tab \tab \tab \tab \tab a html \cr

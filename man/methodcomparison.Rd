@@ -22,6 +22,7 @@ methodcomparison(
   correlation_analysis = TRUE,
   concordance_correlation = TRUE,
   regression_comparison = TRUE,
+  calibration_analysis = FALSE,
   clinical_limits = FALSE,
   clinical_lower = -10,
   clinical_upper = 10,
@@ -75,6 +76,13 @@ coefficient for agreement assessment}
 \item{regression_comparison}{Compare ordinary least squares vs method
 comparison regressions}
 
+\item{calibration_analysis}{Compute calibration metrics assessing how well
+the test method tracks the reference method. Includes
+calibration-in-the-large (intercept; ideal = 0), calibration slope (ideal =
+1), and R-squared. A well-calibrated method has slope near 1 and intercept
+near 0. Useful for validating AI scoring tools, automated assays, and new
+measurement methods against gold standards.}
+
 \item{clinical_limits}{Specify clinical acceptability criteria}
 
 \item{clinical_lower}{Lower bound for clinically acceptable difference}
@@ -118,6 +126,7 @@ A results object containing:
 \code{results$scatterPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$residualPlots} \tab \tab \tab \tab \tab an image \cr
 \code{results$mountainPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$calibrationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$methodGuidance} \tab \tab \tab \tab \tab a html \cr
 \code{results$technicalNotes} \tab \tab \tab \tab \tab a html \cr
 }
