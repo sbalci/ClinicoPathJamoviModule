@@ -8,6 +8,10 @@ items:
       title: Analysis result
       type:  Preformatted
 
+    - name:  text_summary
+      title: Summary
+      type:  Preformatted
+
     - name:  text2
       title: Study Explanation
       type:  Preformatted

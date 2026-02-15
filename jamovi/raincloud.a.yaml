@@ -3,7 +3,7 @@ name: raincloud
 title: Raincloud Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
-version: '0.0.33'
+version: '0.0.34'
 jas: '1.2'
 
 description:

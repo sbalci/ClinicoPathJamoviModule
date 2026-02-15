@@ -30,6 +30,7 @@ kappaSizeFixedN(
 A results object containing:
 \tabular{llllll}{
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }

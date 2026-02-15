@@ -5,16 +5,21 @@
 
 # run  /Applications/jamovi.app/Contents/MacOS/jamovi
 
+# Rscript -e "jmvtools::prepare()"
+# Rscript -e "devtools::document()"
+# Rscript -e "devtools::load_all()"
+
+# Rscript _updateModules.R
 
 # ==============================================
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.33.10"
-new_date: "2026-02-09"
+new_version: "0.0.34"
+new_date: "2026-02-15"
 quick: false
-TEST: true
-meddecide: false
+TEST: false
+meddecide: true
 jjstatsplot: false
 jsurvival: false
 ClinicoPathDescriptives: false

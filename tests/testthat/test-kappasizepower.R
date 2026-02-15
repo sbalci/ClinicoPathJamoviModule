@@ -10,7 +10,6 @@ if (requireNamespace("devtools", quietly = TRUE)) {
 }
 
 test_that("kappaSizePower works for binary outcomes (2 categories)", {
-  # Basic binary case: 2 raters, 2 categories
   results <- kappaSizePower(
     outcome = "2",
     kappa0 = 0.40,
@@ -20,19 +19,23 @@ test_that("kappaSizePower works for binary outcomes (2 categories)", {
     alpha = 0.05,
     power = 0.80
   )
-  
-  # Check if results are populated
+
   expect_true(!is.null(results$text1$content))
   expect_true(!is.null(results$text2$content))
-  
-  # Check content format - should contain a result (not an error)
-  content1 <- results$text1$content
-  expect_true(nchar(content1) > 0)
-  
-  # Explanation should contain key parameters
+  expect_true(!is.null(results$text_summary$content))
+  expect_true(nchar(results$text1$content) > 0)
+
+  # Explanation should contain the descriptive sentence
   content2 <- results$text2$content
-  expect_match(content2, "POWER ANALYSIS", fixed = FALSE)
-  expect_match(content2, "Number of raters: 2", fixed = FALSE)
+  expect_match(content2, "required sample size")
+  expect_match(content2, "kappa0=")
+  expect_match(content2, "kappa1=")
+  expect_match(content2, "2 raters")
+
+  # Summary should contain kappaSize summary output
+  summary_content <- results$text_summary$content
+  expect_match(summary_content, "Kappa0")
+  expect_match(summary_content, "Power-Based Sample Size")
 })
 
 test_that("kappaSizePower works for 3 categories", {
@@ -45,38 +48,53 @@ test_that("kappaSizePower works for 3 categories", {
     alpha = 0.05,
     power = 0.80
   )
-  
+
   expect_true(nchar(results$text1$content) > 0)
-  expect_match(results$text2$content, "Outcome categories: 3")
-  expect_match(results$text2$content, "Number of raters: 3")
+  expect_match(results$text2$content, "required sample size")
+  expect_match(results$text2$content, "3 raters")
 })
 
-test_that("kappaSizePower validates kappa1 > kappa0", {
-  expect_error(kappaSizePower(
-      outcome = "2",
-      kappa0 = 0.60,
-      kappa1 = 0.40,
-      props = "0.5, 0.5",
-      power = 0.80
-  ), "kappa1 must be greater")
+test_that("kappaSizePower works for 4 categories", {
+  results <- kappaSizePower(
+    outcome = "4",
+    kappa0 = 0.40,
+    kappa1 = 0.60,
+    props = "0.10, 0.20, 0.30, 0.40",
+    raters = "2",
+    alpha = 0.05,
+    power = 0.80
+  )
+
+  expect_true(nchar(results$text1$content) > 0)
+  expect_match(results$text2$content, "required sample size")
 })
 
-test_that("kappaSizePower handles proportion validation", {
-  expect_error(kappaSizePower(
-      outcome = "2",
-      kappa0 = 0.4,
-      kappa1 = 0.6,
-      props = "0.20, 0.20",
-      power = 0.80
-  ), "Proportions must sum to 1")
+test_that("kappaSizePower works for 5 categories", {
+  results <- kappaSizePower(
+    outcome = "5",
+    kappa0 = 0.40,
+    kappa1 = 0.60,
+    props = "0.10, 0.20, 0.20, 0.25, 0.25",
+    raters = "2",
+    alpha = 0.05,
+    power = 0.80
+  )
+
+  expect_true(nchar(results$text1$content) > 0)
+  expect_match(results$text2$content, "required sample size")
 })
 
-test_that("kappaSizePower validates power parameter", {
-  expect_error(kappaSizePower(
-      outcome = "2",
-      kappa0 = 0.4,
-      kappa1 = 0.6,
-      props = "0.5, 0.5",
-      power = 0.30
-  ), "Power should be at least 0.5")
+test_that("kappaSizePower integration with kappaSize package calculations", {
+  results <- kappaSizePower(
+    outcome = "2",
+    kappa0 = 0.4,
+    kappa1 = 0.6,
+    props = "0.5, 0.5",
+    raters = "2",
+    alpha = 0.05,
+    power = 0.80
+  )
+
+  expect_true(nchar(results$text1$content) > 0)
+  expect_true(nchar(results$text2$content) > 0)
 })

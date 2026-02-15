@@ -4,7 +4,7 @@ title: Lowest Expected Value for a fixed sample size
 menuGroup: meddecide
 menuSubgroup: Power Analysis
 menuSubtitle: Find lower Kappa based on sample size
-version: '0.0.33'
+version: '0.0.34'
 jas: '1.2'
 
 description:
@@ -63,6 +63,7 @@ options:
         - "3"
         - "4"
         - "5"
+        - "6"
       default: "2"
       description:
           ui: >

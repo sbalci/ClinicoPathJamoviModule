@@ -222,7 +222,10 @@
       "Skill(peer-review)",
       "Skill(clinical-decision-support)",
       "Bash(while read f)",
-      "Bash(do basename \"$f\")"
+      "Bash(do basename \"$f\")",
+      "Bash(codex:*)",
+      "Bash(unset:*)",
+      "Bash(claude mcp list:*)"
     ],
     "deny": [],
     "ask": [],

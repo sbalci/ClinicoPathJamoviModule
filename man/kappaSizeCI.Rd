@@ -6,6 +6,7 @@
 \usage{
 kappaSizeCI(
   outcome = "2",
+  citype = "two_sided",
   kappa0 = 0.6,
   kappaL = 0.4,
   kappaU = 0.8,
@@ -16,6 +17,8 @@ kappaSizeCI(
 }
 \arguments{
 \item{outcome}{Number of outcome level.}
+
+\item{citype}{Type of confidence interval: 'two_sided' or 'one_sided'.}
 
 \item{kappa0}{The null hypothesis value of kappa.}
 
@@ -33,6 +36,7 @@ kappaSizeCI(
 A results object containing:
 \tabular{llllll}{
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 }
 }

@@ -7,6 +7,7 @@ kappaSizeCIOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     public = list(
         initialize = function(
             outcome = "2",
+            citype = "two_sided",
             kappa0 = 0.6,
             kappaL = 0.4,
             kappaU = 0.8,
@@ -29,6 +30,13 @@ kappaSizeCIOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "4",
                     "5"),
                 default="2")
+            private$..citype <- jmvcore::OptionList$new(
+                "citype",
+                citype,
+                options=list(
+                    "two_sided",
+                    "one_sided"),
+                default="two_sided")
             private$..kappa0 <- jmvcore::OptionNumber$new(
                 "kappa0",
                 kappa0,
@@ -58,7 +66,8 @@ kappaSizeCIOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "2",
                     "3",
                     "4",
-                    "5"),
+                    "5",
+                    "6"),
                 default="2")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
@@ -68,6 +77,7 @@ kappaSizeCIOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 max=0.99)
 
             self$.addOption(private$..outcome)
+            self$.addOption(private$..citype)
             self$.addOption(private$..kappa0)
             self$.addOption(private$..kappaL)
             self$.addOption(private$..kappaU)
@@ -77,6 +87,7 @@ kappaSizeCIOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         }),
     active = list(
         outcome = function() private$..outcome$value,
+        citype = function() private$..citype$value,
         kappa0 = function() private$..kappa0$value,
         kappaL = function() private$..kappaL$value,
         kappaU = function() private$..kappaU$value,
@@ -85,6 +96,7 @@ kappaSizeCIOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         alpha = function() private$..alpha$value),
     private = list(
         ..outcome = NA,
+        ..citype = NA,
         ..kappa0 = NA,
         ..kappaL = NA,
         ..kappaU = NA,
@@ -98,6 +110,7 @@ kappaSizeCIResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Group,
     active = list(
         text1 = function() private$.items[["text1"]],
+        text_summary = function() private$.items[["text_summary"]],
         text2 = function() private$.items[["text2"]]),
     private = list(),
     public=list(
@@ -113,6 +126,10 @@ kappaSizeCIResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="text1",
                 title="Analysis result"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text_summary",
+                title="Summary"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
@@ -149,6 +166,7 @@ kappaSizeCIBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # example will be added
 #'}
 #' @param outcome Number of outcome level.
+#' @param citype Type of confidence interval: 'two_sided' or 'one_sided'.
 #' @param kappa0 The null hypothesis value of kappa.
 #' @param kappaL The lower limit of the kappa.
 #' @param kappaU The upper limit of the kappa.
@@ -158,12 +176,14 @@ kappaSizeCIBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' @export
 kappaSizeCI <- function(
     outcome = "2",
+    citype = "two_sided",
     kappa0 = 0.6,
     kappaL = 0.4,
     kappaU = 0.8,
@@ -177,6 +197,7 @@ kappaSizeCI <- function(
 
     options <- kappaSizeCIOptions$new(
         outcome = outcome,
+        citype = citype,
         kappa0 = kappa0,
         kappaL = kappaL,
         kappaU = kappaU,

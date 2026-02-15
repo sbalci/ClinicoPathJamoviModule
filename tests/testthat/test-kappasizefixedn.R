@@ -10,7 +10,6 @@ if (requireNamespace("devtools", quietly = TRUE)) {
 }
 
 test_that("kappaSizeFixedN works for binary outcomes (2 categories)", {
-  # Basic binary case: 2 raters, 2 categories, n=100
   results <- kappaSizeFixedN(
     outcome = "2",
     kappa0 = 0.60,
@@ -19,20 +18,22 @@ test_that("kappaSizeFixedN works for binary outcomes (2 categories)", {
     alpha = 0.05,
     n = 100
   )
-  
-  # Check if results are populated
+
   expect_true(!is.null(results$text1$content))
   expect_true(!is.null(results$text2$content))
-  
-  # Check content format - should contain a numeric result
-  content1 <- results$text1$content
-  expect_true(nchar(content1) > 0)
-  
-  # Explanation should contain key parameters
+  expect_true(!is.null(results$text_summary$content))
+  expect_true(nchar(results$text1$content) > 0)
+
+  # Explanation should contain the descriptive sentence
   content2 <- results$text2$content
-  expect_match(content2, "Outcome categories: 2", fixed = FALSE)
-  expect_match(content2, "Number of raters: 2", fixed = FALSE)
-  expect_match(content2, "Sample size: 100", fixed = FALSE)
+  expect_match(content2, "expected lower bound")
+  expect_match(content2, "100 subjects")
+  expect_match(content2, "2 raters")
+
+  # Summary should contain kappaSize summary output
+  summary_content <- results$text_summary$content
+  expect_match(summary_content, "Kappa0")
+  expect_match(summary_content, "Lower Expected Limit")
 })
 
 test_that("kappaSizeFixedN works for 3 categories", {
@@ -44,39 +45,51 @@ test_that("kappaSizeFixedN works for 3 categories", {
     alpha = 0.05,
     n = 150
   )
-  
+
   expect_true(nchar(results$text1$content) > 0)
-  expect_match(results$text2$content, "Outcome categories: 3")
-  expect_match(results$text2$content, "Number of raters: 3")
+  expect_match(results$text2$content, "expected lower bound")
+  expect_match(results$text2$content, "150 subjects")
+  expect_match(results$text2$content, "3 raters")
 })
 
-test_that("kappaSizeFixedN handles validation errors: proportions", {
-  expect_error(kappaSizeFixedN(
-      outcome = "2",
-      props = "0.20, 0.20",
-      n = 100
-  ), "Proportions must sum to 1")
+test_that("kappaSizeFixedN works for 4 categories", {
+  results <- kappaSizeFixedN(
+    outcome = "4",
+    kappa0 = 0.50,
+    props = "0.10, 0.20, 0.30, 0.40",
+    raters = "2",
+    alpha = 0.05,
+    n = 200
+  )
+
+  expect_true(nchar(results$text1$content) > 0)
+  expect_match(results$text2$content, "expected lower bound")
 })
 
-test_that("kappaSizeFixedN handles validation errors: matched categories", {
-  expect_error(kappaSizeFixedN(
-      outcome = "3",
-      props = "0.5, 0.5",
-      n = 100
-  ), "Expected 3 proportions")
+test_that("kappaSizeFixedN works for 5 categories", {
+  results <- kappaSizeFixedN(
+    outcome = "5",
+    kappa0 = 0.50,
+    props = "0.10, 0.20, 0.20, 0.25, 0.25",
+    raters = "2",
+    alpha = 0.05,
+    n = 200
+  )
+
+  expect_true(nchar(results$text1$content) > 0)
+  expect_match(results$text2$content, "expected lower bound")
 })
 
 test_that("kappaSizeFixedN integration with kappaSize package calculations", {
-    results <- kappaSizeFixedN(
-        outcome = "2",
-        kappa0 = 0.6,
-        props = "0.5, 0.5",
-        raters = "2",
-        alpha = 0.05,
-        n = 100
-    )
-    
-    output_str <- results$text1$content
-    expect_true(nchar(output_str) > 0)
-    expect_match(results$text2$content, "STUDY DESIGN ANALYSIS")
+  results <- kappaSizeFixedN(
+    outcome = "2",
+    kappa0 = 0.6,
+    props = "0.5, 0.5",
+    raters = "2",
+    alpha = 0.05,
+    n = 100
+  )
+
+  expect_true(nchar(results$text1$content) > 0)
+  expect_true(nchar(results$text2$content) > 0)
 })

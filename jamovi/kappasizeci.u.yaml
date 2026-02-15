@@ -41,6 +41,17 @@ children:
 
 
   - type: Label
+    label: Confidence Interval Type
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: citype
+            label: CI Type
+
+
+  - type: Label
     label: Kappa Levels
     children:
         - type: LayoutBox
@@ -73,6 +84,7 @@ children:
               name: kappaU
               label: 'Upper confidence limit'
               format: number
+              enable: (citype:two_sided)
 
 
 

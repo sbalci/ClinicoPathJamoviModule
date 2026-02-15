@@ -436,3 +436,22 @@ Use these skills to update text and analysis in the project:
   pytorch-lightning
 
 
+## Multi-Model Orchestration Protocol
+
+When a bug fix, feature request, or complex task comes in, follow this workflow:
+
+### Step 1 — Codex: Analyze & Plan
+Call the Codex MCP tool and request:
+- Root cause analysis of the issue
+- A step-by-step solution plan
+- List of affected files
+- Potential risks and edge cases
+
+### Step 2 — Claude: Implement
+Take the plan from Codex and implement it yourself. Run tests after completing each step.
+
+### Step 3 — Fallback: Delegate to Codex
+If you fail to resolve a step after 2 attempts, delegate that specific step to Codex via MCP.
+
+### Step 4 — Verify
+Validate the final result by running build and test commands.

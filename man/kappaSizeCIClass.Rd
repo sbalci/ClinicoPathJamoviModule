@@ -11,7 +11,8 @@ evaluating agreement between raters across different numbers of outcome categori
 \details{
 The function uses the kappaSize package to calculate required sample sizes
 for kappa coefficient confidence intervals. It supports 2-5 outcome categories
-and 2-5 raters, with customizable precision requirements and significance levels.
+and 2-6 raters, with customizable precision requirements and significance levels.
+Both two-sided and one-sided confidence intervals are supported.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::kappaSizeCIBase} -> \code{kappaSizeCIClass}

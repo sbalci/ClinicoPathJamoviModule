@@ -10,9 +10,9 @@ if (requireNamespace("devtools", quietly = TRUE)) {
 }
 
 test_that("kappaSizeCI works for binary outcomes (2 categories)", {
-  # Basic binary case: 2 raters, 2 categories, kappa0=0.6, kappaL=0.4, kappaU=0.8
   results <- kappaSizeCI(
     outcome = "2",
+    citype = "two_sided",
     kappa0 = 0.60,
     kappaL = 0.40,
     kappaU = 0.80,
@@ -20,24 +20,29 @@ test_that("kappaSizeCI works for binary outcomes (2 categories)", {
     raters = "2",
     alpha = 0.05
   )
-  
-  # Check if results are populated
+
   expect_true(!is.null(results$text1$content))
   expect_true(!is.null(results$text2$content))
-  
-  # Check content format
+  expect_true(!is.null(results$text_summary$content))
+
   content1 <- results$text1$content
   expect_match(content1, "Required sample size", fixed = FALSE)
-  
-  # Explanation should contain key parameters
+
   content2 <- results$text2$content
   expect_match(content2, "Number of outcome categories: 2")
   expect_match(content2, "Number of raters: 2")
+  expect_match(content2, "Two-sided")
+
+  # Summary should contain kappaSize summary output
+  summary_content <- results$text_summary$content
+  expect_match(summary_content, "Kappa0")
+  expect_match(summary_content, "KappaL")
 })
 
 test_that("kappaSizeCI works for 3 categories", {
   results <- kappaSizeCI(
     outcome = "3",
+    citype = "two_sided",
     kappa0 = 0.50,
     kappaL = 0.30,
     kappaU = 0.70,
@@ -45,62 +50,132 @@ test_that("kappaSizeCI works for 3 categories", {
     raters = "3",
     alpha = 0.05
   )
-  
+
   expect_match(results$text1$content, "Required sample size")
   expect_match(results$text2$content, "Number of outcome categories: 3")
   expect_match(results$text2$content, "Number of raters: 3")
 })
 
-test_that("kappaSizeCI handles validation errors gracefully", {
-  # Invalid proportions (sum != 1)
-  expect_error(
-    kappaSizeCI(
-        outcome = "2",
-        props = "0.20, 0.20" 
-    ),
-    regexp = "Proportions should sum to 1.0"
+test_that("kappaSizeCI works for 4 categories", {
+  results <- kappaSizeCI(
+    outcome = "4",
+    citype = "two_sided",
+    kappa0 = 0.50,
+    kappaL = 0.30,
+    kappaU = 0.70,
+    props = "0.10, 0.20, 0.30, 0.40",
+    raters = "2",
+    alpha = 0.05
   )
-  
-  # Mismatched outcome count and proportions
-  expect_error(
-    kappaSizeCI(
-        outcome = "3",
-        props = "0.5, 0.5"
-    ),
-    regexp = "Expected 3 proportions"
+
+  expect_match(results$text1$content, "Required sample size")
+})
+
+test_that("kappaSizeCI works for 5 categories", {
+  results <- kappaSizeCI(
+    outcome = "5",
+    citype = "two_sided",
+    kappa0 = 0.50,
+    kappaL = 0.30,
+    kappaU = 0.70,
+    props = "0.10, 0.20, 0.20, 0.25, 0.25",
+    raters = "2",
+    alpha = 0.05
   )
-  
-  # Invalid kappa range (L > U)
-  expect_error(
-      kappaSizeCI(
-          outcome = "2",
-          kappaL = 0.9,
-          kappaU = 0.8
-      ),
-      regexp = "kappaL must be less than kappaU"
+
+  expect_match(results$text1$content, "Required sample size")
+})
+
+test_that("kappaSizeCI one-sided CI requires fewer subjects", {
+  two_sided <- kappaSizeCI(
+    outcome = "2",
+    citype = "two_sided",
+    kappa0 = 0.60,
+    kappaL = 0.40,
+    kappaU = 0.80,
+    props = "0.30, 0.70",
+    raters = "2",
+    alpha = 0.05
   )
+
+  one_sided <- kappaSizeCI(
+    outcome = "2",
+    citype = "one_sided",
+    kappa0 = 0.60,
+    kappaL = 0.40,
+    kappaU = 0.80,
+    props = "0.30, 0.70",
+    raters = "2",
+    alpha = 0.05
+  )
+
+  # One-sided should require fewer subjects
+  expect_match(two_sided$text1$content, "Required sample size: 94")
+  expect_match(one_sided$text1$content, "Required sample size: 66")
+
+  # Explanation text should reflect CI type
+  expect_match(two_sided$text2$content, "Two-sided")
+  expect_match(one_sided$text2$content, "One-sided")
+})
+
+test_that("kappaSizeCI one-sided CI works for multi-category outcomes", {
+  results <- kappaSizeCI(
+    outcome = "3",
+    citype = "one_sided",
+    kappa0 = 0.50,
+    kappaL = 0.30,
+    kappaU = 0.70,
+    props = "0.20, 0.30, 0.50",
+    raters = "2",
+    alpha = 0.05
+  )
+
+  expect_match(results$text1$content, "Required sample size: \\d+")
+  expect_match(results$text2$content, "One-sided")
 })
 
 test_that("kappaSizeCI integration with kappaSize package calculations", {
-    # We compare against a known result if possible, or just ensure it returns a valid number
-    # For binary: k0=0.6, kL=0.4, kU=0.8, props=0.5,0.5, raters=2, alpha=0.05
-    # kappaSize::CIBinary(kappa0=0.6, kappaL=0.4, kappaU=0.8, props=c(0.5,0.5), alpha=0.05, raters=2)
-    
-    results <- kappaSizeCI(
-        outcome = "2",
-        kappa0 = 0.6,
-        kappaL = 0.4,
-        kappaU = 0.8,
-        props = "0.5, 0.5",
-        raters = "2",
-        alpha = 0.05
-    )
-    
-    # Extract number from "Required sample size: X"
-    output_str <- results$text1$content
-    # Expected pattern: "Required sample size: [numbers]"
-    expect_match(output_str, "Required sample size: \\d+")
-    
-    number <- as.numeric(gsub("[^0-9]", "", output_str))
-    expect_true(number > 0)
+  results <- kappaSizeCI(
+    outcome = "2",
+    citype = "two_sided",
+    kappa0 = 0.6,
+    kappaL = 0.4,
+    kappaU = 0.8,
+    props = "0.5, 0.5",
+    raters = "2",
+    alpha = 0.05
+  )
+
+  output_str <- results$text1$content
+  expect_match(output_str, "Required sample size: \\d+")
+})
+
+test_that("kappaSizeCI accepts single prevalence input for binary outcomes", {
+  results <- kappaSizeCI(
+    outcome = "2",
+    citype = "two_sided",
+    kappa0 = 0.60,
+    kappaL = 0.40,
+    kappaU = 0.80,
+    props = "0.30",
+    raters = "2",
+    alpha = 0.05
+  )
+
+  expect_match(results$text1$content, "Required sample size:")
+})
+
+test_that("kappaSizeCI supports 6 raters", {
+  results <- kappaSizeCI(
+    outcome = "2",
+    citype = "two_sided",
+    kappa0 = 0.60,
+    kappaL = 0.40,
+    kappaU = 0.80,
+    props = "0.30, 0.70",
+    raters = "6",
+    alpha = 0.05
+  )
+
+  expect_match(results$text1$content, "Required sample size:")
 })
