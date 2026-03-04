@@ -4,7 +4,7 @@ title: Dot Chart
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 # menuSubtitle: Dot Chart
-version: '0.0.34'
+version: '0.0.36'
 jas: '1.2'
 
 

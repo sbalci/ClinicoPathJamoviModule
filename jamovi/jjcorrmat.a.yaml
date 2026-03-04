@@ -4,7 +4,7 @@ title: Correlation Matrix
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
-version: '0.0.34'
+version: '0.0.36'
 jas: '1.2'
 
 

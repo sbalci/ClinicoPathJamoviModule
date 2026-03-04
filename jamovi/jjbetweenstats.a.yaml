@@ -4,7 +4,7 @@ title: Box-Violin Plots to Compare Between Groups
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
-version: '0.0.34'
+version: '0.0.36'
 jas: '1.2'
 
 
