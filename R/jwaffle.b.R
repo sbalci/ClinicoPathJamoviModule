@@ -562,7 +562,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (n_categories > 10) {
                 private$.accumulateMessage(glue::glue(
-                    "<br>⚠️ <strong>Many Categories:</strong> {n_categories} categories detected in '{self$options$groups}'. ",
+                    "<br> <strong>Many Categories:</strong> {n_categories} categories detected in '{self$options$groups}'. ",
                     "Consider grouping rare categories as 'Other' for clarity detailed clinical presentation.<br>"
                 ))
             }
@@ -570,7 +570,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check sample size adequacy for clinical interpretation
             if (n_total < 30) {
                 private$.accumulateMessage(glue::glue(
-                    "<br>⚠️ <strong>Small Sample:</strong> Total n={n_total}. Proportions may be unstable. ",
+                    "<br> <strong>Small Sample:</strong> Total n={n_total}. Proportions may be unstable. ",
                     "Consider combining categories or collecting more data.<br>"
                 ))
             }
@@ -581,7 +581,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (min_count < 5 && n_total >= 30) {
                 small_cats <- names(category_counts)[category_counts < 5]
                 private$.accumulateMessage(glue::glue(
-                    "<br>⚠️ <strong>Rare Categories:</strong> Some categories have <5 cases: {paste(small_cats, collapse = ', ')}. ",
+                    "<br> <strong>Rare Categories:</strong> Some categories have <5 cases: {paste(small_cats, collapse = ', ')}. ",
                     "Consider combining rare categories for more reliable clinical interpretation.<br>"
                 ))
             }
@@ -681,11 +681,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 summary_text <- paste0(
-                    "<b>📊 Waffle Chart Summary by ", facet_var, ":</b><br><br>",
+                    "<b> Waffle Chart Summary by ", facet_var, ":</b><br><br>",
                     paste(summary_parts, collapse = "<br><br>"),
-                    "<br><br><b>🔍 Overall Sample:</b> ", total_cases, " ", unit_label, " showing ", groups_var,
+                    "<br><br><b> Overall Sample:</b> ", total_cases, " ", unit_label, " showing ", groups_var,
                     " distribution across ", length(unique(plotdata[[facet_var]])), " ", facet_var, " groups.",
-                    "<br><br><b>💡 Clinical Note:</b> Compare how ", groups_var,
+                    "<br><br><b> Clinical Note:</b> Compare how ", groups_var,
                     " patterns differ between ", facet_var, " groups. Each square represents a fixed proportion of ", unit_label, "."
                 )
                 
@@ -706,10 +706,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 
                 summary_text <- sprintf(
-                    "<b>📊 Waffle Chart Summary:</b><br><br>
+                    "<b> Waffle Chart Summary:</b><br><br>
                     The sample contains %d %s distributed as: %s.<br><br>
                     <b>Key Finding:</b> %s represents the largest proportion (%.1f%% of %s).<br><br>
-                    <b>💡 Report Template:</b><br>
+                    <b> Report Template:</b><br>
                     <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%d) in our sample of %d %s.\"</i>",
                     total_cases, unit_label, breakdown_list, dominant_category, max_proportion, unit_label,
                     dominant_category, max_proportion, plotdata$count[max_prop_idx], total_cases, unit_label
@@ -773,14 +773,14 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "margin: 20px 0; color: #212529;'>",
 
                     "<h2 style='margin-top: 0; font-size: 24px; font-weight: bold; color: #495057;'>",
-                    "📊 Welcome to Waffle Charts</h2>",
+                    " Welcome to Waffle Charts</h2>",
 
                     "<p style='font-size: 15px; line-height: 1.6; margin: 15px 0; color: #495057;'>",
                     "Create professional waffle charts to visualize categorical distributions ",
                     "using colored squares in a grid format.</p>",
 
                     "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #343a40;'>",
-                    "🎯 Getting Started:</h3>",
+                    " Getting Started:</h3>",
                     "<ol style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: #495057;'>",
                     "<li><strong>Required:</strong> Select a <strong>Groups</strong> variable (categorical)</li>",
                     "<li><strong>Optional:</strong> Add <strong>Counts</strong> variable for weighted data</li>",
@@ -788,7 +788,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</ol>",
 
                     "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #343a40;'>",
-                    "💡 Clinical Examples:</h3>",
+                    " Clinical Examples:</h3>",
                     "<ul style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: #495057;'>",
                     "<li>Tumor grade distribution (G1/G2/G3)</li>",
                     "<li>Treatment response rates (Complete/Partial/None)</li>",
@@ -797,7 +797,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     "<p style='font-size: 14px; margin-top: 20px; padding: 10px; ",
                     "background: #e7f3ff; border-left: 3px solid #0066cc; color: #004085;'>",
-                    "<strong>💡 Tip:</strong> Each square represents ~1% of your sample, ",
+                    "<strong> Tip:</strong> Each square represents ~1% of your sample, ",
                     "making percentages immediately clear.</p>",
                     "</div>"
                 )
@@ -816,7 +816,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # Display validation error in todo and stop
                 error_msg <- glue::glue(
-                    "<br>❌ <b>Input Validation Error:</b><br>
+                    "<br> <b>Input Validation Error:</b><br>
                     <br>{e$message}<br>
                     <br>Please check your variable selections and try again.<br><hr>"
                 )
@@ -855,7 +855,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
             
-            todo <- glue::glue("<br>✅ Waffle chart created successfully. Enable 'Analysis Summary' or 'Show Explanations' in Output Options for detailed interpretations.<br><hr>")
+            todo <- glue::glue("<br> Waffle chart created successfully. Enable 'Analysis Summary' or 'Show Explanations' in Output Options for detailed interpretations.<br><hr>")
             self$results$todo$setContent(todo)
         },
 

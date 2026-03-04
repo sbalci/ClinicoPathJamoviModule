@@ -1,7 +1,6 @@
 
 test_that("classification educational features work", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     
     # Load test data
     data("BreastCancer", package = "ClinicoPath")

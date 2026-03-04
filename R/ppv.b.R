@@ -194,7 +194,7 @@ ppvClass <- R6::R6Class(
             # Build HTML content with enhanced formatting and methodology explanation
             content <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='margin-top: 0;'>📊 Results Summary</h4>",
+                "<h4 style='margin-top: 0;'> Results Summary</h4>",
                 "<p><b>Positive Predictive Value (PPV)</b>: ", ppv_percentage, "%</p>",
                 "<p style='margin-left: 20px; color: #666;'>",
                 "Out of ", round(totalPositives, 1), " claimed positive findings, ",
@@ -208,24 +208,24 @@ ppvClass <- R6::R6Class(
                 "</div>",
                 
                 "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='margin-top: 0;'>🎯 Research Interpretation</h4>",
+                "<h4 style='margin-top: 0;'> Research Interpretation</h4>",
                 "<p><strong>", interpretation, "</strong></p>",
                 if (ppv_percentage < 50) {
-                    paste0("<p style='color: #d73027; font-weight: bold;'>⚠️ Warning: ",
+                    paste0("<p style='color: #d73027; font-weight: bold;'> Warning: ",
                            "Under these conditions, most research claims are likely false. ",
                            "Consider improving study design, increasing sample sizes, or adjusting significance thresholds.</p>")
                 } else if (ppv_percentage < 75) {
-                    paste0("<p style='color: #fc8d59;'>⚠️ Caution: ",
+                    paste0("<p style='color: #fc8d59;'> Caution: ",
                            "A significant portion of findings may be false. ",
                            "Replication and validation studies are strongly recommended.</p>")
                 } else {
-                    paste0("<p style='color: #4575b4;'>✓ Good: ",
+                    paste0("<p style='color: #4575b4;'> Good: ",
                            "Most findings are likely reliable under these conditions.</p>")
                 },
                 "</div>",
                 
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='margin-top: 0;'>🔬 Methodology Notes</h4>",
+                "<h4 style='margin-top: 0;'> Methodology Notes</h4>",
                 "<p><strong>Confusion Matrix Context:</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
                 "<li><strong>True Positives:</strong> Correctly identified true relationships</li>",
@@ -239,7 +239,7 @@ ppvClass <- R6::R6Class(
                 "</div>",
                 
                 "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px;'>",
-                "<h4 style='margin-top: 0;'>📋 Study Parameters Used</h4>",
+                "<h4 style='margin-top: 0;'> Study Parameters Used</h4>",
                 "<ul style='margin: 5px 0;'>",
                 "<li><strong>Prior probability of true hypotheses:</strong> ", self$options$percTrue, "%</li>",
                 "<li><strong>Significance level (α):</strong> ", self$options$alpha, "</li>",

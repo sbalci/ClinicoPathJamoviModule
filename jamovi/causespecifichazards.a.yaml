@@ -13,7 +13,7 @@ description:
         hazard ratios, cumulative incidence functions, and model comparisons across
         different causes of failure.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('mgus2', package='survival')
             

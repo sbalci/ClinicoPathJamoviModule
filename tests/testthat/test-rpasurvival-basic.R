@@ -6,7 +6,6 @@
 # (Recursive Partitioning Analysis for Survival Data)
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(rpasurvival_test, package = "ClinicoPath")

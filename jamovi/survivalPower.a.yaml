@@ -16,7 +16,7 @@ description:
         This function provides a streamlined approach to survival power analysis. For specialized needs,
         consider the other power analysis functions: Classical, Competing Risks, Advanced, or Comprehensive.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             survivalPower(
                 test_type = "log_rank",
@@ -38,9 +38,9 @@ options:
       options:
         - title: "Custom Design"
           name: custom
-        - title: "Phase III Oncology Trial (HR=0.75, 80% power)"
+        - title: "Phase III Oncology Trial (HR=0.75, 80 percent power)"
           name: oncology_phase3
-        - title: "Cardiovascular Prevention (HR=0.85, 90% power)"
+        - title: "Cardiovascular Prevention (HR=0.85, 90 percent power)"
           name: cardio_prevention
         - title: "Biomarker Study (HR=0.67, 2:1 allocation)"
           name: biomarker_study

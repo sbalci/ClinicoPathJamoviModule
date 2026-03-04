@@ -90,6 +90,7 @@ Slide > ROI > Cell hierarchies, and prevents Type I errors from ignoring
 clustering effects.
 }
 \examples{
+\donttest{
 data('histopathology')
 
 hierarchicalpathology(data = histopathology,
@@ -97,5 +98,5 @@ hierarchicalpathology(data = histopathology,
                      level_3 = patient_id,
                      level_2 = slide_id,
                      level_1 = roi_id)
-
+}
 }

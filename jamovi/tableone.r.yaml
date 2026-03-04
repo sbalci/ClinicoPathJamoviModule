@@ -48,7 +48,7 @@ items:
 
 
   - name: reportSentence
-    title: "📋 Copy to Manuscript"
+    title: " Copy to Manuscript"
     type: Html
     visible: (showReportSentence)
     clearWith:

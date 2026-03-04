@@ -184,7 +184,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 # Display validation error in a user-friendly way
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                    "<h4>⚠️ Input Validation Error</h4>",
+                    "<h4> Input Validation Error</h4>",
                     "<p>", e$message, "</p>",
                     "<p><em>Please check your variable selections and data, then try again.</em></p>",
                     "</div>"
@@ -210,7 +210,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             if (nrow(self$data) == 0) {
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 5px;'>",
-                    "<h4>⚠️ Data Error</h4>",
+                    "<h4> Data Error</h4>",
                     "<p>The dataset contains no complete rows. Please check your data and try again.</p>",
                     "</div>"
                 )
@@ -557,7 +557,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             if (self$options$summary_format %in% c("summarytools_df", "summarytools_desc", "summarytools_freq")) {
                 warning_html <- paste0(
                     "<div style='color: orange; padding: 20px; background-color: #fff3cd; border-radius: 5px; margin: 10px 0;'>",
-                    "<h4>⚠️ Feature Temporarily Disabled</h4>",
+                    "<h4> Feature Temporarily Disabled</h4>",
                     "<p>summarytools functionality has been temporarily disabled to prevent resource limit issues in jamovi.</p>",
                     "<p>Please use 'standard' or 'sumvar' format instead for reliable analysis.</p>",
                     "</div><br>", results
@@ -766,7 +766,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
             html <- paste0(html, "</tbody></table>")
             html <- paste0(html, "<p style='font-size: 12px; color: #6c757d; margin-top: 15px;'>")
-            html <- paste0(html, "<em>📊 Enhanced Summary using pivottabler - Layout: ", layout_style, "</em></p>")
+            html <- paste0(html, "<em> Enhanced Summary using pivottabler - Layout: ", layout_style, "</em></p>")
             html <- paste0(html, "</div>")
 
             return(html)
@@ -775,7 +775,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
         .generate_export_info = function() {
             export_html <- paste0(
                 "<div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4 style='color: #155724; margin-top: 0;'>📄 Export Ready</h4>",
+                "<h4 style='color: #155724; margin-top: 0;'> Export Ready</h4>",
                 "<p style='margin: 5px 0;'>Your pivot summary is ready for export in multiple formats:</p>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Excel:</strong> Professional spreadsheet format</li>",
@@ -783,7 +783,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 "<li><strong>HTML:</strong> Web-ready presentation</li>",
                 "</ul>",
                 "<p style='font-size: 12px; color: #155724; margin-bottom: 0;'>",
-                "<em>💡 Export functionality available through pivottabler integration</em></p>",
+                "<em> Export functionality available through pivottabler integration</em></p>",
                 "</div>"
             )
 
@@ -899,7 +899,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
                     header_html <- paste0(
                         "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #1976d2; margin: 0;'>📊 summarytools: Dataset Summary (dfSummary)</h3>",
+                        "<h3 style='color: #1976d2; margin: 0;'> summarytools: Dataset Summary (dfSummary)</h3>",
                         "<p style='margin: 5px 0 0 0; color: #555;'>Comprehensive overview with embedded visualizations - Based on autoEDA research (R Journal 2019)</p>",
                         "</div>"
                     )
@@ -930,7 +930,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
                     header_html <- paste0(
                         "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #7b1fa2; margin: 0;'>📈 summarytools: Advanced Descriptive Statistics</h3>",
+                        "<h3 style='color: #7b1fa2; margin: 0;'> summarytools: Advanced Descriptive Statistics</h3>",
                         "<p style='margin: 5px 0 0 0; color: #555;'>Enhanced descriptives with skewness, kurtosis, and robust statistics</p>",
                         "</div>"
                     )
@@ -970,7 +970,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
                     header_html <- paste0(
                         "<div style='background-color: #ffebee; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #d32f2f; margin: 0;'>📋 summarytools: Frequency Analysis</h3>",
+                        "<h3 style='color: #d32f2f; margin: 0;'> summarytools: Frequency Analysis</h3>",
                         "<p style='margin: 5px 0 0 0; color: #555;'>Enhanced frequency tables with percentages and cumulative statistics</p>",
                         "</div>"
                     )

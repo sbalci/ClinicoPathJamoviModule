@@ -126,8 +126,8 @@ deterministic sensitivity analysis. These should be column names in the
 data.}
 
 \item{sensitivity_range_pct}{Percentage variation around base case for
-sensitivity analysis. For example, 20\\% means vary parameters from 80\\% to
-120\\% of base value.}
+sensitivity analysis. For example, 20 percent means vary parameters from 80
+percent to 120 percent of base value.}
 
 \item{probabilistic_sensitivity}{Monte Carlo simulation to propagate
 uncertainty in all parameters simultaneously. Generates cost-effectiveness
@@ -177,7 +177,7 @@ survival.}
 multi-year time horizons).}
 
 \item{discount_rate_costs}{Annual discount rate for future costs (typically
-3-5\\% in health economics).}
+3-5 percent in health economics).}
 
 \item{discount_effects}{Apply discounting to future health effects (QALYs,
 life-years).}
@@ -267,6 +267,7 @@ valuable for demonstrating value proposition of advanced diagnostics to
 hospital administrators, payers, and policy makers.
 }
 \examples{
+\donttest{
 result <- costeffectiveness(
     data = diagnostic_study,
     strategy = "test_strategy",
@@ -274,5 +275,5 @@ result <- costeffectiveness(
     effectiveness = "correct_diagnoses",
     comparator = "standard_care"
 )
-
+}
 }

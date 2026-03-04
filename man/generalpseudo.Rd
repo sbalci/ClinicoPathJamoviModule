@@ -123,7 +123,8 @@ functionals including survival probabilities, cumulative incidence
 functions, and restricted mean survival times.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 generalpseudo(
     elapsedtime = "time_to_event",
     outcome = "event_status",
@@ -132,5 +133,5 @@ generalpseudo(
     time_points = c(12, 24, 60),
     cause_specific = 1
 )
-
+}
 }

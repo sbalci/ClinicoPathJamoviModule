@@ -746,10 +746,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # Add a notice to the collection
             .addNotice = function(message, level = "warning") {
                 icon <- switch(level,
-                    "warning" = "⚠️",
-                    "info" = "ℹ️",
-                    "error" = "❌",
-                    "⚠️"
+                    "warning" = "",
+                    "info" = "",
+                    "error" = "",
+                    ""
                 )
                 notice_text <- paste0(icon, " ", message)
                 private$.notices <- c(private$.notices, notice_text)

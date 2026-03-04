@@ -17,7 +17,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
         .init = function() {
             if (is.null(self$data) || is.null(self$options$image_path_var) || is.null(self$options$target_var)) {
                 self$results$modelSummary$setContent(
-                    "<h3>🤖 Deep Learning Image Prediction</h3>
+                    "<h3> Deep Learning Image Prediction</h3>
                     <p><strong>Advanced AI for Histopathological Analysis</strong></p>
                     
                     <h4>Supported Architectures:</h4>
@@ -113,7 +113,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             if (length(missing_packages) > 0) {
                 error_msg <- paste(
                     "<div style='color: red; padding: 15px; border: 2px solid red; margin: 10px;'>",
-                    "<h4>❌ Missing Dependencies</h4>",
+                    "<h4> Missing Dependencies</h4>",
                     "<p>The following R packages are required for deep learning analysis:</p>",
                     "<ul>",
                     paste0("<li><code>", missing_packages, "</code></li>", collapse = ""),
@@ -143,7 +143,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             }, error = function(e) {
                 error_msg <- paste(
                     "<div style='color: orange; padding: 15px; border: 2px solid orange; margin: 10px;'>",
-                    "<h4>⚠️ PyTorch Installation Issue</h4>",
+                    "<h4> PyTorch Installation Issue</h4>",
                     "<p>PyTorch is installed but not functioning correctly.</p>",
                     "<p>Error: ", e$message, "</p>",
                     "<p>Please reinstall PyTorch with proper CUDA support if needed.</p>",
@@ -564,7 +564,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             })
             
             summary_content <- paste(
-                "<h3>🤖 Deep Learning Training Complete</h3>",
+                "<h3> Deep Learning Training Complete</h3>",
                 "<div style='background-color: #f0f8f0; padding: 15px; border-left: 5px solid #28a745; margin: 10px 0;'>",
                 "<h4>Training Summary</h4>",
                 "<ul>",

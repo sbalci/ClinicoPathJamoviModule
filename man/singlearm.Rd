@@ -164,10 +164,10 @@ datasets with multiple event levels. This is useful for competing risk
 analysis when there are multiple event types (e.g., death due to disease,
 death due to other causes).}
 
-\item{ci95}{Enable this option to display 95\\% confidence intervals on the
-survival plots. These intervals show the range of uncertainty around the
-estimated survival probabilities and are useful for assessing the precision
-of the estimates.}
+\item{ci95}{Enable this option to display 95 percent confidence intervals
+on the survival plots. These intervals show the range of uncertainty around
+the estimated survival probabilities and are useful for assessing the
+precision of the estimates.}
 
 \item{risktable}{Enable this option to display a table of risk estimates at
 each time point. This table shows the estimated survival probability,

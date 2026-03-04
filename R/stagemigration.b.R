@@ -496,7 +496,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Generate copy-ready paragraphs
             copy_ready_html <- paste0(
                 '<div style="background: #f8f9fa; border-left: 5px solid #007bff; padding: 20px; margin: 20px 0; border-radius: 0 10px 10px 0;">',
-                '<h3 style="color: #007bff; margin-top: 0;">📄 ', t$title, '</h3>',
+                '<h3 style="color: #007bff; margin-top: 0;"> ', t$title, '</h3>',
                 
                 '<div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">',
                 '<h4 style="color: #28a745; margin-top: 0;">', t$methods_header, '</h4>',
@@ -543,7 +543,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 '<div style="text-align: center; margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 5px;">',
                 '<small style="color: #666;">',
-                '📋 <strong>Usage Note:</strong> This summary can be copied directly into clinical reports or adapted for manuscript preparation. ',
+                ' <strong>Usage Note:</strong> This summary can be copied directly into clinical reports or adapted for manuscript preparation. ',
                 'Statistical details and complete methodology are available in the detailed analysis results above.',
                 '</small>',
                 '</div>',
@@ -3165,11 +3165,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Generate comprehensive welcome message
             welcome_html <- "
             <div style='background-color: #e3f2fd; padding: 25px; border-radius: 10px; margin: 20px 0;'>
-            <h2 style='color: #1976d2; margin-top: 0; text-align: center;'>🏥 Advanced TNM Stage Migration Analysis</h2>
+            <h2 style='color: #1976d2; margin-top: 0; text-align: center;'> Advanced TNM Stage Migration Analysis</h2>
             <p style='text-align: center; font-size: 16px; margin-bottom: 25px;'><strong>State-of-the-Art Staging System Validation for Pathologists</strong></p>
 
             <div style='background-color: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
-            <h3 style='color: #1976d2; margin-top: 0;'>📋 Quick Start Guide</h3>
+            <h3 style='color: #1976d2; margin-top: 0;'> Quick Start Guide</h3>
             <ol style='line-height: 1.8;'>
             <li><strong>Select Core Variables:</strong>
                 <ul>
@@ -3186,7 +3186,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
 
             <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
-            <h3 style='color: #1976d2; margin-top: 0;'>🔬 Advanced Statistical Methods</h3>
+            <h3 style='color: #1976d2; margin-top: 0;'> Advanced Statistical Methods</h3>
             <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>
                 <div>
                 <h4 style='color: #495057;'>Discrimination Metrics</h4>
@@ -3210,7 +3210,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
 
             <div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
-            <h3 style='color: #856404; margin-top: 0;'>🎯 Clinical Applications</h3>
+            <h3 style='color: #856404; margin-top: 0;'> Clinical Applications</h3>
             <ul style='line-height: 1.8;'>
             <li><strong>TNM Edition Transitions:</strong> Validate 7th to 8th edition changes</li>
             <li><strong>AJCC Updates:</strong> Assess new staging criteria</li>
@@ -3221,7 +3221,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
 
             <div style='background-color: #d1ecf1; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
-            <h3 style='color: #0c5460; margin-top: 0;'>📊 Comprehensive Output</h3>
+            <h3 style='color: #0c5460; margin-top: 0;'> Comprehensive Output</h3>
             <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>
                 <div>
                 <h4 style='color: #0c5460;'>Statistical Results</h4>
@@ -3245,7 +3245,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
 
             <div style='background-color: #d4edda; padding: 20px; border-radius: 8px;'>
-            <h3 style='color: #155724; margin-top: 0;'>🚀 Getting Started</h3>
+            <h3 style='color: #155724; margin-top: 0;'> Getting Started</h3>
             <p style='margin-bottom: 15px;'><strong>For optimal results:</strong></p>
             <ul style='line-height: 1.8; margin-bottom: 15px;'>
             <li><strong>Sample Size:</strong> Minimum 200 patients recommended for robust validation</li>
@@ -3539,7 +3539,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             <li><strong>Interpretation:</strong> Clinical significance assessment based on IDI magnitude</li>
                         </ul>
                         <div style="background-color: #ffebee; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <p style="margin: 0; color: #c62828;"><strong>⚠️ Important:</strong> To obtain 95% confidence intervals and p-values for IDI, you must enable <strong>"Bootstrap Validation"</strong> in the Advanced Options section. Without bootstrap, only the point estimate of IDI will be calculated.</p>
+                            <p style="margin: 0; color: #c62828;"><strong> Important:</strong> To obtain 95% confidence intervals and p-values for IDI, you must enable <strong>"Bootstrap Validation"</strong> in the Advanced Options section. Without bootstrap, only the point estimate of IDI will be calculated.</p>
                         </div>
                         <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
                         <ul style="margin-left: 20px;">
@@ -3583,7 +3583,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             <li><strong>Model Lines:</strong> Net benefit curves for original and new staging systems</li>
                         </ul>
                         <div style="background-color: #f3f8ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <p style="margin: 0; color: #1565c0;"><strong>📊 Clinical Interpretation:</strong></p>
+                            <p style="margin: 0; color: #1565c0;"><strong> Clinical Interpretation:</strong></p>
                             <ul style="margin: 5px 0 0 20px; color: #1565c0;">
                                 <li><strong>Higher curve = better net benefit</strong> at that threshold</li>
                                 <li><strong>Threshold range:</strong> Where staging system outperforms treat-all/treat-none strategies</li>
@@ -3624,7 +3624,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             <li><strong>Royston & Sauerbrei R²:</strong> Measures explained variation in survival times, accounts for censoring patterns</li>
                         </ul>
                         <div style="background-color: #f0f8f0; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <p style="margin: 0; color: #2e7d32;"><strong>📈 Clinical Interpretation:</strong></p>
+                            <p style="margin: 0; color: #2e7d32;"><strong> Clinical Interpretation:</strong></p>
                             <ul style="margin: 5px 0 0 20px; color: #2e7d32;">
                                 <li><strong>Nagelkerke R² >0.3:</strong> Acceptable explanatory power</li>
                                 <li><strong>McFadden R² >0.2:</strong> Good model fit</li>
@@ -10760,7 +10760,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Add optimal cut-point indicators if available
             if (!is.null(time_data$optimal_cutpoints)) {
                 p <- p + ggplot2::annotate("text", x = 0.765, y = 0.10,
-                            label = "● Optimal cut-points shown",
+                            label = " Optimal cut-points shown",
                             color = "gray50", size = 3, hjust = 0.5)
             }
 
@@ -19044,10 +19044,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     confidence <- "High"
                     conclusion <- "The staging system change represents genuine improvement"
                     guidance <- c(
-                        "✅ Implement staging change with confidence",
-                        "📊 Document methodology for future reference",
-                        "🔍 Monitor outcomes in clinical practice",
-                        "📝 Prepare manuscript for peer review publication"
+                        " Implement staging change with confidence",
+                        " Document methodology for future reference",
+                        " Monitor outcomes in clinical practice",
+                        " Prepare manuscript for peer review publication"
                     )
                 } else if (pass_count + borderline_count >= 2 && fail_count == 0) {
                     final_recommendation <- "CONDITIONAL STAGING IMPROVEMENT"
@@ -19055,10 +19055,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     confidence <- "Moderate"
                     conclusion <- "Mixed evidence for staging legitimacy"
                     guidance <- c(
-                        "⚠️ Conditional implementation with additional safeguards",
-                        "🔬 Perform external validation in independent cohort",
-                        "📊 Conduct additional multivariate analysis",
-                        "👥 Seek expert review before widespread adoption"
+                        " Conditional implementation with additional safeguards",
+                        " Perform external validation in independent cohort",
+                        " Conduct additional multivariate analysis",
+                        " Seek expert review before widespread adoption"
                     )
                 } else {
                     final_recommendation <- "POTENTIAL WILL ROGERS PHENOMENON"
@@ -19066,10 +19066,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     confidence <- "Low"
                     conclusion <- "Insufficient evidence for legitimate improvement"
                     guidance <- c(
-                        "❌ Do not implement staging change at this time",
-                        "🔬 Require additional research addressing identified concerns",
-                        "📊 Perform power analysis for adequate sample size",
-                        "🏥 Consider multi-institutional validation study"
+                        " Do not implement staging change at this time",
+                        " Require additional research addressing identified concerns",
+                        " Perform power analysis for adequate sample size",
+                        " Consider multi-institutional validation study"
                     )
                 }
 
@@ -19094,7 +19094,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     recommendation_level = "None",
                     confidence = "None",
                     conclusion = paste("Recommendation generation failed:", e$message),
-                    guidance = c("🔧 Check data quality and analysis parameters"),
+                    guidance = c(" Check data quality and analysis parameters"),
                     evidence_counts = list(pass = 0, borderline = 0, concern = 0, fail = 0, total = 0)
                 ))
             })
@@ -22994,7 +22994,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Basic validation
                 if (nrow(data) < 50) {
                     self$results$mydataview2$setContent(paste(
-                        "⚠️ Warning: Sample size (", nrow(data), ") may be insufficient for reliable multi-state analysis.",
+                        " Warning: Sample size (", nrow(data), ") may be insufficient for reliable multi-state analysis.",
                         "Consider n ≥ 50 for stable results."
                     ))
                     return(NULL)
@@ -23583,7 +23583,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Basic validation
                 if (nrow(data) < 50) {
                     self$results$mydataview2$setContent(paste(
-                        "⚠️ Warning: Sample size (", nrow(data), ") may be insufficient for reliable competing risks analysis.",
+                        " Warning: Sample size (", nrow(data), ") may be insufficient for reliable competing risks analysis.",
                         "Consider n ≥ 50 for stable results."
                     ))
                     return(NULL)
@@ -24171,7 +24171,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Basic validation
                 if (nrow(data) < 100) {
                     self$results$mydataview2$setContent(paste(
-                        "⚠️ Warning: Sample size (", nrow(data), ") may be insufficient for reliable Random Forest analysis.",
+                        " Warning: Sample size (", nrow(data), ") may be insufficient for reliable Random Forest analysis.",
                         "Consider n ≥ 100 for stable variable importance estimates."
                     ))
                     return(NULL)
@@ -24183,7 +24183,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Load required packages
                 if (!requireNamespace("randomForestSRC", quietly = TRUE)) {
                     self$results$mydataview2$setContent(
-                        "⚠️ randomForestSRC package not available. Please install: install.packages('randomForestSRC')"
+                        " randomForestSRC package not available. Please install: install.packages('randomForestSRC')"
                     )
                     return(NULL)
                 }
@@ -24236,7 +24236,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             }, error = function(e) {
                 self$results$mydataview2$setContent(paste(
-                    "❌ Random Forest Analysis Error:", e$message,
+                    " Random Forest Analysis Error:", e$message,
                     "\nThis may indicate insufficient data or missing required packages."
                 ))
                 return(NULL)
@@ -24600,7 +24600,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Basic validation
                 if (nrow(data) < 100) {
                     self$results$mydataview2$setContent(paste(
-                        "⚠️ Warning: Sample size (", nrow(data), ") may be insufficient for reliable cure model analysis.",
+                        " Warning: Sample size (", nrow(data), ") may be insufficient for reliable cure model analysis.",
                         "Consider n ≥ 100 for stable cure fraction estimates."
                     ))
                     return(NULL)
@@ -24609,7 +24609,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Load required packages
                 if (!requireNamespace("flexsurv", quietly = TRUE)) {
                     self$results$mydataview2$setContent(
-                        "⚠️ flexsurv package not available. Please install: install.packages('flexsurv')"
+                        " flexsurv package not available. Please install: install.packages('flexsurv')"
                     )
                     return(NULL)
                 }
@@ -24677,7 +24677,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             }, error = function(e) {
                 self$results$mydataview2$setContent(paste(
-                    "❌ Cure Model Analysis Error:", e$message,
+                    " Cure Model Analysis Error:", e$message,
                     "\nThis may indicate insufficient long-term follow-up or missing required packages."
                 ))
                 return(NULL)

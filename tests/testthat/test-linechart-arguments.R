@@ -3,13 +3,11 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(linechart_simple)
 data(linechart_grouped)
 data(linechart_clinical)
 
 test_that("linechart respects all feature combinations", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     confidence = c(TRUE, FALSE),
@@ -35,7 +33,6 @@ test_that("linechart respects all feature combinations", {
 })
 
 test_that("linechart handles all color palette options", {
-  devtools::load_all()
 
   palettes <- c("default", "colorblind", "viridis", "clinical")
 
@@ -54,7 +51,6 @@ test_that("linechart handles all color palette options", {
 })
 
 test_that("linechart handles all theme options", {
-  devtools::load_all()
 
   themes <- c("default", "minimal", "classic", "publication")
 
@@ -73,7 +69,6 @@ test_that("linechart handles all theme options", {
 })
 
 test_that("linechart handles theme and palette combinations", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     theme = c("default", "minimal", "publication"),
@@ -98,7 +93,6 @@ test_that("linechart handles theme and palette combinations", {
 })
 
 test_that("linechart handles confidence intervals with different options", {
-  devtools::load_all()
 
   # CI without grouping
   result1 <- linechart(
@@ -132,7 +126,6 @@ test_that("linechart handles confidence intervals with different options", {
 })
 
 test_that("linechart handles trend line with different options", {
-  devtools::load_all()
 
   # Trend without grouping
   result1 <- linechart(
@@ -165,7 +158,6 @@ test_that("linechart handles trend line with different options", {
 })
 
 test_that("linechart handles smoothing with different options", {
-  devtools::load_all()
 
   # Smoothing without grouping
   result1 <- linechart(
@@ -208,7 +200,6 @@ test_that("linechart handles smoothing with different options", {
 })
 
 test_that("linechart handles reference line with different parameters", {
-  devtools::load_all()
 
   # Reference line alone
   result1 <- linechart(
@@ -242,7 +233,6 @@ test_that("linechart handles reference line with different parameters", {
 })
 
 test_that("linechart handles custom labels with different combinations", {
-  devtools::load_all()
 
   # Title only
   result1 <- linechart(
@@ -276,7 +266,6 @@ test_that("linechart handles custom labels with different combinations", {
 })
 
 test_that("linechart handles plot dimension parameters", {
-  devtools::load_all()
 
   dimensions <- list(
     list(width = 400, height = 400),
@@ -300,7 +289,6 @@ test_that("linechart handles plot dimension parameters", {
 })
 
 test_that("linechart handles comprehensive argument combinations", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_clinical,
@@ -325,7 +313,6 @@ test_that("linechart handles comprehensive argument combinations", {
 })
 
 test_that("linechart handles minimal configuration", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_simple,
@@ -340,7 +327,6 @@ test_that("linechart handles minimal configuration", {
 })
 
 test_that("linechart handles maximal configuration", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_grouped,
@@ -364,7 +350,6 @@ test_that("linechart handles maximal configuration", {
 })
 
 test_that("linechart handles different group counts with same parameters", {
-  devtools::load_all()
 
   # Two groups
   result2 <- linechart(
@@ -401,7 +386,6 @@ test_that("linechart handles different group counts with same parameters", {
 })
 
 test_that("linechart handles factor vs character grouping variables", {
-  devtools::load_all()
 
   # Factor group variable
   test_data_factor <- linechart_grouped
@@ -429,7 +413,6 @@ test_that("linechart handles factor vs character grouping variables", {
 })
 
 test_that("linechart handles publication-ready configuration", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_multiple,
@@ -454,7 +437,6 @@ test_that("linechart handles publication-ready configuration", {
 })
 
 test_that("linechart handles all features for short time series", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_short,
@@ -474,7 +456,6 @@ test_that("linechart handles all features for short time series", {
 })
 
 test_that("linechart handles all features for long time series", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_long,
@@ -492,7 +473,6 @@ test_that("linechart handles all features for long time series", {
 })
 
 test_that("linechart handles irregular intervals with all options", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_irregular,
@@ -511,7 +491,6 @@ test_that("linechart handles irregular intervals with all options", {
 })
 
 test_that("linechart handles different patterns with consistent settings", {
-  devtools::load_all()
 
   result <- linechart(
     data = linechart_patterns,
@@ -531,7 +510,6 @@ test_that("linechart handles different patterns with consistent settings", {
 })
 
 test_that("linechart handles all palettes with grouped data", {
-  devtools::load_all()
 
   palettes <- c("default", "colorblind", "viridis", "clinical")
 
@@ -551,7 +529,6 @@ test_that("linechart handles all palettes with grouped data", {
 })
 
 test_that("linechart handles all themes with grouped data", {
-  devtools::load_all()
 
   themes <- c("default", "minimal", "classic", "publication")
 

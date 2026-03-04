@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("jjarcdiagram function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("jjarcdiagram"))
 })
 
 test_that("jjarcdiagram runs with minimal required arguments", {
-  devtools::load_all()
 
   data(jjarcdiagram_test, package = "ClinicoPath")
 
@@ -26,7 +24,6 @@ test_that("jjarcdiagram runs with minimal required arguments", {
 })
 
 test_that("jjarcdiagram produces expected output structure", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -45,7 +42,6 @@ test_that("jjarcdiagram produces expected output structure", {
 })
 
 test_that("jjarcdiagram handles gene regulatory network", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -61,7 +57,6 @@ test_that("jjarcdiagram handles gene regulatory network", {
 })
 
 test_that("jjarcdiagram handles patient similarity network", {
-  devtools::load_all()
 
   data(jjarcdiagram_patient_network)
 
@@ -77,7 +72,6 @@ test_that("jjarcdiagram handles patient similarity network", {
 })
 
 test_that("jjarcdiagram handles disease comorbidity network", {
-  devtools::load_all()
 
   data(jjarcdiagram_disease_network)
 
@@ -93,7 +87,6 @@ test_that("jjarcdiagram handles disease comorbidity network", {
 })
 
 test_that("jjarcdiagram handles unweighted networks", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -108,7 +101,6 @@ test_that("jjarcdiagram handles unweighted networks", {
 })
 
 test_that("jjarcdiagram handles weighted networks", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -124,7 +116,6 @@ test_that("jjarcdiagram handles weighted networks", {
 })
 
 test_that("jjarcdiagram handles grouped networks", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -141,7 +132,6 @@ test_that("jjarcdiagram handles grouped networks", {
 })
 
 test_that("jjarcdiagram handles directed networks", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -156,7 +146,6 @@ test_that("jjarcdiagram handles directed networks", {
 })
 
 test_that("jjarcdiagram handles undirected networks", {
-  devtools::load_all()
 
   data(jjarcdiagram_patient_network)
 
@@ -171,7 +160,6 @@ test_that("jjarcdiagram handles undirected networks", {
 })
 
 test_that("jjarcdiagram handles node display options", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -195,7 +183,6 @@ test_that("jjarcdiagram handles node display options", {
 })
 
 test_that("jjarcdiagram handles node sizing options", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -222,7 +209,6 @@ test_that("jjarcdiagram handles node sizing options", {
 })
 
 test_that("jjarcdiagram handles node sorting options", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -243,7 +229,6 @@ test_that("jjarcdiagram handles node sorting options", {
 })
 
 test_that("jjarcdiagram handles layout orientation", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -267,7 +252,6 @@ test_that("jjarcdiagram handles layout orientation", {
 })
 
 test_that("jjarcdiagram handles arc width options", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -293,7 +277,6 @@ test_that("jjarcdiagram handles arc width options", {
 })
 
 test_that("jjarcdiagram handles custom labels and titles", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -309,7 +292,6 @@ test_that("jjarcdiagram handles custom labels and titles", {
 })
 
 test_that("jjarcdiagram handles statistics display", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 

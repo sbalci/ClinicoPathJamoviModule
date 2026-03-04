@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jwaffle_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jwaffle_quality, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles colorblind palette + 10 rows", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -33,7 +31,6 @@ test_that("jwaffle handles colorblind palette + 10 rows", {
 })
 
 test_that("jwaffle handles professional palette + 3 rows", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -46,7 +43,6 @@ test_that("jwaffle handles professional palette + 3 rows", {
 })
 
 test_that("jwaffle handles journal palette + 5 rows", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -63,7 +59,6 @@ test_that("jwaffle handles journal palette + 5 rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles presentation palette + flipped", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -76,7 +71,6 @@ test_that("jwaffle handles presentation palette + flipped", {
 })
 
 test_that("jwaffle handles pastel palette + flipped", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -93,7 +87,6 @@ test_that("jwaffle handles pastel palette + flipped", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles legend + custom title", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -106,7 +99,6 @@ test_that("jwaffle handles legend + custom title", {
 })
 
 test_that("jwaffle handles legend + custom titles", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -124,7 +116,6 @@ test_that("jwaffle handles legend + custom titles", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles faceting + colorblind palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -137,7 +128,6 @@ test_that("jwaffle handles faceting + colorblind palette", {
 })
 
 test_that("jwaffle handles faceting + professional palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -150,7 +140,6 @@ test_that("jwaffle handles faceting + professional palette", {
 })
 
 test_that("jwaffle handles faceting + journal palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -167,7 +156,6 @@ test_that("jwaffle handles faceting + journal palette", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles faceting + 3 rows", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -180,7 +168,6 @@ test_that("jwaffle handles faceting + 3 rows", {
 })
 
 test_that("jwaffle handles faceting + 10 rows", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -197,7 +184,6 @@ test_that("jwaffle handles faceting + 10 rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles summaries without explanations", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -210,7 +196,6 @@ test_that("jwaffle handles summaries without explanations", {
 })
 
 test_that("jwaffle handles explanations without summaries", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -223,7 +208,6 @@ test_that("jwaffle handles explanations without summaries", {
 })
 
 test_that("jwaffle handles both summaries and explanations", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -240,7 +224,6 @@ test_that("jwaffle handles both summaries and explanations", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete treatment response analysis", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -264,7 +247,6 @@ test_that("jwaffle handles complete treatment response analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete demographics analysis", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -285,7 +267,6 @@ test_that("jwaffle handles complete demographics analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete pathology analysis", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -308,7 +289,6 @@ test_that("jwaffle handles complete pathology analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete disease subtype analysis", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -329,7 +309,6 @@ test_that("jwaffle handles complete disease subtype analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete quality metrics analysis", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -352,7 +331,6 @@ test_that("jwaffle handles complete quality metrics analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles minimal configuration", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -363,7 +341,6 @@ test_that("jwaffle handles minimal configuration", {
 })
 
 test_that("jwaffle handles maximum configuration", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -388,7 +365,6 @@ test_that("jwaffle handles maximum configuration", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles progressive feature addition", {
-  devtools::load_all()
 
   # Step 1: Basic waffle
   result1 <- jwaffle(
@@ -453,7 +429,6 @@ test_that("jwaffle handles progressive feature addition", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle produces consistent results across all palettes", {
-  devtools::load_all()
 
   palettes <- c("default", "colorblind", "professional", "presentation",
                 "journal", "pastel", "dark")
@@ -478,7 +453,6 @@ test_that("jwaffle produces consistent results across all palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles ethnicity with multiple levels", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -498,7 +472,6 @@ test_that("jwaffle handles ethnicity with multiple levels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles molecular subtypes", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -519,7 +492,6 @@ test_that("jwaffle handles molecular subtypes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles margin status with 3 categories", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -539,7 +511,6 @@ test_that("jwaffle handles margin status with 3 categories", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles smoking status", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -559,7 +530,6 @@ test_that("jwaffle handles smoking status", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles risk categories", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -579,7 +549,6 @@ test_that("jwaffle handles risk categories", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles compliance levels with 4 categories", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,

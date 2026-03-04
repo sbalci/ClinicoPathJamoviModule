@@ -13,7 +13,7 @@ description:
         diagnostic decision-making and clinical assessment optimization.
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('clinicaldata', package='ClinicoPath')
             
@@ -152,7 +152,7 @@ options:
           R: Confidence level for reference range calculations and interpretations
 
     - name: delta_threshold
-      title: Delta Check Threshold (%)
+      title: Delta Check Threshold ( percent)
       type: Number
       min: 10
       max: 200

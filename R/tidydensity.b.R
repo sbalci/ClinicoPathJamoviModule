@@ -26,7 +26,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
                 
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #1976d2; margin-top: 0;'>📊 Welcome to Statistical Distribution Generator!</h3>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Statistical Distribution Generator!</h3>
                 <p><strong>Comprehensive distribution analysis using TidyDensity package</strong></p>
                 <p>Generate random data from various statistical distributions with advanced visualization and analysis</p>
                 
@@ -71,7 +71,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
                 </ul>
                 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Professional statistical distribution analysis for clinical research and education</em>
+                 <em>Professional statistical distribution analysis for clinical research and education</em>
                 </p>
                 </div>"
                 
@@ -293,7 +293,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
                 # Convert to HTML table
                 stats_html <- paste0(
                     "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px;'>",
-                    "<h3 style='color: #495057; margin-top: 0;'>📈 Distribution Statistics</h3>",
+                    "<h3 style='color: #495057; margin-top: 0;'> Distribution Statistics</h3>",
                     "<p><strong>Distribution:</strong> ", stringr::str_to_title(self$options$distribution_type), "</p>",
                     "<p><strong>Sample Size:</strong> ", self$options$n_observations, "</p>",
                     "<p><strong>Simulations:</strong> ", self$options$n_simulations, "</p>",
@@ -353,7 +353,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
                 
                 summary_html <- paste0(
                     "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                    "<h3 style='color: #2e7d32; margin-top: 0;'>📋 Summary Statistics Table</h3>",
+                    "<h3 style='color: #2e7d32; margin-top: 0;'> Summary Statistics Table</h3>",
                     
                     "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
                     "<thead><tr style='background-color: #388e3c; color: white;'>",
@@ -532,7 +532,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
             
             html_content <- paste0(
                 "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #ef6c00; margin-top: 0;'>📚 ", param_info$title, "</h3>",
+                "<h3 style='color: #ef6c00; margin-top: 0;'> ", param_info$title, "</h3>",
                 "<p><strong>Description:</strong> ", param_info$description, "</p>",
                 
                 "<h4 style='color: #ef6c00;'>Current Parameters:</h4>",
@@ -559,7 +559,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
             
             interpretation_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📖 Statistical Distribution Guide</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> Statistical Distribution Guide</h3>",
                 
                 "<h4 style='color: #7b1fa2;'>Understanding Plot Types:</h4>",
                 "<ul>",
@@ -604,7 +604,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
                 "</ul>",
                 
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
-                "<em>📊 Professional statistical distribution analysis powered by TidyDensity</em>",
+                "<em> Professional statistical distribution analysis powered by TidyDensity</em>",
                 "</p></div>"
             )
             

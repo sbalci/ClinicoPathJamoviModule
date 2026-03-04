@@ -14,7 +14,7 @@ description:
         Provides agreement statistics, visualization, and clinical interpretation
         for categorical rating data.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Load example data
             data('pathology_ratings', package = 'ClinicoPath')
@@ -156,7 +156,7 @@ options:
       default: true
       description:
           R: >
-            Calculate 95% confidence intervals for Fleiss' kappa using asymptotic standard errors.
+            Calculate 95 percent confidence intervals for Fleiss' kappa using asymptotic standard errors.
 
     - name: kripp
       title: "Krippendorff's Alpha"
@@ -195,7 +195,7 @@ options:
       title: Consensus Method
       type: List
       options:
-        - title: Majority Rule (≥50%)
+        - title: Majority Rule (≥50 percent)
           name: majority
         - title: Super Majority (≥2/3)
           name: super_majority
@@ -571,7 +571,7 @@ options:
       description:
           R: >
             Minimum disagreement proportion for flagging discordant cases.
-            0.5 means at least 50% of raters disagreed with majority diagnosis.
+            0.5 means at least 50 percent of raters disagreed with majority diagnosis.
 
     # Rater Characteristics (optional)
     - name: raterExperience

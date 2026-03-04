@@ -51,6 +51,6 @@ understand the clinical contexts and analytical capabilities of each dataset.
 }
 }
 \seealso{
-\code{\link{tree_datasets}}, \code{\link{tree}}
+\code{\link{tree_datasets}}
 }
 \keyword{datasets}

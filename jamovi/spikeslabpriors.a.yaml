@@ -14,7 +14,7 @@ description:
         survival analysis with automatic variable selection, model averaging, and
         uncertainty quantification for clinical biomarker discovery.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Spike-and-slab variable selection
             spikeslabpriors(

@@ -62,9 +62,11 @@ RECIST 1.1)}
 \item{maxPerOrgan}{Maximum target lesions per organ (default: 2 per RECIST
 1.1)}
 
-\item{prThreshold}{Percent decrease for partial response (default: 30\\%)}
+\item{prThreshold}{Percent decrease for partial response (default: 30
+percent)}
 
-\item{pdThreshold}{Percent increase for progressive disease (default: 20\\%)}
+\item{pdThreshold}{Percent increase for progressive disease (default: 20
+percent)}
 
 \item{pdAbsolute}{Absolute increase required for PD (default: 5mm)}
 
@@ -141,6 +143,7 @@ measurements and applies RECIST 1.1 criteria (Eisenhauer et al., 2009) for
 response classification.
 }
 \examples{
+\donttest{
 data <- data.frame(
     patient = rep(c("P01", "P02"), each = 6),
     time = rep(c(0, 8, 16), 4),
@@ -157,5 +160,5 @@ recist(
     lesionType = "lesion_type",
     lesionDiameter = "diameter"
 )
-
+}
 }

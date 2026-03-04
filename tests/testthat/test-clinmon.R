@@ -1,6 +1,5 @@
 test_that("clinmon works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     
     # Skip if clintools is not available
     skip_if_not_installed("clintools")

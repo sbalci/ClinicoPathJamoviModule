@@ -954,6 +954,7 @@ advancedtrialsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinical_trial')
 #'
 #' advancedtrials(
@@ -965,7 +966,7 @@ advancedtrialsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     alpha_spending = "obrien_fleming",
 #'     number_of_looks = 3
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time_var Time to primary endpoint (survival, progression, response)
 #' @param event_var Event indicator (1=event, 0=censored)

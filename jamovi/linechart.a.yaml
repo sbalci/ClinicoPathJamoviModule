@@ -4,13 +4,13 @@ title: Line Chart
 menuGroup: JJStatsPlot
 menuSubgroup: Lines
 menuSubtitle: 'Time Series and Trend Analysis'
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
     main: Creates line charts for time series analysis and trend visualization, with support for multiple groups, confidence intervals, and statistical overlays.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic line chart
             linechart(

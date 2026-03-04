@@ -3,11 +3,9 @@
 
 context("test-tableone-integration")
 
-devtools::load_all()
 
 test_that("NA handling reports original missingness when excl=TRUE", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("tableone")
 

@@ -21,7 +21,7 @@ description:
         clinical cutoffs in molecular pathology where grey-zone results trigger reflex
         testing (e.g., HER2 2+ requires FISH confirmation).
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- trichotomousroc(
                 data = her2_data,

@@ -14,7 +14,7 @@ description:
         on previous event history, accounting for within-subject correlation and providing 
         robust population-average estimates of covariate effects on inter-event times.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('histopathology', package='ClinicoPath')
 

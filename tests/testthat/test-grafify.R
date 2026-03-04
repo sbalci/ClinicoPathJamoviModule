@@ -11,7 +11,6 @@ test_that("grafify module files exist", {
 test_that("grafify class and function availability", {
     
     # Load the package functions quietly
-    suppressMessages(suppressWarnings(devtools::load_all()))
     
     # Test that grafify class exists after loading
     expect_true(exists("grafifyClass"))
@@ -157,7 +156,6 @@ test_that("grafify has proper dependency management", {
 test_that("grafify basic instantiation works", {
     
     # Load package quietly
-    suppressMessages(suppressWarnings(devtools::load_all()))
     
     if (exists("grafify")) {
         # Create minimal test data

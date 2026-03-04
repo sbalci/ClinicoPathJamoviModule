@@ -1468,6 +1468,7 @@ qualityoflifeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('qol_data')
 #'
 #' qualityoflife(
@@ -1479,7 +1480,7 @@ qualityoflifeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     patient_id = "patient_id",
 #'     instrument_type = "sf36"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param physical_function_items Items measuring physical functioning domain
 #' @param role_physical_items Items measuring role limitations due to physical
@@ -1503,7 +1504,7 @@ qualityoflifeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param scoring_algorithm Scoring algorithm for QoL domains
 #' @param reference_population Reference population for norm-based scoring
 #' @param missing_domain_threshold Maximum missing proportion for domain
-#'   scoring (50\% = 0.5)
+#'   scoring (50 percent = 0.5)
 #' @param imputation_method Method for handling missing QoL data
 #' @param quality_control Perform QoL data quality control checks
 #' @param response_pattern_analysis Analyze response patterns and validity

@@ -3,7 +3,6 @@ context("Medical Decision Analysis - Misclassified Cases")
 
 test_that("decision function handles misclassified cases correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   data("histopathology", package = "ClinicoPath")
 
   # We need to simulate the environment where saveClassifications is set
@@ -13,7 +12,7 @@ test_that("decision function handles misclassified cases correctly", {
   
   # Let's try to construct the R6 object manually to test the logic.
   # This requires accessing non-exported objects, so we need access to the package namespace.
-  # devtools::load_all() makes them available.
+  # library(ClinicoPath) makes them available.
   
   # Setup options
   options <- decisionOptions$new(

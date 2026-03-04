@@ -28,14 +28,14 @@ for (f in files) {
   lines_modified <- FALSE
   new_content <- content
   
-  # 1. Inject devtools::load_all() if missing
+  # 1. Inject library(ClinicoPath) if missing
   if (!str_detect(content_str, "devtools::load_all")) {
      # Find first test_that
      first_test_idx <- which(str_detect(new_content, "test_that"))[1]
      if (!is.na(first_test_idx)) {
        # Insert after opening brace if possible, or usually just after the line
        new_content <- append(new_content, "  skip_if_not_installed('jmvReadWrite')", after = first_test_idx)
-       new_content <- append(new_content, "  devtools::load_all()", after = first_test_idx + 1)
+       new_content <- append(new_content, "  # library loaded by devtools::test()", after = first_test_idx + 1)
        lines_modified <- TRUE
      }
   }

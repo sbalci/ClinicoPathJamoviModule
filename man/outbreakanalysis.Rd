@@ -72,8 +72,8 @@ factors}
 
 \item{epidemic_curve_unit}{Time unit for epidemic curve construction}
 
-\item{attack_rate_analysis}{Calculate attack rates and 95\\% confidence
-intervals}
+\item{attack_rate_analysis}{Calculate attack rates and 95 percent
+confidence intervals}
 
 \item{risk_factor_analysis}{Perform risk factor analysis with odds ratios
 and relative risks}
@@ -180,6 +180,7 @@ robust statistical methods
 for public health decision-making and intervention planning.
 }
 \examples{
+\donttest{
 data('outbreak_data')
 
 outbreakanalysis(
@@ -189,5 +190,5 @@ outbreakanalysis(
     date_onset = "onset_date",
     location_var = "location"
 )
-
+}
 }

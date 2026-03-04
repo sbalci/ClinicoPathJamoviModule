@@ -99,7 +99,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             if (length(warnings) > 0) {
                 warning_html <- paste0(
                     "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>⚠️ Clinical Considerations:</h4>",
+                    "<h4 style='color: #856404; margin-top: 0;'> Clinical Considerations:</h4>",
                     "<ul>",
                     paste0("<li>", warnings, "</li>", collapse = ""),
                     "</ul></div>"
@@ -421,7 +421,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             # Clinical summary with plain language
             clinical_html <- sprintf(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 15px;'>
-                <h4 style='margin-top: 0; color: #007bff;'>🔬 Clinical Interpretation</h4>
+                <h4 style='margin-top: 0; color: #007bff;'> Clinical Interpretation</h4>
                 <p><strong>Key Finding:</strong> Analysis of %d patient samples identified <strong>%d distinct IHC expression patterns</strong> using %d biomarkers.</p>
 
                 <p><strong>Dominant Pattern:</strong> Pattern %d represents the most common phenotype,
@@ -529,7 +529,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             # Generate formatted report text
             report_html <- sprintf(
                 "<div style='background-color: #fff8dc; padding: 15px; border: 1px solid #ffd700; margin-bottom: 15px;'>
-                <h4 style='margin-top: 0; color: #b8860b;'>📋 Copy-Ready Report Text</h4>
+                <h4 style='margin-top: 0; color: #b8860b;'> Copy-Ready Report Text</h4>
 
                 <div style='background-color: white; padding: 10px; border: 1px dashed #ccc; font-family: monospace; font-size: 13px;'>
                 <p><strong>IHC Expression Pattern Analysis:</strong></p>
@@ -544,7 +544,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
                 %s</p>
                 </div>
 
-                <p><small><em>💡 Tip: Copy the text above for your pathology report or manuscript.</em></small></p>
+                <p><small><em> Tip: Copy the text above for your pathology report or manuscript.</em></small></p>
                 </div>",
                 n_samples, n_markers, paste(self$options$markers, collapse = ", "),
                 tools::toTitleCase(method), n_clusters,
@@ -564,7 +564,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             method <- self$options$clusterMethod
 
             summary_html <- sprintf(
-                "<h3>✅ Analysis Complete</h3>
+                "<h3> Analysis Complete</h3>
                 <p><b>Data Summary:</b></p>
                 <ul>
                     <li>Samples analyzed: %d</li>
@@ -572,7 +572,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
                     <li>Expression patterns identified: %d</li>
                     <li>Method: %s clustering</li>
                 </ul>
-                <p><strong>📊 Review Results:</strong> Check the Clinical Interpretation and Copy-Ready Report sections above,
+                <p><strong> Review Results:</strong> Check the Clinical Interpretation and Copy-Ready Report sections above,
                 then examine the detailed tables and visualizations below.</p>",
                 n_samples, n_markers, n_clusters, tools::toTitleCase(method)
             )

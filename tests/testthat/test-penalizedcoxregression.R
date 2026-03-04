@@ -1,7 +1,6 @@
 
 test_that('penalizedcoxregression analysis works', {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
 
   # Synthetic data generation
   set.seed(123)

@@ -95,7 +95,7 @@ set.seed(123)
 n <- 200
 
 # Simulate disease status (latent, unknown)
-disease <- rbinom(n, 1, 0.3)  # 30\\% prevalence
+disease <- rbinom(n, 1, 0.3)  # 30 percent prevalence
 
 # Simulate test results with known sensitivity/specificity
 test1_result <- ifelse(disease == 1,

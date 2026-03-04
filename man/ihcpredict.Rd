@@ -85,7 +85,7 @@ Diagnosis column)}
 \item{catVars}{Binary (pos/neg) or ordinal (0/1/2/3) stain results - must
 match training markers}
 
-\item{contVars}{H-scores (0-300), \\% positivity (0-100) - must match
+\item{contVars}{H-scores (0-300),  percent positivity (0-100) - must match
 training markers}
 
 \item{caseId}{Case identifier for tracking predictions}

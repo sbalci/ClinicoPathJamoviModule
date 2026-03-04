@@ -239,13 +239,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     if (any(expected_counts < 5)) {
                         warnings_list <- c(warnings_list, 
-                            paste("⚠️", .('Expected cell counts < 5 detected. Consider using Fisher\'s exact test (nonparametric option) for more reliable results.'))
+                            paste("", .('Expected cell counts < 5 detected. Consider using Fisher\'s exact test (nonparametric option) for more reliable results.'))
                         )
                     }
                     
                     if (any(contingency_table < 2)) {
                         warnings_list <- c(warnings_list,
-                            paste("⚠️", .('Some categories have very few observations. Consider combining categories or collecting more data.'))
+                            paste("", .('Some categories have very few observations. Consider combining categories or collecting more data.'))
                         )
                     }
                 }, error = function(e) {
@@ -255,9 +255,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # General assumptions
             assumptions <- c(
-                paste("✓", .('Data should be categorical (factors or characters)')),
-                paste("✓", .('Observations should be independent')),
-                paste("✓", .('For statistical tests: adequate sample size in each category'))
+                paste("", .('Data should be categorical (factors or characters)')),
+                paste("", .('Observations should be independent')),
+                paste("", .('For statistical tests: adequate sample size in each category'))
             )
             
             warnings_section <- if (length(warnings_list) > 0) {
@@ -265,7 +265,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                       paste0("<li>", warnings_list, "</li>", collapse = "\n"),
                       "\n</ul>\n")
             } else {
-                paste0("<p>✓ ", .('All basic assumptions appear to be met.'), "</p>\n")
+                paste0("<p> ", .('All basic assumptions appear to be met.'), "</p>\n")
             }
             
             glue::glue(
@@ -735,7 +735,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             current_hash <- digest::digest(list(
                 data_dim = dim(self$data),
                 data_names = names(self$data),
-                data_content = data_content_hash,  # ✅ NOW INCLUDES ACTUAL DATA VALUES
+                data_content = data_content_hash,  #  NOW INCLUDES ACTUAL DATA VALUES
                 options = opts
             ), algo = "md5")
 
@@ -804,7 +804,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pct_dropped <- round(100 * n_dropped / n_before, 1)
                 self$results$todo$setContent(
                     glue::glue(
-                        "<br>ℹ️ <b>{info_title}:</b> {n_dropped} {rows_msg} ({pct_dropped}%) {excluded_msg} {vars_msg}: {var_list}.<br><hr>",
+                        "<br> <b>{info_title}:</b> {n_dropped} {rows_msg} ({pct_dropped}%) {excluded_msg} {vars_msg}: {var_list}.<br><hr>",
                         info_title = .('Info'),
                         rows_msg = ngettext(n_dropped, 'row', 'rows'),
                         excluded_msg = .('excluded due to missing values in'),
@@ -966,7 +966,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Performance warnings
                     perf_warning <- ""
                     if (self$options$typestatistics == "bayes") {
-                        perf_warning <- paste0("<br>⚠️ <b>", .('Performance Note:'), "</b> ", .('Bayesian analysis is computationally intensive.'), "<br>")
+                        perf_warning <- paste0("<br> <b>", .('Performance Note:'), "</b> ", .('Bayesian analysis is computationally intensive.'), "<br>")
                     }
                     
                     # Build status message
@@ -1017,15 +1017,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Enhanced error reporting with more context
                     error_context <- ""
                     if (grepl("continuous", e$message, ignore.case = TRUE)) {
-                        error_context <- paste0("<br>💡 <b>", .('Tip:'), "</b> ", .('Use Data > Transform to create categorical groups from continuous variables.'), "<br>")
+                        error_context <- paste0("<br> <b>", .('Tip:'), "</b> ", .('Use Data > Transform to create categorical groups from continuous variables.'), "<br>")
                     } else if (grepl("minimum|group size", e$message, ignore.case = TRUE)) {
-                        error_context <- paste0("<br>💡 <b>", .('Tip:'), "</b> ", .('Consider combining small categories or collecting more data.'), "<br>")
+                        error_context <- paste0("<br> <b>", .('Tip:'), "</b> ", .('Consider combining small categories or collecting more data.'), "<br>")
                     } else if (grepl("variation|level", e$message, ignore.case = TRUE)) {
-                        error_context <- paste0("<br>💡 <b>", .('Tip:'), "</b> ", .('Ensure your variables have multiple categories for meaningful pie charts.'), "<br>")
+                        error_context <- paste0("<br> <b>", .('Tip:'), "</b> ", .('Ensure your variables have multiple categories for meaningful pie charts.'), "<br>")
                     }
                     
                     error_msg <- glue::glue(
-                        "<br>❌ <b>{error_title}:</b><br>
+                        "<br> <b>{error_title}:</b><br>
                         <br>{e$message}<br>
                         {error_context}
                         <br><b>{troubleshoot_title}:</b><br>
@@ -1235,7 +1235,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Additional checkpoint with timing for Bayesian analysis
             if (override_type == "bayes") {
                 self$results$todo$setContent(
-                    glue::glue("<br>⏳ {msg}<br><hr>", msg = .('Computing Bayesian analysis... This may take 30-60 seconds depending on data size.'))
+                    glue::glue("<br> {msg}<br><hr>", msg = .('Computing Bayesian analysis... This may take 30-60 seconds depending on data size.'))
                 )
                 private$.checkpoint(flush = TRUE)
             }
@@ -1378,7 +1378,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Additional checkpoint with timing for Bayesian analysis
                 if (override_type == "bayes") {
                     self$results$todo$setContent(
-                        glue::glue("<br>⏳ {msg}<br><hr>", msg = .('Computing Bayesian analysis for grouped data... This may take 1-2 minutes depending on number of groups and data size.'))
+                        glue::glue("<br> {msg}<br><hr>", msg = .('Computing Bayesian analysis for grouped data... This may take 1-2 minutes depending on number of groups and data size.'))
                     )
                     private$.checkpoint(flush = TRUE)
                 }

@@ -43,7 +43,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Populate welcome message
                 self$results$welcome$setContent("
                     <div style='padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 8px; border-left: 4px solid #4A90E2;'>
-                        <h3 style='margin-top: 0; color: #2c3e50;'>📊 Medical Decision Analysis</h3>
+                        <h3 style='margin-top: 0; color: #2c3e50;'> Medical Decision Analysis</h3>
                         <p style='font-size: 15px; color: #34495e;'>Evaluate diagnostic test performance with sensitivity, specificity, and predictive values.</p>
 
                         <h4 style='color: #2c3e50; margin-top: 20px;'>Quick Start:</h4>
@@ -55,7 +55,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         </ol>
 
                         <div style='background: #fff; padding: 15px; border-radius: 5px; margin-top: 15px;'>
-                            <h4 style='margin-top: 0; color: #2c3e50;'>💡 What You'll Get:</h4>
+                            <h4 style='margin-top: 0; color: #2c3e50;'> What You'll Get:</h4>
                             <ul style='font-size: 13px; color: #34495e; line-height: 1.6;'>
                                 <li><strong>Sensitivity & Specificity:</strong> How well the test identifies disease presence and absence</li>
                                 <li><strong>Predictive Values:</strong> Probability of disease given test results (PPV, NPV)</li>
@@ -115,10 +115,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Map notice types to colors and icons
                 typeStyles <- list(
-                    ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
-                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
-                    WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
-                    INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+                    ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+                    WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+                    INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
                 )
 
                 html <- "<div style='margin: 10px 0;'>"

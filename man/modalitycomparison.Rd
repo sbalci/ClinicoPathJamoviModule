@@ -52,8 +52,8 @@ between modalities.}
 \item{calculate_weighted_kappa}{Calculate weighted kappa for ordinal scores
 (requires ordered categories).}
 
-\item{confidence_intervals}{Calculate and display 95\\% confidence intervals
-for agreement statistics.}
+\item{confidence_intervals}{Calculate and display 95 percent confidence
+intervals for agreement statistics.}
 
 \item{directional_analysis}{Analyze systematic bias in one direction (e.g.,
 higher scores on digital vs glass).}
@@ -93,6 +93,7 @@ pattern analysis
 and HER2 scoring validation.
 }
 \examples{
+\donttest{
 # Basic modality comparison
 result1 <- modalitycomparison(
   data = data,
@@ -110,5 +111,5 @@ result2 <- modalitycomparison(
   score_categories = "her2_5cat",
   show_discordance_analysis = TRUE
 )
-
+}
 }

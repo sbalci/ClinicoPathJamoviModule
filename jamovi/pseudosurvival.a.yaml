@@ -11,7 +11,7 @@ description:
         survival probability at specific time points and RMST with standard 
         statistical methods.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: RMST regression with covariates
             pseudosurvival(

@@ -5,9 +5,9 @@
 
 # Load development version
 if (requireNamespace("devtools", quietly = TRUE)) {
-    devtools::load_all()
+    # library loaded by devtools::test()
 } else {
-    devtools::load_all()
+    # library loaded by devtools::test()
 }
 library(dplyr)
 

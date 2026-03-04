@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjhistostats handles missing data correctly", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -20,7 +18,6 @@ test_that("jjhistostats handles missing data correctly", {
 })
 
 test_that("jjhistostats handles data with high proportion of missing values", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -38,7 +35,6 @@ test_that("jjhistostats handles data with high proportion of missing values", {
 })
 
 test_that("jjhistostats handles small sample sizes", {
-  devtools::load_all()
 
   data(jjhistostats_small)
 
@@ -52,7 +48,6 @@ test_that("jjhistostats handles small sample sizes", {
 })
 
 test_that("jjhistostats handles very small sample (n=10)", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -68,7 +63,6 @@ test_that("jjhistostats handles very small sample (n=10)", {
 })
 
 test_that("jjhistostats handles minimal sample (n=5)", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -84,7 +78,6 @@ test_that("jjhistostats handles minimal sample (n=5)", {
 })
 
 test_that("jjhistostats handles constant variables", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -102,7 +95,6 @@ test_that("jjhistostats handles constant variables", {
 })
 
 test_that("jjhistostats handles near-constant variables", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -120,7 +112,6 @@ test_that("jjhistostats handles near-constant variables", {
 })
 
 test_that("jjhistostats handles extreme outliers", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -146,7 +137,6 @@ test_that("jjhistostats handles extreme outliers", {
 })
 
 test_that("jjhistostats handles highly skewed data", {
-  devtools::load_all()
 
   data(jjhistostats_skewed)
 
@@ -168,7 +158,6 @@ test_that("jjhistostats handles highly skewed data", {
 })
 
 test_that("jjhistostats handles negative values", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -185,7 +174,6 @@ test_that("jjhistostats handles negative values", {
 })
 
 test_that("jjhistostats handles variables with special characters in names", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -202,7 +190,6 @@ test_that("jjhistostats handles variables with special characters in names", {
 })
 
 test_that("jjhistostats handles bimodal distribution", {
-  devtools::load_all()
 
   data(jjhistostats_bimodal)
 
@@ -217,7 +204,6 @@ test_that("jjhistostats handles bimodal distribution", {
 })
 
 test_that("jjhistostats handles uniform distribution", {
-  devtools::load_all()
 
   data(jjhistostats_uniform)
 
@@ -232,7 +218,6 @@ test_that("jjhistostats handles uniform distribution", {
 })
 
 test_that("jjhistostats handles very wide range of values", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -249,7 +234,6 @@ test_that("jjhistostats handles very wide range of values", {
 })
 
 test_that("jjhistostats handles very small decimal values", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -266,7 +250,6 @@ test_that("jjhistostats handles very small decimal values", {
 })
 
 test_that("jjhistostats handles integer vs numeric variables", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -283,7 +266,6 @@ test_that("jjhistostats handles integer vs numeric variables", {
 })
 
 test_that("jjhistostats handles discrete variables", {
-  devtools::load_all()
 
   data(jjhistostats_pathology)
 
@@ -297,7 +279,6 @@ test_that("jjhistostats handles discrete variables", {
 })
 
 test_that("jjhistostats handles grouped analysis with small groups", {
-  devtools::load_all()
 
   data(jjhistostats_small)
 
@@ -312,7 +293,6 @@ test_that("jjhistostats handles grouped analysis with small groups", {
 })
 
 test_that("jjhistostats handles grouped analysis with unbalanced groups", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -334,7 +314,6 @@ test_that("jjhistostats handles grouped analysis with unbalanced groups", {
 })
 
 test_that("jjhistostats handles grouped analysis with many groups", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -354,7 +333,6 @@ test_that("jjhistostats handles grouped analysis with many groups", {
 })
 
 test_that("jjhistostats handles Inf and -Inf values", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -373,7 +351,6 @@ test_that("jjhistostats handles Inf and -Inf values", {
 })
 
 test_that("jjhistostats handles NaN values", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -391,7 +368,6 @@ test_that("jjhistostats handles NaN values", {
 })
 
 test_that("jjhistostats handles test value at extreme of data range", {
-  devtools::load_all()
 
   data(jjhistostats_labvalues)
 
@@ -415,7 +391,6 @@ test_that("jjhistostats handles test value at extreme of data range", {
 })
 
 test_that("jjhistostats handles test value equal to mean", {
-  devtools::load_all()
 
   data(jjhistostats_labvalues)
 
@@ -433,7 +408,6 @@ test_that("jjhistostats handles test value equal to mean", {
 })
 
 test_that("jjhistostats handles zero test value", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -448,7 +422,6 @@ test_that("jjhistostats handles zero test value", {
 })
 
 test_that("jjhistostats handles negative test value", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -463,7 +436,6 @@ test_that("jjhistostats handles negative test value", {
 })
 
 test_that("jjhistostats handles very small bin width", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -478,7 +450,6 @@ test_that("jjhistostats handles very small bin width", {
 })
 
 test_that("jjhistostats handles very large bin width", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -493,7 +464,6 @@ test_that("jjhistostats handles very large bin width", {
 })
 
 test_that("jjhistostats handles data at boundaries", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -511,7 +481,6 @@ test_that("jjhistostats handles data at boundaries", {
 })
 
 test_that("jjhistostats handles all values identical in one group", {
-  devtools::load_all()
 
   data(jjhistostats_grouped)
 
@@ -531,7 +500,6 @@ test_that("jjhistostats handles all values identical in one group", {
 })
 
 test_that("jjhistostats handles complete separation between groups", {
-  devtools::load_all()
 
   data(jjhistostats_grouped)
 
@@ -554,7 +522,6 @@ test_that("jjhistostats handles complete separation between groups", {
 })
 
 test_that("jjhistostats handles complete overlap between groups", {
-  devtools::load_all()
 
   data(jjhistostats_grouped)
 
@@ -572,7 +539,6 @@ test_that("jjhistostats handles complete overlap between groups", {
 })
 
 test_that("jjhistostats handles extreme confidence levels", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -594,7 +560,6 @@ test_that("jjhistostats handles extreme confidence levels", {
 })
 
 test_that("jjhistostats handles high transparency (near invisible)", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -608,7 +573,6 @@ test_that("jjhistostats handles high transparency (near invisible)", {
 })
 
 test_that("jjhistostats handles zero transparency (opaque)", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 

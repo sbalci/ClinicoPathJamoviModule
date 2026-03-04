@@ -5,7 +5,6 @@
 # Tests edge cases, error conditions, and boundary scenarios
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(waterfall_test, package = "ClinicoPath")

@@ -833,12 +833,12 @@ phevalClass <- R6::R6Class(
             # Overall assessment
             if (violation_count == 0) {
                 html <- paste0(html, "<div class='recommendation pass'>")
-                html <- paste0(html, "<h4>✓ Proportional Hazards Assumption Satisfied</h4>")
+                html <- paste0(html, "<h4> Proportional Hazards Assumption Satisfied</h4>")
                 html <- paste0(html, "<p>All tests support the proportional hazards assumption. The Cox model is appropriate for your data.</p>")
                 html <- paste0(html, "</div>")
             } else if (violation_count / total_tests <= 0.3) {
                 html <- paste0(html, "<div class='recommendation warning'>")
-                html <- paste0(html, "<h4>⚠ Minor Violations Detected</h4>")
+                html <- paste0(html, "<h4> Minor Violations Detected</h4>")
                 html <- paste0(html, "<p>Some tests indicate potential violations (", violation_count, " out of ", total_tests, " tests). Consider:")
                 html <- paste0(html, "<ul><li>Stratified Cox models for problematic covariates</li>")
                 html <- paste0(html, "<li>Time-varying coefficient models</li>")
@@ -846,7 +846,7 @@ phevalClass <- R6::R6Class(
                 html <- paste0(html, "</div>")
             } else {
                 html <- paste0(html, "<div class='recommendation fail'>")
-                html <- paste0(html, "<h4>✗ Serious Violations Detected</h4>")
+                html <- paste0(html, "<h4> Serious Violations Detected</h4>")
                 html <- paste0(html, "<p>Multiple tests indicate violations (", violation_count, " out of ", total_tests, " tests). Recommended actions:")
                 html <- paste0(html, "<ul><li>Use stratified Cox models</li>")
                 html <- paste0(html, "<li>Consider time-varying coefficient models</li>")

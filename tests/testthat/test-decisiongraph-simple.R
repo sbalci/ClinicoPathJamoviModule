@@ -4,7 +4,6 @@ library(testthat)
 library(jmvcore)
 
 if (requireNamespace("devtools", quietly = TRUE)) {
-  devtools::load_all()
 }
 
 test_that("decisiongraph works with simple inputs", {

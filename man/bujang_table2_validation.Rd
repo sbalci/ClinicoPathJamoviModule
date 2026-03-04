@@ -10,7 +10,7 @@ A data frame with 8 rows and 7 variables:
 \item{prevalence}{Disease prevalence (0.05 to 0.90)}
 \item{sensitivity}{Target sensitivity value}
 \item{specificity}{Target specificity value}
-\item{ci_width}{Desired 95\\% CI width (0.10 or 0.20)}
+\item{ci_width}{Desired 95\% CI width (0.10 or 0.20)}
 \item{n_sens_expected}{Expected sample size for sensitivity (from Bujang Table 2)}
 \item{n_spec_expected}{Expected sample size for specificity (from Bujang Table 2)}
 \item{n_total_expected}{Expected total sample size (maximum of sens/spec)}
@@ -19,7 +19,7 @@ A data frame with 8 rows and 7 variables:
 \source{
 Bujang MA (2023). An Elaboration on Sample Size Planning for Performing a
 One-Sample Sensitivity and Specificity Analysis by Basing on Calculations on
-a Specified 95\\% Confidence Interval Width. Diagnostics 13(8):1390.
+a Specified 95\% Confidence Interval Width. Diagnostics 13(8):1390.
 Table 2 (pages 5-6).
 \doi{10.3390/diagnostics13081390}
 }
@@ -40,14 +40,14 @@ in Bujang (2023).
 
 \strong{Validation Test Cases:}
 \enumerate{
-\item Prevalence 5\\%, Sens/Spec 95\\%, CI width 0.10 → N = 940
-\item Prevalence 5\\%, Sens/Spec 70\\%, CI width 0.10 → N = 3,410
-\item Prevalence 10\\%, Sens/Spec 95\\%, CI width 0.10 → N = 940
-\item Prevalence 10\\%, Sens/Spec 90\\%, CI width 0.20 → N = 440
-\item Prevalence 20\\%, Sens/Spec 90\\%, CI width 0.20 → N = 220
-\item Prevalence 50\\%, Sens/Spec 90\\%, CI width 0.20 → N = 88
-\item Prevalence 50\\%, Sens/Spec 80\\%, CI width 0.20 → N = 140
-\item Prevalence 90\\%, Sens/Spec 95\\%, CI width 0.20 → N = 941
+\item Prevalence 5\%, Sens/Spec 95\%, CI width 0.10 → N = 940
+\item Prevalence 5\%, Sens/Spec 70\%, CI width 0.10 → N = 3,410
+\item Prevalence 10\%, Sens/Spec 95\%, CI width 0.10 → N = 940
+\item Prevalence 10\%, Sens/Spec 90\%, CI width 0.20 → N = 440
+\item Prevalence 20\%, Sens/Spec 90\%, CI width 0.20 → N = 220
+\item Prevalence 50\%, Sens/Spec 90\%, CI width 0.20 → N = 88
+\item Prevalence 50\%, Sens/Spec 80\%, CI width 0.20 → N = 140
+\item Prevalence 90\%, Sens/Spec 95\%, CI width 0.20 → N = 941
 }
 }
 \section{Usage}{

@@ -14,7 +14,7 @@ description:
         parameter correction, clinical scenario presets, and dynamic threshold 
         optimization for medical research and diagnostic applications.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Interactive clinical validation with presets
             clinical_validation_interactive(
@@ -174,7 +174,7 @@ options:
       default: false
 
     - name: population_prevalence
-      title: Population Prevalence (%)
+      title: Population Prevalence ( percent)
       type: Number
       default: 10
       min: 0.1

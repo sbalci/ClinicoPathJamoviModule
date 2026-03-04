@@ -22,7 +22,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 </style>
                 </head>
                 <body>
-                <h2>📊 Distribution Selection and Goodness-of-Fit Analysis</h2>
+                <h2> Distribution Selection and Goodness-of-Fit Analysis</h2>
                 <div class='status'>
                 <p><strong>Module:</strong> Parametric Distribution Selection</p>
                 <p><strong>Status:</strong> <span class='pending'>Configure variables and options to begin analysis</span></p>
@@ -50,7 +50,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 self$results$todo$setContent(
                     "<html>
                     <body>
-                    <h3>⚠️ Missing Required Variables</h3>
+                    <h3> Missing Required Variables</h3>
                     <p>Please specify:</p>
                     <ul>
                     <li><strong>Time Variable:</strong> Time to event or censoring</li>
@@ -72,11 +72,11 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             self$results$todo$setContent(
                 "<html>
                 <body>
-                <h3>✅ Analysis Complete</h3>
+                <h3> Analysis Complete</h3>
                 <p><strong>Distribution selection and goodness-of-fit testing completed successfully!</strong></p>
-                <p>📊 Multiple parametric distributions compared</p>
-                <p>🎯 Best-fitting model identified and validated</p>
-                <p>📈 Comprehensive diagnostic plots generated</p>
+                <p> Multiple parametric distributions compared</p>
+                <p> Best-fitting model identified and validated</p>
+                <p> Comprehensive diagnostic plots generated</p>
                 </body>
                 </html>"
             )
@@ -129,7 +129,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
             }, error = function(e) {
                 self$results$todo$setContent(
-                    paste0("<html><body><h3>❌ Analysis Error</h3><p>", 
+                    paste0("<html><body><h3> Analysis Error</h3><p>", 
                            e$message, "</p></body></html>")
                 )
             })
@@ -618,7 +618,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             summary_text <- paste0(
                 "<html><body>",
-                "<h3>📊 Distribution Selection Analysis Summary</h3>",
+                "<h3> Distribution Selection Analysis Summary</h3>",
                 "<p><strong>Model Selection Results:</strong></p>",
                 "<ul>",
                 "<li>Best-fitting distribution: ", best_model, "</li>",
@@ -642,7 +642,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             explanation_text <- paste0(
                 "<html><body>",
-                "<h3>📖 Distribution Selection and Goodness-of-Fit Methodology</h3>",
+                "<h3> Distribution Selection and Goodness-of-Fit Methodology</h3>",
                 
                 "<h4>Overview</h4>",
                 "<p>This analysis systematically compares multiple parametric survival distributions to identify the best-fitting model for your data and validates the adequacy of the selected model.</p>",

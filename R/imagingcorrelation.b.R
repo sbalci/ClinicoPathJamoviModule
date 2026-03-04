@@ -29,7 +29,7 @@ imagingcorrelationClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                        <div class='todo'>Welcome to Imaging Findings Correlation 🏥</div>
+                        <div class='todo'>Welcome to Imaging Findings Correlation </div>
                         <div class='instructions'>
                             <div class='step'><b>1.</b> Drag imaging finding variables to <b>Imaging Findings</b></div>
                             <div class='step'><b>2.</b> Add laboratory results for correlation analysis</div>
@@ -532,7 +532,7 @@ imagingcorrelationClass <- R6::R6Class(
                 .discordant { color: #f39c12; }
             </style></head><body>"
             
-            summary_html <- paste0(summary_html, "<div class='summary-title'>Integrated Diagnostic Summary 🏥</div>")
+            summary_html <- paste0(summary_html, "<div class='summary-title'>Integrated Diagnostic Summary </div>")
             
             # Overall assessment
             totalFindings <- length(imagingFindings)
@@ -595,7 +595,7 @@ imagingcorrelationClass <- R6::R6Class(
             </style></head><body>"
             
             recommendations_html <- paste0(recommendations_html, 
-                "<div class='rec-title'>Evidence-Based Clinical Recommendations 📋</div>"
+                "<div class='rec-title'>Evidence-Based Clinical Recommendations </div>"
             )
             
             # Generate specific recommendations based on findings
@@ -639,7 +639,7 @@ imagingcorrelationClass <- R6::R6Class(
             </style></head><body>"
             
             confidence_html <- paste0(confidence_html, 
-                "<div class='conf-title'>Diagnostic Confidence Assessment 🎯</div>"
+                "<div class='conf-title'>Diagnostic Confidence Assessment </div>"
             )
             
             # Calculate confidence scores for different aspects

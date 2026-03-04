@@ -2,7 +2,6 @@
 # Basic Tests: decisioncompare
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(decisioncompare_test, package = "ClinicoPath")
 data(decisioncompare_threetest, package = "ClinicoPath")
 data(decisioncompare_imaging, package = "ClinicoPath")

@@ -2,7 +2,6 @@
 # Social Science Statistical Visualization using sjPlot package
 
 library(testthat)
-devtools::load_all()
 
 # Test data setup
 set.seed(123)
@@ -55,7 +54,6 @@ missing_data$predictor1[15:25] <- NA
 # Test basic functionality
 test_that("jsjplot basic functionality works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     # Test coefficient plot (default)
     result <- jsjplot(
         data = test_data,

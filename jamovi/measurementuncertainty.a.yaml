@@ -11,9 +11,9 @@ description:
         uncertainty, and uncertainty budgets for clinical laboratory measurements.
         Essential for laboratory accreditation and quality assurance.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             measurementuncertainty(
                 measurement = "glucose_result",
                 reference_value = "certified_value",
@@ -150,7 +150,7 @@ options:
             Comma-separated list of Type B uncertainty components
 
     - name: calibration_uncertainty
-      title: Calibration Uncertainty (%)
+      title: Calibration Uncertainty ( percent)
       type: Number
       min: 0
       max: 10
@@ -160,7 +160,7 @@ options:
             Relative uncertainty from calibration
 
     - name: reference_material_uncertainty
-      title: Reference Material Uncertainty (%)
+      title: Reference Material Uncertainty ( percent)
       type: Number
       min: 0
       max: 5
@@ -170,7 +170,7 @@ options:
             Uncertainty of reference materials
 
     - name: temperature_uncertainty
-      title: Temperature Effect Uncertainty (%)
+      title: Temperature Effect Uncertainty ( percent)
       type: Number
       min: 0
       max: 2
@@ -180,7 +180,7 @@ options:
             Uncertainty due to temperature variations
 
     - name: pipetting_uncertainty
-      title: Pipetting Uncertainty (%)
+      title: Pipetting Uncertainty ( percent)
       type: Number
       min: 0
       max: 2
@@ -190,7 +190,7 @@ options:
             Uncertainty from pipetting operations
 
     - name: sample_stability_uncertainty
-      title: Sample Stability Uncertainty (%)
+      title: Sample Stability Uncertainty ( percent)
       type: Number
       min: 0
       max: 5
@@ -200,7 +200,7 @@ options:
             Uncertainty due to sample stability
 
     - name: matrix_effects_uncertainty
-      title: Matrix Effects Uncertainty (%)
+      title: Matrix Effects Uncertainty ( percent)
       type: Number
       min: 0
       max: 3

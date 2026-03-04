@@ -113,7 +113,7 @@ chisqposttest(
 }
 
 \seealso{
-\code{\link{chisqposttest}}, \code{\link{histopathology}}
+\code{\link{chisqposttest}}
 }
 
 \keyword{datasets}

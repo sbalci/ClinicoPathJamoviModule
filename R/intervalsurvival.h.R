@@ -441,6 +441,7 @@ intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Tumor progression between visits
 #' intervalsurvival(
 #'     data = oncology_data,
@@ -449,7 +450,7 @@ intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'     covariates = c("age", "stage", "treatment"),
 #'     model_type = "aft_weibull"
 #' )
-#'
+#'}
 #' @param left_time Left boundary of the censoring interval
 #' @param right_time Right boundary of the censoring interval
 #' @param status_var Censoring status indicator variable

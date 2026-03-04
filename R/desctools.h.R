@@ -346,6 +346,7 @@ desctoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' research, epidemiological studies, and advanced statistical analysis.
 #'
 #' @examples
+#' \donttest{
 #' # Load example data
 #' data("histopathology")
 #' data("dca_test_data")
@@ -405,7 +406,7 @@ desctoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     normality_var = "Cell.size",
 #'     multiple_testing = "BH"
 #' )
-#'
+#'}
 #' @param data The data as a data frame for statistical analysis.
 #' @param effect_size_analysis Calculate effect sizes including Cohen's D for
 #'   comparing group means. Essential for determining practical significance in

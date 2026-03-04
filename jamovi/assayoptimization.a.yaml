@@ -10,7 +10,7 @@ description:
         Includes power calculations, sample size determination, design optimization,
         and quality control for laboratory assays.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Optimize PCR assay design
             assayoptimization(

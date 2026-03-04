@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jjridges_test, package = "ClinicoPath", envir = environment())
@@ -21,7 +20,6 @@ data(jjridges_small, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges function exists and runs with minimal arguments", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -37,7 +35,6 @@ test_that("jjridges function exists and runs with minimal arguments", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles different continuous x variables", {
-  devtools::load_all()
 
   # Ki67 proliferation index
   result_ki67 <- jjridges(
@@ -77,7 +74,6 @@ test_that("jjridges handles different continuous x variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles different y grouping variables", {
-  devtools::load_all()
 
   # 4-level grouping (tumor stage)
   result_4level <- jjridges(
@@ -109,7 +105,6 @@ test_that("jjridges handles different y grouping variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles basic ridgeline plot type", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -122,7 +117,6 @@ test_that("jjridges handles basic ridgeline plot type", {
 })
 
 test_that("jjridges handles density ridges plot type", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -135,7 +129,6 @@ test_that("jjridges handles density ridges plot type", {
 })
 
 test_that("jjridges handles density ridges with gradient", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -148,7 +141,6 @@ test_that("jjridges handles density ridges with gradient", {
 })
 
 test_that("jjridges handles histogram ridges", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -161,7 +153,6 @@ test_that("jjridges handles histogram ridges", {
 })
 
 test_that("jjridges handles violin ridges", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -178,7 +169,6 @@ test_that("jjridges handles violin ridges", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles different scale values", {
-  devtools::load_all()
 
   # No overlap (scale < 1)
   result_separate <- jjridges(
@@ -213,7 +203,6 @@ test_that("jjridges handles different scale values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles boxplot inside ridges", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -226,7 +215,6 @@ test_that("jjridges handles boxplot inside ridges", {
 })
 
 test_that("jjridges handles data points overlay", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_small,  # Use small dataset for points
@@ -240,7 +228,6 @@ test_that("jjridges handles data points overlay", {
 })
 
 test_that("jjridges handles quantile lines", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -254,7 +241,6 @@ test_that("jjridges handles quantile lines", {
 })
 
 test_that("jjridges handles mean line", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -267,7 +253,6 @@ test_that("jjridges handles mean line", {
 })
 
 test_that("jjridges handles median line", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -284,7 +269,6 @@ test_that("jjridges handles median line", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles parametric statistics", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -298,7 +282,6 @@ test_that("jjridges handles parametric statistics", {
 })
 
 test_that("jjridges handles nonparametric statistics", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -312,7 +295,6 @@ test_that("jjridges handles nonparametric statistics", {
 })
 
 test_that("jjridges handles robust statistics", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_clinical,
@@ -326,7 +308,6 @@ test_that("jjridges handles robust statistics", {
 })
 
 test_that("jjridges handles Bayesian statistics", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -344,7 +325,6 @@ test_that("jjridges handles Bayesian statistics", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles ridge theme", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -357,7 +337,6 @@ test_that("jjridges handles ridge theme", {
 })
 
 test_that("jjridges handles minimal theme", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -370,7 +349,6 @@ test_that("jjridges handles minimal theme", {
 })
 
 test_that("jjridges handles classic theme", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_clinical,
@@ -383,7 +361,6 @@ test_that("jjridges handles classic theme", {
 })
 
 test_that("jjridges handles publication theme", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -400,7 +377,6 @@ test_that("jjridges handles publication theme", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles clinical colorblind-safe palette", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -413,7 +389,6 @@ test_that("jjridges handles clinical colorblind-safe palette", {
 })
 
 test_that("jjridges handles viridis family palettes", {
-  devtools::load_all()
 
   # Viridis
   result_viridis <- jjridges(
@@ -453,7 +428,6 @@ test_that("jjridges handles viridis family palettes", {
 })
 
 test_that("jjridges handles ColorBrewer palettes", {
-  devtools::load_all()
 
   # Set1
   result_set1 <- jjridges(
@@ -493,7 +467,6 @@ test_that("jjridges handles ColorBrewer palettes", {
 })
 
 test_that("jjridges handles custom colors", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -511,7 +484,6 @@ test_that("jjridges handles custom colors", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles fill variable", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -524,7 +496,6 @@ test_that("jjridges handles fill variable", {
 })
 
 test_that("jjridges handles facet variable", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -537,7 +508,6 @@ test_that("jjridges handles facet variable", {
 })
 
 test_that("jjridges handles both fill and facet variables", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -555,7 +525,6 @@ test_that("jjridges handles both fill and facet variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges works with all test datasets", {
-  devtools::load_all()
 
   # jjridges_test
   result1 <- jjridges(data = jjridges_test, x_var = "ki67_index", y_var = "tumor_stage")
@@ -587,7 +556,6 @@ test_that("jjridges works with all test datasets", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles clinical laboratory measurements", {
-  devtools::load_all()
 
   # Glucose levels by diagnosis
   result_glucose <- jjridges(
@@ -627,7 +595,6 @@ test_that("jjridges handles clinical laboratory measurements", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles treatment response over time", {
-  devtools::load_all()
 
   # Pain score by timepoint
   result_pain <- jjridges(
@@ -659,7 +626,6 @@ test_that("jjridges handles treatment response over time", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles biomarker expression across cancer types", {
-  devtools::load_all()
 
   # Mutation burden by cancer type
   result_mut <- jjridges(
@@ -691,7 +657,6 @@ test_that("jjridges handles biomarker expression across cancer types", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles survival time distributions", {
-  devtools::load_all()
 
   # Survival months by treatment
   result_surv_tx <- jjridges(
@@ -723,7 +688,6 @@ test_that("jjridges handles survival time distributions", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles biomarker distribution preset", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_biomarker,
@@ -736,7 +700,6 @@ test_that("jjridges handles biomarker distribution preset", {
 })
 
 test_that("jjridges handles treatment response preset", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_treatment,
@@ -749,7 +712,6 @@ test_that("jjridges handles treatment response preset", {
 })
 
 test_that("jjridges handles age by stage preset", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -762,7 +724,6 @@ test_that("jjridges handles age by stage preset", {
 })
 
 test_that("jjridges handles tumor size comparison preset", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -775,7 +736,6 @@ test_that("jjridges handles tumor size comparison preset", {
 })
 
 test_that("jjridges handles survival time distribution preset", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_survival,

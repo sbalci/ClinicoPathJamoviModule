@@ -3,13 +3,11 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(hullplot_test)
 data(hullplot_clusters)
 data(hullplot_clinical)
 
 test_that("hullplot respects all hull aesthetic parameters", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     hull_concavity = c(0.5, 1.5),
@@ -35,7 +33,6 @@ test_that("hullplot respects all hull aesthetic parameters", {
 })
 
 test_that("hullplot respects all point aesthetic parameters", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     point_size = c(2, 3),
@@ -59,7 +56,6 @@ test_that("hullplot respects all point aesthetic parameters", {
 })
 
 test_that("hullplot respects all color palette options", {
-  devtools::load_all()
 
   palettes <- c("default", "viridis", "set1", "set2", "dark2", "clinical")
 
@@ -79,7 +75,6 @@ test_that("hullplot respects all color palette options", {
 })
 
 test_that("hullplot respects all plot theme options", {
-  devtools::load_all()
 
   themes <- c("minimal", "classic", "light", "dark", "clinical")
 
@@ -99,7 +94,6 @@ test_that("hullplot respects all plot theme options", {
 })
 
 test_that("hullplot handles combinations of theme and palette", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     plot_theme = c("minimal", "classic", "clinical"),
@@ -124,7 +118,6 @@ test_that("hullplot handles combinations of theme and palette", {
 })
 
 test_that("hullplot handles all display option combinations", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     show_labels = c(TRUE, FALSE),
@@ -149,7 +142,6 @@ test_that("hullplot handles all display option combinations", {
 })
 
 test_that("hullplot handles optional variables combinations", {
-  devtools::load_all()
 
   # Only size variable
   result1 <- hullplot(
@@ -184,7 +176,6 @@ test_that("hullplot handles optional variables combinations", {
 })
 
 test_that("hullplot handles confidence ellipses with different parameters", {
-  devtools::load_all()
 
   # Without ellipses
   result1 <- hullplot(
@@ -220,7 +211,6 @@ test_that("hullplot handles confidence ellipses with different parameters", {
 })
 
 test_that("hullplot handles outlier detection with different options", {
-  devtools::load_all()
 
   # Outlier detection alone
   result1 <- hullplot(
@@ -256,7 +246,6 @@ test_that("hullplot handles outlier detection with different options", {
 })
 
 test_that("hullplot handles custom labels with different combinations", {
-  devtools::load_all()
 
   # Custom title only
   result1 <- hullplot(
@@ -293,7 +282,6 @@ test_that("hullplot handles custom labels with different combinations", {
 })
 
 test_that("hullplot handles plot dimension parameters", {
-  devtools::load_all()
 
   dimensions <- list(
     list(width = 400, height = 400),
@@ -318,7 +306,6 @@ test_that("hullplot handles plot dimension parameters", {
 })
 
 test_that("hullplot handles comprehensive argument combinations", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_clinical,
@@ -346,7 +333,6 @@ test_that("hullplot handles comprehensive argument combinations", {
 })
 
 test_that("hullplot handles minimal aesthetics configuration", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_test,
@@ -364,7 +350,6 @@ test_that("hullplot handles minimal aesthetics configuration", {
 })
 
 test_that("hullplot handles maximal aesthetics configuration", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_clusters,
@@ -384,7 +369,6 @@ test_that("hullplot handles maximal aesthetics configuration", {
 })
 
 test_that("hullplot handles publication-ready configuration", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_clinical,
@@ -413,7 +397,6 @@ test_that("hullplot handles publication-ready configuration", {
 })
 
 test_that("hullplot handles different group counts with same parameters", {
-  devtools::load_all()
 
   # Two groups
   result2 <- hullplot(
@@ -450,7 +433,6 @@ test_that("hullplot handles different group counts with same parameters", {
 })
 
 test_that("hullplot handles extreme concavity values", {
-  devtools::load_all()
 
   # Minimum concavity (most concave)
   result_min <- hullplot(
@@ -476,7 +458,6 @@ test_that("hullplot handles extreme concavity values", {
 })
 
 test_that("hullplot handles extreme transparency values", {
-  devtools::load_all()
 
   # Minimum transparency (most opaque)
   result_opaque <- hullplot(
@@ -502,7 +483,6 @@ test_that("hullplot handles extreme transparency values", {
 })
 
 test_that("hullplot handles summary and assumptions together", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_clinical,
@@ -517,7 +497,6 @@ test_that("hullplot handles summary and assumptions together", {
 })
 
 test_that("hullplot handles factor vs character group variables", {
-  devtools::load_all()
 
   # Factor group variable
   test_data_factor <- hullplot_test
@@ -545,7 +524,6 @@ test_that("hullplot handles factor vs character group variables", {
 })
 
 test_that("hullplot handles all clinical configuration options", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_clinical,
@@ -568,7 +546,6 @@ test_that("hullplot handles all clinical configuration options", {
 })
 
 test_that("hullplot handles different expansion values", {
-  devtools::load_all()
 
   expand_values <- c(0.0, 0.05, 0.1, 0.15, 0.2)
 
@@ -588,7 +565,6 @@ test_that("hullplot handles different expansion values", {
 })
 
 test_that("hullplot handles overlapping groups with full feature set", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_overlap,
@@ -608,7 +584,6 @@ test_that("hullplot handles overlapping groups with full feature set", {
 })
 
 test_that("hullplot handles all visualizations for same dataset", {
-  devtools::load_all()
 
   # Ensure all visualization options work together
   result <- hullplot(
@@ -631,7 +606,6 @@ test_that("hullplot handles all visualizations for same dataset", {
 })
 
 test_that("hullplot handles small sample with all features", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_small,
@@ -649,7 +623,6 @@ test_that("hullplot handles small sample with all features", {
 })
 
 test_that("hullplot handles unbalanced groups with all options", {
-  devtools::load_all()
 
   result <- hullplot(
     data = hullplot_unbalanced,

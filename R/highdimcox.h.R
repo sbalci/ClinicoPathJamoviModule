@@ -396,6 +396,7 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' proteomic, or other high-dimensional clinical datasets.
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: LASSO regularization for gene expression data
 #' library(survival)
 #' library(glmnet)
@@ -422,7 +423,7 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     stability_selection = TRUE,
 #'     bootstrap_iterations = 500
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time variable for survival analysis
 #' @param outcome Event indicator variable

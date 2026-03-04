@@ -12,7 +12,7 @@ description:
       and discrimination metrics. Supports logistic regression with stepwise/LASSO
       selection, ROC analysis, calibration plots, and bootstrap validation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage:
             # data <- your_data

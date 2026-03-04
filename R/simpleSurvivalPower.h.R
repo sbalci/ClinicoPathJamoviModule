@@ -1266,6 +1266,7 @@ simpleSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' simpleSurvivalPower(
 #'     test_type = "log_rank",
 #'     effect_size = 0.75,
@@ -1275,7 +1276,7 @@ simpleSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     accrual_period = 24,
 #'     follow_up_period = 36
 #' )
-#'
+#'}
 #' @param clinical_preset Pre-configured parameter sets for common clinical
 #'   trial designs. Selecting a preset will automatically populate appropriate
 #'   values.

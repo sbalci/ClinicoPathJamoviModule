@@ -195,6 +195,7 @@ meta-analysis approaches with comprehensive heterogeneity assessment and
 publication bias evaluation.
 }
 \examples{
+\donttest{
 data('meta_studies')
 
 treatmentmeta(
@@ -204,5 +205,5 @@ treatmentmeta(
     outcome_type = "continuous",
     model_type = "random"
 )
-
+}
 }

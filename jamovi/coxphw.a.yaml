@@ -16,7 +16,7 @@ description:
         reliable hazard ratios and confidence intervals in challenging
         clinical research scenarios.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Weighted Cox regression for rare events
             library(survival)

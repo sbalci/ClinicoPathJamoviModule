@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jjscatterstats_test, package = "ClinicoPath", envir = environment())
@@ -17,7 +16,6 @@ data(jjscatterstats_small, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles small sample (n=30)", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_small,
@@ -29,7 +27,6 @@ test_that("jjscatterstats handles small sample (n=30)", {
 })
 
 test_that("jjscatterstats handles very small sample per group", {
-  devtools::load_all()
 
   # Group by 3-level variable with n=30 total (n≈10 per group)
   result <- jjscatterstats(
@@ -47,7 +44,6 @@ test_that("jjscatterstats handles very small sample per group", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles missing data in dep variable", {
-  devtools::load_all()
 
   test_data_na <- jjscatterstats_test
   test_data_na$ki67_index[1:30] <- NA
@@ -62,7 +58,6 @@ test_that("jjscatterstats handles missing data in dep variable", {
 })
 
 test_that("jjscatterstats handles missing data in group variable", {
-  devtools::load_all()
 
   test_data_na <- jjscatterstats_test
   test_data_na$tumor_size[1:25] <- NA
@@ -77,7 +72,6 @@ test_that("jjscatterstats handles missing data in group variable", {
 })
 
 test_that("jjscatterstats handles missing data in grouping variable", {
-  devtools::load_all()
 
   test_data_na <- jjscatterstats_test
   test_data_na$receptor_status[1:40] <- NA
@@ -93,7 +87,6 @@ test_that("jjscatterstats handles missing data in grouping variable", {
 })
 
 test_that("jjscatterstats handles missing data in both variables", {
-  devtools::load_all()
 
   test_data_na <- jjscatterstats_test
   test_data_na$ki67_index[1:20] <- NA
@@ -113,7 +106,6 @@ test_that("jjscatterstats handles missing data in both variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles extreme outliers", {
-  devtools::load_all()
 
   test_data_outliers <- jjscatterstats_test
   # Add extreme outliers
@@ -130,7 +122,6 @@ test_that("jjscatterstats handles extreme outliers", {
 })
 
 test_that("jjscatterstats handles constant dep variable", {
-  devtools::load_all()
 
   test_data_const <- jjscatterstats_test
   test_data_const$ki67_index <- 50  # All values the same
@@ -146,7 +137,6 @@ test_that("jjscatterstats handles constant dep variable", {
 })
 
 test_that("jjscatterstats handles constant group variable", {
-  devtools::load_all()
 
   test_data_const <- jjscatterstats_test
   test_data_const$tumor_size <- 50  # All values the same
@@ -166,7 +156,6 @@ test_that("jjscatterstats handles constant group variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats errors on non-existent dep variable", {
-  devtools::load_all()
 
   expect_error(
     jjscatterstats(
@@ -180,7 +169,6 @@ test_that("jjscatterstats errors on non-existent dep variable", {
 })
 
 test_that("jjscatterstats errors on non-existent group variable", {
-  devtools::load_all()
 
   expect_error(
     jjscatterstats(
@@ -194,7 +182,6 @@ test_that("jjscatterstats errors on non-existent group variable", {
 })
 
 test_that("jjscatterstats errors on categorical dep variable", {
-  devtools::load_all()
 
   # Trying to use categorical as continuous
   expect_error(
@@ -209,7 +196,6 @@ test_that("jjscatterstats errors on categorical dep variable", {
 })
 
 test_that("jjscatterstats errors on categorical group variable", {
-  devtools::load_all()
 
   # Trying to use categorical as continuous
   expect_error(
@@ -224,7 +210,6 @@ test_that("jjscatterstats errors on categorical group variable", {
 })
 
 test_that("jjscatterstats errors on empty dataset", {
-  devtools::load_all()
 
   empty_data <- jjscatterstats_test[0, ]
 
@@ -244,7 +229,6 @@ test_that("jjscatterstats errors on empty dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles minimum confidence level", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -257,7 +241,6 @@ test_that("jjscatterstats handles minimum confidence level", {
 })
 
 test_that("jjscatterstats handles maximum confidence level", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -270,7 +253,6 @@ test_that("jjscatterstats handles maximum confidence level", {
 })
 
 test_that("jjscatterstats handles minimum point size", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -283,7 +265,6 @@ test_that("jjscatterstats handles minimum point size", {
 })
 
 test_that("jjscatterstats handles maximum point size", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -296,7 +277,6 @@ test_that("jjscatterstats handles maximum point size", {
 })
 
 test_that("jjscatterstats handles minimum point alpha", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -309,7 +289,6 @@ test_that("jjscatterstats handles minimum point alpha", {
 })
 
 test_that("jjscatterstats handles maximum point alpha", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -326,7 +305,6 @@ test_that("jjscatterstats handles maximum point alpha", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles variable names with spaces", {
-  devtools::load_all()
 
   test_data_spaces <- jjscatterstats_test
   names(test_data_spaces)[names(test_data_spaces) == "ki67_index"] <- "Ki67 Index"
@@ -346,7 +324,6 @@ test_that("jjscatterstats handles variable names with spaces", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles tibble input", {
-  devtools::load_all()
 
   tibble_data <- tibble::as_tibble(jjscatterstats_test)
 
@@ -360,7 +337,6 @@ test_that("jjscatterstats handles tibble input", {
 })
 
 test_that("jjscatterstats handles data.frame input", {
-  devtools::load_all()
 
   df_data <- as.data.frame(jjscatterstats_test)
 
@@ -378,7 +354,6 @@ test_that("jjscatterstats handles data.frame input", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles duplicate rows", {
-  devtools::load_all()
 
   test_data_dup <- rbind(jjscatterstats_test, jjscatterstats_test[1:50, ])
 
@@ -396,7 +371,6 @@ test_that("jjscatterstats handles duplicate rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles negative values", {
-  devtools::load_all()
 
   test_data_neg <- jjscatterstats_test
   # Create centered variables with negative values
@@ -413,7 +387,6 @@ test_that("jjscatterstats handles negative values", {
 })
 
 test_that("jjscatterstats handles zero values", {
-  devtools::load_all()
 
   test_data_zero <- jjscatterstats_test
   test_data_zero$ki67_index[1:20] <- 0
@@ -433,7 +406,6 @@ test_that("jjscatterstats handles zero values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles single group level", {
-  devtools::load_all()
 
   test_data_single <- jjscatterstats_test
   test_data_single$receptor_status <- "Positive"  # All same group
@@ -453,7 +425,6 @@ test_that("jjscatterstats handles single group level", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles perfect positive correlation", {
-  devtools::load_all()
 
   test_data_perfect <- jjscatterstats_test
   test_data_perfect$perfect_y <- test_data_perfect$ki67_index * 2  # Perfect correlation
@@ -472,7 +443,6 @@ test_that("jjscatterstats handles perfect positive correlation", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles quadratic relationship", {
-  devtools::load_all()
 
   test_data_quad <- jjscatterstats_test
   test_data_quad$quadratic_y <- test_data_quad$ki67_index^2 + rnorm(nrow(test_data_quad), 0, 100)
@@ -488,7 +458,6 @@ test_that("jjscatterstats handles quadratic relationship", {
 })
 
 test_that("jjscatterstats handles logarithmic relationship", {
-  devtools::load_all()
 
   test_data_log <- jjscatterstats_test
   test_data_log$log_y <- log(test_data_log$ki67_index + 1) * 10 + rnorm(nrow(test_data_log), 0, 2)

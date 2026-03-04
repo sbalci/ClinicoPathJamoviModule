@@ -147,6 +147,7 @@ for repeated measurements and within-subjects analysis with
 statistical annotations and significance testing.
 }
 \examples{
+\donttest{
 # Basic within-subjects analysis with iris dataset (simulated repeated measures)
 data(iris)
 iris_wide <- data.frame(
@@ -219,5 +220,5 @@ jjwithinstats(
     centralityplotting = TRUE,
     mytitle = "Tooth Growth Over Time"
 )
-
+}
 }

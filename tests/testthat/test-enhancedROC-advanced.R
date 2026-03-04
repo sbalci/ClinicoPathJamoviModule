@@ -31,7 +31,6 @@ enhancedROC <- function(...) {
 # - Comprehensive output mode
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(enhancedroc_biomarker, package = "ClinicoPath")

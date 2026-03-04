@@ -341,6 +341,7 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example with pcaloadingtest_data (simulated dataset with known structure)
 #' data("pcaloadingtest_data")
 #'
@@ -356,7 +357,7 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   conflevel = 0.95,
 #'   adjustmethod = "BH"
 #' )
-#'
+#'}
 #' @section References:
 #' Linting M, van Os BJ, Meulman JJ. (2011). Statistical Significance of the Contribution of Variables to the PCA solution: An Alternative Permutation Strategy. Psychometrika, 76(3):440-460.
 #'

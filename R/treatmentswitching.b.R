@@ -733,7 +733,7 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for minimum sample size
             if (nrow(data) < 50) {
                 self$results$todo$setContent(
-                    "<h3>⚠ Small Sample Size Warning</h3>
+                    "<h3> Small Sample Size Warning</h3>
                     <p>Treatment switching analysis typically requires larger sample sizes (≥50) 
                     for reliable propensity score estimation and causal inference.</p>"
                 )

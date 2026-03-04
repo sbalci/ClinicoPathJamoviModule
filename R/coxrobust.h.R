@@ -564,6 +564,7 @@ coxrobustBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' analysis in the presence of data anomalies.
 #'
 #' @examples
+#' \donttest{
 #' # Example: Robust Cox regression
 #' library(survival)
 #' library(coxrobust)
@@ -577,7 +578,7 @@ coxrobustBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     robust_method = "huber",
 #'     tuning_constant = 1.345
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

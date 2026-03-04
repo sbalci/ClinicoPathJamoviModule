@@ -4,7 +4,7 @@ title: Analysis Without Gold Standard
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Multiple Test Analysis Without Gold Standard
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -20,7 +20,7 @@ description:
             n <- 200
             
             # Simulate disease status (latent, unknown)
-            disease <- rbinom(n, 1, 0.3)  # 30% prevalence
+            disease <- rbinom(n, 1, 0.3)  # 30 percent prevalence
             
             # Simulate test results with known sensitivity/specificity
             test1_result <- ifelse(disease == 1, 

@@ -160,7 +160,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<h4 style='margin-top: 15px;'>Required Packages:</h4>",
                     "<p style='margin-left: 20px;'><code>smcure</code>, <code>flexsurvcure</code> (optional: <code>cuRe</code>, <code>npcure</code>)</p>",
 
-                    "<p style='margin-top: 15px;'><em>💡 Tip: Start with Mixture Cure Model, then compare with other types if needed. Ensure adequate follow-up time (at least 2-3x median event time) for reliable cure fraction estimates.</em></p>",
+                    "<p style='margin-top: 15px;'><em> Tip: Start with Mixture Cure Model, then compare with other types if needed. Ensure adequate follow-up time (at least 2-3x median event time) for reliable cure fraction estimates.</em></p>",
                     "</div>"
                 ))
                 return()
@@ -226,7 +226,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'cuReModelInfo',
                     type = jmvcore::NoticeType$INFO,
                     content = paste0(
-                        "ℹ️ cuRe Model Selected\n\n",
+                        " cuRe Model Selected\n\n",
                         "The cuRe model is a specialized approach that can incorporate background mortality rates. ",
                         "This is particularly useful for cancer survival analysis where general population mortality matters.\n\n",
                         "Requirements:\n",
@@ -243,7 +243,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'npcureModelInfo',
                     type = jmvcore::NoticeType$INFO,
                     content = paste0(
-                        "ℹ️ Nonparametric Cure Model Selected\n\n",
+                        " Nonparametric Cure Model Selected\n\n",
                         "The npcure model uses kernel smoothing without distributional assumptions. ",
                         "This provides flexibility but has limitations:\n\n",
                         "• Works with single continuous covariate only\n",
@@ -264,7 +264,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = 'bootstrapWarning',
                         type = jmvcore::NoticeType$INFO,
                         content = paste0(
-                            "⏱️ Bootstrap Confidence Intervals\n\n",
+                            " Bootstrap Confidence Intervals\n\n",
                             "Bootstrap resampling is enabled with ", n_bootstrap, " iterations. ",
                             "This will take additional computation time (possibly several minutes).\n\n",
                             "Progress cannot be displayed during bootstrap. Please be patient."
@@ -1021,7 +1021,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # LIMITATION NOTICE: These are descriptive diagnostics, not formal hypothesis tests
                 gof_table$addRow(rowKey = "notice", values = list(
-                    test_name = "⚠️ LIMITATIONS",
+                    test_name = " LIMITATIONS",
                     statistic = NA,
                     p_value = NA,
                     interpretation = "These diagnostics are descriptive only. Formal goodness-of-fit tests for cure models are limited. Use clinical judgment."
@@ -1077,8 +1077,8 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     statistic = ifelse(converged, 1, 0),
                     p_value = NA,
                     interpretation = ifelse(converged,
-                        "✓ No obvious convergence issues detected",
-                        paste("⚠️", paste(convergence_issues, collapse = "; "))
+                        " No obvious convergence issues detected",
+                        paste("", paste(convergence_issues, collapse = "; "))
                     )
                 ))
 
@@ -1093,8 +1093,8 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }, error = function(e) NA)
 
                 if (!is.na(n_events) && !is.na(n_total)) {
-                    sample_adequacy <- ifelse(n_events >= 50 & n_total >= 200, "✓ Adequate",
-                                            ifelse(n_events >= 20 & n_total >= 100, "⚠️ Marginal", "❌ Inadequate"))
+                    sample_adequacy <- ifelse(n_events >= 50 & n_total >= 200, " Adequate",
+                                            ifelse(n_events >= 20 & n_total >= 100, " Marginal", " Inadequate"))
 
                     gof_table$addRow(rowKey = "sample_size", values = list(
                         test_name = "Sample Size Adequacy",
@@ -1107,7 +1107,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add disclaimer to summary
                 gof_html <- paste0(
                     "<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
-                    "<h4 style='margin-top:0'>⚠️ Goodness of Fit Limitations</h4>",
+                    "<h4 style='margin-top:0'> Goodness of Fit Limitations</h4>",
                     "<p><strong>IMPORTANT:</strong> Cure models lack widely accepted formal goodness-of-fit tests. ",
                     "The diagnostics above are descriptive only and should be interpreted with caution.</p>",
                     "<p><strong>Recommendations:</strong></p>",
@@ -1179,7 +1179,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 sens_html <- paste0(
                     "<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
-                    "<h4 style='margin-top:0'>⚠️ Sensitivity Analysis Limitations</h4>",
+                    "<h4 style='margin-top:0'> Sensitivity Analysis Limitations</h4>",
                     "<p><strong>IMPORTANT:</strong> This is a simplified assessment. For comprehensive sensitivity analysis, ",
                     "models should be refitted with different assumptions (cure thresholds, distributions, covariates).</p>",
                     "</div>",
@@ -1195,11 +1195,11 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ),
 
                     "<p><strong>CI width:</strong> ", round(ci_range * 100, 1), " percentage points ",
-                    ifelse(is_precise, "(✓ Relatively precise)", "(⚠️ Wide - consider more data or bootstrap)"), "</p>",
+                    ifelse(is_precise, "( Relatively precise)", "( Wide - consider more data or bootstrap)"), "</p>",
 
                     "<h4>Recommendations for Robust Sensitivity Analysis</h4>",
                     "<ul>",
-                    "<li><strong>Enable bootstrap CI</strong> (", ifelse(has_bootstrap_ci, "✓ Already enabled", "❌ Not enabled"),
+                    "<li><strong>Enable bootstrap CI</strong> (", ifelse(has_bootstrap_ci, " Already enabled", " Not enabled"),
                     ") for more accurate uncertainty quantification</li>",
                     "<li><strong>Try different cure thresholds:</strong> Rerun analysis with different 'Cure Threshold Time' values ",
                     "(e.g., 48, 60, 72 months) to see if estimates remain stable</li>",

@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.36
+version: 0.0.37
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -1372,7 +1372,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: Function for Interrater Reliability.
@@ -1473,7 +1473,7 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -2062,13 +2062,13 @@ analyses:
     menuSubgroup: Categorical vs Categorical
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
     description: >
-      Create segmented total bar charts (100% stacked bars) that show
+      Create segmented total bar charts (100 percent stacked bars) that show
       proportional 
 
       breakdowns within categories. Perfect for displaying composition data
       where 
 
-      each bar represents 100% and segments show relative proportions.
+      each bar represents 100 percent and segments show relative proportions.
     ribbon: analyses
     category: analyses
   - title: Economist-Style Distribution Plots
@@ -2595,7 +2595,7 @@ analyses:
     description: |
       Advanced ANOVA analysis with comprehensive post hoc testing, 
       effect sizes, and assumption checking. Addresses the critical issue 
-      where 68% of pathology studies fail proper multiple comparisons.
+      where 68 percent of pathology studies fail proper multiple comparisons.
   - title: Mixed Model ANOVA
     name: mixedmodelanova
     ns: ClinicoPath
@@ -2651,7 +2651,7 @@ analyses:
       effect sizes, and association measures. Addresses the critical issue
       where 
 
-      25% of pathology studies use categorical analysis incorrectly.
+      25 percent of pathology studies use categorical analysis incorrectly.
   - title: Treatment Effect Meta-Analysis
     name: treatmentmeta
     ns: ClinicoPath
@@ -2998,17 +2998,17 @@ analyses:
     menuSubgroup: Survival Analysis
     menuTitle: Flexible Parametric Survival Models (Enhanced)
     description: >-
-      🔬 ENHANCED: Comprehensive flexible parametric survival modeling
-      combining  traditional parametric distributions (Generalized Gamma,
-      Weibull, etc.) with  advanced spline-based approaches (Royston-Parmar,
-      B-splines). Provides maximum  flexibility for modeling complex hazard
-      shapes, time-varying effects, and  non-proportional hazards.
+      ENHANCED: Comprehensive flexible parametric survival modeling combining
+      traditional parametric distributions (Generalized Gamma, Weibull, etc.)
+      with advanced spline-based approaches (Royston-Parmar, B-splines).
+      Provides maximum flexibility for modeling complex hazard shapes,
+      time-varying effects, and non-proportional hazards.
 
-      ⚕️ CLINICAL USE: Model survival data when standard Cox models are
-      inadequate.  Ideal for cancer research, health economics, and comparative
-      effectiveness studies.
+      CLINICAL USE: Model survival data when standard Cox models are inadequate.
+      Ideal for cancer research, health economics, and comparative effectiveness
+      studies.
 
-      📊 KEY FEATURES: • Traditional parametric and spline-based models in one
+      KEY FEATURES: • Traditional parametric and spline-based models in one
       function • Automatic model comparison and selection • Clinical
       interpretation of parameters • Comprehensive diagnostic plots • Copy-ready
       report templates
@@ -3081,21 +3081,21 @@ analyses:
     menuTitle: Comprehensive Flexible Parametric Survival Models
     menuSubtitle: Advanced flexible parametric models with clinical analysis
     description: >-
-      🔬 FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
+      FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
 
-      ⚕️ CLINICAL USE: Model survival data with smooth, flexible hazard
-      functions that can capture  complex patterns (increasing, decreasing, or
-      bathtub-shaped hazards). Better than Cox models  when you need to
+      CLINICAL USE: Model survival data with smooth, flexible hazard functions
+      that can capture complex patterns (increasing, decreasing, or
+      bathtub-shaped hazards). Better than Cox models when you need to
       extrapolate beyond observed data or estimate absolute risks.
 
-      📊 WHEN TO USE: • Cancer survival with complex hazard patterns • Health
+      WHEN TO USE: • Cancer survival with complex hazard patterns • Health
       economic evaluations requiring extrapolation • Time-varying treatment
       effects • Relative survival analysis with population mortality
 
-      ⚠️ REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering
+      REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering
       the period of interest • For df>4: need ≥100 events to avoid overfitting
 
-      📈 KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
+      KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
       predictions at specific time points • Model fit statistics (AIC,
       concordance) • Time-varying effect plots • Copy-ready clinical report
       sentences
@@ -4030,7 +4030,7 @@ analyses:
     menuGroup: OncoPathologyT
     menuTitle: '[DEPRECATED] Advanced Flexible Parametric Survival Models'
     description: >
-      ⚠️ DEPRECATED: This function has been consolidated into the enhanced
+      DEPRECATED: This function has been consolidated into the enhanced
       flexrstpm2 function  for better functionality and maintainability. Please
       use flexrstpm2 (SurvivalT > ClinicoPath Survival)  instead, which includes
       all features from this function plus additional capabilities.
@@ -4395,7 +4395,7 @@ analyses:
     menuTitle: Flexible Parametric Models
     menuSubtitle: Advanced parametric survival modeling with flexible baseline hazards
     description: >-
-      ⚠️ DEPRECATED: This function has been consolidated into the enhanced
+      DEPRECATED: This function has been consolidated into the enhanced
       flexrstpm2 function 
 
       for better functionality and maintainability. Please use flexrstpm2
@@ -4602,7 +4602,7 @@ analyses:
       size calculations,
 
       assumption checking, and post hoc analysis - addressing critical gaps
-      identified in 30% 
+      identified in 30 percent 
 
       of pathology studies that use these methods.
   - title: Non-parametric Regression Methods
@@ -4751,7 +4751,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -5346,7 +5346,7 @@ analyses:
     menuTitle: Brier Score & Integrated Brier Score
     menuSubtitle: Calibration accuracy for time-to-event predictions
     description: >
-      ⚠️ IMPORTANT LIMITATIONS: This is a BASIC implementation for single
+      IMPORTANT LIMITATIONS: This is a BASIC implementation for single
       time-point Brier score evaluation. It requires PRE-COMPUTED survival
       probabilities (not raw Cox models). Many features listed below are NOT
       IMPLEMENTED or STATISTICALLY INVALID.
@@ -5357,7 +5357,7 @@ analyses:
       better prediction accuracy (perfect prediction = 0, worst = 1). Includes
       scaled Brier scores relative to null model (Kaplan-Meier curve).
 
-      ⚠️ NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS),
+      NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS),
       competing risks, linear predictor inputs, formula inputs,
       temporal/external validation flags. These features may appear in the UI
       but will generate errors if used.
@@ -5546,12 +5546,12 @@ analyses:
       in the minority (positive) class. The area under the PR curve (PR-AUC or
       Average Precision) provides a single-number summary of model performance.
       PR analysis is essential for evaluating rare event detection (mitotic
-      figures <1%, rare tumor cells, micrometastases), cancer screening where
-      positives are rare, quality control in digital pathology where defects are
-      uncommon, and AI triage systems where abnormal cases are infrequent. This
-      module provides comprehensive PR analysis with optimal threshold
-      selection, comparison to baseline (random classifier), and F-score
-      optimization for different precision-recall trade-offs.
+      figures <1 percent, rare tumor cells, micrometastases), cancer screening
+      where positives are rare, quality control in digital pathology where
+      defects are uncommon, and AI triage systems where abnormal cases are
+      infrequent. This module provides comprehensive PR analysis with optimal
+      threshold selection, comparison to baseline (random classifier), and
+      F-score optimization for different precision-recall trade-offs.
   - title: Time-Dependent Decision Curve Analysis
     name: timedependentdca
     ns: ClinicoPath

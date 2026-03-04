@@ -42,10 +42,11 @@ enhancedtwowayfrequency(
 \item{cellPercent}{Display percentages of total sample (BlueSky
 BSkyTwoWayFrequency feature)}
 
-\item{rowPercent}{Display row-wise percentages (sum to 100\\% across rows)}
+\item{rowPercent}{Display row-wise percentages (sum to 100 percent across
+rows)}
 
-\item{colPercent}{Display column-wise percentages (sum to 100\\% across
-columns)}
+\item{colPercent}{Display column-wise percentages (sum to 100 percent
+across columns)}
 
 \item{showCounts}{Display raw frequency counts in cross-tabulation}
 

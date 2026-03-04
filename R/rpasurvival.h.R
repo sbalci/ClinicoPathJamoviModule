@@ -586,6 +586,7 @@ rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' prognostic staging systems by integrating multiple predictors.
 #'
 #' @examples
+#' \donttest{
 #' # Example: Develop RPA staging system for survival data
 #' # Generate example survival data with multiple predictors
 #' set.seed(12345)
@@ -648,7 +649,7 @@ rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     prunetree = TRUE,
 #'     cptable = TRUE       # Show complexity parameter table
 #' )
-#'
+#'}
 #' @param data .
 #' @param time a (non-negative valued) vector of survival times containing the
 #'   (possibly censored) time to the event or time of last observation

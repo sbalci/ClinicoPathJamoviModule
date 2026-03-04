@@ -120,7 +120,7 @@ options:
       max: 0.99
       default: 0.95
       description: >-
-        Confidence level for coefficient confidence intervals (e.g., 0.95 for 95% CI).
+        Confidence level for coefficient confidence intervals (e.g., 0.95 for 95 percent CI).
 
     - name: inner_ci_level
       title: 'Inner Confidence Level'

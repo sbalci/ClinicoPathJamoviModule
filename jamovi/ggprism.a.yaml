@@ -313,7 +313,7 @@ options:
           name: se
         - title: "Standard Deviation"
           name: sd
-        - title: "95% CI"
+        - title: "95 percent CI"
           name: ci
       default: se
       description:

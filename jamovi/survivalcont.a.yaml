@@ -4,7 +4,7 @@ title: Survival Analysis for Continuous Variable
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 options:
@@ -324,7 +324,7 @@ options:
         Minimum P-value finds points that minimize log-rank p-values.
 
     - name: min_group_size
-      title: Minimum Group Size (%)
+      title: Minimum Group Size ( percent)
       type: Number
       min: 5
       max: 30
@@ -360,11 +360,11 @@ options:
         survival analyses.
 
     - name: ci95
-      title: '95% CI'
+      title: '95 percent CI'
       type: Bool
       default: false
       description: >-
-        Enable this option to display 95% confidence intervals around the survival estimates
+        Enable this option to display 95 percent confidence intervals around the survival estimates
         in the plots.
 
     - name: risktable

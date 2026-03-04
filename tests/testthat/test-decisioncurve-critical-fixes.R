@@ -7,7 +7,6 @@
 
 test_that("decisioncurve rejects non-probability inputs", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
 
     # Create test data with logit-scale predictions (NOT probabilities)

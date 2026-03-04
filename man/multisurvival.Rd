@@ -147,8 +147,8 @@ visualization of survival functions without covariate adjustment.}
 \item{byplot}{The interval (in units defined by \code{timetypeoutput}) at
 which time points or labels are shown on plots.}
 
-\item{ci95}{If true, displays 95\\% confidence intervals around the survival
-estimates on plots.}
+\item{ci95}{If true, displays 95 percent confidence intervals around the
+survival estimates on plots.}
 
 \item{risktable}{If true, displays the number of subjects at risk at each
 time point below the survival plot.}
@@ -299,6 +299,7 @@ or examining multiple predictors, the model accounts for how these factors
 influence event rates relative to the person-time at risk in each subgroup.
 }
 \examples{
+\donttest{
 # Example 1: Basic multivariable Cox regression
 library(survival)
 data(colon)
@@ -384,5 +385,5 @@ multisurvival(
     time_intervals = "180, 365, 730",  # 6mo, 1yr, 2yr
     rate_multiplier = 1000  # Rate per 1000 person-days
 )
-
+}
 }

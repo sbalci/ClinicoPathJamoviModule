@@ -2458,7 +2458,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else {
                 welcome_html <- paste0(welcome_html,
                     "<div style='margin-bottom: 10px;'>",
-                    if(n_vars >= 2) "[✓]" else "[ ]", " Rater Variables: ", n_vars, "/2 minimum</div>",
+                    if(n_vars >= 2) "[]" else "[ ]", " Rater Variables: ", n_vars, "/2 minimum</div>",
                     "<p style='margin: 0; color: #666;'>Select at least 2 rater variables to proceed with analysis.</p>"
                 )
             }
@@ -2711,7 +2711,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             report_html <- paste0(
                 "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.6;'>",
                 "<div style='background: #e3f2fd; border: 1px solid #1976d2; padding: 15px; margin-bottom: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>📋 Copy-Ready Report Template</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'> Copy-Ready Report Template</h4>",
                 "<p style='margin: 0; font-size: 13px; color: #666;'>Click inside the boxes to select text, then copy (Ctrl+C/Cmd+C) for use in reports:</p>",
                 "</div>",
                 
@@ -2736,7 +2736,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "</div></div>",
                 
                 "<div style='background: #fff3e0; border: 1px solid #f57c00; padding: 10px; font-size: 12px;'>",
-                "<strong>💡 Tip:</strong> Combine these sentences and adapt the language to match your publication style. ",
+                "<strong> Tip:</strong> Combine these sentences and adapt the language to match your publication style. ",
                 "Consider adding information about rater training, case characteristics, or clinical context as appropriate.",
                 "</div></div>"
             )
@@ -2815,7 +2815,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<div style='background: #fff3e0; border: 2px solid #f57c00; padding: 20px;'>",
                 "<h3 style='margin: 0 0 15px 0; color: #f57c00; font-size: 18px;'>Assumptions & Caveats</h3>",
                 
-                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'>⚠️ Important Assumptions</h4>",
+                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'> Important Assumptions</h4>",
                 "<ul style='margin: 0 0 15px 0; padding-left: 20px; font-size: 14px;'>",
                 "<li><strong>Independent ratings:</strong> Each rater evaluates cases without knowledge of other ratings</li>",
                 "<li><strong>Same rating scale:</strong> All raters use identical categories in the same order</li>",
@@ -2823,7 +2823,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<li><strong>Stable conditions:</strong> Rating criteria remain consistent throughout the study</li>",
                 "</ul>",
                 
-                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'>📊 Data Requirements</h4>",
+                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'> Data Requirements</h4>",
                 "<ul style='margin: 0 0 15px 0; padding-left: 20px; font-size: 14px;'>",
                 "<li><strong>Minimum sample size:</strong> 30+ cases for reliable estimates</li>",
                 "<li><strong>Category distribution:</strong> Avoid rare categories (<5% of cases)</li>",
@@ -2831,7 +2831,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<li><strong>Factor variables:</strong> Data must be properly coded as factors in your dataset</li>",
                 "</ul>",
                 
-                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'>🔍 Common Pitfalls</h4>",
+                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'> Common Pitfalls</h4>",
                 "<ul style='margin: 0 0 15px 0; padding-left: 20px; font-size: 14px;'>",
                 "<li><strong>Prevalence effects:</strong> Very rare or very common conditions can inflate/deflate kappa</li>",
                 "<li><strong>Bias effects:</strong> Systematic differences between raters reduce apparent agreement</li>",
@@ -2839,7 +2839,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<li><strong>Case difficulty:</strong> Easy/difficult cases may show different agreement patterns</li>",
                 "</ul>",
                 
-                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'>💡 Interpretation Guidelines</h4>",
+                "<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'> Interpretation Guidelines</h4>",
                 "<div style='background: #f8f8f8; padding: 12px; border-radius: 4px; font-size: 14px;'>",
                 "<p style='margin: 0 0 8px 0;'><strong>Kappa Interpretation (Landis & Koch, 1977):</strong></p>",
                 "<ul style='margin: 0 0 8px 0; padding-left: 20px;'>",
@@ -2866,7 +2866,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             guide_html <- paste0(
                 "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
                 "<div style='background: #e3f2fd; border-left: 4px solid #1976d2; padding: 15px; margin-bottom: 15px;'>",
-                "<h3 style='margin: 0 0 10px 0; color: #1976d2; font-size: 18px;'>📊 Weighted Kappa Guide</h3>",
+                "<h3 style='margin: 0 0 10px 0; color: #1976d2; font-size: 18px;'> Weighted Kappa Guide</h3>",
                 "<p style='margin: 0; font-size: 14px; color: #424242;'>",
                 "You have selected <strong>", switch(current_weighting,
                     "equal" = "Linear/Equal weighting",
@@ -2875,10 +2875,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "</p></div>",
                 
                 "<div style='background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 15px;'>",
-                "<h4 style='margin: 0 0 12px 0; color: #2e7d32; font-size: 16px;'>⚖️ Weighting Schemes Explained</h4>",
+                "<h4 style='margin: 0 0 12px 0; color: #2e7d32; font-size: 16px;'> Weighting Schemes Explained</h4>",
                 
                 "<div style='margin-bottom: 15px;'>",
-                "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'>🔹 Linear/Equal Weighting (", 
+                "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'> Linear/Equal Weighting (", 
                 if(current_weighting == "equal") "<span style='background: #c8e6c9; padding: 2px 6px; border-radius: 3px;'>SELECTED</span>" else "Not selected", ")</h5>",
                 "<div style='font-size: 13px; margin-left: 15px;'>",
                 "<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - |i - j| / (k - 1)</p>",
@@ -2892,7 +2892,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "</div></div>",
                 
                 "<div style='margin-bottom: 15px;'>",
-                "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'>🔹 Quadratic/Squared Weighting (",
+                "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'> Quadratic/Squared Weighting (",
                 if(current_weighting == "squared") "<span style='background: #c8e6c9; padding: 2px 6px; border-radius: 3px;'>SELECTED</span>" else "Not selected", ")</h5>",
                 "<div style='font-size: 13px; margin-left: 15px;'>",
                 "<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - [(i - j) / (k - 1)]²</p>",
@@ -2906,7 +2906,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "</div></div>",
                 
                 "<div>",
-                "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'>🔹 Unweighted Kappa (Standard)</h5>",
+                "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'> Unweighted Kappa (Standard)</h5>",
                 "<div style='font-size: 13px; margin-left: 15px;'>",
                 "<p style='margin: 0 0 6px 0;'><strong>When to use:</strong></p>",
                 "<ul style='margin: 0 0 8px 0; padding-left: 20px;'>",
@@ -2919,7 +2919,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "</div>",
                 
                 "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 15px; margin-bottom: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'>🎯 Clinical Decision Guide</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'> Clinical Decision Guide</h4>",
                 "<div style='font-size: 14px;'>",
                 "<p style='margin: 0 0 8px 0;'><strong>Choose Linear weighting when:</strong></p>",
                 "<ul style='margin: 0 0 12px 0; padding-left: 20px;'>",
@@ -2936,11 +2936,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "</ul>",
                 
                 "<p style='margin: 0; font-weight: 500; color: #d84315;'>",
-                "💡 <em>When in doubt, quadratic weighting is often preferred in medical research as it better reflects clinical reality.</em></p>",
+                " <em>When in doubt, quadratic weighting is often preferred in medical research as it better reflects clinical reality.</em></p>",
                 "</div></div>",
                 
                 "<div style='background: #f3e5f5; border-left: 4px solid #8e24aa; padding: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #6a1b9a; font-size: 15px;'>📊 Interpretation Impact</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #6a1b9a; font-size: 15px;'> Interpretation Impact</h4>",
                 "<div style='font-size: 14px;'>",
                 "<p style='margin: 0 0 8px 0;'>Weighted kappa values are typically:</p>",
                 "<ul style='margin: 0 0 8px 0; padding-left: 20px;'>",
@@ -2961,7 +2961,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             glossary_html <- paste0(
                 "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.5;'>",
                 "<div style='background: #f5f5f5; border: 2px solid #2e7d32; padding: 20px; margin-bottom: 20px;'>",
-                "<h3 style='margin: 0 0 15px 0; color: #2e7d32; font-size: 18px;'>📚 Statistical Terms Glossary</h3>",
+                "<h3 style='margin: 0 0 15px 0; color: #2e7d32; font-size: 18px;'> Statistical Terms Glossary</h3>",
                 "<p style='margin: 0; font-size: 14px; color: #666;'>Quick reference for inter-rater reliability statistics and their clinical meanings</p>",
                 "</div>",
                 
@@ -3021,7 +3021,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 
                 # Interpretation Guide
                 "<div style='background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; margin-bottom: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'>📊 Interpretation Guidelines</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'> Interpretation Guidelines</h4>",
                 "<div style='font-size: 14px;'>",
                 "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
                 "<tr style='background: #f5f5f5;'><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Kappa/Alpha Value</th><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Interpretation</th><th style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Clinical Action</th></tr>",
@@ -3036,7 +3036,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 
                 # Tips
                 "<div style='background: #fff3e0; border: 1px solid #f57c00; padding: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'>💡 Practical Tips</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'> Practical Tips</h4>",
                 "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
                 "<li><strong>Sample size:</strong> Minimum 30 cases for reliable estimates, 50+ preferred</li>",
                 "<li><strong>Category balance:</strong> Avoid categories with &lt;5% frequency when possible</li>",
@@ -4124,28 +4124,28 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; font-family: \"Segoe UI\", Arial, sans-serif; line-height: 1.6;'>",
                 
                 "<h3 style='margin: 0 0 15px 0; color: #1976d2; font-size: 18px; border-bottom: 2px solid #e3f2fd; padding-bottom: 8px;'>",
-                "📊 Statistical Commentary & Educational Notes</h3>",
+                " Statistical Commentary & Educational Notes</h3>",
                 
                 "<div style='background: #e8f5e8; border-left: 4px solid #4caf50; padding: 15px; margin-bottom: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 15px;'>✅ Understanding Your Results</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 15px;'> Understanding Your Results</h4>",
                 "<div style='font-size: 14px;'>",
                 private$.generateResultsExplanation(),
                 "</div></div>",
                 
                 "<div style='background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin-bottom: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #f57c00; font-size: 15px;'>🔍 Statistical Interpretation Guide</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #f57c00; font-size: 15px;'> Statistical Interpretation Guide</h4>",
                 "<div style='font-size: 14px;'>",
                 private$.generateInterpretationGuide(),
                 "</div></div>",
                 
                 "<div style='background: #e1f5fe; border-left: 4px solid #0277bd; padding: 15px; margin-bottom: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #01579b; font-size: 15px;'>🎓 Educational Insights</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #01579b; font-size: 15px;'> Educational Insights</h4>",
                 "<div style='font-size: 14px;'>",
                 private$.generateEducationalInsights(),
                 "</div></div>",
                 
                 "<div style='background: #fce4ec; border-left: 4px solid #c2185b; padding: 15px;'>",
-                "<h4 style='margin: 0 0 10px 0; color: #ad1457; font-size: 15px;'>⚠️ Important Considerations</h4>",
+                "<h4 style='margin: 0 0 10px 0; color: #ad1457; font-size: 15px;'> Important Considerations</h4>",
                 "<div style='font-size: 14px;'>",
                 private$.generateImportantConsiderations(),
                 "</div></div>",
@@ -4162,23 +4162,23 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             data_summary <- private$.summarizeCurrentData()
             
             explanations <- c(
-                paste0("📋 <strong>Your Dataset:</strong> ", data_summary$n_cases, " cases rated by ", 
+                paste0(" <strong>Your Dataset:</strong> ", data_summary$n_cases, " cases rated by ", 
                        data_summary$n_raters, " raters across ", data_summary$n_categories, " categories."),
                 
                 if (self$options$gwetAC) {
-                    "🔬 <strong>Gwet's Coefficients:</strong> These are more robust than standard kappa when categories have unequal prevalence - common in clinical diagnoses."
+                    " <strong>Gwet's Coefficients:</strong> These are more robust than standard kappa when categories have unequal prevalence - common in clinical diagnoses."
                 } else { NULL },
                 
                 if (self$options$pabak) {
-                    "⚖️ <strong>PABAK Analysis:</strong> Adjusts for prevalence and bias issues that can artificially inflate or deflate standard kappa values."
+                    " <strong>PABAK Analysis:</strong> Adjusts for prevalence and bias issues that can artificially inflate or deflate standard kappa values."
                 } else { NULL },
                 
                 if (self$options$raterBiasAnalysis) {
-                    "👥 <strong>Bias Detection:</strong> Identifies systematic tendencies in individual raters - crucial for training and calibration programs."
+                    " <strong>Bias Detection:</strong> Identifies systematic tendencies in individual raters - crucial for training and calibration programs."
                 } else { NULL },
                 
                 if (self$options$caseDifficultyScoring) {
-                    "📈 <strong>Difficulty Analysis:</strong> Cases with high disagreement may represent inherently ambiguous diagnoses or need for protocol refinement."
+                    " <strong>Difficulty Analysis:</strong> Cases with high disagreement may represent inherently ambiguous diagnoses or need for protocol refinement."
                 } else { NULL }
             )
             
@@ -4215,13 +4215,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Generate educational insights
         .generateEducationalInsights = function() {
             insights <- c(
-                "📚 <strong>Why Agreement Matters:</strong>",
+                " <strong>Why Agreement Matters:</strong>",
                 "• Ensures consistent patient care across different clinicians",
                 "• Validates diagnostic criteria and protocols",
                 "• Identifies training needs and calibration opportunities",
                 "• Essential for research reproducibility and multi-center studies",
                 "",
-                "🔬 <strong>Advanced Features Explained:</strong>",
+                " <strong>Advanced Features Explained:</strong>",
                 if (self$options$agreementStabilityAnalysis) {
                     "• <em>Stability Analysis:</em> Bootstrap resampling assesses how consistent your agreement statistics would be with different case samples."
                 } else { NULL },
@@ -4232,7 +4232,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     "• <em>Sample Size Planning:</em> Helps design future studies with adequate power to detect meaningful agreement levels."
                 } else { NULL },
                 "",
-                "💡 <strong>Best Practices:</strong>",
+                " <strong>Best Practices:</strong>",
                 "• Pre-specify agreement thresholds before data collection",
                 "• Use multiple agreement measures for comprehensive assessment",
                 "• Consider clinical context when interpreting statistical significance",
@@ -4245,23 +4245,23 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Generate important considerations
         .generateImportantConsiderations = function() {
             considerations <- c(
-                "⚠️ <strong>Statistical Assumptions:</strong>",
+                " <strong>Statistical Assumptions:</strong>",
                 "• Raters should be independent (no collaboration during rating)",
                 "• Cases should be representative of the target population",
                 "• Missing data patterns may affect results",
                 "• Category definitions should be clear and consistent",
                 "",
-                "🎯 <strong>Clinical Interpretation:</strong>",
+                " <strong>Clinical Interpretation:</strong>",
                 "• High statistical agreement ≠ automatically clinically acceptable",
                 "• Consider consequence of disagreements in your specific context",
                 "• Some diagnostic categories may inherently have lower agreement",
                 "• Training and protocols can improve agreement over time",
                 "",
                 if (private$.data_matrix %>% nrow() < 30) {
-                    "📊 <strong>Sample Size Note:</strong> Small sample sizes may produce unstable agreement estimates. Consider collecting additional data for more reliable results."
+                    " <strong>Sample Size Note:</strong> Small sample sizes may produce unstable agreement estimates. Consider collecting additional data for more reliable results."
                 } else { NULL },
                 "",
-                "🔄 <strong>Next Steps:</strong>",
+                " <strong>Next Steps:</strong>",
                 "• Review cases with poor agreement for learning opportunities",
                 "• Consider whether disagreements reveal protocol ambiguities",
                 "• Plan follow-up calibration sessions if agreement is suboptimal",

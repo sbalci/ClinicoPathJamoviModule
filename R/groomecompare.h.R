@@ -528,6 +528,7 @@ groomecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' charts, and side-by-side Kaplan-Meier curves.
 #'
 #' @examples
+#' \donttest{
 #' # Example: Compare ypTNM vs RPA staging systems
 #' # Generate sample survival data with two staging systems
 #' set.seed(12345)
@@ -572,7 +573,7 @@ groomecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     nboot = 100,
 #'     seed = 12345
 #' )
-#'
+#'}
 #' @param data .
 #' @param time a (non-negative valued) vector of survival times
 #' @param event the status indicator (0=censored, 1=event)

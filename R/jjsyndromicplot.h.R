@@ -323,7 +323,7 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjsyndromicplot",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = jjsyndromicplotResults$new(options=options),
                 data = data,
@@ -354,6 +354,7 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example with mtcars dataset
 #' data("mtcars")
 #'
@@ -380,7 +381,7 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   colorhigh = "red",
 #'   varorder = "abs decreasing"
 #' )
-#'
+#'}
 #' @section References:
 #' Ferguson AR, Irvine K-A, Gensel JC, et al. (2013). Derivation of Multivariate Syndromic Outcome Metrics for Consistent Testing across Multiple Models of Cervical Spinal Cord Injury in Rats. PLOS ONE, 8(3):e59712.
 #'

@@ -6,7 +6,6 @@
 # and output consistency for the agreement jamovi function
 
 library(testthat)
-devtools::load_all()
 
 # Load test data
 data(agreement_pathology, package = "ClinicoPath")

@@ -960,6 +960,7 @@ epidemiosurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('population_cohort')
 #'
 #' epidemiosurvival(
@@ -971,7 +972,7 @@ epidemiosurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'     calendar_time = "entry_year",
 #'     population_weights = "sampling_weight"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time_var Follow-up time (years, months, or days)
 #' @param event_var Event indicator (1=event, 0=censored)

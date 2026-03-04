@@ -52,7 +52,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Initialize instructions
             instructions_html <- paste0(
                 "<div style='background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
-                "<h3 style='color: #0277bd; margin-top: 0;'>📊 Grouped Bar Chart Comparison</h3>",
+                "<h3 style='color: #0277bd; margin-top: 0;'> Grouped Bar Chart Comparison</h3>",
                 "<div style='margin: 15px 0;'>",
                 "<p><strong>Create professional grouped bar charts to compare measurements across groups:</strong></p>",
                 "<ul style='margin: 10px 0; padding-left: 25px; line-height: 1.8;'>",
@@ -63,7 +63,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</ul>",
                 "</div>",
                 "<div style='background-color: #fff8e1; padding: 12px; border-radius: 5px; margin: 15px 0;'>",
-                "<h4 style='color: #ff8f00; margin: 0 0 8px 0;'>🚀 Quick Start:</h4>",
+                "<h4 style='color: #ff8f00; margin: 0 0 8px 0;'> Quick Start:</h4>",
                 "<ol style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                 "<li><strong>Select Items:</strong> Choose variables/measurements to compare</li>",
                 "<li><strong>Choose Groups:</strong> Select grouping variable (e.g., disease_group, age_category)</li>",
@@ -72,7 +72,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</ol>",
                 "</div>",
                 "<div style='background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-                "<p style='margin: 0; color: #7b1fa2;'><strong>💡 Pro Tip:</strong> Use reference lines to show normal ranges or clinical cutoffs for better interpretation.</p>",
+                "<p style='margin: 0; color: #7b1fa2;'><strong> Pro Tip:</strong> Use reference lines to show normal ranges or clinical cutoffs for better interpretation.</p>",
                 "</div>",
                 "</div>"
             )
@@ -165,7 +165,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 self$results$plotnotes$setContent(
                     paste0("<div style='color: #d32f2f; background-color: #ffebee; padding: 10px; border-radius: 5px;'>",
-                           "<strong>⚠️ Input Error:</strong> ", e$message, "</div>")
+                           "<strong> Input Error:</strong> ", e$message, "</div>")
                 )
                 return()
             })
@@ -188,7 +188,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 self$results$plotnotes$setContent(
                     paste0("<div style='color: #d32f2f; background-color: #ffebee; padding: 10px; border-radius: 5px;'>",
-                           "<strong>⚠️ Processing Error:</strong> ", e$message, "</div>")
+                           "<strong> Processing Error:</strong> ", e$message, "</div>")
                 )
             })
         },

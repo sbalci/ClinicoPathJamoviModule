@@ -229,7 +229,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 current_hash <- digest::digest(list(
                     data_dim = dim(self$data),
                     data_names = names(self$data),
-                    data_content = data_content_hash,  # ✅ CRITICAL: Include actual data
+                    data_content = data_content_hash,  #  CRITICAL: Include actual data
                     options = list(
                         dep = self$options$dep,
                         group = self$options$group,
@@ -318,7 +318,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .generateAboutContent = function() {
                 about_content <- paste0(
                     "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>",
-                    "<h4 style='color: #007bff; margin-top: 0;'>📊 About Bar Chart Analysis</h4>",
+                    "<h4 style='color: #007bff; margin-top: 0;'> About Bar Chart Analysis</h4>",
                     "<p><strong>Purpose:</strong> Compare the distribution of categorical variables across groups using statistical testing.</p>",
                     "<p><strong>When to Use:</strong></p>",
                     "<ul>",
@@ -364,7 +364,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 
                 summary_content <- paste0(
                     "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>",
-                    "<h4 style='color: #28a745; margin-top: 0;'>📋 Analysis Summary</h4>",
+                    "<h4 style='color: #28a745; margin-top: 0;'> Analysis Summary</h4>",
                     "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", self$options$group, "</p>",
                     "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
                     "<p><strong>Statistical Method:</strong> ", test_method, "</p>",
@@ -418,7 +418,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                 pct_low <- round(100 * low_count_cells / total_cells, 1)
 
                                 warnings <- c(warnings, paste0(
-                                    "⚠️ <strong>Chi-square Assumption Violated:</strong> ",
+                                    " <strong>Chi-square Assumption Violated:</strong> ",
                                     low_count_cells, " of ", total_cells, " cells (", pct_low,
                                     "%) have expected counts < 5."
                                 ))
@@ -431,12 +431,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                         low_count_cells, pct_low
                                     )
                                     recommendations <- c(recommendations,
-                                        "✅ <strong>Automatic Correction:</strong> Using Fisher's Exact Test for 2×2 table with low expected counts."
+                                        " <strong>Automatic Correction:</strong> Using Fisher's Exact Test for 2×2 table with low expected counts."
                                     )
                                 } else {
                                     # For non-2×2 tables, warn but don't auto-switch
                                     recommendations <- c(recommendations,
-                                        "💡 <strong>Recommendation:</strong> Consider combining categories or using non-parametric methods. Fisher's exact test is only available for 2×2 tables."
+                                        " <strong>Recommendation:</strong> Consider combining categories or using non-parametric methods. Fisher's exact test is only available for 2×2 tables."
                                     )
                                 }
                             }
@@ -447,14 +447,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Check for paired data appropriateness
                 if (self$options$paired) {
                     warnings <- c(warnings,
-                        "ℹ️ <strong>Paired Analysis:</strong> McNemar's test assumes matched pairs (e.g., before/after, case/control matching)."
+                        " <strong>Paired Analysis:</strong> McNemar's test assumes matched pairs (e.g., before/after, case/control matching)."
                     )
                 }
 
                 # Generate assumptions content
                 assumptions_content <- paste0(
                     "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>⚠️ Statistical Assumptions & Warnings</h4>",
+                    "<h4 style='color: #856404; margin-top: 0;'> Statistical Assumptions & Warnings</h4>",
 
                     "<p><strong>General Assumptions:</strong></p>",
                     "<ul>",
@@ -489,7 +489,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .generateInterpretationGuide = function() {
                 interpretation_content <- paste0(
                     "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; margin: 10px 0;'>",
-                    "<h4 style='color: #0c5460; margin-top: 0;'>📖 How to Interpret Results</h4>",
+                    "<h4 style='color: #0c5460; margin-top: 0;'> How to Interpret Results</h4>",
                     
                     "<p><strong>Statistical Significance:</strong></p>",
                     "<ul>",
@@ -557,7 +557,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Generate template report
                 report_template <- paste0(
                     "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; margin: 10px 0;'>",
-                    "<h4 style='color: #495057; margin-top: 0;'>📄 Copy-Ready Report Template</h4>",
+                    "<h4 style='color: #495057; margin-top: 0;'> Copy-Ready Report Template</h4>",
                     
                     "<div style='background-color: #ffffff; padding: 15px; border: 1px dashed #6c757d; margin: 10px 0;'>",
                     "<h5>Methods:</h5>",
@@ -591,7 +591,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     
                     "<button onclick='navigator.clipboard.writeText(this.parentElement.querySelector(\"div\").innerText)' ",
                     "style='background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
-                    "📋 Copy Template to Clipboard</button>",
+                    " Copy Template to Clipboard</button>",
                     "</div>"
                 )
                 
@@ -915,7 +915,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     x = rlang::sym(dep_var),
                     y = rlang::sym(self$options$group),
                     counts = if (!is.null(self$options$counts)) rlang::sym(self$options$counts) else NULL,
-                    type = override_type,  # ✅ CRITICAL FIX: Use override_type (may auto-switch to Fisher)
+                    type = override_type,  #  CRITICAL FIX: Use override_type (may auto-switch to Fisher)
                     paired = if (!is.null(self$options$paired)) self$options$paired else FALSE,
                     pairwise.comparisons = use_pairwise,
                     pairwise.display = self$options$pairwisedisplay,
@@ -1015,19 +1015,19 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     
                     todo <- glue::glue(
                         "<div style='padding: 15px; background-color: #e7f3ff; border-left: 4px solid #0066cc; margin: 10px 0;'>",
-                        "<h4 style='color: #0066cc; margin-top: 0;'>🚀 Getting Started</h4>",
+                        "<h4 style='color: #0066cc; margin-top: 0;'> Getting Started</h4>",
                         "<p><strong>Step 1:</strong> Select your <strong>Outcome Variable</strong> (what you want to analyze)</p>",
                         "<p><strong>Step 2:</strong> Choose a <strong>Group Variable</strong> (what you want to compare)</p>",
                         "<p><strong>Step 3:</strong> Pick a <strong>Clinical Analysis Preset</strong> for automatic configuration:</p>",
                         "<ul style='margin-left: 20px;'>",
-                        "<li>🩺 <strong>Diagnostic Test:</strong> 2×2 tables with sensitivity/specificity</li>",
-                        "<li>💊 <strong>Treatment Response:</strong> Compare response rates across treatments</li>",
-                        "<li>🧬 <strong>Biomarker Expression:</strong> Analyze expression patterns</li>",
-                        "<li>⚠️ <strong>Risk Factor Analysis:</strong> Examine risk factor relationships</li>",
+                        "<li> <strong>Diagnostic Test:</strong> 2×2 tables with sensitivity/specificity</li>",
+                        "<li> <strong>Treatment Response:</strong> Compare response rates across treatments</li>",
+                        "<li> <strong>Biomarker Expression:</strong> Analyze expression patterns</li>",
+                        "<li> <strong>Risk Factor Analysis:</strong> Examine risk factor relationships</li>",
                         "</ul>",
                         "<p><strong>Step 4:</strong> Review results and clinical interpretations</p>",
                         "<hr>",
-                        "<p><small>📚 <strong>Documentation:</strong> <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html' target='_blank'>ggbarstats</a> | ",
+                        "<p><small> <strong>Documentation:</strong> <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html' target='_blank'>ggbarstats</a> | ",
                         "<a href='https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html' target='_blank'>grouped_ggbarstats</a></small></p>",
                         "</div>"
                     )
@@ -1063,12 +1063,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         perf_warning <- ""
                         n_groups <- length(unique(prepared_data[[self$options$group]]))
                         if (self$options$pairwisecomparisons && n_groups > 5) {
-                            perf_warning <- paste0("<br>⚠️ <b>Performance Note:</b> Pairwise comparisons with ", n_groups, 
+                            perf_warning <- paste0("<br> <b>Performance Note:</b> Pairwise comparisons with ", n_groups, 
                                                  " groups may be slow. Consider disabling for faster results.<br>")
                         }
                         if (self$options$typestatistics == "bayes") {
                             perf_warning <- paste0(perf_warning, 
-                                                 "<br>⚠️ <b>Performance Note:</b> Bayesian analysis is computationally intensive.<br>")
+                                                 "<br> <b>Performance Note:</b> Bayesian analysis is computationally intensive.<br>")
                         }
                         
                         # Additional info about analysis settings
@@ -1146,15 +1146,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # Enhanced error reporting with more context
                         error_context <- ""
                         if (grepl("continuous", e$message, ignore.case = TRUE)) {
-                            error_context <- "<br>💡 <b>Tip:</b> Use Data > Transform to create categorical groups from continuous variables.<br>"
+                            error_context <- "<br> <b>Tip:</b> Use Data > Transform to create categorical groups from continuous variables.<br>"
                         } else if (grepl("minimum|group size", e$message, ignore.case = TRUE)) {
-                            error_context <- "<br>💡 <b>Tip:</b> Consider combining small categories or collecting more data.<br>"
+                            error_context <- "<br> <b>Tip:</b> Consider combining small categories or collecting more data.<br>"
                         } else if (grepl("variation|level", e$message, ignore.case = TRUE)) {
-                            error_context <- "<br>💡 <b>Tip:</b> Ensure your variables have multiple categories for comparison.<br>"
+                            error_context <- "<br> <b>Tip:</b> Ensure your variables have multiple categories for comparison.<br>"
                         }
                         
                         error_msg <- glue::glue(
-                            "<br>❌ <b>Error in Bar Chart Analysis:</b><br>
+                            "<br> <b>Error in Bar Chart Analysis:</b><br>
                             <br>{e$message}<br>
                             {error_context}
                             <br><b>General Troubleshooting:</b><br>

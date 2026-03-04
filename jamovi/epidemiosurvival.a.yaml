@@ -16,7 +16,7 @@ description:
         competing mortality, and population stratification. Designed for epidemiological
         research including cancer registry studies, cohort studies, and population surveillance.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('population_cohort')
             

@@ -94,7 +94,7 @@ options:
       default: 0.95
       description:
           R: >
-            confidence level for intervals (default 0.95 for 95% CI)
+            confidence level for intervals (default 0.95 for 95 percent CI)
 
     - name: show_plots
       title: Show Agreement Plots

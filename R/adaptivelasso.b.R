@@ -15,11 +15,11 @@ adaptivelassoClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h2>🎯 Adaptive LASSO for Cox Models</h2>
+                    <h2> Adaptive LASSO for Cox Models</h2>
                     <p><strong>Advanced penalized regression with data-driven variable selection</strong></p>
                     
                     <div class='step'>
-                    <strong>📊 Required Data:</strong>
+                    <strong> Required Data:</strong>
                     <ul>
                         <li><span class='highlight'>Time Variable</span>: Time to event or censoring</li>
                         <li><span class='highlight'>Event Indicator</span>: 0 = censored, 1 = event</li>
@@ -28,7 +28,7 @@ adaptivelassoClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🔧 Adaptive LASSO Advantages:</strong>
+                    <strong> Adaptive LASSO Advantages:</strong>
                     <ul>
                         <li><strong>Oracle Property:</strong> Consistent variable selection with optimal rates</li>
                         <li><strong>Reduced Bias:</strong> Less shrinkage of important coefficients</li>
@@ -38,7 +38,7 @@ adaptivelassoClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>⚙️ Weight Methods:</strong>
+                    <strong> Weight Methods:</strong>
                     <ul>
                         <li><strong>Ridge:</strong> Stable weights from ridge regression (recommended)</li>
                         <li><strong>Univariate:</strong> Individual Cox model coefficients</li>
@@ -48,18 +48,18 @@ adaptivelassoClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🎨 Key Features:</strong>
+                    <strong> Key Features:</strong>
                     <ul>
-                        <li>📈 Cross-validation for optimal penalty selection</li>
-                        <li>🎯 Stability selection for robust variable identification</li>
-                        <li>📊 Comprehensive model diagnostics and validation</li>
-                        <li>🔄 Regularization path visualization</li>
-                        <li>⚕️ Clinical risk group analysis</li>
-                        <li>🏗️ Bootstrap confidence intervals</li>
+                        <li> Cross-validation for optimal penalty selection</li>
+                        <li> Stability selection for robust variable identification</li>
+                        <li> Comprehensive model diagnostics and validation</li>
+                        <li> Regularization path visualization</li>
+                        <li> Clinical risk group analysis</li>
+                        <li> Bootstrap confidence intervals</li>
                     </ul>
                     </div>
                     
-                    <p><em>💡 Tip: Start with Ridge weights and 10-fold CV, then enable stability selection for robust variable selection.</em></p>
+                    <p><em> Tip: Start with Ridge weights and 10-fold CV, then enable stability selection for robust variable selection.</em></p>
                     </body>
                     </html>"
                 )

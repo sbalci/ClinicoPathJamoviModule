@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("jjdotplotstats function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("jjdotplotstats"))
 })
 
 test_that("jjdotplotstats runs with minimal required arguments", {
-  devtools::load_all()
 
   data(jjdotplotstats_test, package = "ClinicoPath")
 
@@ -26,7 +24,6 @@ test_that("jjdotplotstats runs with minimal required arguments", {
 })
 
 test_that("jjdotplotstats produces expected output structure", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -41,7 +38,6 @@ test_that("jjdotplotstats produces expected output structure", {
 })
 
 test_that("jjdotplotstats handles parametric statistics (t-test/ANOVA)", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -56,7 +52,6 @@ test_that("jjdotplotstats handles parametric statistics (t-test/ANOVA)", {
 })
 
 test_that("jjdotplotstats handles nonparametric statistics (Mann-Whitney/Kruskal-Wallis)", {
-  devtools::load_all()
 
   data(jjdotplotstats_skewed)
 
@@ -71,7 +66,6 @@ test_that("jjdotplotstats handles nonparametric statistics (Mann-Whitney/Kruskal
 })
 
 test_that("jjdotplotstats handles robust statistics (trimmed means)", {
-  devtools::load_all()
 
   data(jjdotplotstats_outliers)
 
@@ -86,7 +80,6 @@ test_that("jjdotplotstats handles robust statistics (trimmed means)", {
 })
 
 test_that("jjdotplotstats handles Bayesian statistics", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -101,7 +94,6 @@ test_that("jjdotplotstats handles Bayesian statistics", {
 })
 
 test_that("jjdotplotstats handles two-group comparisons", {
-  devtools::load_all()
 
   data(jjdotplotstats_twogroup)
 
@@ -116,7 +108,6 @@ test_that("jjdotplotstats handles two-group comparisons", {
 })
 
 test_that("jjdotplotstats handles three-group comparisons", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -131,7 +122,6 @@ test_that("jjdotplotstats handles three-group comparisons", {
 })
 
 test_that("jjdotplotstats handles four-group comparisons", {
-  devtools::load_all()
 
   data(jjdotplotstats_fourgroup)
 
@@ -146,7 +136,6 @@ test_that("jjdotplotstats handles four-group comparisons", {
 })
 
 test_that("jjdotplotstats handles centrality plotting", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -170,7 +159,6 @@ test_that("jjdotplotstats handles centrality plotting", {
 })
 
 test_that("jjdotplotstats handles different centrality types", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -191,7 +179,6 @@ test_that("jjdotplotstats handles different centrality types", {
 })
 
 test_that("jjdotplotstats handles different effect size types", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -212,7 +199,6 @@ test_that("jjdotplotstats handles different effect size types", {
 })
 
 test_that("jjdotplotstats handles centrality parameter options", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -238,7 +224,6 @@ test_that("jjdotplotstats handles centrality parameter options", {
 })
 
 test_that("jjdotplotstats handles test value testing", {
-  devtools::load_all()
 
   data(jjdotplotstats_reference)
 
@@ -254,7 +239,6 @@ test_that("jjdotplotstats handles test value testing", {
 })
 
 test_that("jjdotplotstats handles test value line", {
-  devtools::load_all()
 
   data(jjdotplotstats_reference)
 
@@ -280,7 +264,6 @@ test_that("jjdotplotstats handles test value line", {
 })
 
 test_that("jjdotplotstats handles grouped analysis", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -295,7 +278,6 @@ test_that("jjdotplotstats handles grouped analysis", {
 })
 
 test_that("jjdotplotstats handles results subtitle", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -319,7 +301,6 @@ test_that("jjdotplotstats handles results subtitle", {
 })
 
 test_that("jjdotplotstats handles Bayes Factor message", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -335,7 +316,6 @@ test_that("jjdotplotstats handles Bayes Factor message", {
 })
 
 test_that("jjdotplotstats handles custom titles", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -352,7 +332,6 @@ test_that("jjdotplotstats handles custom titles", {
 })
 
 test_that("jjdotplotstats handles different datasets", {
-  devtools::load_all()
 
   datasets <- list(
     jjdotplotstats_test = list(dep = "tumor_reduction", group = "treatment"),
@@ -382,7 +361,6 @@ test_that("jjdotplotstats handles different datasets", {
 })
 
 test_that("jjdotplotstats handles different confidence levels", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -402,7 +380,6 @@ test_that("jjdotplotstats handles different confidence levels", {
 })
 
 test_that("jjdotplotstats handles different decimal places", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -422,7 +399,6 @@ test_that("jjdotplotstats handles different decimal places", {
 })
 
 test_that("jjdotplotstats handles different plot dimensions", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -438,7 +414,6 @@ test_that("jjdotplotstats handles different plot dimensions", {
 })
 
 test_that("jjdotplotstats handles skewed data with parametric and nonparametric", {
-  devtools::load_all()
 
   data(jjdotplotstats_skewed)
 

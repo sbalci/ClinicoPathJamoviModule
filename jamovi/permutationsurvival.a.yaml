@@ -14,7 +14,7 @@ description:
         distributional assumptions are violated. Includes various permutation strategies and
         multiple comparison corrections for robust survival analysis.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage will be added
 

@@ -459,22 +459,23 @@ praucBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' the minority (positive) class. The area under the PR curve (PR-AUC or 
 #' Average Precision) provides a single-number summary of model performance. 
 #' PR analysis is essential for evaluating rare event detection (mitotic 
-#' figures <1\%, rare tumor cells, micrometastases), cancer screening where 
-#' positives are rare, quality control in digital pathology where defects are 
-#' uncommon, and AI triage systems where abnormal cases are infrequent. This 
-#' module provides comprehensive PR analysis with optimal threshold selection, 
-#' comparison to baseline (random classifier), and F-score optimization for 
-#' different precision-recall trade-offs.
+#' figures <1 percent, rare tumor cells, micrometastases), cancer screening 
+#' where positives are rare, quality control in digital pathology where 
+#' defects are uncommon, and AI triage systems where abnormal cases are 
+#' infrequent. This module provides comprehensive PR analysis with optimal 
+#' threshold selection, comparison to baseline (random classifier), and 
+#' F-score optimization for different precision-recall trade-offs.
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- prauc(
 #'     data = pathology_data,
 #'     outcome = "cancer",
 #'     predictor = "ai_score",
 #'     positive_level = "positive"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (e.g., cancer/non-cancer,
 #'   positive/negative). Must have exactly two levels.

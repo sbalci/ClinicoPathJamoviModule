@@ -2,7 +2,6 @@
 # Argument Tests: singlearm
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(singlearm_test, package = "ClinicoPath")
 data(singlearm_dates, package = "ClinicoPath")
 data(singlearm_dmy, package = "ClinicoPath")

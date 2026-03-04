@@ -105,6 +105,7 @@ is unknown but falls within an interval. Common in periodic follow-up
 studies, screening programs, and clinical trials with scheduled visits.
 }
 \examples{
+\donttest{
 # Example: Tumor progression between visits
 intervalsurvival(
     data = oncology_data,
@@ -113,5 +114,5 @@ intervalsurvival(
     covariates = c("age", "stage", "treatment"),
     model_type = "aft_weibull"
 )
-
+}
 }

@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("hullplot handles missing data in x variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -27,7 +25,6 @@ test_that("hullplot handles missing data in x variable", {
 })
 
 test_that("hullplot handles missing data in y variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -48,7 +45,6 @@ test_that("hullplot handles missing data in y variable", {
 })
 
 test_that("hullplot handles missing data in group variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -69,7 +65,6 @@ test_that("hullplot handles missing data in group variable", {
 })
 
 test_that("hullplot handles missing data in size variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -89,7 +84,6 @@ test_that("hullplot handles missing data in size variable", {
 })
 
 test_that("hullplot handles single point per group", {
-  devtools::load_all()
 
   # Create minimal data with one point per group
   minimal_data <- data.frame(
@@ -110,7 +104,6 @@ test_that("hullplot handles single point per group", {
 })
 
 test_that("hullplot handles two points per group", {
-  devtools::load_all()
 
   # Create data with two points per group
   two_point_data <- data.frame(
@@ -131,7 +124,6 @@ test_that("hullplot handles two points per group", {
 })
 
 test_that("hullplot handles all points at same location", {
-  devtools::load_all()
 
   # All points identical
   identical_data <- data.frame(
@@ -154,7 +146,6 @@ test_that("hullplot handles all points at same location", {
 })
 
 test_that("hullplot handles collinear points", {
-  devtools::load_all()
 
   # Points on a line
   collinear_data <- data.frame(
@@ -175,7 +166,6 @@ test_that("hullplot handles collinear points", {
 })
 
 test_that("hullplot handles extreme outliers", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -195,7 +185,6 @@ test_that("hullplot handles extreme outliers", {
 })
 
 test_that("hullplot handles Inf values in x", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -214,7 +203,6 @@ test_that("hullplot handles Inf values in x", {
 })
 
 test_that("hullplot handles Inf values in y", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -233,7 +221,6 @@ test_that("hullplot handles Inf values in y", {
 })
 
 test_that("hullplot handles -Inf values", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -253,7 +240,6 @@ test_that("hullplot handles -Inf values", {
 })
 
 test_that("hullplot handles NaN values", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -272,7 +258,6 @@ test_that("hullplot handles NaN values", {
 })
 
 test_that("hullplot handles very small sample size", {
-  devtools::load_all()
 
   # Only 6 observations total
   tiny_data <- data.frame(
@@ -292,7 +277,6 @@ test_that("hullplot handles very small sample size", {
 })
 
 test_that("hullplot handles single group", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -312,7 +296,6 @@ test_that("hullplot handles single group", {
 })
 
 test_that("hullplot handles many groups", {
-  devtools::load_all()
 
   # Create data with 10 groups
   many_groups_data <- data.frame(
@@ -332,7 +315,6 @@ test_that("hullplot handles many groups", {
 })
 
 test_that("hullplot handles variable names with spaces", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -352,7 +334,6 @@ test_that("hullplot handles variable names with spaces", {
 })
 
 test_that("hullplot handles variable names with special characters", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -371,7 +352,6 @@ test_that("hullplot handles variable names with special characters", {
 })
 
 test_that("hullplot handles very long group names", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -394,7 +374,6 @@ test_that("hullplot handles very long group names", {
 })
 
 test_that("hullplot handles groups with different sample sizes (extreme imbalance)", {
-  devtools::load_all()
 
   # Very unbalanced: 100, 5, 3
   extreme_unbalanced <- data.frame(
@@ -414,7 +393,6 @@ test_that("hullplot handles groups with different sample sizes (extreme imbalanc
 })
 
 test_that("hullplot handles negative values", {
-  devtools::load_all()
 
   # All negative values
   negative_data <- data.frame(
@@ -434,7 +412,6 @@ test_that("hullplot handles negative values", {
 })
 
 test_that("hullplot handles mixed positive and negative values", {
-  devtools::load_all()
 
   # Centered around zero
   mixed_data <- data.frame(
@@ -454,7 +431,6 @@ test_that("hullplot handles mixed positive and negative values", {
 })
 
 test_that("hullplot handles very large values", {
-  devtools::load_all()
 
   # Very large scale
   large_data <- data.frame(
@@ -474,7 +450,6 @@ test_that("hullplot handles very large values", {
 })
 
 test_that("hullplot handles very small values", {
-  devtools::load_all()
 
   # Very small scale
   small_data <- data.frame(
@@ -494,7 +469,6 @@ test_that("hullplot handles very small values", {
 })
 
 test_that("hullplot handles extreme aspect ratios", {
-  devtools::load_all()
 
   # Very wide range in x, narrow in y
   aspect_data <- data.frame(
@@ -514,7 +488,6 @@ test_that("hullplot handles extreme aspect ratios", {
 })
 
 test_that("hullplot handles constant x variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -535,7 +508,6 @@ test_that("hullplot handles constant x variable", {
 })
 
 test_that("hullplot handles constant y variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -556,7 +528,6 @@ test_that("hullplot handles constant y variable", {
 })
 
 test_that("hullplot handles constant size variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -576,7 +547,6 @@ test_that("hullplot handles constant size variable", {
 })
 
 test_that("hullplot handles zero variance within groups", {
-  devtools::load_all()
 
   # All points within each group at same location
   zero_var_data <- data.frame(
@@ -597,7 +567,6 @@ test_that("hullplot handles zero variance within groups", {
 })
 
 test_that("hullplot handles empty groups after removing missing data", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -617,7 +586,6 @@ test_that("hullplot handles empty groups after removing missing data", {
 })
 
 test_that("hullplot handles tibble vs data.frame", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -645,7 +613,6 @@ test_that("hullplot handles tibble vs data.frame", {
 })
 
 test_that("hullplot handles invalid concavity values", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -677,7 +644,6 @@ test_that("hullplot handles invalid concavity values", {
 })
 
 test_that("hullplot handles invalid alpha values", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -709,7 +675,6 @@ test_that("hullplot handles invalid alpha values", {
 })
 
 test_that("hullplot handles invalid expand values", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -728,7 +693,6 @@ test_that("hullplot handles invalid expand values", {
 })
 
 test_that("hullplot handles non-existent variables", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -758,7 +722,6 @@ test_that("hullplot handles non-existent variables", {
 })
 
 test_that("hullplot handles empty dataset", {
-  devtools::load_all()
 
   empty_data <- data.frame(
     x = numeric(0),
@@ -780,7 +743,6 @@ test_that("hullplot handles empty dataset", {
 })
 
 test_that("hullplot handles numeric group variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -799,7 +761,6 @@ test_that("hullplot handles numeric group variable", {
 })
 
 test_that("hullplot handles all missing data after filtering", {
-  devtools::load_all()
 
   data(hullplot_test)
 

@@ -27,17 +27,18 @@ samplingerror(
 \item{data}{.}
 
 \item{detectionSensitivity}{Probability of correctly detecting/identifying
-an event (e.g., tumor cell). 100\\% means perfect detection, 95\\% means 5\\%
-false negative rate.}
+an event (e.g., tumor cell). 100 percent means perfect detection, 95
+percent means 5 percent false negative rate.}
 
 \item{biologicalVarianceCV}{Coefficient of variation representing tissue
-heterogeneity. Low (5-10\\%) = homogeneous tissue, Medium (15-25\\%) =
-moderate heterogeneity, High (>30\\%) = highly heterogeneous tissue.}
+heterogeneity. Low (5-10 percent) = homogeneous tissue, Medium (15-25
+percent) = moderate heterogeneity, High (>30 percent) = highly
+heterogeneous tissue.}
 
 \item{sampleSize}{Number of samples/sections/areas examined.}
 
 \item{eventFrequency}{Proportion of sample containing the event of interest
-(e.g., \\% of tissue with tumor, \\% positive cells).}
+(e.g.,  percent of tissue with tumor,  percent positive cells).}
 
 \item{referenceVolume}{Total reference space being sampled (e.g., organ
 volume, total tissue area).}

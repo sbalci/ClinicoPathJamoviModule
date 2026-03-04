@@ -134,6 +134,7 @@ Applications: Understanding pathways in cancer biology, clinical trials,
 epidemiology, and precision medicine research.
 }
 \examples{
+\donttest{
 # Example: Basic mediation
 causalmediation(
     data = mydata,
@@ -153,5 +154,5 @@ causalmediation(
     mediation_tier = 'hd',
     hd_method = 'hdmax2'
 )
-
+}
 }

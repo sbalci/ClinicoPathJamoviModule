@@ -439,6 +439,7 @@ batcheffectBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('your_data')
 #'
 #' batcheffect(data = your_data,
@@ -447,7 +448,7 @@ batcheffectBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'            biological_var = treatment_group,
 #'            perform_pca = TRUE,
 #'            perform_combat = TRUE)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param features Numeric feature variables to assess for batch effects
 #'   (e.g., biomarkers, image features)

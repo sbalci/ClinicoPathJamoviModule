@@ -14,7 +14,7 @@ description:
         and subpopulations. Inspired by Orange Data Mining's interactive projection widgets, adapted for
         jamovi with comprehensive cluster analysis and statistical validation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Basic t-SNE visualization
             library(Rtsne)

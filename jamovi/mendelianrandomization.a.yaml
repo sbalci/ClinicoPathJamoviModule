@@ -20,7 +20,7 @@ description:
         inference in observational studies.
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Analyze effect of BMI on coronary disease
             mendelianrandomization(

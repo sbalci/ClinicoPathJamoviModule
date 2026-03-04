@@ -365,13 +365,14 @@ ihcdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' ihcdiagnostic(
 #'     markers = c("ER", "PR", "HER2", "Ki67"),
 #'     diagnosis = "tumor_type",
 #'     differentialDiagnosis = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param markers Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD
 #'   markers). These can be percentage scores, H-scores, or categorical results.
@@ -391,8 +392,8 @@ ihcdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   performance.
 #' @param clusterMethod Clustering method for differential diagnosis
 #' @param cutpointMethod Method for determining positive/negative cutpoints
-#' @param confidenceLevel Confidence level for performance metrics (0.95 =
-#'   95\% confidence intervals). Higher values give wider, more conservative
+#' @param confidenceLevel Confidence level for performance metrics (0.95 = 95
+#'   percent confidence intervals). Higher values give wider, more conservative
 #'   intervals.
 #' @param crossValidation Use 5-fold cross-validation for more reliable
 #'   performance estimates. Recommended for clinical validation but takes longer

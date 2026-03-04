@@ -6,7 +6,6 @@
 # for the decision calculator (Medical Decision Calculator) jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load edge case test data
 data(decisioncalculator_perfect, package = "ClinicoPath")

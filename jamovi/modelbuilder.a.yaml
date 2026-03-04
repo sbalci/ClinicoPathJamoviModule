@@ -30,13 +30,13 @@ options:
         - name: none
           title: Custom Analysis (no preset)
         - name: cardiac_risk
-          title: 💗 Cardiac Risk Assessment
+          title:  Cardiac Risk Assessment
         - name: cancer_prognosis
-          title: 🎗️ Cancer Prognosis Model
+          title:  Cancer Prognosis Model
         - name: biomarker_validation
-          title: 🧬 Biomarker Validation Study
+          title:  Biomarker Validation Study
         - name: diagnostic_test
-          title: 🔍 Diagnostic Test Evaluation
+          title:  Diagnostic Test Evaluation
       default: none
       description:
           R: >
@@ -70,7 +70,7 @@ options:
       default: false
       description:
           R: >
-            Split data into training (70%) and validation (30%) sets for
+            Split data into training (70 percent) and validation (30 percent) sets for
             unbiased model evaluation.
 
     - name: randomSeed
@@ -281,7 +281,7 @@ options:
         - name: multiple_imputation
           title: Multiple imputation
         - name: exclude_missing
-          title: Exclude variables with >20% missing
+          title: Exclude variables with >20 percent missing
       default: complete_cases
       description:
           R: >

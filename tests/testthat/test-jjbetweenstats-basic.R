@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("jjbetweenstats function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("jjbetweenstats"))
 })
 
 test_that("jjbetweenstats runs with minimal required arguments", {
-  devtools::load_all()
 
   data(jjbetweenstats_test, package = "ClinicoPath")
 
@@ -26,7 +24,6 @@ test_that("jjbetweenstats runs with minimal required arguments", {
 })
 
 test_that("jjbetweenstats produces expected output structure", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -41,7 +38,6 @@ test_that("jjbetweenstats produces expected output structure", {
 })
 
 test_that("jjbetweenstats handles three-group comparison (ANOVA)", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -56,7 +52,6 @@ test_that("jjbetweenstats handles three-group comparison (ANOVA)", {
 })
 
 test_that("jjbetweenstats handles two-group comparison (t-test)", {
-  devtools::load_all()
 
   data(jjbetweenstats_twogroup)
 
@@ -71,7 +66,6 @@ test_that("jjbetweenstats handles two-group comparison (t-test)", {
 })
 
 test_that("jjbetweenstats handles four-group comparison", {
-  devtools::load_all()
 
   data(jjbetweenstats_fourgroup)
 
@@ -86,7 +80,6 @@ test_that("jjbetweenstats handles four-group comparison", {
 })
 
 test_that("jjbetweenstats handles parametric statistics", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -101,7 +94,6 @@ test_that("jjbetweenstats handles parametric statistics", {
 })
 
 test_that("jjbetweenstats handles nonparametric statistics", {
-  devtools::load_all()
 
   data(jjbetweenstats_skewed)
 
@@ -116,7 +108,6 @@ test_that("jjbetweenstats handles nonparametric statistics", {
 })
 
 test_that("jjbetweenstats handles robust statistics", {
-  devtools::load_all()
 
   data(jjbetweenstats_outliers)
 
@@ -131,7 +122,6 @@ test_that("jjbetweenstats handles robust statistics", {
 })
 
 test_that("jjbetweenstats handles Bayesian statistics", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -146,7 +136,6 @@ test_that("jjbetweenstats handles Bayesian statistics", {
 })
 
 test_that("jjbetweenstats handles split-by variable", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -161,7 +150,6 @@ test_that("jjbetweenstats handles split-by variable", {
 })
 
 test_that("jjbetweenstats handles multiple dependent variables", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -175,7 +163,6 @@ test_that("jjbetweenstats handles multiple dependent variables", {
 })
 
 test_that("jjbetweenstats handles pairwise comparisons", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -191,7 +178,6 @@ test_that("jjbetweenstats handles pairwise comparisons", {
 })
 
 test_that("jjbetweenstats handles centrality plotting", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -237,7 +223,6 @@ test_that("jjbetweenstats handles centrality plotting", {
 })
 
 test_that("jjbetweenstats handles equal vs unequal variances", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -261,7 +246,6 @@ test_that("jjbetweenstats handles equal vs unequal variances", {
 })
 
 test_that("jjbetweenstats handles ggpubr plots", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -278,7 +262,6 @@ test_that("jjbetweenstats handles ggpubr plots", {
 })
 
 test_that("jjbetweenstats handles custom titles", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -295,7 +278,6 @@ test_that("jjbetweenstats handles custom titles", {
 })
 
 test_that("jjbetweenstats handles different continuous outcomes", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 
@@ -315,7 +297,6 @@ test_that("jjbetweenstats handles different continuous outcomes", {
 })
 
 test_that("jjbetweenstats handles different grouping variables", {
-  devtools::load_all()
 
   data(jjbetweenstats_test)
 

@@ -314,7 +314,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 infoBullets <- c(infoBullets, paste0("<strong>Grouping variable:</strong> ", group))
 
             if (!is.null(compatibilityWarning))
-                infoBullets <- c(infoBullets, paste0("<strong style='color: #dc3545;'>⚠️ Warning:</strong> ", compatibilityWarning))
+                infoBullets <- c(infoBullets, paste0("<strong style='color: #dc3545;'> Warning:</strong> ", compatibilityWarning))
 
             if (length(prep$messages) > 0)
                 infoBullets <- c(infoBullets, prep$messages)

@@ -6,7 +6,6 @@
 # and parameter ranges for the datetimeconverter jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(datetimeconverter_test, package = "ClinicoPath")

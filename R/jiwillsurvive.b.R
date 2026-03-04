@@ -45,9 +45,9 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # User instructions
             instructions <- "
-<h3>📊 Intuitive Survival Analysis Guide</h3>
+<h3> Intuitive Survival Analysis Guide</h3>
 
-<h4>🎯 Analysis Types:</h4>
+<h4> Analysis Types:</h4>
 <ul>
   <li><strong>Survival Model & Plot:</strong> Complete survival analysis with curves and statistics</li>
   <li><strong>Kaplan-Meier Curves:</strong> Classic survival curve analysis</li>
@@ -55,21 +55,21 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
   <li><strong>Data Preparation:</strong> Calculate follow-up times from dates</li>
 </ul>
 
-<h4>📋 Required Variables:</h4>
+<h4> Required Variables:</h4>
 <ul>
   <li><strong>Time Variable:</strong> Follow-up time or time-to-event (numeric)</li>
   <li><strong>Event Variable:</strong> Event indicator (1=event, 0=censored)</li>
   <li><strong>Grouping Variable:</strong> Optional variable for group comparisons</li>
 </ul>
 
-<h4>📅 Date-Based Analysis:</h4>
+<h4> Date-Based Analysis:</h4>
 <ul>
   <li><strong>Start Date:</strong> Study enrollment or treatment start date</li>
   <li><strong>End Date:</strong> Event date or last follow-up date</li>
   <li><strong>Derive Follow-up:</strong> Enable to calculate time from dates</li>
 </ul>
 
-<h4>🎨 Customization Options:</h4>
+<h4> Customization Options:</h4>
 <ul>
   <li><strong>Plot Styles:</strong> Choose from multiple visual themes</li>
   <li><strong>Color Palettes:</strong> Select colorblind-safe options</li>
@@ -77,7 +77,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
   <li><strong>Confidence Bands:</strong> Show uncertainty around curves</li>
 </ul>
 
-<h4>📈 Statistical Features:</h4>
+<h4> Statistical Features:</h4>
 <ul>
   <li><strong>Log-rank Tests:</strong> Compare survival between groups</li>
   <li><strong>Median Survival:</strong> Estimate median survival times</li>
@@ -85,7 +85,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
   <li><strong>Clinical Interpretation:</strong> Automated result interpretation</li>
 </ul>
 
-<p><em>💡 Tip: Start with 'Data Preparation' if you have date variables, then proceed to 'Survival Model & Plot' for analysis.</em></p>
+<p><em> Tip: Start with 'Data Preparation' if you have date variables, then proceed to 'Survival Model & Plot' for analysis.</em></p>
 "
             self$results$instructions$setContent(instructions)
         },
@@ -278,7 +278,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 
                 # Create summary of derived data
                 summary_text <- paste(
-                    "<h3>📅 Data Preparation Summary</h3>",
+                    "<h3> Data Preparation Summary</h3>",
                     "<h4>Follow-up Time Calculation:</h4>",
                     "<ul>",
                     "<li><strong>Start Date Variable:</strong>", self$options$start_date_var, "</li>",
@@ -457,7 +457,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         .outputLogRankTest = function(test) {
             
             stats_text <- paste(
-                "<h3>📊 Statistical Test Results</h3>",
+                "<h3> Statistical Test Results</h3>",
                 "<h4>Log-rank Test:</h4>",
                 "<ul>",
                 "<li><strong>Chi-square:</strong>", round(test$chisq, 3), "</li>",
@@ -504,7 +504,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             # Median survival times
             median_surv <- summary(fit)$table
             
-            stats_text <- "<h3>📊 Kaplan-Meier Statistics</h3>"
+            stats_text <- "<h3> Kaplan-Meier Statistics</h3>"
             
             if (is.matrix(median_surv)) {
                 stats_text <- paste(stats_text, "<h4>Median Survival Times:</h4><ul>", sep = "\n")
@@ -556,7 +556,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         .createInterpretation = function(fit, data) {
             
             # Generate clinical interpretation
-            interpretation <- "<h3>🏥 Clinical Interpretation</h3>"
+            interpretation <- "<h3> Clinical Interpretation</h3>"
             
             # Sample size
             n_patients <- nrow(data)
@@ -594,7 +594,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # Add recommendations
             interpretation <- paste(interpretation,
-                "<h4>📋 Recommendations:</h4>",
+                "<h4> Recommendations:</h4>",
                 "<ul>",
                 "<li>Consider longer follow-up if median survival not reached</li>",
                 "<li>Evaluate proportional hazards assumption for Cox models</li>",

@@ -506,6 +506,7 @@ survivalfeaturerankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' building multivariable models.
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: Basic feature ranking
 #' library(survival)
 #' data(colon)
@@ -544,7 +545,7 @@ survivalfeaturerankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     adjustPValues = TRUE,
 #'     adjustMethod = "fdr"
 #' )
-#'
+#'}
 #' @param data The dataset to be analyzed, provided as a data frame.
 #' @param survtime The numeric variable representing follow-up time until the
 #'   event or censoring.
@@ -561,8 +562,8 @@ survivalfeaturerankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   statistical significance (smallest p-value first) - hazard: Sorts by effect
 #'   size (hazard ratio furthest from 1) - cindex: Sorts by discriminative
 #'   ability (highest C-index first)
-#' @param showCI If true, displays 95\% confidence intervals for hazard ratios
-#'   in the results table.
+#' @param showCI If true, displays 95 percent confidence intervals for hazard
+#'   ratios in the results table.
 #' @param adjustPValues If true, applies multiple testing correction to
 #'   p-values. Recommended when testing many features to control false discovery
 #'   rate.

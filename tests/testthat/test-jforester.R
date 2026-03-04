@@ -1,5 +1,4 @@
 # Comprehensive tests for jforester function
-devtools::load_all()
 
 # Load test datasets
 data(jforester_meta_analysis_data, package = "ClinicoPath")
@@ -11,7 +10,6 @@ data(jforester_complex_meta_data, package = "ClinicoPath")
 
 test_that("jforester module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("jforesterClass"))
   expect_true(is.function(jforester))
 })

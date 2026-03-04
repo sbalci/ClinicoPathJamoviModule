@@ -326,7 +326,7 @@ groupedforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param show_statistics If TRUE, displays a detailed statistics table with
 #'   hazard ratios, confidence intervals, and p-values.
 #' @param confidence_level Confidence level for confidence intervals (e.g.,
-#'   0.95 for 95\% CI).
+#'   0.95 for 95 percent CI).
 #' @param sort_by_hr If TRUE, sorts subgroups by hazard ratio magnitude in the
 #'   forest plot.
 #' @param show_counts If TRUE, displays sample sizes for each subgroup in the

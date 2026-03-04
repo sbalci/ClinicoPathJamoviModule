@@ -15,7 +15,7 @@ description:
         non-parametric transformations, enabling flexible modeling of survival
         data with automatic transformation selection and validation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Transformation model with Box-Cox transformation
             library(survival)

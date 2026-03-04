@@ -33,10 +33,10 @@ and demonstrating participant flow in observational research.
 This dataset simulates a realistic observational cohort study with:
 \itemize{
 \item 350 participants initially enrolled
-\item 15\\% initial exclusion rate (incomplete records, duplicates)
-\item 8\\% consent exclusion rate (declined, unable to contact)
-\item 10\\% follow-up loss rate (lost, moved, death, withdrew)
-\item Final retention: 70.6\\% (247 participants in final analysis)
+\item 15 percent initial exclusion rate (incomplete records, duplicates)
+\item 8 percent consent exclusion rate (declined, unable to contact)
+\item 10 percent follow-up loss rate (lost, moved, death, withdrew)
+\item Final retention: 70.6 percent (247 participants in final analysis)
 }
 
 Unlike the RCT dataset (\code{clinical_trial_consort_data}), this represents

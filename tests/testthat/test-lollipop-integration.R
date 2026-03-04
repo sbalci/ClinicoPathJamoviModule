@@ -6,7 +6,6 @@
 # Generated: 2026-01-05
 
 library(testthat)
-library(ClinicoPath)
 
 # Load all test datasets
 data(lollipop_test, package = "ClinicoPath", envir = environment())
@@ -21,7 +20,6 @@ data(lollipop_aggregated, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles complete clinical lab analysis workflow", {
-  devtools::load_all()
 
   # Step 1: Basic visualization
   result1 <- lollipop(
@@ -76,7 +74,6 @@ test_that("lollipop handles complete clinical lab analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles treatment comparison workflow", {
-  devtools::load_all()
 
   # Primary outcome
   result1 <- lollipop(
@@ -126,7 +123,6 @@ test_that("lollipop handles treatment comparison workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles biomarker panel workflow", {
-  devtools::load_all()
 
   biomarkers <- c("cea", "ca125", "ca199", "afp", "psa")
 
@@ -149,7 +145,6 @@ test_that("lollipop handles biomarker panel workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles hospital quality metrics workflow", {
-  devtools::load_all()
 
   # Survival rate (higher is better)
   result1 <- lollipop(
@@ -197,7 +192,6 @@ test_that("lollipop handles hospital quality metrics workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles all datasets with consistent parameters", {
-  devtools::load_all()
 
   # lollipop_test
   result1 <- lollipop(
@@ -267,7 +261,6 @@ test_that("lollipop handles all datasets with consistent parameters", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop produces consistent results for vertical and horizontal orientations", {
-  devtools::load_all()
 
   # Vertical
   result_vert <- lollipop(
@@ -295,7 +288,6 @@ test_that("lollipop produces consistent results for vertical and horizontal orie
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles progressive feature addition", {
-  devtools::load_all()
 
   # Step 1: Basic
   result1 <- lollipop(
@@ -392,7 +384,6 @@ test_that("lollipop handles progressive feature addition", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles multiple analyses from same dataset", {
-  devtools::load_all()
 
   lab_params <- c("hemoglobin", "albumin", "creatinine",
                   "platelet_count", "white_blood_cells", "alt", "crp")
@@ -422,7 +413,6 @@ test_that("lollipop handles multiple analyses from same dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop produces consistent results on repeated calls", {
-  devtools::load_all()
 
   # Run same analysis 3 times
   result1 <- lollipop(
@@ -456,7 +446,6 @@ test_that("lollipop produces consistent results on repeated calls", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles multi-center comparison workflow", {
-  devtools::load_all()
 
   # By hospital - hemoglobin
   result1 <- lollipop(

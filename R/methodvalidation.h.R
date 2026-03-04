@@ -438,14 +438,15 @@ methodvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' methodvalidation(
 #'     measurement = "glucose_result",
 #'     reference_value = "reference_glucose",
 #'     replicate = "replicate_number",
 #'     concentration_level = "control_level"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param measurement Test method measurement values
 #' @param reference_value Reference method or target concentration values

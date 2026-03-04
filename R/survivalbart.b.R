@@ -15,11 +15,11 @@ survivalbartClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h2>🌳 Bayesian Additive Regression Trees (BART) for Survival</h2>
+                    <h2> Bayesian Additive Regression Trees (BART) for Survival</h2>
                     <p><strong>Nonparametric Bayesian ensemble learning with automatic interaction detection</strong></p>
                     
                     <div class='step'>
-                    <strong>📊 Required Data:</strong>
+                    <strong> Required Data:</strong>
                     <ul>
                         <li><span class='highlight'>Time Variable</span>: Time to event or censoring</li>
                         <li><span class='highlight'>Event Indicator</span>: 0 = censored, 1 = event</li>
@@ -28,7 +28,7 @@ survivalbartClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🔧 BART Model Types:</strong>
+                    <strong> BART Model Types:</strong>
                     <ul>
                         <li><strong>AFT:</strong> Accelerated failure time modeling log-survival directly</li>
                         <li><strong>Proportional Hazards:</strong> Models log-hazard ratios</li>
@@ -37,7 +37,7 @@ survivalbartClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>⚙️ Key BART Advantages:</strong>
+                    <strong> Key BART Advantages:</strong>
                     <ul>
                         <li><strong>Nonparametric:</strong> No assumptions about functional form</li>
                         <li><strong>Automatic Interactions:</strong> Discovers complex variable relationships</li>
@@ -48,29 +48,29 @@ survivalbartClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🎨 BART Features:</strong>
+                    <strong> BART Features:</strong>
                     <ul>
-                        <li>📈 Ensemble of weak learner trees with Bayesian regularization</li>
-                        <li>🎯 Automatic variable selection and importance ranking</li>
-                        <li>📊 MCMC-based posterior inference with convergence diagnostics</li>
-                        <li>🔄 Cross-validation for out-of-sample performance assessment</li>
-                        <li>⚕️ Individual survival predictions with credible intervals</li>
-                        <li>🏗️ Interaction detection and partial dependence analysis</li>
+                        <li> Ensemble of weak learner trees with Bayesian regularization</li>
+                        <li> Automatic variable selection and importance ranking</li>
+                        <li> MCMC-based posterior inference with convergence diagnostics</li>
+                        <li> Cross-validation for out-of-sample performance assessment</li>
+                        <li> Individual survival predictions with credible intervals</li>
+                        <li> Interaction detection and partial dependence analysis</li>
                     </ul>
                     </div>
                     
                     <div class='step'>
-                    <strong>💡 Clinical Applications:</strong>
+                    <strong> Clinical Applications:</strong>
                     <ul>
-                        <li>🧬 High-dimensional genomic survival analysis</li>
-                        <li>🏥 Personalized medicine with complex interactions</li>
-                        <li>💊 Treatment effect heterogeneity assessment</li>
-                        <li>🎯 Robust prediction with model uncertainty</li>
-                        <li>📊 Exploratory survival analysis with unknown relationships</li>
+                        <li> High-dimensional genomic survival analysis</li>
+                        <li> Personalized medicine with complex interactions</li>
+                        <li> Treatment effect heterogeneity assessment</li>
+                        <li> Robust prediction with model uncertainty</li>
+                        <li> Exploratory survival analysis with unknown relationships</li>
                     </ul>
                     </div>
                     
-                    <p><em>💡 Tip: Start with AFT model and 200 trees, use defaults for priors, and examine variable importance for insights.</em></p>
+                    <p><em> Tip: Start with AFT model and 200 trees, use defaults for priors, and examine variable importance for insights.</em></p>
                     </body>
                     </html>"
                 )

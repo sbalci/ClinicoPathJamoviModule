@@ -1,6 +1,5 @@
 test_that("highdimcox loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Test that the function can be loaded
   expect_true(requireNamespace("jmvcore", quietly = TRUE))
   

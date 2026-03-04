@@ -1882,14 +1882,15 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' **Variable Types:**
 #' - Categorical: pos/neg, intensity levels (0/1/2/3), ordinal scales
-#' - Continuous: H-scores (0-300), \% positivity (0-100), expression levels
+#' - Continuous: H-scores (0-300),  percent positivity (0-100), expression 
+#' levels
 #' - Mixed: Any combination of categorical and continuous markers
 #' 
 #' Uses Gower distance to handle mixed data types appropriately.
 #' 
 #' @param data The data as a data frame.
 #' @param catVars Binary (pos/neg) or ordinal (0/1/2/3) stain results
-#' @param contVars H-scores (0-300), \% positivity (0-100), or other
+#' @param contVars H-scores (0-300),  percent positivity (0-100), or other
 #'   continuous measures
 #' @param caseId Case identifier for tracking
 #' @param spatialCompartment Groups cases by spatial location (e.g.,

@@ -470,6 +470,7 @@ missingdataexplorerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinical_data')
 #'
 #' missingdataexplorer(
@@ -479,7 +480,7 @@ missingdataexplorerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     pattern_analysis = TRUE,
 #'     mechanism_testing = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param analysis_vars Variables to include in missing data pattern analysis
 #' @param group_var Grouping variable for comparing missingness patterns
@@ -495,7 +496,7 @@ missingdataexplorerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param group_comparison Compare missingness patterns between groups
 #' @param mcar_test Method for testing Missing Completely At Random assumption
 #' @param min_pattern_freq Minimum frequency for reporting missing data
-#'   patterns (5\% = 0.05)
+#'   patterns (5 percent = 0.05)
 #' @param max_patterns_display Maximum number of missing data patterns to
 #'   display in detail
 #' @param pattern_plot Generate missing data pattern plots
@@ -508,7 +509,7 @@ missingdataexplorerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param informative_missingness Test whether missingness is informative
 #'   (related to outcomes)
 #' @param completeness_threshold Threshold for acceptable variable
-#'   completeness (80\% = 0.8)
+#'   completeness (80 percent = 0.8)
 #' @param case_completeness Analyze completeness at the case/subject level
 #' @param variable_importance Assess which variables predict missingness in
 #'   others

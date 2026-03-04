@@ -29,7 +29,7 @@ labinterpretClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                        <div class='todo'>Welcome to Laboratory Result Interpretation 🧪</div>
+                        <div class='todo'>Welcome to Laboratory Result Interpretation </div>
                         <div class='instructions'>
                             <div class='step'><b>1.</b> Drag laboratory test variables to <b>Laboratory Values</b></div>
                             <div class='step'><b>2.</b> Add patient demographic variables (Age, Gender, etc.)</div>
@@ -467,7 +467,7 @@ labinterpretClass <- R6::R6Class(
                 .warning { color: #f39c12; }
             </style></head><body>"
             
-            summary_html <- paste0(summary_html, "<div class='summary-title'>Clinical Interpretation Summary 📋</div>")
+            summary_html <- paste0(summary_html, "<div class='summary-title'>Clinical Interpretation Summary </div>")
             
             # Overall assessment
             abnormalCount <- private$.countAbnormalValues(data, labValues)
@@ -518,7 +518,7 @@ labinterpretClass <- R6::R6Class(
                 .monitoring { background-color: #fef9e7; border-left: 4px solid #f39c12; }
             </style></head><body>"
             
-            recommendations_html <- paste0(recommendations_html, "<div class='rec-title'>Evidence-Based Clinical Recommendations 🏥</div>")
+            recommendations_html <- paste0(recommendations_html, "<div class='rec-title'>Evidence-Based Clinical Recommendations </div>")
             
             # Generate specific recommendations based on findings
             recommendations <- private$.generateSpecificRecommendations(data, labValues)

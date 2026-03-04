@@ -952,6 +952,7 @@ outbreakanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('outbreak_data')
 #'
 #' outbreakanalysis(
@@ -961,7 +962,7 @@ outbreakanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'     date_onset = "onset_date",
 #'     location_var = "location"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param case_status Binary variable indicating case (1) vs control (0) or
 #'   case vs non-case
@@ -976,8 +977,8 @@ outbreakanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param outbreak_type Type of outbreak pattern expected
 #' @param analysis_type Primary analytical approach for outbreak investigation
 #' @param epidemic_curve_unit Time unit for epidemic curve construction
-#' @param attack_rate_analysis Calculate attack rates and 95\% confidence
-#'   intervals
+#' @param attack_rate_analysis Calculate attack rates and 95 percent
+#'   confidence intervals
 #' @param risk_factor_analysis Perform risk factor analysis with odds ratios
 #'   and relative risks
 #' @param dose_response_analysis Analyze dose-response relationships for

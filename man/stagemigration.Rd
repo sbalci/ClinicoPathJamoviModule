@@ -242,34 +242,34 @@ stagemigration(
 \item{data}{The dataset containing staging and survival information for TNM
 validation analysis.}
 
-\item{oldStage}{📋 CLINICAL EXAMPLE: Select your current staging variable
-such as 'TNM7_Stage'  containing values like: Stage I, Stage IIA, Stage
-IIB, Stage IIIA, Stage IIIB, Stage IV. 🔍 TECHNICAL DETAILS: The original
-staging variable (e.g., TNM 7th edition, AJCC 7th edition). Should be coded
-as ordered factor with appropriate stage levels for meaningful comparison.}
+\item{oldStage}{CLINICAL EXAMPLE: Select your current staging variable such
+as 'TNM7_Stage' containing values like: Stage I, Stage IIA, Stage IIB,
+Stage IIIA, Stage IIIB, Stage IV. TECHNICAL DETAILS: The original staging
+variable (e.g., TNM 7th edition, AJCC 7th edition). Should be coded as
+ordered factor with appropriate stage levels for meaningful comparison.}
 
-\item{newStage}{📋 CLINICAL EXAMPLE: Select your new staging variable such
-as 'TNM8_Stage'  containing the same patients but potentially different
-stage assignments based on  revised criteria (e.g., T descriptor changes,
-nodal assessment updates). 🔍 TECHNICAL DETAILS: The proposed new staging
-variable (e.g., TNM 8th edition, revised staging). Should use the same
-coding structure as the original staging system for valid comparison.}
+\item{newStage}{CLINICAL EXAMPLE: Select your new staging variable such as
+'TNM8_Stage' containing the same patients but potentially different stage
+assignments based on revised criteria (e.g., T descriptor changes, nodal
+assessment updates). TECHNICAL DETAILS: The proposed new staging variable
+(e.g., TNM 8th edition, revised staging). Should use the same coding
+structure as the original staging system for valid comparison.}
 
-\item{survivalTime}{📋 CLINICAL EXAMPLE: Select your follow-up time
-variable such as 'OS_months'  containing values like: 12.5, 24.8, 36.2,
-45.0 (months from diagnosis to death or last contact). 🔍 TECHNICAL
-DETAILS: Time to event or censoring in consistent units (months
-recommended). For overall survival analysis, use time from diagnosis to
-death or last follow-up. For disease-free survival, use time from treatment
-to recurrence or last follow-up.}
+\item{survivalTime}{CLINICAL EXAMPLE: Select your follow-up time variable
+such as 'OS_months' containing values like: 12.5, 24.8, 36.2, 45.0 (months
+from diagnosis to death or last contact). TECHNICAL DETAILS: Time to event
+or censoring in consistent units (months recommended). For overall survival
+analysis, use time from diagnosis to death or last follow-up. For
+disease-free survival, use time from treatment to recurrence or last
+follow-up.}
 
-\item{event}{📋 CLINICAL EXAMPLE: Select your event variable such as
-'Death_Status'  containing values like: 0 (alive/censored), 1 (dead/event
-occurred) OR  "Alive", "Dead" OR "No Event", "Death", "Disease
-Progression". 🔍 TECHNICAL DETAILS: Event indicator (1 = event occurred, 0
-= censored) or factor with event levels. For overall survival, event =
-death from any cause. For disease-specific survival,  event = death from
-the specific disease being studied.}
+\item{event}{CLINICAL EXAMPLE: Select your event variable such as
+'Death_Status' containing values like: 0 (alive/censored), 1 (dead/event
+occurred) OR "Alive", "Dead" OR "No Event", "Death", "Disease Progression".
+TECHNICAL DETAILS: Event indicator (1 = event occurred, 0 = censored) or
+factor with event levels. For overall survival, event = death from any
+cause. For disease-specific survival, event = death from the specific
+disease being studied.}
 
 \item{eventLevel}{The level indicating event occurrence when using factor
 variables.}
@@ -369,7 +369,7 @@ considered clinically significant. Default 0.02 based on oncology
 literature recommendations.}
 
 \item{nriClinicalThreshold}{Minimum NRI improvement considered clinically
-meaningful. Default 0.20 (20\\% net reclassification improvement).}
+meaningful. Default 0.20 (20 percent net reclassification improvement).}
 
 \item{performHomogeneityTests}{Test homogeneity within stages and monotonic
 trend across stages. Essential for validating stage ordering and grouping.}
@@ -596,8 +596,8 @@ selected rank statistics  provides the most rigorous approach with proper
 multiple testing correction.}
 
 \item{cutpointRange}{Proportion range for cut-point search (e.g., "0.1,
-0.9" excludes outer  10\\% to maintain statistical power). Prevents extreme
-cut-points that  create unbalanced groups.}
+0.9" excludes outer  10 percent to maintain statistical power). Prevents
+extreme cut-points that  create unbalanced groups.}
 
 \item{multipleTestingCorrection}{Multiple testing correction method for
 cut-point determination.  Bonferroni is most conservative; use when testing
@@ -875,8 +875,8 @@ non-parametric uses Kaplan-Meier plateau  detection, both provides
 validation.}
 
 \item{cureConfidenceLevel}{Confidence level for cure model parameter
-estimates and cure fraction  confidence intervals. Standard 95\\% provides
-balance between precision  and coverage.}
+estimates and cure fraction  confidence intervals. Standard 95 percent
+provides balance between precision  and coverage.}
 
 \item{cureBootstrapCI}{Calculate bootstrap confidence intervals for cure
 fractions and model  parameters. Provides robust uncertainty quantification
@@ -1064,7 +1064,8 @@ reliable confidence intervals.}
 
 \item{concordanceProbabilityConfidenceLevel}{Confidence level for
 concordance probability confidence intervals. Standard choices are 0.90,
-0.95, or 0.99 for 90\\%, 95\\%, or 99\\% confidence intervals respectively.}
+0.95, or 0.99 for 90 percent, 95 percent, or 99 percent confidence
+intervals respectively.}
 
 \item{concordanceProbabilityCompareStages}{Compare concordance
 probabilities between different staging systems using hypothesis tests and
@@ -1136,7 +1137,8 @@ accurate intervals but increase computation time.}
 
 \item{winRatioConfidenceLevel}{Confidence level for win ratio confidence
 intervals and hypothesis tests. Standard choices are 0.90, 0.95, or 0.99
-for 90\\%, 95\\%, or 99\\% confidence intervals respectively.}
+for 90 percent, 95 percent, or 99 percent confidence intervals
+respectively.}
 
 \item{winRatioHandleTies}{Strategy for handling tied comparisons. Split
 assigns 0.5 wins to each. Ignore excludes tied pairs from analysis. Next

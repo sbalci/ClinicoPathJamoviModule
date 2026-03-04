@@ -75,6 +75,7 @@ stepwise/LASSO selection, ROC analysis, calibration plots, and bootstrap
 validation.
 }
 \examples{
+\donttest{
 # Example usage:
 # data <- your_data
 # ClinicoPath::predmodel(
@@ -84,5 +85,5 @@ validation.
 #   validation = "bootstrap",
 #   calibration = TRUE
 # )
-
+}
 }

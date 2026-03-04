@@ -71,11 +71,11 @@ options:
       title: Confidence Level
       type: List
       options:
-        - title: 95%
+        - title: 95 percent
           name: "95"
-        - title: 90%
+        - title: 90 percent
           name: "90"
-        - title: 99%
+        - title: 99 percent
           name: "99"
       default: "95"
       description: Confidence level for intervals

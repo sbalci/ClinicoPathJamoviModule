@@ -1269,6 +1269,7 @@ patientreportedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('pro_data')
 #'
 #' patientreported(
@@ -1279,7 +1280,7 @@ patientreportedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'     reliability_analysis = TRUE,
 #'     validity_analysis = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param scale_items Items/questions that comprise the PRO scale or
 #'   questionnaire
@@ -1313,7 +1314,7 @@ patientreportedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param min_items_required Minimum number of non-missing items required for
 #'   scale scoring
 #' @param missing_threshold Maximum proportion of missing items allowed for
-#'   scoring (50\% = 0.5)
+#'   scoring (50 percent = 0.5)
 #' @param clinical_interpretation Provide clinical interpretation of PRO
 #'   scores
 #' @param normative_comparison Compare scores to published normative data

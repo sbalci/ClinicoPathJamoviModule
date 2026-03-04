@@ -2,7 +2,6 @@
 # Edge Cases Tests: oddsratio
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(oddsratio_small, package = "ClinicoPath")
 data(oddsratio_large, package = "ClinicoPath")
 data(oddsratio_perfect, package = "ClinicoPath")

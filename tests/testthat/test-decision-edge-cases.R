@@ -2,7 +2,6 @@
 # Edge Cases Tests: decision
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(decision_small, package = "ClinicoPath")
 data(decision_large, package = "ClinicoPath")
 data(decision_perfect, package = "ClinicoPath")

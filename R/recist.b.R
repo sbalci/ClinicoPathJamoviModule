@@ -956,7 +956,7 @@ recistClass <- R6::R6Class(
                     currentHtml <- self$results$runSummary$state
                     if (is.null(currentHtml)) currentHtml <- ""
                     newHtml <- paste0(currentHtml,
-                        "<p style='color: green;'><b>✓ Data Exported:</b> ",
+                        "<p style='color: green;'><b> Data Exported:</b> ",
                         filepath, "</p>")
                     self$results$runSummary$setContent(newHtml)
                 }, error = function(e) {

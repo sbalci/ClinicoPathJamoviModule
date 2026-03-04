@@ -490,7 +490,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "datetimeconverter",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = datetimeconverterResults$new(options=options),
                 data = data,
@@ -512,7 +512,8 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' creating time-based variables.
 #'
 #' @examples
-#' # Basic datetime conversion: '0.0.35'
+#' \donttest{
+#' # Basic datetime conversion: '0.0.36'
 #' datetimeconverter(
 #'   data = study_data,
 #'   datetime_var = "event_date",
@@ -528,7 +529,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   extract_month = TRUE,
 #'   extract_dayname = TRUE
 #' )
-#'
+#'}
 #' @param data The data as a data frame containing datetime variable to
 #'   convert.
 #' @param datetime_var Variable containing datetime information in various

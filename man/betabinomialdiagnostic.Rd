@@ -126,6 +126,7 @@ centers using beta-binomial distributions with flexible correlation
 structures.
 }
 \examples{
+\donttest{
 # Example: Beta-binomial diagnostic accuracy analysis
 betabinomialdiagnostic(
     data = diagnostic_data,
@@ -134,5 +135,5 @@ betabinomialdiagnostic(
     study_id = study_center,
     overdispersion_model = "beta_binomial"
 )
-
+}
 }

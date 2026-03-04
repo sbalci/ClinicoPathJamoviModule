@@ -15,7 +15,7 @@ description:
         relative to the number of observations, or when multicollinearity is present.
         The regularization helps with variable selection and prevents overfitting.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: LASSO penalized Cox regression
             library(survival)

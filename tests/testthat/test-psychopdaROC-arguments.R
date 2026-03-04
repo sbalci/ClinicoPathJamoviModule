@@ -16,7 +16,6 @@ psychopdaROC <- function(...) {
 # Argument Tests: psychopdaROC
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(psychopdaROC_test, package = "ClinicoPath")
 data(psychopdaROC_subgroup, package = "ClinicoPath")
 data(psychopdaROC_costbenefit, package = "ClinicoPath")

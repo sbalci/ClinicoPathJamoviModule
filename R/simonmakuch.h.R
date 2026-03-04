@@ -1051,6 +1051,7 @@ simonmakuchBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' statistical comparisons.
 #'
 #' @examples
+#' \donttest{
 #' # Load example data
 #' data("simon_makuch_simple")
 #'
@@ -1109,7 +1110,7 @@ simonmakuchBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     performBootstrapValidation = TRUE,
 #'     showMethodologyNotes = TRUE
 #' )
-#'
+#'}
 #' @param data The dataset containing survival and time-dependent variable
 #'   information.
 #' @param survivalTime Time to event or censoring in consistent units (months

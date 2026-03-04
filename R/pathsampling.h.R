@@ -1791,8 +1791,8 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   significantly across sample types. Only available when Sample Type variable
 #'   is specified. Uses likelihood ratio test.
 #' @param useGeometricCI Use theoretical geometric model confidence intervals
-#'   when bootstrap shows ceiling effect (100\% bounds). Provides more realistic
-#'   uncertainty estimates.
+#'   when bootstrap shows ceiling effect (100 percent bounds). Provides more
+#'   realistic uncertainty estimates.
 #' @param ciMethod Method for calculating confidence intervals. Auto selects
 #'   geometric when bootstrap shows ceiling effect, otherwise uses bootstrap.
 #' @param showModelFit Perform goodness-of-fit test comparing observed vs
@@ -1813,7 +1813,7 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   'ps_cumulative_prob_5'). Only used when Append Variables is enabled.
 #' @param autoDetectHeterogeneity Automatically analyze and report if sample
 #'   types have significantly different detection probabilities. Requires Sample
-#'   Type variable. Warns if CV > 30\%.
+#'   Type variable. Warns if CV > 30 percent.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr

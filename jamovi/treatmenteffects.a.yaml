@@ -17,7 +17,7 @@ description:
         comparative effectiveness research, real-world evidence studies, and observational research
         where randomized controlled trials are not feasible.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('treatment_data')
             
@@ -287,7 +287,7 @@ options:
       max: 0.1
       default: 0.05
       description:
-          R: Quantiles for weight trimming (e.g., 0.05 = trim top/bottom 5%)
+          R: Quantiles for weight trimming (e.g., 0.05 = trim top/bottom 5 percent)
 
     - name: stabilized_weights
       title: Stabilized Weights

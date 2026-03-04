@@ -6,7 +6,6 @@
 # and output consistency for the diagnosticmeta jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(diagnosticmeta_test, package = "ClinicoPath")

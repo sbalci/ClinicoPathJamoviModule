@@ -44,12 +44,12 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
             if (is.null(self$options$date_vars) || length(self$options$date_vars) == 0) {
                 intro_msg <- "
                 <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #2e7d32; margin-top: 0;'>🔍 Welcome to Date/DateTime Validator!</h3>
+                <h3 style='color: #2e7d32; margin-top: 0;'> Welcome to Date/DateTime Validator!</h3>
                 <p><strong>Comprehensive date and datetime validation for clinical research databases</strong></p>
                 <p>Validates and diagnoses messy date/datetime formats using multiple R packages (datefixR, anytime, lubridate)</p>
 
                 <div style='background-color: #fff9c4; padding: 10px; border-radius: 5px; margin: 15px 0;'>
-                <p style='margin: 0;'><strong>ℹ️ For datetime conversion with component extraction:</strong></p>
+                <p style='margin: 0;'><strong> For datetime conversion with component extraction:</strong></p>
                 <p style='margin: 5px 0 0 0;'>Use the <strong>DateTime Converter</strong> module to extract year, month, day, hour, minute, second components into separate columns.</p>
                 </div>
 
@@ -96,7 +96,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                 </ul>
 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Professional date/datetime validation for clinical research data quality and standardization</em>
+                 <em>Professional date/datetime validation for clinical research data quality and standardization</em>
                 </p>
                 </div>"
 
@@ -620,7 +620,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
             table_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #495057; margin-top: 0;'>🔍 Date/DateTime Validation Results</h3>",
+                "<h3 style='color: #495057; margin-top: 0;'> Date/DateTime Validation Results</h3>",
                 "<p><strong>Method:</strong> ", private$.get_method_description(), "</p>",
                 "<p><strong>Variables Processed:</strong> ", total_vars, "</p>"
             )
@@ -672,7 +672,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
                         original_val <- if (is.na(result$original[i])) "NA" else as.character(result$original[i])
                         corrected_val <- if (is.na(result$corrected[i])) "NA" else as.character(result$corrected[i])
-                        status <- if (result$success[i]) "✓" else "✗"
+                        status <- if (result$success[i]) "" else ""
                         method <- result$method_used[i] %||% "unknown"
 
                         table_html <- paste0(table_html,
@@ -750,7 +750,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
             quality_html <- paste0(
                 "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #1976d2; margin-top: 0;'>📊 Quality Assessment</h3>",
+                "<h3 style='color: #1976d2; margin-top: 0;'> Quality Assessment</h3>",
 
                 "<h4 style='color: #1976d2;'>Overall Performance:</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
@@ -806,15 +806,15 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
             if (success_rate >= 95) {
                 quality_html <- paste0(quality_html,
-                    "<li>✅ Excellent validation rate (≥95%) - data is ready for analysis</li>"
+                    "<li> Excellent validation rate (≥95%) - data is ready for analysis</li>"
                 )
             } else if (success_rate >= 85) {
                 quality_html <- paste0(quality_html,
-                    "<li>⚠️ Good validation rate (85-94%) - review failed cases</li>"
+                    "<li> Good validation rate (85-94%) - review failed cases</li>"
                 )
             } else {
                 quality_html <- paste0(quality_html,
-                    "<li>❌ Low validation rate (<85%) - consider different method or manual review</li>"
+                    "<li> Low validation rate (<85%) - consider different method or manual review</li>"
                 )
             }
 
@@ -851,7 +851,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
             format_html <- paste0(
                 "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #ef6c00; margin-top: 0;'>🔍 Format Analysis</h3>",
+                "<h3 style='color: #ef6c00; margin-top: 0;'> Format Analysis</h3>",
 
                 "<h4 style='color: #ef6c00;'>Detected Patterns:</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>"
@@ -898,7 +898,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
             summary_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>📋 Validation Summary</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'> Validation Summary</h3>",
 
                 "<h4 style='color: #2e7d32;'>Processing Settings:</h4>",
                 "<ul>",
@@ -928,10 +928,10 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
             interpretation_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📚 Date/DateTime Validation Guide</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> Date/DateTime Validation Guide</h3>",
 
                 "<div style='background-color: #fff9c4; padding: 12px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<p style='margin: 0;'><strong>ℹ️ Related Module:</strong></p>",
+                "<p style='margin: 0;'><strong> Related Module:</strong></p>",
                 "<p style='margin: 5px 0 0 0;'>For datetime conversion with component extraction (year, month, day, hour, minute, second), ",
                 "use the <strong>DateTime Converter</strong> module. This validator focuses on quality assessment and format validation.</p>",
                 "</div>",
@@ -990,7 +990,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                 "</ul>",
 
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
-                "<em>🔍 Professional date/datetime validation for clinical research data quality assurance</em>",
+                "<em> Professional date/datetime validation for clinical research data quality assurance</em>",
                 "</p></div>"
             )
 

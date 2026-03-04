@@ -49,10 +49,9 @@ options:
       permitted: [factor]
       default: null
       description: >-
-        📋 CLINICAL EXAMPLE: Select your current staging variable such as 'TNM7_Stage' 
+        CLINICAL EXAMPLE: Select your current staging variable such as 'TNM7_Stage'
         containing values like: Stage I, Stage IIA, Stage IIB, Stage IIIA, Stage IIIB, Stage IV.
-        
-        🔍 TECHNICAL DETAILS: The original staging variable (e.g., TNM 7th edition, AJCC 7th edition).
+        TECHNICAL DETAILS: The original staging variable (e.g., TNM 7th edition, AJCC 7th edition).
         Should be coded as ordered factor with appropriate stage levels for meaningful comparison.
 
     - name: newStage
@@ -62,11 +61,10 @@ options:
       permitted: [factor]
       default: null
       description: >-
-        📋 CLINICAL EXAMPLE: Select your new staging variable such as 'TNM8_Stage' 
-        containing the same patients but potentially different stage assignments based on 
+        CLINICAL EXAMPLE: Select your new staging variable such as 'TNM8_Stage'
+        containing the same patients but potentially different stage assignments based on
         revised criteria (e.g., T descriptor changes, nodal assessment updates).
-        
-        🔍 TECHNICAL DETAILS: The proposed new staging variable (e.g., TNM 8th edition, revised staging).
+        TECHNICAL DETAILS: The proposed new staging variable (e.g., TNM 8th edition, revised staging).
         Should use the same coding structure as the original staging system for valid comparison.
 
     - name: survivalTime
@@ -76,10 +74,9 @@ options:
       permitted: [numeric]
       default: null
       description: >-
-        📋 CLINICAL EXAMPLE: Select your follow-up time variable such as 'OS_months' 
+        CLINICAL EXAMPLE: Select your follow-up time variable such as 'OS_months'
         containing values like: 12.5, 24.8, 36.2, 45.0 (months from diagnosis to death or last contact).
-        
-        🔍 TECHNICAL DETAILS: Time to event or censoring in consistent units (months recommended).
+        TECHNICAL DETAILS: Time to event or censoring in consistent units (months recommended).
         For overall survival analysis, use time from diagnosis to death or last follow-up.
         For disease-free survival, use time from treatment to recurrence or last follow-up.
 
@@ -90,12 +87,11 @@ options:
       permitted: [factor, numeric]
       default: null
       description: >-
-        📋 CLINICAL EXAMPLE: Select your event variable such as 'Death_Status' 
-        containing values like: 0 (alive/censored), 1 (dead/event occurred) OR 
+        CLINICAL EXAMPLE: Select your event variable such as 'Death_Status'
+        containing values like: 0 (alive/censored), 1 (dead/event occurred) OR
         "Alive", "Dead" OR "No Event", "Death", "Disease Progression".
-        
-        🔍 TECHNICAL DETAILS: Event indicator (1 = event occurred, 0 = censored) or factor with event levels.
-        For overall survival, event = death from any cause. For disease-specific survival, 
+        TECHNICAL DETAILS: Event indicator (1 = event occurred, 0 = censored) or factor with event levels.
+        For overall survival, event = death from any cause. For disease-specific survival,
         event = death from the specific disease being studied.
 
     - name: eventLevel
@@ -110,13 +106,13 @@ options:
       title: 'Clinical Analysis Preset'
       type: List
       options:
-        - title: "🏥 Routine Clinical Validation (Basic + Key Metrics)"
+        - title: " Routine Clinical Validation (Basic + Key Metrics)"
           name: routine_clinical
-        - title: "📊 Research Study (Standard + Advanced Statistics)"  
+        - title: " Research Study (Standard + Advanced Statistics)"  
           name: research_study
-        - title: "📝 Publication Manuscript (All Methods + Visualizations)"
+        - title: " Publication Manuscript (All Methods + Visualizations)"
           name: publication_ready
-        - title: "🔬 Custom Analysis (Manual Configuration)"
+        - title: " Custom Analysis (Manual Configuration)"
           name: custom
       default: routine_clinical
       description: >-
@@ -126,7 +122,7 @@ options:
         Choose 'Custom' to manually configure all options.
 
     - name: enableGuidedMode
-      title: '🧭 Guided Analysis Mode'
+      title: ' Guided Analysis Mode'
       type: Bool
       default: false
       description: >-
@@ -135,7 +131,7 @@ options:
         Highly recommended for users new to staging validation methods.
 
     - name: generateCopyReadyReport
-      title: '📄 Generate Copy-Ready Clinical Summary'
+      title: ' Generate Copy-Ready Clinical Summary'
       type: Bool
       default: false
       description: >-
@@ -145,7 +141,7 @@ options:
 
     # Accessibility and User Experience Options
     - name: enableAccessibilityFeatures
-      title: '♿ Accessibility Features'
+      title: ' Accessibility Features'
       type: Bool
       default: false
       description: >-
@@ -154,7 +150,7 @@ options:
         Ensures outputs are accessible to users with visual impairments.
 
     - name: preferredLanguage
-      title: '🌐 Output Language'
+      title: ' Output Language'
       type: List
       options:
         - title: "English (EN)"
@@ -167,7 +163,7 @@ options:
         Scientific terminology and statistical results remain standardized.
 
     - name: enableProgressIndicators
-      title: '⏱️ Show Progress Indicators'
+      title: ' Show Progress Indicators'
       type: Bool
       default: false
       description: >-
@@ -175,7 +171,7 @@ options:
         bootstrap validation and cross-validation. Helps users track analysis progress.
 
     - name: optimizeForLargeDatasets
-      title: '🚀 Large Dataset Optimization'
+      title: ' Large Dataset Optimization'
       type: Bool
       default: false
       description: >-
@@ -358,7 +354,7 @@ options:
       default: 0.20
       description: >-
         Minimum NRI improvement considered clinically meaningful.
-        Default 0.20 (20% net reclassification improvement).
+        Default 0.20 (20 percent net reclassification improvement).
 
     # Homogeneity and Trend Tests
     - name: performHomogeneityTests
@@ -890,7 +886,7 @@ options:
       default: "0.1, 0.9"
       description: >-
         Proportion range for cut-point search (e.g., "0.1, 0.9" excludes outer 
-        10% to maintain statistical power). Prevents extreme cut-points that 
+        10 percent to maintain statistical power). Prevents extreme cut-points that 
         create unbalanced groups.
 
     - name: multipleTestingCorrection
@@ -1606,7 +1602,7 @@ options:
       default: 0.95
       description: >-
         Confidence level for cure model parameter estimates and cure fraction 
-        confidence intervals. Standard 95% provides balance between precision 
+        confidence intervals. Standard 95 percent provides balance between precision 
         and coverage.
 
     - name: cureBootstrapCI
@@ -2129,7 +2125,7 @@ options:
       description:
         R: >
           Confidence level for concordance probability confidence intervals.
-          Standard choices are 0.90, 0.95, or 0.99 for 90%, 95%, or 99%
+          Standard choices are 0.90, 0.95, or 0.99 for 90 percent, 95 percent, or 99 percent
           confidence intervals respectively.
 
     - name: concordanceProbabilityCompareStages
@@ -2346,8 +2342,8 @@ options:
       description:
         R: >
           Confidence level for win ratio confidence intervals and hypothesis
-          tests. Standard choices are 0.90, 0.95, or 0.99 for 90%, 95%, or
-          99% confidence intervals respectively.
+          tests. Standard choices are 0.90, 0.95, or 0.99 for 90 percent, 95 percent, or
+          99 percent confidence intervals respectively.
 
     - name: winRatioHandleTies
       title: 'Tie Handling Strategy'
@@ -2559,13 +2555,13 @@ options:
       type: List
       options:
         - name: conservative
-          title: 'Conservative (5-25%)'
+          title: 'Conservative (5-25 percent)'
         - name: standard
-          title: 'Standard (10-50%)'
+          title: 'Standard (10-50 percent)'
         - name: aggressive
-          title: 'Aggressive (15-75%)'
+          title: 'Aggressive (15-75 percent)'
         - name: comprehensive
-          title: 'Comprehensive (5-95%)'
+          title: 'Comprehensive (5-95 percent)'
       default: standard
       description:
         R: >

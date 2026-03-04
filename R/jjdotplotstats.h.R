@@ -334,7 +334,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotplotstats",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = jjdotplotstatsResults$new(options=options),
                 data = data,
@@ -356,6 +356,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic dot plot with iris dataset
 #' jjdotplotstats(
 #'     data = iris,
@@ -403,7 +404,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     centralityparameter = "mean",
 #'     mytitle = "Tooth Growth by Supplement Type"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param dep A continuous numeric variable for which the distribution will be
 #'   displayed across different groups using dot plots.
@@ -444,10 +445,10 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param bfmessage Display Bayes Factor interpretation (evidence strength)
 #'   when using Bayesian analysis. BF > 3 indicates moderate evidence, BF > 10
 #'   strong evidence.
-#' @param conflevel Confidence level for intervals (0.95 = 95\% confidence
-#'   interval). This represents the probability that the true population
-#'   parameter lies within the calculated interval. 95\% is standard for most
-#'   analyses.
+#' @param conflevel Confidence level for intervals (0.95 = 95 percent
+#'   confidence interval). This represents the probability that the true
+#'   population parameter lies within the calculated interval. 95 percent is
+#'   standard for most analyses.
 #' @param k Number of decimal places for statistical results (p-values, effect
 #'   sizes). More decimal places show greater precision but may not be
 #'   clinically meaningful.

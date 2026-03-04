@@ -613,7 +613,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decision",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = decisionResults$new(options=options),
                 data = data,
@@ -657,7 +657,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param od Boolean selection whether to show original data frequency tables.
 #' @param fnote Boolean selection whether to show detailed explanatory
 #'   footnotes.
-#' @param ci Boolean selection whether to calculate and display 95\%
+#' @param ci Boolean selection whether to calculate and display 95 percent
 #'   confidence intervals.
 #' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
 #' @param showNaturalLanguage Boolean selection whether to show the natural

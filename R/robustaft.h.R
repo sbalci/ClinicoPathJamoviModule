@@ -614,6 +614,7 @@ robustaftBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' estimates in challenging clinical datasets.
 #'
 #' @examples
+#' \donttest{
 #' # Example: Robust AFT model with Weibull distribution
 #' library(survival)
 #' library(RobustAFT)
@@ -628,7 +629,7 @@ robustaftBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     robust_method = "huber",
 #'     tuning_constant = 1.345
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

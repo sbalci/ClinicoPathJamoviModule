@@ -2,7 +2,6 @@
 # Edge Cases Tests: outcomeorganizer
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(outcomeorganizer_small, package = "ClinicoPath")
 data(outcomeorganizer_censored, package = "ClinicoPath")
 data(outcomeorganizer_allevents, package = "ClinicoPath")

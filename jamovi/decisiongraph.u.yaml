@@ -16,11 +16,11 @@ children:
         label: "Select the type of decision analysis to perform"
         children:
           - type: Label
-            label: "💡 Simple: Basic decision tree with costs and probabilities"
+            label: " Simple: Basic decision tree with costs and probabilities"
           - type: Label
-            label: "🔄 Markov: Long-term health state modeling with cycles"
+            label: " Markov: Long-term health state modeling with cycles"
           - type: Label
-            label: "💰 Cost-Effectiveness: Economic evaluation with ICER analysis"
+            label: " Cost-Effectiveness: Economic evaluation with ICER analysis"
       - type: LayoutBox
         margin: large
         children:
@@ -88,9 +88,9 @@ children:
         label: "Configure health states and transitions for Markov modeling"
         children:
           - type: Label
-            label: "🏥 Health States: Define possible patient states (Healthy, Sick, Dead)"
+            label: " Health States: Define possible patient states (Healthy, Sick, Dead)"
           - type: Label
-            label: "🔀 Transitions: Probabilities of moving between states"
+            label: " Transitions: Probabilities of moving between states"
       - type: VariableSupplier
         persistentItems: false
         stretchFactor: 1
@@ -183,9 +183,9 @@ children:
         label: "Configure economic evaluation parameters"
         children:
           - type: Label
-            label: "💵 NMB: Net Monetary Benefit using willingness-to-pay threshold"
+            label: " NMB: Net Monetary Benefit using willingness-to-pay threshold"
           - type: Label
-            label: "📊 ICER: Incremental Cost-Effectiveness Ratio analysis"
+            label: " ICER: Incremental Cost-Effectiveness Ratio analysis"
       - type: LayoutBox
         margin: large
         children:

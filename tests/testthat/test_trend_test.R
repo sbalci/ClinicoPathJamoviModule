@@ -1,7 +1,6 @@
 context("trend_test")
 
 test_that("trend_test works", {
-  devtools::load_all()
   
   # Create test data similar to the article (block groups vs microscopic positivity)
   set.seed(123)

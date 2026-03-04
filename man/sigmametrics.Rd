@@ -114,12 +114,13 @@ compliance and quality improvement initiatives. Essential for laboratory
 method validation and performance monitoring.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 sigmametrics(
     bias = "method_bias",
     cv = "coefficient_variation",
     tea = "total_allowable_error",
     analyte = "test_name"
 )
-
+}
 }

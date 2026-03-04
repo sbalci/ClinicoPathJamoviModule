@@ -23,7 +23,7 @@ description:
         CRITICAL: Requires centered and scaled data for valid correlation-based interpretation.
         Without centering/scaling, the test compares raw variance instead of correlation structure.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example with mtcars dataset
             data("mtcars")
@@ -128,7 +128,7 @@ options:
       description:
           R: >
             Confidence level for confidence intervals (0.80-0.99).
-            Default: 0.95 for 95% CI.
+            Default: 0.95 for 95 percent CI.
 
     - name: adjustmethod
       title: P-value Adjustment Method

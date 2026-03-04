@@ -93,11 +93,12 @@ continuous measurements to clinically actionable thresholds and
 preventing arbitrary cutpoint selection in pathology studies.
 }
 \examples{
+\donttest{
 data('histopathology')
 
 optimalcutpoint(data = histopathology,
                biomarker = ki67_score,
                outcome = tumor_grade,
                analysis_type = "binary")
-
+}
 }

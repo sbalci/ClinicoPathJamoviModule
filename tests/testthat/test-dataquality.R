@@ -1,10 +1,8 @@
 # Test file for dataquality function
 library(testthat)
-devtools::load_all()
 
 test_that("dataquality basic functionality", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Load test data
   data("histopathology", package = "ClinicoPath")
 

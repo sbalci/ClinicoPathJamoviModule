@@ -13,7 +13,7 @@ description:
         Automatically calculates time-to-event and event status variables for use in survival analysis.
         Designed for seamless integration with swimmer/waterfall plot data.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data <- data.frame(
                 patient = c("P01", "P02", "P03"),

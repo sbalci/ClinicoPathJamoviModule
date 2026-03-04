@@ -2,7 +2,6 @@
 # High-performance scatter plots using scattermore package
 
 library(testthat)
-devtools::load_all()
 
 # Test data setup
 set.seed(123)
@@ -28,7 +27,6 @@ large_data <- data.frame(
 # Test basic functionality
 test_that("jscattermore basic functionality works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     # Test basic scatter plot
     result <- jscattermore(
         data = test_data,

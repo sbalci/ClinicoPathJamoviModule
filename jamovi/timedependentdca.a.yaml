@@ -20,7 +20,7 @@ description:
         time-varying treatment decisions.
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example with survival outcome
             library(survival)
@@ -164,7 +164,7 @@ options:
       default: false
       description:
           R: >
-            calculate 95% confidence intervals for net benefit using bootstrap resampling (computationally intensive)
+            calculate 95 percent confidence intervals for net benefit using bootstrap resampling (computationally intensive)
 
     - name: bootstrap_iterations
       title: Bootstrap Iterations
@@ -184,7 +184,7 @@ options:
       default: 0.95
       description:
           R: >
-            confidence level for bootstrap intervals (e.g., 0.95 for 95% CI)
+            confidence level for bootstrap intervals (e.g., 0.95 for 95 percent CI)
 
     - name: plot_net_benefit
       title: Plot Net Benefit Curves

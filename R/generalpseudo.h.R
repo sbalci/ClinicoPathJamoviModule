@@ -599,7 +599,8 @@ generalpseudoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' generalpseudo(
 #'     elapsedtime = "time_to_event",
 #'     outcome = "event_status",
@@ -608,7 +609,7 @@ generalpseudoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     time_points = c(12, 24, 60),
 #'     cause_specific = 1
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (for survival: 1 = event, 0 = censored; for

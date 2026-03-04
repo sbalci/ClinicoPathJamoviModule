@@ -168,22 +168,23 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$coefficientsTable)}
 }
 \description{
-🔬 FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
-⚕️ CLINICAL USE: Model survival data with smooth, flexible hazard functions
-that can capture  complex patterns (increasing, decreasing, or
-bathtub-shaped hazards). Better than Cox models  when you need to
+FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
+CLINICAL USE: Model survival data with smooth, flexible hazard functions
+that can capture complex patterns (increasing, decreasing, or
+bathtub-shaped hazards). Better than Cox models when you need to
 extrapolate beyond observed data or estimate absolute risks.
-📊 WHEN TO USE: • Cancer survival with complex hazard patterns • Health
+WHEN TO USE: • Cancer survival with complex hazard patterns • Health
 economic evaluations requiring extrapolation • Time-varying treatment
 effects • Relative survival analysis with population mortality
-⚠️ REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering
-the period of interest • For df>4: need ≥100 events to avoid overfitting
-📈 KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
+REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering the
+period of interest • For df>4: need ≥100 events to avoid overfitting
+KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
 predictions at specific time points • Model fit statistics (AIC,
 concordance) • Time-varying effect plots • Copy-ready clinical report
 sentences
 }
 \examples{
+\donttest{
 # Example 1: Basic flexible parametric model
 library(rstpm2)
 library(survival)
@@ -211,5 +212,5 @@ flexrstpm2(
     scale = "odds",
     show_time_varying_plots = TRUE
 )
-
+}
 }

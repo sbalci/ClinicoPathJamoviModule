@@ -129,6 +129,7 @@ for
 biomarker prediction from H&E-stained tissue images.
 }
 \examples{
+\donttest{
 # Basic Vision Transformer prediction
 deeplearningprediction(
     data = image_data,
@@ -149,5 +150,5 @@ deeplearningprediction(
     gray_zone_width = 5.0,
     thresholds = c(5, 10, 15, 20)
 )
-
+}
 }

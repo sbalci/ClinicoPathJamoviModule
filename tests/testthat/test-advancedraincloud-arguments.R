@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("advancedraincloud handles clinical significance options", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -25,7 +24,6 @@ test_that("advancedraincloud handles clinical significance options", {
 })
 
 test_that("advancedraincloud handles effect size calculations", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -47,7 +45,6 @@ test_that("advancedraincloud handles effect size calculations", {
 })
 
 test_that("advancedraincloud handles change score analysis", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -65,7 +62,6 @@ test_that("advancedraincloud handles change score analysis", {
 })
 
 test_that("advancedraincloud handles sample size annotations", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -81,7 +77,6 @@ test_that("advancedraincloud handles sample size annotations", {
 })
 
 test_that("advancedraincloud handles clinical trial features", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -104,7 +99,6 @@ test_that("advancedraincloud handles clinical trial features", {
 })
 
 test_that("advancedraincloud handles biomarker features", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   week12_data <- subset(advancedraincloud_test, timepoint == "Week 12")
@@ -123,7 +117,6 @@ test_that("advancedraincloud handles biomarker features", {
 })
 
 test_that("advancedraincloud handles outlier methods", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -144,7 +137,6 @@ test_that("advancedraincloud handles outlier methods", {
 })
 
 test_that("advancedraincloud handles p-value positions", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -166,7 +158,6 @@ test_that("advancedraincloud handles p-value positions", {
 })
 
 test_that("advancedraincloud handles journal styles", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -187,7 +178,6 @@ test_that("advancedraincloud handles journal styles", {
 })
 
 test_that("advancedraincloud handles report generation options", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -204,7 +194,6 @@ test_that("advancedraincloud handles report generation options", {
 })
 
 test_that("advancedraincloud handles combined advanced features", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -238,7 +227,6 @@ test_that("advancedraincloud handles combined advanced features", {
 })
 
 test_that("advancedraincloud handles optional variables set to NULL", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -257,7 +245,6 @@ test_that("advancedraincloud handles optional variables set to NULL", {
 })
 
 test_that("advancedraincloud handles show/hide options", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 

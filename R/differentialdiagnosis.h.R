@@ -535,6 +535,7 @@ differentialdiagnosisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' # Basic differential diagnosis analysis
@@ -543,7 +544,7 @@ differentialdiagnosisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #'                     confirmedDiagnosis = 'Diagnosis',
 #'                     diagnostic_probability = TRUE,
 #'                     likelihood_ratios = TRUE)
-#'
+#'}
 #' @param data .
 #' @param clinicalFindings Clinical findings, symptoms, signs, and test
 #'   results for diagnostic reasoning

@@ -121,7 +121,8 @@ of converted data. Perfect for preparing datetime data for analysis and
 creating time-based variables.
 }
 \examples{
-# Basic datetime conversion: '0.0.35'
+\donttest{
+# Basic datetime conversion: '0.0.36'
 datetimeconverter(
   data = study_data,
   datetime_var = "event_date",
@@ -137,5 +138,5 @@ datetimeconverter(
   extract_month = TRUE,
   extract_dayname = TRUE
 )
-
+}
 }

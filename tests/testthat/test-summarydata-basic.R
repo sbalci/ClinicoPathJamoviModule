@@ -9,7 +9,6 @@
 
 # library(testthat)
 # library(ClinicoPath)
-devtools::load_all()
 
 # Load test data
 data(summarydata_test, package = "ClinicoPath", envir = environment())

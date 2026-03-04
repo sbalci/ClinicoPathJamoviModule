@@ -17,9 +17,9 @@ description:
         patterns in the data. The method supports various PCA approaches including standard PCA,
         sparse PCA, and supervised PCA for survival data.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             principalcox(
                 elapsedtime = "time_to_event",
                 outcome = "event_status",

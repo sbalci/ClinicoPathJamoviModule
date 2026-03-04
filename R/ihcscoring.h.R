@@ -566,7 +566,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalSummary",
-                title="\uD83D\uDCCB Analysis Summary (Copy-Ready)",
+                title="Analysis Summary (Copy-Ready)",
                 visible=TRUE,
                 clearWith=list(
                     "intensity_var",
@@ -578,12 +578,12 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
-                title="\uD83D\uDD2C About This Analysis",
+                title="About This Analysis",
                 visible=TRUE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="clinicalReport",
-                title="\uD83D\uDCC4 Clinical Report Template",
+                title="Clinical Report Template",
                 visible=TRUE,
                 clearWith=list(
                     "intensity_var",
@@ -596,7 +596,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
-                title="\u26A0\uFE0F Assumptions & Caveats",
+                title="Assumptions & Caveats",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -1573,7 +1573,7 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param guided_biomarker guided configuration for common biomarkers with
 #'   recommended settings
 #' @param intensity_var staining intensity scores (typically 0-3 scale)
-#' @param proportion_var percentage of positive cells (0-100\%)
+#' @param proportion_var percentage of positive cells (0-100 percent)
 #' @param sample_id_var unique identifier for each sample
 #' @param group_var grouping variable for comparative analysis
 #' @param scoring_method primary scoring methodology to emphasize

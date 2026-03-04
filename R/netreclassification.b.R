@@ -16,11 +16,11 @@ netreclassificationClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h2>📊 Net Reclassification Improvement (NRI)</h2>
+                    <h2> Net Reclassification Improvement (NRI)</h2>
                     <p><strong>Advanced assessment of model improvement through reclassification analysis</strong></p>
                     
                     <div class='step'>
-                    <strong>📋 Required Data:</strong>
+                    <strong> Required Data:</strong>
                     <ul>
                         <li><span class='highlight'>Outcome Variable</span>: Binary event indicator (0/1)</li>
                         <li><span class='highlight'>Baseline Model Predictions</span>: Risk scores from reference model</li>
@@ -29,7 +29,7 @@ netreclassificationClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🎯 NRI Types:</strong>
+                    <strong> NRI Types:</strong>
                     <ul>
                         <li><strong>Categorical NRI:</strong> Uses predefined risk thresholds (e.g., 5%, 10%, 20%)</li>
                         <li><strong>Continuous NRI:</strong> Risk-free approach comparing all risk changes</li>
@@ -38,28 +38,28 @@ netreclassificationClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🔍 Key Features:</strong>
+                    <strong> Key Features:</strong>
                     <ul>
-                        <li>📈 Bootstrap confidence intervals for robust inference</li>
-                        <li>🔄 Decomposition into event and non-event contributions</li>
-                        <li>📊 Detailed reclassification transition matrices</li>
-                        <li>🎨 Comprehensive visualization of risk redistribution</li>
-                        <li>🔧 Sensitivity analysis across different thresholds</li>
-                        <li>👥 Subgroup analysis for population heterogeneity</li>
+                        <li> Bootstrap confidence intervals for robust inference</li>
+                        <li> Decomposition into event and non-event contributions</li>
+                        <li> Detailed reclassification transition matrices</li>
+                        <li> Comprehensive visualization of risk redistribution</li>
+                        <li> Sensitivity analysis across different thresholds</li>
+                        <li> Subgroup analysis for population heterogeneity</li>
                     </ul>
                     </div>
                     
                     <div class='step'>
-                    <strong>💡 Clinical Applications:</strong>
+                    <strong> Clinical Applications:</strong>
                     <ul>
-                        <li>🧬 Biomarker validation and incremental value assessment</li>
-                        <li>❤️ Cardiovascular risk prediction model enhancement</li>
-                        <li>🎯 Cancer prognosis model development</li>
-                        <li>💊 Treatment decision support tool evaluation</li>
+                        <li> Biomarker validation and incremental value assessment</li>
+                        <li> Cardiovascular risk prediction model enhancement</li>
+                        <li> Cancer prognosis model development</li>
+                        <li> Treatment decision support tool evaluation</li>
                     </ul>
                     </div>
                     
-                    <p><em>💡 Tip: Use categorical NRI with clinically meaningful thresholds for interpretable results, and continuous NRI for comprehensive assessment.</em></p>
+                    <p><em> Tip: Use categorical NRI with clinically meaningful thresholds for interpretable results, and continuous NRI for comprehensive assessment.</em></p>
                     </body>
                     </html>"
                 )

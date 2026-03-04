@@ -44,6 +44,9 @@
 #' @importFrom purrr partial
 #' @import magrittr
 
+#' @noRd
+NULL
+
 # Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
 .createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
@@ -53,25 +56,25 @@
         ERROR = list(
             bg = "#f8d7da",
             border = "#dc3545",
-            icon = "❌",
+            icon = "",
             title_color = "#721c24"
         ),
         STRONG_WARNING = list(
             bg = "#fff3cd",
             border = "#ff9800",
-            icon = "⚠️",
+            icon = "",
             title_color = "#856404"
         ),
         WARNING = list(
             bg = "#fff3cd",
             border = "#ffc107",
-            icon = "⚠️",
+            icon = "",
             title_color = "#856404"
         ),
         INFO = list(
             bg = "#d1ecf1",
             border = "#17a2b8",
-            icon = "ℹ️",
+            icon = "",
             title_color = "#0c5460"
         )
     )
@@ -397,7 +400,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (length(validation_results$warnings) > 0) {
                     warning_msg <- paste0(
                         "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<strong>⚠️ Variable Name Warnings:</strong><br>",
+                        "<strong> Variable Name Warnings:</strong><br>",
                         paste(validation_results$warnings, collapse = "<br>"),
                         "</div>"
                     )
@@ -444,12 +447,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                         "<p><strong>When to use FWER control:</strong></p>",
                         "<ul>",
-                        "<li>✅ Confirmatory studies where even one false positive is unacceptable</li>",
-                        "<li>✅ Clinical trials with regulatory requirements</li>",
-                        "<li>✅ When you have strong prior hypotheses to test</li>",
+                        "<li> Confirmatory studies where even one false positive is unacceptable</li>",
+                        "<li> Clinical trials with regulatory requirements</li>",
+                        "<li> When you have strong prior hypotheses to test</li>",
                         "</ul>",
 
-                        "<p><em>💡 FWER methods are conservative - you may miss true effects to avoid false positives. Consider FDR methods (BH/BY) for exploratory research.</em></p>",
+                        "<p><em> FWER methods are conservative - you may miss true effects to avoid false positives. Consider FDR methods (BH/BY) for exploratory research.</em></p>",
                         "</div>"
                     )
                 } else {
@@ -473,12 +476,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                         "<p><strong>When to use FDR control:</strong></p>",
                         "<ul>",
-                        "<li>✅ Exploratory analyses with many comparisons</li>",
-                        "<li>✅ Genomic/proteomic studies with thousands of tests</li>",
-                        "<li>✅ Hypothesis-generating research where you can tolerate some false positives</li>",
+                        "<li> Exploratory analyses with many comparisons</li>",
+                        "<li> Genomic/proteomic studies with thousands of tests</li>",
+                        "<li> Hypothesis-generating research where you can tolerate some false positives</li>",
                         "</ul>",
 
-                        "<p><em>💡 FDR methods are less conservative than FWER - you'll discover more effects but accept a small proportion of false positives.</em></p>",
+                        "<p><em> FDR methods are less conservative than FWER - you'll discover more effects but accept a small proportion of false positives.</em></p>",
                         "</div>"
                     )
                 }
@@ -522,7 +525,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "<li><strong>arsenal:</strong> Comprehensive tables with many options</li>",
                         "</ul>",
 
-                        "<p style='margin-top: 15px;'><em>💡 Tip: Use gtsummary style for publication-ready tables with automatic q-values and FDR correction.</em></p>",
+                        "<p style='margin-top: 15px;'><em> Tip: Use gtsummary style for publication-ready tables with automatic q-values and FDR correction.</em></p>",
                         "</div>"
                     )
                     self$results$todo$setContent(todo)
@@ -875,17 +878,17 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                             "<p><strong>When to use FDR control:</strong></p>",
                             "<ul>",
-                            "<li>✅ Exploratory analyses where discovering patterns is the goal</li>",
-                            "<li>✅ Genomic/proteomic studies with hundreds or thousands of tests</li>",
-                            "<li>✅ Screening studies to generate hypotheses for follow-up</li>",
-                            "<li>✅ When you can tolerate a small proportion of false positives</li>",
+                            "<li> Exploratory analyses where discovering patterns is the goal</li>",
+                            "<li> Genomic/proteomic studies with hundreds or thousands of tests</li>",
+                            "<li> Screening studies to generate hypotheses for follow-up</li>",
+                            "<li> When you can tolerate a small proportion of false positives</li>",
                             "</ul>",
 
                             "<p><strong>Important considerations:</strong></p>",
                             "<ul>",
-                            "<li>⚠️ FDR methods assume independence or positive dependence between tests</li>",
-                            "<li>⚠️ Less conservative than Bonferroni/Holm - you'll find more discoveries but accept some false positives</li>",
-                            "<li>⚠️ Should not replace careful hypothesis planning and validation</li>",
+                            "<li> FDR methods assume independence or positive dependence between tests</li>",
+                            "<li> Less conservative than Bonferroni/Holm - you'll find more discoveries but accept some false positives</li>",
+                            "<li> Should not replace careful hypothesis planning and validation</li>",
                             "</ul>",
 
                             "<p><small><em>Correction applied using ", method_names[[p_adjust_method]], " method via gtsummary::add_q()</em></small></p>",
@@ -911,17 +914,17 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                             "<p><strong>When to use FWER control:</strong></p>",
                             "<ul>",
-                            "<li>✅ Confirmatory studies where false positives are costly</li>",
-                            "<li>✅ Clinical trials with regulatory requirements</li>",
-                            "<li>✅ When testing pre-specified hypotheses</li>",
-                            "<li>✅ When even a single false positive is unacceptable</li>",
+                            "<li> Confirmatory studies where false positives are costly</li>",
+                            "<li> Clinical trials with regulatory requirements</li>",
+                            "<li> When testing pre-specified hypotheses</li>",
+                            "<li> When even a single false positive is unacceptable</li>",
                             "</ul>",
 
                             "<p><strong>Important considerations:</strong></p>",
                             "<ul>",
-                            "<li>⚠️ Very conservative - may miss true effects (reduced power)</li>",
-                            "<li>⚠️ With many tests (>10), corrections can be extremely stringent</li>",
-                            "<li>⚠️ Consider FDR methods (BH/BY) for exploratory research with many tests</li>",
+                            "<li> Very conservative - may miss true effects (reduced power)</li>",
+                            "<li> With many tests (>10), corrections can be extremely stringent</li>",
+                            "<li> Consider FDR methods (BH/BY) for exploratory research with many tests</li>",
                             "</ul>",
 
                             "<p><small><em>Correction applied using ", method_names[[p_adjust_method]], " method via gtsummary::add_q()</em></small></p>",

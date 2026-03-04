@@ -20,7 +20,6 @@ enhancedROC <- function(...) {
 # for the enhancedROC jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(enhancedroc_biomarker, package = "ClinicoPath")

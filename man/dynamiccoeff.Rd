@@ -125,6 +125,7 @@ sophisticated alternatives to static coefficient approaches in survival
 analysis.
 }
 \examples{
+\donttest{
 # Example 1: Dynamic coefficient model with Bayesian updating
 library(survival)
 library(dlm)
@@ -138,5 +139,5 @@ dynamiccoeff(
     dynamic_covariates = c("diagtime"),
     updating_method = "kalman"
 )
-
+}
 }

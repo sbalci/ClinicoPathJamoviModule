@@ -14,7 +14,7 @@ description:
       survival outcomes. Essential for demonstrating incremental value of new
       biomarkers or predictors.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage - Binary outcome:
             # ClinicoPath::reclassmetrics(

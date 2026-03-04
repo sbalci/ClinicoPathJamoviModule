@@ -118,6 +118,7 @@ other metrics. Inspired by Orange Data Mining's Test & Score widget,
 adapted for clinical research with comprehensive model diagnostics.
 }
 \examples{
+\donttest{
 # Example: Compare Cox models
 modelperformance(
     data = cancer_data,
@@ -128,5 +129,5 @@ modelperformance(
     model2vars = c("age", "stage", "grade"),
     model3vars = c("age", "stage", "grade", "ki67")
 )
-
+}
 }

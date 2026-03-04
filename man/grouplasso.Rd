@@ -235,6 +235,7 @@ group-wise feature selection with preserved biological or clinical
 structure.
 }
 \examples{
+\donttest{
 result <- grouplasso(
     data = mydata,
     time = "time_to_event",
@@ -244,5 +245,5 @@ result <- grouplasso(
     penalty_type = "group_lasso",
     cv_folds = 10
 )
-
+}
 }

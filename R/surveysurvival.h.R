@@ -820,6 +820,7 @@ surveysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: Basic survey-weighted Kaplan-Meier
 #' library(survival)
 #' library(survey)
@@ -863,7 +864,7 @@ surveysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     design_type = "multistage",
 #'     nest_clusters = TRUE
 #' )
-#'
+#'}
 #' @param data The survey dataset to be analyzed, provided as a data frame.
 #'   Must contain survival variables, survey design variables (weights, strata,
 #'   clusters), and any explanatory variables for analysis.
@@ -906,7 +907,7 @@ surveysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param robust_se Use robust variance estimation accounting for survey
 #'   design effects.
 #' @param ci_level Confidence level for confidence intervals (e.g., 0.95 for
-#'   95\% CI).
+#'   95 percent CI).
 #' @param population_totals Calculate population-level survival estimates and
 #'   totals.
 #' @param subpopulation Variable defining subpopulation for domain estimation.

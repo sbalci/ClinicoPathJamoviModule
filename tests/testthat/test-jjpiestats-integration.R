@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load all test datasets
 data(jjpiestats_test, package = "ClinicoPath", envir = environment())
@@ -21,7 +20,6 @@ data(jjpiestats_small, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles complete diagnostic test evaluation workflow", {
-  devtools::load_all()
 
   # Step 1: Basic distribution
   result1 <- jjpiestats(
@@ -72,7 +70,6 @@ test_that("jjpiestats handles complete diagnostic test evaluation workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles complete treatment comparison workflow", {
-  devtools::load_all()
 
   # Step 1: Overall response distribution
   result1 <- jjpiestats(
@@ -122,7 +119,6 @@ test_that("jjpiestats handles complete treatment comparison workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles complete biomarker distribution workflow", {
-  devtools::load_all()
 
   # Step 1: Overall expression distribution
   result1 <- jjpiestats(
@@ -168,7 +164,6 @@ test_that("jjpiestats handles complete biomarker distribution workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles all datasets with consistent parameters", {
-  devtools::load_all()
 
   # jjpiestats_test
   result1 <- jjpiestats(
@@ -221,7 +216,6 @@ test_that("jjpiestats handles all datasets with consistent parameters", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats produces consistent results across statistical test types", {
-  devtools::load_all()
 
   # Parametric
   result_param <- jjpiestats(
@@ -268,7 +262,6 @@ test_that("jjpiestats produces consistent results across statistical test types"
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles progressive feature addition", {
-  devtools::load_all()
 
   # Step 1: Minimal
   result1 <- jjpiestats(
@@ -352,7 +345,6 @@ test_that("jjpiestats handles progressive feature addition", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles multiple analyses from same dataset", {
-  devtools::load_all()
 
   variables <- c("treatment_response", "disease_severity", "gender", "tumor_stage")
 
@@ -377,7 +369,6 @@ test_that("jjpiestats handles multiple analyses from same dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats produces consistent results on repeated calls", {
-  devtools::load_all()
 
   # Run same analysis 3 times
   result1 <- jjpiestats(
@@ -411,7 +402,6 @@ test_that("jjpiestats produces consistent results on repeated calls", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles multi-site study comparison workflow", {
-  devtools::load_all()
 
   # Overall distribution
   result_overall <- jjpiestats(
@@ -445,7 +435,6 @@ test_that("jjpiestats handles multi-site study comparison workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats integrates clinical presets with appropriate data", {
-  devtools::load_all()
 
   # Diagnostic preset with diagnostic data
   result_diag <- jjpiestats(

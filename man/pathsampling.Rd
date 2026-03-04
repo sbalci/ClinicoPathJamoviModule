@@ -194,8 +194,8 @@ significantly across sample types. Only available when Sample Type variable
 is specified. Uses likelihood ratio test.}
 
 \item{useGeometricCI}{Use theoretical geometric model confidence intervals
-when bootstrap shows ceiling effect (100\\% bounds). Provides more realistic
-uncertainty estimates.}
+when bootstrap shows ceiling effect (100 percent bounds). Provides more
+realistic uncertainty estimates.}
 
 \item{ciMethod}{Method for calculating confidence intervals. Auto selects
 geometric when bootstrap shows ceiling effect, otherwise uses bootstrap.}
@@ -227,7 +227,7 @@ probabilities, recommended sample counts, and detection categories.}
 
 \item{autoDetectHeterogeneity}{Automatically analyze and report if sample
 types have significantly different detection probabilities. Requires Sample
-Type variable. Warns if CV > 30\\%.}
+Type variable. Warns if CV > 30 percent.}
 }
 \value{
 A results object containing:

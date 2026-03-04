@@ -15,9 +15,9 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       if (!private$.isReady()) {
         self$results$interactiveGuidance$setContent(
           "<div style='padding: 20px; background: #e3f2fd; border-left: 4px solid #2196f3;'>
-           <h4>🔬 Interactive Clinical Model Validation</h4>
+           <h4> Interactive Clinical Model Validation</h4>
            <p><strong>Getting Started:</strong> Select an outcome variable and at least one predictor variable to begin analysis.</p>
-           <p><strong>💡 Pro Tip:</strong> Try using a clinical preset from the dropdown for optimized parameters!</p>
+           <p><strong> Pro Tip:</strong> Try using a clinical preset from the dropdown for optimized parameters!</p>
            <ul style='margin: 10px 0;'>
            <li>Choose your <strong>outcome variable</strong> (binary factor)</li>
            <li>Add <strong>predictor variables</strong> (numeric or factors)</li>
@@ -100,14 +100,14 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
         
         if (is.null(outcome_var)) {
           self$results$parameterValidation$setContent(
-            "<div class='alert alert-warning'>⚠️ <strong>Missing Outcome Variable:</strong> Please select an outcome variable to proceed.</div>"
+            "<div class='alert alert-warning'> <strong>Missing Outcome Variable:</strong> Please select an outcome variable to proceed.</div>"
           )
           return(NULL)
         }
         
         if (length(predictor_vars) == 0) {
           self$results$parameterValidation$setContent(
-            "<div class='alert alert-warning'>⚠️ <strong>Missing Predictors:</strong> Please select at least one predictor variable.</div>"
+            "<div class='alert alert-warning'> <strong>Missing Predictors:</strong> Please select at least one predictor variable.</div>"
           )
           return(NULL)
         }
@@ -133,7 +133,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
         final_n <- nrow(analysis_data)
         if (final_n < 10) {
           self$results$parameterValidation$setContent(
-            "<div class='alert alert-danger'>❌ <strong>Insufficient Data:</strong> Need at least 10 complete cases for analysis.</div>"
+            "<div class='alert alert-danger'> <strong>Insufficient Data:</strong> Need at least 10 complete cases for analysis.</div>"
           )
           return(NULL)
         }
@@ -142,13 +142,13 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
         if (final_n < original_n * 0.8) {
           loss_pct <- round((original_n - final_n) / original_n * 100, 1)
           self$results$parameterValidation$setContent(
-            paste0("<div class='alert alert-warning'>⚠️ <strong>Data Loss:</strong> ", 
+            paste0("<div class='alert alert-warning'> <strong>Data Loss:</strong> ", 
                    loss_pct, "% of cases removed due to missing data (", 
                    original_n - final_n, " of ", original_n, " cases).</div>")
           )
         } else {
           self$results$parameterValidation$setContent(
-            "<div class='alert alert-success'>✅ <strong>Data Ready:</strong> All parameters validated successfully.</div>"
+            "<div class='alert alert-success'> <strong>Data Ready:</strong> All parameters validated successfully.</div>"
           )
         }
         
@@ -156,7 +156,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
         
       }, error = function(e) {
         self$results$parameterValidation$setContent(
-          paste0("<div class='alert alert-danger'>❌ <strong>Data Error:</strong> ", e$message, "</div>")
+          paste0("<div class='alert alert-danger'> <strong>Data Error:</strong> ", e$message, "</div>")
         )
         return(NULL)
       })
@@ -437,16 +437,16 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
           
           if (metric_name == "sensitivity" && self$options$min_sensitivity < 0.99) {
             clinical_threshold <- sprintf("≥%.1f%%", self$options$min_sensitivity * 100)
-            meets_req <- ifelse(metric_data$estimate >= self$options$min_sensitivity, "✅ Yes", "❌ No")
+            meets_req <- ifelse(metric_data$estimate >= self$options$min_sensitivity, " Yes", " No")
           } else if (metric_name == "specificity" && self$options$min_specificity < 0.99) {
             clinical_threshold <- sprintf("≥%.1f%%", self$options$min_specificity * 100)
-            meets_req <- ifelse(metric_data$estimate >= self$options$min_specificity, "✅ Yes", "❌ No")
+            meets_req <- ifelse(metric_data$estimate >= self$options$min_specificity, " Yes", " No")
           } else if (metric_name == "ppv" && self$options$min_ppv < 0.99) {
             clinical_threshold <- sprintf("≥%.1f%%", self$options$min_ppv * 100)
-            meets_req <- ifelse(metric_data$estimate >= self$options$min_ppv, "✅ Yes", "❌ No")
+            meets_req <- ifelse(metric_data$estimate >= self$options$min_ppv, " Yes", " No")
           } else if (metric_name == "npv" && self$options$min_npv < 0.99) {
             clinical_threshold <- sprintf("≥%.1f%%", self$options$min_npv * 100)
-            meets_req <- ifelse(metric_data$estimate >= self$options$min_npv, "✅ Yes", "❌ No")
+            meets_req <- ifelse(metric_data$estimate >= self$options$min_npv, " Yes", " No")
           }
           
           results_table$addRow(rowKey=metric_name, values=list(
@@ -550,7 +550,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       
       html_content <- sprintf(
         "<div style='padding: 15px; background: #e8f5e8; border-left: 4px solid #4caf50;'>
-         <h4>✅ Analysis Complete - Interactive Clinical Validation</h4>
+         <h4> Analysis Complete - Interactive Clinical Validation</h4>
          <p><strong>Overall Performance:</strong> %s (AUC = %.3f)</p>
          <div style='margin: 10px 0;'>
          <strong>Key Metrics:</strong>
@@ -560,7 +560,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
          <li>AUC: %.3f [%.3f - %.3f]</li>
          </ul>
          </div>
-         <p><strong>🎯 Interactive Features Active:</strong> Try changing the clinical preset or validation parameters to see real-time updates!</p>
+         <p><strong> Interactive Features Active:</strong> Try changing the clinical preset or validation parameters to see real-time updates!</p>
          </div>",
         performance_level, auc_val,
         sens_val * 100, validation_results$sensitivity$lower_ci * 100, validation_results$sensitivity$upper_ci * 100,
@@ -575,7 +575,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
     .generateRealtimeMetrics = function(validation_results) {
       html_content <- sprintf(
         "<div class='realtime-metrics' style='background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: Arial, sans-serif;'>
-         <h5 style='color: #1976d2; margin-bottom: 15px;'>📊 Real-Time Performance Dashboard</h5>
+         <h5 style='color: #1976d2; margin-bottom: 15px;'> Real-Time Performance Dashboard</h5>
          <div style='display: flex; flex-wrap: wrap; gap: 15px;'>
            <div class='metric-card' style='flex: 1; min-width: 150px; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
              <h6 style='margin: 0 0 8px 0; color: #666; font-size: 12px;'>AUC</h6>

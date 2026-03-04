@@ -27,7 +27,7 @@ conditionalgeeClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h1>🔗 Conditional GEE for Recurrent Events Gap Times Analysis</h1>
+                    <h1> Conditional GEE for Recurrent Events Gap Times Analysis</h1>
                     
                     <div class='info'>
                     <strong>Welcome to Conditional GEE Analysis</strong><br>
@@ -40,18 +40,18 @@ conditionalgeeClass <- R6::R6Class(
                     </ul>
                     </div>
 
-                    <h2>📋 Required Variables:</h2>
+                    <h2> Required Variables:</h2>
                     <div class='step'><strong>1. Subject ID:</strong> Unique identifier for each subject/patient</div>
                     <div class='step'><strong>2. Gap Time:</strong> Time between consecutive events (inter-event times)</div>
                     <div class='step'><strong>3. Event Indicator:</strong> Binary indicator (1=event occurred, 0=censored)</div>
                     
-                    <h2>📊 Optional Variables:</h2>
+                    <h2> Optional Variables:</h2>
                     <div class='step'><strong>Event Number/Order:</strong> Sequence number of each event (1st, 2nd, 3rd, etc.)</div>
                     <div class='step'><strong>Covariates:</strong> Time-invariant variables affecting gap times</div>
                     <div class='step'><strong>Time-Varying Covariates:</strong> Variables that change over time</div>
                     <div class='step'><strong>Baseline Covariates:</strong> Subject-level baseline characteristics</div>
 
-                    <h2>🔍 Model Framework:</h2>
+                    <h2> Model Framework:</h2>
                     <div class='formula'>
                     <strong>Conditional GEE Model:</strong><br>
                     g(E[T_{ij} | H_{i(j-1)}]) = β₀ + βᵀX_{ij} + γᵀH_{i(j-1)}<br>
@@ -63,7 +63,7 @@ conditionalgeeClass <- R6::R6Class(
                     </div>
 
                     <div class='interpretation'>
-                    <strong>📊 Key Features:</strong><br>
+                    <strong> Key Features:</strong><br>
                     • Conditional modeling given previous event history<br>
                     • Multiple distribution families (Exponential, Weibull, Gamma, Log-normal)<br>
                     • Various correlation structures (Exchangeable, AR(1), Unstructured)<br>
@@ -71,7 +71,7 @@ conditionalgeeClass <- R6::R6Class(
                     • Model diagnostics and goodness-of-fit assessment
                     </div>
 
-                    <p><strong>👆 Please assign the required variables to continue with the analysis.</strong></p>
+                    <p><strong> Please assign the required variables to continue with the analysis.</strong></p>
                     </body>
                     </html>"
                 )
@@ -534,7 +534,7 @@ conditionalgeeClass <- R6::R6Class(
             </head>
             <body>
             
-            <h3>📚 Understanding Conditional GEE for Gap Times</h3>
+            <h3> Understanding Conditional GEE for Gap Times</h3>
             
             <div class='section'>
             <strong>What are Conditional GEE Models?</strong><br>
@@ -611,7 +611,7 @@ conditionalgeeClass <- R6::R6Class(
             </head>
             <body>
             
-            <h3>📊 Conditional GEE Results Interpretation</h3>
+            <h3> Conditional GEE Results Interpretation</h3>
             
             <div class='summary'>
             <strong>Model Summary:</strong><br>
@@ -623,7 +623,7 @@ conditionalgeeClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>📈 Coefficient Interpretation:</strong><br>
+            <strong> Coefficient Interpretation:</strong><br>
             • Coefficients represent effects on the transformed gap time scale<br>
             • Positive coefficients indicate longer gap times (lower event rate)<br>
             • Negative coefficients indicate shorter gap times (higher event rate)<br>
@@ -631,7 +631,7 @@ conditionalgeeClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>🔗 Correlation Structure:</strong><br>
+            <strong> Correlation Structure:</strong><br>
             • Accounts for dependence between gap times within subjects<br>
             • Provides robust standard errors despite correlation<br>
             • Choice of structure affects efficiency but not consistency<br>
@@ -639,7 +639,7 @@ conditionalgeeClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>📊 Clinical Implications:</strong><br>
+            <strong> Clinical Implications:</strong><br>
             • Results apply to population-average gap times<br>
             • Useful for understanding factors affecting recurrence patterns<br>
             • Can inform intervention timing and resource planning<br>
@@ -647,7 +647,7 @@ conditionalgeeClass <- R6::R6Class(
             </div>
 
             <div class='warning'>
-            <strong>⚠️ Important Considerations:</strong><br>
+            <strong> Important Considerations:</strong><br>
             • Gap time distribution assumption should be validated<br>
             • Correlation structure choice affects efficiency<br>
             • Large cluster sizes improve asymptotic properties<br>

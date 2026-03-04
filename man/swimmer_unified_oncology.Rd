@@ -5,20 +5,22 @@
 \alias{swimmer_unified_oncology}
 \title{Oncology Clinical Trial Swimmer Plot Data}
 \format{
-A data frame with 20 rows and 12 variables:
+A data frame with 20 rows and 14 variables:
 \describe{
 \item{PatientID}{Character. Unique patient identifiers (PT001-PT020)}
 \item{StartTime}{Numeric. Treatment start time (all patients start at 0)}
 \item{EndTime}{Numeric. Treatment end time in months (8-54 months)}
 \item{BestResponse}{Character. Best overall response per RECIST (CR, PR, SD, PD)}
-\item{Surgery}{Numeric. Time of surgery in months (1-7 months, NA if no surgery)}
-\item{Biopsy}{Numeric. Time of biopsy in months (0-4 months)}
-\item{FirstResponse}{Numeric. Time of first documented response (6-24 months, NA if no response)}
-\item{Progression}{Numeric. Time of disease progression (6-36 months, NA if no progression)}
-\item{DeathLastFU}{Numeric. Time of death or last follow-up (8-30 months, NA if alive)}
-\item{TumorType}{Character. Primary tumor type (Lung, Breast, Melanoma, Colon, Liver)}
-\item{Stage}{Character. Disease stage (IIA, IIB, IIIA, IIIB, IV)}
-\item{Biomarker}{Character. Relevant biomarker status (PD-L1+, HER2+, BRAF+, etc.)}
+\item{Baseline}{Numeric. Baseline assessment time}
+\item{FirstAssessment}{Numeric. Time of first assessment in months}
+\item{BestResponseTime}{Numeric. Time of best response in months}
+\item{Progression}{Numeric. Time of disease progression (NA if no progression)}
+\item{Death}{Numeric. Time of death (NA if alive)}
+\item{Stage}{Character. Disease stage}
+\item{Arm}{Character. Treatment arm}
+\item{Site}{Character. Clinical trial site}
+\item{Age}{Numeric. Patient age}
+\item{Gender}{Character. Patient gender}
 }
 }
 \source{
@@ -30,7 +32,7 @@ data(swimmer_unified_oncology)
 \description{
 A realistic oncology clinical trial dataset demonstrating comprehensive
 swimmer plot analysis for regulatory submissions. Includes detailed
-clinical milestones, tumor characteristics, and biomarker information.
+clinical milestones, tumor characteristics, and demographic information.
 }
 \examples{
  
@@ -43,16 +45,16 @@ swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "BestResponse", 
-  milestone1Name = "Surgery",
-  milestone1Date = "Surgery",
-  milestone2Name = "Biopsy",
-  milestone2Date = "Biopsy",
-  milestone3Name = "First Response",
-  milestone3Date = "FirstResponse",
-  milestone4Name = "Progression", 
+  milestone1Name = "Baseline",
+  milestone1Date = "Baseline",
+  milestone2Name = "First Assessment",
+  milestone2Date = "FirstAssessment",
+  milestone3Name = "Best Response",
+  milestone3Date = "BestResponseTime",
+  milestone4Name = "Progression",
   milestone4Date = "Progression",
-  milestone5Name = "Death/Last FU",
-  milestone5Date = "DeathLastFU",
+  milestone5Name = "Death",
+  milestone5Date = "Death",
   referenceLines = "protocol",
   showInterpretation = TRUE,
   personTimeAnalysis = TRUE,

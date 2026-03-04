@@ -8,6 +8,28 @@
 # PACKAGE DEPENDENCIES AND OPERATORS
 # ============================================================================
 
+#' @importFrom stats binomial qbeta
+#' @importFrom utils install.packages sessionInfo tail
+NULL
+
+# Suppress R CMD CHECK notes for global variables used in NSE / auto-generated
+# class references that are defined in other sub-packages or lazily.
+utils::globalVariables(c(
+    # Auto-generated R6 class references (defined in sub-packages / lazy loading)
+    "alluvial2Class",
+    "alluvial3Class",
+    "diagnosticperformanceClass",
+    "intervalcensorcureClass",
+    "jjriverplotClass",
+    "thresholdregressionClass",
+    "treatmentswitchingClass",
+    # NSE / ggplot2 aesthetics used inside functions
+    "label",
+    "lo_y",
+    "type",
+    "x"
+))
+
 #' Load required packages with error handling
 #' @param package_name Character string with package name
 #' @param install_if_missing Logical, whether to install if package is missing
@@ -28,20 +50,22 @@ load_required_package("rlang")
 load_required_package("magrittr")
 
 #' Null-coalescing operator
-#' @name null-coalescing
-#' @rdname null-coalescing
+#' @name null_coalescing
+#' @aliases %||%
+#' @param x Left-hand side value
+#' @param y Right-hand side default value
 #' @keywords internal
 #' @export
 #' @importFrom rlang %||%
-#' @usage lhs \%||\% rhs
 `%||%` <- rlang::`%||%`
 
 #' NA-coalescing operator
 #' @name na-coalescing
 #' @rdname na-coalescing
+#' @param x Left-hand side value
+#' @param y Right-hand side default value
 #' @keywords internal
 #' @export
-#' @usage lhs \%|\% rhs
 `%|%` <- function(x, y) {
     if (is.na(x)) y else x
 }
@@ -49,18 +73,20 @@ load_required_package("magrittr")
 #' Not-in operator
 #' @name not-in
 #' @rdname not-in
+#' @param x Values to check
+#' @param table Values to check against
 #' @keywords internal
 #' @export
-#' @usage lhs \%notin\% rhs
-`%notin%` <- Negate("%in%")
+`%notin%` <- function(x, table) !(x %in% table)
 
 #' Alternative not-in operator
 #' @name not-in-alt
 #' @rdname not-in-alt
+#' @param x Values to check
+#' @param table Values to check against
 #' @keywords internal
 #' @export
-#' @usage lhs \%!in\% rhs
-`%!in%` <- Negate("%in%")
+`%!in%` <- function(x, table) !(x %in% table)
 
 #' Pipe operator
 #' @name %>%
@@ -361,16 +387,18 @@ validateROCInputs <- function(x, class_var, pos_class = NULL) {
 # HTML TABLE UTILITIES
 # ============================================================================
 
-#' Print formatted HTML table for sensitivity/specificity results
+#' Format HTML table for sensitivity/specificity results
 #' @description Creates HTML table for confusion matrix visualization
-#' @param Title Title for the confusion matrix table
-#' @param TP Number of true positives
-#' @param FP Number of false positives
-#' @param TN Number of true negatives
-#' @param FN Number of false negatives
+#' @param x A list with elements Title, TP, FP, TN, FN
+#' @param ... Additional arguments (ignored)
 #' @return HTML string containing the formatted table
 #' @export
-print.sensSpecTable <- function(Title, TP, FP, TN, FN) {
+print.sensSpecTable <- function(x, ...) {
+    Title <- x$Title
+    TP <- x$TP
+    FP <- x$FP
+    TN <- x$TN
+    FN <- x$FN
     # Validate inputs
     if (any(!is.finite(c(TP, FP, TN, FN)))) {
         return("<p>Error: Invalid confusion matrix values</p>")

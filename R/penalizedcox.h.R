@@ -787,6 +787,7 @@ penalizedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' overfitting.
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: LASSO penalized Cox regression
 #' library(survival)
 #' library(glmnet)
@@ -813,7 +814,7 @@ penalizedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     lambda_selection = "1se",
 #'     variable_selection = TRUE
 #' )
-#'
+#'}
 #' @param data The dataset for analysis, provided as a data frame. Should
 #'   contain survival variables and predictor variables for penalized
 #'   regression.

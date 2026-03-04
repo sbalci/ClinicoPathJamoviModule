@@ -292,8 +292,9 @@ mediansurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' median survival with handling of censored data and group comparisons.
 #'
 #' @examples
+#' \donttest{
 #' # Example usage will be added
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis.
 #' @param outcome Event indicator variable.

@@ -95,7 +95,7 @@ treated units}
 \item{weight_trimming}{Trim extreme propensity score weights}
 
 \item{trim_quantiles}{Quantiles for weight trimming (e.g., 0.05 = trim
-top/bottom 5\\%)}
+top/bottom 5 percent)}
 
 \item{stabilized_weights}{Use stabilized inverse probability weights}
 
@@ -193,6 +193,7 @@ observational research
 where randomized controlled trials are not feasible.
 }
 \examples{
+\donttest{
 data('treatment_data')
 
 treatmenteffects(
@@ -203,5 +204,5 @@ treatmenteffects(
     causal_method = "propensity_score",
     estimand = "ate"
 )
-
+}
 }

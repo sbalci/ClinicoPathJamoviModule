@@ -32,9 +32,9 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
                             "<h3>Welcome to Continuous Variable Relationship Analysis</h3>",
                             "<p>This analysis follows <strong>BMJ best practices</strong> for handling continuous variables:</p>",
                             "<ul>",
-                            "<li>✅ <strong>Avoid categorization</strong> - Keeps full information from continuous data</li>",
-                            "<li>✅ <strong>Use flexible modeling</strong> - Captures non-linear relationships</li>",
-                            "<li>✅ <strong>Visualize relationships</strong> - Understand patterns before modeling</li>",
+                            "<li> <strong>Avoid categorization</strong> - Keeps full information from continuous data</li>",
+                            "<li> <strong>Use flexible modeling</strong> - Captures non-linear relationships</li>",
+                            "<li> <strong>Visualize relationships</strong> - Understand patterns before modeling</li>",
                             "</ul>",
                             "<p><strong>To begin:</strong> Select an outcome variable and a continuous predictor.</p>",
                             "<hr>",
@@ -56,7 +56,7 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
             if (sum(!complete_cases) > 0) {
                 self$results$warningMessage$setVisible(TRUE)
                 self$results$warningMessage$setContent(
-                    sprintf("<p>⚠️ <strong>Warning:</strong> %d cases with missing values were excluded.</p>", 
+                    sprintf("<p> <strong>Warning:</strong> %d cases with missing values were excluded.</p>", 
                             sum(!complete_cases))
                 )
             }
@@ -121,10 +121,10 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
                 
                 "<h5>Your Selected Method: ", 
                 switch(self$options$modelType,
-                    spline = "Restricted Cubic Splines ✅",
-                    fp = "Fractional Polynomials ✅",
-                    linear = "Linear Model ⚠️",
-                    categorized = "Categorized Variables ❌"
+                    spline = "Restricted Cubic Splines ",
+                    fp = "Fractional Polynomials ",
+                    linear = "Linear Model ",
+                    categorized = "Categorized Variables "
                 ),
                 "</h5>")
                 
@@ -138,14 +138,14 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
                 } else if (self$options$modelType == "linear") {
                     guidance_html <- 
                      paste0(guidance_html,
-                    "<p>⚠️ <strong>Caution:</strong> Linear models assume a constant effect across the entire range. ",
+                    "<p> <strong>Caution:</strong> Linear models assume a constant effect across the entire range. ",
                     "Consider using splines to check for non-linearity.</p>"
                      )
                 } else if (self$options$modelType == "categorized") {
                     guidance_html <- 
                      paste0(guidance_html,
                     
-                    "<p>❌ <strong>Not Recommended:</strong> Categorization loses information and statistical power. ",
+                    "<p> <strong>Not Recommended:</strong> Categorization loses information and statistical power. ",
                     "This option is provided for educational purposes only to demonstrate why it's problematic.</p>"
                      )
                 }

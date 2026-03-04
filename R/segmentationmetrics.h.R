@@ -886,6 +886,7 @@ segmentationmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- segmentationmetrics(
 #'     data = segmentation_results,
 #'     prediction_mask = "ai_segmentation",
@@ -893,7 +894,7 @@ segmentationmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     image_id = "slide_id",
 #'     metric_type = "all"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param prediction_mask AI-predicted segmentation mask. For binary
 #'   segmentation, this is a binary variable (0/1 or background/foreground). For
@@ -970,7 +971,7 @@ segmentationmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param bootstrap_samples Number of bootstrap samples for confidence
 #'   interval estimation.
 #' @param confidence_level Confidence level for interval estimation (default
-#'   95\%).
+#'   95 percent).
 #' @param quality_thresholds Apply clinical quality thresholds to categorize
 #'   segmentation performance (excellent/good/acceptable/poor) based on Dice/IoU
 #'   values.

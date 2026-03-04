@@ -39,7 +39,7 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Initialize instructions
             instructions_html <- paste(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
-                "<h3 style='color: #c7254e; margin-top: 0;'>📊 Economist-Style Distribution Plots</h3>",
+                "<h3 style='color: #c7254e; margin-top: 0;'> Economist-Style Distribution Plots</h3>",
                 "<div style='margin: 10px 0;'>",
                 "<p><strong>Create professional distribution visualizations inspired by The Economist magazine's distinctive style.</strong></p>",
                 "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
@@ -63,7 +63,7 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 "</ol>",
                 "</div>",
                 "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-                "<p style='margin: 0; color: #856404;'><strong>💡 Pro Tip:</strong> The Economist style is perfect for showing price variations, outcome distributions, or any data where you want to emphasize distribution characteristics in a compact, elegant format.</p>",
+                "<p style='margin: 0; color: #856404;'><strong> Pro Tip:</strong> The Economist style is perfect for showing price variations, outcome distributions, or any data where you want to emphasize distribution characteristics in a compact, elegant format.</p>",
                 "</div>",
                 "</div>"
             )
@@ -101,7 +101,7 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 font_guidance <- if (!font_status$optimal_available) {
                     paste(
                         "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-                        "<h4 style='color: #856404; margin: 0 0 8px 0;'>📖 Font Installation Guide</h4>",
+                        "<h4 style='color: #856404; margin: 0 0 8px 0;'> Font Installation Guide</h4>",
                         "<p style='margin: 5px 0; color: #856404;'><strong>Current font:</strong> ", font_status$best_font, "</p>",
                         if (!font_status$optimal_available) {
                             paste(
@@ -112,7 +112,7 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                 "<li>Verdana (good substitute, usually pre-installed)</li>",
                                 "</ul>",
                                 "<p style='margin: 5px 0; color: #856404; font-size: 0.9em;'>",
-                                "💡 See ECONOMIST_FONTS_INSTALLATION.md for detailed instructions",
+                                " See ECONOMIST_FONTS_INSTALLATION.md for detailed instructions",
                                 "</p>"
                             )
                         } else "",
@@ -445,9 +445,9 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             legend_html <- paste0(legend_html, "<p><strong>Understanding the Economist-Style Distribution Plot:</strong></p>")
             legend_html <- paste0(legend_html, "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.8;'>")
-            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$tenth_color, "; font-weight: bold;'>●</span> <strong>10th Percentile:</strong> 10% of values fall below this point</li>")
-            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$median_color, "; font-weight: bold;'>●</span> <strong>Median (50th Percentile):</strong> Middle value of the distribution</li>")
-            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$ninetieth_color, "; font-weight: bold;'>●</span> <strong>90th Percentile:</strong> 90% of values fall below this point</li>")
+            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$tenth_color, "; font-weight: bold;'></span> <strong>10th Percentile:</strong> 10% of values fall below this point</li>")
+            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$median_color, "; font-weight: bold;'></span> <strong>Median (50th Percentile):</strong> Middle value of the distribution</li>")
+            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$ninetieth_color, "; font-weight: bold;'></span> <strong>90th Percentile:</strong> 90% of values fall below this point</li>")
             legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$distribution_fill, "; font-weight: bold;'>▓</span> <strong>Distribution Area:</strong> Shows the shape and spread of data</li>")
             legend_html <- paste0(legend_html, "</ul>")
             

@@ -903,6 +903,7 @@ treatmenteffectsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('treatment_data')
 #'
 #' treatmenteffects(
@@ -913,7 +914,7 @@ treatmenteffectsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'     causal_method = "propensity_score",
 #'     estimand = "ate"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param treatment_var Binary treatment variable (treated vs. control)
 #' @param outcome_var Primary outcome variable of interest
@@ -937,7 +938,7 @@ treatmenteffectsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   treated units
 #' @param weight_trimming Trim extreme propensity score weights
 #' @param trim_quantiles Quantiles for weight trimming (e.g., 0.05 = trim
-#'   top/bottom 5\%)
+#'   top/bottom 5 percent)
 #' @param stabilized_weights Use stabilized inverse probability weights
 #' @param weight_normalization Method for normalizing weights
 #' @param outcome_model Model for outcome regression

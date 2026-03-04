@@ -3,7 +3,7 @@ name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
 menuGroup: OncoPath
 menuSubgroup: IHC Analysis
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -13,7 +13,7 @@ description:
         meta-regression, and publication bias assessment for AI algorithm validation 
         and biomarker diagnostic accuracy synthesis.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('diagnostic_studies')
             

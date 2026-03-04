@@ -12,9 +12,6 @@ A data frame with 55 rows and 3 columns:
 \item{primary_use}{Character. Primary analytical use case}
 }
 }
-\usage{
-data("oncology_datasets_summary")
-}
 \description{
 A summary data frame containing information about all 55 oncology datasets
 available in the ClinicoPath package, imported from OncoDataSets.

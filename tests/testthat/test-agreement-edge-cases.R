@@ -6,7 +6,6 @@
 # and error handling for the agreement jamovi function
 
 library(testthat)
-devtools::load_all()
 
 # Load edge case test data
 data(agreement_perfect, package = "ClinicoPath")

@@ -252,7 +252,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "linechart",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = linechartResults$new(options=options),
                 data = data,
@@ -272,6 +272,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' overlays.
 #'
 #' @examples
+#' \donttest{
 #' # Basic line chart
 #' linechart(
 #'     data = clinical_data,
@@ -288,7 +289,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     confidence = TRUE,
 #'     trendline = TRUE
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param xvar The variable for the x-axis. Typically represents time,
 #'   sequence, or ordered categories.

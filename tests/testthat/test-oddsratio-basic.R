@@ -2,7 +2,6 @@
 # Basic Functionality Tests: oddsratio
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(oddsratio_test, package = "ClinicoPath")
 
 test_that("oddsratio function exists", {

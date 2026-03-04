@@ -26,7 +26,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (length(self$options$vars) == 0) {
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #1976d2; margin-top: 0;'>🔍 Welcome to AutoEDA!</h3>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to AutoEDA!</h3>
                 <p><strong>Automated Exploratory Data Analysis</strong> using DataExplorer integration</p>
                 <p>This tool provides comprehensive automated EDA capabilities based on research from 
                 <em>R Journal 2019: The Landscape of R Packages for Automated Exploratory Data Analysis</em></p>
@@ -51,7 +51,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 </ul>
                 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Based on DataExplorer package - the #2 most popular autoEDA tool (82,624+ downloads)</em>
+                 <em>Based on DataExplorer package - the #2 most popular autoEDA tool (82,624+ downloads)</em>
                 </p>
                 </div>"
                 
@@ -170,7 +170,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             # Create comprehensive overview
             overview_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>📊 Dataset Overview Analysis</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'> Dataset Overview Analysis</h3>",
                 "<p>Automated dataset introduction and summary statistics</p>",
                 "</div>",
                 
@@ -197,7 +197,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             overview_html <- paste0(overview_html,
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #333; margin-top: 0;'>📋 Data Quality Assessment</h4>",
+                "<h4 style='color: #333; margin-top: 0;'> Data Quality Assessment</h4>",
                 "<p><span style='color: ", quality_color, "; font-weight: bold;'>", quality_status, "</span> - ",
                 "Complete data in ", complete_pct, "% of rows with ", missing_pct, "% missing values overall.</p>",
                 "</div>"
@@ -206,7 +206,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             # Add variable type breakdown
             overview_html <- paste0(overview_html,
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #333; margin-top: 0;'>🔢 Variable Type Summary</h4>",
+                "<h4 style='color: #333; margin-top: 0;'> Variable Type Summary</h4>",
                 "<ul>",
                 "<li><strong>Continuous Variables:</strong> ", intro_result$continuous_columns, " (suitable for correlation, regression analysis)</li>",
                 "<li><strong>Discrete Variables:</strong> ", intro_result$discrete_columns, " (suitable for frequency analysis, cross-tabulation)</li>",
@@ -231,7 +231,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #f57c00; margin-top: 0;'>🔍 Missing Value Analysis</h3>",
+                "<h3 style='color: #f57c00; margin-top: 0;'> Missing Value Analysis</h3>",
                 "<p>Comprehensive missing data pattern analysis and recommendations</p>",
                 "</div>"
             )
@@ -239,7 +239,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (nrow(missing_profile) == 0 || sum(missing_profile$num_missing) == 0) {
                 analysis_html <- paste0(header_html,
                     "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #2e7d32;'>✅ No Missing Values Detected</h4>",
+                    "<h4 style='color: #2e7d32;'> No Missing Values Detected</h4>",
                     "<p>Congratulations! Your dataset has no missing values. This is ideal for most statistical analyses.</p>",
                     "</div>"
                 )
@@ -281,7 +281,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 
                 analysis_html <- paste0(analysis_html,
                     "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #1976d2; margin-top: 0;'>📊 Analysis Recommendations</h4>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'> Analysis Recommendations</h4>",
                     "<ul>",
                     "<li><strong>Overall Missing Data:</strong> ", total_missing_pct, "% of all data points</li>",
                     "<li><strong>Variables with High Missing Values:</strong> ", high_missing, " (>", threshold, "%)</li>",
@@ -290,7 +290,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 
                 if (high_missing > 0) {
                     analysis_html <- paste0(analysis_html,
-                        "<p><strong>🔧 Recommended Actions:</strong></p>",
+                        "<p><strong> Recommended Actions:</strong></p>",
                         "<ul>",
                         "<li>Consider removing variables with >30% missing values</li>",
                         "<li>Use appropriate imputation methods for important variables</li>",
@@ -299,7 +299,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     )
                 } else {
                     analysis_html <- paste0(analysis_html,
-                        "<p style='color: #2e7d32;'><strong>✅ Good Data Quality:</strong> Missing values are within acceptable ranges.</p>"
+                        "<p style='color: #2e7d32;'><strong> Good Data Quality:</strong> Missing values are within acceptable ranges.</p>"
                     )
                 }
                 
@@ -314,7 +314,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📈 Variable Distribution Analysis</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> Variable Distribution Analysis</h3>",
                 "<p>Automated univariate analysis and distribution characteristics</p>",
                 "</div>"
             )
@@ -328,7 +328,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (sum(numeric_vars) > 0) {
                 analysis_html <- paste0(analysis_html,
                     "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #2e7d32; margin-top: 0;'>🔢 Continuous Variables (", sum(numeric_vars), ")</h4>",
+                    "<h4 style='color: #2e7d32; margin-top: 0;'> Continuous Variables (", sum(numeric_vars), ")</h4>",
                     "<p>Statistical summaries and distribution characteristics for numeric variables.</p>"
                 )
                 
@@ -344,7 +344,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (sum(categorical_vars) > 0) {
                 analysis_html <- paste0(analysis_html,
                     "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #f57c00; margin-top: 0;'>📊 Categorical Variables (", sum(categorical_vars), ")</h4>",
+                    "<h4 style='color: #f57c00; margin-top: 0;'> Categorical Variables (", sum(categorical_vars), ")</h4>",
                     "<p>Frequency distributions and level analysis for categorical variables.</p>"
                 )
                 
@@ -360,7 +360,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             # Add distribution insights
             analysis_html <- paste0(analysis_html,
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #1976d2; margin-top: 0;'>📋 Distribution Insights</h4>",
+                "<h4 style='color: #1976d2; margin-top: 0;'> Distribution Insights</h4>",
                 "<p><strong>Analysis Complete:</strong> Distribution analysis identifies data patterns, outliers, and normality characteristics.</p>",
                 "<p><strong>Next Steps:</strong> Use this information for appropriate statistical test selection and data transformation decisions.</p>",
                 "</div>"
@@ -376,7 +376,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #0277bd; margin-top: 0;'>🔗 Correlation Analysis</h3>",
+                "<h3 style='color: #0277bd; margin-top: 0;'> Correlation Analysis</h3>",
                 "<p>Relationship analysis between numeric variables using ", self$options$correlation_method, " correlation</p>",
                 "</div>"
             )
@@ -384,7 +384,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (ncol(numeric_data) < 2) {
                 analysis_html <- paste0(header_html,
                     "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #f57c00;'>⚠️ Insufficient Numeric Variables</h4>",
+                    "<h4 style='color: #f57c00;'> Insufficient Numeric Variables</h4>",
                     "<p>Correlation analysis requires at least 2 numeric variables. Please select more numeric variables for correlation analysis.</p>",
                     "</div>"
                 )
@@ -408,7 +408,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 if (nrow(strong_correlations) > 0) {
                     analysis_html <- paste0(analysis_html,
                         "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                        "<h4 style='color: #f57c00; margin-top: 0;'>🔍 Strong Correlations Detected</h4>",
+                        "<h4 style='color: #f57c00; margin-top: 0;'> Strong Correlations Detected</h4>",
                         "<ul>"
                     )
                     
@@ -420,7 +420,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                         cor_value <- round(cor_matrix[row_idx, col_idx], 3)
                         
                         analysis_html <- paste0(analysis_html,
-                            "<li><strong>", var1, "</strong> ↔ <strong>", var2, "</strong>: r = ", cor_value, "</li>"
+                            "<li><strong>", var1, "</strong>  <strong>", var2, "</strong>: r = ", cor_value, "</li>"
                         )
                     }
                     
@@ -430,7 +430,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 # Add interpretation
                 analysis_html <- paste0(analysis_html,
                     "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #2e7d32; margin-top: 0;'>📊 Interpretation Guide</h4>",
+                    "<h4 style='color: #2e7d32; margin-top: 0;'> Interpretation Guide</h4>",
                     "<ul>",
                     "<li><strong>|r| > 0.7:</strong> Strong correlation - consider multicollinearity</li>",
                     "<li><strong>0.3 < |r| < 0.7:</strong> Moderate correlation - meaningful relationship</li>",
@@ -451,7 +451,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #fce4ec; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #c2185b; margin-top: 0;'>🔄 Principal Component Analysis</h3>",
+                "<h3 style='color: #c2185b; margin-top: 0;'> Principal Component Analysis</h3>",
                 "<p>Dimensionality reduction and feature importance analysis</p>",
                 "</div>"
             )
@@ -459,7 +459,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (ncol(numeric_data) < 2) {
                 analysis_html <- paste0(header_html,
                     "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #f57c00;'>⚠️ Insufficient Variables for PCA</h4>",
+                    "<h4 style='color: #f57c00;'> Insufficient Variables for PCA</h4>",
                     "<p>PCA requires at least 2 numeric variables. Please select more numeric variables.</p>",
                     "</div>"
                 )
@@ -470,7 +470,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 if (nrow(complete_data) < 3) {
                     analysis_html <- paste0(header_html,
                         "<div style='background-color: #ffebee; padding: 15px; border-radius: 8px;'>",
-                        "<h4 style='color: #f44336;'>❌ Insufficient Complete Cases</h4>",
+                        "<h4 style='color: #f44336;'> Insufficient Complete Cases</h4>",
                         "<p>PCA requires complete cases. Please handle missing values first.</p>",
                         "</div>"
                     )
@@ -493,7 +493,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     # Variance explained table
                     analysis_html <- paste0(analysis_html,
                         "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                        "<h4 style='color: #1976d2; margin-top: 0;'>📊 Variance Explained</h4>",
+                        "<h4 style='color: #1976d2; margin-top: 0;'> Variance Explained</h4>",
                         "<table style='width: 100%; border-collapse: collapse;'>",
                         "<tr style='background-color: #e0e0e0;'>",
                         "<th style='padding: 8px; border: 1px solid #ddd;'>Component</th>",
@@ -518,7 +518,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     first_two_variance <- round(cumulative_variance[2] * 100, 1)
                     analysis_html <- paste0(analysis_html,
                         "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px;'>",
-                        "<h4 style='color: #2e7d32; margin-top: 0;'>📋 PCA Interpretation</h4>",
+                        "<h4 style='color: #2e7d32; margin-top: 0;'> PCA Interpretation</h4>",
                         "<p><strong>First 2 Components:</strong> Explain ", first_two_variance, "% of total variance</p>",
                         "<p><strong>Dimensionality Reduction:</strong> ",
                         if (first_two_variance > 70) "Excellent - strong dimensional structure" else
@@ -539,7 +539,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #fff8e1; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #f57f17; margin-top: 0;'>🎯 Target Variable Analysis</h3>",
+                "<h3 style='color: #f57f17; margin-top: 0;'> Target Variable Analysis</h3>",
                 "<p>Supervised exploratory analysis with target variable relationships</p>",
                 "</div>"
             )
@@ -547,7 +547,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (is.null(target_var) || length(target_var) == 0) {
                 analysis_html <- paste0(header_html,
                     "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #f57c00;'>⚠️ No Target Variable Selected</h4>",
+                    "<h4 style='color: #f57c00;'> No Target Variable Selected</h4>",
                     "<p>Please select a target variable for supervised EDA analysis.</p>",
                     "<p><strong>Target Variable:</strong> The outcome or dependent variable you want to predict or understand.</p>",
                     "</div>"
@@ -570,7 +570,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     target_stats <- summary(target_data[!is.na(target_data)])
                     analysis_html <- paste0(analysis_html,
                         "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                        "<h4 style='color: #2e7d32; margin-top: 0;'>📊 Target Statistics</h4>",
+                        "<h4 style='color: #2e7d32; margin-top: 0;'> Target Statistics</h4>",
                         "<p><strong>Mean:</strong> ", round(target_stats["Mean"], 2), "</p>",
                         "<p><strong>Median:</strong> ", round(target_stats["Median"], 2), "</p>",
                         "<p><strong>Range:</strong> [", round(target_stats["Min."], 2), " - ", round(target_stats["Max."], 2), "]</p>",
@@ -581,7 +581,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     target_table <- table(target_data, useNA = "ifany")
                     analysis_html <- paste0(analysis_html,
                         "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                        "<h4 style='color: #1976d2; margin-top: 0;'>📊 Target Distribution</h4>",
+                        "<h4 style='color: #1976d2; margin-top: 0;'> Target Distribution</h4>",
                         "<table style='width: 100%; border-collapse: collapse;'>",
                         "<tr style='background-color: #e0e0e0;'>",
                         "<th style='padding: 8px; border: 1px solid #ddd;'>Level</th>",
@@ -611,7 +611,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 # Analysis recommendations
                 analysis_html <- paste0(analysis_html,
                     "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px;'>",
-                    "<h4 style='color: #1976d2; margin-top: 0;'>📋 Analysis Recommendations</h4>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'> Analysis Recommendations</h4>",
                     "<p><strong>Suggested Analyses:</strong></p>",
                     "<ul>",
                     if (is_numeric_target) {
@@ -632,13 +632,13 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             report_html <- paste0(
                 "<div style='background-color: #e8eaf6; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #3f51b5; margin-top: 0;'>📑 Comprehensive AutoEDA Report</h3>",
+                "<h3 style='color: #3f51b5; margin-top: 0;'> Comprehensive AutoEDA Report</h3>",
                 "<p>Complete automated exploratory data analysis based on DataExplorer integration</p>",
                 "<p><em>Generated on: ", Sys.Date(), "</em></p>",
                 "</div>",
                 
                 "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #333; margin-top: 0;'>📋 Report Contents</h4>",
+                "<h4 style='color: #333; margin-top: 0;'> Report Contents</h4>",
                 "<ol>",
                 "<li><strong>Dataset Overview:</strong> Dimensions, types, and data quality</li>",
                 "<li><strong>Missing Value Analysis:</strong> Missing patterns and recommendations</li>",
@@ -654,7 +654,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             report_html <- paste0(report_html,
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>1️⃣ Dataset Overview</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>1⃣ Dataset Overview</h4>",
                 "<p><strong>Dimensions:</strong> ", intro_result$rows, " rows × ", intro_result$columns, " columns</p>",
                 "<p><strong>Data Types:</strong> ", intro_result$continuous_columns, " continuous, ", intro_result$discrete_columns, " discrete</p>",
                 "<p><strong>Completeness:</strong> ", round(intro_result$complete_rows/intro_result$rows*100, 1), "% complete rows</p>",
@@ -667,7 +667,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             report_html <- paste0(report_html,
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>2️⃣ Missing Value Summary</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'>2⃣ Missing Value Summary</h4>",
                 "<p><strong>Overall Missing:</strong> ", total_missing_pct, "% of all data points</p>",
                 "<p><strong>Variables with Missing:</strong> ", sum(missing_profile$num_missing > 0), " / ", nrow(missing_profile), "</p>",
                 "</div>"
@@ -679,7 +679,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             report_html <- paste0(report_html,
                 "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #7b1fa2; margin-top: 0;'>3️⃣ Variable Distribution Summary</h4>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'>3⃣ Variable Distribution Summary</h4>",
                 "<p><strong>Numeric Variables:</strong> ", numeric_vars, " (suitable for correlation, regression)</p>",
                 "<p><strong>Categorical Variables:</strong> ", categorical_vars, " (suitable for frequency, cross-tabulation)</p>",
                 "</div>"
@@ -693,7 +693,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 
                 report_html <- paste0(report_html,
                     "<div style='background-color: #e1f5fe; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #0277bd; margin-top: 0;'>4️⃣ Correlation Insights</h4>",
+                    "<h4 style='color: #0277bd; margin-top: 0;'>4⃣ Correlation Insights</h4>",
                     "<p><strong>Strong Correlations:</strong> ", strong_correlations, " pairs (|r| > 0.7)</p>",
                     "<p><strong>Analysis Ready:</strong> Suitable for multivariate analysis</p>",
                     "</div>"
@@ -703,7 +703,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             # Final recommendations
             report_html <- paste0(report_html,
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #1976d2; margin-top: 0;'>🚀 Next Steps & Recommendations</h4>",
+                "<h4 style='color: #1976d2; margin-top: 0;'> Next Steps & Recommendations</h4>",
                 "<ul>",
                 "<li><strong>Data Quality:</strong> ", 
                 if (total_missing_pct < 5) "Excellent - proceed with analysis" else "Address missing values before modeling", "</li>",
@@ -713,7 +713,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 if (intro_result$complete_rows / intro_result$rows > 0.95) "Ready for immediate modeling" else "Consider data preprocessing", "</li>",
                 "</ul>",
                 "<p style='font-size: 12px; color: #555; margin-top: 15px;'>",
-                "<em>📊 Report generated using DataExplorer autoEDA integration - ClinicoPath Module</em>",
+                "<em> Report generated using DataExplorer autoEDA integration - ClinicoPath Module</em>",
                 "</p>",
                 "</div>"
             )
@@ -725,7 +725,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             # Generate overview visualization using DataExplorer::plot_intro
             plots_html <- paste0(
                 "<div style='background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 15px;'>",
-                "<h4 style='color: #333; margin-top: 0;'>📊 Dataset Overview Visualization</h4>",
+                "<h4 style='color: #333; margin-top: 0;'> Dataset Overview Visualization</h4>",
                 "<p><em>Interactive plot generated using DataExplorer::plot_intro</em></p>",
                 "</div>"
             )
@@ -738,7 +738,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             insights_html <- paste0(
                 "<div style='background-color: #f1f8e9; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #33691e; margin-top: 0;'>🏥 Clinical Data Analysis Insights</h3>",
+                "<h3 style='color: #33691e; margin-top: 0;'> Clinical Data Analysis Insights</h3>",
                 "<p>Specialized patterns and recommendations for clinical/pathological research</p>",
                 "</div>"
             )
@@ -749,7 +749,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (length(clinical_patterns) > 0) {
                 insights_html <- paste0(insights_html,
                     "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #2e7d32; margin-top: 0;'>🔬 Detected Clinical Variables</h4>",
+                    "<h4 style='color: #2e7d32; margin-top: 0;'> Detected Clinical Variables</h4>",
                     "<ul>"
                 )
                 
@@ -777,7 +777,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             # Clinical research recommendations
             insights_html <- paste0(insights_html,
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>📋 Clinical Research Recommendations</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'> Clinical Research Recommendations</h4>",
                 "<ul>",
                 "<li><strong>Sample Size:</strong> Current dataset has ", nrow(data), " cases - ",
                 if (nrow(data) >= 100) "adequate for most analyses" else if (nrow(data) >= 30) "suitable for basic analysis" else "consider power analysis", "</li>",
@@ -916,7 +916,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             range_html <- paste0(
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>⚠️ Reference Range Analysis</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'> Reference Range Analysis</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr style='background-color: #e0e0e0;'>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>Variable</th>",
@@ -941,7 +941,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             range_html <- paste0(range_html, 
                 "</table>",
                 "<p style='font-size: 12px; color: #555; margin-top: 10px;'>",
-                "<em>💡 Review outliers for data entry errors or genuine extreme values</em>",
+                "<em> Review outliers for data entry errors or genuine extreme values</em>",
                 "</p>",
                 "</div>"
             )
@@ -980,7 +980,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             quality_html <- paste0(
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #1976d2; margin-top: 0;'>📊 Clinical Data Quality Score</h4>",
+                "<h4 style='color: #1976d2; margin-top: 0;'> Clinical Data Quality Score</h4>",
                 "<div style='text-align: center; margin: 15px 0;'>",
                 "<span style='font-size: 24px; font-weight: bold; color: ", quality_color, ";'>", quality_score, "/100</span>",
                 "<br><span style='color: ", quality_color, "; font-weight: bold;'>", quality_label, "</span>",
@@ -1003,7 +1003,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>🎨 ggEDA Enhanced Dataset Overview</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'> ggEDA Enhanced Dataset Overview</h3>",
                 "<p>Publication-quality exploratory data analysis with enhanced visualizations</p>",
                 "</div>"
             )
@@ -1019,7 +1019,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             analysis_html <- paste0(header_html, basic_summary, var_type_viz, completeness_viz,
                 "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #1976d2; margin-top: 0;'>📊 ggEDA Advantages</h4>",
+                "<h4 style='color: #1976d2; margin-top: 0;'> ggEDA Advantages</h4>",
                 "<ul>",
                 "<li><strong>Publication Quality:</strong> Professional visualizations for research papers</li>",
                 "<li><strong>Clinical Focus:</strong> Designed for biomedical and clinical research</li>",
@@ -1037,7 +1037,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📈 ggEDA Clinical Variable Distributions</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> ggEDA Clinical Variable Distributions</h3>",
                 "<p>Enhanced distribution analysis optimized for clinical and biomedical research</p>",
                 "</div>"
             )
@@ -1053,7 +1053,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             analysis_html <- paste0(header_html, clinical_vars, dist_analysis, ref_analysis,
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>🏥 Clinical Research Insights</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'> Clinical Research Insights</h4>",
                 "<ul>",
                 "<li><strong>Biomarker Patterns:</strong> Enhanced visualization of biomarker distributions</li>",
                 "<li><strong>Clinical Ranges:</strong> Automatic detection of physiologically plausible values</li>",
@@ -1071,7 +1071,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #0277bd; margin-top: 0;'>🔗 ggEDA Advanced Correlation Analysis</h3>",
+                "<h3 style='color: #0277bd; margin-top: 0;'> ggEDA Advanced Correlation Analysis</h3>",
                 "<p>Enhanced correlation analysis with clinical research applications</p>",
                 "</div>"
             )
@@ -1087,7 +1087,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             analysis_html <- paste0(header_html, cor_analysis, network_analysis, clinical_sig,
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>🔬 Research Applications</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> Research Applications</h4>",
                 "<ul>",
                 "<li><strong>Biomarker Discovery:</strong> Identify correlated biomarkers for panel development</li>",
                 "<li><strong>Clinical Pathways:</strong> Understand relationships between clinical variables</li>",
@@ -1105,7 +1105,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             header_html <- paste0(
                 "<div style='background-color: #fff8e1; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #f57f17; margin-top: 0;'>🧬 ggEDA Biomarker Analysis</h3>",
+                "<h3 style='color: #f57f17; margin-top: 0;'> ggEDA Biomarker Analysis</h3>",
                 "<p>Specialized analysis for biomarker discovery and validation studies</p>",
                 "</div>"
             )
@@ -1125,7 +1125,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             analysis_html <- paste0(header_html, biomarker_detection, biomarker_distributions, 
                 clinical_correlations, validation_metrics,
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px;'>",
-                "<h4 style='color: #1976d2; margin-top: 0;'>📋 Biomarker Research Workflow</h4>",
+                "<h4 style='color: #1976d2; margin-top: 0;'> Biomarker Research Workflow</h4>",
                 "<ol>",
                 "<li><strong>Discovery:</strong> Identify potential biomarker candidates</li>",
                 "<li><strong>Characterization:</strong> Analyze biomarker distributions and ranges</li>",
@@ -1148,7 +1148,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             paste0(
                 "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #333; margin-top: 0;'>📊 Enhanced Dataset Summary</h4>",
+                "<h4 style='color: #333; margin-top: 0;'> Enhanced Dataset Summary</h4>",
                 "<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;'>",
                 "<div style='background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 15px; border-radius: 8px; text-align: center;'>",
                 "<h5 style='margin: 0; color: #1976d2;'>Observations</h5>",
@@ -1174,7 +1174,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .create_variable_type_visualization = function(data) {
             paste0(
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>🔢 Variable Type Analysis</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> Variable Type Analysis</h4>",
                 "<p><em>Enhanced visualization with ggEDA provides better insights into variable structure and suitability for different analysis types.</em></p>",
                 "</div>"
             )
@@ -1184,7 +1184,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             complete_pct <- round(sum(complete.cases(data)) / nrow(data) * 100, 1)
             paste0(
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>✅ Data Completeness</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'> Data Completeness</h4>",
                 "<p><strong>Complete Cases:</strong> ", complete_pct, "% of observations have complete data</p>",
                 "<p><em>ggEDA provides enhanced missing data pattern visualization for better understanding of data quality.</em></p>",
                 "</div>"
@@ -1201,7 +1201,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             )
             
             detected_html <- "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>"
-            detected_html <- paste0(detected_html, "<h4 style='color: #2e7d32; margin-top: 0;'>🔬 Detected Clinical Variables</h4>")
+            detected_html <- paste0(detected_html, "<h4 style='color: #2e7d32; margin-top: 0;'> Detected Clinical Variables</h4>")
             
             for (pattern_name in names(clinical_patterns)) {
                 vars <- clinical_patterns[[pattern_name]]
@@ -1218,7 +1218,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .analyze_clinical_distributions = function(data) {
             paste0(
                 "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #7b1fa2; margin-top: 0;'>📈 Clinical Distribution Analysis</h4>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'> Clinical Distribution Analysis</h4>",
                 "<p><em>ggEDA provides enhanced distribution plots with clinical reference ranges and outlier detection optimized for biomedical research.</em></p>",
                 "</div>"
             )
@@ -1227,7 +1227,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .analyze_clinical_references = function(data) {
             paste0(
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>📏 Reference Range Analysis</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'> Reference Range Analysis</h4>",
                 "<p><em>Automated detection of values outside clinical reference ranges with enhanced visualization.</em></p>",
                 "</div>"
             )
@@ -1236,7 +1236,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .analyze_clinical_correlations = function(data) {
             paste0(
                 "<div style='background-color: #e1f5fe; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #0277bd; margin-top: 0;'>🔗 Clinical Correlation Matrix</h4>",
+                "<h4 style='color: #0277bd; margin-top: 0;'> Clinical Correlation Matrix</h4>",
                 "<p><em>Enhanced correlation analysis with clinical significance thresholds and publication-quality heatmaps.</em></p>",
                 "</div>"
             )
@@ -1245,7 +1245,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .analyze_biomarker_networks = function(data) {
             paste0(
                 "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #7b1fa2; margin-top: 0;'>🕸️ Biomarker Correlation Networks</h4>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'> Biomarker Correlation Networks</h4>",
                 "<p><em>Network visualization of biomarker relationships for panel development and pathway analysis.</em></p>",
                 "</div>"
             )
@@ -1254,7 +1254,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .assess_clinical_significance = function(data) {
             paste0(
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>📊 Clinical Significance Assessment</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> Clinical Significance Assessment</h4>",
                 "<p><em>Statistical and clinical significance evaluation with effect size estimation.</em></p>",
                 "</div>"
             )
@@ -1263,7 +1263,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .detect_biomarker_variables = function(data) {
             paste0(
                 "<div style='background-color: #fff8e1; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #f57f17; margin-top: 0;'>🧬 Biomarker Detection</h4>",
+                "<h4 style='color: #f57f17; margin-top: 0;'> Biomarker Detection</h4>",
                 "<p><em>Automated identification of potential biomarker variables based on naming patterns and data characteristics.</em></p>",
                 "</div>"
             )
@@ -1272,7 +1272,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .analyze_biomarker_distributions = function(data) {
             paste0(
                 "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #1976d2; margin-top: 0;'>📈 Biomarker Distribution Analysis</h4>",
+                "<h4 style='color: #1976d2; margin-top: 0;'> Biomarker Distribution Analysis</h4>",
                 "<p><em>Specialized distribution analysis for biomarker data with log transformation assessment and normality testing.</em></p>",
                 "</div>"
             )
@@ -1281,7 +1281,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .analyze_biomarker_clinical_associations = function(data) {
             paste0(
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>🏥 Clinical Association Analysis</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> Clinical Association Analysis</h4>",
                 "<p><em>Analysis of biomarker associations with clinical outcomes and demographic variables.</em></p>",
                 "</div>"
             )
@@ -1290,7 +1290,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
         .generate_biomarker_validation_metrics = function(data) {
             paste0(
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>✅ Validation Metrics</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'> Validation Metrics</h4>",
                 "<p><em>Biomarker validation metrics including coefficient of variation, dynamic range, and clinical utility indicators.</em></p>",
                 "</div>"
             )

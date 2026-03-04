@@ -5,7 +5,6 @@ library(jmvcore)
 
 # Load the package
 if (requireNamespace("devtools", quietly = TRUE)) {
-  devtools::load_all()
 }
 
 test_that("entropyanalysis works with basic settings", {

@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(raincloud_test, package = "ClinicoPath", envir = environment())
@@ -21,7 +20,6 @@ data(raincloud_skewed, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud function exists and runs with minimal arguments", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -37,7 +35,6 @@ test_that("raincloud function exists and runs with minimal arguments", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles different continuous dependent variables", {
-  devtools::load_all()
 
   # Symptom score (0-100 scale)
   result_symptom <- raincloud(
@@ -77,7 +74,6 @@ test_that("raincloud handles different continuous dependent variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles different grouping variables", {
-  devtools::load_all()
 
   # Binary grouping (Male/Female)
   result_binary <- raincloud(
@@ -109,7 +105,6 @@ test_that("raincloud handles different grouping variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles facet variable for multiple panels", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -122,7 +117,6 @@ test_that("raincloud handles facet variable for multiple panels", {
 })
 
 test_that("raincloud handles faceting by hospital site", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -139,7 +133,6 @@ test_that("raincloud handles faceting by hospital site", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles additional color variable", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -156,7 +149,6 @@ test_that("raincloud handles additional color variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles violin plot component", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -171,7 +163,6 @@ test_that("raincloud handles violin plot component", {
 })
 
 test_that("raincloud handles boxplot component", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -186,7 +177,6 @@ test_that("raincloud handles boxplot component", {
 })
 
 test_that("raincloud handles dot plot component", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -201,7 +191,6 @@ test_that("raincloud handles dot plot component", {
 })
 
 test_that("raincloud handles all components combined", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -220,7 +209,6 @@ test_that("raincloud handles all components combined", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles clinical theme", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_clinical,
@@ -233,7 +221,6 @@ test_that("raincloud handles clinical theme", {
 })
 
 test_that("raincloud handles minimal theme", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -246,7 +233,6 @@ test_that("raincloud handles minimal theme", {
 })
 
 test_that("raincloud handles classic theme", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -259,7 +245,6 @@ test_that("raincloud handles classic theme", {
 })
 
 test_that("raincloud handles publication theme", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -272,7 +257,6 @@ test_that("raincloud handles publication theme", {
 })
 
 test_that("raincloud handles Prism themes", {
-  devtools::load_all()
 
   # Prism default
   result_prism <- raincloud(
@@ -307,7 +291,6 @@ test_that("raincloud handles Prism themes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles default palette", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -320,7 +303,6 @@ test_that("raincloud handles default palette", {
 })
 
 test_that("raincloud handles viridis palette", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -333,7 +315,6 @@ test_that("raincloud handles viridis palette", {
 })
 
 test_that("raincloud handles GraphPad Prism palettes", {
-  devtools::load_all()
 
   # Floral
   result_floral <- raincloud(
@@ -368,7 +349,6 @@ test_that("raincloud handles GraphPad Prism palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles normality tests", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -381,7 +361,6 @@ test_that("raincloud handles normality tests", {
 })
 
 test_that("raincloud handles group comparison tests", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -394,7 +373,6 @@ test_that("raincloud handles group comparison tests", {
 })
 
 test_that("raincloud handles outlier detection", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -407,7 +385,6 @@ test_that("raincloud handles outlier detection", {
 })
 
 test_that("raincloud handles mean display", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -420,7 +397,6 @@ test_that("raincloud handles mean display", {
 })
 
 test_that("raincloud handles median display", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -437,7 +413,6 @@ test_that("raincloud handles median display", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud works with all test datasets", {
-  devtools::load_all()
 
   # raincloud_test
   result1 <- raincloud(data = raincloud_test, dep_var = "symptom_score", group_var = "treatment_group")
@@ -469,7 +444,6 @@ test_that("raincloud works with all test datasets", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles clinical laboratory measurements", {
-  devtools::load_all()
 
   # Glucose across diagnoses
   result_glucose <- raincloud(
@@ -509,7 +483,6 @@ test_that("raincloud handles clinical laboratory measurements", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles treatment effect data", {
-  devtools::load_all()
 
   # Tumor size by treatment
   result_tumor <- raincloud(
@@ -541,7 +514,6 @@ test_that("raincloud handles treatment effect data", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles biomarker expression data", {
-  devtools::load_all()
 
   # Ki67 by grade
   result_ki67 <- raincloud(
@@ -581,7 +553,6 @@ test_that("raincloud handles biomarker expression data", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles different distribution types", {
-  devtools::load_all()
 
   # Normal distribution
   result_normal <- raincloud(

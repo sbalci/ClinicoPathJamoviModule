@@ -456,6 +456,7 @@ bbcplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic BBC-style visualization
 #' library(bbplot)
 #' library(ggplot2)
@@ -467,7 +468,7 @@ bbcplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' # Finalize with BBC branding
 #' finalise_plot(plot, "Source: Data source", "output.png")
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param y_var The dependent variable for the main axis.
 #' @param x_var The independent variable for categories or groups.

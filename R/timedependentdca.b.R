@@ -143,11 +143,11 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 icon <- switch(
                     notice$type,
-                    "ERROR" = "⛔",
-                    "STRONG_WARNING" = "⚠️",
-                    "WARNING" = "⚠",
-                    "INFO" = "ℹ",
-                    "ℹ"
+                    "ERROR" = "",
+                    "STRONG_WARNING" = "",
+                    "WARNING" = "",
+                    "INFO" = "",
+                    ""
                 )
 
                 html_parts <- c(html_parts, sprintf(

@@ -1,6 +1,5 @@
 test_that("coefplot works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     
     # Skip if required packages are not available
     skip_if_not_installed("coefplot")

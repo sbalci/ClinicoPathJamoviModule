@@ -4,7 +4,7 @@ title: Box-Violin Plots to Compare Between Groups
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 
@@ -15,7 +15,7 @@ description:
         for comparing continuous variables between groups with statistical
         annotations.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic comparison between groups
             jjbetweenstats(
@@ -258,7 +258,7 @@ options:
             IMPORTANT: This option does NOT automatically adjust p-values. It provides instructions for
             manual correction. When testing multiple endpoints (e.g., cholesterol, glucose, triglycerides),
             the family-wise error rate increases. For example, testing 3 variables at α=0.05 gives actual
-            error rate of ~14%. Select a correction method to see step-by-step instructions for manually
+            error rate of ~14 percent. Select a correction method to see step-by-step instructions for manually
             applying that correction to the p-values shown in the plots.
           ui: >
             Get guidance for correcting multiple endpoint testing. IMPORTANT: Corrections are NOT applied

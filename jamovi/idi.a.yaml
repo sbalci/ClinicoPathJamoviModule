@@ -24,7 +24,7 @@ description:
         numeric risk improvement is more relevant than categorical
         reclassification, such as in precision medicine applications.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- idi(
                 data = mydata,
@@ -140,7 +140,7 @@ options:
       description:
           R: >
             Proportion of extreme values to trim when using trimmed mean.
-            0.1 trims 10% from each tail, providing robust estimation.
+            0.1 trims 10 percent from each tail, providing robust estimation.
 
     # Statistical inference
     - name: confidence_level
@@ -152,7 +152,7 @@ options:
       description:
           R: >
             Confidence level for IDI confidence intervals and hypothesis testing.
-            0.95 provides 95% confidence intervals.
+            0.95 provides 95 percent confidence intervals.
 
     - name: bootstrap_samples
       title: Bootstrap Samples
@@ -471,7 +471,7 @@ options:
       description:
           R: >
             Type I error rate for hypothesis testing and confidence intervals.
-            Standard value is 0.05 for 95% confidence.
+            Standard value is 0.05 for 95 percent confidence.
 
     - name: random_seed
       title: Random Seed

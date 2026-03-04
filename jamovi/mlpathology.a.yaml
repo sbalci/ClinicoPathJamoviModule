@@ -12,7 +12,7 @@ description:
         segmentation quality assessment, and statistical model comparison for AI 
         validation and algorithm comparison studies.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('classification_results')
             

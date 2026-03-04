@@ -5,7 +5,7 @@ flexcompriskClass <- R6::R6Class(
     private = list(
         .init = function() {
             todo <- paste0(
-                "<h4>📋 Flexible Competing Risks Models</h4>",
+                "<h4> Flexible Competing Risks Models</h4>",
                 "<p><b>Required:</b></p>",
                 "<ul>",
                 "<li>Time variable (numeric, time-to-event)</li>",
@@ -39,7 +39,7 @@ flexcompriskClass <- R6::R6Class(
             
             if (length(covs) == 0) {
                 self$results$todo$setContent(
-                    "<h4>⚠️ Covariates Required</h4>
+                    "<h4> Covariates Required</h4>
                     <p>Flexible competing risks models require at least one covariate. 
                     Please add covariates to the analysis.</p>"
                 )
@@ -59,7 +59,7 @@ flexcompriskClass <- R6::R6Class(
             
             if (sum(complete_cases) < 20) {
                 self$results$todo$setContent(
-                    "<h4>❌ Insufficient Data</h4>
+                    "<h4> Insufficient Data</h4>
                     <p>Less than 20 complete observations available. 
                     Flexible models require larger sample sizes.</p>"
                 )
@@ -87,7 +87,7 @@ flexcompriskClass <- R6::R6Class(
             if (length(missing_packages) > 0) {
                 self$results$todo$setContent(
                     paste0(
-                        "<h4>📦 Packages Required</h4>
+                        "<h4> Packages Required</h4>
                         <p>This analysis requires the following packages: ", 
                         paste(missing_packages, collapse = ", "), 
                         "</p>
@@ -141,7 +141,7 @@ flexcompriskClass <- R6::R6Class(
                 
             }, error = function(e) {
                 error_msg <- paste0(
-                    "<h4>❌ Analysis Error</h4>",
+                    "<h4> Analysis Error</h4>",
                     "<p>Error in flexible competing risks analysis: ", e$message, "</p>",
                     "<p><b>Common solutions:</b></p>",
                     "<ul>",
@@ -227,7 +227,7 @@ flexcompriskClass <- R6::R6Class(
             
             educational_content <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
-                "<h4>📚 Flexible Competing Risks Models</h4>",
+                "<h4> Flexible Competing Risks Models</h4>",
                 "<p><b>Current Model:</b> ", switch(model_type,
                     "splines" = "Flexible Parametric (Spline-based)",
                     "forest" = "Random Survival Forests",
@@ -430,7 +430,7 @@ flexcompriskClass <- R6::R6Class(
             
             methods_content <- paste0(
                 "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
-                "<h4>📊 Statistical Methods</h4>",
+                "<h4> Statistical Methods</h4>",
                 "<p><b>Model Type:</b> ", tools::toTitleCase(model_type), " competing risks model</p>",
                 
                 "<p><b>Model Specifications:</b></p>",
@@ -472,7 +472,7 @@ flexcompriskClass <- R6::R6Class(
             
             recommendations <- paste0(
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-                "<h4>💡 Model Selection and Interpretation</h4>",
+                "<h4> Model Selection and Interpretation</h4>",
                 
                 "<p><b>Current Model Benefits:</b></p>",
                 "<ul>"

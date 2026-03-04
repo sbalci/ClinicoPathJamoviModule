@@ -459,13 +459,14 @@ cochranqBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' cochranq(
 #'     variables = c("baseline", "month1", "month3", "month6"),
 #'     id = "patient_id",
 #'     method = "asymptotic"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param variables Binary variables measured at different time points or
 #'   conditions (minimum 3 variables required)

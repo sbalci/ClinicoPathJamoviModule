@@ -6,7 +6,6 @@
 # for the ihcheterogeneity jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(ihcheterogeneity_test, package = "ClinicoPath")

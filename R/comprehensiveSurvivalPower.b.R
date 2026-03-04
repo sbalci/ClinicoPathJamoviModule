@@ -47,7 +47,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
         .populateInstructions = function() {
             instructions_html <- paste0(
                 "<div style='padding: 20px; background-color: #f8f9fa; border-radius: 8px; margin: 15px 0;'>",
-                "<h3 style='color: #2c3e50; margin-top: 0;'>📊 Comprehensive Survival Power Analysis</h3>",
+                "<h3 style='color: #2c3e50; margin-top: 0;'> Comprehensive Survival Power Analysis</h3>",
                 "<p><strong>This unified tool combines all survival power analysis methods:</strong></p>",
                 "<ul style='margin-left: 20px;'>",
                 "<li><strong>Standard Methods:</strong> Log-rank tests, Cox regression</li>",
@@ -62,7 +62,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
                 "<li>Enter your study parameters</li>",
                 "</ol>",
                 "<p style='margin-top: 15px; padding: 10px; background-color: #e8f4fd; border-left: 4px solid #2196F3;'>",
-                "<strong>💡 Tip:</strong> Enable 'Show Detailed Output' for comprehensive results including assumptions and sensitivity analysis.",
+                "<strong> Tip:</strong> Enable 'Show Detailed Output' for comprehensive results including assumptions and sensitivity analysis.",
                 "</p>",
                 "</div>"
             )
@@ -721,7 +721,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
             interpretation_html <- paste0(
                 "<div style='padding: 20px; background-color: #f0f8ff; border-radius: 8px; margin: 15px 0;'>",
-                "<h4 style='color: #2c3e50; margin-top: 0;'>🔍 Clinical Interpretation</h4>"
+                "<h4 style='color: #2c3e50; margin-top: 0;'> Clinical Interpretation</h4>"
             )
 
             # Method-specific interpretation
@@ -742,7 +742,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
             # Regulatory considerations
             if (self$options$show_detailed_output) {
                 interpretation_html <- paste0(interpretation_html,
-                    "<h5 style='color: #34495e; margin-top: 20px;'>📋 Regulatory Considerations</h5>",
+                    "<h5 style='color: #34495e; margin-top: 20px;'> Regulatory Considerations</h5>",
                     "<ul>",
                     "<li>Results assume all key assumptions are met</li>",
                     "<li>Consider sensitivity analysis for key parameters</li>",

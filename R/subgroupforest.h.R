@@ -341,6 +341,7 @@ subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Survival outcome subgroup analysis
 #' subgroupforest(
 #'     data = clinical_trial,
@@ -362,7 +363,7 @@ subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     outcomeType = "binary",
 #'     effectMeasure = "or"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Primary outcome variable. For survival analysis, this should
 #'   be the time variable. For binary outcomes, use 0/1 or factor with 2 levels.

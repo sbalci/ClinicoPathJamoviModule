@@ -281,7 +281,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </ul>
 
             <div class='alert alert-warning' style='background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin: 10px 0;'>
-                <h4 style='margin-top: 0; color: #856404;'>⚠️ Current Implementation Limitations</h4>
+                <h4 style='margin-top: 0; color: #856404;'> Current Implementation Limitations</h4>
                 <p style='margin-bottom: 5px;'><strong>Single Exposure Change Only:</strong></p>
                 <ul style='margin-bottom: 5px;'>
                     <li>This implementation handles <strong>at most ONE exposure change per patient</strong></li>
@@ -466,7 +466,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <h3>Clinical Interpretation of Time-Dependent Survival Analysis</h3>
                 
                 <div class='alert alert-success'>
-                    <h4>📊 Interpreting Hazard Ratios:</h4>
+                    <h4> Interpreting Hazard Ratios:</h4>
                     <ul>
                         <li><strong>HR > 1:</strong> Increased hazard (higher risk) in exposed group
                             <ul><li><em>Example:</em> HR = 1.5 means 50% higher risk of event</li></ul>
@@ -479,7 +479,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div class='alert alert-warning'>
-                    <h4>⚕️ Clinical Decision Making:</h4>
+                    <h4> Clinical Decision Making:</h4>
                     <ul>
                         <li><strong>Treatment Timing:</strong> Consider optimal timing for intervention initiation</li>
                         <li><strong>Risk-Benefit Assessment:</strong> Weigh treatment benefits against potential harms</li>
@@ -488,7 +488,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </ul>
                 </div>
                 
-                <h4>🔍 Clinical Significance Assessment:</h4>
+                <h4> Clinical Significance Assessment:</h4>
                 <ul>
                     <li><strong>Statistical vs Clinical Significance:</strong> Small p-values don't guarantee clinical relevance</li>
                     <li><strong>Confidence Intervals:</strong> Wide intervals suggest uncertainty in effect size</li>
@@ -496,7 +496,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <li><strong>Number Needed to Treat:</strong> Can be derived from survival differences at specific timepoints</li>
                 </ul>
                 
-                <h4>⚠️ Important Limitations:</h4>
+                <h4> Important Limitations:</h4>
                 <ul>
                     <li><strong>Temporal Generalizability:</strong> Results specific to timing patterns in your study population</li>
                     <li><strong>Confounding by Indication:</strong> Exposure timing may be related to prognosis</li>
@@ -505,7 +505,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </ul>
                 
                 <div class='alert alert-info'>
-                    <h4>📋 Reporting Recommendations:</h4>
+                    <h4> Reporting Recommendations:</h4>
                     <ul>
                         <li>Report both crude and adjusted hazard ratios</li>
                         <li>Describe exposure ascertainment and timing</li>
@@ -524,13 +524,13 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 methodology_html <- "
                 <h3>Simon-Makuch Methodology Detailed Notes</h3>
                 
-                <h4>🔬 Statistical Foundation:</h4>
+                <h4> Statistical Foundation:</h4>
                 <p>The Simon-Makuch method addresses the fundamental challenge in time-to-event analysis where 
                 exposure status changes during follow-up. The method was developed by Richard Simon and 
                 Robert J. Makuch in 1984 to provide unbiased survival estimates when dealing with 
                 time-dependent exposures.</p>
                 
-                <h4>📊 Technical Implementation:</h4>
+                <h4> Technical Implementation:</h4>
                 <ul>
                     <li><strong>Counting Process Notation:</strong> Uses (tstart, tstop] intervals for each observation period</li>
                     <li><strong>Left-Truncation:</strong> Proper handling of delayed entry into exposure groups</li>
@@ -538,7 +538,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <li><strong>Partial Likelihood:</strong> Cox regression adapted for time-dependent covariates</li>
                 </ul>
                 
-                <h4>🎯 Key Assumptions:</h4>
+                <h4> Key Assumptions:</h4>
                 <ul>
                     <li><strong>Non-Informative Censoring:</strong> Censoring unrelated to exposure timing</li>
                     <li><strong>Exposure Ascertainment:</strong> Timing of exposure changes is accurately known</li>
@@ -546,7 +546,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <li><strong>Independent Observations:</strong> No clustering unless accounted for</li>
                 </ul>
                 
-                <h4>🔍 Model Diagnostics:</h4>
+                <h4> Model Diagnostics:</h4>
                 <ul>
                     <li><strong>Proportional Hazards Test:</strong> Schoenfeld residuals analysis</li>
                     <li><strong>Functional Form:</strong> Martingale residuals for continuous variables</li>
@@ -555,7 +555,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </ul>
                 
                 <div class='alert alert-primary'>
-                    <h5>💡 Advanced Considerations:</h5>
+                    <h5> Advanced Considerations:</h5>
                     <ul>
                         <li><strong>Competing Risks:</strong> Consider Fine-Gray subdistribution hazard models</li>
                         <li><strong>Recurrent Events:</strong> Use robust variance or frailty models</li>

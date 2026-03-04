@@ -632,7 +632,7 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "diagnosticmeta",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = diagnosticmetaResults$new(options=options),
                 data = data,
@@ -657,6 +657,7 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('diagnostic_studies')
 #'
 #' diagnosticmeta(data = diagnostic_studies,
@@ -665,7 +666,7 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'               false_positives = fp,
 #'               false_negatives = fn,
 #'               true_negatives = tn)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param study Variable containing unique study identifiers
 #' @param true_positives Number of true positive results in each study

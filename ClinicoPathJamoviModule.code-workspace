@@ -5,6 +5,18 @@
 		},
 		{
 			"path": "../meddecide"
+		},
+		{
+			"path": "../OncoPath"
+		},
+		{
+			"path": "../ClinicoPathDescriptives"
+		},
+		{
+			"path": "../jsurvival"
+		},
+		{
+			"path": "../jjstatsplot"
 		}
 	],
 	"settings": {}

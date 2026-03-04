@@ -16,7 +16,7 @@ description:
         Designed for clinical research applications with regulatory compliance features
         for model validation and documentation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('clinical_data')
             
@@ -213,7 +213,7 @@ options:
       max: 0.9
       default: 0.7
       description:
-          R: Proportion of data for training (70% = 0.7)
+          R: Proportion of data for training (70 percent = 0.7)
 
     - name: validation_method
       title: Validation Method

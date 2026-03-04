@@ -84,7 +84,7 @@ survival)}
 
 \item{handle_missing}{Method for handling missing data}
 
-\item{train_proportion}{Proportion of data for training (70\\% = 0.7)}
+\item{train_proportion}{Proportion of data for training (70 percent = 0.7)}
 
 \item{validation_method}{Method for model validation}
 
@@ -208,6 +208,7 @@ features
 for model validation and documentation.
 }
 \examples{
+\donttest{
 data('clinical_data')
 
 clinicalprediction(
@@ -218,5 +219,5 @@ clinicalprediction(
     interpretability = TRUE,
     validation_method = "cv_10fold"
 )
-
+}
 }

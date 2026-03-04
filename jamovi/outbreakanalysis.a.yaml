@@ -16,7 +16,7 @@ description:
         investigation, surveillance analysis, and epidemiological research with robust statistical methods
         for public health decision-making and intervention planning.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('outbreak_data')
             
@@ -182,7 +182,7 @@ options:
       type: Bool
       default: true
       description:
-          R: Calculate attack rates and 95% confidence intervals
+          R: Calculate attack rates and 95 percent confidence intervals
 
     - name: risk_factor_analysis
       title: Risk Factor Analysis

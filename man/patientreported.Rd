@@ -108,7 +108,7 @@ time points}
 scale scoring}
 
 \item{missing_threshold}{Maximum proportion of missing items allowed for
-scoring (50\\% = 0.5)}
+scoring (50 percent = 0.5)}
 
 \item{clinical_interpretation}{Provide clinical interpretation of PRO
 scores}
@@ -229,6 +229,7 @@ longitudinal analysis.
 Essential for patient-centered outcomes research and clinical trials.
 }
 \examples{
+\donttest{
 data('pro_data')
 
 patientreported(
@@ -239,5 +240,5 @@ patientreported(
     reliability_analysis = TRUE,
     validity_analysis = TRUE
 )
-
+}
 }

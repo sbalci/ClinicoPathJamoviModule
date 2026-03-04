@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("jjwithinstats function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("jjwithinstats"))
 })
 
 test_that("jjwithinstats runs with minimal required arguments (two timepoints)", {
-  devtools::load_all()
 
   data(jjwithinstats_paired, package = "ClinicoPath")
 
@@ -26,7 +24,6 @@ test_that("jjwithinstats runs with minimal required arguments (two timepoints)",
 })
 
 test_that("jjwithinstats runs with three timepoints", {
-  devtools::load_all()
 
   data(jjwithinstats_test, package = "ClinicoPath")
 
@@ -41,7 +38,6 @@ test_that("jjwithinstats runs with three timepoints", {
 })
 
 test_that("jjwithinstats runs with four timepoints", {
-  devtools::load_all()
 
   data(jjwithinstats_biomarker, package = "ClinicoPath")
 
@@ -57,7 +53,6 @@ test_that("jjwithinstats runs with four timepoints", {
 })
 
 test_that("jjwithinstats produces expected output structure", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -73,7 +68,6 @@ test_that("jjwithinstats produces expected output structure", {
 })
 
 test_that("jjwithinstats handles parametric statistics (repeated measures ANOVA)", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -89,7 +83,6 @@ test_that("jjwithinstats handles parametric statistics (repeated measures ANOVA)
 })
 
 test_that("jjwithinstats handles parametric statistics (paired t-test)", {
-  devtools::load_all()
 
   data(jjwithinstats_paired)
 
@@ -104,7 +97,6 @@ test_that("jjwithinstats handles parametric statistics (paired t-test)", {
 })
 
 test_that("jjwithinstats handles nonparametric statistics (Friedman test)", {
-  devtools::load_all()
 
   data(jjwithinstats_biomarker)
 
@@ -121,7 +113,6 @@ test_that("jjwithinstats handles nonparametric statistics (Friedman test)", {
 })
 
 test_that("jjwithinstats handles nonparametric statistics (Wilcoxon signed-rank)", {
-  devtools::load_all()
 
   data(jjwithinstats_paired)
 
@@ -136,7 +127,6 @@ test_that("jjwithinstats handles nonparametric statistics (Wilcoxon signed-rank)
 })
 
 test_that("jjwithinstats handles robust statistics", {
-  devtools::load_all()
 
   data(jjwithinstats_laboratory)
 
@@ -153,7 +143,6 @@ test_that("jjwithinstats handles robust statistics", {
 })
 
 test_that("jjwithinstats handles Bayesian statistics", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -169,7 +158,6 @@ test_that("jjwithinstats handles Bayesian statistics", {
 })
 
 test_that("jjwithinstats handles pairwise comparisons", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -186,7 +174,6 @@ test_that("jjwithinstats handles pairwise comparisons", {
 })
 
 test_that("jjwithinstats handles point paths (individual trajectories)", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -202,7 +189,6 @@ test_that("jjwithinstats handles point paths (individual trajectories)", {
 })
 
 test_that("jjwithinstats handles centrality plotting", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -252,7 +238,6 @@ test_that("jjwithinstats handles centrality plotting", {
 })
 
 test_that("jjwithinstats handles centrality path", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -269,7 +254,6 @@ test_that("jjwithinstats handles centrality path", {
 })
 
 test_that("jjwithinstats handles clinical presets", {
-  devtools::load_all()
 
   # Biomarker preset
   data(jjwithinstats_biomarker)
@@ -307,7 +291,6 @@ test_that("jjwithinstats handles clinical presets", {
 })
 
 test_that("jjwithinstats handles ggpubr plots", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -336,7 +319,6 @@ test_that("jjwithinstats handles ggpubr plots", {
 })
 
 test_that("jjwithinstats handles custom titles", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -354,7 +336,6 @@ test_that("jjwithinstats handles custom titles", {
 })
 
 test_that("jjwithinstats handles different datasets", {
-  devtools::load_all()
 
   datasets <- list(
     jjwithinstats_test = list(dep1 = "baseline", dep2 = "week4", dep3 = "week12"),

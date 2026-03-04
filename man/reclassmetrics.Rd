@@ -95,6 +95,7 @@ binary and survival outcomes. Essential for demonstrating incremental value
 of new biomarkers or predictors.
 }
 \examples{
+\donttest{
 # Example usage - Binary outcome:
 # ClinicoPath::reclassmetrics(
 #   data = data,
@@ -115,5 +116,5 @@ of new biomarkers or predictors.
 #   outcomeType = "survival",
 #   timePoint = 60
 # )
-
+}
 }

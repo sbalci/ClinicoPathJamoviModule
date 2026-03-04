@@ -64,9 +64,6 @@
 #' @importFrom dplyr summarise group_by mutate select
 #' @importFrom htmltools HTML
 
-# Null-coalescing operator helper (defined at top for better organization)
-`%||%` <- function(x, y) if (is.null(x)) y else x
-
 missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataClass",
     inherit = missingdataBase,
     private = list(
@@ -84,7 +81,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                 
                 intro_msg <- "
                 <div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #2e7d32; margin-top: 0;'>🔍 Welcome to Missing Data Analysis!</h3>
+                <h3 style='color: #2e7d32; margin-top: 0;'> Welcome to Missing Data Analysis!</h3>
                 <p><strong>Comprehensive missing data analysis and multiple imputation</strong></p>
                 <p>Analyze missing data patterns and perform multiple imputation using mice and ggmice packages</p>
                 
@@ -138,7 +135,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                 </ul>
                 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Professional missing data analysis for clinical research data quality and statistical validity</em>
+                 <em>Professional missing data analysis for clinical research data quality and statistical validity</em>
                 </p>
                 </div>"
                 
@@ -424,7 +421,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             }, error = function(e) {
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                    "<h4>❌ Imputation Error</h4>",
+                    "<h4> Imputation Error</h4>",
                     "<p><strong>Error message:</strong> ", e$message, "</p>",
                     "<p><strong>Possible solutions:</strong></p>",
                     "<ul>",
@@ -458,7 +455,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                 # Create HTML table
                 pattern_html <- paste0(
                     "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px;'>",
-                    "<h3 style='color: #495057; margin-top: 0;'>📊 Missing Data Pattern Analysis</h3>",
+                    "<h3 style='color: #495057; margin-top: 0;'> Missing Data Pattern Analysis</h3>",
                     
                     "<h4 style='color: #495057;'>Overall Summary:</h4>",
                     "<table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>",
@@ -523,7 +520,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                 
                 summary_html <- paste0(
                     "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
-                    "<h3 style='color: #1976d2; margin-top: 0;'>📈 Multiple Imputation Summary</h3>",
+                    "<h3 style='color: #1976d2; margin-top: 0;'> Multiple Imputation Summary</h3>",
                     
                     "<h4 style='color: #1976d2;'>Imputation Parameters:</h4>",
                     "<table style='width: 100%; border-collapse: collapse; margin-bottom: 15px;'>",
@@ -591,7 +588,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             
             interpretation_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📚 Missing Data Analysis Guide</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> Missing Data Analysis Guide</h3>",
                 
                 "<h4 style='color: #7b1fa2;'>Understanding Missing Data Mechanisms:</h4>",
                 "<ul>",
@@ -653,7 +650,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                 "</ul>",
                 
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
-                "<em>🔍 Professional missing data analysis powered by mice and ggmice packages</em>",
+                "<em> Professional missing data analysis powered by mice and ggmice packages</em>",
                 "</p></div>"
             )
             
@@ -688,7 +685,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             if (length(missing_packages) > 0 || length(version_issues) > 0) {
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                    "<h4>📦 Package Dependencies Required</h4>"
+                    "<h4> Package Dependencies Required</h4>"
                 )
                 
                 if (length(missing_packages) > 0) {
@@ -724,7 +721,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             if (length(missing_vars) > 0) {
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                    "<h4>❌ Variables Not Found</h4>",
+                    "<h4> Variables Not Found</h4>",
                     "<p>The following variables were not found in the dataset: ",
                     paste(missing_vars, collapse = ", "), "</p>",
                     "<p>Please check variable names and try again.</p>",
@@ -741,7 +738,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             if (length(empty_vars) > 0) {
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
-                    "<h4>❌ Empty Variables Detected</h4>",
+                    "<h4> Empty Variables Detected</h4>",
                     "<p>The following variables contain only missing values: ",
                     paste(empty_vars, collapse = ", "), "</p>",
                     "<p>Please select variables with at least some observed values.</p>",
@@ -754,7 +751,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             if (sum(is.na(analysis_data)) == 0) {
                 no_missing_msg <- "
                 <div style='background-color: #fff3cd; padding: 20px; border-radius: 8px;'>
-                <h4 style='color: #856404;'>✅ No Missing Data Detected</h4>
+                <h4 style='color: #856404;'> No Missing Data Detected</h4>
                 <p>The selected variables contain no missing values. Missing data analysis is not needed for this dataset.</p>
                 <p><strong>Suggestions:</strong></p>
                 <ul>
@@ -773,7 +770,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             if (length(high_missing_vars) > 0) {
                 warning_msg <- paste0(
                     "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
-                    "<h4 style='color: #856404;'>⚠️ High Missing Data Warning</h4>",
+                    "<h4 style='color: #856404;'> High Missing Data Warning</h4>",
                     "<p>The following variables have >90% missing data: ",
                     paste(high_missing_vars, collapse = ", "), "</p>",
                     "<p>Consider removing these variables or interpreting results cautiously.</p>",

@@ -825,6 +825,7 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- adaptivelasso(
 #'     data = mydata,
 #'     time = "time_to_event",
@@ -835,7 +836,7 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     stability_selection = TRUE,
 #'     alpha = 1.0
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

@@ -3,7 +3,6 @@
 # Purpose: Realistic clinical workflows and complete analyses
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 
 # COVID-19 Testing Workflows ----
 test_that("COVID-19 workflow: screening to confirmation strategy", {

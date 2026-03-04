@@ -10,7 +10,7 @@ items:
       visible: true
 
     - name: clinicalSummary
-      title: 📋 Analysis Summary (Copy-Ready)
+      title:  Analysis Summary (Copy-Ready)
       type: Html
       visible: true
       clearWith:
@@ -22,12 +22,12 @@ items:
           - binary_cutpoint
 
     - name: aboutAnalysis
-      title: 🔬 About This Analysis
+      title:  About This Analysis
       type: Html
       visible: true
 
     - name: clinicalReport
-      title: 📄 Clinical Report Template
+      title:  Clinical Report Template
       type: Preformatted
       visible: true
       clearWith:
@@ -40,7 +40,7 @@ items:
           - confidence_level
 
     - name: assumptions
-      title: ⚠️ Assumptions & Caveats
+      title:  Assumptions & Caveats
       type: Html
       visible: true
 

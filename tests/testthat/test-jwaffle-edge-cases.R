@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jwaffle_test, package = "ClinicoPath", envir = environment())
@@ -18,7 +17,6 @@ data(jwaffle_demographics, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles small sample (n=30)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_small,
@@ -29,7 +27,6 @@ test_that("jwaffle handles small sample (n=30)", {
 })
 
 test_that("jwaffle handles very small sample per facet", {
-  devtools::load_all()
 
   # n=30 with faceting creates very small groups
   result <- jwaffle(
@@ -46,7 +43,6 @@ test_that("jwaffle handles very small sample per facet", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles missing data in groups variable", {
-  devtools::load_all()
 
   test_data_na <- jwaffle_test
   test_data_na$response_category[1:30] <- NA
@@ -60,7 +56,6 @@ test_that("jwaffle handles missing data in groups variable", {
 })
 
 test_that("jwaffle handles missing data in facet variable", {
-  devtools::load_all()
 
   test_data_na <- jwaffle_test
   test_data_na$treatment[1:25] <- NA
@@ -75,7 +70,6 @@ test_that("jwaffle handles missing data in facet variable", {
 })
 
 test_that("jwaffle handles missing data in counts variable", {
-  devtools::load_all()
 
   test_data_na <- jwaffle_test
   test_data_na$patient_count[1:20] <- NA
@@ -90,7 +84,6 @@ test_that("jwaffle handles missing data in counts variable", {
 })
 
 test_that("jwaffle handles missing data in multiple variables", {
-  devtools::load_all()
 
   test_data_na <- jwaffle_test
   test_data_na$response_category[1:15] <- NA
@@ -110,7 +103,6 @@ test_that("jwaffle handles missing data in multiple variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle errors on non-existent groups variable", {
-  devtools::load_all()
 
   expect_error(
     jwaffle(
@@ -123,7 +115,6 @@ test_that("jwaffle errors on non-existent groups variable", {
 })
 
 test_that("jwaffle errors on non-existent facet variable", {
-  devtools::load_all()
 
   expect_error(
     jwaffle(
@@ -137,7 +128,6 @@ test_that("jwaffle errors on non-existent facet variable", {
 })
 
 test_that("jwaffle errors on numeric groups variable", {
-  devtools::load_all()
 
   # groups should be categorical
   expect_error(
@@ -151,7 +141,6 @@ test_that("jwaffle errors on numeric groups variable", {
 })
 
 test_that("jwaffle errors on empty dataset", {
-  devtools::load_all()
 
   empty_data <- jwaffle_test[0, ]
 
@@ -170,7 +159,6 @@ test_that("jwaffle errors on empty dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles minimum rows (1)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -182,7 +170,6 @@ test_that("jwaffle handles minimum rows (1)", {
 })
 
 test_that("jwaffle handles large rows value (20)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -198,7 +185,6 @@ test_that("jwaffle handles large rows value (20)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles variable names with spaces", {
-  devtools::load_all()
 
   test_data_spaces <- jwaffle_test
   names(test_data_spaces)[names(test_data_spaces) == "response_category"] <- "Response Category"
@@ -216,7 +202,6 @@ test_that("jwaffle handles variable names with spaces", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles tibble input", {
-  devtools::load_all()
 
   tibble_data <- tibble::as_tibble(jwaffle_test)
 
@@ -229,7 +214,6 @@ test_that("jwaffle handles tibble input", {
 })
 
 test_that("jwaffle handles data.frame input", {
-  devtools::load_all()
 
   df_data <- as.data.frame(jwaffle_test)
 
@@ -246,7 +230,6 @@ test_that("jwaffle handles data.frame input", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles duplicate rows", {
-  devtools::load_all()
 
   test_data_dup <- rbind(jwaffle_test, jwaffle_test[1:50, ])
 
@@ -263,7 +246,6 @@ test_that("jwaffle handles duplicate rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles highly unbalanced groups", {
-  devtools::load_all()
 
   # Create highly unbalanced data (95% in one category)
   test_data_unbal <- jwaffle_test
@@ -279,7 +261,6 @@ test_that("jwaffle handles highly unbalanced groups", {
 })
 
 test_that("jwaffle handles rare categories (<1%)", {
-  devtools::load_all()
 
   # Create data where one category is very rare
   test_data_rare <- jwaffle_test
@@ -303,7 +284,6 @@ test_that("jwaffle handles rare categories (<1%)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles single category level", {
-  devtools::load_all()
 
   test_data_single <- jwaffle_test
   test_data_single$response_category <- "Complete Response"  # All same category
@@ -321,7 +301,6 @@ test_that("jwaffle handles single category level", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles 5 category levels", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -332,7 +311,6 @@ test_that("jwaffle handles 5 category levels", {
 })
 
 test_that("jwaffle handles 5 category levels with faceting", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -348,7 +326,6 @@ test_that("jwaffle handles 5 category levels with faceting", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles some zero counts", {
-  devtools::load_all()
 
   test_data_zero <- jwaffle_test
   test_data_zero$patient_count[1:20] <- 0
@@ -367,7 +344,6 @@ test_that("jwaffle handles some zero counts", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles character groups variable", {
-  devtools::load_all()
 
   test_data_char <- jwaffle_test
   test_data_char$response_category <- as.character(test_data_char$response_category)
@@ -381,7 +357,6 @@ test_that("jwaffle handles character groups variable", {
 })
 
 test_that("jwaffle handles character facet variable", {
-  devtools::load_all()
 
   test_data_char <- jwaffle_test
   test_data_char$treatment <- as.character(test_data_char$treatment)
@@ -400,7 +375,6 @@ test_that("jwaffle handles character facet variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles empty title string", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -412,7 +386,6 @@ test_that("jwaffle handles empty title string", {
 })
 
 test_that("jwaffle handles empty legend title string", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -429,7 +402,6 @@ test_that("jwaffle handles empty legend title string", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles faceting with 5 levels", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -445,7 +417,6 @@ test_that("jwaffle handles faceting with 5 levels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles very few rows with many categories", {
-  devtools::load_all()
 
   # 2 rows with 5 categories = only 20 squares for 5 colors
   result <- jwaffle(
@@ -458,7 +429,6 @@ test_that("jwaffle handles very few rows with many categories", {
 })
 
 test_that("jwaffle handles many rows with few categories", {
-  devtools::load_all()
 
   # 15 rows with 2 categories = 150 squares for 2 colors
   result <- jwaffle(
@@ -475,7 +445,6 @@ test_that("jwaffle handles many rows with few categories", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles decimal count values", {
-  devtools::load_all()
 
   test_data_decimal <- jwaffle_test
   test_data_decimal$decimal_count <- runif(nrow(test_data_decimal), 0.5, 2.5)
@@ -494,7 +463,6 @@ test_that("jwaffle handles decimal count values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles negative count values", {
-  devtools::load_all()
 
   test_data_negative <- jwaffle_test
   test_data_negative$negative_count <- c(-1, rep(1, nrow(test_data_negative) - 1))
@@ -514,7 +482,6 @@ test_that("jwaffle handles negative count values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles long category names", {
-  devtools::load_all()
 
   test_data_long <- jwaffle_test
   levels(test_data_long$response_category) <- c(
@@ -538,7 +505,6 @@ test_that("jwaffle handles long category names", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles single facet level", {
-  devtools::load_all()
 
   test_data_single_facet <- jwaffle_test
   test_data_single_facet$treatment <- "Chemotherapy"  # All same
@@ -557,7 +523,6 @@ test_that("jwaffle handles single facet level", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles all missing in one facet level", {
-  devtools::load_all()
 
   test_data_facet_na <- jwaffle_test
   # Set all values to NA for one treatment group

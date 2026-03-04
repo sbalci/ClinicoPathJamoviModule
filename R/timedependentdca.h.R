@@ -446,7 +446,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "timedependentdca",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = timedependentdcaResults$new(options=options),
                 data = data,
@@ -474,6 +474,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example with survival outcome
 #' library(survival)
 #' data <- lung
@@ -486,7 +487,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   time_points = c(180, 365, 730),
 #'   reference_strategy = 'treat_all'
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time a string naming the time-to-event variable
 #' @param event a string naming the event indicator (1=event, 0=censored)
@@ -500,12 +501,12 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param estimate_survival method for estimating event probabilities from
 #'   predictor
 #' @param smoothing apply LOESS smoothing to decision curves for visualization
-#' @param use_bootstrap calculate 95\% confidence intervals for net benefit
-#'   using bootstrap resampling (computationally intensive)
+#' @param use_bootstrap calculate 95 percent confidence intervals for net
+#'   benefit using bootstrap resampling (computationally intensive)
 #' @param bootstrap_iterations number of bootstrap iterations for confidence
 #'   interval calculation
-#' @param ci_level confidence level for bootstrap intervals (e.g., 0.95 for
-#'   95\% CI)
+#' @param ci_level confidence level for bootstrap intervals (e.g., 0.95 for 95
+#'   percent CI)
 #' @param plot_net_benefit plot net benefit curves across threshold
 #'   probabilities
 #' @param plot_by_timepoint create separate plots for each time point (vs.

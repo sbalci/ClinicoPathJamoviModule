@@ -234,6 +234,7 @@ times, and transition-specific hazard ratios with clinical interpretation
 frameworks for evidence-based medicine.
 }
 \examples{
+\donttest{
 result <- illnessdeath(
     data = mydata,
     time_entry = "entry_time",
@@ -243,5 +244,5 @@ result <- illnessdeath(
     covariates = c("age", "treatment", "stage"),
     reversible_illness = FALSE
 )
-
+}
 }

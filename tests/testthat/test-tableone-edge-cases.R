@@ -14,7 +14,6 @@
 # Generated: 2026-01-02
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(tableone_test, package = "ClinicoPath")

@@ -606,6 +606,7 @@ grafifyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Scientific scatter plot with error bars
 #' data(clinical_data)
 #' grafify(
@@ -616,7 +617,7 @@ grafifyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     error_type = "sd",
 #'     color_palette = "vibrant"
 #' )
-#'
+#'}
 #' @param data The data as a data frame containing scientific or clinical
 #'   variables for professional visualization with grafify.
 #' @param vars Continuous variables for plotting. Can be used as X, Y

@@ -106,6 +106,7 @@ priority-based
 warnings for evidence-based clinical decision support.
 }
 \examples{
+\donttest{
 data('histopathology', package='ClinicoPath')
 
 # Basic clinical alert monitoring
@@ -113,5 +114,5 @@ clinicalalerts(histopathology,
              clinicalVars = 'Age',
              alert_summary = TRUE,
              detailed_alerts = TRUE)
-
+}
 }

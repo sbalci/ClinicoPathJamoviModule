@@ -16,7 +16,7 @@ children:
         label: "Select diagnostic tests (lab values, imaging findings, clinical signs) and your gold standard reference"
         children:
           - type: Label
-            label: "💡 Tip: Choose 2-5 complementary tests for optimal performance"
+            label: " Tip: Choose 2-5 complementary tests for optimal performance"
       - type: VariableSupplier
         persistentItems: false
         stretchFactor: 1
@@ -100,11 +100,11 @@ children:
         label: "Choose how tests should be combined and evaluated"
         children:
           - type: Label
-            label: "🔍 Single: Each test evaluated independently"
+            label: " Single: Each test evaluated independently"
           - type: Label
-            label: "⚡ Parallel: Tests performed simultaneously (any/all positive)"
+            label: " Parallel: Tests performed simultaneously (any/all positive)"
           - type: Label  
-            label: "📋 Sequential: Tests performed in order (stop when criteria met)"
+            label: " Sequential: Tests performed in order (stop when criteria met)"
       - type: LayoutBox
         margin: large
         children:
@@ -153,11 +153,11 @@ children:
         label: "Define what makes an optimal test panel for your clinical scenario"
         children:
           - type: Label
-            label: "🎯 Accuracy: Overall correctness (recommended for balanced datasets)"
+            label: " Accuracy: Overall correctness (recommended for balanced datasets)"
           - type: Label
-            label: "🔍 Sensitivity: Prioritize catching positive cases (screening)"
+            label: " Sensitivity: Prioritize catching positive cases (screening)"
           - type: Label
-            label: "✅ Specificity: Prioritize avoiding false positives (confirmatory)"
+            label: " Specificity: Prioritize avoiding false positives (confirmatory)"
       - type: LayoutBox
         margin: large
         children:
@@ -333,7 +333,7 @@ children:
   # CLINICAL GUIDANCE & GLOSSARY
   # ==========================================
   - type: CollapseBox
-    label: "📚 Clinical Guidance & Terminology"
+    label: " Clinical Guidance & Terminology"
     margin: normal
     collapsed: true
     children:
@@ -356,13 +356,13 @@ children:
         label: "Clinical Decision Guidelines"
         children:
           - type: Label
-            label: "🏥 Screening Tests: Prioritize high sensitivity (minimize missed cases)"
+            label: " Screening Tests: Prioritize high sensitivity (minimize missed cases)"
           - type: Label
-            label: "🔬 Confirmatory Tests: Prioritize high specificity (minimize false alarms)"
+            label: " Confirmatory Tests: Prioritize high specificity (minimize false alarms)"
           - type: Label
-            label: "⚖️ Balanced Testing: Consider both sensitivity and specificity equally"
+            label: " Balanced Testing: Consider both sensitivity and specificity equally"
           - type: Label
-            label: "💰 Cost-Effectiveness: Include test costs and clinical consequences"
+            label: " Cost-Effectiveness: Include test costs and clinical consequences"
 
   # ==========================================
   # ADVANCED SETTINGS

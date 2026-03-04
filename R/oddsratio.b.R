@@ -841,14 +841,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         statistical_recommendations,
 
                         "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                        "<b>⚠️ Important: Please Verify These Interpretations</b><br>",
+                        "<b> Important: Please Verify These Interpretations</b><br>",
                         "<small>",
                         "<b>Positive outcome level:</b> '", lr_results$positive_outcome_used, "' ",
                         "<span style='color: #666;'>(", lr_results$outcome_determination_method, ")</span><br>",
                         "<b>Positive predictor level:</b> '", lr_results$positive_predictor_used, "' ",
                         "<span style='color: #666;'>(", lr_results$predictor_determination_method, ")</span><br><br>",
 
-                        "<b>📊 Contingency Table:</b><br>",
+                        "<b> Contingency Table:</b><br>",
                         "<table style='border-collapse: collapse; margin: 5px 0;'>",
                         "<tr><th style='border: 1px solid #ddd; padding: 5px;'></th>",
                         "<th style='border: 1px solid #ddd; padding: 5px;'>", outcome_levels[1], "</th>",
@@ -862,7 +862,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "</table>",
                         "TP: ", lr_results$tp, ", FP: ", lr_results$fp, ", FN: ", lr_results$fn, ", TN: ", lr_results$tn, "<br><br>",
 
-                        "<b>📝 How to Use:</b><br>",
+                        "<b> How to Use:</b><br>",
                         "1. Check that the positive outcome level is correct for your study<br>",
                         "2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>",
                         "3. The nomogram calculations depend on these interpretations being correct<br>",
@@ -978,7 +978,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 predictor_level_warning <- paste0(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Automatic Predictor Level Detection</h4>",
+                    "<h4 style='margin-top: 0; color: #856404;'> Automatic Predictor Level Detection</h4>",
                     "<p><strong>The positive predictor level was automatically detected as: '", positive_predictor_level, "'</strong></p>",
                     "<p>Method: ", predictor_determination_method, "</p>",
                     "<p style='color: #856404;'><strong>Important:</strong> Please verify that '", positive_predictor_level, "' is the correct positive level. ",
@@ -1021,7 +1021,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 recommendation_text <- paste0(
                     "<div style='background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-                    "<b>💡 Statistical Recommendations:</b><br>",
+                    "<b> Statistical Recommendations:</b><br>",
                     paste(recommendations_list, collapse = "<br>"),
                     "</div>"
                 )
@@ -1107,10 +1107,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(fit = fit, dd = dd))
             }, error = function(e) {
                 detailed_error <- paste(
-                    "🔧 Nomogram Preparation Error:",
+                    " Nomogram Preparation Error:",
                     paste("Technical error:", e$message),
                     "",
-                    "💡 Common causes and solutions:",
+                    " Common causes and solutions:",
                     "• Perfect separation: Some variable levels perfectly predict the outcome",
                     "  → Try combining categories or removing problematic variables",
                     "• Convergence issues: Model failed to converge",
@@ -1120,7 +1120,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "• Missing values: Incomplete data after cleaning",
                     "  → Review data preprocessing steps",
                     "",
-                    "🔄 Suggested next steps:",
+                    " Suggested next steps:",
                     "• Check model summary for convergence warnings",
                     "• Review variable distributions for separation issues",
                     "• Consider using fewer explanatory variables",
@@ -1402,10 +1402,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 <p><strong>Requirements:</strong></p>
                 <ul>
-                    <li>✅ Must be <strong>binary</strong> (exactly 2 levels): Yes/No, Present/Absent, Positive/Negative</li>
-                    <li>✅ Examples: Sex (Male/Female), LVI (Absent/Present), Treatment (Control/Treated)</li>
-                    <li>❌ Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li>
-                    <li>❌ Cannot use multi-category: Grade 1/2/3, Stage I/II/III/IV</li>
+                    <li> Must be <strong>binary</strong> (exactly 2 levels): Yes/No, Present/Absent, Positive/Negative</li>
+                    <li> Examples: Sex (Male/Female), LVI (Absent/Present), Treatment (Control/Treated)</li>
+                    <li> Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li>
+                    <li> Cannot use multi-category: Grade 1/2/3, Stage I/II/III/IV</li>
                 </ul>
 
                 <p><strong>Why Binary Only?</strong></p>
@@ -1433,7 +1433,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 </ul>
 
                 <div style="background-color: #d1ecf1; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>💡 Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select
+                    <strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select
                     a binary variable for the diagnostic predictor, or the nomogram will not be generated.
                 </div>
             </div>
@@ -1526,7 +1526,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (min_expected < 5) {
                     assumptions_ok <- FALSE
                     warnings <- append(warnings, paste0(
-                        "⚠️ Small expected cell counts detected (minimum = ", round(min_expected, 2), "). ",
+                        " Small expected cell counts detected (minimum = ", round(min_expected, 2), "). ",
                         "Chi-square assumptions may be violated."
                     ))
                     
@@ -1541,7 +1541,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for very small total sample size
                 if (total_n < 20) {
                     warnings <- append(warnings, paste0(
-                        "⚠️ Very small sample size (n = ", total_n, "). ",
+                        " Very small sample size (n = ", total_n, "). ",
                         "Results should be interpreted with extreme caution."
                     ))
                 }
@@ -1549,7 +1549,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for zero cells
                 if (any(cont_table == 0)) {
                     warnings <- append(warnings, 
-                        "⚠️ Zero cells detected in contingency table. This may affect odds ratio calculation."
+                        " Zero cells detected in contingency table. This may affect odds ratio calculation."
                     )
                 }
             }
@@ -1574,7 +1574,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (current_memory > critical_threshold) {
                 warning(paste0(
-                    "⚠️ Large Dataset Warning: Dataset size is ", round(current_memory, 1), " MB. ",
+                    " Large Dataset Warning: Dataset size is ", round(current_memory, 1), " MB. ",
                     "This may cause performance issues or memory problems during ", operation, ". ",
                     "Consider:\n",
                     "• Working with a representative sample\n",
@@ -1584,7 +1584,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return("critical")
             } else if (current_memory > warning_threshold) {
                 message(paste0(
-                    "ℹ️ Dataset size: ", round(current_memory, 1), " MB. ",
+                    " Dataset size: ", round(current_memory, 1), " MB. ",
                     "Analysis may take longer than usual."
                 ))
                 return("warning")

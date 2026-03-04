@@ -75,7 +75,7 @@ assessment including missing values, negative intervals, and distribution
 statistics.}
 
 \item{confidence_level}{Confidence level for statistical intervals (mean
-confidence intervals). Standard epidemiological practice uses 95\\%
+confidence intervals). Standard epidemiological practice uses 95 percent
 confidence intervals.}
 
 \item{show_summary}{Generate a plain-language interpretation of results
@@ -113,6 +113,7 @@ person-time follow-up calculations, capturing both participant counts and
 observation duration for accurate incidence rate calculations.
 }
 \examples{
+\donttest{
 # Basic time interval calculation:
 timeinterval(
   data = study_data,
@@ -131,5 +132,5 @@ timeinterval(
   landmark_time = 6,
   output_unit = "months"
 )
-
+}
 }

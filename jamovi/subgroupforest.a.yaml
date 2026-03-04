@@ -14,7 +14,7 @@ description:
         Supports survival (time-to-event), binary, and continuous outcomes with
         comprehensive statistical validation and heterogeneity testing.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Survival outcome subgroup analysis
             subgroupforest(
@@ -133,11 +133,11 @@ options:
       title: Confidence Level
       type: List
       options:
-        - title: 95%
+        - title: 95 percent
           name: "0.95"
-        - title: 90%
+        - title: 90 percent
           name: "0.90"
-        - title: 99%
+        - title: 99 percent
           name: "0.99"
       default: "0.95"
       description:

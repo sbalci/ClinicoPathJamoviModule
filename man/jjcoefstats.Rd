@@ -127,6 +127,7 @@ automatic model fitting from raw data. Uses ggstatsplot's ggcoefstats() for
 professional visualization.
 }
 \examples{
+\donttest{
 # Example usage:
 # For pre-computed coefficients:
 # ClinicoPath::jjcoefstats(
@@ -143,5 +144,5 @@ professional visualization.
 #   predictors = vars(height, age, sex),
 #   modelType = "lm"
 # )
-
+}
 }

@@ -15,9 +15,9 @@ description:
         regression techniques, providing an alternative to hazard-based models. Particularly
         useful when interest lies in survival probabilities rather than hazard ratios.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             directregression(
                 elapsedtime = "time_to_event",
                 outcome = "event_status",

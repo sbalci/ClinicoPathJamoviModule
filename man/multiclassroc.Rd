@@ -54,7 +54,7 @@ estimates}
 \item{bootstrap_samples}{number of bootstrap samples for CI calculation}
 
 \item{confidence_level}{confidence level for intervals (default: 0.95 for
-95\\% CI)}
+95 percent CI)}
 
 \item{pairwise_comparisons}{show detailed results for all pairwise class
 comparisons (OvO method)}
@@ -104,6 +104,7 @@ with
 multiple levels, and AI model validation for multi-class predictions.
 }
 \examples{
+\donttest{
 # Example with tumor subtype classification
 data <- data.frame(
   true_class = factor(sample(c("TypeA", "TypeB", "TypeC"), 100, replace=TRUE)),
@@ -120,5 +121,5 @@ multiclassroc(
   calculate_macro_auc = TRUE,
   confidence_intervals = TRUE
 )
-
+}
 }

@@ -213,9 +213,9 @@ options:
           name: se
         - title: Standard Deviation
           name: sd
-        - title: 95% Confidence Interval
+        - title: 95 percent Confidence Interval
           name: ci95
-        - title: 99% Confidence Interval
+        - title: 99 percent Confidence Interval
           name: ci99
         - title: Interquartile Range
           name: iqr

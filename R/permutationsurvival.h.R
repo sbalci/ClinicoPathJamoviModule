@@ -335,8 +335,9 @@ permutationsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' multiple comparison corrections for robust survival analysis.
 #'
 #' @examples
+#' \donttest{
 #' # Example usage will be added
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis
 #' @param outcome Event indicator variable

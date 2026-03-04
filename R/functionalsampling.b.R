@@ -181,9 +181,9 @@ functionalsamplingClass <- R6::R6Class(
             if (self$options$analyze_neighborhoods) {
                 func_table <- self$results$functional_assessment
                 func_table$setRow(rowNo = 1, values = list(
-                    criterion_1 = if (results$criterion_1) "✓ Yes" else "✗ No",
-                    criterion_2 = if (results$criterion_2) "✓ Yes" else "✗ No",
-                    criterion_3 = if (results$criterion_3) "✓ Yes" else "✗ No",
+                    criterion_1 = if (results$criterion_1) " Yes" else " No",
+                    criterion_2 = if (results$criterion_2) " Yes" else " No",
+                    criterion_3 = if (results$criterion_3) " Yes" else " No",
                     conclusion = results$conclusion
                 ))
             }
@@ -275,9 +275,9 @@ their spatial distribution pattern.</p>
 <h4>Clinical Example (from Kayser et al., 2009)</h4>
 <p><strong>Galectin-1 Binding Cells in Lung Carcinoma:</strong></p>
 <ul>
-<li>Frequency: < 5% (rare) ✓</li>
-<li>Mean distance between rare cells: 245 ± 198 μm (high CV = random) ✓</li>
-<li>Distance to nearest neighbors: Consistent (low CV) ✓</li>
+<li>Frequency: < 5% (rare) </li>
+<li>Mean distance between rare cells: 245 ± 198 μm (high CV = random) </li>
+<li>Distance to nearest neighbors: Consistent (low CV) </li>
 <li><strong>Conclusion:</strong> Evidence of regulatory/catalyst function</li>
 <li><strong>Biological validation:</strong> Galectin-1 has growth regulatory and immunomodulatory properties</li>
 </ul>

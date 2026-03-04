@@ -11,9 +11,9 @@ description:
         for clinical laboratory methods. Supports regulatory submissions and laboratory accreditation.
         Essential for establishing method performance characteristics.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             methodvalidation(
                 measurement = "glucose_result",
                 reference_value = "reference_glucose",
@@ -182,7 +182,7 @@ options:
             Source for method acceptance criteria
 
     - name: custom_cv_limit
-      title: Custom CV Limit (%)
+      title: Custom CV Limit ( percent)
       type: Number
       min: 1
       max: 50
@@ -192,7 +192,7 @@ options:
             Custom coefficient of variation acceptance limit
 
     - name: custom_bias_limit
-      title: Custom Bias Limit (%)
+      title: Custom Bias Limit ( percent)
       type: Number
       min: 1
       max: 50

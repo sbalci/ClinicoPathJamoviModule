@@ -6,7 +6,6 @@
 # Generated: 2026-01-05
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(lollipop_test, package = "ClinicoPath", envir = environment())
@@ -18,7 +17,6 @@ data(lollipop_small, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop function exists and runs with minimal arguments", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -30,7 +28,6 @@ test_that("lollipop function exists and runs with minimal arguments", {
 })
 
 test_that("lollipop runs with basic clinical lab data", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -42,7 +39,6 @@ test_that("lollipop runs with basic clinical lab data", {
 })
 
 test_that("lollipop handles treatment comparison data", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_treatment,
@@ -58,7 +54,6 @@ test_that("lollipop handles treatment comparison data", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles different aggregation methods", {
-  devtools::load_all()
 
   # No aggregation
   result_none <- lollipop(
@@ -102,7 +97,6 @@ test_that("lollipop handles different aggregation methods", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles different sort orders", {
-  devtools::load_all()
 
   # Original order
   result_orig <- lollipop(
@@ -146,7 +140,6 @@ test_that("lollipop handles different sort orders", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles vertical and horizontal orientations", {
-  devtools::load_all()
 
   # Vertical orientation
   result_vert <- lollipop(
@@ -172,7 +165,6 @@ test_that("lollipop handles vertical and horizontal orientations", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles showValues option", {
-  devtools::load_all()
 
   result_values <- lollipop(
     data = lollipop_test,
@@ -184,7 +176,6 @@ test_that("lollipop handles showValues option", {
 })
 
 test_that("lollipop handles showMean option", {
-  devtools::load_all()
 
   result_mean <- lollipop(
     data = lollipop_test,
@@ -200,7 +191,6 @@ test_that("lollipop handles showMean option", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles highlighting", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -217,7 +207,6 @@ test_that("lollipop handles highlighting", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles different color schemes", {
-  devtools::load_all()
 
   # Default
   result_default <- lollipop(
@@ -261,7 +250,6 @@ test_that("lollipop handles different color schemes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles different plot themes", {
-  devtools::load_all()
 
   # Default
   result_default <- lollipop(
@@ -305,7 +293,6 @@ test_that("lollipop handles different plot themes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles different line types", {
-  devtools::load_all()
 
   line_types <- c("solid", "dashed", "dotted", "dotdash")
 
@@ -325,7 +312,6 @@ test_that("lollipop handles different line types", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles custom labels and titles", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -343,7 +329,6 @@ test_that("lollipop handles custom labels and titles", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop works with all test datasets", {
-  devtools::load_all()
 
   # lollipop_test
   result1 <- lollipop(

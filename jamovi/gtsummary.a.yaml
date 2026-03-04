@@ -49,7 +49,7 @@ options:
         - name: range
           title: Range (Min, Max)
         - name: n_percent
-          title: N (%)
+          title: N ( percent)
         - name: missing
           title: Missing values
       default: [ mean_sd, median_iqr, n_percent ]

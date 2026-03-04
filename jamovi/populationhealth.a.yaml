@@ -14,7 +14,7 @@ description:
         system optimization through evidence-based population health insights.
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('population_health', package='ClinicoPath')
             

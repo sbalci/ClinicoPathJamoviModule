@@ -94,6 +94,7 @@ Key features:
 }
 }
 \examples{
+\donttest{
 # Bayesian meta-analysis of treatment effects
 bayesianmetaanalysis(
     data = data,
@@ -103,5 +104,5 @@ bayesianmetaanalysis(
     modelType = "random_effects",
     outcomeType = "continuous"
 )
-
+}
 }

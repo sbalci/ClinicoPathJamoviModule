@@ -1048,6 +1048,7 @@ qtwistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Load example data
 #' data("qtwist_breast_cancer")
 #'
@@ -1084,7 +1085,7 @@ qtwistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     plot_partitioned_survival = TRUE,
 #'     plot_sensitivity = TRUE
 #' )
-#'
+#'}
 #' @param data Dataset containing overall survival, progression-free survival,
 #'   and toxicity information.
 #' @param time_os Time to death or censoring in consistent units (months
@@ -1156,7 +1157,7 @@ qtwistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   preference changes. Identifies "break-even" points for clinical
 #'   decision-making.
 #' @param confidence_level Confidence level for interval estimation (default:
-#'   0.95 for 95\% CI).
+#'   0.95 for 95 percent CI).
 #' @param bootstrap_ci Use bootstrap resampling to calculate confidence
 #'   intervals for Q-TWiST treatment differences. Recommended for robust
 #'   inference.

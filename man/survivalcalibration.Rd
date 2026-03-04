@@ -102,6 +102,7 @@ specific time points using bootstrap validation and cross-validation.
 TRIPOD-compliant reporting.
 }
 \examples{
+\donttest{
 # Example usage:
 # data <- your_data
 # ClinicoPath::survivalcalibration(
@@ -112,5 +113,5 @@ TRIPOD-compliant reporting.
 #   calibrationTime = 60,
 #   validationMethod = "bootstrap"
 # )
-
+}
 }

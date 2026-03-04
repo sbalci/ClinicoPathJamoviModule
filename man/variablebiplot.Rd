@@ -118,6 +118,7 @@ Data Mining's contribution analysis, adapted for clinical research with
 comprehensive variable importance metrics.
 }
 \examples{
+\donttest{
 # Example: PCA biplot for tumor staging
 variablebiplot(
     data = clinical_data,
@@ -127,5 +128,5 @@ variablebiplot(
     showLoadings = TRUE,
     topContributors = 10
 )
-
+}
 }

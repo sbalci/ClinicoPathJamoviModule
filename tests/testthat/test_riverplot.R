@@ -1,7 +1,6 @@
 context("riverplot")
 
 test_that("riverplot works", {
-  devtools::load_all()
   library(ggplot2)
   library(ggalluvial)
   library(dplyr)

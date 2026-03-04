@@ -915,6 +915,7 @@ bayesianclinicalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinical_data')
 #'
 #' bayesianclinical(
@@ -923,7 +924,7 @@ bayesianclinicalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'     treatment_var = "treatment_group",
 #'     covariates = c("age", "severity", "comorbidity")
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome_var Primary clinical outcome of interest
 #' @param treatment_var Treatment group or intervention variable

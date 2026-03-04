@@ -1,6 +1,5 @@
 test_that("tidydensity function exists and basic functionality works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test function existence
   expect_true(exists("tidydensity"))

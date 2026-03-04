@@ -18,7 +18,7 @@ description:
         multiple levels, and AI model validation for multi-class predictions.
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example with tumor subtype classification
             data <- data.frame(
@@ -147,7 +147,7 @@ options:
       default: 0.95
       description:
           R: >
-            confidence level for intervals (default: 0.95 for 95% CI)
+            confidence level for intervals (default: 0.95 for 95 percent CI)
 
     - name: pairwise_comparisons
       title: Show All Pairwise Comparisons

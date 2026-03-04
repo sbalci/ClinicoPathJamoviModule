@@ -18,7 +18,7 @@
 \describe{
 \item{patient_id}{Character. Patient identifier (PT001-PT150)}
 \item{time}{Numeric. Survival time in months (exponential distribution, mean ~20)}
-\item{event}{Factor. Event indicator (0 = censored, 1 = death/event). Event rate ~60\\%}
+\item{event}{Factor. Event indicator (0 = censored, 1 = death/event). Event rate ~60\%}
 \item{age}{Numeric. Patient age in years (40-80)}
 \item{sex}{Factor. Patient sex (Male, Female)}
 \item{ypTNM}{Ordered factor. Post-neoadjuvant pathological staging (I, II, III, IV)}
@@ -40,7 +40,7 @@
 \describe{
 \item{patient_id}{Character. Patient identifier (LG001-LG300)}
 \item{time}{Numeric. Survival time in months}
-\item{event}{Factor. Event indicator (0, 1). Event rate ~55\\%}
+\item{event}{Factor. Event indicator (0, 1). Event rate ~55\%}
 \item{age}{Numeric. Patient age in years}
 \item{sex}{Factor. Patient sex}
 \item{AJCC8}{Ordered factor. AJCC 8th edition staging (IA, IB, IIA, IIB, IIIA, IIIB, IIIC, IV)}
@@ -73,7 +73,7 @@ following characteristics:
 
 \itemize{
 \item Survival times follow exponential distribution
-\item Event rates are clinically realistic (55-65\\%)
+\item Event rates are clinically realistic (55-65\%)
 \item Prognostic correlations built in (advanced stage → shorter survival)
 \item Both systems have predictive value but differ in discrimination
 \item Sufficient events per variable (EPV > 10) for Cox models
@@ -176,7 +176,7 @@ The datasets support testing of:
 All datasets have been validated for:
 \itemize{
 \item Non-negative survival times
-\item Appropriate event rates (55-65\\%)
+\item Appropriate event rates (55-65\%)
 \item Stage-survival correlation (advanced stage → worse prognosis)
 \item Sufficient EPV (events per variable > 10) for Cox models
 \item Realistic clinical distributions

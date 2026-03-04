@@ -167,10 +167,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
               # Map notice types to colors and icons
               typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
-                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
-                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
               )
 
               html <- "<div style='margin: 10px 0;'>"
@@ -1318,7 +1318,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 df = NA,
                                 p = NA,
                                 interpretation = sprintf(
-                                    "⚠️ Could not calculate: %s. Check that all tests have valid paired data.",
+                                    " Could not calculate: %s. Check that all tests have valid paired data.",
                                     error_msg
                                 )
                             )
@@ -1327,7 +1327,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         # Add warning footnote
                         mcnemarTable$setNote(
                             "Cochran's Q test failed. Pairwise comparisons may still be valid but should be interpreted cautiously.",
-                            symbol = "⚠"
+                            symbol = ""
                         )
                     }
                 )
@@ -1446,7 +1446,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 rowKey = comparison_name,
                                 col = "p",
                                 sprintf(
-                                    "⚠️ Small number of discordant pairs (n=%d). Results may be unreliable (recommend n≥%d).",
+                                    " Small number of discordant pairs (n=%d). Results may be unreliable (recommend n≥%d).",
                                     n_discordant, private$MIN_DISCORDANT_PAIRS
                                 )
                             )
@@ -1765,9 +1765,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Create comprehensive HTML report
                 report_html <- paste0(
                     '<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">',
-                    '<h2 style="color: #2c3e50; border-bottom: 2px solid #3498db;">📋 Clinical Summary</h2>',
+                    '<h2 style="color: #2c3e50; border-bottom: 2px solid #3498db;"> Clinical Summary</h2>',
                     results_section,
-                    '<h3 style="color: #27ae60; margin-top: 30px;">📝 Report Sentences</h3>',
+                    '<h3 style="color: #27ae60; margin-top: 30px;"> Report Sentences</h3>',
                     '<div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;">',
                     '<h4 style="margin-top: 0;">Methods Section:</h4>',
                     '<p style="font-style: italic; line-height: 1.6;">', methods_section, "</p>",
@@ -1776,7 +1776,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     '<h4 style="margin-top: 0;">Results Section:</h4>',
                     '<p style="font-style: italic; line-height: 1.6;">', results_section, "</p>",
                     "</div>",
-                    '<h3 style="color: #8e44ad; margin-top: 30px;">💡 Clinical Recommendations</h3>',
+                    '<h3 style="color: #8e44ad; margin-top: 30px;"> Clinical Recommendations</h3>',
                     clinical_recommendations,
                     "</div>"
                 )
@@ -1894,11 +1894,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 about_html <- paste0(
                     '<div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px;">',
                     '<h2 style="color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;">',
-                    "🔬 About Medical Decision Test Comparison</h2>",
+                    " About Medical Decision Test Comparison</h2>",
 
                     # What This Analysis Does
                     '<div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 10px; margin: 20px 0;">',
-                    '<h3 style="color: #1565c0; margin-top: 0;">📊 What This Analysis Does</h3>',
+                    '<h3 style="color: #1565c0; margin-top: 0;"> What This Analysis Does</h3>',
                     '<p style="line-height: 1.6; color: #333;">',
                     "This tool compares the diagnostic performance of multiple medical tests against a gold standard reference. ",
                     "It systematically evaluates sensitivity, specificity, predictive values, likelihood ratios, and overall accuracy ",
@@ -1908,7 +1908,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     # When to Use
                     '<div style="background-color: #f1f8e9; border: 1px solid #8bc34a; padding: 20px; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #4a7c59; margin-top: 0;">🎯 When to Use This Analysis</h3>',
+                    '<h3 style="color: #4a7c59; margin-top: 0;"> When to Use This Analysis</h3>',
                     '<ul style="line-height: 1.8; color: #4a7c59;">',
                     "<li><strong>Test Validation:</strong> Comparing new diagnostic methods against established standards</li>",
                     "<li><strong>Method Comparison:</strong> Evaluating which of several tests performs better</li>",
@@ -1920,7 +1920,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     # How to Use
                     '<div style="background-color: #fff3e0; border: 1px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #e65100; margin-top: 0;">📝 How to Use This Analysis</h3>',
+                    '<h3 style="color: #e65100; margin-top: 0;"> How to Use This Analysis</h3>',
                     '<ol style="line-height: 1.8; color: #e65100;">',
                     "<li><strong>Select Gold Standard:</strong> Choose your most reliable reference test (e.g., biopsy, expert consensus)</li>",
                     "<li><strong>Choose Tests to Compare:</strong> Select 2-3 diagnostic tests you want to evaluate</li>",
@@ -1933,7 +1933,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     # Key Metrics Explained
                     '<div style="background-color: #f3e5f5; border: 1px solid #9c27b0; padding: 20px; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #6a1b9a; margin-top: 0;">📈 Key Metrics Explained</h3>',
+                    '<h3 style="color: #6a1b9a; margin-top: 0;"> Key Metrics Explained</h3>',
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #6a1b9a;">',
                     "<div>",
                     "<p><strong>Sensitivity:</strong> Probability test is positive when disease present (rule-out ability)</p>",
@@ -1952,7 +1952,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     # Clinical Guidelines
                     '<div style="background-color: #e8f5e8; border: 1px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #2e7d32; margin-top: 0;">⚕️ Clinical Interpretation Guidelines</h3>',
+                    '<h3 style="color: #2e7d32; margin-top: 0;"> Clinical Interpretation Guidelines</h3>',
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #2e7d32;">',
                     "<div>",
                     '<h4 style="margin-bottom: 5px;">Screening Tests (Rule-Out):</h4>',
@@ -1967,7 +1967,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     # Assumptions and Limitations
                     '<div style="background-color: #fff8e1; border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">',
-                    '<h3 style="color: #f57f17; margin-top: 0;">⚠️ Important Assumptions & Limitations</h3>',
+                    '<h3 style="color: #f57f17; margin-top: 0;"> Important Assumptions & Limitations</h3>',
                     '<ul style="line-height: 1.6; color: #f57f17;">',
                     "<li><strong>Gold Standard:</strong> Assumes your reference test is truly accurate</li>",
                     "<li><strong>Sample Size:</strong> Results more reliable with larger, representative samples</li>",
@@ -2158,7 +2158,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 test_names <- names(test_results)
 
                 html <- "<div style='background-color:#f9f9f9; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>"
-                html <- paste0(html, "<h4 style='margin-top:0;'>📊 Summary</h4>")
+                html <- paste0(html, "<h4 style='margin-top:0;'> Summary</h4>")
 
                 if (n_tests == 3) {
                     # Check if Cochran's Q was performed
@@ -2254,7 +2254,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 test_names <- names(test_results)
 
                 html <- "<div style='background-color:#f0f0f0; padding:15px; border:1px solid #ccc; margin:10px 0;'>"
-                html <- paste0(html, "<h4 style='margin-top:0;'>📝 Manuscript-Ready Report</h4>")
+                html <- paste0(html, "<h4 style='margin-top:0;'> Manuscript-Ready Report</h4>")
                 html <- paste0(
                     html, "<p style='font-size:10pt; color:#666; margin-bottom:10px;'>",
                     "Copy and adapt to your manuscript. Verify all statistical values and add clinical context.</p>"
@@ -2338,7 +2338,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 html <- "<div style='font-family: Arial, sans-serif; line-height:1.6;'>"
 
                 # Glossary section
-                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db;'>📚 Statistical Glossary</h4>")
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db;'> Statistical Glossary</h4>")
                 html <- paste0(html, "<dl style='margin-left:15px;'>")
 
                 html <- paste0(
@@ -2392,7 +2392,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "</dl>")
 
                 # Assumptions section
-                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db; margin-top:25px;'>⚙️ Assumptions & Requirements</h4>")
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db; margin-top:25px;'> Assumptions & Requirements</h4>")
                 html <- paste0(html, "<ul style='margin-left:15px;'>")
                 html <- paste0(
                     html,
@@ -2405,7 +2405,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "</ul>")
 
                 # When to use section
-                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db; margin-top:25px;'>🎯 When to Use This Analysis</h4>")
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #3498db; margin-top:25px;'> When to Use This Analysis</h4>")
                 html <- paste0(html, "<ul style='margin-left:15px;'>")
                 html <- paste0(
                     html,
@@ -2417,7 +2417,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "</ul>")
 
                 # Limitations section
-                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #e74c3c; margin-top:25px;'>⚠️ Limitations</h4>")
+                html <- paste0(html, "<h4 style='color:#2c3e50; border-bottom:2px solid #e74c3c; margin-top:25px;'> Limitations</h4>")
                 html <- paste0(html, "<ul style='margin-left:15px; color:#c0392b;'>")
                 html <- paste0(
                     html,

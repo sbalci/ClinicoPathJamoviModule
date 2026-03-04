@@ -522,6 +522,7 @@ treemedicalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example for cancer diagnosis
 #' data(cancer_data)
 #' treemedical(
@@ -533,7 +534,7 @@ treemedicalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     validation = "cv",
 #'     show_tree_plot = TRUE
 #' )
-#'
+#'}
 #' @param data The data as a data frame containing clinical variables and
 #'   outcomes.
 #' @param vars Continuous variables such as biomarker levels, age,  laboratory

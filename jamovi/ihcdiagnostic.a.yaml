@@ -12,9 +12,9 @@ description:
         Diagnostic performance analysis and clinical classification using IHC markers.
         Designed for differential diagnosis and antibody panel optimization.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             ihcdiagnostic(
                 markers = c("ER", "PR", "HER2", "Ki67"),
                 diagnosis = "tumor_type",
@@ -132,7 +132,7 @@ options:
       default: 0.95
       description:
           R: >
-            Confidence level for performance metrics (0.95 = 95% confidence intervals).
+            Confidence level for performance metrics (0.95 = 95 percent confidence intervals).
             Higher values give wider, more conservative intervals.
 
     - name: crossValidation

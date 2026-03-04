@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("statsplot2 handles all distribution types", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -25,7 +24,6 @@ test_that("statsplot2 handles all distribution types", {
 })
 
 test_that("statsplot2 handles all direction types", {
-  devtools::load_all()
 
   data(statsplot2_test)
   data(statsplot2_repeated)
@@ -50,7 +48,6 @@ test_that("statsplot2 handles all direction types", {
 })
 
 test_that("statsplot2 handles plot type combinations", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -80,7 +77,6 @@ test_that("statsplot2 handles plot type combinations", {
 })
 
 test_that("statsplot2 handles split-by variable combinations", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -100,7 +96,6 @@ test_that("statsplot2 handles split-by variable combinations", {
 })
 
 test_that("statsplot2 handles label customizations", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -136,7 +131,6 @@ test_that("statsplot2 handles label customizations", {
 })
 
 test_that("statsplot2 handles repeated measures with split variable", {
-  devtools::load_all()
 
   data(statsplot2_repeated)
 
@@ -153,7 +147,6 @@ test_that("statsplot2 handles repeated measures with split variable", {
 })
 
 test_that("statsplot2 handles comprehensive parameter combinations", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -174,7 +167,6 @@ test_that("statsplot2 handles comprehensive parameter combinations", {
 })
 
 test_that("statsplot2 handles different continuous outcomes", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -195,7 +187,6 @@ test_that("statsplot2 handles different continuous outcomes", {
 })
 
 test_that("statsplot2 handles different categorical outcomes", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -220,7 +211,6 @@ test_that("statsplot2 handles different categorical outcomes", {
 })
 
 test_that("statsplot2 handles different grouping variables", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -239,7 +229,6 @@ test_that("statsplot2 handles different grouping variables", {
 })
 
 test_that("statsplot2 handles NULL optional parameters", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -258,7 +247,6 @@ test_that("statsplot2 handles NULL optional parameters", {
 })
 
 test_that("statsplot2 handles factor vs character variables", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -285,7 +273,6 @@ test_that("statsplot2 handles factor vs character variables", {
 })
 
 test_that("statsplot2 handles multiple special datasets", {
-  devtools::load_all()
 
   # Clinical trial data
   data(statsplot2_clinical)

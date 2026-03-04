@@ -95,9 +95,9 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             stop(paste0(
                                 "X variable '", self$options$xvar, "' is numeric (", n_unique, " unique values) but ",
                                 self$options$plotType, " requires a categorical variable.\n\n",
-                                "⚠️ WARNING: Using numeric IDs (e.g., patient IDs) as categorical groups produces ",
+                                " WARNING: Using numeric IDs (e.g., patient IDs) as categorical groups produces ",
                                 "meaningless statistical comparisons.\n\n",
-                                "💡 Solution: Convert numeric codes to factors or select a proper grouping variable ",
+                                " Solution: Convert numeric codes to factors or select a proper grouping variable ",
                                 "(e.g., treatment group, disease stage)."
                             ))
                         }
@@ -126,7 +126,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 " (must be numeric).
 
 ",
-                                "💡 Solution: Select continuous numeric variables for both axes."
+                                " Solution: Select continuous numeric variables for both axes."
                             ))
                         }
                         stop(paste0(
@@ -134,7 +134,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             self$options$plotType, " plots. Current type: ", class(y_data)[1], "
 
 ",
-                            "💡 Solution: Select a continuous numeric variable (e.g., biomarker level, ",
+                            " Solution: Select a continuous numeric variable (e.g., biomarker level, ",
                             "measurement value, score)."
                         ))
                     }
@@ -149,7 +149,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "X variable '", self$options$xvar, "' is ", class(x_data)[1], " (must be numeric).
 
 ",
-                            "💡 Solution: Select continuous numeric variables for both axes."
+                            " Solution: Select continuous numeric variables for both axes."
                         ))
                     }
                 }
@@ -177,7 +177,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(paste0(
                     "<div style='padding: 20px; background: #fff3cd; border: 2px solid #ff6b6b;'>",
-                    "<h3>❌ Data Validation Error</h3>",
+                    "<h3> Data Validation Error</h3>",
                     "<p><strong>", e$message, "</strong></p>",
                     "</div>"))
                 stop(e)
@@ -1258,7 +1258,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             summary_html <- paste0(
                 "<div style='padding: 15px; background: linear-gradient(to right, #f0f8ff, #e6f3ff); border-left: 4px solid #4CAF50; border-radius: 4px;'>",
-                "<h4 style='margin-top: 0; color: #2c3e50;'>📊 Analysis Summary</h4>",
+                "<h4 style='margin-top: 0; color: #2c3e50;'> Analysis Summary</h4>",
                 "<p>", omnibus_text, pairwise_text, effect_text, "</p>",
                 "<p style='margin-bottom: 0;'><em style='color: #555;'>", clinical_text, "</em></p>",
                 "</div>"
@@ -1292,7 +1292,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateWelcomeMessage = function() {
             paste0(
                 "<div style='padding: 20px; background: #f9f9f9; border: 1px solid #ddd;'>",
-                "<h3>📊 Welcome to ggpubr Plots!</h3>",
+                "<h3> Welcome to ggpubr Plots!</h3>",
                 "<p>Create publication-ready visualizations using the ggpubr package.</p>",
                 "<h4>Getting Started:</h4>",
                 "<ol>",
@@ -1309,7 +1309,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li><strong>Density Plot:</strong> Smooth distribution</li>",
                 "</ul>",
                 "<p style='margin-top: 15px; color: #666;'>",
-                "<em>💡 Tip: Enable 'Add statistical comparisons' for automatic p-values!</em>",
+                "<em> Tip: Enable 'Add statistical comparisons' for automatic p-values!</em>",
                 "</p></div>")
         },
 

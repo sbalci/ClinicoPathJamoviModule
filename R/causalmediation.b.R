@@ -35,7 +35,7 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             <li><b>Methods:</b> Regression-based, IORW, MSM</li>
             </ul>
 
-            <h4>Tier 3: HIGH-DIMENSIONAL Mediation (hdmax2) 🌟 FLAGSHIP</h4>
+            <h4>Tier 3: HIGH-DIMENSIONAL Mediation (hdmax2)  FLAGSHIP</h4>
             <ul>
             <li><b>Use when:</b> Omics-scale mediators (thousands to millions)</li>
             <li><b>Provides:</b> Automatic mediator selection, FDR control</li>
@@ -132,7 +132,7 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             info <- switch(tier,
                 "basic" = "<b>Selected:</b> Tier 1 - Basic Mediation\n<b>Package:</b> mediation\n<b>Best for:</b> Single mediator analysis",
                 "comprehensive" = "<b>Selected:</b> Tier 2 - Comprehensive Mediation\n<b>Package:</b> CMAverse\n<b>Best for:</b> Multiple mediators with DAG",
-                "hd" = "<b>Selected:</b> Tier 3 - HIGH-DIMENSIONAL Mediation 🌟\n<b>Package:</b> hdmax2\n<b>Best for:</b> Omics-scale mediators",
+                "hd" = "<b>Selected:</b> Tier 3 - HIGH-DIMENSIONAL Mediation \n<b>Package:</b> hdmax2\n<b>Best for:</b> Omics-scale mediators",
                 "Unknown tier"
             )
 
@@ -307,12 +307,12 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             info_html <- paste0(info_html, "<p><b>Confidence Level:</b> ", self$options$conf_level * 100, "%</p>")
 
             if (acme_p < 0.05) {
-                info_html <- paste0(info_html, "<p><b>✅ Significant mediation effect detected</b></p>")
+                info_html <- paste0(info_html, "<p><b> Significant mediation effect detected</b></p>")
                 info_html <- paste0(info_html, "<p>The mediator explains approximately ",
                                   round(abs(prop_med) * 100, 1),
                                   "% of the total effect.</p>")
             } else {
-                info_html <- paste0(info_html, "<p><b>❌ No significant mediation effect</b></p>")
+                info_html <- paste0(info_html, "<p><b> No significant mediation effect</b></p>")
             }
 
             self$results$modelInfo$setContent(info_html)
@@ -441,7 +441,7 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }
 
                 # Summary
-                summary_html <- "<h4>HIGH-DIMENSIONAL Mediation Results 🌟</h4>"
+                summary_html <- "<h4>HIGH-DIMENSIONAL Mediation Results </h4>"
                 summary_html <- paste0(summary_html, "<p><b>Total Mediators Tested:</b> ", length(mediator_names), "</p>")
                 summary_html <- paste0(summary_html, "<p><b>Significant Mediators (FDR < ", self$options$hd_fdr_threshold, "):</b> ", n_sig, "</p>")
                 summary_html <- paste0(summary_html, "<p><b>Top ", top_n, " Mediators Displayed</b></p>")
@@ -455,7 +455,7 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 summary_html <- paste0(summary_html, "</ul>")
 
                 if (n_sig > 0) {
-                    summary_html <- paste0(summary_html, "<p><b>✅ HIGH-DIMENSIONAL mediation pathway identified!</b></p>")
+                    summary_html <- paste0(summary_html, "<p><b> HIGH-DIMENSIONAL mediation pathway identified!</b></p>")
                 } else {
                     summary_html <- paste0(summary_html, "<p><b>No significant mediators detected at FDR threshold</b></p>")
                 }

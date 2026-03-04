@@ -1,10 +1,8 @@
 # Load required libraries and data
-devtools::load_all()
 data(histopathology, package = "ClinicoPath")
 
 test_that("contTables module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("contTablesClass"))
   expect_true(is.function(contTables))
 })

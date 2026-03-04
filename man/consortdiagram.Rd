@@ -114,10 +114,11 @@ Follows the approach described by Riinu Ots
 (https://www.riinu.me/2024/02/consort/).
 }
 \examples{
+\donttest{
 # Prepare data with exclusion columns
 # Each row = one participant
 # Non-NA values in exclusion columns indicate exclusion at that stage
 # Example:
 # data with columns: id, age_exclusion, consent_exclusion, randomization_arm
-
+}
 }

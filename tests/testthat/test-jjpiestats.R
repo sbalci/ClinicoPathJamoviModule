@@ -1,6 +1,5 @@
 test_that("jjpiestats works with basic pie chart", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Load test data with categorical variables
   data(iris)
   

@@ -387,6 +387,7 @@ bayesianmetaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Bayesian meta-analysis of treatment effects
 #' bayesianmetaanalysis(
 #'     data = data,
@@ -396,7 +397,7 @@ bayesianmetaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #'     modelType = "random_effects",
 #'     outcomeType = "continuous"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param effectSize the effect size variable (e.g., mean difference, log odds
 #'   ratio)

@@ -9,13 +9,13 @@
 #' \describe{
 #'   \item{patient_id}{Character. Patient identifier (PT001-PT200)}
 #'   \item{time}{Numeric. Survival time in months (range: 0.5-120, mean ~36)}
-#'   \item{event}{Factor. Event indicator (0 = censored, 1 = death/event). Event rate ~65\%}
+#'   \item{event}{Factor. Event indicator (0 = censored, 1 = death/event). Event rate ~65%}
 #'   \item{age}{Numeric. Patient age in years (40-85, mean ~65)}
 #'   \item{stage}{Ordered factor. Tumor stage (I, II, III, IV)}
 #'   \item{grade}{Ordered factor. Tumor grade (G1, G2, G3)}
 #'   \item{LVI}{Factor. Lymphovascular invasion (Absent, Present)}
 #'   \item{tumor_size}{Numeric. Tumor size in centimeters (0.5-10)}
-#'   \item{ki67}{Numeric. Ki-67 proliferation index, percentage (0-100). ~3\% missing}
+#'   \item{ki67}{Numeric. Ki-67 proliferation index, percentage (0-100). ~3% missing}
 #'   \item{performance_status}{Ordered factor. ECOG performance status (0, 1, 2)}
 #'   \item{treatment}{Factor. Treatment modality (Surgery only, Surgery + Chemo, Surgery + Radio, Trimodal)}
 #' }
@@ -34,7 +34,7 @@
 #' \describe{
 #'   \item{patient_id}{Character. Patient identifier (LG0001-LG0500)}
 #'   \item{time}{Numeric. Survival time in months}
-#'   \item{event}{Factor. Event indicator (0, 1). Event rate ~70\%}
+#'   \item{event}{Factor. Event indicator (0, 1). Event rate ~70%}
 #'   \item{age}{Numeric. Patient age in years}
 #'   \item{stage}{Ordered factor. Detailed tumor stage (IA, IB, IIA, IIB, IIIA, IIIB, IV)}
 #'   \item{grade}{Ordered factor. Tumor grade (1, 2, 3)}
@@ -60,9 +60,9 @@
 #'
 #' \itemize{
 #'   \item Survival times follow exponential distribution
-#'   \item Event rates are clinically realistic (60-70\%)
+#'   \item Event rates are clinically realistic (60-70%)
 #'   \item Prognostic correlations built in (Stage IV → shorter survival)
-#'   \item Missing data pattern (~3\% in continuous biomarkers)
+#'   \item Missing data pattern (~3% in continuous biomarkers)
 #'   \item Events-per-variable (EPV) ratio > 10 for all datasets
 #' }
 #'
@@ -128,7 +128,7 @@
 #'   \item \strong{Complex trees}: Use \code{rpasurvival_large} with maxdepth=5
 #'   \item \strong{Event coding}: Test TRUE/FALSE and 1/2 coding schemes
 #'   \item \strong{Time units}: Test days, months, years with time_unit parameter
-#'   \item \strong{Missing data}: Verify handling of ~3\% missing values
+#'   \item \strong{Missing data}: Verify handling of ~3% missing values
 #'   \item \strong{Mixed predictors}: Continuous, ordinal, and nominal variables
 #' }
 #'

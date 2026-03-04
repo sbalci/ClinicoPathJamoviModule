@@ -45,10 +45,10 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             )
 
             icon <- switch(type,
-                "ERROR" = "❌",
-                "STRONG_WARNING" = "⚠️",
-                "WARNING" = "⚠️",
-                "INFO" = "ℹ️",
+                "ERROR" = "",
+                "STRONG_WARNING" = "",
+                "WARNING" = "",
+                "INFO" = "",
                 "•"
             )
 
@@ -1021,7 +1021,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             summary_html <- paste0(
                 "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
-                "<h4>📝 Plain Language Summary</h4>",
+                "<h4> Plain Language Summary</h4>",
                 "<p style='font-size: 14px; line-height: 1.6;'>", summary_text, "</p>",
                 "<p style='font-size: 12px; color: #666; margin-top: 15px;'><em>This summary is suitable for copying into pathology reports, research manuscripts, or presentations. It provides key findings in accessible language without technical jargon.</em></p>",
                 "</div>"
@@ -1034,7 +1034,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # FIX 4: Generate educational content explaining the analysis
             explanations_html <- paste0(
                 "<div style='background-color: #f0f4ff; padding: 20px; border-radius: 8px; border-left: 5px solid #2196f3;'>",
-                "<h3>📚 About This Analysis: Agreement Analysis for Digital Pathology</h3>",
+                "<h3> About This Analysis: Agreement Analysis for Digital Pathology</h3>",
 
                 "<h4>What This Analysis Does:</h4>",
                 "<p>Agreement analysis evaluates whether two (or more) measurement methods produce consistent results on the same samples. ",
@@ -1059,7 +1059,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
                 "<h4>How to Interpret Results:</h4>",
 
-                "<p><strong>🔵 ICC (Intraclass Correlation Coefficient):</strong></p>",
+                "<p><strong> ICC (Intraclass Correlation Coefficient):</strong></p>",
                 "<ul>",
                 "<li><strong>Excellent (≥0.90):</strong> Methods can be used interchangeably without concern</li>",
                 "<li><strong>Good (0.75-0.89):</strong> Methods are suitable for most clinical applications</li>",
@@ -1067,14 +1067,14 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "<li><strong>Poor (<0.50):</strong> Methods should not be used interchangeably</li>",
                 "</ul>",
 
-                "<p><strong>🟢 Bland-Altman Plot:</strong></p>",
+                "<p><strong> Bland-Altman Plot:</strong></p>",
                 "<ul>",
                 "<li><strong>Mean Difference (Bias):</strong> Average difference between methods. Zero indicates no systematic bias.</li>",
                 "<li><strong>Limits of Agreement (LoA):</strong> 95% of differences fall within these limits. Narrow limits indicate good agreement.</li>",
                 "<li><strong>Proportional Bias:</strong> If differences increase with magnitude (sloped pattern), disagreement varies across measurement range</li>",
                 "</ul>",
 
-                "<p><strong>🟣 Correlation vs Agreement:</strong></p>",
+                "<p><strong> Correlation vs Agreement:</strong></p>",
                 "<ul>",
                 "<li><strong>Correlation (Spearman/Pearson):</strong> Measures strength of linear relationship. Can be high even if methods systematically differ by a constant.</li>",
                 "<li><strong>Agreement (ICC/CCC):</strong> Measures actual concordance. Requires methods to give similar <em>absolute</em> values, not just similar ranking.</li>",
@@ -1083,11 +1083,11 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
                 "<h4>Common Pitfalls to Avoid:</h4>",
                 "<ul>",
-                "<li>❌ Using correlation alone to assess agreement (correlation ≠ agreement)</li>",
-                "<li>❌ Ignoring Bland-Altman plots (visual inspection reveals patterns missed by statistics)</li>",
-                "<li>❌ Relying on small samples (n<30) for validation studies</li>",
-                "<li>❌ Comparing methods across different ranges (e.g., one method only in high values)</li>",
-                "<li>❌ Assuming statistical significance equals clinical significance (always consider clinical context)</li>",
+                "<li> Using correlation alone to assess agreement (correlation ≠ agreement)</li>",
+                "<li> Ignoring Bland-Altman plots (visual inspection reveals patterns missed by statistics)</li>",
+                "<li> Relying on small samples (n<30) for validation studies</li>",
+                "<li> Comparing methods across different ranges (e.g., one method only in high values)</li>",
+                "<li> Assuming statistical significance equals clinical significance (always consider clinical context)</li>",
                 "</ul>",
 
                 "<h4>Recommended Reading:</h4>",
@@ -1099,7 +1099,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "</ul>",
 
                 "<p style='margin-top: 20px; padding: 15px; background-color: white; border-radius: 5px;'>",
-                "<strong>💡 Pro Tip:</strong> When reporting agreement analysis, always include: (1) ICC with 95% CI, (2) Bland-Altman mean difference and LoA, ",
+                "<strong> Pro Tip:</strong> When reporting agreement analysis, always include: (1) ICC with 95% CI, (2) Bland-Altman mean difference and LoA, ",
                 "(3) visual Bland-Altman plot, and (4) clinical interpretation of agreement magnitude in context of your application.",
                 "</p>",
 
@@ -1186,7 +1186,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             report_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4>📋 Copy-Ready Report Sentences</h4>",
+                "<h4> Copy-Ready Report Sentences</h4>",
                 "<div style='font-family: monospace; background-color: white; padding: 12px; border: 1px solid #ddd; border-radius: 3px; margin: 8px 0;'>",
                 "<strong>Methods:</strong><br>", methods_sentence,
                 "</div>",
@@ -1206,7 +1206,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         .generateStatisticalGlossary = function() {
             glossary_html <- paste0(
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
-                "<h4>📚 Statistical Terms Glossary</h4>",
+                "<h4> Statistical Terms Glossary</h4>",
                 "<div style='margin: 10px 0;'>",
 
                 "<p><strong>ICC (Intraclass Correlation Coefficient):</strong> Measures reliability and agreement between measurement methods. ",
@@ -1254,7 +1254,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             guide_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745;'>",
-                "<h4>🎯 ICC Selection Guide</h4>",
+                "<h4> ICC Selection Guide</h4>",
 
                 "<div style='margin: 15px 0;'>",
                 "<h5>Current Selection: <span style='color: #007bff; font-weight: bold;'>",
@@ -1262,9 +1262,9 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "</div>",
 
                 "<div style='background-color: white; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
-                "<h5>📊 When to Use Each Type:</h5>",
+                "<h5> When to Use Each Type:</h5>",
 
-                "<p><strong>🟢 Consistency (ICC 3,1) - Recommended for most studies:</strong></p>",
+                "<p><strong> Consistency (ICC 3,1) - Recommended for most studies:</strong></p>",
                 "<ul>",
                 "<li><strong>Biomarker Scoring:</strong> Ki67 proliferation index, ER/PR scoring, HER2 assessment</li>",
                 "<li><strong>Platform Comparison:</strong> HALO vs Aiforia vs ImageJ measurements</li>",
@@ -1272,7 +1272,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "<li><strong>Research Question:</strong> 'Do methods rank samples similarly?'</li>",
                 "</ul>",
 
-                "<p><strong>🟡 Absolute Agreement (ICC 2,1) - Use for exact concordance:</strong></p>",
+                "<p><strong> Absolute Agreement (ICC 2,1) - Use for exact concordance:</strong></p>",
                 "<ul>",
                 "<li><strong>Reference Range Validation:</strong> Establishing interchangeable cutoffs</li>",
                 "<li><strong>Method Substitution:</strong> When exact numerical agreement is critical</li>",
@@ -1282,12 +1282,12 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "</div>",
 
                 "<div style='background-color: #f8f9fa; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
-                "<h5>🏥 Clinical Preset Guidance:</h5>",
+                "<h5> Clinical Preset Guidance:</h5>",
                 "<p>", preset_recommendation, "</p>",
                 "</div>",
 
                 "<div style='background-color: #fff3cd; padding: 12px; border-radius: 3px; margin: 10px 0;'>",
-                "<h5>⚠️ Key Differences:</h5>",
+                "<h5> Key Differences:</h5>",
                 "<ul>",
                 "<li><strong>Consistency:</strong> Focuses on relative agreement - methods may differ by a constant but rank similarly</li>",
                 "<li><strong>Absolute Agreement:</strong> Requires identical values - stricter criterion for interchangeability</li>",
@@ -1295,7 +1295,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "</ul>",
                 "</div>",
 
-                "<p><em>💡 Tip: Most digital pathology studies use Consistency because systematic platform differences are common but don't affect clinical interpretation if ranking is preserved.</em></p>",
+                "<p><em> Tip: Most digital pathology studies use Consistency because systematic platform differences are common but don't affect clinical interpretation if ranking is preserved.</em></p>",
                 "</div>"
             )
 

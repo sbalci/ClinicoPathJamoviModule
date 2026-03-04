@@ -22,7 +22,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #1976d2; margin-top: 0;'>📋 Welcome to Modern Table Formatting!</h3>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Modern Table Formatting!</h3>
                 <p><strong>Publication-ready tables with tinytable</strong> - zero dependencies, maximum flexibility</p>
                 <p>Create beautiful, modern tables for clinical research and data presentation</p>
                 
@@ -59,7 +59,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 </ul>
                 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Modern alternative to traditional table packages - lightweight, flexible, and beautiful</em>
+                 <em>Modern alternative to traditional table packages - lightweight, flexible, and beautiful</em>
                 </p>
                 </div>"
                 
@@ -459,7 +459,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             
             interpretation_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>📋 Modern Table Formatting Guide</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'> Modern Table Formatting Guide</h3>",
                 
                 "<h4 style='color: #2e7d32;'>Current Table Configuration:</h4>",
                 "<ul>",
@@ -506,7 +506,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 "</ul>",
                 
                 "<p style='font-size: 12px; color: #2e7d32; margin-top: 15px;'>",
-                "<em>📋 Modern table formatting that enhances your research presentation with zero dependency overhead</em>",
+                "<em> Modern table formatting that enhances your research presentation with zero dependency overhead</em>",
                 "</p></div>"
             )
             

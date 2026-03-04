@@ -3,7 +3,6 @@
 # Test main decisioncurve() function
 test_that("decisioncurve function works with basic parameters", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   testthat::skip_on_cran()
   
   # Load test data

@@ -5,7 +5,7 @@ directbinomialClass <- R6::R6Class(
         .init = function() {
             # Initialize todo list
             todo <- paste0(
-                "<h4>📋 Direct Binomial Regression Analysis</h4>",
+                "<h4> Direct Binomial Regression Analysis</h4>",
                 "<p><b>Required:</b></p>",
                 "<ul>",
                 "<li>Time variable (numeric, time-to-event)</li>",
@@ -38,7 +38,7 @@ directbinomialClass <- R6::R6Class(
             
             if (length(covs) == 0) {
                 self$results$todo$setContent(
-                    "<h4>⚠️ Covariates Required</h4>
+                    "<h4> Covariates Required</h4>
                     <p>Direct binomial regression requires at least one covariate. 
                     Please add covariates to the analysis.</p>"
                 )
@@ -58,7 +58,7 @@ directbinomialClass <- R6::R6Class(
             
             if (sum(complete_cases) < 10) {
                 self$results$todo$setContent(
-                    "<h4>❌ Insufficient Data</h4>
+                    "<h4> Insufficient Data</h4>
                     <p>Less than 10 complete observations available. 
                     Please check for missing values or increase sample size.</p>"
                 )
@@ -71,7 +71,7 @@ directbinomialClass <- R6::R6Class(
             # Check for required packages
             if (!requireNamespace("timereg", quietly = TRUE)) {
                 self$results$todo$setContent(
-                    "<h4>📦 Package Required</h4>
+                    "<h4> Package Required</h4>
                     <p>This analysis requires the 'timereg' package. 
                     Please install it using: install.packages('timereg')</p>"
                 )
@@ -119,7 +119,7 @@ directbinomialClass <- R6::R6Class(
                 
             }, error = function(e) {
                 error_msg <- paste0(
-                    "<h4>❌ Analysis Error</h4>",
+                    "<h4> Analysis Error</h4>",
                     "<p>Error in direct binomial regression: ", e$message, "</p>",
                     "<p><b>Common solutions:</b></p>",
                     "<ul>",
@@ -166,7 +166,7 @@ directbinomialClass <- R6::R6Class(
         .populateEducationalInfo = function() {
             educational_content <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
-                "<h4>📚 Direct Binomial Regression for Competing Risks</h4>",
+                "<h4> Direct Binomial Regression for Competing Risks</h4>",
                 "<p><b>Method Overview:</b> Direct binomial regression models cumulative incidence functions ",
                 "directly without assuming proportional subdistribution hazards. This approach is particularly ",
                 "useful when the proportional hazards assumption is violated.</p>",
@@ -327,7 +327,7 @@ directbinomialClass <- R6::R6Class(
         .populateResidualAnalysis = function() {
             residual_content <- paste0(
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-                "<h4>🔍 Residual Analysis</h4>",
+                "<h4> Residual Analysis</h4>",
                 "<p><b>Model Diagnostics:</b> Direct binomial regression residuals help assess model adequacy.</p>",
                 
                 "<p><b>Residual Types:</b></p>",
@@ -352,7 +352,7 @@ directbinomialClass <- R6::R6Class(
         .populateMethodsInfo = function() {
             methods_content <- paste0(
                 "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
-                "<h4>📊 Statistical Methods</h4>",
+                "<h4> Statistical Methods</h4>",
                 
                 "<p><b>Analysis Method:</b> Direct binomial regression for competing risks using the timereg package.</p>",
                 

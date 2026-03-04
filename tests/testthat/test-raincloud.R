@@ -35,7 +35,6 @@ describe("Raincloud Summary Statistics", {
 
   test_that(".generate_statistics calculates correct values", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("dplyr")
     

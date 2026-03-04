@@ -66,7 +66,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 self$options$color_var,
                 self$options$size_var,
                 data_size,
-                data_hash,  # ✅ Now includes actual data content
+                data_hash,  #  Now includes actual data content
                 sep = "|"
             )
 
@@ -184,7 +184,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 self$options$x_var == "" || self$options$y_var == "" || self$options$group_var == "") {
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #1976d2; margin-top: 0;'>🎯 Welcome to Hull Plot Visualization!</h3>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Hull Plot Visualization!</h3>
                 <p><strong>Create stunning cluster visualizations</strong> using ggforce hull polygons</p>
                 <p>Based on R-Bloggers tutorial: 'Make a Hull Plot to Visualize Clusters in ggplot2'</p>
 
@@ -206,7 +206,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 </ul>
 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Hull plots use ggforce::geom_mark_hull() to create polygonal boundaries around grouped data points</em>
+                 <em>Hull plots use ggforce::geom_mark_hull() to create polygonal boundaries around grouped data points</em>
                 </p>
                 </div>"
 
@@ -514,7 +514,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Create HTML table
             stats_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #495057; margin-top: 0;'>📊 Group Statistics Summary</h3>",
+                "<h3 style='color: #495057; margin-top: 0;'> Group Statistics Summary</h3>",
                 "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>Group</th>",
@@ -572,7 +572,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             
             outlier_html <- paste0(
                 "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #856404; margin-top: 0;'>⚠️ Outlier Detection (IQR Method)</h3>",
+                "<h3 style='color: #856404; margin-top: 0;'> Outlier Detection (IQR Method)</h3>",
                 "<ul>"
             )
             
@@ -605,7 +605,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             if (length(validation_warnings) > 0) {
                 warnings_html <- paste0(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>⚠️ Data Quality Warnings</h4>"
+                    "<h4 style='color: #856404; margin-top: 0;'> Data Quality Warnings</h4>"
                 )
                 for (warning in validation_warnings) {
                     warnings_html <- paste0(warnings_html, "<p style='color: #856404; margin: 5px 0;'>• ", warning, "</p>")
@@ -616,7 +616,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             interpretation_html <- paste0(
                 warnings_html,
                 "<div style='background-color: #d1ecf1; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #0c5460; margin-top: 0;'>📋 Hull Plot Interpretation Guide</h3>",
+                "<h3 style='color: #0c5460; margin-top: 0;'> Hull Plot Interpretation Guide</h3>",
 
                 "<h4 style='color: #0c5460;'>Plot Summary:</h4>",
                 "<ul>",
@@ -642,7 +642,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "</ul>",
 
                 "<p style='font-size: 12px; color: #0c5460; margin-top: 15px;'>",
-                "<em>💡 Hull plots are excellent for presentations and publications as they clearly show group boundaries and relationships.</em>",
+                "<em> Hull plots are excellent for presentations and publications as they clearly show group boundaries and relationships.</em>",
                 "</p></div>"
             )
 
@@ -709,12 +709,12 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Generate copy-ready summary
             summary_html <- paste0(
                 "<div style='background-color: #e8f5e8; border-left: 4px solid #28a745; padding: 20px; margin-bottom: 20px; border-radius: 4px;'>",
-                "<h3 style='color: #155724; margin-top: 0;'>📄 Natural Language Summary</h3>",
+                "<h3 style='color: #155724; margin-top: 0;'> Natural Language Summary</h3>",
 
                 # Add disclaimer about descriptive nature
                 if (n_groups >= 2) paste0(
                     "<div style='background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0;'>",
-                    "<p style='margin: 0; font-size: 13px;'><strong>⚠️ Note on 'Separation' Assessment:</strong> ",
+                    "<p style='margin: 0; font-size: 13px;'><strong> Note on 'Separation' Assessment:</strong> ",
                     "The descriptors '", separation_quality, "' are based on a descriptive heuristic (discriminability index = ",
                     "mean distance between group centroids / mean standard deviation). ",
                     "<strong>This is NOT a formal statistical test.</strong> ",
@@ -772,7 +772,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .generate_assumptions_guide = function() {
             assumptions_html <- paste0(
                 "<div style='background-color: #fff8e1; border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 20px; border-radius: 4px;'>",
-                "<h3 style='color: #e65100; margin-top: 0;'>📋 Data Requirements & Assumptions</h3>",
+                "<h3 style='color: #e65100; margin-top: 0;'> Data Requirements & Assumptions</h3>",
 
                 "<h4 style='color: #e65100;'>Data Requirements:</h4>",
                 "<ul style='color: #e65100;'>",
@@ -808,7 +808,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "</ul>",
 
                 "<div style='background-color: #ffe0b2; padding: 15px; border-radius: 6px; margin-top: 15px; border: 2px solid #ff9800;'>",
-                "<h4 style='color: #bf360c; margin-top: 0;'>🚨 Critical Reminder: Exploratory vs. Inferential Analysis</h4>",
+                "<h4 style='color: #bf360c; margin-top: 0;'> Critical Reminder: Exploratory vs. Inferential Analysis</h4>",
                 "<p style='color: #bf360c; margin: 5px 0;'><strong>Hull plots are DESCRIPTIVE VISUALIZATIONS, not statistical tests.</strong></p>",
                 "<ul style='color: #bf360c; margin: 10px 0;'>",
                 "<li><strong>Visual separation ≠ statistical significance:</strong> Groups may appear separated in a hull plot but not differ significantly when tested formally</li>",

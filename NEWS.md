@@ -1,6 +1,6 @@
 # ClinicoPath News
 
-## Version 0.0.34
+# ClinicoPath 0.0.34
 
 ### 🗓️ **January 31, 2026 - RPA Survival Staging & Groome Comparison**
 
@@ -87,7 +87,7 @@
 
 ---
 
-## Version 0.0.33.05
+# ClinicoPath 0.0.33.05
 
 ### 🗓️ **January 27, 2026 - Simulation Validation & Stability**
 
@@ -112,7 +112,7 @@
 ---
 
 
-## Version 0.0.32.60
+# ClinicoPath 0.0.32.60
 
 ### 🗓️ **December 28, 2025 - Comprehensive Analysis Enhancements**
 
@@ -172,7 +172,7 @@
 
 ---
 
-## Version 0.0.32.48
+# ClinicoPath 0.0.32.48
 
 ### 🗓️ **December 16, 2025 - JJStatsPlot Enhancements**
 
@@ -216,7 +216,7 @@
 
 ---
 
-## Version 0.0.32.38
+# ClinicoPath 0.0.32.38
 
 ### 🗓️ **December 1, 2025 - Project Organization & Documentation**
 
@@ -241,7 +241,7 @@
 
 ---
 
-## Version 0.0.32.26
+# ClinicoPath 0.0.32.26
 
 ### 🗓️ **November 30, 2025 - Critical Fixes: Survival & Decision Analysis**
 
@@ -278,7 +278,7 @@ Critically evaluated and fixed fundamental issues in 4 key modules: `survivalcon
 
 ---
 
-## Version 0.0.32.25
+# ClinicoPath 0.0.32.25
 
 ### 🗓️ **November 29, 2025 - Evaluation: Pathology & Multivariate Modules**
 
@@ -339,7 +339,7 @@ Critically evaluated and verified 5 key modules: `outlierdetection`, `pathagreem
 
 ---
 
-## Version 0.0.32.24
+# ClinicoPath 0.0.32.24
 
 ### 🗓️ **November 26, 2025 - Evaluation: Data Quality Assessment (checkdata)**
 
@@ -415,7 +415,7 @@ Critically evaluated and verified 5 key modules: `outlierdetection`, `pathagreem
 
 ---
 
-## Version 0.0.32.23
+# ClinicoPath 0.0.32.23
 
 ### 🗓️ **November 26, 2025 - Evaluation: Categorize Continuous Variables (categorize)**
 
@@ -440,7 +440,7 @@ Critical evaluation of the `categorize` function for accurate binning of continu
 
 ---
 
-## Version 0.0.32.22
+# ClinicoPath 0.0.32.22
 
 ### 🗓️ **November 26, 2025 - Evaluation: Survival Endpoint Derivation (survivalendpoints)**
 
@@ -466,7 +466,7 @@ Critical evaluation of the `survivalendpoints` function for accurate derivation 
 
 ---
 
-## Version 0.0.32.21
+# ClinicoPath 0.0.32.21
 
 ### 🗓️ **November 26, 2025 - Evaluation: Time Interval Calculator (timeinterval)**
 
@@ -492,7 +492,7 @@ Critical evaluation of the `timeinterval` function for accurate time interval ca
 
 ---
 
-## Version 0.0.32.20
+# ClinicoPath 0.0.32.20
 
 ### 🗓️ **November 26, 2025 - Evaluation: Survival Power Analysis (survivalPower)**
 
@@ -517,7 +517,7 @@ Critical evaluation of the `survivalPower` function for sample size and power ca
 
 ---
 
-## Version 0.0.32.19
+# ClinicoPath 0.0.32.19
 
 ### 🗓️ **November 25, 2025 - Evaluation: Survival Analysis (survival)**
 
@@ -985,7 +985,7 @@ Critically evaluated the `jjsegmentedtotalbar` function for mathematical accurac
 
 ---
 
-## Version 0.0.32.18
+# ClinicoPath 0.0.32.18
 
 ### 🗓️ **January 5, 2025 - Phase 13: Survival Endpoint Derivation**
 
@@ -1180,7 +1180,7 @@ Potential additions for future versions:
 
 ---
 
-## Version 0.0.32.17
+# ClinicoPath 0.0.32.17
 
 ### 🗓️ **January 5, 2025 - Phase 12: Multi-Lesion RECIST 1.1 Aggregation**
 
@@ -1338,7 +1338,7 @@ Eisenhauer EA, Therasse P, Bogaerts J, et al. New response evaluation criteria i
 
 ---
 
-## Version 0.0.32.16
+# ClinicoPath 0.0.32.16
 
 ### 🗓️ **January 5, 2025 - Phase 11: iRECIST Analysis for Immunotherapy Trials**
 
@@ -1466,7 +1466,7 @@ Chiou VL, Burotto M. Pseudoprogression and immune-related response in solid tumo
 
 ---
 
-## Version 0.0.32.14
+# ClinicoPath 0.0.32.14
 
 ### 🗓️ **January 4, 2025 - Phase 10: Decision Curve Analysis & Fine-Gray Competing Risks**
 
@@ -1708,7 +1708,7 @@ Validated existing Decision Curve Analysis (DCA) module for clinical net benefit
 
 ---
 
-## Version 0.0.32.13
+# ClinicoPath 0.0.32.13
 
 ### 🗓️ **January 4, 2025 - Phase 9: Advanced Prediction Model Suite & Survival Analysis Enhancement**
 
@@ -1895,7 +1895,7 @@ These implementations provide:
 
 ---
 
-## Version 0.0.32.11
+# ClinicoPath 0.0.32.11
 
 ### 🗓️ **October 27, 2025 - Phase 8: Literature-Driven Statistical Methods Expansion**
 
@@ -2102,7 +2102,7 @@ Following systematic literature review (Kayser 2009, Bujang 2023) and priority f
 
 ---
 
-## Version 0.0.32.10
+# ClinicoPath 0.0.32.10
 
 ### 🗓️ **January 24, 2025 - Phase 7: Optional Advanced Methods**
 
@@ -2234,7 +2234,7 @@ Added capabilities now cover:
 
 ---
 
-## Version 0.0.32.09
+# ClinicoPath 0.0.32.09
 
 ### 🗓️ **January 24, 2025 - Phase 6: Advanced Performance Metrics**
 
@@ -2359,7 +2359,7 @@ When dealing with imbalanced datasets (e.g., 1% cancer prevalence):
 
 ---
 
-## Version 0.0.32.08
+# ClinicoPath 0.0.32.08
 
 ### 🗓️ **January 24, 2025 - Phase 6 Completion: 100% Feature Achievement**
 
@@ -2437,7 +2437,7 @@ When dealing with imbalanced datasets (e.g., 1% cancer prevalence):
 
 ---
 
-## Version 0.0.32.07
+# ClinicoPath 0.0.32.07
 
 ### 🗓️ **January 24, 2025 - Phase 5 Economic Evaluation**
 
@@ -2546,7 +2546,7 @@ The module outputs include:
 
 ---
 
-## Version 0.0.32.06
+# ClinicoPath 0.0.32.06
 
 ### 🗓️ **January 24, 2025 - Phase 3 Advanced ROC Methods**
 
@@ -2620,7 +2620,7 @@ The module outputs include:
 
 ---
 
-## Version 0.0.32.05
+# ClinicoPath 0.0.32.05
 
 ### 🗓️ **January 24, 2025 - Phase 2 Prognostic Validation Methods**
 
@@ -2708,7 +2708,7 @@ The module outputs include:
 
 ---
 
-## Version 0.0.31.81
+# ClinicoPath 0.0.31.81
 
 ### 🗓️ **September 30, 2025 - Agreement Clustering Analysis Implementation**
 
@@ -2845,7 +2845,7 @@ The module outputs include:
 
 ---
 
-## Version 0.0.31.70
+# ClinicoPath 0.0.31.70
 
 ### 🗓️ **September 19, 2025 - Comprehensive Survival Power Analysis Enhancement**
 
@@ -2899,7 +2899,7 @@ The module outputs include:
 * **Error Handling:** Improved user feedback and convergence monitoring
 * **Documentation:** Comprehensive vignette with usage examples and best practices
 
-## Version 0.0.31.69
+# ClinicoPath 0.0.31.69
 
 ### 🗓️ **September 18, 2025 - OncoPath Module Launch & Specialized Oncological Analysis**
 
@@ -2957,7 +2957,7 @@ The module outputs include:
 * **Enhanced Maintenance:** Simplified development and maintenance with clear separation of concerns
 * **Better Documentation:** Module-specific documentation websites for targeted user guidance
 
-## Version 0.0.31.59
+# ClinicoPath 0.0.31.59
 
 ### 🗓️ **September 7, 2025 - Enhanced ROC Analysis & Clinical Workflow Optimization**
 
@@ -3003,7 +3003,7 @@ The module outputs include:
 * **Progressive Disclosure UI:** Context-aware interface that adapts to user expertise level
 * **Clinical Preset Logic:** Automated configuration for common clinical scenarios with appropriate defaults
 
-## Version 0.0.31.48
+# ClinicoPath 0.0.31.48
 
 ### 🗓️ **August 26, 2025 - Advanced AI and Deep Learning Integration**
 
@@ -3049,7 +3049,7 @@ The module outputs include:
 * **Quality Assurance:** Automated quality control checks, outlier detection, and performance monitoring
 * **Educational Tools:** Interactive explanations and visualizations for training pathologists in AI interpretation
 
-## Version 0.0.31.45
+# ClinicoPath 0.0.31.45
 
 ### 🗓️ **August 25, 2025 - BlueSky Integration and Advanced Statistical Methods**
 
@@ -3316,7 +3316,7 @@ The module outputs include:
 * **Bootstrap methods** with configurable iterations and bias correction
 * **MCMC diagnostics** with convergence monitoring and chain analysis
 
-## Version 0.0.31.44
+# ClinicoPath 0.0.31.44
 
 ### 🗓️ **August 24, 2025 - Enhanced Statistical Methods for Small Samples**
 
@@ -3446,7 +3446,7 @@ The module outputs include:
 * **Life Expectancy Analysis:** Life expectancy loss estimation with age-group stratification and population impact assessment
 * **Clinical Epidemiology:** Cancer registry analysis, population health surveillance, and comparative survival research
 
-## Version 0.0.31.43
+# ClinicoPath 0.0.31.43
 
 ### 🗓️ **August 24, 2025 - Diagnostic Performance Analysis Enhancements**
 
@@ -3631,7 +3631,7 @@ The module outputs include:
 * **Total Functions:** 150+ specialized survival analysis and clinical research functions
 * **Regulatory Focus:** FDA/EMA compliance considerations throughout with comprehensive documentation and validation
 
-## Version 0.0.31.42
+# ClinicoPath 0.0.31.42
 
 ### 🗓️ **January 24, 2025 - Phase 8: Advanced Survival Methodology Implementation**
 
@@ -3683,7 +3683,7 @@ The module outputs include:
 * **Enhanced:** Error handling and validation across all new survival modules
 * **Improved:** Clinical interpretation and methodology explanations for advanced methods
 
-## Version 0.0.31.39
+# ClinicoPath 0.0.31.39
 
 ### 🗓️ **August 24, 2025 - Advanced Laboratory Quality Control and Spatial Analysis Implementation**
 
@@ -3753,7 +3753,7 @@ The module outputs include:
 * **Performance Optimization:** Efficient algorithms for large dataset processing with memory management and computational optimization
 * **Clinical Validation:** Extensive testing with clinical datasets and validation against established statistical software packages
 
-## Version 0.0.31.38
+# ClinicoPath 0.0.31.38
 
 ### 🗓️ **August 23, 2025 - Chi-Square Post-Hoc Analysis Enhancement and Advanced Clinical Analytics**
 
@@ -3957,7 +3957,7 @@ The module outputs include:
 * **Diagnostic Network Diagrams:** Network graphs showing relationships and information flow between different diagnostic modalities
 * **ROC Curve Analysis:** Diagnostic performance visualization with AUC calculations for single and combined imaging tests
 
-## Version 0.0.31.36
+# ClinicoPath 0.0.31.36
 
 ### 🗓️ **August 22, 2025 - IHC Clustering Analysis Enhancement**
 
@@ -3991,7 +3991,7 @@ The module outputs include:
 * **Quality Assessment:** Silhouette analysis for optimal k selection, consensus clustering for stability, and comprehensive association testing
 * **Clinical Integration:** Optional survival analysis integration and clinical variable correlation testing
 
-## Version 0.0.31.35
+# ClinicoPath 0.0.31.35
 
 ### 🗓️ **August 20, 2025 - Advanced Machine Learning & Regularization Methods**
 
@@ -4050,7 +4050,7 @@ The module outputs include:
 * **Model Space Exploration:** Visualization of model posterior probabilities, inclusion probabilities, and convergence diagnostics
 * **Uncertainty Decomposition:** Graphical representation of model vs. parameter uncertainty contributions
 
-## Version 0.0.31.34
+# ClinicoPath 0.0.31.34
 
 ### 🗓️ **August 20, 2025 - Decision Analysis Enhancement & Architecture Redesign**
 
@@ -4165,7 +4165,7 @@ The module outputs include:
 * **Robust Error Handling:** Graceful fallbacks when optional packages (pROC, rpart.plot) are unavailable
 * **Comprehensive Documentation:** Detailed parameter descriptions with clinical focus and usage examples
 
-## Version 0.0.31.33
+# ClinicoPath 0.0.31.33
 
 ### 🗓️ **August 19, 2025 - Cause-Specific Hazards Models Implementation**
 
@@ -4192,7 +4192,7 @@ The module outputs include:
 * **Comprehensive Output:** Model fit statistics, hazard ratios, cumulative incidence estimates, and diagnostic tests
 * **Visualization Suite:** Cumulative incidence plots, cause-specific hazard plots, and comprehensive diagnostic plots
 
-## Version 0.0.31.33
+# ClinicoPath 0.0.31.33
 
 ### 🗓️ **August 19, 2025 - Parametric Frailty Models Implementation**
 
@@ -4219,7 +4219,7 @@ The module outputs include:
 * **Visualization Suite:** Hazard function plots, survival function plots, frailty distribution plots, and diagnostic plots
 * **Clinical Application:** Designed for real-world clinical data with robust error handling and data validation
 
-## Version 0.0.31.32
+# ClinicoPath 0.0.31.32
 
 ### 🗓️ **August 18, 2025 - EM-Algorithm Frailty Models Implementation**
 
@@ -4260,7 +4260,7 @@ The module outputs include:
 * **EM Algorithm Convergence:** Detailed convergence diagnostics including iteration count, final log-likelihood, and tolerance criteria
 * **Empirical Bayes Predictions:** Individual group frailty predictions with shrinkage statistics and prediction intervals
 
-## Version 0.0.31.31
+# ClinicoPath 0.0.31.31
 
 ### 🗓️ **August 18, 2025 - Mixed-Effects Cox Models Implementation**
 
@@ -4294,7 +4294,7 @@ The module outputs include:
 * **Hierarchical Structure Summary:** Group-level statistics including number of groups and observations per group
 * **Model Diagnostics:** AIC/BIC, events per parameter, and convergence information
 
-## Version 0.0.31.30
+# ClinicoPath 0.0.31.30
 
 ### 🗓️ **August 18, 2025 - Transformation Models Implementation**
 
@@ -4330,7 +4330,7 @@ The module outputs include:
 * **Model Comparison Tools:** Side-by-side evaluation of different transformation approaches
 * **Natural Language Summaries:** Clinical interpretation of transformation selection and model results
 
-## Version 0.0.31.29
+# ClinicoPath 0.0.31.29
 
 ### 🗓️ **August 18, 2025 - Robust AFT Models Implementation**
 
@@ -4387,7 +4387,7 @@ The module outputs include:
 * **Convergence Control:** Maximum iterations and tolerance settings for M-estimation
 * **Bootstrap Options:** Optional bootstrap confidence intervals for enhanced reliability
 
-## Version 0.0.31.28
+# ClinicoPath 0.0.31.28
 
 ### 🗓️ **August 18, 2025 - Weighted Cox Regression Implementation**
 
@@ -4436,7 +4436,7 @@ The module outputs include:
 * **Cluster Robust Variance:** Support for clustered data with robust variance estimation
 * **Offset Variables:** Integration of known offset terms in the weighted partial likelihood
 
-## Version 0.0.31.27
+# ClinicoPath 0.0.31.27
 
 ### 🗓️ **August 18, 2025 - Robust Cox Regression Implementation**
 
@@ -4478,7 +4478,7 @@ The module outputs include:
 * **Stratified Analysis Support:** Robust estimation within stratified Cox models
 * **Weighted Analysis:** Integration with observation weights for complex sampling designs
 
-## Version 0.0.31.26
+# ClinicoPath 0.0.31.26
 
 ### 🗓️ **August 18, 2025 - Rank-based AFT Estimation Implementation**
 
@@ -4519,7 +4519,7 @@ The module outputs include:
 * **Acceleration Factor Plots:** Forest plot-style visualization of acceleration factors with confidence intervals
 * **Model Comparison Plots:** Graphical comparison of AFT and Cox model predictions for model validation
 
-## Version 0.0.31.25
+# ClinicoPath 0.0.31.25
 
 ### 🗓️ **August 18, 2025 - Proportional Hazards Testing Implementation**
 
@@ -4569,7 +4569,7 @@ The module outputs include:
 
 ---
 
-## Version 0.0.31.24
+# ClinicoPath 0.0.31.24
 
 ### 🗓️ **August 18, 2025 - Dynamic Coefficient Models Implementation**
 
@@ -4619,7 +4619,7 @@ The module outputs include:
 
 ---
 
-## Version 0.0.31.23
+# ClinicoPath 0.0.31.23
 
 ### 🗓️ **August 18, 2025 - Smooth Time-Varying Effects Implementation**
 
@@ -4758,7 +4758,7 @@ This implementation provides essential methodology for parametric survival analy
 
 This implementation provides essential methodology for survival analysis when standard Cox proportional hazards assumptions are violated, offering flexible additive modeling approaches that reveal time-dependent patterns in covariate effects crucial for understanding evolving treatment and prognostic factor influences in clinical research.
 
-## Version 0.0.31.20
+# ClinicoPath 0.0.31.20
 
 ### 🗓️ **August 18, 2025 - High-Dimensional Cox Regression Implementation**
 
@@ -4801,7 +4801,7 @@ This implementation provides essential methodology for survival analysis when st
 
 This implementation addresses critical needs in modern biomedical research where traditional Cox regression fails due to high-dimensional predictor spaces, providing robust variable selection and prediction modeling essential for genomic medicine and precision oncology applications.
 
-## Version 0.0.31.19
+# ClinicoPath 0.0.31.19
 
 ### 🗓️ **August 18, 2025 - Stratified Parametric Models Implementation**
 
@@ -4844,7 +4844,7 @@ This implementation addresses critical needs in modern biomedical research where
 
 This implementation addresses the critical need for modeling survival data with group-specific baseline hazards while maintaining the efficiency and interpretability of parametric approaches, essential for heterogeneous patient populations and subgroup analyses in clinical research.
 
-## Version 0.0.31.19
+# ClinicoPath 0.0.31.19
 
 ### 🗓️ **August 18, 2025 - Flexible Baseline Distributions Implementation**
 
@@ -4887,7 +4887,7 @@ This implementation addresses the critical need for modeling survival data with 
 
 This implementation provides the statistical flexibility needed for complex survival patterns while maintaining the smooth, interpretable estimates essential for clinical decision-making and prognostic model development.
 
-## Version 0.0.31.18
+# ClinicoPath 0.0.31.18
 
 ### 🗓️ **August 18, 2025 - Distribution Selection and Goodness-of-Fit Implementation**
 
@@ -4930,7 +4930,7 @@ This implementation provides the statistical flexibility needed for complex surv
 
 This implementation addresses the critical need for objective, data-driven selection of parametric survival distributions, ensuring that statistical models are both statistically adequate and clinically meaningful for survival analysis applications.
 
-## Version 0.0.31.17
+# ClinicoPath 0.0.31.17
 
 ### 🗓️ **August 18, 2025 - Spline-based Hazard Functions Implementation**
 
@@ -4973,7 +4973,7 @@ This implementation addresses the critical need for objective, data-driven selec
 
 This implementation addresses the critical need for flexible parametric survival modeling in clinical research, where standard parametric distributions may be too restrictive for complex hazard patterns commonly observed in medical data.
 
-## Version 0.0.31.16
+# ClinicoPath 0.0.31.16
 
 ### 🗓️ **August 18, 2025 - Flexible Parametric Survival Models Implementation**
 
@@ -5025,7 +5025,7 @@ This implementation addresses the critical need for flexible parametric survival
 
 *This implementation significantly advances the parametric survival modeling capabilities in ClinicoPath, providing researchers with state-of-the-art tools for modeling complex survival patterns that cannot be adequately captured by standard parametric distributions.*
 
-## Version 0.0.31.15
+# ClinicoPath 0.0.31.15
 
 ### 🗓️ **August 18, 2025 - Median Survival Comparisons Implementation**
 
@@ -5070,7 +5070,7 @@ This implementation addresses the critical need for flexible parametric survival
 
 *This implementation completes Phase 1 Core Hypothesis Testing in the ClinicoPath survival analysis roadmap, providing a comprehensive suite of non-parametric and median-based survival comparison methods essential for clinical research.*
 
-## Version 0.0.31.14
+# ClinicoPath 0.0.31.14
 
 ### 🗓️ **August 18, 2025 - Permutation Tests for Survival Implementation**
 
@@ -5104,7 +5104,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Multiple Comparison Corrections:** Bonferroni, Holm, Hochberg, and Benjamini-Hochberg adjustments
 * **Comprehensive Group Statistics:** Sample sizes, events, and median survival with confidence intervals
 
-## Version 0.0.31.13
+# ClinicoPath 0.0.31.13
 
 ### 🗓️ **August 18, 2025 - Restricted Mean Survival Time Tests Implementation**
 
@@ -5131,7 +5131,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Regulatory Submissions:** Clear demonstration of treatment efficacy with absolute rather than relative benefits
 * **Patient Communication:** Easily interpretable results for shared decision-making
 
-## Version 0.0.31.12
+# ClinicoPath 0.0.31.12
 
 ### 🗓️ **August 18, 2025 - Weighted Log-Rank Tests Implementation**
 
@@ -5158,7 +5158,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Comprehensive Output:** Group summaries, median survival times, event counts, and sample size reporting
 * **Visualization Support:** Kaplan-Meier curves, weight function plots, and test statistic evolution over time
 
-## Version 0.0.31.11
+# ClinicoPath 0.0.31.11
 
 ### 🗓️ **August 18, 2025 - Fleming-Harrington G-rho Family Tests Implementation**
 
@@ -5185,7 +5185,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Flexible Test Selection:** Individual control over early, late, and standard log-rank tests within the G-rho family
 * **Multiple Visualization Options:** Weight function plots, survival difference trajectories, and test statistic comparisons
 
-## Version 0.0.31.10
+# ClinicoPath 0.0.31.10
 
 ### 🗓️ **August 18, 2025 - Time-Varying Covariates Cox Regression Implementation**
 
@@ -5212,7 +5212,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Recurrent Events Support:** Extended Andersen-Gill and Prentice-Williams-Peterson models for multiple events per subject
 * **Interpolation Methods:** Linear and spline interpolation for missing covariate values between measurement times with clinical validity checks
 
-## Version 0.0.31.09
+# ClinicoPath 0.0.31.09
 
 ### 🗓️ **August 17, 2025 - Mixed-Effects Cox Regression Implementation**
 
@@ -5250,7 +5250,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Advanced Visualization:** Forest plots for fixed effects, random effects distributions, and cluster-specific survival curves
 * **Production Quality:** Comprehensive error handling, input validation, and robust implementation for multi-center research
 
-## Version 0.0.31.08
+# ClinicoPath 0.0.31.08
 
 ### 🗓️ **August 17, 2025 - Penalized Cox Regression Implementation**
 
@@ -5288,7 +5288,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Tabular Data Support:** Full compatibility with jamovi's data structure and clinical research dataset formats
 * **Production Quality:** Comprehensive error handling, input validation, and robust implementation for research applications
 
-## Version 0.0.31.07
+# ClinicoPath 0.0.31.07
 
 ### 🗓️ **August 17, 2025 - Survey-Weighted Survival Analysis Implementation**
 
@@ -5326,7 +5326,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Tabular Data Compatibility:** Full support for jamovi's tabular data structure with survey variable specification and validation
 * **Production Quality:** Comprehensive testing, error handling, and documentation with clinical research focus
 
-## Version 0.0.31.06
+# ClinicoPath 0.0.31.06
 
 ### 🗓️ **August 17, 2025 - Multisurvival Function Comprehensive Enhancement**
 
@@ -5361,7 +5361,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Documentation Excellence:** Complete roxygen2 documentation, clinical interpretation guides, and methodological explanations for all features
 * **Regulatory Readiness:** Implementation follows pharmaceutical research standards with validation frameworks and comprehensive reporting capabilities
 
-## Version 0.0.33.01
+# ClinicoPath 0.0.33.01
 
 ### 🗓️ **August 15, 2025 - Comprehensive Survival Analysis Roadmap Implementation**
 
@@ -5426,7 +5426,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Quality Assurance:** Comprehensive validation frameworks ensuring statistical accuracy and clinical reliability
 * **Innovation Pipeline:** Strategic positioning for integration of emerging methodologies including machine learning, deep learning, and precision medicine applications
 
-## Version 0.0.33.00
+# ClinicoPath 0.0.33.00
 
 ### 🗓️ **August 15, 2025 - Advanced Survival Analysis Implementation (Phases 5-7)**
 
@@ -5478,7 +5478,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Reporting Standards:** TRIPOD and REMARK compliance with structured reporting checklists and implementation guidance
 * **Clinical Workflow:** Implementation guides, training materials, and decision support tools for successful clinical translation
 
-## Version 0.0.32.04
+# ClinicoPath 0.0.32.04
 
 ### 🗓️ **August 15, 2025 - Digital Pathology Phase 5: Publication & Clinical Translation Complete**
 
@@ -5533,7 +5533,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Reproducibility Focus:** Complete code documentation, parameter tracking, and validation for scientific reproducibility
 * **Clinical Translation:** Bridge between statistical analysis and clinical implementation with user-friendly interfaces
 
-## Version 0.0.32.03
+# ClinicoPath 0.0.32.03
 
 ### 🗓️ **August 15, 2025 - Survival Analysis Enhancement Plan Complete**
 
@@ -5567,7 +5567,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Rich Visualization Support:** Survival curves, hazard functions, interval visualization, event timelines, model comparison plots
 * **Clinical Translation:** Plain-language result interpretation, comprehensive HTML output with publication-ready tables
 
-## Version 0.0.32.02
+# ClinicoPath 0.0.32.02
 
 ### 🗓️ **August 15, 2025 - Continuation: Survival Enhancement & Digital Pathology Implementation**
 
@@ -5582,7 +5582,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Clinical Applications:** Direct time-point survival analysis, RMST comparisons, regulatory submissions requiring specific timepoint estimates
 * **Target Applications:** Clinical trials with milestone analysis, health economic evaluations, personalized survival prediction
 
-## Version 0.0.32.01
+# ClinicoPath 0.0.32.01
 
 ### 🗓️ **August 15, 2025 - Phase 5 & Survival Enhancement Complete Implementation**
 
@@ -5642,7 +5642,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Optimal Cutpoint Analysis:** ✅ Maximally selected rank statistics for continuous biomarker thresholds (`optimalcutpoint.b.R`)
 * **Target Applications:** Digital pathology workflows, image analysis validation, spatial pathology, AI model evaluation, biomarker discovery
 
-## Version 0.0.31.04
+# ClinicoPath 0.0.31.04
 
 ### 🗓️ **August 15, 2025 - Phase 3 & 4 Complete Implementation**
 
@@ -5710,7 +5710,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Documentation Complete:** All modules properly documented with devtools::document()
 * **Clinical Research Ready:** All implementations focused on tabular data analysis for clinical and pathology research
 
-## Version 0.0.31.03
+# ClinicoPath 0.0.31.03
 
 ### 🗓️ **August 15, 2025 - Previous Implementations**
 
@@ -6122,7 +6122,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Win Ratio Analysis:** Composite endpoint analysis for staging comparison
 * **Clinical Impact:** Robust performance metrics for staging system validation
 
-## Version 0.0.31.02
+# ClinicoPath 0.0.31.02
 
 ### 🚀 Major New Features
 
@@ -6182,7 +6182,7 @@ This implementation addresses the critical need for flexible parametric survival
 * **Phase 3 Pipeline:** Biomarker signature development and prognostic factor analysis
 * **Phase 4 Future:** Clinical trial analytics including treatment response and adverse event analysis
 
-## Version 0.0.31.01
+# ClinicoPath 0.0.31.01
 
 ### Enhancements
 
@@ -6305,7 +6305,7 @@ This implementation addresses the critical need for flexible parametric survival
     * Comprehensive error handling with informative user guidance
     * Integration with survival analysis and prognostic modeling workflows
 
-## Version 0.0.3.96
+# ClinicoPath 0.0.3.96
 
 ### New Features & Enhancements
 
@@ -6320,7 +6320,7 @@ This implementation addresses the critical need for flexible parametric survival
   * Added a progress bar for real-time feedback.
   * Fixed several runtime errors and improved parameter validation.
 
-## Version 0.0.3.95
+# ClinicoPath 0.0.3.95
 
 ### Bug Fixes
 
@@ -6332,13 +6332,13 @@ This implementation addresses the critical need for flexible parametric survival
   * Enhanced the `decisiongraph` module with health economics features.
   * Added Net Monetary Benefit (NMB) and Incremental Cost-Effectiveness Ratio (ICER) analysis.
 
-## Version 0.0.3.90
+# ClinicoPath 0.0.3.90
 
 ### Documentation
 
 * Updated all submodule documentation links in the `README` to point to their respective documentation sites.
 
-## Version 0.0.3.82
+# ClinicoPath 0.0.3.82
 
 ### New Features
 
@@ -6346,14 +6346,14 @@ This implementation addresses the critical need for flexible parametric survival
   * Implemented a comprehensive framework for assessing the clinical utility of staging systems.
   * Added Net Benefit Analysis and Number Needed to Treat (NNT) calculations.
 
-## Version 0.0.3.81
+# ClinicoPath 0.0.3.81
 
 ### New Features
 
 * **Frailty Models:**
   * Added support for frailty models for clustered survival data using mixed-effects Cox models.
 
-## Version 0.0.3.80
+# ClinicoPath 0.0.3.80
 
 ### New Features
 

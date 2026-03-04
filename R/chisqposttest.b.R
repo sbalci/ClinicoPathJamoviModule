@@ -541,7 +541,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Create significance indicator
                 sig_indicator <- if (is_significant) {
-                    htmltools::span(style = "color: #d32f2f; font-weight: bold;", "✓ Significant")
+                    htmltools::span(style = "color: #d32f2f; font-weight: bold;", " Significant")
                 } else {
                     htmltools::span(style = "color: #666;", "Not significant")
                 }
@@ -1296,7 +1296,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(counts) && show_warnings && self$options$showEducational) {
                 weight_warning <- htmltools::div(
                     style = "padding: 10px; background-color: #e1f5fe; border-left: 4px solid #0277bd; margin: 10px 0;",
-                    htmltools::h5("📊 Weighted Data Analysis", style = "color: #01579b; margin-top: 0;"),
+                    htmltools::h5(" Weighted Data Analysis", style = "color: #01579b; margin-top: 0;"),
                     htmltools::p("The data is being treated as frequency counts. Each row represents a combination of categories with the specified count/weight.")
                 )
                 self$results$weightedDataInfo$setContent(as.character(weight_warning))
@@ -1940,9 +1940,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             title_text <- if (assumptions$warning_level == "none") {
-                .("✓ Assumptions Check: All conditions met")
+                .(" Assumptions Check: All conditions met")
             } else {
-                .("⚠ Assumptions Check: Review required")
+                .(" Assumptions Check: Review required")
             }
             
             assumptions_content <- htmltools::div(

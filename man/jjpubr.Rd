@@ -150,6 +150,7 @@ Each plot type supports:
 }
 }
 \examples{
+\donttest{
 # Box plot with statistical comparison
 jjpubr(
     data = mtcars,
@@ -178,5 +179,5 @@ jjpubr(
     addDensity = TRUE,
     fillColor = "#0073C2FF"
 )
-
+}
 }

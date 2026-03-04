@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("hullplot integrates with all test datasets", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "hullplot_test", x = "x", y = "y", group = "group"),
@@ -40,7 +38,6 @@ test_that("hullplot integrates with all test datasets", {
 })
 
 test_that("hullplot produces consistent results across data formats", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -68,7 +65,6 @@ test_that("hullplot produces consistent results across data formats", {
 })
 
 test_that("hullplot handles complete clinical trial workflow", {
-  devtools::load_all()
 
   data(hullplot_clinical)
 
@@ -126,7 +122,6 @@ test_that("hullplot handles complete clinical trial workflow", {
 })
 
 test_that("hullplot handles exploratory data analysis workflow", {
-  devtools::load_all()
 
   data(hullplot_clusters)
 
@@ -164,7 +159,6 @@ test_that("hullplot handles exploratory data analysis workflow", {
 })
 
 test_that("hullplot handles quality control workflow", {
-  devtools::load_all()
 
   data(hullplot_outliers)
 
@@ -201,7 +195,6 @@ test_that("hullplot handles quality control workflow", {
 })
 
 test_that("hullplot handles comparative analysis workflow", {
-  devtools::load_all()
 
   data(hullplot_test)
   data(hullplot_clusters)
@@ -229,7 +222,6 @@ test_that("hullplot handles comparative analysis workflow", {
 })
 
 test_that("hullplot handles different spatial arrangements", {
-  devtools::load_all()
 
   # Well-separated groups
   data(hullplot_test)
@@ -267,7 +259,6 @@ test_that("hullplot handles different spatial arrangements", {
 })
 
 test_that("hullplot handles different sample sizes consistently", {
-  devtools::load_all()
 
   # Small sample
   data(hullplot_small)
@@ -301,7 +292,6 @@ test_that("hullplot handles different sample sizes consistently", {
 })
 
 test_that("hullplot handles balanced vs unbalanced groups", {
-  devtools::load_all()
 
   # Balanced groups
   data(hullplot_test)
@@ -327,7 +317,6 @@ test_that("hullplot handles balanced vs unbalanced groups", {
 })
 
 test_that("hullplot handles all color palettes consistently", {
-  devtools::load_all()
 
   data(hullplot_clusters)
 
@@ -350,7 +339,6 @@ test_that("hullplot handles all color palettes consistently", {
 })
 
 test_that("hullplot handles all plot themes consistently", {
-  devtools::load_all()
 
   data(hullplot_clusters)
 
@@ -373,7 +361,6 @@ test_that("hullplot handles all plot themes consistently", {
 })
 
 test_that("hullplot handles combinations of all visual features", {
-  devtools::load_all()
 
   data(hullplot_clinical)
 
@@ -408,7 +395,6 @@ test_that("hullplot handles combinations of all visual features", {
 })
 
 test_that("hullplot handles gene expression analysis workflow", {
-  devtools::load_all()
 
   data(hullplot_fourgroup)
 
@@ -450,7 +436,6 @@ test_that("hullplot handles gene expression analysis workflow", {
 })
 
 test_that("hullplot handles biomarker analysis workflow", {
-  devtools::load_all()
 
   data(hullplot_unbalanced)
 
@@ -491,7 +476,6 @@ test_that("hullplot handles biomarker analysis workflow", {
 })
 
 test_that("hullplot handles different concavity settings across datasets", {
-  devtools::load_all()
 
   concavity_values <- c(0.5, 1.0, 1.5, 2.0)
 
@@ -513,7 +497,6 @@ test_that("hullplot handles different concavity settings across datasets", {
 })
 
 test_that("hullplot handles progressive feature addition", {
-  devtools::load_all()
 
   data(hullplot_clinical)
 
@@ -547,7 +530,6 @@ test_that("hullplot handles progressive feature addition", {
 })
 
 test_that("hullplot handles all datasets with consistent parameters", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "hullplot_test", x = "x", y = "y", group = "group"),
@@ -584,7 +566,6 @@ test_that("hullplot handles all datasets with consistent parameters", {
 })
 
 test_that("hullplot output structure is consistent across all datasets", {
-  devtools::load_all()
 
   datasets <- c("hullplot_test", "hullplot_clusters", "hullplot_clinical")
 
@@ -615,7 +596,6 @@ test_that("hullplot output structure is consistent across all datasets", {
 })
 
 test_that("hullplot handles repeated analyses with same data", {
-  devtools::load_all()
 
   data(hullplot_test)
 

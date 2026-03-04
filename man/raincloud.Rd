@@ -138,6 +138,7 @@ multimodality
 and distribution shape. Based on the ggdist R-Bloggers tutorial.
 }
 \examples{
+\donttest{
 # Load example dataset
 data(histopathology)
 
@@ -184,5 +185,5 @@ raincloud(
   violin_width = 0.8,
   alpha_violin = 0.6
 )
-
+}
 }

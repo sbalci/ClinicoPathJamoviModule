@@ -825,6 +825,7 @@ comprehensiveSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE))
 #' regulatory submissions.
 #'
 #' @examples
+#' \donttest{
 #' # Standard log-rank test power calculation
 #' comprehensiveSurvivalPower(
 #'     method_category = "standard",
@@ -856,7 +857,7 @@ comprehensiveSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE))
 #'     alpha = 0.05,
 #'     rmst_timepoint = 24
 #' )
-#'
+#'}
 #' @param data The data as a data frame (optional for power calculations).
 #' @param method_category Choose the category of survival analysis method.
 #'   Standard methods include log-rank tests and Cox regression. Competing risks
@@ -874,16 +875,16 @@ comprehensiveSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE))
 #' @param alpha Type I error rate. Standard values: 0.05 (two-sided) or 0.025
 #'   (one-sided). For non-inferiority trials, consider 0.025.
 #' @param power Statistical power (probability of detecting true effect).
-#'   Standard values: 0.80 (80\%) or 0.90 (90\%). Higher power requires larger
-#'   sample sizes.
+#'   Standard values: 0.80 (80 percent) or 0.90 (90 percent). Higher power
+#'   requires larger sample sizes.
 #' @param sample_size Total number of subjects in the study. Used when
 #'   calculating power or detectable effect size from a fixed sample size.
 #' @param allocation_ratio Ratio of control to treatment group sizes. 1.0 =
 #'   equal allocation (1:1), 2.0 = twice as many controls (2:1). Equal
 #'   allocation is most efficient.
 #' @param hazard_ratio Expected hazard ratio. Values < 1 indicate treatment
-#'   benefit. Common values: 0.75 (25\% reduction), 0.67 (33\% reduction), 0.50
-#'   (50\% reduction).
+#'   benefit. Common values: 0.75 (25 percent reduction), 0.67 (33 percent
+#'   reduction), 0.50 (50 percent reduction).
 #' @param median_survival_control Expected median survival time in control
 #'   group. Units should match your study timeline (months, years, etc.).
 #' @param median_survival_treatment Expected median survival time in treatment
@@ -893,8 +894,8 @@ comprehensiveSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE))
 #'   duration.
 #' @param follow_up_period Additional follow-up time after accrual completion.
 #'   Total study duration = accrual period + follow-up period.
-#' @param dropout_rate Annual rate of loss to follow-up (0.05 = 5\% per year).
-#'   Higher dropout rates require larger sample sizes to maintain power.
+#' @param dropout_rate Annual rate of loss to follow-up (0.05 = 5 percent per
+#'   year). Higher dropout rates require larger sample sizes to maintain power.
 #' @param event_rate Proportion of subjects expected to experience the event
 #'   during study period. Used for simple design calculations.
 #' @param competing_event_rate Proportion experiencing competing events (for
@@ -907,8 +908,8 @@ comprehensiveSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE))
 #'   analysis. Should be clinically meaningful and within study follow-up
 #'   period.
 #' @param non_inferiority_margin Non-inferiority margin for hazard ratio. 1.25
-#'   means treatment is non-inferior if HR < 1.25 (25\% increase in hazard is
-#'   acceptable).
+#'   means treatment is non-inferior if HR < 1.25 (25 percent increase in hazard
+#'   is acceptable).
 #' @param superiority_test After establishing non-inferiority, test for
 #'   superiority. Requires hierarchical testing approach to control Type I
 #'   error.
@@ -924,7 +925,7 @@ comprehensiveSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE))
 #' @param show_detailed_output Display detailed calculation steps and
 #'   intermediate results.
 #' @param show_sensitivity_analysis Perform sensitivity analysis varying key
-#'   parameters around their specified values (+/- 10\%, 20\%).
+#'   parameters around their specified values (+/- 10 percent, 20 percent).
 #' @param show_power_curves Generate plots showing power vs sample size,
 #'   effect size, or other parameters.
 #' @param export_study_design Generate a comprehensive study design document

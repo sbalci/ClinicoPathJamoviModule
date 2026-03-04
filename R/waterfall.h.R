@@ -665,7 +665,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "waterfall",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = waterfallResults$new(options=options),
                 data = data,
@@ -695,7 +695,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   cm, sum of diameters) or pre-calculated percentage changes from baseline.
 #'   For raw measurements: requires time variable with baseline at time = 0. For
 #'   percentages: negative values = tumor shrinkage (good response), positive
-#'   values = tumor growth (poor response). Example: -30 means 30\% decrease.
+#'   values = tumor growth (poor response). Example: -30 means 30 percent
+#'   decrease.
 #' @param timeVar Time point of measurement (e.g., months from baseline, days
 #'   from treatment start). Required for spider plot and raw measurement
 #'   processing. Baseline should be time = 0.
@@ -706,9 +707,9 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (requires time variable) or 'percentage' for pre-calculated percentage
 #'   changes from baseline
 #' @param sortBy Sort the waterfall plot by best response or patient ID.
-#' @param showThresholds Show +20\% and -30\% RECIST v1.1 thresholds as dashed
-#'   lines. Helps identify Progressive Disease (PD) and Partial Response (PR)
-#'   cutoffs.
+#' @param showThresholds Show +20 percent and -30 percent RECIST v1.1
+#'   thresholds as dashed lines. Helps identify Progressive Disease (PD) and
+#'   Partial Response (PR) cutoffs.
 #' @param labelOutliers Label responses exceeding the specified threshold.
 #' @param showMedian Show median response as a horizontal line.
 #' @param showCI Show confidence interval around median response.

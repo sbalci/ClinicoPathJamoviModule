@@ -12,20 +12,20 @@ A data frame with 6 rows and 13 variables:
 \item{prevalence}{Disease prevalence in target population (0-1)}
 \item{target_sensitivity}{Target sensitivity value (0-1)}
 \item{target_specificity}{Target specificity value (0-1)}
-\item{ci_width}{Desired 95\\% CI width}
+\item{ci_width}{Desired 95\% CI width}
 \item{study_purpose}{Study purpose: "diagnostic", "screening_sens", or "screening_spec"}
 \item{expected_n_sens}{Expected sample size for sensitivity estimation}
 \item{expected_n_spec}{Expected sample size for specificity estimation}
 \item{final_n}{Final required sample size (maximum of sensitivity/specificity)}
 \item{notes}{Clinical notes and justification}
-\item{nonresponse_rate}{Expected non-response rate (\\%)}
+\item{nonresponse_rate}{Expected non-response rate (\%)}
 \item{final_n_adjusted}{Final sample size adjusted for non-response}
 }
 }
 \source{
 Bujang MA (2023). An Elaboration on Sample Size Planning for Performing a
 One-Sample Sensitivity and Specificity Analysis by Basing on Calculations on
-a Specified 95\\% Confidence Interval Width. Diagnostics 13(8):1390.
+a Specified 95\% Confidence Interval Width. Diagnostics 13(8):1390.
 \doi{10.3390/diagnostics13081390}
 }
 \usage{
@@ -42,7 +42,7 @@ The dataset includes six diverse clinical scenarios:
 \strong{1. Colorectal Cancer Blood Test}
 \itemize{
 \item Population: High-risk patients (age >50, family history)
-\item Prevalence: 10\\%
+\item Prevalence: 10\%
 \item Purpose: Diagnostic (need excellent sensitivity AND specificity)
 \item Required N: 940 subjects
 }
@@ -50,7 +50,7 @@ The dataset includes six diverse clinical scenarios:
 \strong{2. COVID-19 Rapid Antigen Test}
 \itemize{
 \item Population: General population (asymptomatic screening)
-\item Prevalence: 5\\%
+\item Prevalence: 5\%
 \item Purpose: Screening (emphasize sensitivity)
 \item Required N: 1,880 subjects
 }
@@ -58,7 +58,7 @@ The dataset includes six diverse clinical scenarios:
 \strong{3. AI-Based Diabetic Retinopathy Detection}
 \itemize{
 \item Population: Diabetic patients
-\item Prevalence: 30\\%
+\item Prevalence: 30\%
 \item Purpose: Diagnostic with moderate precision
 \item Required N: 147 subjects
 }
@@ -66,7 +66,7 @@ The dataset includes six diverse clinical scenarios:
 \strong{4. Rare Disease Biomarker (Fabry Disease)}
 \itemize{
 \item Population: Suspected patients referred to genetics clinic
-\item Prevalence: 2\\% (very low!)
+\item Prevalence: 2\% (very low!)
 \item Purpose: Diagnostic
 \item Required N: 7,900 subjects (large due to low prevalence)
 }
@@ -74,7 +74,7 @@ The dataset includes six diverse clinical scenarios:
 \strong{5. Lung Cancer LDCT Screening}
 \itemize{
 \item Population: Heavy smokers (>30 pack-years)
-\item Prevalence: 15\\%
+\item Prevalence: 15\%
 \item Purpose: Screening (emphasize specificity to reduce false positives)
 \item Required N: 4,020 subjects
 }
@@ -82,7 +82,7 @@ The dataset includes six diverse clinical scenarios:
 \strong{6. Digital Mammography Screening}
 \itemize{
 \item Population: Women age 50-70 (recalled for further testing)
-\item Prevalence: 50\\% (enriched population)
+\item Prevalence: 50\% (enriched population)
 \item Purpose: Diagnostic with moderate precision
 \item Required N: 88 subjects
 }

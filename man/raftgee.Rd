@@ -118,6 +118,7 @@ times with emphasis on median survival relationships and time acceleration
 effects in clinical research applications.
 }
 \examples{
+\donttest{
 # Example 1: Basic rank-based AFT with GEE
 library(aftgee)
 library(survival)
@@ -131,5 +132,5 @@ raftgee(
     rank_method = "logrank",
     correlation_structure = "independence"
 )
-
+}
 }

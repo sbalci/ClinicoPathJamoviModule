@@ -107,7 +107,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p>", .("Welcome to the Advanced Ridge Plot analysis!"), "</p>",
 
                     "<div style='background:#f0f8ff; border-left:4px solid #2196F3; padding:15px; margin:15px 0;'>",
-                        "<h4 style='color:#2196F3; margin-top:0;'>📊 ", .("Clinical Guidance"), "</h4>",
+                        "<h4 style='color:#2196F3; margin-top:0;'> ", .("Clinical Guidance"), "</h4>",
                         "<p><strong>", .("When to Use Ridge Plots:"), "</strong></p>",
                         "<ul style='margin-bottom:10px;'>",
                             "<li>", .("Compare biomarker distributions between patient groups"), "</li>",
@@ -372,7 +372,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Build plain text summary
             text_summary <- paste0(
                 "<div style='background:#fff8e1; border:1px solid #ffc107; padding:15px; margin:10px 0; font-family:monospace;'>",
-                "<h4 style='color:#f57c00; margin-top:0;'>📋 Copy-Ready Report Summary</h4>",
+                "<h4 style='color:#f57c00; margin-top:0;'> Copy-Ready Report Summary</h4>",
                 "<p style='font-size:11px; color:#666; margin-bottom:10px;'>",
                 "Select and copy the text below for inclusion in reports or presentations.",
                 "</p>",
@@ -436,7 +436,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Comprehensive educational guide about ridge plots
             html <- paste0(
                 "<div style='background:#e8f5e9; border-left:4px solid #4caf50; padding:15px; margin:10px 0;'>",
-                "<h3 style='color:#2e7d32; margin-top:0;'>📚 About Ridge Plots</h3>",
+                "<h3 style='color:#2e7d32; margin-top:0;'> About Ridge Plots</h3>",
 
                 "<h4 style='color:#2e7d32;'>What are Ridge Plots?</h4>",
                 "<p>Ridge plots (also called ridgeline plots or joyplots) display the distribution of a ",
@@ -519,7 +519,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!has_stats) {
                 html <- paste0(
                     "<div style='background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#856404; margin-top:0;'>ℹ️ Statistical Testing Disabled</h4>",
+                    "<h4 style='color:#856404; margin-top:0;'> Statistical Testing Disabled</h4>",
                     "<p>Enable 'Show Statistics' to view statistical assumptions and methodological notes.</p>",
                     "</div>"
                 )
@@ -529,7 +529,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Build assumptions based on test type
             html <- paste0(
                 "<div style='background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:10px 0;'>",
-                "<h3 style='color:#856404; margin-top:0;'>⚠️ Statistical Assumptions & Caveats</h3>",
+                "<h3 style='color:#856404; margin-top:0;'> Statistical Assumptions & Caveats</h3>",
                 "<p><strong>Selected Test Type:</strong> ", tools::toTitleCase(gsub("_", " ", test_type)), "</p>"
             )
 
@@ -1992,7 +1992,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#e3f2fd; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<strong>🎨 ", .("Gradient Coloring:"), "</strong> ", .("Colors represent the value of"), " ", 
+                    "<strong> ", .("Gradient Coloring:"), "</strong> ", .("Colors represent the value of"), " ", 
                     self$options$x_var, " ", .("along each ridge, helping visualize how values are distributed within groups."), "</div>"
                 )
             }
@@ -2001,7 +2001,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#e8f5e8; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<strong>📊 ", .("Boxplots:"), "</strong> ", .("Show median (center line), quartiles (box boundaries), and outliers for each group."), " ",
+                    "<strong> ", .("Boxplots:"), "</strong> ", .("Show median (center line), quartiles (box boundaries), and outliers for each group."), " ",
                     .("Compare medians and quartile ranges across groups for clinical significance."), "</div>"
                 )
             }
@@ -2011,7 +2011,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#fff3e0; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<strong>📈 ", .("Statistical Tests:"), "</strong> ", .("Pairwise comparisons test whether group differences are statistically significant."), " ",
+                    "<strong> ", .("Statistical Tests:"), "</strong> ", .("Pairwise comparisons test whether group differences are statistically significant."), " ",
                     .("Consider effect sizes alongside p-values for clinical importance. Adjust for multiple comparisons when appropriate."), "</div>"
                 )
             }

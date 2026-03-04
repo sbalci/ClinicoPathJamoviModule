@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("advancedraincloud errors on missing required arguments", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -35,7 +34,6 @@ test_that("advancedraincloud errors on missing required arguments", {
 })
 
 test_that("advancedraincloud handles missing data correctly", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -51,7 +49,6 @@ test_that("advancedraincloud handles missing data correctly", {
 })
 
 test_that("advancedraincloud handles data with all NA in y_var", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   test_data_all_na <- advancedraincloud_test
@@ -68,7 +65,6 @@ test_that("advancedraincloud handles data with all NA in y_var", {
 })
 
 test_that("advancedraincloud handles small sample sizes", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -86,7 +82,6 @@ test_that("advancedraincloud handles small sample sizes", {
 })
 
 test_that("advancedraincloud handles single group", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -103,7 +98,6 @@ test_that("advancedraincloud handles single group", {
 })
 
 test_that("advancedraincloud handles constant y variable", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   constant_data <- advancedraincloud_test
@@ -120,7 +114,6 @@ test_that("advancedraincloud handles constant y variable", {
 })
 
 test_that("advancedraincloud handles variables with special characters", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   special_data <- advancedraincloud_test
@@ -139,7 +132,6 @@ test_that("advancedraincloud handles variables with special characters", {
 })
 
 test_that("advancedraincloud handles extreme values", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   extreme_data <- advancedraincloud_test
@@ -158,7 +150,6 @@ test_that("advancedraincloud handles extreme values", {
 })
 
 test_that("advancedraincloud handles negative values", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   negative_data <- advancedraincloud_test
@@ -176,7 +167,6 @@ test_that("advancedraincloud handles negative values", {
 })
 
 test_that("advancedraincloud handles zero values", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   zero_data <- advancedraincloud_test
@@ -192,7 +182,6 @@ test_that("advancedraincloud handles zero values", {
 })
 
 test_that("advancedraincloud handles factor vs character variables", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -218,7 +207,6 @@ test_that("advancedraincloud handles factor vs character variables", {
 })
 
 test_that("advancedraincloud handles unbalanced groups", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -239,7 +227,6 @@ test_that("advancedraincloud handles unbalanced groups", {
 })
 
 test_that("advancedraincloud handles numeric x_var", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -257,7 +244,6 @@ test_that("advancedraincloud handles numeric x_var", {
 })
 
 test_that("advancedraincloud handles longitudinal ID with missing connections", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -279,7 +265,6 @@ test_that("advancedraincloud handles longitudinal ID with missing connections", 
 })
 
 test_that("advancedraincloud handles log transform with zero values", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   zero_biomarker_data <- advancedraincloud_test
@@ -297,7 +282,6 @@ test_that("advancedraincloud handles log transform with zero values", {
 })
 
 test_that("advancedraincloud handles invalid clinical cutoff values", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -314,7 +298,6 @@ test_that("advancedraincloud handles invalid clinical cutoff values", {
 })
 
 test_that("advancedraincloud handles invalid MCID values", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -332,7 +315,6 @@ test_that("advancedraincloud handles invalid MCID values", {
 })
 
 test_that("advancedraincloud handles baseline_group not in data", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -349,7 +331,6 @@ test_that("advancedraincloud handles baseline_group not in data", {
 })
 
 test_that("advancedraincloud handles empty string labels", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -366,7 +347,6 @@ test_that("advancedraincloud handles empty string labels", {
 })
 
 test_that("advancedraincloud handles very long variable names", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   long_name_data <- advancedraincloud_test

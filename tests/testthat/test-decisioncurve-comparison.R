@@ -4,7 +4,6 @@ context("Decision Curve Analysis - Model Comparison")
 test_that("decisioncurve creates valid bootstrap comparisons", {
     testthat::skip_on_cran()
     skip_if_not_installed('jmvReadWrite')
-    devtools::load_all()
     
     # Load data
     data("histopathology", package = "ClinicoPath")

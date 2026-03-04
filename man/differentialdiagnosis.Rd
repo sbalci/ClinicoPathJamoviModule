@@ -137,6 +137,7 @@ evidence-based
 clinical decision support and diagnostic accuracy optimization.
 }
 \examples{
+\donttest{
 data('histopathology', package='ClinicoPath')
 
 # Basic differential diagnosis analysis
@@ -145,5 +146,5 @@ differentialdiagnosis(histopathology,
                     confirmedDiagnosis = 'Diagnosis',
                     diagnostic_probability = TRUE,
                     likelihood_ratios = TRUE)
-
+}
 }

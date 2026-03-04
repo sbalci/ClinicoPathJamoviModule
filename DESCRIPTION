@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.36
+Version: 0.0.37
 Date: 2026-03-04
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
@@ -266,7 +266,30 @@ Imports:
     PredictABEL,
     tools,
     base64enc,
-    CIfinder
+    CIfinder,
+    Epi,
+    FactoMineR,
+    GPArotation,
+    boot,
+    dbscan,
+    digest,
+    epitools,
+    ggridges,
+    gtExtras,
+    leaps,
+    magick,
+    mlr3pipelines,
+    pec,
+    pracma,
+    pwr,
+    reReg,
+    reticulate,
+    riskRegression,
+    survey,
+    sva,
+    timereg,
+    torch,
+    torchvision
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -285,13 +308,13 @@ Remotes:
     ClinicoPath/waffle
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression: xz
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests:
     rmarkdown,
     randomForestSRC,
     OncoDataSets,
-    digest,
     coxphw,
     flexsurvcure,
     cuRe,
@@ -301,8 +324,6 @@ Suggests:
     VGAM,
     effsize,
     testthat (>= 3.0.0),
-    pwr,
-    boot,
     jmvReadWrite,
     anytime,
     datefixR,
@@ -312,7 +333,8 @@ Suggests:
     logistf,
     naniar,
     parttree,
-    UpSetR
+    tiff,
+    quarto
 Config/testthat/edition: 3
 Collate: 
     '00jmv.R'

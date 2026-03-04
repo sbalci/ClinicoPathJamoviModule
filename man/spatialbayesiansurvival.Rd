@@ -201,6 +201,7 @@ disease mapping capabilities, and hierarchical Bayesian modeling for
 clinical research with geographic components.
 }
 \examples{
+\donttest{
 # Spatial Bayesian survival analysis
 spatialbayesiansurvival(
     data = clinical_data,
@@ -211,5 +212,5 @@ spatialbayesiansurvival(
     spatial_model = "car",
     mcmc_samples = 5000
 )
-
+}
 }

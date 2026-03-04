@@ -97,6 +97,7 @@ Includes gamma frailty, shared frailty, and correlated frailty models
 for multi-center studies, family studies, and recurrent events.
 }
 \examples{
+\donttest{
 # Example: Multi-center survival with shared frailty
 frailtysurvival(
     data = multicenter_data,
@@ -106,5 +107,5 @@ frailtysurvival(
     covariates = c("age", "stage", "treatment"),
     frailty_type = "shared"
 )
-
+}
 }

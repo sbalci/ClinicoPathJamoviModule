@@ -81,7 +81,7 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                 "<p style='margin: 0; color: #ef6c00;'><strong>Clinical Note:</strong> These diagnostics are essential for validating Cox model assumptions in clinical research. Violations may require model adjustments or alternative analytical approaches.</p>",
                 "</div>",
-                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'>💡 This module implements the diagnostic capabilities from GitHub Issue #61 using survminer's ggcoxdiagnostics.</p>",
+                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements the diagnostic capabilities from GitHub Issue #61 using survminer's ggcoxdiagnostics.</p>",
                 "</div>"
             )
             
@@ -341,10 +341,10 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Interpretation
                 any_violation <- any(zph$table[, "p"] < 0.05, na.rm = TRUE)
                 if (any_violation) {
-                    ph_html <- paste0(ph_html, "<p style='color: red; font-weight: bold;'>⚠️ Warning: Proportional hazards assumption may be violated (p < 0.05).</p>")
+                    ph_html <- paste0(ph_html, "<p style='color: red; font-weight: bold;'> Warning: Proportional hazards assumption may be violated (p < 0.05).</p>")
                     ph_html <- paste0(ph_html, "<p>Consider stratification, time-dependent covariates, or alternative models.</p>")
                 } else {
-                    ph_html <- paste0(ph_html, "<p style='color: green; font-weight: bold;'>✅ Proportional hazards assumption appears to hold (all p ≥ 0.05).</p>")
+                    ph_html <- paste0(ph_html, "<p style='color: green; font-weight: bold;'> Proportional hazards assumption appears to hold (all p ≥ 0.05).</p>")
                 }
                 
                 ph_html <- paste0(ph_html, "</div>")
@@ -422,13 +422,13 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     
                     # Determine status and color
                     if (vif_val >= threshold) {
-                        status <- "⚠️ High"
+                        status <- " High"
                         color <- "color: red; font-weight: bold;"
                     } else if (vif_val >= 2.5) {
-                        status <- "⚠️ Moderate"
+                        status <- " Moderate"
                         color <- "color: orange; font-weight: bold;"
                     } else {
-                        status <- "✅ Low"
+                        status <- " Low"
                         color <- "color: green;"
                     }
                     
@@ -451,7 +451,7 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Clinical recommendations
                 if (max_vif >= threshold) {
-                    vif_html <- paste0(vif_html, "<p style='color: red; font-weight: bold;'>⚠️ Warning: High multicollinearity detected!</p>")
+                    vif_html <- paste0(vif_html, "<p style='color: red; font-weight: bold;'> Warning: High multicollinearity detected!</p>")
                     vif_html <- paste0(vif_html, "<p><strong>Recommendations:</strong></p>")
                     vif_html <- paste0(vif_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
                     vif_html <- paste0(vif_html, "<li>Consider removing highly correlated variables</li>")
@@ -460,9 +460,9 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     vif_html <- paste0(vif_html, "<li>Combine correlated variables into composite scores</li>")
                     vif_html <- paste0(vif_html, "</ul>")
                 } else if (max_vif >= 2.5) {
-                    vif_html <- paste0(vif_html, "<p style='color: orange; font-weight: bold;'>⚠️ Moderate multicollinearity detected. Monitor carefully.</p>")
+                    vif_html <- paste0(vif_html, "<p style='color: orange; font-weight: bold;'> Moderate multicollinearity detected. Monitor carefully.</p>")
                 } else {
-                    vif_html <- paste0(vif_html, "<p style='color: green; font-weight: bold;'>✅ No significant multicollinearity detected.</p>")
+                    vif_html <- paste0(vif_html, "<p style='color: green; font-weight: bold;'> No significant multicollinearity detected.</p>")
                 }
                 
                 vif_html <- paste0(vif_html, "</div>")

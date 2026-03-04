@@ -235,12 +235,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Helper function to create clinical interpretation boxes
             .createInterpretationBox = function(title, content, warning = NULL) {
                 warning_html <- if (!is.null(warning)) {
-                    glue::glue('<div class="warning-box">⚠️ {warning}</div>')
+                    glue::glue('<div class="warning-box"> {warning}</div>')
                 } else ""
 
                 interpretation_html <- glue::glue(
                     '<div class="interpretation-box">
-                    <h4 class="interpretation-title">📊 {title}</h4>
+                    <h4 class="interpretation-title"> {title}</h4>
                     <div class="interpretation-content">{content}</div>
                     {warning_html}
                     </div>'
@@ -3766,19 +3766,19 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Cox Regression Explanation
                 private$.setExplanationContent("coxRegressionExplanation", '
                 <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Cox Regression for Continuous Variables</h3>
+                    <h3 style="color: #2c5282; margin-top: 0;"> Understanding Cox Regression for Continuous Variables</h3>
 
                     <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                         <h4 style="color: #2d3748; margin-top: 0;">What is Cox Regression with Continuous Variables?</h4>
                         <p style="margin: 8px 0;">Cox regression with continuous variables analyzes how <strong>each unit increase</strong> in a continuous predictor (e.g., age, biomarker level) affects survival risk.</p>
 
                         <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>💡 Key Concept:</strong> Unlike categorical variables, continuous variables provide a <strong>dose-response relationship</strong> - showing how risk changes smoothly across the entire range of values.
+                            <strong> Key Concept:</strong> Unlike categorical variables, continuous variables provide a <strong>dose-response relationship</strong> - showing how risk changes smoothly across the entire range of values.
                         </div>
                     </div>
 
                     <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #d68910; margin-top: 0;">🎯 Interpreting Hazard Ratios (HR)</h4>
+                        <h4 style="color: #d68910; margin-top: 0;"> Interpreting Hazard Ratios (HR)</h4>
                         <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                             <tr style="background-color: #fff3cd;">
                                 <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">HR Value</th>
@@ -3804,7 +3804,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #2e7d32; margin-top: 0;">📈 Clinical Examples</h4>
+                        <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Examples</h4>
 
                         <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                             <strong>Example 1: Age and Cancer Survival</strong>
@@ -3827,7 +3827,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                        <strong>⚠️ Important Assumptions:</strong>
+                        <strong> Important Assumptions:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li><strong>Linear relationship:</strong> Effect is constant across all values (may not always be true)</li>
                             <li><strong>Proportional hazards:</strong> Relative effect stays constant over time</li>
@@ -3840,19 +3840,19 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Cut-off Point Analysis Explanation
                 private$.setExplanationContent("cutoffAnalysisExplanation", '
                 <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <h3 style="color: #2c5282; margin-top: 0;">✂️ Understanding Cut-off Point Analysis</h3>
+                    <h3 style="color: #2c5282; margin-top: 0;"> Understanding Cut-off Point Analysis</h3>
 
                     <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                         <h4 style="color: #2d3748; margin-top: 0;">What is Cut-off Point Analysis?</h4>
                         <p style="margin: 8px 0;">Cut-off analysis transforms a <strong>continuous variable into binary groups</strong> (high vs low) by finding the optimal threshold that best separates patients with different survival outcomes.</p>
 
                         <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>🎯 Goal:</strong> Find the value that creates two groups with the <strong>maximum survival difference</strong>
+                            <strong> Goal:</strong> Find the value that creates two groups with the <strong>maximum survival difference</strong>
                         </div>
                     </div>
 
                     <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #d68910; margin-top: 0;">📊 How It Works</h4>
+                        <h4 style="color: #d68910; margin-top: 0;"> How It Works</h4>
 
                         <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                             <strong>1. Maximally Selected Rank Statistics Method:</strong>
@@ -3889,10 +3889,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #2e7d32; margin-top: 0;">🏥 Clinical Benefits</h4>
+                        <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Benefits</h4>
 
                         <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>✅ Advantages:</strong>
+                            <strong> Advantages:</strong>
                             <ul style="margin: 5px 0; padding-left: 20px;">
                                 <li><strong>Simple decision-making:</strong> "High" vs "Low" is easier than continuous values</li>
                                 <li><strong>Risk stratification:</strong> Clear groups for treatment planning</li>
@@ -3902,7 +3902,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         </div>
 
                         <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>💡 Clinical Example:</strong>
+                            <strong> Clinical Example:</strong>
                             <p style="margin: 5px 0;">Biomarker X optimal cut-off = 25.3 ng/mL</p>
                             <ul style="margin: 5px 0; padding-left: 20px;">
                                 <li>High group (≥25.3): 40% 5-year survival</li>
@@ -3913,7 +3913,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style="background-color: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #c62828; margin-top: 0;">⚠️ Important Limitations</h4>
+                        <h4 style="color: #c62828; margin-top: 0;"> Important Limitations</h4>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li><strong>Data-dependent:</strong> Optimal cut-off may vary between studies</li>
                             <li><strong>Information loss:</strong> Converting continuous to binary loses precision</li>
@@ -3923,7 +3923,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                        <strong>💡 Best Practices:</strong>
+                        <strong> Best Practices:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>Validate cut-off in independent cohort when possible</li>
                             <li>Consider clinical relevance, not just statistical significance</li>
@@ -3997,14 +3997,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Survival Plots Explanation
                 private$.setExplanationContent("survivalPlotsExplanation", '
                 <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Survival Curves for Continuous Variables</h3>
+                    <h3 style="color: #2c5282; margin-top: 0;"> Understanding Survival Curves for Continuous Variables</h3>
 
                     <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #2d3748; margin-top: 0;">📈 Survival Curves with Cut-offs</h4>
+                        <h4 style="color: #2d3748; margin-top: 0;"> Survival Curves with Cut-offs</h4>
                         <p style="margin: 8px 0;">When analyzing continuous variables, survival plots show <strong>separate curves for high vs low groups</strong> based on the optimal cut-off value.</p>
 
                         <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>📖 How to Read the Plot:</strong>
+                            <strong> How to Read the Plot:</strong>
                             <ul style="margin: 5px 0; padding-left: 20px;">
                                 <li><strong>Two curves:</strong> High group (above cut-off) vs Low group (below cut-off)</li>
                                 <li><strong>Separation:</strong> Wider gap between curves = stronger prognostic effect</li>
@@ -4015,36 +4015,36 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #d68910; margin-top: 0;">🔍 Curve Interpretation Patterns</h4>
+                        <h4 style="color: #d68910; margin-top: 0;"> Curve Interpretation Patterns</h4>
                         <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                             <tr style="background-color: #fff3cd;">
                                 <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Pattern</th>
                                 <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Meaning</th>
                             </tr>
                             <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>📏 Wide separation early</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Wide separation early</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Strong early prognostic effect</td>
                             </tr>
                             <tr style="background-color: #fffbf0;">
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>📈 Curves converge later</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Curves converge later</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Effect diminishes over time</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>↔ Parallel curves</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Parallel curves</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Consistent proportional hazards</td>
                             </tr>
                             <tr style="background-color: #fffbf0;">
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>✖ Crossing curves</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Crossing curves</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Time-dependent effects (complex interpretation)</td>
                             </tr>
                         </table>
                     </div>
 
                     <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                        <h4 style="color: #2e7d32; margin-top: 0;">💡 Clinical Application Tips</h4>
+                        <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Application Tips</h4>
 
                         <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>🎯 Risk Stratification:</strong>
+                            <strong> Risk Stratification:</strong>
                             <ul style="margin: 5px 0; padding-left: 20px;">
                                 <li>High group: May need more intensive monitoring/treatment</li>
                                 <li>Low group: Could be suitable for less intensive approaches</li>
@@ -4053,7 +4053,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         </div>
 
                         <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                            <strong>📊 Biomarker Validation:</strong>
+                            <strong> Biomarker Validation:</strong>
                             <p style="margin: 5px 0;">Strong separation with p<0.001 suggests the biomarker could be clinically useful for:</p>
                             <ul style="margin: 5px 0; padding-left: 20px;">
                                 <li>Patient counseling about prognosis</li>
@@ -4064,7 +4064,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                        <strong>⚠️ Important Considerations:</strong>
+                        <strong> Important Considerations:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li><strong>Cut-off validation:</strong> Confirm cut-off value in independent dataset</li>
                             <li><strong>Clinical relevance:</strong> Ensure the difference is clinically meaningful</li>

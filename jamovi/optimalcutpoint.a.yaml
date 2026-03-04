@@ -14,7 +14,7 @@ description:
         continuous measurements to clinically actionable thresholds and 
         preventing arbitrary cutpoint selection in pathology studies.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('histopathology')
             

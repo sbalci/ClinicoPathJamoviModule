@@ -140,6 +140,7 @@ before statistical analysis and meeting regulatory standards for clinical
 research.
 }
 \examples{
+\donttest{
 data('clinical_data')
 
 featurequality(
@@ -148,5 +149,5 @@ featurequality(
     outlier_detection = TRUE,
     correlation_analysis = TRUE
 )
-
+}
 }

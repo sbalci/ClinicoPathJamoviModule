@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjdotplotstats handles missing data correctly", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -25,7 +23,6 @@ test_that("jjdotplotstats handles missing data correctly", {
 })
 
 test_that("jjdotplotstats handles data with high proportion of missing values", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -45,7 +42,6 @@ test_that("jjdotplotstats handles data with high proportion of missing values", 
 })
 
 test_that("jjdotplotstats handles small sample sizes", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -62,7 +58,6 @@ test_that("jjdotplotstats handles small sample sizes", {
 })
 
 test_that("jjdotplotstats handles minimal sample size per group (n=5)", {
-  devtools::load_all()
 
   data(jjdotplotstats_twogroup)
 
@@ -79,7 +74,6 @@ test_that("jjdotplotstats handles minimal sample size per group (n=5)", {
 })
 
 test_that("jjdotplotstats handles very small groups (n=3)", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -96,7 +90,6 @@ test_that("jjdotplotstats handles very small groups (n=3)", {
 })
 
 test_that("jjdotplotstats handles constant variables", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -115,7 +108,6 @@ test_that("jjdotplotstats handles constant variables", {
 })
 
 test_that("jjdotplotstats handles near-constant variables", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -134,7 +126,6 @@ test_that("jjdotplotstats handles near-constant variables", {
 })
 
 test_that("jjdotplotstats handles extreme outliers", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -171,7 +162,6 @@ test_that("jjdotplotstats handles extreme outliers", {
 })
 
 test_that("jjdotplotstats handles highly skewed data", {
-  devtools::load_all()
 
   data(jjdotplotstats_skewed)
 
@@ -195,7 +185,6 @@ test_that("jjdotplotstats handles highly skewed data", {
 })
 
 test_that("jjdotplotstats handles negative values", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -213,7 +202,6 @@ test_that("jjdotplotstats handles negative values", {
 })
 
 test_that("jjdotplotstats handles variables with special characters in names", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -232,7 +220,6 @@ test_that("jjdotplotstats handles variables with special characters in names", {
 })
 
 test_that("jjdotplotstats handles unbalanced groups", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -249,7 +236,6 @@ test_that("jjdotplotstats handles unbalanced groups", {
 })
 
 test_that("jjdotplotstats handles very unbalanced groups (extreme)", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -266,7 +252,6 @@ test_that("jjdotplotstats handles very unbalanced groups (extreme)", {
 })
 
 test_that("jjdotplotstats handles all missing in one group", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -285,7 +270,6 @@ test_that("jjdotplotstats handles all missing in one group", {
 })
 
 test_that("jjdotplotstats handles very wide range of values", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -303,7 +287,6 @@ test_that("jjdotplotstats handles very wide range of values", {
 })
 
 test_that("jjdotplotstats handles very small decimal values", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -321,7 +304,6 @@ test_that("jjdotplotstats handles very small decimal values", {
 })
 
 test_that("jjdotplotstats handles integer vs numeric variables", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -339,7 +321,6 @@ test_that("jjdotplotstats handles integer vs numeric variables", {
 })
 
 test_that("jjdotplotstats handles grouped analysis with many groups", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -360,7 +341,6 @@ test_that("jjdotplotstats handles grouped analysis with many groups", {
 })
 
 test_that("jjdotplotstats handles grouped analysis with small groups", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -378,7 +358,6 @@ test_that("jjdotplotstats handles grouped analysis with small groups", {
 })
 
 test_that("jjdotplotstats handles Inf and -Inf values", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -398,7 +377,6 @@ test_that("jjdotplotstats handles Inf and -Inf values", {
 })
 
 test_that("jjdotplotstats handles NaN values", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -417,7 +395,6 @@ test_that("jjdotplotstats handles NaN values", {
 })
 
 test_that("jjdotplotstats handles test value at extreme of data range", {
-  devtools::load_all()
 
   data(jjdotplotstats_reference)
 
@@ -443,7 +420,6 @@ test_that("jjdotplotstats handles test value at extreme of data range", {
 })
 
 test_that("jjdotplotstats handles test value equal to all data points", {
-  devtools::load_all()
 
   data(jjdotplotstats_reference)
 
@@ -462,7 +438,6 @@ test_that("jjdotplotstats handles test value equal to all data points", {
 })
 
 test_that("jjdotplotstats handles zero test value", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -478,7 +453,6 @@ test_that("jjdotplotstats handles zero test value", {
 })
 
 test_that("jjdotplotstats handles negative test value", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -494,7 +468,6 @@ test_that("jjdotplotstats handles negative test value", {
 })
 
 test_that("jjdotplotstats handles single observation per group", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -512,7 +485,6 @@ test_that("jjdotplotstats handles single observation per group", {
 })
 
 test_that("jjdotplotstats handles perfect separation between groups", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -532,7 +504,6 @@ test_that("jjdotplotstats handles perfect separation between groups", {
 })
 
 test_that("jjdotplotstats handles complete overlap between groups", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -550,7 +521,6 @@ test_that("jjdotplotstats handles complete overlap between groups", {
 })
 
 test_that("jjdotplotstats handles bounded data (0-100)", {
-  devtools::load_all()
 
   data(jjdotplotstats_qol)
 
@@ -566,7 +536,6 @@ test_that("jjdotplotstats handles bounded data (0-100)", {
 })
 
 test_that("jjdotplotstats handles data at boundaries", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 

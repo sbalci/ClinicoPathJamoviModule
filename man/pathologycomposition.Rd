@@ -46,10 +46,10 @@ composition patterns}
 \item{confidence_level}{Confidence level for risk estimates and intervals}
 
 \item{low_risk_threshold}{Maximum risk probability for low-risk
-classification (5\\% = 0.05)}
+classification (5 percent = 0.05)}
 
 \item{high_risk_threshold}{Minimum risk probability for high-risk
-classification (20\\% = 0.20)}
+classification (20 percent = 0.20)}
 
 \item{min_group_size}{Minimum number of cases required for composition
 pattern analysis}
@@ -87,6 +87,7 @@ composition
 pattern analysis, and optimal threshold identification.
 }
 \examples{
+\donttest{
 data('pathology_data')
 
 pathologycomposition(data = pathology_data,
@@ -94,5 +95,5 @@ pathologycomposition(data = pathology_data,
                     component1 = signet_ring_cells,
                     component2 = poorly_differentiated,
                     composition_analysis = TRUE)
-
+}
 }

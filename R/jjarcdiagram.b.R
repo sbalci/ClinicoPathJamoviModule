@@ -90,7 +90,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     warning(paste("Report generation failed:", e$message))
                     # Set fallback content
                     fallback_html <- paste(
-                        .("<h3>📄 Analysis Summary</h3>"),
+                        .("<h3> Analysis Summary</h3>"),
                         "<div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;'>",
                         .("<p><strong>Status:</strong> Network analysis completed successfully.</p>"),
                         .("<p><strong>Note:</strong> Detailed summary generation encountered an issue. Basic network visualization is available above.</p>"),
@@ -109,9 +109,9 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Update todo with processing status
             todo <- glue::glue(
                 .("<br>Network Analysis Complete
-                <br>📊 Nodes: {network_data$n_nodes}
-                <br>🔗 Edges: {network_data$n_edges}
-                <br>📈 Density: {round(network_data$density, 3)}
+                <br> Nodes: {network_data$n_nodes}
+                <br> Edges: {network_data$n_edges}
+                <br> Density: {round(network_data$density, 3)}
                 <br><hr>")
             )
             self$results$todo$setContent(todo)
@@ -165,10 +165,10 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             preset_guidance <- private$.getPresetGuidance()
             
             instructions <- paste(
-                .("<h3>🌐 Arc Diagram Network Visualization</h3>"),
+                .("<h3> Arc Diagram Network Visualization</h3>"),
                 preset_guidance,
                 
-                .("<h4>📋 Getting Started:</h4>"),
+                .("<h4> Getting Started:</h4>"),
                 "<ul>",
                 .("<li><strong>Source Node:</strong> Select the variable representing connection origins</li>"),
                 .("<li><strong>Target Node:</strong> Select the variable representing connection destinations</li>"),
@@ -176,7 +176,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("<li><strong>Node Groups:</strong> Optional categorical variable for color coding</li>"),
                 "</ul>",
                 
-                .("<h4>🎨 Customization Options:</h4>"),
+                .("<h4> Customization Options:</h4>"),
                 "<ul>",
                 .("<li><strong>Layout:</strong> Choose horizontal or vertical arrangement</li>"),
                 .("<li><strong>Node Sizing:</strong> Fixed size or proportional to degree centrality</li>"),
@@ -185,14 +185,14 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("<li><strong>Color Schemes:</strong> Multiple palettes for different node groups</li>"),
                 "</ul>",
                 
-                .("<h4>📊 Network Metrics:</h4>"),
+                .("<h4> Network Metrics:</h4>"),
                 "<ul>",
                 .("<li><strong>Density:</strong> Measure of network connectivity</li>"),
                 .("<li><strong>Centrality:</strong> Node importance in the network</li>"),
                 .("<li><strong>Communities:</strong> Group structure detection</li>"),
                 "</ul>",
                 
-                .("<p><em>💡 Tip: Arc diagrams are ideal for visualizing hierarchical or sequential relationships with minimal visual clutter.</em></p>"),
+                .("<p><em> Tip: Arc diagrams are ideal for visualizing hierarchical or sequential relationships with minimal visual clutter.</em></p>"),
                 sep = "\n"
             )
             return(instructions)
@@ -205,7 +205,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             guidance <- switch(preset,
                 "gene_interaction" = paste(
                     "<div style='background-color: #e8f5e8; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50;'>",
-                    .("<h4>🧬 Gene Interaction Network Analysis</h4>"),
+                    .("<h4> Gene Interaction Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Gene regulatory relationships, protein interactions, pathway analysis</p>"),
                     .("<p><strong>Recommendations:</strong> Use gene symbols as nodes, interaction scores as weights, pathways/functions as groups</p>"),
                     .("<p><strong>Suggested Settings:</strong> Sort by group, enable statistics, use degree-based node sizing</p>"),
@@ -214,7 +214,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ),
                 "patient_network" = paste(
                     "<div style='background-color: #e3f2fd; padding: 10px; margin: 10px 0; border-left: 4px solid #2196F3;'>",
-                    .("<h4>👥 Patient Similarity Network Analysis</h4>"),
+                    .("<h4> Patient Similarity Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Patient similarity, treatment response, clinical outcomes</p>"),
                     .("<p><strong>Recommendations:</strong> Use patient IDs as nodes, similarity scores as weights, clinical subtypes as groups</p>"),
                     .("<p><strong>Suggested Settings:</strong> Sort by group, enable statistics, use horizontal layout</p>"),
@@ -223,7 +223,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ),
                 "pathway_network" = paste(
                     "<div style='background-color: #fff3e0; padding: 10px; margin: 10px 0; border-left: 4px solid #ff9800;'>",
-                    .("<h4>🔬 Biological Pathway Network Analysis</h4>"),
+                    .("<h4> Biological Pathway Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Pathway interactions, biological processes, functional modules</p>"),
                     .("<p><strong>Recommendations:</strong> Use pathway names as nodes, interaction strength as weights, functional categories as groups</p>"),
                     .("<p><strong>Suggested Settings:</strong> Sort by degree, enable statistics, use weight-based arc widths</p>"),
@@ -232,7 +232,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ),
                 "comorbidity_network" = paste(
                     "<div style='background-color: #fce4ec; padding: 10px; margin: 10px 0; border-left: 4px solid #e91e63;'>",
-                    .("<h4>🏥 Disease Co-occurrence Network Analysis</h4>"),
+                    .("<h4> Disease Co-occurrence Network Analysis</h4>"),
                     .("<p><strong>Optimized for:</strong> Disease associations, comorbidity patterns, epidemiological analysis</p>"),
                     .("<p><strong>Recommendations:</strong> Use disease codes/names as nodes, co-occurrence frequency as weights, disease categories as groups</p>"),
                     .("<p><strong>Suggested Settings:</strong> Sort by degree, enable statistics, use weight-based arc widths</p>"),
@@ -859,7 +859,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             connectivity_interp <- ifelse(igraph::is_connected(g), .("fully connected network"), .("network with isolated components"))
             
             stats_text <- paste(
-                .("<h3>📊 Network Statistics</h3>"),
+                .("<h3> Network Statistics</h3>"),
                 .("<h4>Basic Metrics:</h4>"),
                 "<ul>",
                 paste(.("<li><strong>Number of Nodes:</strong>"), network_data$n_nodes, "</li>"),
@@ -872,15 +872,15 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add clinical interpretation summary
             clinical_summary <- paste(
-                .("<h4>📋 Clinical Interpretation:</h4>"),
+                .("<h4> Clinical Interpretation:</h4>"),
                 "<div style='background-color: #f0f8ff; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50;'>",
                 sprintf(.("<p><strong>Network Overview:</strong> This network contains %d entities with %d relationships, showing %s connectivity (density = %.3f).</p>"), 
                         network_data$n_nodes, network_data$n_edges, density_interp, network_data$density),
                 ifelse(network_data$density < 0.1, 
-                       .("<p><strong>💡 Insight:</strong> Sparse networks may indicate specialized or selective relationships between entities.</p>"),
+                       .("<p><strong> Insight:</strong> Sparse networks may indicate specialized or selective relationships between entities.</p>"),
                        ifelse(network_data$density > 0.5,
-                              .("<p><strong>💡 Insight:</strong> Dense networks suggest strong interconnectedness, possibly indicating shared pathways or common mechanisms.</p>"),
-                              .("<p><strong>💡 Insight:</strong> Moderate connectivity suggests a balanced network structure with both specialized and shared relationships.</p>"))),
+                              .("<p><strong> Insight:</strong> Dense networks suggest strong interconnectedness, possibly indicating shared pathways or common mechanisms.</p>"),
+                              .("<p><strong> Insight:</strong> Moderate connectivity suggests a balanced network structure with both specialized and shared relationships.</p>"))),
                 "</div>",
                 sep = "\n"
             )
@@ -930,7 +930,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is_connected) {
                     stats_text <- paste(stats_text,
                         "<div style='background-color: #fff3cd; padding: 8px; margin: 8px 0; border-left: 4px solid #ffc107;'>",
-                        .("<p><strong>⚠️ Disconnected Network:</strong> This network contains isolated components. Centrality measures (betweenness, closeness) may be less meaningful. Nodes unreachable from others are assigned zero centrality.</p>"),
+                        .("<p><strong> Disconnected Network:</strong> This network contains isolated components. Centrality measures (betweenness, closeness) may be less meaningful. Nodes unreachable from others are assigned zero centrality.</p>"),
                         "</div>",
                         sep = "\n"
                     )
@@ -949,7 +949,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Fallback if no valid centrality values
                     stats_text <- paste(stats_text,
                         "<div style='background-color: #f8d7da; padding: 8px; margin: 8px 0; border-left: 4px solid #dc3545;'>",
-                        .("<p><strong>❌ Error:</strong> Could not calculate valid centrality measures. Network may be too disconnected or contain invalid data.</p>"),
+                        .("<p><strong> Error:</strong> Could not calculate valid centrality measures. Network may be too disconnected or contain invalid data.</p>"),
                         "</div>",
                         sep = "\n"
                     )
@@ -969,13 +969,13 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add centrality interpretation
                 centrality_interp <- paste(
                     "<div style='background-color: #fff5f5; padding: 8px; margin: 8px 0; border-left: 4px solid #FF6B6B;'>",
-                    sprintf(.("<p><strong>🎯 Key Players:</strong> '%s' is the most connected entity (%.2f %s), suggesting it may be a hub or central player.</p>"),
+                    sprintf(.("<p><strong> Key Players:</strong> '%s' is the most connected entity (%.2f %s), suggesting it may be a hub or central player.</p>"),
                             highest_degree_node, max_degree, degree_label),
                     if (highest_betweenness_node != highest_degree_node) {
-                        sprintf(.("<p><strong>🌉 Bridge Entity:</strong> '%s' has the highest betweenness centrality, indicating it serves as an important bridge between different network regions.</p>"),
+                        sprintf(.("<p><strong> Bridge Entity:</strong> '%s' has the highest betweenness centrality, indicating it serves as an important bridge between different network regions.</p>"),
                                 highest_betweenness_node)
                     } else {
-                        .("<p><strong>🌟 Central Hub:</strong> The same entity serves as both the most connected node and the main bridge in the network.</p>")
+                        .("<p><strong> Central Hub:</strong> The same entity serves as both the most connected node and the main bridge in the network.</p>")
                     },
                     "</div>",
                     sep = "\n"
@@ -1003,10 +1003,10 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to create assumptions and guidelines
         .createAssumptions = function() {
             assumptions <- paste(
-                .("<h3>📋 Network Analysis Assumptions & Guidelines</h3>"),
+                .("<h3> Network Analysis Assumptions & Guidelines</h3>"),
                 "<div style='background-color: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px;'>",
 
-                .("<h4>📊 Data Requirements:</h4>"),
+                .("<h4> Data Requirements:</h4>"),
                 "<ul style='margin-left: 20px;'>",
                 .("<li><strong>Data Format:</strong> Each row represents one relationship/connection</li>"),
                 .("<li><strong>Node Variables:</strong> Source and Target must be categorical (factors)</li>"),
@@ -1014,7 +1014,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("<li><strong>Missing Data:</strong> Rows with missing source/target values are automatically excluded</li>"),
                 "</ul>",
 
-                .("<h4>🎯 Network Analysis Guidelines:</h4>"),
+                .("<h4> Network Analysis Guidelines:</h4>"),
                 "<ul style='margin-left: 20px;'>",
                 .("<li><strong>Network Size:</strong> Optimal range is 10-1000 nodes for meaningful analysis</li>"),
                 .("<li><strong>Self-loops:</strong> Connections from a node to itself are automatically detected and removed</li>"),
@@ -1023,7 +1023,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("<li><strong>Isolated Nodes:</strong> Entities with no connections appear only if referenced; unreachable nodes get zero centrality</li>"),
                 "</ul>",
 
-                .("<h4>📈 Interpretation Notes:</h4>"),
+                .("<h4> Interpretation Notes:</h4>"),
                 "<ul style='margin-left: 20px;'>",
                 .("<li><strong>Network Density:</strong> 0-0.2 (sparse), 0.2-0.5 (moderate), >0.5 (dense). Aggregating duplicate edges ensures density ≤ 1.0</li>"),
                 .("<li><strong>Degree Centrality:</strong> Number of direct connections (hub identification). For weighted networks, uses strength (sum of weights)</li>"),
@@ -1032,7 +1032,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("<li><strong>Connected Components:</strong> Isolated subnetworks may indicate distinct functional modules. Warnings issued for disconnected graphs</li>"),
                 "</ul>",
 
-                .("<h4>⚠️ Common Pitfalls & Important Notes:</h4>"),
+                .("<h4> Common Pitfalls & Important Notes:</h4>"),
                 "<ul style='margin-left: 20px;'>",
                 .("<li><strong>Small Networks:</strong> Centrality measures less reliable with < 10 nodes (warning issued)</li>"),
                 .("<li><strong>Duplicate Edges:</strong> If not aggregated, density can exceed 1.0 and centrality measures may be inflated. Enable 'Aggregate Duplicate Edges' to fix this</li>"),
@@ -1067,7 +1067,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Create the copy-ready sentence
             report_html <- paste(
-                .("<h3>📄 Copy-Ready Analysis Summary</h3>"),
+                .("<h3> Copy-Ready Analysis Summary</h3>"),
                 "<div style='background-color: #e8f5e8; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #4CAF50;'>",
                 
                 sprintf(.("<p><strong>Network Summary:</strong> Arc diagram analysis of a %s network revealed %d entities connected by %d relationships, with a network density of %.3f indicating %s structure.</p>"),
@@ -1098,7 +1098,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ""
                 },
                 
-                .("<p><em>💡 Tip: Copy the text above for use in reports, presentations, or publications.</em></p>"),
+                .("<p><em> Tip: Copy the text above for use in reports, presentations, or publications.</em></p>"),
                 "</div>",
                 sep = "\n"
             )
@@ -1109,7 +1109,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to generate glossary panel
         .generateGlossary = function() {
             glossary_html <- paste(
-                .("<h3>📖 Network Analysis Glossary</h3>"),
+                .("<h3> Network Analysis Glossary</h3>"),
                 "<div style='background-color: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
 
                 "<dl style='margin: 0;'>",
@@ -1167,7 +1167,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</dl>",
 
                 "<p style='margin-top: 15px; font-style: italic; color: #666;'>",
-                .("💡 Tip: Use this glossary as a quick reference when interpreting network statistics and visualizations."),
+                .(" Tip: Use this glossary as a quick reference when interpreting network statistics and visualizations."),
                 "</p>",
 
                 "</div>",

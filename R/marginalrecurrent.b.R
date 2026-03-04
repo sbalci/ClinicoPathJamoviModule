@@ -27,7 +27,7 @@ marginalrecurrentClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h1>📊 Marginal Models for Recurrent Events Analysis</h1>
+                    <h1> Marginal Models for Recurrent Events Analysis</h1>
                     
                     <div class='info'>
                     <strong>Welcome to Marginal Models for Recurrent Events Analysis</strong><br>
@@ -40,17 +40,17 @@ marginalrecurrentClass <- R6::R6Class(
                     </ul>
                     </div>
 
-                    <h2>📋 Required Variables:</h2>
+                    <h2> Required Variables:</h2>
                     <div class='step'><strong>1. Subject ID:</strong> Unique identifier for each subject/patient</div>
                     <div class='step'><strong>2. Event Time:</strong> Time of each recurrent event occurrence</div>
                     <div class='step'><strong>3. Event Indicator:</strong> Binary indicator (1=event occurred, 0=censored)</div>
                     
-                    <h2>📊 Optional Variables:</h2>
+                    <h2> Optional Variables:</h2>
                     <div class='step'><strong>Terminal Event Time:</strong> Time of terminal event (death, cure, etc.)</div>
                     <div class='step'><strong>Terminal Event Indicator:</strong> Binary indicator for terminal event</div>
                     <div class='step'><strong>Covariates:</strong> Variables that may affect the recurrence rate</div>
 
-                    <h2>🔍 Model Types Available:</h2>
+                    <h2> Model Types Available:</h2>
                     <div class='formula'>
                     <strong>Marginal Rate Model:</strong> λ(t|X) = λ₀(t) exp(βᵀX)<br>
                     <strong>Accelerated Rate Model:</strong> λ(t|X) = λ₀(t exp(βᵀX)) exp(βᵀX)<br>
@@ -58,7 +58,7 @@ marginalrecurrentClass <- R6::R6Class(
                     </div>
 
                     <div class='interpretation'>
-                    <strong>📊 Analysis Output:</strong><br>
+                    <strong> Analysis Output:</strong><br>
                     • Model coefficient estimates with confidence intervals<br>
                     • Cumulative rate function estimates<br>
                     • Survival function for terminal events<br>
@@ -67,7 +67,7 @@ marginalrecurrentClass <- R6::R6Class(
                     • Bootstrap confidence intervals when requested
                     </div>
 
-                    <p><strong>👆 Please assign the required variables to continue with the analysis.</strong></p>
+                    <p><strong> Please assign the required variables to continue with the analysis.</strong></p>
                     </body>
                     </html>"
                 )
@@ -650,7 +650,7 @@ marginalrecurrentClass <- R6::R6Class(
             </head>
             <body>
             
-            <h3>📚 Understanding Marginal Models for Recurrent Events</h3>
+            <h3> Understanding Marginal Models for Recurrent Events</h3>
             
             <div class='section'>
             <strong>What are Marginal Models?</strong><br>
@@ -725,7 +725,7 @@ marginalrecurrentClass <- R6::R6Class(
             </head>
             <body>
             
-            <h3>📊 Results Interpretation</h3>
+            <h3> Results Interpretation</h3>
             
             <div class='summary'>
             <strong>Model Summary:</strong><br>
@@ -736,7 +736,7 @@ marginalrecurrentClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>📈 Key Findings:</strong><br>
+            <strong> Key Findings:</strong><br>
             • The model estimates the rate of recurrent events over time<br>
             • Coefficients represent the log-rate ratio for each covariate<br>
             • Positive coefficients indicate increased event rates<br>
@@ -744,7 +744,7 @@ marginalrecurrentClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>🔍 Clinical Interpretation:</strong><br>
+            <strong> Clinical Interpretation:</strong><br>
             • <strong>Rate ratios:</strong> exp(coefficient) gives the multiplicative effect on event rate<br>
             • <strong>Cumulative rate:</strong> Expected number of events by each time point<br>
             • <strong>Population average:</strong> Results apply to the average subject in the population<br>
@@ -752,7 +752,7 @@ marginalrecurrentClass <- R6::R6Class(
             </div>
 
             <div class='warning'>
-            <strong>⚠️ Important Considerations:</strong><br>
+            <strong> Important Considerations:</strong><br>
             • Verify that the proportional rate assumption is reasonable<br>
             • Check goodness-of-fit to assess model adequacy<br>
             • Consider terminal events if they affect recurrent event processes<br>

@@ -24,7 +24,7 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li><strong>Statistics:</strong> Automatic counts, percentages, and totals</li>",
                 "<li><strong>Excel Export:</strong> Direct export capability for publications</li>",
                 "</ul>",
-                "<p style='margin: 5px 0; color: #6c757d;'><em>💡 Tip: This module uses pivottabler for enhanced flexibility and professional formatting</em></p>",
+                "<p style='margin: 5px 0; color: #6c757d;'><em> Tip: This module uses pivottabler for enhanced flexibility and professional formatting</em></p>",
                 "</div>"
             )
             

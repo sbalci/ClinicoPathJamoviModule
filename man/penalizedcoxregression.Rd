@@ -92,6 +92,7 @@ Key features:
 }
 }
 \examples{
+\donttest{
 # Penalized Cox regression with LASSO
 penalizedcoxregression(
     data = data,
@@ -101,5 +102,5 @@ penalizedcoxregression(
     penaltyType = "lasso",
     crossValidation = TRUE
 )
-
+}
 }

@@ -632,6 +632,7 @@ treecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Compare multiple tree algorithms
 #' treecomparison(
 #'     data = clinical_data,
@@ -642,7 +643,7 @@ treecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     algorithms = c("cart", "rf", "gbm"),
 #'     validation = "repeated_cv"
 #' )
-#'
+#'}
 #' @param data The data as a data frame for algorithm comparison.
 #' @param vars .
 #' @param facs .

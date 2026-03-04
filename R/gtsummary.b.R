@@ -26,11 +26,11 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 <br><h4>Features:</h4>
                 <ul>
-                <li>📊 Professional publication-ready tables</li>
-                <li>📈 Automatic statistical testing</li>
-                <li>🎨 Extensive formatting options</li>
-                <li>📋 Multiple output formats (HTML, LaTeX, Word)</li>
-                <li>✨ Built on the powerful gtsummary R package</li>
+                <li> Professional publication-ready tables</li>
+                <li> Automatic statistical testing</li>
+                <li> Extensive formatting options</li>
+                <li> Multiple output formats (HTML, LaTeX, Word)</li>
+                <li> Built on the powerful gtsummary R package</li>
                 </ul>
                 "
                 self$results$todo$setVisible(TRUE)

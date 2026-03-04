@@ -12,7 +12,7 @@ description:
         of parametric baseline distributions combined with frailty components to model
         unobserved heterogeneity between clusters or individuals.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('lung', package='survival')
             

@@ -23,7 +23,7 @@ description:
         probabilities, mean sojourn times, and transition-specific hazard ratios
         with clinical interpretation frameworks for evidence-based medicine.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- illnessdeath(
                 data = mydata,

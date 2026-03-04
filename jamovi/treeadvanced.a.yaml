@@ -13,7 +13,7 @@ description:
         validation methods, hyperparameter tuning, and detailed clinical performance
         assessment for medical research and clinical decision support.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Advanced analysis with hyperparameter tuning
             tree_advanced(
@@ -265,7 +265,7 @@ options:
       default: false
 
     - name: population_prevalence
-      title: Population Prevalence (%)
+      title: Population Prevalence ( percent)
       type: Number
       default: 10
       min: 0.1

@@ -57,12 +57,12 @@ bayesianmaClass <- R6::R6Class(
                     <body>
                         <div class='main'>
                             <div class='todo'>
-                                <div class='todo-title'>⚠️ Setup Required</div>
-                                <div class='todo-item'>📊 Add at least 2 predictor variables for model averaging</div>
-                                <div class='todo-item'>🎯 Configure prior type and parameters</div>
-                                <div class='todo-item'>⚙️ Set MCMC method and chain parameters</div>
-                                <div class='todo-item'>📈 Choose model selection criteria</div>
-                                <div class='todo-item'>🔍 Configure convergence diagnostics</div>
+                                <div class='todo-title'> Setup Required</div>
+                                <div class='todo-item'> Add at least 2 predictor variables for model averaging</div>
+                                <div class='todo-item'> Configure prior type and parameters</div>
+                                <div class='todo-item'> Set MCMC method and chain parameters</div>
+                                <div class='todo-item'> Choose model selection criteria</div>
+                                <div class='todo-item'> Configure convergence diagnostics</div>
                             </div>
                         </div>
                     </body>
@@ -88,7 +88,7 @@ bayesianmaClass <- R6::R6Class(
                 <body>
                     <div class='main'>
                         <div class='info'>
-                            <div class='info-title'>✅ Ready for Bayesian Model Averaging</div>
+                            <div class='info-title'> Ready for Bayesian Model Averaging</div>
                             <p>Analysis configured successfully. BMA will explore the model space and provide model-averaged coefficient estimates accounting for model uncertainty.</p>
                         </div>
                     </div>
@@ -1009,17 +1009,17 @@ bayesianmaClass <- R6::R6Class(
             </head>
             <body>
                 <div class='explanation'>
-                    <h3>🎯 Bayesian Model Averaging Results</h3>
+                    <h3> Bayesian Model Averaging Results</h3>
                     
                     <div class='method-info'>
-                        <h4>📊 Method Overview</h4>
+                        <h4> Method Overview</h4>
                         <p><strong>Bayesian Model Averaging</strong> accounts for model uncertainty by averaging predictions 
                         over multiple models weighted by their posterior probabilities. This provides more robust inferences 
                         than selecting a single model.</p>
                     </div>
 
                     <div class='result-section'>
-                        <h4>🎯 Variable Selection Results</h4>
+                        <h4> Variable Selection Results</h4>
                         <div class='interpretation'>
                             <p>Selected <span class='highlight'>", n_selected, " variables</span> with inclusion probability ≥ ", 
                             round(self$options$variable_selection_threshold, 2), ".</p>
@@ -1029,7 +1029,7 @@ bayesianmaClass <- R6::R6Class(
                     </div>
 
                     <div class='result-section'>
-                        <h4>🔧 Model Configuration</h4>
+                        <h4> Model Configuration</h4>
                         <ul>
                             <li><strong>Prior Type:</strong> ", self$options$prior_type, "</li>
                             <li><strong>MCMC Method:</strong> ", self$options$mcmc_method, "</li>
@@ -1039,20 +1039,20 @@ bayesianmaClass <- R6::R6Class(
                     </div>
 
                     <div class='result-section'>
-                        <h4>📈 Clinical Interpretation</h4>
+                        <h4> Clinical Interpretation</h4>
                         <div class='interpretation'>
                             <p><strong>Bayesian Model Averaging</strong> is particularly valuable for:</p>
                             <ul>
-                                <li>🎯 <strong>Robust prediction:</strong> Accounts for model uncertainty in predictions</li>
-                                <li>📊 <strong>Variable importance:</strong> Inclusion probabilities indicate variable relevance</li>
-                                <li>🏥 <strong>Clinical guidelines:</strong> More conservative approach than single model selection</li>
-                                <li>🔬 <strong>Research synthesis:</strong> Combines evidence across multiple model specifications</li>
+                                <li> <strong>Robust prediction:</strong> Accounts for model uncertainty in predictions</li>
+                                <li> <strong>Variable importance:</strong> Inclusion probabilities indicate variable relevance</li>
+                                <li> <strong>Clinical guidelines:</strong> More conservative approach than single model selection</li>
+                                <li> <strong>Research synthesis:</strong> Combines evidence across multiple model specifications</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class='result-section'>
-                        <h4>⚠️ Important Considerations</h4>
+                        <h4> Important Considerations</h4>
                         <ul>
                             <li><strong>Prior Sensitivity:</strong> Results may depend on prior specifications</li>
                             <li><strong>Computational Cost:</strong> BMA is computationally intensive</li>

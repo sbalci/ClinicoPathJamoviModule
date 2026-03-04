@@ -2,7 +2,6 @@
 # Edge Cases Tests: singlearm
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(singlearm_small, package = "ClinicoPath")
 data(singlearm_censored, package = "ClinicoPath")
 data(singlearm_allevents, package = "ClinicoPath")

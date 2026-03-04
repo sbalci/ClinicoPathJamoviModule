@@ -891,6 +891,7 @@ bayesianmaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Bayesian Model Averaging for survival analysis
 #'
 #' @examples
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' bayesianma(data = histopathology,
@@ -900,7 +901,7 @@ bayesianmaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'           prior_type = 'uniform',
 #'           mcmc_chains = 3,
 #'           mcmc_iterations = 5000)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time_var the time-to-event variable
 #' @param event_var the event indicator variable (0/1 or FALSE/TRUE)

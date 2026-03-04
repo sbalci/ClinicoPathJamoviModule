@@ -955,6 +955,7 @@ populationhealthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('population_health', package='ClinicoPath')
 #'
 #' # Basic population health analytics
@@ -965,7 +966,7 @@ populationhealthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'                geographic = 'ZipCode',
 #'                risk_stratification = TRUE,
 #'                predictive_modeling = TRUE)
-#'
+#'}
 #' @param data .
 #' @param patientID Unique patient identifier for population tracking and
 #'   analysis

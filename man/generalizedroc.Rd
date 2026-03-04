@@ -58,7 +58,7 @@ other parameters}
 \item{bootstrap_samples}{number of bootstrap samples for CI calculation}
 
 \item{confidence_level}{confidence level for intervals (default: 0.95 for
-95\\% CI)}
+95 percent CI)}
 
 \item{show_diagnostics}{show diagnostic tests for normality and variance
 equality}
@@ -130,6 +130,7 @@ The generalized approach models the full distribution rather than imposing
 binary cutoffs, providing more flexible and robust performance assessment.
 }
 \examples{
+\donttest{
 # Example with continuous Ki67 percentage
 data <- data.frame(
   outcome = factor(sample(c("Low", "High"), 100, replace=TRUE)),
@@ -143,5 +144,5 @@ generalizedroc(
   assume_equal_variance = FALSE,
   transformation = 'none'
 )
-
+}
 }

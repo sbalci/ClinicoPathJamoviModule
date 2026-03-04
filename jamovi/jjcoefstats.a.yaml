@@ -12,7 +12,7 @@ description:
       Supports both pre-computed coefficients and automatic model fitting from raw data.
       Uses ggstatsplot's ggcoefstats() for professional visualization.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage:
             # For pre-computed coefficients:

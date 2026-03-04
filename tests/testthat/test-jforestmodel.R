@@ -1,5 +1,4 @@
 # Comprehensive tests for jforestmodel function
-devtools::load_all()
 
 # Load test datasets
 data(histopathology, package = "ClinicoPath")
@@ -9,7 +8,6 @@ data(melanoma, package = "ClinicoPath")
 
 test_that("jforestmodel module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("jforestmodelClass"))
   expect_true(is.function(jforestmodel))
 })

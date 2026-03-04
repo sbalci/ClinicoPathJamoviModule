@@ -3,7 +3,7 @@ name: ihcheterogeneity
 title: IHC Heterogeneity Analysis
 menuGroup: OncoPath
 menuSubgroup: IHC Analysis
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 options:
@@ -23,7 +23,7 @@ options:
           R: >
             Optional reference measurement for comparison with regional measurements. Can be whole section average,
             hotspot area, or overall tumor measurement. Leave empty for inter-regional comparison studies.
-            Example: Ki67 proliferation index (0-100%), ER H-score (0-300), PR percentage (0-100%).
+            Example: Ki67 proliferation index (0-100 percent), ER H-score (0-300), PR percentage (0-100 percent).
       default: NULL
     - name: biopsy1
       title: Regional Measurement 1 (Required)
@@ -36,7 +36,7 @@ options:
           R: >
             Continuous biomarker measurement from first tissue region or area.
             Should represent same biomarker as reference measurement for heterogeneity comparison.
-            Example: Ki67 % from tumor periphery, ER H-score from invasive front.
+            Example: Ki67  percent from tumor periphery, ER H-score from invasive front.
 
     - name: biopsy2
       title: Regional Measurement 2 (Optional)
@@ -159,8 +159,8 @@ options:
       description:
           R: >
             Coefficient of variation threshold for acceptable sampling variability.
-            Typical clinical values: 15-25% for immunohistochemistry (Ki67, ER, PR),
-            10-20% for molecular assays, 20-30% for heterogeneous markers (HER2, PD-L1).
+            Typical clinical values: 15-25 percent for immunohistochemistry (Ki67, ER, PR),
+            10-20 percent for molecular assays, 20-30 percent for heterogeneous markers (HER2, PD-L1).
             Lower values indicate more stringent quality requirements.
 
     - name: correlation_threshold

@@ -572,6 +572,7 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' with comprehensive cluster analysis and statistical validation.
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: Basic t-SNE visualization
 #' library(Rtsne)
 #' data(iris)
@@ -604,7 +605,7 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'     survivalTime = "months",
 #'     survivalEvent = "death"
 #' )
-#'
+#'}
 #' @param data The dataset to be analyzed, provided as a data frame.
 #' @param vars Continuous variables to use for calculating patient similarity.
 #'   These will be used to compute distances between patients. Categorical

@@ -24,7 +24,7 @@ description:
         AI algorithms before deployment in diagnostic workflows, comparing segmentation
         methods, and establishing performance benchmarks for digital pathology systems.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- segmentationmetrics(
                 data = segmentation_results,
@@ -313,7 +313,7 @@ options:
       max: 0.99
       description:
           R: >
-            Confidence level for interval estimation (default 95%).
+            Confidence level for interval estimation (default 95 percent).
 
     # Quality Thresholds
     - name: quality_thresholds

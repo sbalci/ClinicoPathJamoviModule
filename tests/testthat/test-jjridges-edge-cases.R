@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(jjridges_test, package = "ClinicoPath", envir = environment())
@@ -17,7 +16,6 @@ data(jjridges_small, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles very small datasets", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_small,
@@ -29,7 +27,6 @@ test_that("jjridges handles very small datasets", {
 })
 
 test_that("jjridges handles single group level", {
-  devtools::load_all()
 
   single_level_data <- jjridges_small %>%
     filter(group == "Group A")
@@ -48,7 +45,6 @@ test_that("jjridges handles single group level", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles missing values in x variable", {
-  devtools::load_all()
 
   test_data_na <- jjridges_test
   test_data_na$ki67_index[1:30] <- NA
@@ -63,7 +59,6 @@ test_that("jjridges handles missing values in x variable", {
 })
 
 test_that("jjridges handles missing values in y variable", {
-  devtools::load_all()
 
   test_data_na_y <- jjridges_test
   test_data_na_y$tumor_stage[1:25] <- NA
@@ -78,7 +73,6 @@ test_that("jjridges handles missing values in y variable", {
 })
 
 test_that("jjridges handles missing values in fill variable", {
-  devtools::load_all()
 
   test_data_na_fill <- jjridges_test
   test_data_na_fill$receptor_status[1:35] <- NA
@@ -98,7 +92,6 @@ test_that("jjridges handles missing values in fill variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles outliers", {
-  devtools::load_all()
 
   outlier_data <- jjridges_test
   outlier_data$ki67_index[1:10] <- 200  # Extreme outliers
@@ -113,7 +106,6 @@ test_that("jjridges handles outliers", {
 })
 
 test_that("jjridges handles constant variable", {
-  devtools::load_all()
 
   constant_data <- jjridges_small
   constant_data$constant_var <- 50
@@ -132,7 +124,6 @@ test_that("jjridges handles constant variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges errors on non-existent x variable", {
-  devtools::load_all()
 
   expect_error(
     jjridges(
@@ -146,7 +137,6 @@ test_that("jjridges errors on non-existent x variable", {
 })
 
 test_that("jjridges errors on categorical x variable", {
-  devtools::load_all()
 
   expect_error(
     jjridges(
@@ -160,7 +150,6 @@ test_that("jjridges errors on categorical x variable", {
 })
 
 test_that("jjridges errors on empty dataset", {
-  devtools::load_all()
 
   empty_data <- jjridges_small[0, ]
 
@@ -180,7 +169,6 @@ test_that("jjridges errors on empty dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles minimum scale", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -193,7 +181,6 @@ test_that("jjridges handles minimum scale", {
 })
 
 test_that("jjridges handles maximum scale", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -210,7 +197,6 @@ test_that("jjridges handles maximum scale", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles variable names with spaces", {
-  devtools::load_all()
 
   test_data_spaces <- jjridges_small
   names(test_data_spaces)[names(test_data_spaces) == "measurement"] <- "measurement value"
@@ -229,7 +215,6 @@ test_that("jjridges handles variable names with spaces", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles tibble input", {
-  devtools::load_all()
 
   test_tibble <- tibble::as_tibble(jjridges_small)
 
@@ -243,7 +228,6 @@ test_that("jjridges handles tibble input", {
 })
 
 test_that("jjridges handles data.frame input", {
-  devtools::load_all()
 
   test_df <- as.data.frame(jjridges_small)
 
@@ -261,7 +245,6 @@ test_that("jjridges handles data.frame input", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles many group levels", {
-  devtools::load_all()
 
   many_levels_data <- jjridges_test
   many_levels_data$many_groups <- paste0("Group_", sample(1:10, nrow(many_levels_data), replace = TRUE))
@@ -281,7 +264,6 @@ test_that("jjridges handles many group levels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles duplicate rows", {
-  devtools::load_all()
 
   test_data_dup <- rbind(jjridges_small, jjridges_small)
 
@@ -299,7 +281,6 @@ test_that("jjridges handles duplicate rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles negative values", {
-  devtools::load_all()
 
   negative_data <- jjridges_small
   negative_data$measurement <- negative_data$measurement - 100
@@ -314,7 +295,6 @@ test_that("jjridges handles negative values", {
 })
 
 test_that("jjridges handles zero values", {
-  devtools::load_all()
 
   zero_data <- jjridges_small
   zero_data$measurement[1:10] <- 0

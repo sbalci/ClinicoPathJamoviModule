@@ -6,7 +6,6 @@
 # Generated: 2026-01-05
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(lollipop_test, package = "ClinicoPath", envir = environment())
@@ -18,7 +17,6 @@ data(lollipop_biomarkers, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles conditional coloring with threshold", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -31,7 +29,6 @@ test_that("lollipop handles conditional coloring with threshold", {
 })
 
 test_that("lollipop handles conditional coloring without threshold (uses 0)", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_treatment,
@@ -47,7 +44,6 @@ test_that("lollipop handles conditional coloring without threshold (uses 0)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles custom baseline values", {
-  devtools::load_all()
 
   # Zero baseline (default)
   result_zero <- lollipop(
@@ -73,7 +69,6 @@ test_that("lollipop handles custom baseline values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles different point sizes", {
-  devtools::load_all()
 
   # Small points
   result_small <- lollipop(
@@ -95,7 +90,6 @@ test_that("lollipop handles different point sizes", {
 })
 
 test_that("lollipop handles different line widths", {
-  devtools::load_all()
 
   # Thin lines
   result_thin <- lollipop(
@@ -121,7 +115,6 @@ test_that("lollipop handles different line widths", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles all features together", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -154,7 +147,6 @@ test_that("lollipop handles all features together", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles aggregation with different sort orders", {
-  devtools::load_all()
 
   # Mean + sort by value ascending
   result1 <- lollipop(
@@ -192,7 +184,6 @@ test_that("lollipop handles aggregation with different sort orders", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles highlight with conditional coloring", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -211,7 +202,6 @@ test_that("lollipop handles highlight with conditional coloring", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles horizontal orientation with sorting", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -229,7 +219,6 @@ test_that("lollipop handles horizontal orientation with sorting", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles all theme and color scheme combinations", {
-  devtools::load_all()
 
   themes <- c("default", "minimal", "classic", "publication")
   color_schemes <- c("default", "clinical", "viridis", "colorblind")
@@ -254,7 +243,6 @@ test_that("lollipop handles all theme and color scheme combinations", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles multiple visual enhancements", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_test,
@@ -274,7 +262,6 @@ test_that("lollipop handles multiple visual enhancements", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles biomarker data with highlighting", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_biomarkers,
@@ -295,7 +282,6 @@ test_that("lollipop handles biomarker data with highlighting", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles treatment response data comprehensively", {
-  devtools::load_all()
 
   result <- lollipop(
     data = lollipop_treatment,
@@ -322,7 +308,6 @@ test_that("lollipop handles treatment response data comprehensively", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles minimal configuration", {
-  devtools::load_all()
 
   result_min <- lollipop(
     data = lollipop_test,
@@ -333,7 +318,6 @@ test_that("lollipop handles minimal configuration", {
 })
 
 test_that("lollipop handles maximum configuration", {
-  devtools::load_all()
 
   result_max <- lollipop(
     data = lollipop_test,
@@ -368,7 +352,6 @@ test_that("lollipop handles maximum configuration", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("lollipop handles different clinical lab parameters", {
-  devtools::load_all()
 
   lab_params <- c("hemoglobin", "albumin", "creatinine",
                   "platelet_count", "white_blood_cells", "alt", "crp")

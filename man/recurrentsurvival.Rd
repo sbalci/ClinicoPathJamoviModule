@@ -144,6 +144,7 @@ and chronic disease episodes. Handles gap time, calendar time, and counting
 process formulations.
 }
 \examples{
+\donttest{
 # Example: Cancer recurrence analysis
 recurrentsurvival(
     data = cancer_data,
@@ -154,5 +155,5 @@ recurrentsurvival(
     covariates = c("age", "stage", "treatment"),
     model_type = "ag_model"
 )
-
+}
 }

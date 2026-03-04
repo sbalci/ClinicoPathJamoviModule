@@ -449,7 +449,7 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjbetweenstats",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = jjbetweenstatsResults$new(options=options),
                 data = data,
@@ -471,6 +471,7 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic comparison between groups
 #' jjbetweenstats(
 #'     data = iris,
@@ -514,7 +515,7 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     xtitle = "Supplement",
 #'     ytitle = "Tooth Length"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param dep .
 #' @param group .
@@ -543,9 +544,9 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   option does NOT automatically adjust p-values. It provides instructions for
 #'   manual correction. When testing multiple endpoints (e.g., cholesterol,
 #'   glucose, triglycerides), the family-wise error rate increases. For example,
-#'   testing 3 variables at alpha=0.05 gives actual error rate of ~14\%. Select
-#'   a correction method to see step-by-step instructions for manually applying
-#'   that correction to the p-values shown in the plots.
+#'   testing 3 variables at alpha=0.05 gives actual error rate of ~14 percent.
+#'   Select a correction method to see step-by-step instructions for manually
+#'   applying that correction to the p-values shown in the plots.
 #' @param plotwidth Width of the plot in pixels. Default is 650.
 #' @param plotheight Height of the plot in pixels. Default is 450.
 #' @param colorblindSafe Whether to use colorblind-safe color palette for plot

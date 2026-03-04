@@ -413,6 +413,7 @@ pseudosurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: RMST regression with covariates
 #' pseudosurvival(
 #'     data = cancer_data,
@@ -422,7 +423,7 @@ pseudosurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     analysis_type = "rmst_regression",
 #'     tau_rmst = 60
 #' )
-#'
+#'}
 #' @param time_var Survival time variable
 #' @param status_var Event status indicator variable
 #' @param covariates Covariates to include in the pseudo-regression model

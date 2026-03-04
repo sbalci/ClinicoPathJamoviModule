@@ -486,6 +486,7 @@ advancedimputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinical_trial_data')
 #'
 #' advancedimputation(
@@ -495,7 +496,7 @@ advancedimputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'     sensitivity_analysis = TRUE,
 #'     mnar_methods = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param imputation_vars Variables with missing values to be imputed
 #' @param auxiliary_vars Complete or mostly complete variables to assist

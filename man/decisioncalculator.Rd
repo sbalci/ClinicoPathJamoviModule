@@ -48,7 +48,8 @@ Requires a value between 0.001 and 0.999, default 0.300.}
 \item{fnote}{Boolean selection whether to show detailed explanatory
 footnotes.}
 
-\item{ci}{Boolean selection whether to calculate 95\\% confidence intervals.}
+\item{ci}{Boolean selection whether to calculate 95 percent confidence
+intervals.}
 
 \item{fagan}{Boolean selection whether to generate a Fagan nomogram plot.}
 
@@ -119,6 +120,7 @@ post-test probabilities. Supports confidence interval estimation and
 Fagan nomogram visualization for clinical decision making.
 }
 \examples{
+\donttest{
 # Basic diagnostic test evaluation with known counts
 result1 <- decisioncalculator(
   TP = 90,  # True positives
@@ -127,7 +129,7 @@ result1 <- decisioncalculator(
   FP = 20   # False positives
 )
 
-# Include 95\\% confidence intervals
+# Include 95 percent confidence intervals
 result2 <- decisioncalculator(
   TP = 90, FN = 10, TN = 80, FP = 20,
   ci = TRUE
@@ -138,5 +140,5 @@ result3 <- decisioncalculator(
   TP = 90, FN = 10, TN = 80, FP = 20,
   ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
 )
-
+}
 }

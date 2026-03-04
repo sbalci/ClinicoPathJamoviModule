@@ -5,7 +5,6 @@
 # Tests all argument combinations and parameter settings
 
 library(testthat)
-library(ClinicoPath)
 data(rpasurvival_test)
 
 test_that("rpasurvival minbucket parameter affects tree structure", {

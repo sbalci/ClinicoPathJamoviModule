@@ -113,6 +113,7 @@ bar charts, line plots, and more. Perfect for quick data visualization with
 intelligent defaults.
 }
 \examples{
+\donttest{
 # Auto-select plot type based on variables
 esquisseauto(
     data = mtcars,
@@ -127,5 +128,5 @@ esquisseauto(
     yvar = "Sepal.Length",
     colorvar = "Species"
 )
-
+}
 }

@@ -88,7 +88,7 @@ icccoeffClass <- R6::R6Class(
             </head>
             <body>
             <div class='main'>
-                <div class='header'>📊 Intraclass Correlation Coefficient (ICC)</div>"
+                <div class='header'> Intraclass Correlation Coefficient (ICC)</div>"
             
             content <- switch(type,
                 "setup" = "
@@ -115,7 +115,7 @@ icccoeffClass <- R6::R6Class(
                     Choose the appropriate ICC type based on your study design.
                 </div>
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
-                    <strong>✓ Analysis configured correctly</strong><br>
+                    <strong> Analysis configured correctly</strong><br>
                     Select ICC type and review results below.
                 </div>"
             )
@@ -147,7 +147,7 @@ icccoeffClass <- R6::R6Class(
             if (nrow(icc_data) < 2) {
                 self$results$instructions$setContent(
                     "<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ Insufficient data</strong><br>
+                    <strong> Insufficient data</strong><br>
                     Need at least 2 complete cases for ICC calculation.
                     </div>"
                 )
@@ -158,7 +158,7 @@ icccoeffClass <- R6::R6Class(
             if (!all(sapply(icc_data, is.numeric))) {
                 self$results$instructions$setContent(
                     "<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ Non-numeric data</strong><br>
+                    <strong> Non-numeric data</strong><br>
                     All rater variables must be numeric.
                     </div>"
                 )
@@ -174,7 +174,7 @@ icccoeffClass <- R6::R6Class(
             if (!requireNamespace("irr", quietly = TRUE)) {
                 self$results$instructions$setContent(
                     "<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ Package Required</strong><br>
+                    <strong> Package Required</strong><br>
                     The 'irr' package is required for ICC calculation.
                     </div>"
                 )
@@ -217,7 +217,7 @@ icccoeffClass <- R6::R6Class(
             }, error = function(e) {
                 self$results$instructions$setContent(
                     paste0("<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ ICC Calculation Error</strong><br>
+                    <strong> ICC Calculation Error</strong><br>
                     ", e$message, "
                     </div>")
                 )
@@ -288,7 +288,7 @@ icccoeffClass <- R6::R6Class(
             
             apa_text <- paste0(
                 "<div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>",
-                "<h3 style='color: #1976d2; margin-bottom: 15px;'>📝 APA Style Results</h3>",
+                "<h3 style='color: #1976d2; margin-bottom: 15px;'> APA Style Results</h3>",
                 "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; font-family: monospace;'>",
                 "<strong>", results$icc_type, "</strong> = ", icc_formatted,
                 ", ", sprintf("%.0f", results$conf_level * 100), "% CI [", ci_formatted, "]",
@@ -337,13 +337,13 @@ icccoeffClass <- R6::R6Class(
             # Standard ICC interpretation guidelines
             assessments <- list(
                 list(criteria = "Poor reliability", threshold = "< 0.50", 
-                     assessment = if (icc_value < 0.50) "✓ Poor" else ""),
+                     assessment = if (icc_value < 0.50) " Poor" else ""),
                 list(criteria = "Moderate reliability", threshold = "0.50 - 0.75", 
-                     assessment = if (icc_value >= 0.50 && icc_value < 0.75) "✓ Moderate" else ""),
+                     assessment = if (icc_value >= 0.50 && icc_value < 0.75) " Moderate" else ""),
                 list(criteria = "Good reliability", threshold = "0.75 - 0.90", 
-                     assessment = if (icc_value >= 0.75 && icc_value < 0.90) "✓ Good" else ""),
+                     assessment = if (icc_value >= 0.75 && icc_value < 0.90) " Good" else ""),
                 list(criteria = "Excellent reliability", threshold = "> 0.90", 
-                     assessment = if (icc_value >= 0.90) "✓ Excellent" else "")
+                     assessment = if (icc_value >= 0.90) " Excellent" else "")
             )
             
             for (i in 1:length(assessments)) {
@@ -356,7 +356,7 @@ icccoeffClass <- R6::R6Class(
             
             interpretation_html <- "
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
-                <h3 style='color: #1976d2; margin-bottom: 15px;'>📚 ICC Interpretation Guide</h3>
+                <h3 style='color: #1976d2; margin-bottom: 15px;'> ICC Interpretation Guide</h3>
                 
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
                     <strong>ICC Value Interpretation (Koo & Li, 2016):</strong><br>

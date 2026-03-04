@@ -123,7 +123,7 @@ probability predictions. Empty string uses data-driven quantiles.}
 time predictions. Provides percentile-based survival time estimates.}
 
 \item{credible_level}{Level for posterior credible intervals on all
-estimates. 0.95 provides 95\\% credible intervals.}
+estimates. 0.95 provides 95 percent credible intervals.}
 
 \item{cross_validation}{Perform k-fold cross-validation to assess
 out-of-sample performance and model generalization.}
@@ -236,6 +236,7 @@ formulations
 with comprehensive posterior inference and model diagnostics.
 }
 \examples{
+\donttest{
 result <- survivalbart(
     data = mydata,
     time = "time_to_event",
@@ -246,5 +247,5 @@ result <- survivalbart(
     n_burn = 1000,
     n_post = 2000
 )
-
+}
 }

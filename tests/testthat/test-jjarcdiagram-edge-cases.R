@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("jjarcdiagram errors on missing required arguments", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -35,7 +34,6 @@ test_that("jjarcdiagram errors on missing required arguments", {
 })
 
 test_that("jjarcdiagram handles minimal network (2 nodes)", {
-  devtools::load_all()
 
   # Create minimal network
   minimal_net <- data.frame(
@@ -55,7 +53,6 @@ test_that("jjarcdiagram handles minimal network (2 nodes)", {
 })
 
 test_that("jjarcdiagram handles single edge network", {
-  devtools::load_all()
 
   single_edge <- data.frame(
     node1 = "Gene_A",
@@ -74,7 +71,6 @@ test_that("jjarcdiagram handles single edge network", {
 })
 
 test_that("jjarcdiagram handles self-loops", {
-  devtools::load_all()
 
   # Network with self-loops (node connects to itself)
   selfloop_net <- data.frame(
@@ -95,7 +91,6 @@ test_that("jjarcdiagram handles self-loops", {
 })
 
 test_that("jjarcdiagram handles duplicate edges", {
-  devtools::load_all()
 
   # Network with duplicate edges
   duplicate_edges <- data.frame(
@@ -117,7 +112,6 @@ test_that("jjarcdiagram handles duplicate edges", {
 })
 
 test_that("jjarcdiagram handles missing weight values", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
   test_data_na <- jjarcdiagram_test
@@ -135,7 +129,6 @@ test_that("jjarcdiagram handles missing weight values", {
 })
 
 test_that("jjarcdiagram handles all NA weights", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
   test_data_all_na <- jjarcdiagram_test
@@ -153,7 +146,6 @@ test_that("jjarcdiagram handles all NA weights", {
 })
 
 test_that("jjarcdiagram handles missing node labels", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
   test_data_na_nodes <- jjarcdiagram_test
@@ -171,7 +163,6 @@ test_that("jjarcdiagram handles missing node labels", {
 })
 
 test_that("jjarcdiagram handles factor vs character variables", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -199,7 +190,6 @@ test_that("jjarcdiagram handles factor vs character variables", {
 })
 
 test_that("jjarcdiagram handles special characters in node names", {
-  devtools::load_all()
 
   special_net <- data.frame(
     from = c("Node (1)", "Node-2", "Node_3"),
@@ -218,7 +208,6 @@ test_that("jjarcdiagram handles special characters in node names", {
 })
 
 test_that("jjarcdiagram handles very long node names", {
-  devtools::load_all()
 
   long_name_net <- data.frame(
     from = c("VeryLongGeneName_ABCDEFGHIJKLMNOPQRSTUVWXYZ_123456789",
@@ -239,7 +228,6 @@ test_that("jjarcdiagram handles very long node names", {
 })
 
 test_that("jjarcdiagram handles zero weights", {
-  devtools::load_all()
 
   zero_weight_net <- data.frame(
     from = c("A", "B", "C"),
@@ -258,7 +246,6 @@ test_that("jjarcdiagram handles zero weights", {
 })
 
 test_that("jjarcdiagram handles negative weights", {
-  devtools::load_all()
 
   # Negative weights (e.g., negative correlation)
   negative_weight_net <- data.frame(
@@ -279,7 +266,6 @@ test_that("jjarcdiagram handles negative weights", {
 })
 
 test_that("jjarcdiagram handles extremely large weights", {
-  devtools::load_all()
 
   large_weight_net <- data.frame(
     from = c("A", "B", "C"),
@@ -299,7 +285,6 @@ test_that("jjarcdiagram handles extremely large weights", {
 })
 
 test_that("jjarcdiagram handles constant weights", {
-  devtools::load_all()
 
   constant_weight_net <- data.frame(
     from = c("A", "B", "C"),
@@ -318,7 +303,6 @@ test_that("jjarcdiagram handles constant weights", {
 })
 
 test_that("jjarcdiagram handles disconnected components", {
-  devtools::load_all()
 
   # Network with disconnected components
   disconnected_net <- data.frame(
@@ -338,7 +322,6 @@ test_that("jjarcdiagram handles disconnected components", {
 })
 
 test_that("jjarcdiagram handles single node (isolate)", {
-  devtools::load_all()
 
   # Network where one node has no connections
   isolate_net <- data.frame(
@@ -358,7 +341,6 @@ test_that("jjarcdiagram handles single node (isolate)", {
 })
 
 test_that("jjarcdiagram handles missing group values", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
   test_data_na_group <- jjarcdiagram_test
@@ -377,7 +359,6 @@ test_that("jjarcdiagram handles missing group values", {
 })
 
 test_that("jjarcdiagram handles single group", {
-  devtools::load_all()
 
   single_group_net <- data.frame(
     from = c("A", "B", "C"),
@@ -398,7 +379,6 @@ test_that("jjarcdiagram handles single group", {
 })
 
 test_that("jjarcdiagram handles empty plot title", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -413,7 +393,6 @@ test_that("jjarcdiagram handles empty plot title", {
 })
 
 test_that("jjarcdiagram handles very long plot title", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -430,7 +409,6 @@ test_that("jjarcdiagram handles very long plot title", {
 })
 
 test_that("jjarcdiagram handles parameter boundary values", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 

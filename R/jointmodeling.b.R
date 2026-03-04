@@ -58,7 +58,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<h3>Welcome to Joint Longitudinal-Survival Modeling</h3>
                     
                     <div style='background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin: 15px 0;'>
-                    <h4>🔗 What are Joint Models?</h4>
+                    <h4> What are Joint Models?</h4>
                     <p>Joint models simultaneously analyze:</p>
                     <ul>
                     <li><b>Longitudinal Process:</b> Biomarker trajectory over time (e.g., PSA, CD4 count)</li>
@@ -68,7 +68,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </div>
                     
                     <div style='background-color: #f0f8e8; padding: 20px; border-radius: 8px; margin: 15px 0;'>
-                    <h4>📊 Clinical Applications</h4>
+                    <h4> Clinical Applications</h4>
                     <ul>
                     <li><b>Oncology:</b> PSA trajectory and prostate cancer survival</li>
                     <li><b>Cardiology:</b> Biomarker trends and cardiovascular events</li>
@@ -79,7 +79,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </div>
                     
                     <div style='background-color: #fff8e1; padding: 20px; border-radius: 8px; margin: 15px 0;'>
-                    <h4>📋 Data Requirements</h4>
+                    <h4> Data Requirements</h4>
                     <p><b>Your data must be in LONG format:</b></p>
                     <ul>
                     <li>Multiple rows per patient (one per biomarker measurement)</li>
@@ -100,7 +100,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </div>
                     
                     <div style='background-color: #ffebee; padding: 20px; border-radius: 8px; margin: 15px 0;'>
-                    <h4>⚠️ Computational Notes</h4>
+                    <h4> Computational Notes</h4>
                     <ul>
                     <li><b>Analysis Time:</b> 2-10 minutes depending on data size</li>
                     <li><b>Memory Usage:</b> Moderate to high (especially with Bayesian methods)</li>
@@ -109,7 +109,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </ul>
                     </div>
                     
-                    <h4>🚀 Getting Started</h4>
+                    <h4> Getting Started</h4>
                     <ol>
                     <li>Select <b>Patient ID</b> variable</li>
                     <li>Select <b>Longitudinal Time</b> (measurement times)</li>
@@ -191,7 +191,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 progress_html <- glue::glue(
                     "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>🔄 Joint Model Analysis Progress</h4>
+                    <h4> Joint Model Analysis Progress</h4>
                     <div style='background-color: #ddd; border-radius: 10px; padding: 3px;'>
                     <div style='width: {progress_pct}%; background-color: #2196F3; height: 20px; border-radius: 8px; 
                     display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;'>
@@ -205,7 +205,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 progress_html <- glue::glue(
                     "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>✅ {message}</h4>
+                    <h4> {message}</h4>
                     <p>Joint model analysis completed. Results are ready for interpretation.</p>
                     </div>"
                 )
@@ -286,7 +286,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create data summary
                 data_summary <- glue::glue(
                     "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>📊 Data Summary</h4>
+                    <h4> Data Summary</h4>
                     <ul>
                     <li><b>Number of Patients:</b> {n_patients}</li>
                     <li><b>Total Observations:</b> {n_observations}</li>
@@ -511,7 +511,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             long_summary <- glue::glue(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                <h4>📈 Longitudinal Model Results</h4>
+                <h4> Longitudinal Model Results</h4>
                 <p><b>Fixed Effects (Population Level):</b></p>
                 <ul>",
                 paste0("<li>", names(fixed_effects), ": ", round(fixed_effects, 4), "</li>", collapse = ""),
@@ -596,7 +596,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(coef_table) > 0) {
                     surv_summary <- glue::glue(
                         "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                        <h4>⚰️ Cox Survival Model Results</h4>
+                        <h4> Cox Survival Model Results</h4>
                         <p><b>Hazard Ratios:</b></p>
                         <ul>",
                         paste0("<li>", rownames(coef_table), ": HR = ", round(exp(coef_table[,1]), 3),
@@ -618,7 +618,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 coef_table <- summary(surv_model)$table
                 surv_summary <- glue::glue(
                     "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>⚰️ Parametric Survival Model Results</h4>
+                    <h4> Parametric Survival Model Results</h4>
                     <p><b>Distribution:</b> {surv_model$dist}</p>
                     <p><b>Coefficients:</b></p>
                     <ul>",
@@ -691,7 +691,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     # MCMC diagnostics for Bayesian models
                     diagnostic_html <- "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>🔍 MCMC Diagnostics</h4>"
+                    <h4> MCMC Diagnostics</h4>"
                     
                     # Check for convergence diagnostics
                     if (requireNamespace('coda', quietly = TRUE)) {
@@ -711,7 +711,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     # Non-Bayesian diagnostics
                     diagnostic_html <- "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>🔍 Model Diagnostics</h4>
+                    <h4> Model Diagnostics</h4>
                     <p><b>Model Type:</b> Two-stage estimation</p>
                     <p><b>Convergence:</b> Standard errors computed successfully</p>
                     </div>"
@@ -742,7 +742,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     unique_ids <- unique(data[[vars$id]])[1:min(10, length(unique(data[[vars$id]])))]  # Limit to 10 for speed
                     
                     prediction_html <- "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>🎯 Dynamic Risk Predictions</h4>
+                    <h4> Dynamic Risk Predictions</h4>
                     <p><b>Prediction Window:</b> "
                     prediction_html <- paste0(prediction_html, pred_window, " time units</p>")
                     prediction_html <- paste0(prediction_html, "<p><b>Prediction Horizons:</b> ", 
@@ -756,7 +756,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     # For other models, provide general information
                     prediction_html <- "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>🎯 Dynamic Predictions</h4>
+                    <h4> Dynamic Predictions</h4>
                     <p><b>Note:</b> Dynamic predictions available with Bayesian joint models</p>
                     <p><b>Current Model:</b> Two-stage estimation</p>
                     </div>"
@@ -780,7 +780,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Simplified validation metrics
                     validation_html <- glue::glue(
                         "<div style='background-color: #f5f5dc; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                        <h4>✅ Internal Validation Results</h4>
+                        <h4> Internal Validation Results</h4>
                         <p><b>Validation Method:</b> {cv_folds}-fold cross-validation</p>
                         <p><b>Discrimination Metrics:</b></p>
                         <ul>
@@ -796,7 +796,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                 } else {
                     validation_html <- "<div style='background-color: #f5f5dc; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <h4>✅ Model Validation</h4>
+                    <h4> Model Validation</h4>
                     <p>Validation metrics disabled. Enable discrimination metrics for detailed validation.</p>
                     </div>"
                     
@@ -853,9 +853,9 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 final_summary <- glue::glue(
                     "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid #4caf50;'>
-                    <h3>✨ Joint Longitudinal-Survival Model Summary</h3>
+                    <h3> Joint Longitudinal-Survival Model Summary</h3>
                     
-                    <h4>🔗 Model Specification</h4>
+                    <h4> Model Specification</h4>
                     <ul>
                     <li><b>Longitudinal Outcome:</b> {vars$biomarker}</li>
                     <li><b>Survival Outcome:</b> {vars$surv_time} (Status: {vars$surv_status})</li>
@@ -864,14 +864,14 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><b>Estimation Method:</b> {stringr::str_to_title(estimation_method)}</li>
                     </ul>
                     
-                    <h4>🎯 Key Findings</h4>
+                    <h4> Key Findings</h4>
                     <ul>
                     <li><b>Association Structure:</b> {self$options$association_structure %||% 'current_value'}</li>
                     <li><b>Functional Form:</b> {stringr::str_to_title(self$options$functional_form %||% 'linear')}</li>
                     <li><b>Random Effects:</b> {stringr::str_replace_all(self$options$random_effects %||% 'intercept_slope', '_', ' ')}</li>
                     </ul>
                     
-                    <h4>📈 Clinical Interpretation</h4>
+                    <h4> Clinical Interpretation</h4>
                     <p>The joint model quantifies how changes in <b>{vars$biomarker}</b> over time 
                     are associated with the risk of the survival event. This enables:</p>
                     <ul>
@@ -881,7 +881,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li>Optimal timing for clinical interventions</li>
                     </ul>
                     
-                    <h4>👥 Clinical Applications</h4>
+                    <h4> Clinical Applications</h4>
                     <ul>
                     <li><b>Personalized Medicine:</b> Individual risk profiles</li>
                     <li><b>Treatment Monitoring:</b> Response assessment over time</li>

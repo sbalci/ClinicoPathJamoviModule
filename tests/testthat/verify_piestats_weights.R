@@ -22,7 +22,6 @@ df <- data.frame(
 # 1. Verify Weighted Chi-square via ggpiestats (indirectly)
 test_that("jjpiestats runs with weighted counts", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Mock options
   options <- jjpiestatsOptions$new(

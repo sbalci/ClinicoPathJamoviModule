@@ -148,11 +148,11 @@ exclusions.}
 \item{show_cv_bands}{Display coefficient of variation bands for assay
 variability.}
 
-\item{cv_band_1}{First CV band percentage (typically 15\\% for analytical
-variability).}
+\item{cv_band_1}{First CV band percentage (typically 15 percent for
+analytical variability).}
 
-\item{cv_band_2}{Second CV band percentage (typically 20\\% for biological
-variability).}
+\item{cv_band_2}{Second CV band percentage (typically 20 percent for
+biological variability).}
 
 \item{p_value_position}{Where to display p-values from group comparisons.}
 

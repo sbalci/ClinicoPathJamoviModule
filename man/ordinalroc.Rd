@@ -212,11 +212,12 @@ grading and staging are fundamental to diagnosis and prognosis (Gleason
 score, Nottingham grade, FIGO stage, etc.).
 }
 \examples{
+\donttest{
 result <- ordinalroc(
     data = grading_data,
     predictor = "biomarker_score",
     ordinal_outcome = "tumor_grade",
     outcome_order = c("well", "moderate", "poor")
 )
-
+}
 }

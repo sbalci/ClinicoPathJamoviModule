@@ -1307,7 +1307,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             summary_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-left: 4px solid #007bff; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
                 "<h3 style='color: #007bff; margin-top: 0; font-size: 1.2em; display: flex; align-items: center;'>",
-                "<span style='margin-right: 8px;'>📊</span>",
+                "<span style='margin-right: 8px;'></span>",
                 .("Clinical Summary"),
                 "</h3>",
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
@@ -1490,7 +1490,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                         # Main mismatch notice
                         "<div style='background: #f5f5f5; border: 2px solid #d63384; padding: 20px; margin-bottom: 20px;'>",
-                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #d63384;'>⚠️ Data Type Mismatch</h2>",
+                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #d63384;'> Data Type Mismatch</h2>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "You selected <strong style='color: #333;'>Date/Time</strong> input type, but your data contains <strong style='color: #333;'>numeric values</strong>",
                         "</p>",
@@ -1503,7 +1503,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                         # Required action section
                         "<div style='background: #f9f9f9; border-left: 4px solid #d63384; padding: 15px; margin-bottom: 20px;'>",
-                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>📋 Required Action</h3>",
+                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'> Required Action</h3>",
                         "<ol style='margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;'>",
                         "<li><strong>Go to 'Time & Date Settings'</strong> section (click to expand)</li>",
                         "<li><strong>Change 'Time Input Type'</strong> from 'Date/Time' to <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>Raw Values</span></li>",
@@ -1515,7 +1515,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                         # Helpful tip section
                         "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
-                        "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>💡 Data Type Guide</h4>",
+                        "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'> Data Type Guide</h4>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "<strong>Use Date/Time for:</strong> 2023-01-15, 15/01/2023, 2023-01-15 14:30:00<br>",
                         "<strong>Use Raw Values for:</strong> 0, 30, 90.5, 365 (numeric days/months/years)",
@@ -1535,7 +1535,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                         # Main detection notice with clean styling like decisionpanel
                         "<div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>",
-                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'>🔍 Date Format Detected</h2>",
+                        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'> Date Format Detected</h2>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "Found date format: <strong style='color: #333;'>", validation_result$format, "</strong> in your time variables",
                         "</p>",
@@ -1548,7 +1548,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                         # Required action section with clean border styling
                         "<div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>",
-                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>📋 Required Action</h3>",
+                        "<h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'> Required Action</h3>",
                         "<ol style='margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;'>",
                         "<li><strong>Go to 'Time & Date Settings'</strong> section (click to expand)</li>",
                         "<li><strong>Change 'Time Input Type'</strong> from 'Raw Values' to <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>Date/Time</span></li>",
@@ -1561,7 +1561,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                         # Helpful tip section with subtle styling
                         "<div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>",
-                        "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>💡 Important Note</h4>",
+                        "<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'> Important Note</h4>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
                         "Configuring the date settings properly ensures accurate timeline calculations ",
                         "and gives you full control over how dates are displayed in your swimmer plot.",
@@ -1738,11 +1738,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .generateInstructions = function() {
             paste0(
                 "<div style='background-color: #e1f5fe; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
-                .("<h3 style='color: #0277bd; margin-top: 0;'>🏊 Swimmer Plot Analysis</h3>"),
+                .("<h3 style='color: #0277bd; margin-top: 0;'> Swimmer Plot Analysis</h3>"),
                 .("<p>Create comprehensive swimmer plots for visualizing patient timelines, treatments, and clinical events using the advanced ggswim package.</p>"),
                 
                 "<div style='margin: 15px 0;'>",
-                .("<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>📋 Required Variables:</h4>"),
+                .("<h4 style='color: #0288d1; margin: 10px 0 5px 0;'> Required Variables:</h4>"),
                 "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                 .("<li><strong>Patient ID:</strong> Unique identifier for each patient</li>"),
                 .("<li><strong>Start Time:</strong> Treatment/observation start time</li>"),
@@ -1751,7 +1751,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</div>",
                 
                 "<div style='margin: 15px 0;'>",
-                .("<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>⚡ Enhanced Features:</h4>"),
+                .("<h4 style='color: #0288d1; margin: 10px 0 5px 0;'> Enhanced Features:</h4>"),
                 "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                 .("<li><strong>Complete ggswim Integration:</strong> Professional clinical visualization</li>"),
                 .("<li><strong>Milestone Support:</strong> Track key clinical events (surgery, progression, etc.)</li>"),
@@ -1763,7 +1763,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</div>",
                 
                 "<div style='margin: 15px 0;'>",
-                .("<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>🎨 Visualization Options:</h4>"),
+                .("<h4 style='color: #0288d1; margin: 10px 0 5px 0;'> Visualization Options:</h4>"),
                 "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                 .("<li><strong>Swim Lanes:</strong> Horizontal patient timelines with response coloring</li>"),
                 "<li><strong>Event Markers:</strong> Custom glyphs for clinical events</li>",
@@ -1774,7 +1774,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</div>",
                 
                 "<div style='margin: 15px 0;'>",
-                "<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>📊 Data Formats Supported:</h4>",
+                "<h4 style='color: #0288d1; margin: 10px 0 5px 0;'> Data Formats Supported:</h4>",
                 "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                 "<li><strong>Raw Numeric:</strong> Days, weeks, months from treatment start</li>",
                 "<li><strong>Date/Time:</strong> Actual calendar dates with multiple format support</li>",
@@ -1788,7 +1788,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</div>",
                 
                 "<div style='background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-                "<p style='margin: 0; color: #7b1fa2;'><strong>✨ Enhanced Features:</strong> Complete ggswim package integration with swim lanes, event markers, status arrows, and professional clinical themes for maximum flexibility and publication-ready output.</p>",
+                "<p style='margin: 0; color: #7b1fa2;'><strong> Enhanced Features:</strong> Complete ggswim package integration with swim lanes, event markers, status arrows, and professional clinical themes for maximum flexibility and publication-ready output.</p>",
                 "</div>",
                 
                 "</div>",
@@ -2649,28 +2649,28 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Define clinical icon mappings
             clinical_mapping <- list(
                 # Treatment events
-                "treatment" = "💊", "therapy" = "💊", "drug" = "💊", "medication" = "💊",
-                "infusion" = "💉", "injection" = "💉", "dose" = "💉",
-                "surgery" = "🏥", "operation" = "🏥", "procedure" = "🏥",
+                "treatment" = "", "therapy" = "", "drug" = "", "medication" = "",
+                "infusion" = "", "injection" = "", "dose" = "",
+                "surgery" = "", "operation" = "", "procedure" = "",
                 
                 # Response events  
-                "response" = "📊", "assessment" = "📊", "evaluation" = "📊",
-                "progression" = "📈", "recurrence" = "🔄", "relapse" = "🔄",
-                "remission" = "✅", "complete response" = "✅", "cr" = "✅",
-                "partial response" = "🟡", "pr" = "🟡",
-                "stable disease" = "🟠", "sd" = "🟠",
-                "progressive disease" = "🔴", "pd" = "🔴",
+                "response" = "", "assessment" = "", "evaluation" = "",
+                "progression" = "", "recurrence" = "", "relapse" = "",
+                "remission" = "", "complete response" = "", "cr" = "",
+                "partial response" = "", "pr" = "",
+                "stable disease" = "", "sd" = "",
+                "progressive disease" = "", "pd" = "",
                 
                 # Adverse events
-                "adverse event" = "⚠️", "ae" = "⚠️", "toxicity" = "⚠️",
-                "death" = "💀", "mortality" = "💀",
+                "adverse event" = "", "ae" = "", "toxicity" = "",
+                "death" = "", "mortality" = "",
                 
                 # Follow-up events
-                "follow-up" = "📅", "visit" = "📅", "appointment" = "📅",
-                "scan" = "🔬", "imaging" = "🔬", "ct" = "🔬", "mri" = "🔬",
+                "follow-up" = "", "visit" = "", "appointment" = "",
+                "scan" = "", "imaging" = "", "ct" = "", "mri" = "",
                 
                 # Generic events
-                "event" = "⚫", "milestone" = "🎯", "endpoint" = "🏁"
+                "event" = "", "milestone" = "", "endpoint" = ""
             )
             
             # Create glyph vector
@@ -2695,7 +2695,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         glyphs[i] <- clinical_mapping[[first_match]]
                     } else {
                         # Fallback to default symbols
-                        default_symbols <- c("⬤", "■", "▲", "◆", "✚", "✖", "⬟", "★", "●", "◼")
+                        default_symbols <- c("⬤", "■", "", "", "", "", "⬟", "", "", "")
                         glyphs[i] <- default_symbols[((i - 1) %% length(default_symbols)) + 1]
                     }
                 }
@@ -2708,7 +2708,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .generateClinicalGlossary = function() {
             glossary_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
-                "<h3 style='color: #007bff; margin-top: 0;'>📚 Clinical Glossary</h3>",
+                "<h3 style='color: #007bff; margin-top: 0;'> Clinical Glossary</h3>",
 
                 "<div style='margin: 10px 0;'>",
                 "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>Response Categories</h4>",
@@ -2822,7 +2822,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             copy_ready_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-left: 4px solid #28a745; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
                 "<h3 style='color: #155724; margin-top: 0; display: flex; align-items: center;'>",
-                "<span style='margin-right: 8px;'>📄</span>",
+                "<span style='margin-right: 8px;'></span>",
                 "Copy-Ready Manuscript Text",
                 "</h3>",
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
@@ -2844,7 +2844,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             about_html <- paste0(
                 "<div style='background-color: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
                 "<h3 style='color: #856404; margin-top: 0; display: flex; align-items: center;'>",
-                "<span style='margin-right: 8px;'>ℹ️</span>",
+                "<span style='margin-right: 8px;'></span>",
                 "About Swimmer Plot Analysis",
                 "</h3>",
 

@@ -273,13 +273,14 @@ roc2dBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- roc2d(
 #'     data = dual_marker_data,
 #'     marker1 = "biomarker_A",
 #'     marker2 = "biomarker_B",
 #'     outcome = "disease_status"
 #' )
-#'
+#'}
 #' @param data .
 #' @param marker1 .
 #' @param marker2 .

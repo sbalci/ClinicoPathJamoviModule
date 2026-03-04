@@ -5,7 +5,6 @@ library(jmvcore)
 
 # Load the package
 if (requireNamespace("devtools", quietly = TRUE)) {
-  devtools::load_all()
 }
 
 test_that("bayesdca works with minimal inputs", {

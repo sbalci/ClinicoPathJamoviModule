@@ -122,7 +122,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     valid = FALSE, 
                     message = paste0(
                         "<div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                        "<h4>❌ INSUFFICIENT EVENTS</h4>",
+                        "<h4> INSUFFICIENT EVENTS</h4>",
                         "<p><strong>Found:</strong> ", n_events, " events in ", n_obs, " observations (", round(event_rate, 1), "% event rate)</p>",
                         "<p><strong>Required:</strong> ≥10 events for basic parametric modeling</p>",
                         "<p><strong>Recommendation:</strong> Collect more data or consider simpler analysis methods.</p>",
@@ -140,7 +140,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         valid = FALSE,
                         message = paste0(
                             "<div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                            "<h4>⚠️ TOO MANY COVARIATES</h4>",
+                            "<h4> TOO MANY COVARIATES</h4>",
                             "<p><strong>Current:</strong> ", n_covs, " covariates with ", n_events, " events (ratio: ", round(events_per_var, 1), ")</p>",
                             "<p><strong>Rule of thumb:</strong> Need ≥5 events per covariate for reliable estimates</p>",
                             "<p><strong>Recommendation:</strong> Use ≤", floor(n_events/5), " covariates or collect more data.</p>",
@@ -153,7 +153,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Warning for marginal sample sizes
                 if (events_per_var < 10) {
                     warnings_list <- c(warnings_list,
-                        paste0("<p>⚠️ <strong>Marginal sample size:</strong> ", round(events_per_var, 1), 
+                        paste0("<p> <strong>Marginal sample size:</strong> ", round(events_per_var, 1), 
                               " events per covariate. Consider using fewer covariates for more stable estimates.</p>")
                     )
                 }
@@ -163,7 +163,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (model_approach %in% c('spline_based', 'automatic') && spline_df > 4) {
                 if (n_events < spline_df * 10) {
                     warnings_list <- c(warnings_list,
-                        paste0("<p>⚠️ <strong>Complex spline model:</strong> ", spline_df, " degrees of freedom with ", 
+                        paste0("<p> <strong>Complex spline model:</strong> ", spline_df, " degrees of freedom with ", 
                               n_events, " events. Consider reducing complexity to 3-4 degrees of freedom.</p>")
                     )
                 }
@@ -172,7 +172,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Very low event rate warning
             if (event_rate < 5) {
                 warnings_list <- c(warnings_list,
-                    paste0("<p>⚠️ <strong>Low event rate:</strong> ", round(event_rate, 1), 
+                    paste0("<p> <strong>Low event rate:</strong> ", round(event_rate, 1), 
                           "% events. Parametric models may be less reliable with very low event rates.</p>")
                 )
             }
@@ -180,7 +180,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Very high event rate (may indicate coding issues)
             if (event_rate > 90) {
                 warnings_list <- c(warnings_list,
-                    paste0("<p>⚠️ <strong>Very high event rate:</strong> ", round(event_rate, 1), 
+                    paste0("<p> <strong>Very high event rate:</strong> ", round(event_rate, 1), 
                           "% events. Please verify event coding is correct (1=event, 0=censored).</p>")
                 )
             }
@@ -189,7 +189,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             warnings_html <- if (length(warnings_list) > 0) {
                 paste0(
                     "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                    "<h4>⚠️ Analysis Warnings</h4>",
+                    "<h4> Analysis Warnings</h4>",
                     paste(warnings_list, collapse = ""),
                     "</div>"
                 )
@@ -705,7 +705,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             n_events <- sum(model_results$data$event)
             
             summary_html <- paste0(
-                "<h3>📊 Model Summary</h3>",
+                "<h3> Model Summary</h3>",
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                 "<p><strong>Approach:</strong> ", 
                 switch(approach,
@@ -797,7 +797,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Populate comparison table
             for (result in comparison_results) {
                 is_best <- result$model == best_model
-                best_indicator <- if (is_best) "✓ Best" else ""
+                best_indicator <- if (is_best) " Best" else ""
                 
                 table$addRow(rowKey = result$model, values = list(
                     model = result$model,
@@ -827,9 +827,9 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             covariate_names <- self$options$covariates
             
             clinical_html <- paste0(
-                "<h3>⚕️ Clinical Summary</h3>",
+                "<h3> Clinical Summary</h3>",
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4>📈 Model Performance</h4>",
+                "<h4> Model Performance</h4>",
                 "<p><strong>Distribution Fit:</strong> ", distribution, " distribution provides ",
                 private$.assessModelFit(model), "</p>",
                 "<p><strong>Sample Adequacy:</strong> ", n_obs, " patients with ", n_events, 
@@ -841,7 +841,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (!is.null(covariate_names) && length(covariate_names) > 0) {
                 clinical_html <- paste0(clinical_html,
                     "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                    "<h4>🔍 Clinical Findings</h4>",
+                    "<h4> Clinical Findings</h4>",
                     private$.generateClinicalFindings(model, covariate_names),
                     "</div>"
                 )
@@ -851,7 +851,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             assumptions_check <- private$.checkModelAssumptions(model_results, data)
             clinical_html <- paste0(clinical_html,
                 "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4>⚙️ Model Assumptions & Validation</h4>",
+                "<h4> Model Assumptions & Validation</h4>",
                 assumptions_check,
                 "</div>"
             )
@@ -859,7 +859,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Add copy-ready report section
             clinical_html <- paste0(clinical_html,
                 "<div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4>📋 Copy-Ready Report</h4>",
+                "<h4> Copy-Ready Report</h4>",
                 "<p style='font-family: monospace; background-color: white; padding: 10px; border: 1px solid #ccc;'>",
                 private$.generateCopyReadyReport(model_results),
                 "</p></div>"
@@ -975,20 +975,20 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Check sample size adequacy
             if (n_events >= 30) {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>✅ <strong>Sample Size:</strong> Adequate with ", n_events, " events for reliable parametric modeling.</p>")
+                    "<p> <strong>Sample Size:</strong> Adequate with ", n_events, " events for reliable parametric modeling.</p>")
             } else if (n_events >= 10) {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>⚠️ <strong>Sample Size:</strong> Marginal with ", n_events, " events. Results may be less stable.</p>")
+                    "<p> <strong>Sample Size:</strong> Marginal with ", n_events, " events. Results may be less stable.</p>")
                 warnings_count <- warnings_count + 1
             }
             
             # Check event rate
             if (event_rate >= 10 && event_rate <= 80) {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>✅ <strong>Event Rate:</strong> Appropriate at ", round(event_rate, 1), "% for parametric modeling.</p>")
+                    "<p> <strong>Event Rate:</strong> Appropriate at ", round(event_rate, 1), "% for parametric modeling.</p>")
             } else {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>⚠️ <strong>Event Rate:</strong> ", round(event_rate, 1), "% may affect model reliability.</p>")
+                    "<p> <strong>Event Rate:</strong> ", round(event_rate, 1), "% may affect model reliability.</p>")
                 warnings_count <- warnings_count + 1
             }
             
@@ -996,10 +996,10 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             n_params <- length(model$coefficients)
             if (n_events / n_params >= 10) {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>✅ <strong>Model Complexity:</strong> ", n_params, " parameters well-supported by data.</p>")
+                    "<p> <strong>Model Complexity:</strong> ", n_params, " parameters well-supported by data.</p>")
             } else {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>⚠️ <strong>Model Complexity:</strong> ", n_params, " parameters may be too many for ", n_events, " events.</p>")
+                    "<p> <strong>Model Complexity:</strong> ", n_params, " parameters may be too many for ", n_events, " events.</p>")
                 warnings_count <- warnings_count + 1
             }
             
@@ -1007,10 +1007,10 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             aic_value <- AIC(model)
             if (aic_value < nrow(data)) {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>✅ <strong>Model Fit:</strong> ", distribution, " distribution provides good fit (AIC=", round(aic_value, 1), ").</p>")
+                    "<p> <strong>Model Fit:</strong> ", distribution, " distribution provides good fit (AIC=", round(aic_value, 1), ").</p>")
             } else {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>⚠️ <strong>Model Fit:</strong> Consider simpler model or check for outliers (AIC=", round(aic_value, 1), ").</p>")
+                    "<p> <strong>Model Fit:</strong> Consider simpler model or check for outliers (AIC=", round(aic_value, 1), ").</p>")
                 warnings_count <- warnings_count + 1
             }
             
@@ -1018,14 +1018,14 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             censoring_rate <- (n_obs - n_events) / n_obs * 100
             if (censoring_rate <= 50) {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>✅ <strong>Censoring:</strong> ", round(censoring_rate, 1), "% censoring rate is appropriate.</p>")
+                    "<p> <strong>Censoring:</strong> ", round(censoring_rate, 1), "% censoring rate is appropriate.</p>")
             } else if (censoring_rate <= 80) {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>⚠️ <strong>Censoring:</strong> High censoring (", round(censoring_rate, 1), "%) may limit model precision.</p>")
+                    "<p> <strong>Censoring:</strong> High censoring (", round(censoring_rate, 1), "%) may limit model precision.</p>")
                 warnings_count <- warnings_count + 1
             } else {
                 assumptions_html <- paste0(assumptions_html,
-                    "<p>❌ <strong>Censoring:</strong> Very high censoring (", round(censoring_rate, 1), "%) - consider longer follow-up.</p>")
+                    "<p> <strong>Censoring:</strong> Very high censoring (", round(censoring_rate, 1), "%) - consider longer follow-up.</p>")
                 warnings_count <- warnings_count + 1
             }
             
@@ -1033,13 +1033,13 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (warnings_count == 0) {
                 assumptions_html <- paste0(
                     "<p style='background-color: #d4edda; padding: 8px; border-radius: 3px;'>",
-                    "<strong>✅ Overall Assessment:</strong> All key assumptions appear satisfied. Model results are reliable.</p>",
+                    "<strong> Overall Assessment:</strong> All key assumptions appear satisfied. Model results are reliable.</p>",
                     assumptions_html
                 )
             } else {
                 assumptions_html <- paste0(
                     "<p style='background-color: #fff3cd; padding: 8px; border-radius: 3px;'>",
-                    "<strong>⚠️ Overall Assessment:</strong> ", warnings_count, " assumption concerns detected. Interpret results with caution.</p>",
+                    "<strong> Overall Assessment:</strong> ", warnings_count, " assumption concerns detected. Interpret results with caution.</p>",
                     assumptions_html
                 )
             }
@@ -1136,10 +1136,10 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (!self$options$showExplanations) return()
             
             methodology_html <- "
-            <h3>📚 About This Analysis</h3>
+            <h3> About This Analysis</h3>
             
             <div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-            <h4>🎯 What This Analysis Does</h4>
+            <h4> What This Analysis Does</h4>
             <p>Flexible parametric survival modeling fits smooth mathematical functions to survival data, allowing for complex hazard patterns that Cox regression cannot capture. This approach is especially useful when you need to:</p>
             <ul>
                 <li>Model non-proportional hazards (risk changes over time)</li>
@@ -1150,7 +1150,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
             
             <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-            <h4>📋 When to Use This Analysis</h4>
+            <h4> When to Use This Analysis</h4>
             <p><strong>Ideal for:</strong></p>
             <ul>
                 <li>Cancer survival studies with adequate follow-up</li>
@@ -1167,7 +1167,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
             
             <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-            <h4>⚠️ Key Assumptions & Limitations</h4>
+            <h4> Key Assumptions & Limitations</h4>
             <ul>
                 <li><strong>Independent observations:</strong> Each patient contributes one survival time</li>
                 <li><strong>Correct event coding:</strong> 1=event occurred, 0=censored</li>
@@ -1178,7 +1178,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
             
             <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-            <h4>🚀 How to Use This Function</h4>
+            <h4> How to Use This Function</h4>
             <ol>
                 <li><strong>Select Variables:</strong> Choose time variable (months/years), event indicator (1/0), and covariates</li>
                 <li><strong>Choose Approach:</strong> Traditional (standard distributions), Flexible (splines), or Automatic (best fit)</li>
@@ -1189,7 +1189,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
             
             <div style='background-color: #f0f0f0; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-            <h4>📊 Distribution Guide</h4>
+            <h4> Distribution Guide</h4>
             <p><strong>Weibull:</strong> Most common, good for increasing/decreasing hazards (cancer, wear-out)</p>
             <p><strong>Log-normal:</strong> Bell-shaped hazard, good for acute conditions with recovery</p>
             <p><strong>Gamma:</strong> Flexible shape, can handle complex hazard patterns</p>
@@ -1198,7 +1198,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             </div>
             
             <div style='background-color: #e2e3e5; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-            <h4>📝 Reporting Template</h4>
+            <h4> Reporting Template</h4>
             <p style='font-style: italic;'>\"Flexible parametric survival analysis was performed using [distribution] distribution. The model included [N] patients with [N] events ([%] event rate). [Covariate] was associated with [HR] hazard of [outcome] (HR=X.XX, 95% CI X.XX-X.XX, p=X.XXX). Model fit was assessed using AIC ([value]) and diagnostic plots.\"</p>
             </div>"
             

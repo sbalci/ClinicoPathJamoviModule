@@ -16,7 +16,7 @@ description:
         Informative than the ROC Plot When Evaluating Binary Classifiers on
         Imbalanced Datasets." PLoS ONE 10(3): e0118432.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic PRC curve
             precisionrecall(data = mydata, outcome = 'disease', score = 'biomarker')

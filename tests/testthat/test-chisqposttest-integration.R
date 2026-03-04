@@ -3,7 +3,6 @@
 
 test_that("chisqposttest enforces omnibus significance prerequisite", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     # Create data where omnibus test will be NON-significant
     # Approximately equal proportions across groups
     set.seed(123)

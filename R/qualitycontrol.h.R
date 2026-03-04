@@ -845,13 +845,14 @@ qualitycontrolBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' qualitycontrol(
 #'     measurement_var = "measurement",
 #'     analysis_type = "control_charts",
 #'     control_chart_type = "all_charts"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param measurement_var Continuous variable containing laboratory
 #'   measurement values for quality control analysis
@@ -886,8 +887,8 @@ qualitycontrolBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param outlier_detection Method for detecting and handling outliers in
 #'   reference interval estimation
 #' @param pt_target_value Target value for proficiency testing analysis
-#' @param pt_acceptable_range Acceptable range for proficiency testing (±\% or
-#'   ± absolute units)
+#' @param pt_acceptable_range Acceptable range for proficiency testing (±
+#'   percent or ± absolute units)
 #' @param validation_components Components of analytical method validation to
 #'   assess
 #' @param precision_design Design for precision assessment following

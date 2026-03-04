@@ -138,6 +138,7 @@ for
 optimal therapeutic decision-making.
 }
 \examples{
+\donttest{
 data('histopathology', package='ClinicoPath')
 
 # Basic treatment optimization analysis
@@ -147,5 +148,5 @@ treatmentoptim(histopathology,
              responseVar = 'Response',
              treatment_selection = TRUE,
              dose_optimization = TRUE)
-
+}
 }

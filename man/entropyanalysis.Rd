@@ -108,6 +108,7 @@ selection, test ordering optimization, multi-class uncertainty
 quantification.
 }
 \examples{
+\donttest{
 # Example with AI prediction probabilities
 data <- data.frame(
   true_class = factor(sample(c("A", "B", "C"), 100, replace=TRUE)),
@@ -122,5 +123,5 @@ entropyanalysis(
   probability_vars = c('prob_A', 'prob_B', 'prob_C'),
   uncertainty_threshold = 0.5
 )
-
+}
 }

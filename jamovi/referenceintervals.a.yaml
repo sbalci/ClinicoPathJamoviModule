@@ -11,9 +11,9 @@ description:
         and partitioning analysis for demographic factors. Essential for laboratory standardization
         and clinical interpretation of test results.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             referenceintervals(
                 measurement = "laboratory_value",
                 age = "patient_age",

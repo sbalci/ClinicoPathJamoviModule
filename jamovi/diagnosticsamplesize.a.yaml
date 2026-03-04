@@ -43,7 +43,7 @@ options:
       default: 0.10
 
     - name: ci_width
-      title: Desired 95% CI Width
+      title: Desired 95 percent CI Width
       type: Number
       min: 0.05
       max: 0.30
@@ -57,7 +57,7 @@ options:
       default: 0.05
 
     - name: nonresponse_rate
-      title: Non-Response Rate (%)
+      title: Non-Response Rate ( percent)
       type: Number
       min: 0
       max: 50

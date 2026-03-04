@@ -100,8 +100,8 @@ raters. More accurate but computationally intensive.}
 \item{multiraterMethod}{Choose specific method for multi-rater agreement
 analysis or use automatic selection.}
 
-\item{fleissCI}{Calculate 95\\% confidence intervals for Fleiss' kappa using
-asymptotic standard errors.}
+\item{fleissCI}{Calculate 95 percent confidence intervals for Fleiss' kappa
+using asymptotic standard errors.}
 
 \item{kripp}{Calculate Krippendorff's alpha, a generalized measure of
 reliability for any number of observers and data types.}
@@ -237,8 +237,8 @@ that distinguish diagnostic style groups. These cases are useful for
 training and quality assurance discussions.}
 
 \item{discordantThreshold}{Minimum disagreement proportion for flagging
-discordant cases. 0.5 means at least 50\\% of raters disagreed with majority
-diagnosis.}
+discordant cases. 0.5 means at least 50 percent of raters disagreed with
+majority diagnosis.}
 
 \item{raterExperience}{Years of experience for each rater. Will be tested
 for association with style group membership.}
@@ -345,6 +345,7 @@ analysis. Provides agreement statistics, visualization, and clinical
 interpretation for categorical rating data.
 }
 \examples{
+\donttest{
 # Load example data
 data('pathology_ratings', package = 'ClinicoPath')
 
@@ -375,5 +376,5 @@ agreement(pathology_ratings,
           consensus_method = 'majority',
           tie_breaking = 'arbitration',
           show_consensus_table = TRUE)
-
+}
 }

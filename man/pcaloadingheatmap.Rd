@@ -100,6 +100,7 @@ Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease
 }
 
 \examples{
+\donttest{
 # Example with mtcars dataset
 data("mtcars")
 
@@ -114,5 +115,5 @@ pcaloadingheatmap(
   textvalues = TRUE,
   gradientcolor = TRUE
 )
-
+}
 }

@@ -2,7 +2,6 @@
 # Argument Tests: survivalcont
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(survivalcont_test, package = "ClinicoPath")
 data(survivalcont_dates, package = "ClinicoPath")
 data(survivalcont_landmark, package = "ClinicoPath")

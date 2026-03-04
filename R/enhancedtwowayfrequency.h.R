@@ -549,9 +549,10 @@ enhancedtwowayfrequencyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #' @param colVar .
 #' @param cellPercent Display percentages of total sample (BlueSky
 #'   BSkyTwoWayFrequency feature)
-#' @param rowPercent Display row-wise percentages (sum to 100\% across rows)
-#' @param colPercent Display column-wise percentages (sum to 100\% across
-#'   columns)
+#' @param rowPercent Display row-wise percentages (sum to 100 percent across
+#'   rows)
+#' @param colPercent Display column-wise percentages (sum to 100 percent
+#'   across columns)
 #' @param showCounts Display raw frequency counts in cross-tabulation
 #' @param showTotals Include row and column totals in tables
 #' @param chiSquareTest Perform Pearson's chi-square test for association

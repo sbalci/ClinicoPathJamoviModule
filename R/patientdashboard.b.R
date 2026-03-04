@@ -29,7 +29,7 @@ patientdashboardClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                        <div class='todo'>Welcome to Patient Monitoring Dashboard 🏥</div>
+                        <div class='todo'>Welcome to Patient Monitoring Dashboard </div>
                         <div class='instructions'>
                             <div class='step'><b>1.</b> Select patient identifier variable</div>
                             <div class='step'><b>2.</b> Add vital signs parameters (heart rate, blood pressure, etc.)</div>
@@ -194,7 +194,7 @@ patientdashboardClass <- R6::R6Class(
             currentPatient <- if (!is.null(patientData)) as.character(patientData[1]) else "Unknown"
             
             summary_html <- paste0(summary_html, 
-                "<div class='patient-header'>🏥 Patient Monitor: ", currentPatient, "</div>"
+                "<div class='patient-header'> Patient Monitor: ", currentPatient, "</div>"
             )
             
             # Dashboard configuration summary
@@ -588,7 +588,7 @@ patientdashboardClass <- R6::R6Class(
                 .timestamp { color: #7f8c8d; font-size: 12px; }
             </style></head><body>"
             
-            summary_html <- paste0(summary_html, "<div class='clinical-title'>📋 Clinical Summary Report</div>")
+            summary_html <- paste0(summary_html, "<div class='clinical-title'> Clinical Summary Report</div>")
             
             # Current status
             patientData <- data[[patientID[1]]]
@@ -642,7 +642,7 @@ patientdashboardClass <- R6::R6Class(
                 .low-risk { color: #27ae60; }
             </style></head><body>"
             
-            predictive_html <- paste0(predictive_html, "<div class='pred-title'>🔮 Predictive Analytics</div>")
+            predictive_html <- paste0(predictive_html, "<div class='pred-title'> Predictive Analytics</div>")
             
             # Risk predictions
             predictive_html <- paste0(predictive_html, 
@@ -679,7 +679,7 @@ patientdashboardClass <- R6::R6Class(
                 .metric { margin: 5px 0; padding: 3px; }
             </style></head><body>"
             
-            outcomes_html <- paste0(outcomes_html, "<div class='outcome-title'>📈 Patient Outcomes</div>")
+            outcomes_html <- paste0(outcomes_html, "<div class='outcome-title'> Patient Outcomes</div>")
             
             # Outcome metrics
             outcomes_html <- paste0(outcomes_html, 

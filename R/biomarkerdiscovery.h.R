@@ -1311,6 +1311,7 @@ biomarkerdiscoveryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('biomarker_data')
 #'
 #' biomarkerdiscovery(
@@ -1321,7 +1322,7 @@ biomarkerdiscoveryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'     validation_method = "bootstrap",
 #'     interpretability = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome_var Primary outcome variable for biomarker discovery
 #' @param biomarker_vars Potential biomarker variables (genes, proteins,
@@ -1348,7 +1349,7 @@ biomarkerdiscoveryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param correlation_threshold Correlation threshold for removing highly
 #'   correlated features
 #' @param validation_method Method for model validation
-#' @param train_proportion Proportion of data for training (70\% = 0.7)
+#' @param train_proportion Proportion of data for training (70 percent = 0.7)
 #' @param hyperparameter_tuning Perform hyperparameter optimization
 #' @param n_bootstrap_samples Number of bootstrap samples for confidence
 #'   intervals

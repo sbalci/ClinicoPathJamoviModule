@@ -320,9 +320,9 @@ clinmonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   indices. This can improve temporal resolution but increases computation
 #'   time.
 #' @param blockmin Minimum measurements required to create a block as a
-#'   percentage. Blocks with less data will be omitted. Default is 50\%.
+#'   percentage. Blocks with less data will be omitted. Default is 50 percent.
 #' @param epochmin Minimum blocks required to create an epoch as a percentage.
-#'   Epochs with fewer blocks will be omitted. Default is 50\%.
+#'   Epochs with fewer blocks will be omitted. Default is 50 percent.
 #' @param fast_processing Enable fast processing by aggregating data before
 #'   analysis. This speeds up computation but may reduce precision.
 #' @param show_summary Display summary statistics for calculated hemodynamic

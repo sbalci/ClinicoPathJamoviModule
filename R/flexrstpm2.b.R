@@ -218,22 +218,22 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
       .validateInputs = function() {
         # Check for required variables with clinical context
         if (is.null(self$options$elapsedtime) || self$options$elapsedtime == "") {
-          return(list(valid = FALSE, message = "⚠️ Time variable required (e.g., survival time, follow-up duration)"))
+          return(list(valid = FALSE, message = " Time variable required (e.g., survival time, follow-up duration)"))
         }
         
         if (is.null(self$options$outcome) || self$options$outcome == "") {
-          return(list(valid = FALSE, message = "⚠️ Event variable required (0=censored, 1=event occurred)"))
+          return(list(valid = FALSE, message = " Event variable required (0=censored, 1=event occurred)"))
         }
         
         if (is.null(self$options$covariates) || length(self$options$covariates) == 0) {
-          return(list(valid = FALSE, message = "⚠️ At least one covariate required (predictor variables like age, stage, treatment)"))
+          return(list(valid = FALSE, message = " At least one covariate required (predictor variables like age, stage, treatment)"))
         }
         
         # Check minimum observations
         if (nrow(self$data) < private$MIN_OBSERVATIONS) {
           return(list(
             valid = FALSE, 
-            message = paste("❌ Insufficient data: Need at least", private$MIN_OBSERVATIONS, 
+            message = paste(" Insufficient data: Need at least", private$MIN_OBSERVATIONS, 
                           "observations. Flexible parametric models require adequate sample size.")
           ))
         }
@@ -253,7 +253,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           # Critical minimums for flexible parametric models
           if (n_events < 10) {
             return(list(valid = FALSE, 
-                       message = paste0("❌ INSUFFICIENT EVENTS: Only ", n_events, " events detected. ",
+                       message = paste0(" INSUFFICIENT EVENTS: Only ", n_events, " events detected. ",
                                       "Flexible parametric models need ≥30 events (ideally ≥50). ",
                                       "Consider Kaplan-Meier or simple parametric models instead.")))
           }
@@ -264,7 +264,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           if (n_events < 30) {
             warnings_html <- paste0(
               "<div style='background-color:#fff3cd; padding:10px; border-left:4px solid #ffc107;'>",
-              "<strong>⚠️ Low Event Count Warning</strong><br>",
+              "<strong> Low Event Count Warning</strong><br>",
               "Only ", n_events, " events detected. Flexible parametric models work best with ≥30 events.<br>",
               "Recommendations:<br>",
               "• Use df=2-3 (lower complexity)<br>",
@@ -277,7 +277,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           # Validate degrees of freedom based on sample size
           df <- self$options$df
           if (df < 1 || df > 10) {
-            return(list(valid = FALSE, message = "⚠️ Degrees of freedom must be between 1 and 10"))
+            return(list(valid = FALSE, message = " Degrees of freedom must be between 1 and 10"))
           }
           
           # Clinical guidance for df selection
@@ -287,7 +287,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
             if (df > 4 && n_events < 100) {
               warnings_html <- paste0(warnings_html,
                 "<div style='background-color:#f8d7da; padding:10px; border-left:4px solid #dc3545; margin-top:10px;'>",
-                "<strong>⚠️ Overfitting Risk</strong><br>",
+                "<strong> Overfitting Risk</strong><br>",
                 "High complexity (df=", df, ") with only ", n_events, " events.<br>",
                 "Recommendation: Use df=3-4 for <100 events",
                 "</div>"
@@ -297,7 +297,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
             if (events_per_df < 10) {
               warnings_html <- paste0(warnings_html,
                 "<div style='background-color:#fff3cd; padding:10px; border-left:4px solid #ffc107; margin-top:10px;'>",
-                "<strong>⚠️ Sparse Data</strong><br>",
+                "<strong> Sparse Data</strong><br>",
                 "Only ", round(events_per_df, 1), " events per degree of freedom.<br>",
                 "Minimum 10 events/df recommended. Consider df=", max(1, floor(n_events/10)),
                 "</div>"
@@ -315,7 +315,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
             if (n_events < min_events_tvc) {
               warnings_html <- paste0(warnings_html,
                 "<div style='background-color:#fff3cd; padding:10px; border-left:4px solid #ffc107; margin-top:10px;'>",
-                "<strong>⚠️ Time-Varying Effects</strong><br>",
+                "<strong> Time-Varying Effects</strong><br>",
                 "Complex model needs ≥", min_events_tvc, " events for ", n_tvc, " time-varying covariate(s).<br>",
                 "You have ", n_events, " events. Consider simpler model.",
                 "</div>"
@@ -1359,7 +1359,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           
           summary_text <- paste(
             "<div style='background-color: #f8f9fa; border: 2px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 8px;'>",
-            "<h4 style='color: #155724; margin-top: 0;'>📋 Clinical Summary</h4>",
+            "<h4 style='color: #155724; margin-top: 0;'> Clinical Summary</h4>",
             
             "<p><strong>Analysis:</strong> ", model_type, " model with ", spline_df, 
             " degrees of freedom", if (n_covariates > 0) paste(" and", n_covariates, "covariates") else "", ".</p>",
@@ -1380,7 +1380,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
             
             # Copy-ready template
             "<div style='background-color: #fff; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
-            "<h5>📄 Copy-Ready Report Template</h5>",
+            "<h5> Copy-Ready Report Template</h5>",
             "<div style='background-color: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 3px; font-family: monospace; font-size: 12px;'>",
             "Flexible parametric survival analysis was performed using ", model_type, " models with ", spline_df, " degrees of freedom. ",
             if (n_covariates > 0) paste("Analysis included", n_covariates, "covariates. ") else "No covariates were included. ",
@@ -1406,32 +1406,32 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
       .generateMethodExplanation = function() {
         explanation_html <- paste0(
           "<div style='background-color:#e7f3ff; padding:20px; border-left:5px solid #0066cc; margin:15px 0;'>",
-          "<h3 style='color:#004080; margin-top:0;'>📖 About Flexible Parametric Survival Models</h3>",
+          "<h3 style='color:#004080; margin-top:0;'> About Flexible Parametric Survival Models</h3>",
           
           "<h4>What This Analysis Does</h4>",
           "<p>Flexible parametric (Royston-Parmar) models fit smooth survival curves using restricted cubic splines ",
           "to model the baseline hazard function. Unlike Cox models, they provide:</p>",
           "<ul>",
-          "<li>✅ Absolute risk predictions (not just relative hazards)</li>",
-          "<li>✅ Smooth hazard functions that can capture complex patterns</li>",
-          "<li>✅ Reliable extrapolation beyond observed follow-up</li>",
-          "<li>✅ Direct estimation of survival percentiles</li>",
+          "<li> Absolute risk predictions (not just relative hazards)</li>",
+          "<li> Smooth hazard functions that can capture complex patterns</li>",
+          "<li> Reliable extrapolation beyond observed follow-up</li>",
+          "<li> Direct estimation of survival percentiles</li>",
           "</ul>",
           
           "<h4>When to Use This Method</h4>",
           "<p><strong>Ideal for:</strong></p>",
           "<ul>",
-          "<li>🎯 Cancer survival with non-proportional hazards</li>",
-          "<li>🎯 Health economic evaluations requiring lifetime projections</li>",
-          "<li>🎯 Analyzing time-varying treatment effects</li>",
-          "<li>🎯 Studies needing absolute risk estimates</li>",
+          "<li> Cancer survival with non-proportional hazards</li>",
+          "<li> Health economic evaluations requiring lifetime projections</li>",
+          "<li> Analyzing time-varying treatment effects</li>",
+          "<li> Studies needing absolute risk estimates</li>",
           "</ul>",
           
           "<p><strong>Not recommended when:</strong></p>",
           "<ul>",
-          "<li>❌ You have <30 events (use Kaplan-Meier or simple parametric)</li>",
-          "<li>❌ Only interested in relative effects (Cox model simpler)</li>",
-          "<li>❌ Very small sample size (<50 patients)</li>",
+          "<li> You have <30 events (use Kaplan-Meier or simple parametric)</li>",
+          "<li> Only interested in relative effects (Cox model simpler)</li>",
+          "<li> Very small sample size (<50 patients)</li>",
           "</ul>",
           
           "<h4>Key Parameters Explained</h4>",
@@ -1485,13 +1485,13 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           "<h4>Interpreting Results</h4>",
           "<p><strong>Key outputs to check:</strong></p>",
           "<ul>",
-          "<li>📊 <strong>Hazard Ratios:</strong> HR>1 means increased risk, HR<1 means decreased risk</li>",
-          "<li>📊 <strong>Concordance (C-index):</strong> >0.7 good discrimination, >0.8 excellent</li>",
-          "<li>📊 <strong>AIC:</strong> Lower values indicate better model fit</li>",
-          "<li>📊 <strong>Survival Predictions:</strong> Probability of surviving to specific time points</li>",
+          "<li> <strong>Hazard Ratios:</strong> HR>1 means increased risk, HR<1 means decreased risk</li>",
+          "<li> <strong>Concordance (C-index):</strong> >0.7 good discrimination, >0.8 excellent</li>",
+          "<li> <strong>AIC:</strong> Lower values indicate better model fit</li>",
+          "<li> <strong>Survival Predictions:</strong> Probability of surviving to specific time points</li>",
           "</ul>",
           
-          "<h4>⚠️ Assumptions & Caveats</h4>",
+          "<h4> Assumptions & Caveats</h4>",
           "<ul>",
           "<li>Assumes smooth hazard function (no sudden jumps)</li>",
           "<li>Requires adequate events across follow-up period</li>",
@@ -1517,7 +1517,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           "<dd>Probability model correctly orders event times (0.5=random, 1=perfect)</dd>",
           "</dl>",
           
-          "<h4>📚 References</h4>",
+          "<h4> References</h4>",
           "<p style='font-size:0.9em;'>",
           "• Royston P, Parmar MKB. Flexible parametric proportional-hazards and proportional-odds models ",
           "for censored survival data. Stat Med 2002;21:2175-97.<br>",

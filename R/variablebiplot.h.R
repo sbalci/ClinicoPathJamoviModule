@@ -434,6 +434,7 @@ variablebiplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' comprehensive variable importance metrics.
 #'
 #' @examples
+#' \donttest{
 #' # Example: PCA biplot for tumor staging
 #' variablebiplot(
 #'     data = clinical_data,
@@ -443,7 +444,7 @@ variablebiplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     showLoadings = TRUE,
 #'     topContributors = 10
 #' )
-#'
+#'}
 #' @param data .
 #' @param groupVar .
 #' @param features .

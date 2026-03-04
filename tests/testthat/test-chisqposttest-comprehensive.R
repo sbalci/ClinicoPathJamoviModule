@@ -3,7 +3,6 @@
 # and multiple testing corrections against trusted R packages
 
 library(testthat)
-devtools::load_all()
 
 # Helper function to extract table data from jamovi results
 extract_table_data <- function(result, table_name) {
@@ -33,7 +32,6 @@ extract_table_data <- function(result, table_name) {
 
 test_that("Chi-squared statistic matches stats::chisq.test() for 2x2 table", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create simple 2x2 contingency table
   data <- data.frame(
     treatment = factor(rep(c("Drug", "Placebo"), c(60, 60))),

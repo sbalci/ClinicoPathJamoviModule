@@ -21,7 +21,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$age) || is.null(self$options$gender)) {
                 self$results$welcome$setContent(
                     "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196F3;'>
-                    <h3 style='color: #1976d2; margin-top: 0;'>📊 Age Pyramid Analysis</h3>
+                    <h3 style='color: #1976d2; margin-top: 0;'> Age Pyramid Analysis</h3>
                     <p style='font-size: 15px;'>Create demographic visualizations showing age distribution by gender.</p>
                     <h4 style='color: #1976d2; margin-bottom: 8px;'>Required Variables:</h4>
                     <ol style='font-size: 14px; line-height: 1.6;'>
@@ -100,7 +100,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(female_level) && !is.null(male_level) && female_level == male_level) {
                 error_html <- paste0(
                     "<div style='background-color: #ffebee; padding: 20px; border-radius: 8px; border-left: 4px solid #f44336;'>",
-                    "<h3 style='color: #c62828; margin-top: 0;'>⚠️ Configuration Error</h3>",
+                    "<h3 style='color: #c62828; margin-top: 0;'> Configuration Error</h3>",
                     "<p style='font-size: 15px;'><strong>Female and Male gender levels cannot be the same.</strong></p>",
                     "<p style='font-size: 14px;'>You have selected '<strong>", female_level, "</strong>' for both Female and Male.</p>",
                     "<h4 style='color: #c62828; margin-bottom: 8px;'>To fix this:</h4>",
@@ -517,7 +517,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_excluded <- n_initial - n_final
 
             html <- "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;'>"
-            html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #1976d2;'>📊 Data Summary</h4>")
+            html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #1976d2;'> Data Summary</h4>")
             html <- paste0(html, "<table style='width: 100%; font-size: 14px;'>")
             html <- paste0(html, "<tr><td><strong>Initial observations:</strong></td><td>", n_initial, "</td></tr>")
             html <- paste0(html, "<tr><td><strong>Final observations:</strong></td><td>", n_final, "</td></tr>")

@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jwaffle_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jwaffle_quality, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle function exists and runs with minimal arguments", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -31,7 +29,6 @@ test_that("jwaffle function exists and runs with minimal arguments", {
 })
 
 test_that("jwaffle handles treatment response data", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -42,7 +39,6 @@ test_that("jwaffle handles treatment response data", {
 })
 
 test_that("jwaffle handles disease subtype data", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -53,7 +49,6 @@ test_that("jwaffle handles disease subtype data", {
 })
 
 test_that("jwaffle handles pathology data", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -68,7 +63,6 @@ test_that("jwaffle handles pathology data", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles default rows (5)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -80,7 +74,6 @@ test_that("jwaffle handles default rows (5)", {
 })
 
 test_that("jwaffle handles 10 rows", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -92,7 +85,6 @@ test_that("jwaffle handles 10 rows", {
 })
 
 test_that("jwaffle handles 3 rows", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -104,7 +96,6 @@ test_that("jwaffle handles 3 rows", {
 })
 
 test_that("jwaffle handles 1 row (minimum)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -120,7 +111,6 @@ test_that("jwaffle handles 1 row (minimum)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles standard orientation (flip=false)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -132,7 +122,6 @@ test_that("jwaffle handles standard orientation (flip=false)", {
 })
 
 test_that("jwaffle handles flipped orientation (flip=true)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -148,7 +137,6 @@ test_that("jwaffle handles flipped orientation (flip=true)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles default palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -160,7 +148,6 @@ test_that("jwaffle handles default palette", {
 })
 
 test_that("jwaffle handles colorblind palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -172,7 +159,6 @@ test_that("jwaffle handles colorblind palette", {
 })
 
 test_that("jwaffle handles professional palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -184,7 +170,6 @@ test_that("jwaffle handles professional palette", {
 })
 
 test_that("jwaffle handles presentation palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -196,7 +181,6 @@ test_that("jwaffle handles presentation palette", {
 })
 
 test_that("jwaffle handles journal palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -208,7 +192,6 @@ test_that("jwaffle handles journal palette", {
 })
 
 test_that("jwaffle handles pastel palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -220,7 +203,6 @@ test_that("jwaffle handles pastel palette", {
 })
 
 test_that("jwaffle handles dark palette", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -236,7 +218,6 @@ test_that("jwaffle handles dark palette", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles legend hidden (default)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -248,7 +229,6 @@ test_that("jwaffle handles legend hidden (default)", {
 })
 
 test_that("jwaffle handles legend shown", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -264,7 +244,6 @@ test_that("jwaffle handles legend shown", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles no title (default)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -276,7 +255,6 @@ test_that("jwaffle handles no title (default)", {
 })
 
 test_that("jwaffle handles custom title", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -288,7 +266,6 @@ test_that("jwaffle handles custom title", {
 })
 
 test_that("jwaffle handles custom legend title", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -301,7 +278,6 @@ test_that("jwaffle handles custom legend title", {
 })
 
 test_that("jwaffle handles both custom titles", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -319,7 +295,6 @@ test_that("jwaffle handles both custom titles", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles no faceting (default)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -330,7 +305,6 @@ test_that("jwaffle handles no faceting (default)", {
 })
 
 test_that("jwaffle handles faceting by 2-level variable", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -342,7 +316,6 @@ test_that("jwaffle handles faceting by 2-level variable", {
 })
 
 test_that("jwaffle handles faceting by 3-level variable", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -354,7 +327,6 @@ test_that("jwaffle handles faceting by 3-level variable", {
 })
 
 test_that("jwaffle handles faceting by 4-level variable", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -366,7 +338,6 @@ test_that("jwaffle handles faceting by 4-level variable", {
 })
 
 test_that("jwaffle handles faceting by 5-level variable", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -382,7 +353,6 @@ test_that("jwaffle handles faceting by 5-level variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles summaries hidden (default)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -394,7 +364,6 @@ test_that("jwaffle handles summaries hidden (default)", {
 })
 
 test_that("jwaffle handles summaries shown", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -406,7 +375,6 @@ test_that("jwaffle handles summaries shown", {
 })
 
 test_that("jwaffle handles explanations hidden (default)", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -418,7 +386,6 @@ test_that("jwaffle handles explanations hidden (default)", {
 })
 
 test_that("jwaffle handles explanations shown", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_quality,
@@ -434,7 +401,6 @@ test_that("jwaffle handles explanations shown", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles 2-level categorical", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -445,7 +411,6 @@ test_that("jwaffle handles 2-level categorical", {
 })
 
 test_that("jwaffle handles 3-level categorical", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -456,7 +421,6 @@ test_that("jwaffle handles 3-level categorical", {
 })
 
 test_that("jwaffle handles 4-level categorical", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -467,7 +431,6 @@ test_that("jwaffle handles 4-level categorical", {
 })
 
 test_that("jwaffle handles 5-level categorical", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_disease,
@@ -478,7 +441,6 @@ test_that("jwaffle handles 5-level categorical", {
 })
 
 test_that("jwaffle handles 5-level age groups", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -489,7 +451,6 @@ test_that("jwaffle handles 5-level age groups", {
 })
 
 test_that("jwaffle handles 5-level ethnicity", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -504,7 +465,6 @@ test_that("jwaffle handles 5-level ethnicity", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles data without count variable", {
-  devtools::load_all()
 
   # No counts specified - each row counted once
   result <- jwaffle(
@@ -516,7 +476,6 @@ test_that("jwaffle handles data without count variable", {
 })
 
 test_that("jwaffle handles data with count variable", {
-  devtools::load_all()
 
   # With counts specified
   result <- jwaffle(

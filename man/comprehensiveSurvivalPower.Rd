@@ -74,8 +74,8 @@ allow interim analyses.}
 (one-sided). For non-inferiority trials, consider 0.025.}
 
 \item{power}{Statistical power (probability of detecting true effect).
-Standard values: 0.80 (80\\%) or 0.90 (90\\%). Higher power requires larger
-sample sizes.}
+Standard values: 0.80 (80 percent) or 0.90 (90 percent). Higher power
+requires larger sample sizes.}
 
 \item{sample_size}{Total number of subjects in the study. Used when
 calculating power or detectable effect size from a fixed sample size.}
@@ -85,8 +85,8 @@ equal allocation (1:1), 2.0 = twice as many controls (2:1). Equal
 allocation is most efficient.}
 
 \item{hazard_ratio}{Expected hazard ratio. Values < 1 indicate treatment
-benefit. Common values: 0.75 (25\\% reduction), 0.67 (33\\% reduction), 0.50
-(50\\% reduction).}
+benefit. Common values: 0.75 (25 percent reduction), 0.67 (33 percent
+reduction), 0.50 (50 percent reduction).}
 
 \item{median_survival_control}{Expected median survival time in control
 group. Units should match your study timeline (months, years, etc.).}
@@ -101,8 +101,8 @@ duration.}
 \item{follow_up_period}{Additional follow-up time after accrual completion.
 Total study duration = accrual period + follow-up period.}
 
-\item{dropout_rate}{Annual rate of loss to follow-up (0.05 = 5\\% per year).
-Higher dropout rates require larger sample sizes to maintain power.}
+\item{dropout_rate}{Annual rate of loss to follow-up (0.05 = 5 percent per
+year). Higher dropout rates require larger sample sizes to maintain power.}
 
 \item{event_rate}{Proportion of subjects expected to experience the event
 during study period. Used for simple design calculations.}
@@ -121,8 +121,8 @@ analysis. Should be clinically meaningful and within study follow-up
 period.}
 
 \item{non_inferiority_margin}{Non-inferiority margin for hazard ratio. 1.25
-means treatment is non-inferior if HR < 1.25 (25\\% increase in hazard is
-acceptable).}
+means treatment is non-inferior if HR < 1.25 (25 percent increase in hazard
+is acceptable).}
 
 \item{superiority_test}{After establishing non-inferiority, test for
 superiority. Requires hierarchical testing approach to control Type I
@@ -145,7 +145,7 @@ analyses. O'Brien-Fleming type preserves most alpha for final analysis.}
 intermediate results.}
 
 \item{show_sensitivity_analysis}{Perform sensitivity analysis varying key
-parameters around their specified values (+/- 10\\%, 20\\%).}
+parameters around their specified values (+/- 10 percent, 20 percent).}
 
 \item{show_power_curves}{Generate plots showing power vs sample size,
 effect size, or other parameters.}
@@ -234,6 +234,7 @@ considerations. Essential for study planning, grant applications, and
 regulatory submissions.
 }
 \examples{
+\donttest{
 # Standard log-rank test power calculation
 comprehensiveSurvivalPower(
     method_category = "standard",
@@ -265,5 +266,5 @@ comprehensiveSurvivalPower(
     alpha = 0.05,
     rmst_timepoint = 24
 )
-
+}
 }

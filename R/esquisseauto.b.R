@@ -138,48 +138,48 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                     # Detect common error patterns and provide helpful guidance
                     if (grepl("must only have an x or y aesthetic", error_msg, ignore.case = TRUE)) {
                         stop(glue::glue(
-                            "❌ Bar chart error: You've selected both X and Y variables.\n\n",
-                            "📊 For bar charts with '{selected_geom}' geom:\n",
+                            " Bar chart error: You've selected both X and Y variables.\n\n",
+                            " For bar charts with '{selected_geom}' geom:\n",
                             "  • Use ONLY X variable (for counts/frequencies)\n",
                             "  • OR use X + Y if Y is already aggregated\n\n",
-                            "💡 Current selection:\n",
+                            " Current selection:\n",
                             "  • X: {xvar}\n",
                             "  • Y: {if (!is.null(yvar)) yvar else '(none)'}\n\n",
-                            "🔧 Solutions:\n",
+                            " Solutions:\n",
                             "  1. Remove Y variable for automatic counting\n",
                             "  2. Switch to 'Column' geom if Y contains values to plot\n",
                             "  3. Enable manual geom selection and choose appropriate plot type"
                         ))
                     } else if (grepl("Discrete value supplied to continuous scale", error_msg, ignore.case = TRUE)) {
                         stop(glue::glue(
-                            "❌ Scale mismatch: A categorical variable was used where continuous is expected.\n\n",
-                            "💡 Suggestions:\n",
+                            " Scale mismatch: A categorical variable was used where continuous is expected.\n\n",
+                            " Suggestions:\n",
                             "  • Check if X/Y variables are the correct type\n",
                             "  • Size aesthetic requires continuous variables\n",
                             "  • Try a different plot type for categorical data"
                         ))
                     } else if (grepl("Continuous value supplied to discrete scale", error_msg, ignore.case = TRUE)) {
                         stop(glue::glue(
-                            "❌ Scale mismatch: A continuous variable was used where categorical is expected.\n\n",
-                            "💡 Suggestions:\n",
+                            " Scale mismatch: A continuous variable was used where categorical is expected.\n\n",
+                            " Suggestions:\n",
                             "  • Convert continuous variable to factor for grouping\n",
                             "  • Try scatter plot for continuous-continuous relationships"
                         ))
                     } else if (grepl("not found|object.*not found", error_msg, ignore.case = TRUE)) {
                         stop(glue::glue(
-                            "❌ Variable not found in data.\n\n",
-                            "🔍 Please check:\n",
+                            " Variable not found in data.\n\n",
+                            " Please check:\n",
                             "  • All selected variables exist in your dataset\n",
                             "  • Variable names are spelled correctly\n",
                             "  • No variables have been removed from data"
                         ))
                     } else if (grepl("stat.*aesthetic", error_msg, ignore.case = TRUE)) {
                         stop(glue::glue(
-                            "❌ Incompatible variable combination for '{selected_geom}' plot.\n\n",
-                            "📊 Current setup:\n",
+                            " Incompatible variable combination for '{selected_geom}' plot.\n\n",
+                            " Current setup:\n",
                             "  • X: {xvar} ({xdata_type})\n",
                             "  • Y: {if (!is.null(yvar)) paste0(yvar, ' (', ydata_type, ')') else '(none)'}\n\n",
-                            "💡 Suggestions:\n",
+                            " Suggestions:\n",
                             "  1. Try a different plot type (disable Auto-Select)\n",
                             "  2. Check variable types match plot requirements\n",
                             "  3. Remove incompatible aesthetic mappings (color, fill, size)\n\n",
@@ -188,18 +188,18 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                     } else {
                         # Generic error with context
                         stop(glue::glue(
-                            "❌ Plot generation failed.\n\n",
-                            "📊 Your configuration:\n",
+                            " Plot generation failed.\n\n",
+                            " Your configuration:\n",
                             "  • X: {xvar}\n",
                             "  • Y: {if (!is.null(yvar)) yvar else '(none)'}\n",
                             "  • Plot Type: {selected_geom}\n",
                             "  • Color: {if (!is.null(colorvar) && colorvar != '') colorvar else '(none)'}\n",
                             "  • Fill: {if (!is.null(fillvar) && fillvar != '') fillvar else '(none)'}\n\n",
-                            "💡 Try:\n",
+                            " Try:\n",
                             "  1. Simplify: Remove optional aesthetics (color, fill, size)\n",
                             "  2. Different geom: Disable Auto-Select and choose manually\n",
                             "  3. Check data: Ensure variables have valid values\n\n",
-                            "🔧 Technical details:\n{error_msg}"
+                            " Technical details:\n{error_msg}"
                         ))
                     }
                 })

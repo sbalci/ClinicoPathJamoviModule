@@ -129,7 +129,7 @@ options:
           R: >
             Number of most frequently mutated genes to display.
           jamovi: >
-            📊 Number of most frequently mutated genes to include in analysis. 
+            Number of most frequently mutated genes to include in analysis.
             Clinical guidance: 10-20 genes typical for tumor profiling, 3-5 for focused therapeutic targets.
 
     - name: genesToInclude
@@ -140,7 +140,7 @@ options:
           R: >
             Comma-separated list of specific genes to include (overrides topn).
           jamovi: >
-            🎯 Focus on specific genes of clinical interest (e.g., "TP53,KRAS,PIK3CA,EGFR").
+            Focus on specific genes of clinical interest (e.g., "TP53,KRAS,PIK3CA,EGFR").
             Example therapeutic targets: BRAF, EGFR, ALK, ROS1, NTRK, IDH1, IDH2.
 
     - name: genesToIgnore
@@ -203,7 +203,7 @@ options:
           R: >
             Color scheme for the oncoplot visualization.
           jamovi: >
-            🎨 Choose color scheme for mutations. Color-blind safe options recommended for publications and presentations.
+             Choose color scheme for mutations. Color-blind safe options recommended for publications and presentations.
 
     - name: showMutationLoad
       title: Show Mutation Load
@@ -243,7 +243,7 @@ options:
           R: >
             Display tumor mutation burden (TMB) bar plot.
           jamovi: >
-            🧬 Display total mutations per sample. High TMB (>10-20 mutations/Mb) may predict immunotherapy response in many cancer types.
+             Display total mutations per sample. High TMB (>10-20 mutations/Mb) may predict immunotherapy response in many cancer types.
 
     - name: showTMBTable
       title: Show TMB Table

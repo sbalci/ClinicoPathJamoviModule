@@ -158,7 +158,7 @@ skewed distributions.}
 interval estimation.}
 
 \item{confidence_level}{Confidence level for interval estimation (default
-95\\%).}
+95 percent).}
 
 \item{quality_thresholds}{Apply clinical quality thresholds to categorize
 segmentation performance (excellent/good/acceptable/poor) based on Dice/IoU
@@ -265,6 +265,7 @@ workflows, comparing segmentation methods, and establishing performance
 benchmarks for digital pathology systems.
 }
 \examples{
+\donttest{
 result <- segmentationmetrics(
     data = segmentation_results,
     prediction_mask = "ai_segmentation",
@@ -272,5 +273,5 @@ result <- segmentationmetrics(
     image_id = "slide_id",
     metric_type = "all"
 )
-
+}
 }

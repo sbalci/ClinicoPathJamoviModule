@@ -1040,7 +1040,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "singlearm",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = singlearmResults$new(options=options),
                 data = data,
@@ -1165,10 +1165,10 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   datasets with multiple event levels. This is useful for competing risk
 #'   analysis when there are multiple event types (e.g., death due to disease,
 #'   death due to other causes).
-#' @param ci95 Enable this option to display 95\% confidence intervals on the
-#'   survival plots. These intervals show the range of uncertainty around the
-#'   estimated survival probabilities and are useful for assessing the precision
-#'   of the estimates.
+#' @param ci95 Enable this option to display 95 percent confidence intervals
+#'   on the survival plots. These intervals show the range of uncertainty around
+#'   the estimated survival probabilities and are useful for assessing the
+#'   precision of the estimates.
 #' @param risktable Enable this option to display a table of risk estimates at
 #'   each time point. This table shows the estimated survival probability,
 #'   cumulative event rate, and cumulative hazard at each time point and is

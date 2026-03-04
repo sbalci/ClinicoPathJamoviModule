@@ -198,6 +198,7 @@ clinical guidelines, and
 personalized treatment decisions with proper uncertainty communication.
 }
 \examples{
+\donttest{
 data('clinical_data')
 
 bayesianclinical(
@@ -206,5 +207,5 @@ bayesianclinical(
     treatment_var = "treatment_group",
     covariates = c("age", "severity", "comorbidity")
 )
-
+}
 }

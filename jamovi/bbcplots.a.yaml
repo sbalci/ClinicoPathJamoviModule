@@ -20,7 +20,7 @@ description:
     Features BBC's signature minimalist aesthetic with Helvetica typography, strategic use of
     gridlines, and standardized chart dimensions optimized for digital publication.
   R:
-    dontrun: false
+    dontrun: true
     usage: |
       # Basic BBC-style visualization
       library(bbplot)

@@ -4,7 +4,7 @@ title: Combine Medical Decision Tests
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Combine and evaluate test patterns
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -14,7 +14,7 @@ description:
         standard to identify optimal testing strategies. Calculates sensitivity,
         specificity, PPV, NPV, and accuracy for each pattern combination.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Two-test combination analysis
             result <- decisioncombine(
@@ -112,6 +112,7 @@ options:
       title: Test 3 Positive Level
       type: Level
       variable: (test3)
+      allowNone: true
       description:
           R: >
             The level representing a positive result for Test 3.

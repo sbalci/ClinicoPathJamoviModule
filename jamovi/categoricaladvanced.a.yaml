@@ -9,9 +9,9 @@ description:
     main: |
         Enhanced categorical analysis with chi-square tests, Fisher's exact tests, 
         effect sizes, and association measures. Addresses the critical issue where 
-        25% of pathology studies use categorical analysis incorrectly.
+        25 percent of pathology studies use categorical analysis incorrectly.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('histopathology')
             

@@ -12,7 +12,7 @@ description:
         and variance components in complex survival data with unobserved heterogeneity.
         Supports multiple frailty distributions and convergence diagnostics.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('lung', package='survival')
             

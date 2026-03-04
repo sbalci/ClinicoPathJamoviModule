@@ -82,7 +82,7 @@ classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
                 "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                 "<p style='margin: 0; color: #f57c00;'><strong>Clinical Note:</strong> These calculations are essential for proper clinical trial design. Consider consultation with a biostatistician for complex studies.</p>",
                 "</div>",
-                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'>💡 This module implements GitHub Issue #72 using gsDesign package methods.</p>",
+                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements GitHub Issue #72 using gsDesign package methods.</p>",
                 "</div>"
             )
             
@@ -765,14 +765,14 @@ classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             
             if (self$options$export_results) {
                 results_count <- if (!is.null(private$.results_data)) 1 else 0
-                summary_html <- paste0(summary_html, "<p>✅ <strong>Power Analysis Results:</strong> ", results_count, " record exported</p>")
+                summary_html <- paste0(summary_html, "<p> <strong>Power Analysis Results:</strong> ", results_count, " record exported</p>")
                 summary_html <- paste0(summary_html, "<p style='margin-left: 20px; color: #666;'>Contains: sample size, power, hazard ratios, study parameters</p>")
             }
             
             if (self$options$export_power_curve) {
                 power_data <- private$.generate_power_curve_data()
                 curve_count <- if (!is.null(power_data)) nrow(power_data) else 0
-                summary_html <- paste0(summary_html, "<p>✅ <strong>Power Curve Data:</strong> ", curve_count, " data points exported</p>")
+                summary_html <- paste0(summary_html, "<p> <strong>Power Curve Data:</strong> ", curve_count, " data points exported</p>")
                 summary_html <- paste0(summary_html, "<p style='margin-left: 20px; color: #666;'>Contains: sample size vs power relationships for external plotting</p>")
             }
             

@@ -11,7 +11,6 @@ knitr::opts_chunk$set(
 
 ## -----------------------------------------------------------------------------
 # Load required libraries
-devtools::load_all()
 
 # Load the histopathology dataset
 data(histopathology, package = "ClinicoPath")

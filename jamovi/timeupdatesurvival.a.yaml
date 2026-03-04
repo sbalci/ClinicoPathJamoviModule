@@ -10,9 +10,9 @@ description:
         dynamic hazard functions. Incorporates real-time patient information updates 
         for precision medicine and personalized survival prediction.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             timeupdatesurvival(
                 time = "time_variable",
                 status = "status_variable",

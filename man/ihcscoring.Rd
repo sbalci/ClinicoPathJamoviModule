@@ -66,7 +66,7 @@ recommended settings}
 
 \item{intensity_var}{staining intensity scores (typically 0-3 scale)}
 
-\item{proportion_var}{percentage of positive cells (0-100\\%)}
+\item{proportion_var}{percentage of positive cells (0-100 percent)}
 
 \item{sample_id_var}{unique identifier for each sample}
 

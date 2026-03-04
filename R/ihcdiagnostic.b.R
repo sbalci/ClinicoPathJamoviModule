@@ -440,7 +440,7 @@ ihcdiagnosticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 predicted_group <- cluster_mapping[private$.clusters[i]]
                 actual_group <- as.character(private$.diagnosis_groups[i])
                 confidence <- private$.calculateConfidence(i)
-                correct <- ifelse(predicted_group == actual_group, "✓", "✗")
+                correct <- ifelse(predicted_group == actual_group, "", "")
 
                 self$results$differentialResults$addRow(
                     rowKey = i,

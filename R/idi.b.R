@@ -16,11 +16,11 @@ idiClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h2>📈 Integrated Discrimination Improvement (IDI)</h2>
+                    <h2> Integrated Discrimination Improvement (IDI)</h2>
                     <p><strong>Continuous measure of model discrimination improvement without risk categories</strong></p>
                     
                     <div class='step'>
-                    <strong>📋 Required Data:</strong>
+                    <strong> Required Data:</strong>
                     <ul>
                         <li><span class='highlight'>Outcome Variable</span>: Binary event indicator (0/1)</li>
                         <li><span class='highlight'>Baseline Model Predictions</span>: Risk scores from reference model</li>
@@ -29,7 +29,7 @@ idiClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🎯 IDI Types:</strong>
+                    <strong> IDI Types:</strong>
                     <ul>
                         <li><strong>Standard IDI:</strong> Absolute difference in discrimination slopes</li>
                         <li><strong>Relative IDI:</strong> Percentage improvement over baseline discrimination</li>
@@ -39,39 +39,39 @@ idiClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🔍 Key Advantages over NRI:</strong>
+                    <strong> Key Advantages over NRI:</strong>
                     <ul>
-                        <li>📊 <strong>Continuous Scale:</strong> No arbitrary risk thresholds required</li>
-                        <li>🎯 <strong>Direct Discrimination:</strong> Measures separation between risk groups</li>
-                        <li>📈 <strong>Sensitive to Small Changes:</strong> Detects subtle improvements</li>
-                        <li>🔄 <strong>Complementary to C-statistic:</strong> Different discrimination aspect</li>
+                        <li> <strong>Continuous Scale:</strong> No arbitrary risk thresholds required</li>
+                        <li> <strong>Direct Discrimination:</strong> Measures separation between risk groups</li>
+                        <li> <strong>Sensitive to Small Changes:</strong> Detects subtle improvements</li>
+                        <li> <strong>Complementary to C-statistic:</strong> Different discrimination aspect</li>
                     </ul>
                     </div>
                     
                     <div class='step'>
-                    <strong>🎨 Analysis Features:</strong>
+                    <strong> Analysis Features:</strong>
                     <ul>
-                        <li>📈 Bootstrap confidence intervals for robust inference</li>
-                        <li>🔄 Decomposition into event and non-event contributions</li>
-                        <li>📊 Risk distribution analysis and visualization</li>
-                        <li>🎯 Outlier detection and influence analysis</li>
-                        <li>🔧 Cross-validation for optimism correction</li>
-                        <li>👥 Subgroup analysis for population heterogeneity</li>
+                        <li> Bootstrap confidence intervals for robust inference</li>
+                        <li> Decomposition into event and non-event contributions</li>
+                        <li> Risk distribution analysis and visualization</li>
+                        <li> Outlier detection and influence analysis</li>
+                        <li> Cross-validation for optimism correction</li>
+                        <li> Subgroup analysis for population heterogeneity</li>
                     </ul>
                     </div>
                     
                     <div class='step'>
-                    <strong>💡 Clinical Applications:</strong>
+                    <strong> Clinical Applications:</strong>
                     <ul>
-                        <li>🧬 Biomarker validation in precision medicine</li>
-                        <li>💊 Treatment response prediction enhancement</li>
-                        <li>❤️ Cardiovascular risk model improvement</li>
-                        <li>🎯 Cancer prognosis model development</li>
-                        <li>📊 Continuous quality improvement in prediction</li>
+                        <li> Biomarker validation in precision medicine</li>
+                        <li> Treatment response prediction enhancement</li>
+                        <li> Cardiovascular risk model improvement</li>
+                        <li> Cancer prognosis model development</li>
+                        <li> Continuous quality improvement in prediction</li>
                     </ul>
                     </div>
                     
-                    <p><em>💡 Tip: Use standard IDI for most applications, enable decomposition to understand improvement sources, and consider bootstrap for robust inference.</em></p>
+                    <p><em> Tip: Use standard IDI for most applications, enable decomposition to understand improvement sources, and consider bootstrap for robust inference.</em></p>
                     </body>
                     </html>"
                 )

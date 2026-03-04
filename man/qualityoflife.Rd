@@ -103,7 +103,7 @@ stage)}
 \item{reference_population}{Reference population for norm-based scoring}
 
 \item{missing_domain_threshold}{Maximum missing proportion for domain
-scoring (50\\% = 0.5)}
+scoring (50 percent = 0.5)}
 
 \item{imputation_method}{Method for handling missing QoL data}
 
@@ -236,6 +236,7 @@ patient-centered care, and
 health technology assessment.
 }
 \examples{
+\donttest{
 data('qol_data')
 
 qualityoflife(
@@ -247,5 +248,5 @@ qualityoflife(
     patient_id = "patient_id",
     instrument_type = "sf36"
 )
-
+}
 }

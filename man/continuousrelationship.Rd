@@ -46,7 +46,7 @@ flexibility}
 \item{referenceValue}{Reference value for the predictor (e.g., BMI=25).  If
 not specified, uses median value.}
 
-\item{showCI}{Display 95\\% confidence intervals on plots}
+\item{showCI}{Display 95 percent confidence intervals on plots}
 
 \item{showRug}{Show rug plot of actual data points}
 
@@ -92,6 +92,7 @@ using  evidence-based approaches from BMJ best practices. Avoids common
 pitfalls like  arbitrary categorization and linear assumptions.
 }
 \examples{
+\donttest{
 # Example: Analyzing BMI vs mortality risk
 continuousrelationship(
     data = clinical_data,
@@ -101,5 +102,5 @@ continuousrelationship(
     nKnots = 4,
     showGuidance = TRUE
 )
-
+}
 }

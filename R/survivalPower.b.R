@@ -499,13 +499,13 @@ survivalPowerClass <- R6::R6Class(
             # VERSION 0.3.0 LIMITATIONS WARNING - Added to prevent misleading users
             instructions <- paste0(
                 "<div style='background-color: #fff3cd; border: 2px solid #ff9800; border-radius: 5px; padding: 15px; margin-bottom: 15px;'>",
-                "<h4 style='color: #ff6f00; margin-top: 0;'>⚠️ Beta Version 0.3.0 - Known Limitations</h4>",
+                "<h4 style='color: #ff6f00; margin-top: 0;'> Beta Version 0.3.0 - Known Limitations</h4>",
                 "<p><strong>Current Implementation Status:</strong></p>",
                 "<ul style='margin-bottom: 10px;'>",
-                "<li><strong>✅ WORKING:</strong> Log-rank test, Cox regression, Non-inferiority designs</li>",
-                "<li><strong>⛔ NOT AVAILABLE:</strong> Competing risks, RMST-based tests, SNP survival, Weighted log-rank</li>",
-                "<li><strong>⛔ DISTRIBUTION:</strong> Only exponential survival distribution supported (other distributions will be blocked)</li>",
-                "<li><strong>⛔ ACCRUAL:</strong> Only uniform accrual pattern fully validated</li>",
+                "<li><strong> WORKING:</strong> Log-rank test, Cox regression, Non-inferiority designs</li>",
+                "<li><strong> NOT AVAILABLE:</strong> Competing risks, RMST-based tests, SNP survival, Weighted log-rank</li>",
+                "<li><strong> DISTRIBUTION:</strong> Only exponential survival distribution supported (other distributions will be blocked)</li>",
+                "<li><strong> ACCRUAL:</strong> Only uniform accrual pattern fully validated</li>",
                 "</ul>",
                 "<p style='margin-bottom: 0;'><strong>Important:</strong> This is a beta version with core features functional but incomplete. ",
                 "For production clinical trials, verify calculations with independent biostatistician review.</p>",
@@ -1477,7 +1477,7 @@ survivalPowerClass <- R6::R6Class(
                     return("Acceptable (within CI)")
                 }
             } else {
-                return("⚠️ Outside CI - Review assumptions")
+                return(" Outside CI - Review assumptions")
             }
         },
         
@@ -4229,7 +4229,7 @@ survivalPowerClass <- R6::R6Class(
             # Create natural language summary
             summary_text <- paste0(
                 "<div class='jmv-clinical-summary'>",
-                "<h3>📋 Plain Language Summary</h3>",
+                "<h3> Plain Language Summary</h3>",
                 "<p><strong>Study Design:</strong> ", private$.format_test_type(test_type),
                 " for ", private$.format_primary_endpoint(self$options$primary_endpoint), "</p>",
 
@@ -4326,7 +4326,7 @@ survivalPowerClass <- R6::R6Class(
 
             explanation_html <- paste0(
                 "<div class='jmv-educational-guide'>",
-                "<h3>📚 Educational Guide: ", private$.format_test_type(test_type), "</h3>",
+                "<h3> Educational Guide: ", private$.format_test_type(test_type), "</h3>",
                 "<div class='explanation-section'>",
                 "<h4>What does this test do?</h4>",
                 "<p>", current_explanation$what, "</p>",
@@ -4353,7 +4353,7 @@ survivalPowerClass <- R6::R6Class(
             # Generate glossary of statistical terms
             glossary_html <- paste0(
                 "<div class='jmv-glossary'>",
-                "<h3>📖 Statistical Terms Glossary</h3>",
+                "<h3> Statistical Terms Glossary</h3>",
 
                 "<div class='glossary-term'>",
                 "<h4>Hazard Ratio (HR)</h4>",
@@ -4402,13 +4402,13 @@ survivalPowerClass <- R6::R6Class(
 
             workflow_html <- paste0(
                 "<div class='jmv-guided-workflow'>",
-                "<h3>🎯 Guided Analysis Workflow</h3>",
+                "<h3> Guided Analysis Workflow</h3>",
                 "<div class='workflow-steps'>",
 
                 # Step 1: Choose Analysis Type
                 "<div class='workflow-step ", if (current_step >= 1) "completed" else "current", "'>",
                 "<h4>Step 1: Choose Analysis Type</h4>",
-                "<p>✓ Select what you want to calculate: Sample Size, Power, Effect Size, or Study Duration</p>",
+                "<p> Select what you want to calculate: Sample Size, Power, Effect Size, or Study Duration</p>",
                 "<p><em>Current: ", private$.format_analysis_type(self$options$analysis_type), "</em></p>",
                 "</div>",
 
@@ -4442,7 +4442,7 @@ survivalPowerClass <- R6::R6Class(
 
                 # Next Steps Recommendation
                 "<div class='next-steps'>",
-                "<h4>🔄 Next Steps:</h4>",
+                "<h4> Next Steps:</h4>",
                 if (current_step < 3) {
                     "<p>Complete the parameter settings in the left panel, then review your results.</p>"
                 } else if (current_step < 5) {

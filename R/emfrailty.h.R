@@ -483,6 +483,7 @@ emfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('lung', package='survival')
 #'
 #' emfrailty(data = lung,
@@ -493,7 +494,7 @@ emfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'          frailty_distribution = 'gamma',
 #'          estimation_method = 'em',
 #'          max_iterations = 100)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable. Should
 #'   contain positive  numeric values representing the time to event or

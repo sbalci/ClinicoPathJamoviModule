@@ -2,12 +2,10 @@
 # These tests validate the correctness of the pie chart function
 
 library(testthat)
-devtools::load_all()
 
 # Test 1: Selective NA Omission ----
 test_that("jjpiestats uses selective NA omission for relevant variables only", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create test data with NAs in different columns
   test_data <- data.frame(
     treatment_response = factor(c("CR", "PR", "SD", "PD", "CR", "PR", "SD", "PD", "CR", "PR")),

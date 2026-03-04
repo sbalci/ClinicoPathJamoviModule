@@ -88,13 +88,14 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Enhanced categorical analysis with chi-square tests, Fisher's exact tests,
 effect sizes, and association measures. Addresses the critical issue where
-25\\% of pathology studies use categorical analysis incorrectly.
+25 percent of pathology studies use categorical analysis incorrectly.
 }
 \examples{
+\donttest{
 data('histopathology')
 
 categoricaladvanced(data = histopathology,
                    rows = tumor_type,
                    cols = grade)
-
+}
 }

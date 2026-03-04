@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("statsplot2 errors on missing required arguments", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -35,7 +34,6 @@ test_that("statsplot2 errors on missing required arguments", {
 })
 
 test_that("statsplot2 handles missing data correctly", {
-  devtools::load_all()
 
   data(statsplot2_test)
   test_data_na <- statsplot2_test
@@ -52,7 +50,6 @@ test_that("statsplot2 handles missing data correctly", {
 })
 
 test_that("statsplot2 handles all NA in dependent variable", {
-  devtools::load_all()
 
   data(statsplot2_test)
   test_data_all_na <- statsplot2_test
@@ -69,7 +66,6 @@ test_that("statsplot2 handles all NA in dependent variable", {
 })
 
 test_that("statsplot2 handles missing grouping variable values", {
-  devtools::load_all()
 
   data(statsplot2_test)
   test_data_na_group <- statsplot2_test
@@ -86,7 +82,6 @@ test_that("statsplot2 handles missing grouping variable values", {
 })
 
 test_that("statsplot2 handles small sample sizes", {
-  devtools::load_all()
 
   data(statsplot2_test)
   small_data <- statsplot2_test[1:15, ]
@@ -102,7 +97,6 @@ test_that("statsplot2 handles small sample sizes", {
 })
 
 test_that("statsplot2 handles very small sample sizes", {
-  devtools::load_all()
 
   data(statsplot2_test)
   tiny_data <- statsplot2_test[1:6, ]
@@ -118,7 +112,6 @@ test_that("statsplot2 handles very small sample sizes", {
 })
 
 test_that("statsplot2 handles single group", {
-  devtools::load_all()
 
   data(statsplot2_test)
   single_group <- subset(statsplot2_test, treatment == "Placebo")
@@ -134,7 +127,6 @@ test_that("statsplot2 handles single group", {
 })
 
 test_that("statsplot2 handles constant dependent variable", {
-  devtools::load_all()
 
   data(statsplot2_test)
   const_data <- statsplot2_test
@@ -151,7 +143,6 @@ test_that("statsplot2 handles constant dependent variable", {
 })
 
 test_that("statsplot2 handles constant grouping variable", {
-  devtools::load_all()
 
   data(statsplot2_test)
   const_group <- statsplot2_test
@@ -168,7 +159,6 @@ test_that("statsplot2 handles constant grouping variable", {
 })
 
 test_that("statsplot2 handles variables with special characters", {
-  devtools::load_all()
 
   data(statsplot2_test)
   special_data <- statsplot2_test
@@ -184,7 +174,6 @@ test_that("statsplot2 handles variables with special characters", {
 })
 
 test_that("statsplot2 handles very long variable names", {
-  devtools::load_all()
 
   data(statsplot2_test)
   long_name_data <- statsplot2_test
@@ -201,7 +190,6 @@ test_that("statsplot2 handles very long variable names", {
 })
 
 test_that("statsplot2 handles extreme values", {
-  devtools::load_all()
 
   data(statsplot2_test)
   extreme_data <- statsplot2_test
@@ -217,7 +205,6 @@ test_that("statsplot2 handles extreme values", {
 })
 
 test_that("statsplot2 handles negative values", {
-  devtools::load_all()
 
   data(statsplot2_test)
   negative_data <- statsplot2_test
@@ -233,7 +220,6 @@ test_that("statsplot2 handles negative values", {
 })
 
 test_that("statsplot2 handles zero values", {
-  devtools::load_all()
 
   data(statsplot2_test)
   zero_data <- statsplot2_test
@@ -249,7 +235,6 @@ test_that("statsplot2 handles zero values", {
 })
 
 test_that("statsplot2 handles unbalanced groups", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -267,7 +252,6 @@ test_that("statsplot2 handles unbalanced groups", {
 })
 
 test_that("statsplot2 handles integer vs numeric variables", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -289,7 +273,6 @@ test_that("statsplot2 handles integer vs numeric variables", {
 })
 
 test_that("statsplot2 handles empty plot title", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -304,7 +287,6 @@ test_that("statsplot2 handles empty plot title", {
 })
 
 test_that("statsplot2 handles very long plot title", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -321,7 +303,6 @@ test_that("statsplot2 handles very long plot title", {
 })
 
 test_that("statsplot2 handles factor levels in different orders", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -342,7 +323,6 @@ test_that("statsplot2 handles factor levels in different orders", {
 })
 
 test_that("statsplot2 handles unused factor levels", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -363,7 +343,6 @@ test_that("statsplot2 handles unused factor levels", {
 })
 
 test_that("statsplot2 handles numeric grouping variable as continuous", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -378,7 +357,6 @@ test_that("statsplot2 handles numeric grouping variable as continuous", {
 })
 
 test_that("statsplot2 handles repeated measures with incomplete IDs", {
-  devtools::load_all()
 
   data(statsplot2_repeated)
 
@@ -396,7 +374,6 @@ test_that("statsplot2 handles repeated measures with incomplete IDs", {
 })
 
 test_that("statsplot2 handles missing split-by variable values", {
-  devtools::load_all()
 
   data(statsplot2_test)
   test_data_na_split <- statsplot2_test
@@ -414,7 +391,6 @@ test_that("statsplot2 handles missing split-by variable values", {
 })
 
 test_that("statsplot2 handles single level in split variable", {
-  devtools::load_all()
 
   data(statsplot2_test)
   single_split <- statsplot2_test

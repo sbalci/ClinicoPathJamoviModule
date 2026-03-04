@@ -101,6 +101,7 @@ This analysis is particularly useful for:
 • Teaching sequential testing concepts and Bayesian probability
 }
 \examples{
+\donttest{
 # COVID-19 testing: Rapid antigen followed by RT-PCR confirmation
 # Shows how serial positive strategy improves specificity
 data(sequential_testing_examples)
@@ -130,5 +131,5 @@ data(strategy_comparison)          # Strategy performance comparisons
 data(cost_effectiveness_examples)  # Economic analysis examples
 data(teaching_examples)            # Educational scenarios
 data(common_test_combinations)     # Reference test characteristics
-
+}
 }

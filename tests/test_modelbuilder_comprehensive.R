@@ -2,7 +2,6 @@
 # Tests all features and arguments with realistic clinical data
 
 # Load required libraries
-devtools::load_all()  # Or whatever the package name is
 library(dplyr)
 
 # Load all test datasets

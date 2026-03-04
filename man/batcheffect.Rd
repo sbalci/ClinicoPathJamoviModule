@@ -107,6 +107,7 @@ assessment,
 and comprehensive quality control metrics for high-dimensional data.
 }
 \examples{
+\donttest{
 data('your_data')
 
 batcheffect(data = your_data,
@@ -115,5 +116,5 @@ batcheffect(data = your_data,
            biological_var = treatment_group,
            perform_pca = TRUE,
            perform_combat = TRUE)
-
+}
 }

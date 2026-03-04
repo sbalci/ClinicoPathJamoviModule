@@ -471,7 +471,7 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjcoefstats",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = jjcoefstatsResults$new(options=options),
                 data = data,
@@ -493,6 +493,7 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example usage:
 #' # For pre-computed coefficients:
 #' # ClinicoPath::jjcoefstats(
@@ -509,7 +510,7 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #   predictors = vars(height, age, sex),
 #' #   modelType = "lm"
 #' # )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param inputMode Whether to use pre-computed coefficients or fit a model
 #'   from raw data.

@@ -11,7 +11,6 @@ test_that("groupedforest module files exist", {
 test_that("groupedforest class and function availability", {
   
   # Load the package functions quietly
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   # Test that groupedforest class exists after loading
   expect_true(exists("groupedforestClass"))
@@ -116,7 +115,6 @@ test_that("groupedforest handles basic survival data structure", {
 test_that("groupedforest parameter combinations work", {
   
   # Load package quietly
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     # Load test data
@@ -138,7 +136,6 @@ test_that("groupedforest parameter combinations work", {
 test_that("groupedforest with comprehensive dataset", {
   
   # Load package quietly
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     # Load comprehensive test data
@@ -174,7 +171,6 @@ test_that("groupedforest with comprehensive dataset", {
 
 test_that("groupedforest multiple subgroups dataset", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     # Load multi-subgroups data
@@ -209,7 +205,6 @@ test_that("groupedforest multiple subgroups dataset", {
 
 test_that("groupedforest precision medicine dataset", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     # Load precision medicine data
@@ -243,7 +238,6 @@ test_that("groupedforest precision medicine dataset", {
 
 test_that("groupedforest biomarker stratification", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     # Load biomarker data
@@ -278,7 +272,6 @@ test_that("groupedforest biomarker stratification", {
 
 test_that("groupedforest clinical trial interaction data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     # Load interaction data
@@ -316,7 +309,6 @@ test_that("groupedforest clinical trial interaction data", {
 
 test_that("groupedforest plot theme options", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     load("data/groupedforest_simple_data.rda")
@@ -341,7 +333,6 @@ test_that("groupedforest plot theme options", {
 
 test_that("groupedforest hazard ratio range options", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     load("data/groupedforest_simple_data.rda")
@@ -368,7 +359,6 @@ test_that("groupedforest hazard ratio range options", {
 
 test_that("groupedforest confidence level options", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     load("data/groupedforest_simple_data.rda")
@@ -393,7 +383,6 @@ test_that("groupedforest confidence level options", {
 
 test_that("groupedforest display options combinations", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     load("data/groupedforest_comprehensive_data.rda")
@@ -429,7 +418,6 @@ test_that("groupedforest dependency handling", {
   for (pkg in required_packages) {
     if (requireNamespace(pkg, quietly = TRUE)) {
       expect_error({
-        suppressMessages(suppressWarnings(devtools::load_all()))
         if (exists("groupedforest")) {
           load("data/basic_survival_data.rda")
           result <- groupedforest(
@@ -449,7 +437,6 @@ test_that("groupedforest dependency handling", {
 
 test_that("groupedforest with missing data handling", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     # Create data with missing values
@@ -474,7 +461,6 @@ test_that("groupedforest with missing data handling", {
 
 test_that("groupedforest required methods exist", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupedforest")) {
     load("data/basic_survival_data.rda")

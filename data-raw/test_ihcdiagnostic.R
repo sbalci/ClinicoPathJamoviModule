@@ -2,7 +2,7 @@
 # Load helper functions for multi-format data saving
 source("data-raw/data_save_helpers.R")
 
-devtools::load_all()
+library(ClinicoPath)
 
 # Create test data with various IHC marker formats
 test_data <- data.frame(

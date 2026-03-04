@@ -92,12 +92,13 @@ whether the median values  differ significantly across multiple related
 measurements or time points.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 friedmantest(
     dependent = "measurement_value",
     subject = "patient_id",
     within = "time_point",
     posthoc = TRUE
 )
-
+}
 }

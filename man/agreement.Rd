@@ -160,10 +160,11 @@ where each row is a unique observation.}
 diagnosis given by the observer.}
 
 \item{baConfidenceLevel}{Confidence level for Bland-Altman limits of
-agreement (LoA). Typically 0.95 for 95\\% confidence intervals.}
+agreement (LoA). Typically 0.95 for 95 percent confidence intervals.}
 
 \item{confLevel}{Confidence level for confidence intervals in ICC, CCC,
-bootstrap CIs, and other agreement statistics. Default is 0.95 (95\\% CI).}
+bootstrap CIs, and other agreement statistics. Default is 0.95 (95 percent
+CI).}
 
 \item{proportionalBias}{Test whether the difference between raters changes
 systematically with the magnitude of measurement (proportional bias). Uses
@@ -314,9 +315,9 @@ when establishing equivalence between manual and automated measurements or
 between different measurement platforms.}
 
 \item{tdiCoverage}{The proportion of differences that should fall within
-TDI limits (default: 90\\%). Common values: 90\\% for general agreement, 95\\%
-for stringent requirements. This defines what percentage of future
-measurements must fall within acceptable limits.}
+TDI limits (default: 90 percent). Common values: 90 percent for general
+agreement, 95 percent for stringent requirements. This defines what
+percentage of future measurements must fall within acceptable limits.}
 
 \item{tdiLimit}{Maximum acceptable difference between methods in original
 units. Example: For tumor size, 5mm might be clinically acceptable. TDI
@@ -564,9 +565,9 @@ Recommended when analytical CIs are unavailable or when distributions may
 be non-normal (e.g., skewed kappa distributions with few categories).}
 
 \item{nBoot}{Number of bootstrap resamples for confidence interval
-estimation. 1000 is adequate for 95\\% CIs. Use 5000-10000 for
-publication-quality 99\\% CIs or when metrics are near boundary values (0 or
-1).}
+estimation. 1000 is adequate for 95 percent CIs. Use 5000-10000 for
+publication-quality 99 percent CIs or when metrics are near boundary values
+(0 or 1).}
 
 \item{showBootstrapCIGuide}{Show educational guide for bootstrap confidence
 intervals and when they are preferred over analytical CIs.}
@@ -608,10 +609,11 @@ every category in your data, identifying which specific
 diagnoses/classifications have strong agreement and which may need improved
 training or criteria clarification.}
 
-\item{specificConfidenceIntervals}{Calculate 95\\% confidence intervals for
-specific agreement indices using Wilson score method. Recommended for
-publication and when sample sizes vary across categories. Helps distinguish
-true differences in category-specific agreement from random variation.}
+\item{specificConfidenceIntervals}{Calculate 95 percent confidence
+intervals for specific agreement indices using Wilson score method.
+Recommended for publication and when sample sizes vary across categories.
+Helps distinguish true differences in category-specific agreement from
+random variation.}
 
 \item{showSpecificAgreementGuide}{Show educational guide and clinical use
 cases for Specific Agreement Indices before running analysis.}
@@ -628,9 +630,9 @@ ratings. Will be added to the dataset and available for downstream
 analyses.}
 
 \item{consensusRule}{Rule for defining consensus. Simple majority = modal
-category with >50\\% of votes. Supermajority requires ≥75\\% agreement.
-Unanimous requires 100\\% agreement. Cases not meeting threshold are set to
-NA in consensus variable.}
+category with >50 percent of votes. Supermajority requires ≥75 percent
+agreement. Unanimous requires 100 percent agreement. Cases not meeting
+threshold are set to NA in consensus variable.}
 
 \item{tieBreaker}{How to handle ties when no single category meets the
 consensus threshold (e.g., 2-2 split with 4 raters). Exclude = set
@@ -642,26 +644,27 @@ computed column. Choose between Simple (3 categories) or Detailed (5
 categories) classification. Useful for identifying difficult cases and
 quality control.}
 
-\item{detailLevel}{Simple mode: All Agreed (100\\%), Majority Agreed
-(≥threshold\\%), No Agreement (<threshold\\%). Detailed mode: Absolute
-(100\\%), High, Moderate, Low, Poor (based on custom/data-driven
-thresholds). Simple mode replicates the former "Agreement Status" feature.}
+\item{detailLevel}{Simple mode: All Agreed (100 percent), Majority Agreed
+(≥threshold percent), No Agreement (<threshold percent). Detailed mode:
+Absolute (100 percent), High, Moderate, Low, Poor (based on
+custom/data-driven thresholds). Simple mode replicates the former
+"Agreement Status" feature.}
 
-\item{simpleThreshold}{For Simple mode only: Minimum \\% for "Majority
-Agreed" status. 50\\% = simple majority, 75\\% = supermajority, 100\\% =
-unanimous.}
+\item{simpleThreshold}{For Simple mode only: Minimum  percent for "Majority
+Agreed" status. 50 percent = simple majority, 75 percent = supermajority,
+100 percent = unanimous.}
 
 \item{loaThresholds}{For Detailed mode only: How to define 5 LoA
 categories. Custom = user-defined cutpoints. Quartiles/Tertiles =
 data-driven splits.}
 
 \item{loaHighThreshold}{For Detailed mode with Custom thresholds only:
-Minimum \\% for "High" classification (e.g., 75\\% = ≥12/16 raters). Cases ≥
-this threshold are "High Agreement".}
+Minimum  percent for "High" classification (e.g., 75 percent = ≥12/16
+raters). Cases ≥ this threshold are "High Agreement".}
 
 \item{loaLowThreshold}{For Detailed mode with Custom thresholds only:
-Minimum \\% for "Low" classification (e.g., 56\\% = ≥9/16 raters). Below =
-"Poor", between Low and High = "Moderate".}
+Minimum  percent for "Low" classification (e.g., 56 percent = ≥9/16
+raters). Below = "Poor", between Low and High = "Moderate".}
 
 \item{loaVariableName}{Name for the computed Level of Agreement variable
 added to the dataset. Default: 'agreement_level'. Will contain categories
@@ -744,8 +747,8 @@ Euclidean: Groups raters with similar absolute rating values - Manhattan:
 Like Euclidean but less sensitive to outliers For categorical data: -
 Agreement-based: Distance = 1 - pairwise agreement proportion Correlation
 is recommended for most applications as it captures rating pattern
-similarity regardless of systematic shifts (one rater consistently 10\\%
-higher).}
+similarity regardless of systematic shifts (one rater consistently 10
+percent higher).}
 
 \item{clusterLinkage}{How to measure distance between clusters: - Average:
 Distance between cluster means (balanced, recommended for most cases) -

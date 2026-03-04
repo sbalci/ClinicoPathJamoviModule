@@ -894,6 +894,7 @@ hierarchicalbayesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Hierarchical Bayesian diagnostic meta-analysis
 #' hierarchicalbayes(
 #'     data = multicenter_data,
@@ -904,7 +905,7 @@ hierarchicalbayesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'     study_id = center,
 #'     model_type = "bivariate_normal"
 #' )
-#'
+#'}
 #' @param tp True positive counts by study/center
 #' @param fp False positive counts by study/center
 #' @param fn False negative counts by study/center

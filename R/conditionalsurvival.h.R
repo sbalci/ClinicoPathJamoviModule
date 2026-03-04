@@ -260,8 +260,9 @@ conditionalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' approaches, and inverse probability weighting.
 #'
 #' @examples
+#' \donttest{
 #' # example will be added
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param timeVar Survival time variable (numeric)
 #' @param outcomeVar Event indicator (0=censored, 1=event)

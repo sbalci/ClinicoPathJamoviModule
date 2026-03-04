@@ -11,9 +11,9 @@ description:
         for analytical methods. Supports ISO 15189 compliance and quality improvement initiatives.
         Essential for laboratory method validation and performance monitoring.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             sigmametrics(
                 bias = "method_bias",
                 cv = "coefficient_variation",
@@ -28,7 +28,7 @@ options:
           R: the data as a data frame
 
     - name: bias
-      title: Bias (%)
+      title: Bias ( percent)
       type: Variable
       suggested:
         - continuous
@@ -39,7 +39,7 @@ options:
             Method bias as percentage from target value
 
     - name: cv
-      title: Coefficient of Variation (%)
+      title: Coefficient of Variation ( percent)
       type: Variable
       suggested:
         - continuous
@@ -50,7 +50,7 @@ options:
             Coefficient of variation (precision) as percentage
 
     - name: tea
-      title: Total Allowable Error (%)
+      title: Total Allowable Error ( percent)
       type: Variable
       suggested:
         - continuous
@@ -130,7 +130,7 @@ options:
             Source for quality goal specifications
 
     - name: custom_tea
-      title: Custom TEa Value (%)
+      title: Custom TEa Value ( percent)
       type: Number
       min: 0.1
       max: 50

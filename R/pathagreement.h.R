@@ -1705,6 +1705,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Load example data
 #' data('pathology_ratings', package = 'ClinicoPath')
 #'
@@ -1735,7 +1736,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'           consensus_method = 'majority',
 #'           tie_breaking = 'arbitration',
 #'           show_consensus_table = TRUE)
-#'
+#'}
 #' @param data The data as a data frame. Each row represents a case/subject,
 #'   and columns represent different raters/observers.
 #' @param vars Variables representing different raters/observers. Each
@@ -1756,8 +1757,8 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   raters. More accurate but computationally intensive.
 #' @param multiraterMethod Choose specific method for multi-rater agreement
 #'   analysis or use automatic selection.
-#' @param fleissCI Calculate 95\% confidence intervals for Fleiss' kappa using
-#'   asymptotic standard errors.
+#' @param fleissCI Calculate 95 percent confidence intervals for Fleiss' kappa
+#'   using asymptotic standard errors.
 #' @param kripp Calculate Krippendorff's alpha, a generalized measure of
 #'   reliability for any number of observers and data types.
 #' @param krippMethod Measurement level for Krippendorff's alpha calculation.
@@ -1850,8 +1851,8 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   that distinguish diagnostic style groups. These cases are useful for
 #'   training and quality assurance discussions.
 #' @param discordantThreshold Minimum disagreement proportion for flagging
-#'   discordant cases. 0.5 means at least 50\% of raters disagreed with majority
-#'   diagnosis.
+#'   discordant cases. 0.5 means at least 50 percent of raters disagreed with
+#'   majority diagnosis.
 #' @param raterExperience Years of experience for each rater. Will be tested
 #'   for association with style group membership.
 #' @param raterSpecialty Specialty or practice type (e.g., specialist vs

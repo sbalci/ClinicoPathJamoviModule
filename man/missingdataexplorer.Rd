@@ -65,7 +65,7 @@ indicators}
 \item{mcar_test}{Method for testing Missing Completely At Random assumption}
 
 \item{min_pattern_freq}{Minimum frequency for reporting missing data
-patterns (5\\% = 0.05)}
+patterns (5 percent = 0.05)}
 
 \item{max_patterns_display}{Maximum number of missing data patterns to
 display in detail}
@@ -88,7 +88,7 @@ display in detail}
 (related to outcomes)}
 
 \item{completeness_threshold}{Threshold for acceptable variable
-completeness (80\\% = 0.8)}
+completeness (80 percent = 0.8)}
 
 \item{case_completeness}{Analyze completeness at the case/subject level}
 
@@ -143,6 +143,7 @@ documentation
 of missing data handling strategies.
 }
 \examples{
+\donttest{
 data('clinical_data')
 
 missingdataexplorer(
@@ -152,5 +153,5 @@ missingdataexplorer(
     pattern_analysis = TRUE,
     mechanism_testing = TRUE
 )
-
+}
 }

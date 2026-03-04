@@ -506,6 +506,7 @@ raftgeeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' effects in clinical research applications.
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: Basic rank-based AFT with GEE
 #' library(aftgee)
 #' library(survival)
@@ -519,7 +520,7 @@ raftgeeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     rank_method = "logrank",
 #'     correlation_structure = "independence"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

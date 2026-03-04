@@ -2421,7 +2421,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 html <- self$results$text1
                 if (!is.null(html)) {
                     error_html <- paste0(
-                        "<div style='color: red; font-weight: bold;'>⚠️ Analysis Error</div>",
+                        "<div style='color: red; font-weight: bold;'> Analysis Error</div>",
                         "<p>", user_msg, "</p>",
                         "<details><summary>Technical Details (click to expand)</summary>",
                         "<pre style='background-color: #f5f5f5; padding: 10px; margin: 5px 0;'>",
@@ -3208,7 +3208,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                                 "<p><strong>Total Cost:</strong> $", format(round(markovData$totalCost, 2), big.mark = ","), "</p>",
                                 "<p><strong>Total Utility:</strong> ", round(markovData$totalUtility, 3), " QALYs</p>",
                                 "<p><strong>Cycle Length:</strong> ", markovData$cycleLength, " years</p>",
-                                if (markovData$converged) "<p><strong>Status:</strong> <span style='color: green;'>✓ Model converged</span></p>" else "<p><strong>Status:</strong> <span style='color: orange;'>⚠ Model did not fully converge</span></p>"
+                                if (markovData$converged) "<p><strong>Status:</strong> <span style='color: green;'> Model converged</span></p>" else "<p><strong>Status:</strong> <span style='color: orange;'> Model did not fully converge</span></p>"
                             ))
                         }
                     } else {

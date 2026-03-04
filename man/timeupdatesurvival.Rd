@@ -103,7 +103,8 @@ and  dynamic hazard functions. Incorporates real-time patient information
 updates  for precision medicine and personalized survival prediction.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 timeupdatesurvival(
     time = "time_variable",
     status = "status_variable",
@@ -111,5 +112,5 @@ timeupdatesurvival(
     update_times = c(0.5, 1, 2),
     method = "aalen_additive"
 )
-
+}
 }

@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jjsegmentedtotalbar_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jjsegmentedtotalbar_temporal, package = "ClinicoPath", envir = environment(
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar function exists and runs with minimal arguments", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -33,7 +31,6 @@ test_that("jjsegmentedtotalbar function exists and runs with minimal arguments",
 })
 
 test_that("jjsegmentedtotalbar handles demographics data", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -46,7 +43,6 @@ test_that("jjsegmentedtotalbar handles demographics data", {
 })
 
 test_that("jjsegmentedtotalbar handles biomarker data", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -63,7 +59,6 @@ test_that("jjsegmentedtotalbar handles biomarker data", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles stacked plot type", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -77,7 +72,6 @@ test_that("jjsegmentedtotalbar handles stacked plot type", {
 })
 
 test_that("jjsegmentedtotalbar handles flerlage plot type", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -95,7 +89,6 @@ test_that("jjsegmentedtotalbar handles flerlage plot type", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles clean chart style", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -109,7 +102,6 @@ test_that("jjsegmentedtotalbar handles clean chart style", {
 })
 
 test_that("jjsegmentedtotalbar handles publication chart style", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -123,7 +115,6 @@ test_that("jjsegmentedtotalbar handles publication chart style", {
 })
 
 test_that("jjsegmentedtotalbar handles presentation chart style", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -137,7 +128,6 @@ test_that("jjsegmentedtotalbar handles presentation chart style", {
 })
 
 test_that("jjsegmentedtotalbar handles clinical chart style", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -151,7 +141,6 @@ test_that("jjsegmentedtotalbar handles clinical chart style", {
 })
 
 test_that("jjsegmentedtotalbar handles bbc_style chart style", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -165,7 +154,6 @@ test_that("jjsegmentedtotalbar handles bbc_style chart style", {
 })
 
 test_that("jjsegmentedtotalbar handles prism_style chart style", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_temporal,
@@ -183,7 +171,6 @@ test_that("jjsegmentedtotalbar handles prism_style chart style", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles default palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -197,7 +184,6 @@ test_that("jjsegmentedtotalbar handles default palette", {
 })
 
 test_that("jjsegmentedtotalbar handles viridis palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -211,7 +197,6 @@ test_that("jjsegmentedtotalbar handles viridis palette", {
 })
 
 test_that("jjsegmentedtotalbar handles Set1 palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -225,7 +210,6 @@ test_that("jjsegmentedtotalbar handles Set1 palette", {
 })
 
 test_that("jjsegmentedtotalbar handles Dark2 palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -239,7 +223,6 @@ test_that("jjsegmentedtotalbar handles Dark2 palette", {
 })
 
 test_that("jjsegmentedtotalbar handles Paired palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_temporal,
@@ -253,7 +236,6 @@ test_that("jjsegmentedtotalbar handles Paired palette", {
 })
 
 test_that("jjsegmentedtotalbar handles clinical palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -267,7 +249,6 @@ test_that("jjsegmentedtotalbar handles clinical palette", {
 })
 
 test_that("jjsegmentedtotalbar handles colorblind palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -281,7 +262,6 @@ test_that("jjsegmentedtotalbar handles colorblind palette", {
 })
 
 test_that("jjsegmentedtotalbar handles bbc_multi palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -295,7 +275,6 @@ test_that("jjsegmentedtotalbar handles bbc_multi palette", {
 })
 
 test_that("jjsegmentedtotalbar handles prism_colorblind_safe palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -309,7 +288,6 @@ test_that("jjsegmentedtotalbar handles prism_colorblind_safe palette", {
 })
 
 test_that("jjsegmentedtotalbar handles nature palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_temporal,
@@ -323,7 +301,6 @@ test_that("jjsegmentedtotalbar handles nature palette", {
 })
 
 test_that("jjsegmentedtotalbar handles science palette", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -341,7 +318,6 @@ test_that("jjsegmentedtotalbar handles science palette", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles show_percentages", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -355,7 +331,6 @@ test_that("jjsegmentedtotalbar handles show_percentages", {
 })
 
 test_that("jjsegmentedtotalbar handles show_counts", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -369,7 +344,6 @@ test_that("jjsegmentedtotalbar handles show_counts", {
 })
 
 test_that("jjsegmentedtotalbar handles both percentages and counts", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -388,7 +362,6 @@ test_that("jjsegmentedtotalbar handles both percentages and counts", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles integer percentage format", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -403,7 +376,6 @@ test_that("jjsegmentedtotalbar handles integer percentage format", {
 })
 
 test_that("jjsegmentedtotalbar handles decimal1 percentage format", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -418,7 +390,6 @@ test_that("jjsegmentedtotalbar handles decimal1 percentage format", {
 })
 
 test_that("jjsegmentedtotalbar handles decimal2 percentage format", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_temporal,
@@ -437,7 +408,6 @@ test_that("jjsegmentedtotalbar handles decimal2 percentage format", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles vertical orientation", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -451,7 +421,6 @@ test_that("jjsegmentedtotalbar handles vertical orientation", {
 })
 
 test_that("jjsegmentedtotalbar handles horizontal orientation", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -469,7 +438,6 @@ test_that("jjsegmentedtotalbar handles horizontal orientation", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles no sorting", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -483,7 +451,6 @@ test_that("jjsegmentedtotalbar handles no sorting", {
 })
 
 test_that("jjsegmentedtotalbar handles sort by total", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -497,7 +464,6 @@ test_that("jjsegmentedtotalbar handles sort by total", {
 })
 
 test_that("jjsegmentedtotalbar handles sort by largest segment", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -511,7 +477,6 @@ test_that("jjsegmentedtotalbar handles sort by largest segment", {
 })
 
 test_that("jjsegmentedtotalbar handles alphabetical sorting", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_temporal,
@@ -529,7 +494,6 @@ test_that("jjsegmentedtotalbar handles alphabetical sorting", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles faceting by 2-level variable", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -543,7 +507,6 @@ test_that("jjsegmentedtotalbar handles faceting by 2-level variable", {
 })
 
 test_that("jjsegmentedtotalbar handles faceting by 3-level variable", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -557,7 +520,6 @@ test_that("jjsegmentedtotalbar handles faceting by 3-level variable", {
 })
 
 test_that("jjsegmentedtotalbar handles faceting by 4-level variable", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -575,7 +537,6 @@ test_that("jjsegmentedtotalbar handles faceting by 4-level variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles chi-square statistical test", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -593,7 +554,6 @@ test_that("jjsegmentedtotalbar handles chi-square statistical test", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles flerlage with labels", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_quality,
@@ -608,7 +568,6 @@ test_that("jjsegmentedtotalbar handles flerlage with labels", {
 })
 
 test_that("jjsegmentedtotalbar handles flerlage label customization", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_temporal,
@@ -625,7 +584,6 @@ test_that("jjsegmentedtotalbar handles flerlage label customization", {
 })
 
 test_that("jjsegmentedtotalbar handles flerlage alpha transparency", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,
@@ -640,7 +598,6 @@ test_that("jjsegmentedtotalbar handles flerlage alpha transparency", {
 })
 
 test_that("jjsegmentedtotalbar handles flerlage box color", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,

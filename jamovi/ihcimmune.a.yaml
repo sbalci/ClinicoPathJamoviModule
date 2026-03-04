@@ -12,9 +12,9 @@ description:
         Tumor-infiltrating lymphocyte (TIL) analysis and immune microenvironment characterization
         using IHC markers. Specialized for immuno-oncology applications.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             ihcimmune(
                 immune_markers = c("CD3", "CD4", "CD8", "CD20"),
                 tilAnalysis = TRUE,
@@ -168,7 +168,7 @@ options:
             Calculate composite score for checkpoint inhibitor therapy prediction
 
     - name: pd1Cutoff
-      title: PD-1 Positivity Cutoff (%)
+      title: PD-1 Positivity Cutoff ( percent)
       type: Number
       min: 0
       max: 100
@@ -178,7 +178,7 @@ options:
             Threshold for PD-1 positivity assessment
 
     - name: pdl1Cutoff
-      title: PD-L1 Positivity Cutoff (%)
+      title: PD-L1 Positivity Cutoff ( percent)
       type: Number
       min: 0
       max: 100
@@ -188,7 +188,7 @@ options:
             Threshold for PD-L1 positivity assessment
 
     - name: cd3Threshold
-      title: CD3+ TIL Threshold (%)
+      title: CD3+ TIL Threshold ( percent)
       type: Number
       min: 1
       max: 100
@@ -198,7 +198,7 @@ options:
             Threshold for CD3+ TIL categorization (Low vs Intermediate)
 
     - name: cd8Threshold
-      title: CD8+ TIL Threshold (%)
+      title: CD8+ TIL Threshold ( percent)
       type: Number
       min: 1
       max: 100
@@ -208,7 +208,7 @@ options:
             Threshold for CD8+ TIL categorization (Low vs Intermediate)
 
     - name: immuneScoreThreshold
-      title: Immune Score Threshold (%)
+      title: Immune Score Threshold ( percent)
       type: Number
       min: 1
       max: 100

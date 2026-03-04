@@ -15,7 +15,7 @@ description:
         are sensitive to extreme observations or model misspecification,
         ensuring reliable parameter estimates in challenging clinical datasets.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Robust AFT model with Weibull distribution
             library(survival)

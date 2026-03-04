@@ -1,12 +1,8 @@
-#' Stage Migration Analysis - Discrimination Metrics
-#'
-#' @description
-#' Advanced discrimination metrics for staging system comparison including
-#' NRI (Net Reclassification Improvement), IDI (Integrated Discrimination
-#' Improvement), and time-dependent metrics.
-#'
-#' @keywords internal
-#' @noRd
+# Stage Migration Analysis - Discrimination Metrics
+#
+# Advanced discrimination metrics for staging system comparison including
+# NRI (Net Reclassification Improvement), IDI (Integrated Discrimination
+# Improvement), and time-dependent metrics.
 
 # Source: Functions moved and refactored from stagemigration_helpers.R
 

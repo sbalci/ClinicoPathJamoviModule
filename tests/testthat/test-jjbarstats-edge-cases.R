@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("jjbarstats errors on missing required arguments", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -35,7 +34,6 @@ test_that("jjbarstats errors on missing required arguments", {
 })
 
 test_that("jjbarstats handles missing data correctly", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   test_data_na <- jjbarstats_test
@@ -53,7 +51,6 @@ test_that("jjbarstats handles missing data correctly", {
 })
 
 test_that("jjbarstats handles all NA in dependent variable", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   test_data_all_na <- jjbarstats_test
@@ -70,7 +67,6 @@ test_that("jjbarstats handles all NA in dependent variable", {
 })
 
 test_that("jjbarstats handles missing grouping variable values", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   test_data_na_group <- jjbarstats_test
@@ -88,7 +84,6 @@ test_that("jjbarstats handles missing grouping variable values", {
 })
 
 test_that("jjbarstats handles small sample sizes", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   small_data <- jjbarstats_test[1:30, ]
@@ -104,7 +99,6 @@ test_that("jjbarstats handles small sample sizes", {
 })
 
 test_that("jjbarstats handles very small sample sizes", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   tiny_data <- jjbarstats_test[1:10, ]
@@ -120,7 +114,6 @@ test_that("jjbarstats handles very small sample sizes", {
 })
 
 test_that("jjbarstats handles single level in dependent variable", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   single_dep <- jjbarstats_test
@@ -137,7 +130,6 @@ test_that("jjbarstats handles single level in dependent variable", {
 })
 
 test_that("jjbarstats handles single level in grouping variable", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   single_group <- jjbarstats_test
@@ -154,7 +146,6 @@ test_that("jjbarstats handles single level in grouping variable", {
 })
 
 test_that("jjbarstats handles variables with special characters", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   special_data <- jjbarstats_test
@@ -170,7 +161,6 @@ test_that("jjbarstats handles variables with special characters", {
 })
 
 test_that("jjbarstats handles very long variable names", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   long_name_data <- jjbarstats_test
@@ -187,7 +177,6 @@ test_that("jjbarstats handles very long variable names", {
 })
 
 test_that("jjbarstats handles unbalanced contingency tables", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -206,7 +195,6 @@ test_that("jjbarstats handles unbalanced contingency tables", {
 })
 
 test_that("jjbarstats handles sparse contingency tables", {
-  devtools::load_all()
 
   # Create sparse 3×3 table with many zero cells
   sparse_data <- data.frame(
@@ -225,7 +213,6 @@ test_that("jjbarstats handles sparse contingency tables", {
 })
 
 test_that("jjbarstats handles factor levels in different orders", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -246,7 +233,6 @@ test_that("jjbarstats handles factor levels in different orders", {
 })
 
 test_that("jjbarstats handles unused factor levels", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -267,7 +253,6 @@ test_that("jjbarstats handles unused factor levels", {
 })
 
 test_that("jjbarstats handles missing split-by variable values", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   test_data_na_split <- jjbarstats_test
@@ -286,7 +271,6 @@ test_that("jjbarstats handles missing split-by variable values", {
 })
 
 test_that("jjbarstats handles single level in split variable", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   single_split <- jjbarstats_test
@@ -303,7 +287,6 @@ test_that("jjbarstats handles single level in split variable", {
 })
 
 test_that("jjbarstats handles invalid expected proportions", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -320,7 +303,6 @@ test_that("jjbarstats handles invalid expected proportions", {
 })
 
 test_that("jjbarstats handles wrong number of expected proportions", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -337,7 +319,6 @@ test_that("jjbarstats handles wrong number of expected proportions", {
 })
 
 test_that("jjbarstats handles aggregated data with zero counts", {
-  devtools::load_all()
 
   # Create aggregated data with some zero counts
   zero_counts_data <- data.frame(
@@ -357,7 +338,6 @@ test_that("jjbarstats handles aggregated data with zero counts", {
 })
 
 test_that("jjbarstats handles aggregated data with all zero counts", {
-  devtools::load_all()
 
   zero_all_data <- data.frame(
     response = rep(c("No Response", "Partial Response"), each = 2),
@@ -377,7 +357,6 @@ test_that("jjbarstats handles aggregated data with all zero counts", {
 })
 
 test_that("jjbarstats handles perfect association", {
-  devtools::load_all()
 
   # Create perfect 1:1 association (deterministic relationship)
   perfect_data <- data.frame(
@@ -395,7 +374,6 @@ test_that("jjbarstats handles perfect association", {
 })
 
 test_that("jjbarstats handles complete independence", {
-  devtools::load_all()
 
   # Create data with no association (completely independent)
   independent_data <- data.frame(
@@ -413,7 +391,6 @@ test_that("jjbarstats handles complete independence", {
 })
 
 test_that("jjbarstats handles paired data with perfect agreement", {
-  devtools::load_all()
 
   # All subjects have same status at baseline and follow-up
   perfect_agreement <- data.frame(
@@ -432,7 +409,6 @@ test_that("jjbarstats handles paired data with perfect agreement", {
 })
 
 test_that("jjbarstats handles paired data with perfect disagreement", {
-  devtools::load_all()
 
   # All subjects flip status
   perfect_disagreement <- data.frame(
@@ -451,7 +427,6 @@ test_that("jjbarstats handles paired data with perfect disagreement", {
 })
 
 test_that("jjbarstats handles extreme confidence levels", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -475,7 +450,6 @@ test_that("jjbarstats handles extreme confidence levels", {
 })
 
 test_that("jjbarstats handles large contingency tables", {
-  devtools::load_all()
 
   # Create 5×5 contingency table
   large_table <- data.frame(

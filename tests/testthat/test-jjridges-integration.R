@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load all test datasets
 data(jjridges_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jjridges_survival, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles complete biomarker analysis workflow", {
-  devtools::load_all()
 
   # Step 1: Basic distribution
   result1 <- jjridges(
@@ -88,7 +86,6 @@ test_that("jjridges handles complete biomarker analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles complete clinical lab analysis workflow", {
-  devtools::load_all()
 
   # Step 1: Glucose distribution
   result1 <- jjridges(
@@ -138,7 +135,6 @@ test_that("jjridges handles complete clinical lab analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles complete treatment response workflow", {
-  devtools::load_all()
 
   # Step 1: Pain scores by timepoint
   result1 <- jjridges(
@@ -187,7 +183,6 @@ test_that("jjridges handles complete treatment response workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles all datasets with consistent parameters", {
-  devtools::load_all()
 
   # Test dataset
   result1 <- jjridges(
@@ -245,7 +240,6 @@ test_that("jjridges handles all datasets with consistent parameters", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges produces consistent results across plot types", {
-  devtools::load_all()
 
   plot_types <- c("ridgeline", "density_ridges", "density_ridges_gradient", "histogram_ridges", "violin_ridges")
 
@@ -270,7 +264,6 @@ test_that("jjridges produces consistent results across plot types", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges produces consistent results across themes", {
-  devtools::load_all()
 
   themes <- c("theme_ridges", "theme_minimal", "theme_classic", "theme_pubr")
 
@@ -295,7 +288,6 @@ test_that("jjridges produces consistent results across themes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles progressive feature addition", {
-  devtools::load_all()
 
   # Minimal
   result1 <- jjridges(
@@ -367,7 +359,6 @@ test_that("jjridges handles progressive feature addition", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges produces consistent results on repeated calls", {
-  devtools::load_all()
 
   result1 <- jjridges(
     data = jjridges_test,
@@ -400,7 +391,6 @@ test_that("jjridges produces consistent results on repeated calls", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges integrates clinical presets with appropriate data", {
-  devtools::load_all()
 
   # Biomarker preset
   result_bio <- jjridges(
@@ -444,7 +434,6 @@ test_that("jjridges integrates clinical presets with appropriate data", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles multiple analyses from same dataset", {
-  devtools::load_all()
 
   variables <- c("ki67_index", "tumor_size", "protein_expression", "age")
 

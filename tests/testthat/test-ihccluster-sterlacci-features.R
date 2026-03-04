@@ -3,7 +3,6 @@
 
 test_that("Jaccard distance option works with binary data", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     skip_if_not_installed("proxy")
 
     # Create simple binary test data

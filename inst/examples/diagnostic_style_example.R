@@ -2,7 +2,7 @@
 # Demonstrates the Usubutun et al. (2012) methodology for identifying pathologist diagnostic "schools"
 
 # Load required libraries
-devtools::load_all()
+library(ClinicoPath)
 library(ggplot2)
 library(dplyr)
 

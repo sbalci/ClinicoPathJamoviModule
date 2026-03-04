@@ -2,7 +2,7 @@
 % Please edit documentation in R/stagemigration-utils.R
 \name{stagemigration_escapeVar}
 \alias{stagemigration_escapeVar}
-\title{Stage Migration Analysis - Core Utility Functions}
+\title{Escape Variable Names for Safe Handling}
 \usage{
 stagemigration_escapeVar(varname, backticks = TRUE)
 }
@@ -15,9 +15,6 @@ stagemigration_escapeVar(varname, backticks = TRUE)
 Escaped variable name(s)
 }
 \description{
-Core utility functions for consistent variable handling, safe execution,
-and common operations across stage migration analysis modules.
-
 Ensures variable names are safe for use in formulas and data operations.
 Handles spaces, special characters, and reserved words.
 }

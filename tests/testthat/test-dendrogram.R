@@ -5,7 +5,6 @@ source("../../R/dendrogram.b.R")
 
 test_that("dendrogram works with basic linear plot", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     set.seed(123)
     data <- data.frame(
         Gene1 = rnorm(50),

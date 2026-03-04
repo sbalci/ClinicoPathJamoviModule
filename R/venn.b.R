@@ -117,7 +117,12 @@
 #'      regionLabels = "percent",
 #'      colorPalette = "viridis")
 #' }
+#' @name vennClass
 #' @export vennClass
+NULL
+
+#' @noRd
+NULL
 
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
@@ -150,7 +155,7 @@
 
     if (length(problematic) > 0) {
         message <- paste0(
-            "⚠️ Variable name format note: ", paste(problematic, collapse = "; "),
+            " Variable name format note: ", paste(problematic, collapse = "; "),
             ". If you encounter parsing errors, consider renaming these variables or using the jamovi GUI for variable selection."
         )
         return(list(valid = FALSE, message = message))
@@ -277,10 +282,10 @@ vennClass <- if (requireNamespace('jmvcore'))
                     } else {
                         welcome_content <- paste0(welcome_content,
                             "<div style='margin-bottom: 10px;'>",
-                            if(has_var1) "[✓]" else "[ ]", " Variable 1: ", if(has_var1) "Selected" else "Not selected",
+                            if(has_var1) "[]" else "[ ]", " Variable 1: ", if(has_var1) "Selected" else "Not selected",
                             if(has_var1 && has_var1_level) " + Level" else "", "</div>",
                             "<div style='margin-bottom: 10px;'>",
-                            if(has_var2) "[✓]" else "[ ]", " Variable 2: ", if(has_var2) "Selected" else "Not selected",
+                            if(has_var2) "[]" else "[ ]", " Variable 2: ", if(has_var2) "Selected" else "Not selected",
                             if(has_var2 && has_var2_level) " + Level" else "", "</div>",
                             if(optional_vars > 0) paste0("<div style='margin-bottom: 10px;'>[+] Optional Variables: ", optional_vars, "</div>") else ""
                         )
@@ -338,14 +343,14 @@ vennClass <- if (requireNamespace('jmvcore'))
                         .("This tool helps you visualize overlaps between categorical variables using Venn and Upset diagrams."),
                         "<br><br>",
                         "<div style='background-color: #e8f4f8; padding: 12px; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95em;'>",
-                        "<strong>📋 ", .("Step-by-Step Variable Selection:"), "</strong>",
+                        "<strong> ", .("Step-by-Step Variable Selection:"), "</strong>",
                         "<ol style='margin: 8px 0 0 0; padding-left: 20px;'>",
                         "<li><strong>", .("Start with Variable 1"), "</strong> - ", .("Select your first categorical variable"), "</li>",
                         "<li><strong>", .("Add Variable 2"), "</strong> - ", .("Choose a second variable (unlocks after Variable 1)"), "</li>",
                         "<li><strong>", .("Optional: Variable 3"), "</strong> - ", .("Add a third variable for 3-way analysis"), "</li>",
                         "<li><strong>", .("Optional: Variable 4"), "</strong> - ", .("Add a fourth variable for 4-way analysis"), "</li>",
                         "</ol>",
-                        "<em>💡 ", .("Tip: Each variable must be categorical (factor) and you'll need to select which level represents 'true' for each."), "</em>",
+                        "<em> ", .("Tip: Each variable must be categorical (factor) and you'll need to select which level represents 'true' for each."), "</em>",
                         "</div>",
                         "<hr><br>"
                     )
@@ -995,7 +1000,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 report_content <- paste0(
                     "<div style='background-color: #f0f8f0; padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60;'>",
-                    "<h4 style='color: #27ae60; margin-top: 0;'>📋 Copy-Ready Clinical Summary</h4>",
+                    "<h4 style='color: #27ae60; margin-top: 0;'> Copy-Ready Clinical Summary</h4>",
                     "<div style='background-color: white; padding: 12px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6; border: 1px solid #e9ecef;'>",
                     "<h6 style='margin: 0 0 8px 0; color: #495057;'>Clinical Report Template</h6>",
                     "<p style='margin: 0 0 10px 0;'>", clinical_paragraph, "</p>",
@@ -1008,7 +1013,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "</ul>",
                     "</div>",
                     "<div style='margin-top: 10px; padding: 8px; background-color: #e7f3ff; border-radius: 3px;'>",
-                    "<small>💡 <strong>Usage:</strong> Select and copy text from either template above. ",
+                    "<small> <strong>Usage:</strong> Select and copy text from either template above. ",
                     "The clinical report template provides publication-ready prose, while the summary offers bullet-point details.</small>",
                     "</div>",
                     "</div>"
@@ -1565,7 +1570,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     } else {
                         html_content <- paste0(html_content,
                             "<div style='background: #fff3cd; padding: 10px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 10px 0;'>",
-                            "<p><strong>📊 Enable Calculations:</strong></p>",
+                            "<p><strong> Enable Calculations:</strong></p>",
                             "<p>To see detailed set calculations, please enable the specific options:</p>",
                             "<ul>",
                             "<li><strong>Calculate Overlaps:</strong> Shows intersection members</li>",
@@ -1747,7 +1752,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 interpretation <- paste0(
                     "<div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; border-radius: 4px;'>",
-                    "<h5 style='margin: 0 0 10px 0; color: #155724;'>🔬 Clinical Interpretation</h5>",
+                    "<h5 style='margin: 0 0 10px 0; color: #155724;'> Clinical Interpretation</h5>",
                     "<p style='margin: 0 0 8px 0;'><strong>Key Finding:</strong> In this dataset of ", total_n, " cases, ",
                     "'", largest_var, "' shows the highest prevalence with ", largest_count, " positive cases (", largest_pct, "%).</p>",
                     "<p style='margin: 0 0 8px 0;'><strong>Overlap Pattern:</strong> The variables show ", overlap_level, " levels of intersection, ",
@@ -1755,7 +1760,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     else if (overlap_level == "moderate") "indicating meaningful but not dominant relationships."
                     else "suggesting the variables capture largely distinct characteristics.", "</p>",
                     "<p style='margin: 0; font-size: 0.9em; color: #6c757d;'>",
-                    "💡 <em>Clinical Relevance:</em> Use Venn diagrams to identify patient subgroups, assess diagnostic overlap, ",
+                    " <em>Clinical Relevance:</em> Use Venn diagrams to identify patient subgroups, assess diagnostic overlap, ",
                     "or evaluate multi-marker patterns in pathology and oncology research.</p>",
                     "</div>"
                 )
@@ -1772,7 +1777,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     small_counts <- sum(intersection_data$TrueCount < 5, na.rm = TRUE)
                     if (small_counts > 0) {
                         warnings <- c(warnings, paste0(
-                            "⚠️ <strong>Small Sample Warning:</strong> ", small_counts, " variable(s) have fewer than 5 positive cases. ",
+                            " <strong>Small Sample Warning:</strong> ", small_counts, " variable(s) have fewer than 5 positive cases. ",
                             "Consider combining categories or collecting additional data for robust statistical inference."
                         ))
                     }
@@ -1781,7 +1786,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     low_prev <- sum((intersection_data$TrueCount / total_n) < 0.05, na.rm = TRUE)
                     if (low_prev > 0) {
                         warnings <- c(warnings, paste0(
-                            "📊 <strong>Low Prevalence Note:</strong> ", low_prev, " variable(s) have prevalence below 5%. ",
+                            " <strong>Low Prevalence Note:</strong> ", low_prev, " variable(s) have prevalence below 5%. ",
                             "Venn diagram patterns may be difficult to interpret visually."
                         ))
                     }
@@ -1789,7 +1794,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # Check for total sample size
                     if (total_n < 30) {
                         warnings <- c(warnings, paste0(
-                            "📈 <strong>Sample Size Advisory:</strong> With only ", total_n, " cases, overlap patterns should be interpreted cautiously. ",
+                            " <strong>Sample Size Advisory:</strong> With only ", total_n, " cases, overlap patterns should be interpreted cautiously. ",
                             "Consider this as exploratory analysis requiring validation in larger samples."
                         ))
                     }
@@ -1812,7 +1817,7 @@ vennClass <- if (requireNamespace('jmvcore'))
             .generateGlossary = function() {
                 glossary_content <- paste0(
                     "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #6f42c1;'>",
-                    "<h4 style='color: #6f42c1; margin-top: 0;'>📚 Statistical Glossary & Clinical Guide</h4>",
+                    "<h4 style='color: #6f42c1; margin-top: 0;'> Statistical Glossary & Clinical Guide</h4>",
 
                     "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;'>",
 
@@ -1853,7 +1858,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     # Statistical Considerations
                     "<div style='background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeaa7;'>",
-                    "<h6 style='margin: 0 0 8px 0; color: #856404;'>⚠️ Statistical Considerations</h6>",
+                    "<h6 style='margin: 0 0 8px 0; color: #856404;'> Statistical Considerations</h6>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Sample Size:</strong> Ensure adequate cases in each intersection for reliable interpretation</p>",
                     "<p style='margin: 0 0 6px 0; font-size: 0.9em;'><strong>Independence:</strong> Venn diagrams show overlap but don't imply causal relationships</p>",
                     "<p style='margin: 0; font-size: 0.9em;'><strong>Clinical Context:</strong> Always interpret results within appropriate clinical and biological context</p>",
@@ -1871,7 +1876,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (length(private$.errors) > 0) {
                     error_html <- paste(
                         "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; border-radius: 4px;'>",
-                        "<h4 style='margin-top: 0; color: #721c24;'>⛔ Validation Errors</h4>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> Validation Errors</h4>",
                         paste(sprintf("<p style='margin: 5px 0; color: #721c24;'>• %s</p>", private$.errors), collapse = ""),
                         "</div>",
                         sep = ""
@@ -1884,7 +1889,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (length(private$.warnings) > 0) {
                     warning_html <- paste(
                         "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>⚠️ Important Warnings</h4>",
+                        "<h4 style='margin-top: 0; color: #856404;'> Important Warnings</h4>",
                         paste(sprintf("<p style='margin: 5px 0; color: #856404;'>• %s</p>", private$.warnings), collapse = ""),
                         "</div>",
                         sep = ""
@@ -1897,7 +1902,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (length(private$.info) > 0) {
                     info_html <- paste(
                         "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; border-radius: 4px;'>",
-                        "<h4 style='margin-top: 0; color: #0c5460;'>ℹ️ Analysis Information</h4>",
+                        "<h4 style='margin-top: 0; color: #0c5460;'> Analysis Information</h4>",
                         paste(sprintf("<p style='margin: 5px 0; color: #0c5460;'>• %s</p>", private$.info), collapse = ""),
                         "</div>",
                         sep = ""

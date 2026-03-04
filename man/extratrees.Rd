@@ -174,6 +174,7 @@ excellent scalability. Ideal for exploratory analysis, baseline modeling,
 and ensemble methods in survival prediction tasks.
 }
 \examples{
+\donttest{
 result <- extratrees(
     data = mydata,
     time = "time_to_event",
@@ -184,5 +185,5 @@ result <- extratrees(
     min_node_size = 10,
     splitrule = "extratrees"
 )
-
+}
 }

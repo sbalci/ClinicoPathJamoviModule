@@ -1909,7 +1909,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaROC",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = psychopdaROCResults$new(options=options),
                 data = data,
@@ -2063,8 +2063,8 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   net benefit curves, decision curve analysis, and clinical impact
 #'   assessment.
 #' @param treatmentThreshold Treatment threshold range for decision curve
-#'   analysis (min,max,step). Example: "0.05,0.5,0.05" creates thresholds from
-#'   5\% to 50\% in 5\% steps.
+#'   analysis (min,max,step). Example: "0.05,0.5,0.05" creates thresholds from 5
+#'   percent to 50 percent in 5 percent steps.
 #' @param harmBenefitRatio Ratio of harm from unnecessary treatment to benefit
 #'   from necessary treatment. Lower values favor more aggressive treatment
 #'   policies.

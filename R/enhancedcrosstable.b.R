@@ -73,7 +73,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "<li><strong>Review Results:</strong> Examine cross-table with statistical analysis</li>",
                 "</ol>",
                 "</div>",
-                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'>💡 This module uses the danchaltiel/crosstable package for enhanced functionality and complements existing ClinicoPath cross-table modules.</p>",
+                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module uses the danchaltiel/crosstable package for enhanced functionality and complements existing ClinicoPath cross-table modules.</p>",
                 "</div>"
             )
             

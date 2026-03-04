@@ -301,7 +301,7 @@ functionalsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param rare_event Label identifying the rare event/cell type in the
 #'   event_type variable.
 #' @param frequency_threshold Maximum frequency to consider an event as "rare"
-#'   (default 5\%).
+#'   (default 5 percent).
 #' @param calculate_nnd Calculate distances between each rare event and its
 #'   nearest neighbor.
 #' @param test_randomness Test if rare events are randomly distributed

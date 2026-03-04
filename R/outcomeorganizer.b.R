@@ -1041,7 +1041,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 natural_summary <- sprintf(
                     "<div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
-                    <b>📋 Copy-Ready Report Text:</b><br><br>
+                    <b> Copy-Ready Report Text:</b><br><br>
                     The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis.
                     Events (coded as 1) represent %s.
                     Non-events (coded as 0) represent %s.

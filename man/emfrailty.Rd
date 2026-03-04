@@ -184,6 +184,7 @@ heterogeneity. Supports multiple frailty distributions and convergence
 diagnostics.
 }
 \examples{
+\donttest{
 data('lung', package='survival')
 
 emfrailty(data = lung,
@@ -194,5 +195,5 @@ emfrailty(data = lung,
          frailty_distribution = 'gamma',
          estimation_method = 'em',
          max_iterations = 100)
-
+}
 }

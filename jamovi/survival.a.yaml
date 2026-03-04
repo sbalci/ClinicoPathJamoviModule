@@ -15,7 +15,7 @@ description:
         across groups. The Cox proportional hazards model incorporates person-time by modeling 
         the hazard function, which represents the instantaneous event rate per unit of person-time.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # example will be added
 
@@ -344,7 +344,7 @@ options:
       default: false
 
     - name: ci95
-      title: '95% CI'
+      title: '95 percent CI'
       type: Bool
       default: false
 

@@ -11,7 +11,7 @@ description:
         and chronic disease episodes. Handles gap time, calendar time, and counting 
         process formulations.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Cancer recurrence analysis
             recurrentsurvival(

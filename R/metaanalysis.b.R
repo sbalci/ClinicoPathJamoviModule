@@ -86,7 +86,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(missing_packages) > 0) {
                 self$results$instructions$setContent(
                     paste0("<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
-                           <h4>⚠️ Missing Required Packages</h4>
+                           <h4> Missing Required Packages</h4>
                            <p>Please install the following packages to use meta-analysis:</p>
                            <ul><li>", paste(missing_packages, collapse = "</li><li>"), "</li></ul>
                            <p>Install with: <code>install.packages(c('", paste(missing_packages, collapse = "', '"), "'))</code></p>
@@ -98,7 +98,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Note optional features if packages missing
             if (length(optional_features) > 0) {
                 feature_note <- paste0("<div style='color: #856404; padding: 10px; background-color: #fff3cd; border-radius: 5px; margin-bottom: 10px;'>
-                                       <h5>💡 Optional Features Available</h5>
+                                       <h5> Optional Features Available</h5>
                                        <p>Install additional packages for enhanced functionality:</p>
                                        <ul><li>", paste(optional_features, collapse = "</li><li>"), "</li></ul>
                                        </div>")
@@ -112,7 +112,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!requireNamespace("metafor", quietly = TRUE)) {
                 self$results$instructions$setContent(
                     "<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
-                    <h4>⚠️ Required Package Missing</h4>
+                    <h4> Required Package Missing</h4>
                     <p>Meta-analysis requires the 'metafor' package.</p>
                     <p>Install with: <code>install.packages('metafor')</code></p>
                     </div>"
@@ -200,7 +200,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(errors) > 0) {
                 message <- paste0(
                     "<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
-                    <h4>❌ Data Issues Found</h4>
+                    <h4> Data Issues Found</h4>
                     <p><b>The following issues must be resolved:</b></p>
                     <ul><li>", paste(errors, collapse = "</li><li>"), "</li></ul>
                     </div>"
@@ -211,7 +211,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(warnings) > 0) {
                 message <- paste0(
                     "<div style='color: #856404; padding: 15px; background-color: #fff3cd; border-radius: 5px;'>
-                    <h4>⚠️ Data Quality Warnings</h4>
+                    <h4> Data Quality Warnings</h4>
                     <p><b>Please review the following:</b></p>
                     <ul><li>", paste(warnings, collapse = "</li><li>"), "</li></ul>
                     <p><i>You can proceed with the analysis, but consider addressing these issues for better results.</i></p>
@@ -275,7 +275,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (sum(complete_cases) < 2) {
                 self$results$instructions$setContent(
                     "<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
-                    <h4>⚠️ Insufficient Data</h4>
+                    <h4> Insufficient Data</h4>
                     <p>Meta-analysis requires at least 2 studies with complete effect size and variance data.</p>
                     <p><b>Current status:</b> Found " + sum(complete_cases) + " complete cases out of " + length(effect_sizes) + " total.</p>
                     <p><b>Check your data for:</b></p>
@@ -429,7 +429,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Start with summary
             summary_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                <h4>📊 Analysis Summary</h4>
+                <h4> Analysis Summary</h4>
                 <p>", summary_text, "</p>
                 </div>"
             )
@@ -444,7 +444,7 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(copy_ready_text)) {
                 summary_html <- paste0(summary_html,
                     "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #28a745;'>
-                    <h4>📝 Copy-Ready Interpretation</h4>
+                    <h4> Copy-Ready Interpretation</h4>
                     <p><i>Click to select and copy:</i></p>
                     <p style='background-color: #ffffff; padding: 10px; border: 1px dashed #ccc; border-radius: 3px; font-family: monospace; font-size: 14px;' onclick='this.select();'>",
                     copy_ready_text, "</p>

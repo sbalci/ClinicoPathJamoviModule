@@ -370,7 +370,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Add methodology note for interpretation
                 if (has_repeated_measures || !is.null(groupby)) {
                     correlation_stats$independence_note <- paste0(
-                        "⚠️ IMPORTANT LIMITATION: Statistics assume independent observations. ",
+                        " IMPORTANT LIMITATION: Statistics assume independent observations. ",
                         "For longitudinal data with repeated measures, these statistics may ",
                         "overstate significance. ",
                         "Consider: (1) Aggregating to patient-level summaries (e.g., slope per patient), ",
@@ -515,7 +515,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Add independence assumption warning if applicable
                 if (!is.null(correlation_stats$independence_note)) {
                     table$addRow(rowKey = row_num, values = list(
-                        measure = .("⚠️ Statistical Validity"),
+                        measure = .(" Statistical Validity"),
                         value = "",
                         interpretation = correlation_stats$independence_note
                     ))
@@ -716,9 +716,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         quad_r2 <- summary(quadratic_model)$r.squared
                         improvement <- quad_r2 - linear_r2
                         if (improvement > 0.05) {
-                            .("⚠️ Potential non-linear relationship detected. Consider polynomial or spline fitting.")
+                            .(" Potential non-linear relationship detected. Consider polynomial or spline fitting.")
                         } else {
-                            .("✅ Linear relationship assumption appears reasonable.")
+                            .(" Linear relationship assumption appears reasonable.")
                         }
                     } else {
                         .("Unable to assess linearity automatically.")
@@ -738,9 +738,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         if (!is.null(shapiro_result)) {
                             if (shapiro_result$p.value > 0.05) {
-                                .("✅ Residuals appear normally distributed (Shapiro-Wilk p > 0.05).")
+                                .(" Residuals appear normally distributed (Shapiro-Wilk p > 0.05).")
                             } else {
-                                .("⚠️ Residuals may not be normally distributed (Shapiro-Wilk p ≤ 0.05). Consider robust methods.")
+                                .(" Residuals may not be normally distributed (Shapiro-Wilk p ≤ 0.05). Consider robust methods.")
                             }
                         } else {
                             .("Unable to test normality of residuals.")

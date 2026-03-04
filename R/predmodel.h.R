@@ -337,6 +337,7 @@ predmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example usage:
 #' # data <- your_data
 #' # ClinicoPath::predmodel(
@@ -346,7 +347,7 @@ predmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #   validation = "bootstrap",
 #' #   calibration = TRUE
 #' # )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (disease/event vs. no disease/no
 #'   event).

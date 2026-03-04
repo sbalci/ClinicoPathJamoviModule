@@ -71,6 +71,6 @@ and expected results for comprehensive validation of enhanced medical decision
 tree analysis capabilities.
 }
 \seealso{
-\code{\link{tree_datasets}}, \code{\link{tree}}
+\code{\link{tree_datasets}}
 }
 \keyword{datasets}

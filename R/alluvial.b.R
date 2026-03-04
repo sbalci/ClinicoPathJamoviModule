@@ -88,7 +88,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$STRONG_WARNING
                 # )
                 # warning_notice$setContent(paste0(
-                # "⚠️ <b>Missing Weights:</b> ", n_na, " observations (", pct_na,
+                # " <b>Missing Weights:</b> ", n_na, " observations (", pct_na,
                 # "%) have missing weights. ",
                 # "These will be excluded from the visualization."
                 # ))
@@ -149,7 +149,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     collapse = ", ")
 
                 info_notice$setContent(paste0(
-                    "ℹ️ <b>Missing Data Excluded:</b> ", n_removed, " of ", n_total,
+                    " <b>Missing Data Excluded:</b> ", n_removed, " of ", n_total,
                     " observations (", pct_removed, "%) excluded due to missing values.<br/>",
                     "Variables with missingness: ", missing_details, "<br/>",
                     "Analysis based on ", nrow(data_clean), " complete cases."
@@ -260,7 +260,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$STRONG_WARNING
                 # )
                 # warning_notice$setContent(paste0(
-                # "⚠️ <b>Too Many Categories:</b> Variable '", var_safe, "' has ",
+                # " <b>Too Many Categories:</b> Variable '", var_safe, "' has ",
                 # unique_values, " categories. This may create an unreadable plot with too many thin flows.<br/>",
                 # "<b>Recommendation:</b> Consider reducing to 3-7 categories for optimal visualization. ",
                 # "Use Data → Transform to group less frequent categories."
@@ -413,11 +413,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ToDo Message ----
                 todo <- "
                 <div style='font-family: Arial, sans-serif; color: #2c3e50; padding: 10px;'>
-                  <h2>📊 Alluvial Diagrams</h2>
+                  <h2> Alluvial Diagrams</h2>
                   <p>Visualize the flow of categorical data across multiple dimensions.</p>
 
                   <div style='background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0;'>
-                    <h3 style='margin-top: 0;'>🚀 Quick Start</h3>
+                    <h3 style='margin-top: 0;'> Quick Start</h3>
                     <ul style='margin-bottom: 0;'>
                       <li>Select <strong>2-5 categorical variables</strong> (optimal: 3-4)</li>
                       <li>Each variable should have <strong>3-7 categories</strong> for best readability</li>
@@ -426,7 +426,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   </div>
 
                   <div style='background-color: #f0f8f0; border-left: 4px solid #4caf50; padding: 10px; margin: 10px 0;'>
-                    <h3 style='margin-top: 0;'>🏥 Clinical Use Cases</h3>
+                    <h3 style='margin-top: 0;'> Clinical Use Cases</h3>
                     <ul style='margin-bottom: 0;'>
                       <li><strong>Patient flow:</strong> Track progression through treatment stages</li>
                       <li><strong>Tumor progression:</strong> Visualize grade/stage transitions</li>
@@ -436,7 +436,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   </div>
 
                   <div style='background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0;'>
-                    <h3 style='margin-top: 0;'>💡 Tips</h3>
+                    <h3 style='margin-top: 0;'> Tips</h3>
                     <ul style='margin-bottom: 0;'>
                       <li>Arrange variables in <strong>logical order</strong> (e.g., temporal sequence: Grade → Stage → Response)</li>
                       <li>Start with <strong>fewer variables</strong> and add more once you understand the patterns</li>
@@ -474,7 +474,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$ERROR
                 # )
                 # error_notice$setContent(
-                # "⛔ <b>Validation Failed:</b> Alluvial diagram requires at least 2 variables with valid data. Please check variable selection and ensure sufficient data."
+                # " <b>Validation Failed:</b> Alluvial diagram requires at least 2 variables with valid data. Please check variable selection and ensure sufficient data."
                 # )
                 # REMOVED: self$results$insert(999, error_notice)
                     return()
@@ -492,7 +492,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$ERROR
                 # )
                 # error_notice$setContent(paste0(
-                # "⛔ <b>Variable Not Found:</b> Condensation variable '", condvar_safe,
+                # " <b>Variable Not Found:</b> Condensation variable '", condvar_safe,
                 # "' does not exist in the data. Please select a valid variable from the available list."
                 # ))
                 # REMOVED: self$results$insert(999, error_notice)
@@ -549,7 +549,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$ERROR
                 # )
                 # error_notice$setContent(
-                # "⛔ <b>No Complete Data:</b> All observations have missing values in one or more selected variables. Cannot generate plot."
+                # " <b>No Complete Data:</b> All observations have missing values in one or more selected variables. Cannot generate plot."
                 # )
                 # REMOVED: self$results$insert(999, error_notice)
                     return()
@@ -596,7 +596,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = jmvcore::NoticeType$INFO
                     )
                     truncate_notice$setContent(paste0(
-                        "ℹ️ <b>Variables Truncated:</b> ", num_selected, " variables selected, ",
+                        " <b>Variables Truncated:</b> ", num_selected, " variables selected, ",
                         "but maximum is ", maxvars, ". Only the first ", maxvars, " variables will be displayed.<br/>",
                         "<b>Tip:</b> Increase 'Maximum variables' setting (up to 20) to display more variables."
                     ))
@@ -643,7 +643,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$STRONG_WARNING
                 # )
                 # warning_notice$setContent(paste0(
-                # "⚠️ <b>Complex Visualization:</b> The selected variables create ",
+                # " <b>Complex Visualization:</b> The selected variables create ",
                 # total_combinations, " possible flow combinations. ",
                 # "This may result in an overcrowded, difficult-to-interpret plot.<br/>",
                 # "<b>Recommendations:</b><br/>",
@@ -695,7 +695,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$STRONG_WARNING
                 # )
                 # warning_notice$setContent(paste0(
-                # "⚠️ <b>Weight Variable Ignored:</b> The 'Weight Variable' option is only supported by the <strong>GG Alluvial</strong> engine.<br/>",
+                # " <b>Weight Variable Ignored:</b> The 'Weight Variable' option is only supported by the <strong>GG Alluvial</strong> engine.<br/>",
                 # "<b>Suggestion:</b> Switch 'Plot Engine' to 'GG Alluvial (manual control)' to use weighted flows."
                 # ))
                 # REMOVED: # REMOVED: self$results$insert(999, warning_notice)  # Causes serialization error
@@ -754,7 +754,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$ERROR
                 # )
                 # error_notice$setContent(paste0(
-                # "⛔ <b>Incompatible Options:</b> Custom titles cannot be used with marginal plots. ",
+                # " <b>Incompatible Options:</b> Custom titles cannot be used with marginal plots. ",
                 # "This combination would produce ambiguous plot labeling.<br/><br/>",
                 # "<b>Required Action:</b> Choose one:<br/>",
                 # "• Disable 'Use custom title' to keep marginal plots<br/>",
@@ -787,7 +787,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # type = jmvcore::NoticeType$ERROR
                 # )
                 # error_notice$setContent(paste0(
-                # "⛔ <b>Plot Generation Failed:</b> ", htmltools::htmlEscape(e$message), "<br/><br/>",
+                # " <b>Plot Generation Failed:</b> ", htmltools::htmlEscape(e$message), "<br/><br/>",
                 # "<b>Suggestions:</b><br/>",
                 # "• Try using the Easy Alluvial engine instead of GG Alluvial<br/>",
                 # "• Reduce the number of variables<br/>",

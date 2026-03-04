@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjcorrmat handles missing data correctly", {
-  devtools::load_all()
 
   # Test data already has ~3% missing in ki67_index and necrosis_percent
   data(jjcorrmat_test)
@@ -29,7 +27,6 @@ test_that("jjcorrmat handles missing data correctly", {
 })
 
 test_that("jjcorrmat handles data with high proportion of missing values", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -59,7 +56,6 @@ test_that("jjcorrmat handles data with high proportion of missing values", {
 })
 
 test_that("jjcorrmat handles small sample sizes", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -75,7 +71,6 @@ test_that("jjcorrmat handles small sample sizes", {
 })
 
 test_that("jjcorrmat handles minimal sample size (n=10)", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -91,7 +86,6 @@ test_that("jjcorrmat handles minimal sample size (n=10)", {
 })
 
 test_that("jjcorrmat handles constant variables", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -109,7 +103,6 @@ test_that("jjcorrmat handles constant variables", {
 })
 
 test_that("jjcorrmat handles perfect correlations", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -126,7 +119,6 @@ test_that("jjcorrmat handles perfect correlations", {
 })
 
 test_that("jjcorrmat handles near-zero correlations", {
-  devtools::load_all()
 
   data(jjcorrmat_mixed)
 
@@ -140,7 +132,6 @@ test_that("jjcorrmat handles near-zero correlations", {
 })
 
 test_that("jjcorrmat handles strong negative correlations", {
-  devtools::load_all()
 
   data(jjcorrmat_mixed)
 
@@ -154,7 +145,6 @@ test_that("jjcorrmat handles strong negative correlations", {
 })
 
 test_that("jjcorrmat handles extreme outliers", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -188,7 +178,6 @@ test_that("jjcorrmat handles extreme outliers", {
 })
 
 test_that("jjcorrmat handles highly skewed data", {
-  devtools::load_all()
 
   data(jjcorrmat_biomarker)
 
@@ -212,7 +201,6 @@ test_that("jjcorrmat handles highly skewed data", {
 })
 
 test_that("jjcorrmat handles negative values", {
-  devtools::load_all()
 
   data(jjcorrmat_mixed)
 
@@ -226,7 +214,6 @@ test_that("jjcorrmat handles negative values", {
 })
 
 test_that("jjcorrmat handles variables with special characters in names", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -244,7 +231,6 @@ test_that("jjcorrmat handles variables with special characters in names", {
 })
 
 test_that("jjcorrmat handles all variables with missing data", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -273,7 +259,6 @@ test_that("jjcorrmat handles all variables with missing data", {
 })
 
 test_that("jjcorrmat handles very wide range of values", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -292,7 +277,6 @@ test_that("jjcorrmat handles very wide range of values", {
 })
 
 test_that("jjcorrmat handles very small decimal values", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -311,7 +295,6 @@ test_that("jjcorrmat handles very small decimal values", {
 })
 
 test_that("jjcorrmat handles integer vs numeric variables", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -330,7 +313,6 @@ test_that("jjcorrmat handles integer vs numeric variables", {
 })
 
 test_that("jjcorrmat handles mixed correlation strengths", {
-  devtools::load_all()
 
   data(jjcorrmat_mixed)
 
@@ -345,7 +327,6 @@ test_that("jjcorrmat handles mixed correlation strengths", {
 })
 
 test_that("jjcorrmat handles grouped analysis with unbalanced groups", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -366,7 +347,6 @@ test_that("jjcorrmat handles grouped analysis with unbalanced groups", {
 })
 
 test_that("jjcorrmat handles grouped analysis with small groups", {
-  devtools::load_all()
 
   data(jjcorrmat_imaging)
 
@@ -381,7 +361,6 @@ test_that("jjcorrmat handles grouped analysis with small groups", {
 })
 
 test_that("jjcorrmat handles partial correlations with many variables", {
-  devtools::load_all()
 
   data(jjcorrmat_labvalues)
 
@@ -397,7 +376,6 @@ test_that("jjcorrmat handles partial correlations with many variables", {
 })
 
 test_that("jjcorrmat handles Inf and -Inf values", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -416,7 +394,6 @@ test_that("jjcorrmat handles Inf and -Inf values", {
 })
 
 test_that("jjcorrmat handles NaN values", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -434,7 +411,6 @@ test_that("jjcorrmat handles NaN values", {
 })
 
 test_that("jjcorrmat handles very strict significance level", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -450,7 +426,6 @@ test_that("jjcorrmat handles very strict significance level", {
 })
 
 test_that("jjcorrmat handles very lenient significance level", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -465,7 +440,6 @@ test_that("jjcorrmat handles very lenient significance level", {
 })
 
 test_that("jjcorrmat handles only two variables (minimum)", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -479,7 +453,6 @@ test_that("jjcorrmat handles only two variables (minimum)", {
 })
 
 test_that("jjcorrmat handles maximum variables (large matrix)", {
-  devtools::load_all()
 
   data(jjcorrmat_labvalues)
 

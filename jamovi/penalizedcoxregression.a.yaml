@@ -25,7 +25,7 @@ description:
         - High-dimensional survival analysis capabilities
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Penalized Cox regression with LASSO
             penalizedcoxregression(

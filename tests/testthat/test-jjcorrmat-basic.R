@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("jjcorrmat function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("jjcorrmat"))
 })
 
 test_that("jjcorrmat runs with minimal required arguments", {
-  devtools::load_all()
 
   data(jjcorrmat_test, package = "ClinicoPath")
 
@@ -25,7 +23,6 @@ test_that("jjcorrmat runs with minimal required arguments", {
 })
 
 test_that("jjcorrmat produces expected output structure", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -39,7 +36,6 @@ test_that("jjcorrmat produces expected output structure", {
 })
 
 test_that("jjcorrmat handles parametric statistics (Pearson)", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -53,7 +49,6 @@ test_that("jjcorrmat handles parametric statistics (Pearson)", {
 })
 
 test_that("jjcorrmat handles nonparametric statistics (Spearman)", {
-  devtools::load_all()
 
   data(jjcorrmat_biomarker)
 
@@ -67,7 +62,6 @@ test_that("jjcorrmat handles nonparametric statistics (Spearman)", {
 })
 
 test_that("jjcorrmat handles robust statistics (percentage bend)", {
-  devtools::load_all()
 
   data(jjcorrmat_vitals)
 
@@ -81,7 +75,6 @@ test_that("jjcorrmat handles robust statistics (percentage bend)", {
 })
 
 test_that("jjcorrmat handles Bayesian statistics", {
-  devtools::load_all()
 
   data(jjcorrmat_mixed)
 
@@ -95,7 +88,6 @@ test_that("jjcorrmat handles Bayesian statistics", {
 })
 
 test_that("jjcorrmat handles different matrix types", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -125,7 +117,6 @@ test_that("jjcorrmat handles different matrix types", {
 })
 
 test_that("jjcorrmat handles different matrix methods", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -147,7 +138,6 @@ test_that("jjcorrmat handles different matrix methods", {
 })
 
 test_that("jjcorrmat handles grouped analysis", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -161,7 +151,6 @@ test_that("jjcorrmat handles grouped analysis", {
 })
 
 test_that("jjcorrmat handles p-value adjustment methods", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -180,7 +169,6 @@ test_that("jjcorrmat handles p-value adjustment methods", {
 })
 
 test_that("jjcorrmat handles partial correlations", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -195,7 +183,6 @@ test_that("jjcorrmat handles partial correlations", {
 })
 
 test_that("jjcorrmat handles different missing data strategies", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -217,7 +204,6 @@ test_that("jjcorrmat handles different missing data strategies", {
 })
 
 test_that("jjcorrmat handles custom colors", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -233,7 +219,6 @@ test_that("jjcorrmat handles custom colors", {
 })
 
 test_that("jjcorrmat handles custom titles", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -249,7 +234,6 @@ test_that("jjcorrmat handles custom titles", {
 })
 
 test_that("jjcorrmat handles different significance levels", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -268,7 +252,6 @@ test_that("jjcorrmat handles different significance levels", {
 })
 
 test_that("jjcorrmat handles different confidence levels", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -287,7 +270,6 @@ test_that("jjcorrmat handles different confidence levels", {
 })
 
 test_that("jjcorrmat handles different decimal places", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -306,7 +288,6 @@ test_that("jjcorrmat handles different decimal places", {
 })
 
 test_that("jjcorrmat handles different datasets", {
-  devtools::load_all()
 
   datasets <- list(
     jjcorrmat_test = c("tumor_size", "ki67_index", "mitotic_count"),
@@ -333,7 +314,6 @@ test_that("jjcorrmat handles different datasets", {
 })
 
 test_that("jjcorrmat handles minimum number of variables (2)", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -346,7 +326,6 @@ test_that("jjcorrmat handles minimum number of variables (2)", {
 })
 
 test_that("jjcorrmat handles many variables (8+)", {
-  devtools::load_all()
 
   data(jjcorrmat_labvalues)
 
@@ -360,7 +339,6 @@ test_that("jjcorrmat handles many variables (8+)", {
 })
 
 test_that("jjcorrmat handles log-normal distributed data", {
-  devtools::load_all()
 
   data(jjcorrmat_biomarker)
 
@@ -381,7 +359,6 @@ test_that("jjcorrmat handles log-normal distributed data", {
 })
 
 test_that("jjcorrmat handles different plot dimensions", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 

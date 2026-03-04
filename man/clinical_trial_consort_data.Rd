@@ -38,13 +38,13 @@ function and demonstrating CONSORT 2010 compliant flow diagrams.
 This dataset simulates a realistic Phase III clinical trial with:
 \itemize{
 \item 500 participants initially assessed for eligibility
-\item 20\\% screening exclusion rate (age, performance, comorbidity)
-\item 10\\% enrollment exclusion rate (consent, eligibility)
+\item 20 percent screening exclusion rate (age, performance, comorbidity)
+\item 10 percent enrollment exclusion rate (consent, eligibility)
 \item 1:1 randomization to Treatment A vs Treatment B
-\item 5\\% allocation exclusion rate (intervention not received)
-\item 12\\% follow-up loss rate (lost to follow-up, death, withdrawal)
-\item 3\\% analysis exclusion rate (missing data, protocol violations)
-\item Final retention: 58.4\\% (292 participants analyzed)
+\item 5 percent allocation exclusion rate (intervention not received)
+\item 12 percent follow-up loss rate (lost to follow-up, death, withdrawal)
+\item 3 percent analysis exclusion rate (missing data, protocol violations)
+\item Final retention: 58.4 percent (292 participants analyzed)
 }
 
 Exclusion variables use NA for participants who continued to the next stage.

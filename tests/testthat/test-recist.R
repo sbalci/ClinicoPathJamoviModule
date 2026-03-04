@@ -1,7 +1,6 @@
 
 test_that("recist works for basic PR case", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     data <- data.frame(
         patient = rep("P1", 6),
         time = rep(c(0, 6, 12), each = 2),

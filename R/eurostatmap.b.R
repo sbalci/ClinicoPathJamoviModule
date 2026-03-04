@@ -10,6 +10,9 @@
 #' @import dplyr
 #' @import giscoR
 
+# Package-local cache environment — avoids assigning to .GlobalEnv
+.eurostat_pkg_cache <- new.env(parent = emptyenv())
+
 eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "eurostatmapClass",
     inherit = eurostatmapBase,
@@ -64,11 +67,11 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     cached_data <- NULL
                     
                     if (self$options$cache_data) {
-                        # Simple session-based caching
-                        if (!exists(".eurostat_cache", envir = .GlobalEnv)) {
-                            assign(".eurostat_cache", list(), envir = .GlobalEnv)
+                        # Simple session-based caching using package-local environment
+                        if (!exists(".eurostat_cache", envir = .eurostat_pkg_cache)) {
+                            assign(".eurostat_cache", list(), envir = .eurostat_pkg_cache)
                         }
-                        cache_env <- get(".eurostat_cache", envir = .GlobalEnv)
+                        cache_env <- get(".eurostat_cache", envir = .eurostat_pkg_cache)
                         if (cache_key %in% names(cache_env)) {
                             cached_data <- cache_env[[cache_key]]
                             message("Using cached Eurostat data")
@@ -103,9 +106,9 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         # Cache the filtered data if caching is enabled
                         if (self$options$cache_data && nrow(plotData) > 0) {
-                            cache_env <- get(".eurostat_cache", envir = .GlobalEnv)
+                            cache_env <- get(".eurostat_cache", envir = .eurostat_pkg_cache)
                             cache_env[[cache_key]] <- plotData
-                            assign(".eurostat_cache", cache_env, envir = .GlobalEnv)
+                            assign(".eurostat_cache", cache_env, envir = .eurostat_pkg_cache)
                             message("Data cached for future use")
                         }
                     } else {

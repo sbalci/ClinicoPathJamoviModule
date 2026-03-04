@@ -17,7 +17,7 @@ description:
         Supports randomized controlled trials (RCTs), equivalence trials, non-inferiority
         trials, superiority trials, and observational studies with proper power calculations.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('your_data')
             
@@ -221,14 +221,14 @@ options:
           - name: "absolute"
             title: "Absolute Difference"
           - name: "relative"
-            title: "Relative Difference (%)"
+            title: "Relative Difference ( percent)"
       default: "absolute"
       description:
           R: Type of margin for non-inferiority/equivalence testing
 
     # Advanced Options
     - name: dropout_rate
-      title: Expected Dropout Rate (%)
+      title: Expected Dropout Rate ( percent)
       type: Number
       min: 0
       max: 50

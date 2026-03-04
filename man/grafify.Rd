@@ -179,6 +179,7 @@ distribution plots,
 before-after comparisons, and factorial designs with professional styling.
 }
 \examples{
+\donttest{
 # Example: Scientific scatter plot with error bars
 data(clinical_data)
 grafify(
@@ -189,5 +190,5 @@ grafify(
     error_type = "sd",
     color_palette = "vibrant"
 )
-
+}
 }

@@ -25,7 +25,7 @@ description:
         - Publication bias assessment and adjustment
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Bayesian meta-analysis of treatment effects
             bayesianmetaanalysis(

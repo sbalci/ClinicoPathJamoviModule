@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjhistostats integrates with all test datasets", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "jjhistostats_test", dep = "age_years"),
@@ -34,7 +32,6 @@ test_that("jjhistostats integrates with all test datasets", {
 })
 
 test_that("jjhistostats data.frame vs tibble compatibility", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -56,7 +53,6 @@ test_that("jjhistostats data.frame vs tibble compatibility", {
 })
 
 test_that("jjhistostats consistency across runs with same data", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -79,7 +75,6 @@ test_that("jjhistostats consistency across runs with same data", {
 })
 
 test_that("jjhistostats complete clinical workflow - patient demographics", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -126,7 +121,6 @@ test_that("jjhistostats complete clinical workflow - patient demographics", {
 })
 
 test_that("jjhistostats complete clinical workflow - lab values", {
-  devtools::load_all()
 
   data(jjhistostats_labvalues)
 
@@ -161,7 +155,6 @@ test_that("jjhistostats complete clinical workflow - lab values", {
 })
 
 test_that("jjhistostats complete clinical workflow - biomarkers", {
-  devtools::load_all()
 
   data(jjhistostats_skewed)
 
@@ -193,7 +186,6 @@ test_that("jjhistostats complete clinical workflow - biomarkers", {
 })
 
 test_that("jjhistostats complete clinical workflow - pathology", {
-  devtools::load_all()
 
   data(jjhistostats_pathology)
 
@@ -226,7 +218,6 @@ test_that("jjhistostats complete clinical workflow - pathology", {
 })
 
 test_that("jjhistostats complete clinical workflow - grouped analysis", {
-  devtools::load_all()
 
   data(jjhistostats_grouped)
 
@@ -260,7 +251,6 @@ test_that("jjhistostats complete clinical workflow - grouped analysis", {
 })
 
 test_that("jjhistostats statistical method comparison on same data", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -300,7 +290,6 @@ test_that("jjhistostats statistical method comparison on same data", {
 })
 
 test_that("jjhistostats centrality type comparison on same data", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -344,7 +333,6 @@ test_that("jjhistostats centrality type comparison on same data", {
 })
 
 test_that("jjhistostats clinical preset comparison", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -392,7 +380,6 @@ test_that("jjhistostats clinical preset comparison", {
 })
 
 test_that("jjhistostats handles different distribution types", {
-  devtools::load_all()
 
   # Normal distribution
   data(jjhistostats_labvalues)
@@ -434,7 +421,6 @@ test_that("jjhistostats handles different distribution types", {
 })
 
 test_that("jjhistostats handles single vs multiple variables", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -463,7 +449,6 @@ test_that("jjhistostats handles single vs multiple variables", {
 })
 
 test_that("jjhistostats grouped analysis across different datasets", {
-  devtools::load_all()
 
   # Test dataset stratified by treatment
   data(jjhistostats_test)
@@ -496,7 +481,6 @@ test_that("jjhistostats grouped analysis across different datasets", {
 })
 
 test_that("jjhistostats publication-ready configurations work correctly", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -548,7 +532,6 @@ test_that("jjhistostats publication-ready configurations work correctly", {
 })
 
 test_that("jjhistostats handles complete analysis pipeline", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -605,7 +588,6 @@ test_that("jjhistostats handles complete analysis pipeline", {
 })
 
 test_that("jjhistostats handles ggpubr additional plots integration", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -639,7 +621,6 @@ test_that("jjhistostats handles ggpubr additional plots integration", {
 })
 
 test_that("jjhistostats handles different sample sizes correctly", {
-  devtools::load_all()
 
   # Small (n=25)
   data(jjhistostats_small)

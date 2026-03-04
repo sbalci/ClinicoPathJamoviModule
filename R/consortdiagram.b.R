@@ -28,7 +28,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<p style='font-weight: bold; color: #721c24; margin-bottom: 10px;'>",
                 "ERROR: ", message, "</p>",
                 "<div style='background: #f8d7da; padding: 15px; margin: 10px; border: 1px solid #f5c6cb;'>",
-                "<h3>❌ ", title, "</h3>"
+                "<h3> ", title, "</h3>"
             )
             if (!is.null(details)) {
                 html <- paste0(html, "<ul>")
@@ -45,7 +45,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<p style='font-weight: bold; color: #856404; margin-bottom: 10px;'>",
                 "WARNING: ", message, "</p>",
                 "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
-                "<h4>⚠️ ", title, "</h4>"
+                "<h4> ", title, "</h4>"
             )
             if (!is.null(details)) {
                 html <- paste0(html, "<ul>")
@@ -507,7 +507,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             html <- paste0(
                 "<div style='background: #f0f8ff; padding: 15px; margin: 10px; border: 1px solid #ccc;'>",
-                "<h4>📊 Participant Flow Summary</h4>",
+                "<h4> Participant Flow Summary</h4>",
                 "<ul>",
                 "<li><strong>Initial participants:</strong> ", total_n, "</li>",
                 "<li><strong>Final analyzed:</strong> ", final_n, "</li>",
@@ -540,7 +540,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Interpretation guidance
             html <- paste0(html,
                 "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
-                "<h4>💡 Interpretation Guidance</h4>",
+                "<h4> Interpretation Guidance</h4>",
                 "<p><strong>Retention Rate Assessment:</strong></p>",
                 "<ul>",
                 "<li>≥80%: Excellent retention, minimal risk of bias</li>",
@@ -580,13 +580,13 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             html <- paste0(
                 "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
-                "<h4>✓ CONSORT 2010 Compliance Checklist</h4>",
+                "<h4> CONSORT 2010 Compliance Checklist</h4>",
                 "<p><strong>Required Elements:</strong></p>",
                 "<ul>"
             )
 
             for (item in names(checklist$required)) {
-                status <- if (checklist$required[[item]]) "✅" else "❌"
+                status <- if (checklist$required[[item]]) "" else ""
                 html <- paste0(html, "<li>", status, " ", item, "</li>")
             }
 
@@ -597,7 +597,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             for (item in names(checklist$recommended)) {
-                status <- if (checklist$recommended[[item]]) "✅" else "⚠️"
+                status <- if (checklist$recommended[[item]]) "" else ""
                 html <- paste0(html, "<li>", status, " ", item, "</li>")
             }
 
@@ -657,7 +657,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # High attrition warning
             if (retention_rate < 60) {
                 quality_warnings <- c(quality_warnings,
-                    paste0("⚠️ High attrition rate (", 100 - retention_rate, "%) may introduce bias"))
+                    paste0(" High attrition rate (", 100 - retention_rate, "%) may introduce bias"))
             }
 
             # Check for arm imbalance
@@ -665,7 +665,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 retention_rates <- sapply(private$.armData, function(x) x$retention_rate)
                 if (max(retention_rates) - min(retention_rates) > 15) {
                     quality_warnings <- c(quality_warnings,
-                        "⚠️ Differential retention between treatment arms detected")
+                        " Differential retention between treatment arms detected")
                 }
             }
 
@@ -692,14 +692,14 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             html <- paste0(
                 "<div style='background: #f0f8ff; padding: 15px; margin: 10px; border: 1px solid #4a90e2;'>",
-                "<h4>📋 Manuscript-Ready Summary</h4>",
+                "<h4> Manuscript-Ready Summary</h4>",
                 "<div style='background: white; padding: 12px; margin: 10px 0; border-left: 3px solid #4a90e2;'>",
                 "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6;'>",
                 summary_sentence,
                 "</p>",
                 "</div>",
                 "<p style='font-size: 0.85em; color: #666;'>",
-                "<em>📎 Copy the text above for your manuscript's methods or results section.</em>",
+                "<em> Copy the text above for your manuscript's methods or results section.</em>",
                 "</p>"
             )
 
@@ -725,7 +725,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateAboutAnalysis = function() {
             html <- paste0(
                 "<div style='background: #f9f9f9; padding: 15px; margin: 10px; border: 1px solid #ddd;'>",
-                "<h4>📚 About CONSORT Flow Diagrams</h4>",
+                "<h4> About CONSORT Flow Diagrams</h4>",
 
                 "<p><strong>What is a CONSORT diagram?</strong></p>",
                 "<p style='margin-left: 15px;'>",
@@ -760,7 +760,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li>Per-protocol analysis uses participants who completed the study</li>",
                 "</ul>",
 
-                "<p><strong>📖 References:</strong></p>",
+                "<p><strong> References:</strong></p>",
                 "<ul style='margin-left: 15px; font-size: 0.9em;'>",
                 "<li>Schulz KF, Altman DG, Moher D. (2010). CONSORT 2010 Statement. <em>BMJ</em> 340:c332.</li>",
                 "<li>Ots R. (2024). <a href='https://www.riinu.me/2024/02/consort/' target='_blank'>",
@@ -789,9 +789,9 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check retention
             if (retention_rate >= 80) {
-                strengths <- c(strengths, "✅ Excellent participant retention (≥80%)")
+                strengths <- c(strengths, " Excellent participant retention (≥80%)")
             } else if (retention_rate < 60) {
-                issues <- c(issues, "⚠️ Low retention rate may introduce attrition bias")
+                issues <- c(issues, " Low retention rate may introduce attrition bias")
             }
 
             # Check for exclusion reasons documentation
@@ -804,26 +804,26 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (has_detailed_reasons) {
-                strengths <- c(strengths, "✅ Exclusion reasons documented")
+                strengths <- c(strengths, " Exclusion reasons documented")
             } else {
-                issues <- c(issues, "⚠️ Exclusion reasons not specified - consider enabling detailed breakdown")
+                issues <- c(issues, " Exclusion reasons not specified - consider enabling detailed breakdown")
             }
 
             # Check for randomization
             if (!is.null(private$.armData) && length(private$.armData) > 0) {
-                strengths <- c(strengths, "✅ Randomized trial design with treatment arms")
+                strengths <- c(strengths, " Randomized trial design with treatment arms")
 
                 # Check for differential attrition
                 retention_rates <- sapply(private$.armData, function(x) x$retention_rate)
                 if (max(retention_rates) - min(retention_rates) > 15) {
-                    issues <- c(issues, "⚠️ Differential attrition between arms may indicate treatment tolerability issues")
+                    issues <- c(issues, " Differential attrition between arms may indicate treatment tolerability issues")
                 }
             }
 
             # Build HTML
             html <- paste0(
                 "<div style='background: #fff8e1; padding: 15px; margin: 10px; border: 1px solid #ffa726;'>",
-                "<h4>⚠️ Caveats & Assumptions</h4>",
+                "<h4> Caveats & Assumptions</h4>",
 
                 "<p><strong>Key Assumptions:</strong></p>",
                 "<ul style='margin-left: 15px;'>",
@@ -866,7 +866,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</ul>",
 
                 "<p style='font-size: 0.85em; color: #666; margin-top: 10px;'>",
-                "<strong>💡 Tip:</strong> High-quality CONSORT diagrams enhance manuscript acceptance rates ",
+                "<strong> Tip:</strong> High-quality CONSORT diagrams enhance manuscript acceptance rates ",
                 "and improve study reproducibility.",
                 "</p>",
                 "</div>"
@@ -950,7 +950,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateWelcomeMessage = function() {
             return(paste0(
                 "<div style='background: #f9f9f9; padding: 20px; margin: 10px; border: 1px solid #ddd;'>",
-                "<h3>📊 CONSORT Flow Diagram Generator</h3>",
+                "<h3> CONSORT Flow Diagram Generator</h3>",
                 "<p>Create CONSORT 2010 compliant flow diagrams using the <strong>consort</strong> R package.</p>",
 
                 "<h4>How It Works:</h4>",
@@ -1005,7 +1005,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</tr>",
                 "</table>",
 
-                "<p style='margin-top: 15px;'><strong>📚 Resources:</strong></p>",
+                "<p style='margin-top: 15px;'><strong> Resources:</strong></p>",
                 "<ul>",
                 "<li><a href='https://www.riinu.me/2024/02/consort/' target='_blank'>CONSORT diagrams in R tutorial by Riinu Ots</a></li>",
                 "<li><a href='http://www.consort-statement.org/' target='_blank'>CONSORT 2010 Statement</a></li>",

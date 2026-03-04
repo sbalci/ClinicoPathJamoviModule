@@ -3,7 +3,6 @@
 
 test_that("agreement module setup", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   data("histopathology", package = "ClinicoPath")
   # expect_true(exists("agreementResults")) # This check might fail if not exported
   expect_true(is.function(agreement))

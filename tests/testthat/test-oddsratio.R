@@ -7,7 +7,6 @@ library(dplyr)
 library(finalfit)
 
 # Load the package
-devtools::load_all()
 
 # Load test data
 if (file.exists("data/oddsratio_test_data.rda")) {

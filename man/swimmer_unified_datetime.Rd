@@ -5,16 +5,14 @@
 \alias{swimmer_unified_datetime}
 \title{DateTime Swimmer Plot Example Data}
 \format{
-A data frame with 10 rows and 8 variables:
+A data frame with 10 rows and 6 variables:
 \describe{
 \item{PatientID}{Character. Unique patient identifiers (PT001-PT010)}
 \item{StartDate}{Character. Treatment start date in YYYY-MM-DD format}
 \item{EndDate}{Character. Treatment end date in YYYY-MM-DD format}
 \item{BestResponse}{Character. Best overall response (CR, PR, SD, PD)}
-\item{Surgery}{Character. Surgery date in YYYY-MM-DD format (NA if no surgery)}
-\item{ProgressionAssessment}{Character. Date of progression assessment (NA if no progression)}
-\item{EventType}{Character. Type of clinical event recorded}
-\item{Site}{Character. Clinical trial site (Center A, B, C)}
+\item{SurgeryDate}{Character. Surgery date in YYYY-MM-DD format (NA if no surgery)}
+\item{ProgressionDate}{Character. Date of progression assessment (NA if no progression)}
 }
 }
 \source{
@@ -43,7 +41,7 @@ swimmerplot(
   timeUnit = "months",
   timeDisplay = "relative",
   milestone1Name = "Surgery",
-  milestone1Date = "Surgery"
+  milestone1Date = "SurgeryDate"
 )
 
 }

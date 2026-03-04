@@ -589,13 +589,14 @@ ihcimmuneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' ihcimmune(
 #'     immune_markers = c("CD3", "CD4", "CD8", "CD20"),
 #'     tilAnalysis = TRUE,
 #'     immuneContexture = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param immune_markers Immune cell markers (CD3, CD4, CD8, CD20, etc.)
 #' @param checkpoint_markers Immune checkpoint markers (PD-1, PD-L1, CTLA-4,

@@ -492,6 +492,7 @@ extratreesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- extratrees(
 #'     data = mydata,
 #'     time = "time_to_event",
@@ -502,7 +503,7 @@ extratreesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     min_node_size = 10,
 #'     splitrule = "extratrees"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

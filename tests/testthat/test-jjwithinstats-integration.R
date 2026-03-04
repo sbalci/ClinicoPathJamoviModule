@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjwithinstats integrates with all test datasets", {
-  devtools::load_all()
 
   # Load all jjwithinstats test datasets
   data(jjwithinstats_test, package = "ClinicoPath")
@@ -26,7 +24,6 @@ test_that("jjwithinstats integrates with all test datasets", {
 })
 
 test_that("jjwithinstats works with data.frame vs tibble", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -51,7 +48,6 @@ test_that("jjwithinstats works with data.frame vs tibble", {
 })
 
 test_that("jjwithinstats produces consistent results across multiple runs", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -78,7 +74,6 @@ test_that("jjwithinstats produces consistent results across multiple runs", {
 })
 
 test_that("jjwithinstats clinical presets match appropriate datasets", {
-  devtools::load_all()
 
   # Biomarker preset with biomarker data
   data(jjwithinstats_biomarker)
@@ -117,7 +112,6 @@ test_that("jjwithinstats clinical presets match appropriate datasets", {
 })
 
 test_that("jjwithinstats statistical types match data distributions", {
-  devtools::load_all()
 
   # Parametric for normally distributed QoL data
   data(jjwithinstats_qol)
@@ -154,7 +148,6 @@ test_that("jjwithinstats statistical types match data distributions", {
 })
 
 test_that("jjwithinstats handles two-timepoint vs multi-timepoint comparisons", {
-  devtools::load_all()
 
   # Two timepoints (paired t-test)
   data(jjwithinstats_paired)
@@ -191,7 +184,6 @@ test_that("jjwithinstats handles two-timepoint vs multi-timepoint comparisons", 
 })
 
 test_that("jjwithinstats pairwise comparisons work with different adjustments", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -214,7 +206,6 @@ test_that("jjwithinstats pairwise comparisons work with different adjustments", 
 })
 
 test_that("jjwithinstats centrality types align with statistical types", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -268,7 +259,6 @@ test_that("jjwithinstats centrality types align with statistical types", {
 })
 
 test_that("jjwithinstats ggpubr integration produces additional plots", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -288,7 +278,6 @@ test_that("jjwithinstats ggpubr integration produces additional plots", {
 })
 
 test_that("jjwithinstats handles complete workflow scenarios", {
-  devtools::load_all()
 
   # Scenario 1: Tumor response clinical trial
   data(jjwithinstats_test)
@@ -373,7 +362,6 @@ test_that("jjwithinstats handles complete workflow scenarios", {
 })
 
 test_that("jjwithinstats handles publication-ready output configurations", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -428,7 +416,6 @@ test_that("jjwithinstats handles publication-ready output configurations", {
 })
 
 test_that("jjwithinstats handles different outcome patterns", {
-  devtools::load_all()
 
   # Pattern 1: Progressive decline (tumor size)
   data(jjwithinstats_test)
@@ -472,7 +459,6 @@ test_that("jjwithinstats handles different outcome patterns", {
 })
 
 test_that("jjwithinstats maintains data integrity through analysis", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -494,7 +480,6 @@ test_that("jjwithinstats maintains data integrity through analysis", {
 })
 
 test_that("jjwithinstats handles cross-dataset variable patterns", {
-  devtools::load_all()
 
   # All datasets should work with their respective variable patterns
   datasets_and_vars <- list(

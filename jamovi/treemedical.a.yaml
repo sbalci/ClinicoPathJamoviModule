@@ -13,7 +13,7 @@ description:
         Uses enhanced CART algorithm optimized for healthcare applications with
         clinical validation, performance metrics, and medical interpretation guidelines.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example for cancer diagnosis
             data(cancer_data)

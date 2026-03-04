@@ -116,7 +116,8 @@ tau and can be compared between groups or modeled with covariates using
 regression techniques.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 rmstregression(
     elapsedtime = "time_to_event",
     outcome = "event_status",
@@ -124,5 +125,5 @@ rmstregression(
     tau = 60,
     analysis_type = "comparison"
 )
-
+}
 }

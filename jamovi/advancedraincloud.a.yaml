@@ -3,7 +3,7 @@ name: advancedraincloud
 title: Advanced Raincloud Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -339,7 +339,7 @@ options:
           Name or level of the baseline/reference group.
           
     - name: responder_threshold
-      title: Response Threshold (%)
+      title: Response Threshold ( percent)
       type: Number
       default: 20
       description:
@@ -412,9 +412,9 @@ options:
       options:
         - title: "None"
           name: none
-        - title: "Winsorize (5/95%)"
+        - title: "Winsorize (5/95 percent)"
           name: winsorize
-        - title: "Trim (5/95%)"
+        - title: "Trim (5/95 percent)"
           name: trim
         - title: "IQR Method"
           name: iqr
@@ -424,7 +424,7 @@ options:
           Method for handling outliers in the data.
           
     - name: show_cv_bands
-      title: Show CV% Bands
+      title: Show CV percent Bands
       type: Bool
       default: false
       description:
@@ -439,7 +439,7 @@ options:
       default: 15
       description:
         R: >
-          First CV band percentage (typically 15% for analytical variability).
+          First CV band percentage (typically 15 percent for analytical variability).
           
     - name: cv_band_2
       title: CV Band 2 Percentage
@@ -449,7 +449,7 @@ options:
       default: 20
       description:
         R: >
-          Second CV band percentage (typically 20% for biological variability).
+          Second CV band percentage (typically 20 percent for biological variability).
 
     # Publication Options
     - name: p_value_position

@@ -3,7 +3,7 @@ name:  checkdata
 title: Single Variable Quality Check
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 options:
@@ -47,7 +47,7 @@ options:
             Analyze patterns in missing data and value distributions.
 
     - name: rareCategoryThreshold
-      title: Rare Category Threshold (%)
+      title: Rare Category Threshold ( percent)
       type: Number
       min: 0.1
       max: 20

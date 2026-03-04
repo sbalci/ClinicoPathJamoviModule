@@ -96,7 +96,8 @@ certain time. Essential for  long-term prognosis and dynamic patient
 counseling in clinical practice.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 condsurvival(
     time = "time_variable",
     status = "status_variable",
@@ -104,5 +105,5 @@ condsurvival(
     conditional_times = c(1, 2, 5),
     prediction_times = c(1, 3, 5)
 )
-
+}
 }

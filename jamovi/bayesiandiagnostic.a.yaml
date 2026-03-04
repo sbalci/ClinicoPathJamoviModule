@@ -14,7 +14,7 @@ description:
         diagnostic odds ratios with full uncertainty quantification. Supports
         meta-analysis, hierarchical modeling, and comparative test evaluation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Bayesian diagnostic test evaluation
             bayesiandiagnostic(

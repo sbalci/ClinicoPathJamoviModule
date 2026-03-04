@@ -64,8 +64,8 @@ adverse event occurrence).}
 \item{outcomePositive}{Which level of the outcome variable represents the
 positive case.}
 
-\item{splitData}{Split data into training (70\\%) and validation (30\\%) sets
-for unbiased model evaluation.}
+\item{splitData}{Split data into training (70 percent) and validation (30
+percent) sets for unbiased model evaluation.}
 
 \item{randomSeed}{Random seed for reproducible data splitting and results.}
 

@@ -3,7 +3,6 @@ context("StudyDiagram Smoke Test")
 
 test_that("Step Summary Logic", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Mock Data
   df <- data.frame(
      step = c("Screened", "Eligible", "Enrolled"),

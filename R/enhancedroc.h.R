@@ -1891,7 +1891,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "enhancedROC",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = enhancedROCResults$new(options=options),
                 data = data,

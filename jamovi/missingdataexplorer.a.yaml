@@ -17,7 +17,7 @@ description:
         for understanding missingness before imputation and for regulatory documentation
         of missing data handling strategies.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('clinical_data')
             
@@ -140,7 +140,7 @@ options:
       max: 0.5
       default: 0.05
       description:
-          R: Minimum frequency for reporting missing data patterns (5% = 0.05)
+          R: Minimum frequency for reporting missing data patterns (5 percent = 0.05)
 
     - name: max_patterns_display
       title: Maximum Patterns to Display
@@ -217,7 +217,7 @@ options:
       max: 1.0
       default: 0.8
       description:
-          R: Threshold for acceptable variable completeness (80% = 0.8)
+          R: Threshold for acceptable variable completeness (80 percent = 0.8)
 
     - name: case_completeness
       title: Case Completeness Analysis

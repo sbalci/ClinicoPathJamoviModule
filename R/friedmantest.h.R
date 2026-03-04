@@ -542,14 +542,15 @@ friedmantestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' friedmantest(
 #'     dependent = "measurement_value",
 #'     subject = "patient_id",
 #'     within = "time_point",
 #'     posthoc = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param dependent Continuous or ordinal dependent variable measured
 #'   repeatedly

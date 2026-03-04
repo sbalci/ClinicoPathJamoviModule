@@ -113,13 +113,13 @@ options:
       title: Statistics for Categorical Variables
       type: List
       options:
-        - title: "N (%)"
+        - title: "N ( percent)"
           name: n_percent
         - title: "N only"
           name: n_only
-        - title: "% only"
+        - title: " percent only"
           name: percent_only
-        - title: "N (%), Missing N"
+        - title: "N ( percent), Missing N"
           name: n_percent_missing
       default: n_percent
       description:

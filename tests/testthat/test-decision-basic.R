@@ -2,7 +2,6 @@
 # Basic Tests: decision
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(decision_test, package = "ClinicoPath")
 data(decision_screening, package = "ClinicoPath")
 data(decision_diagnostic, package = "ClinicoPath")

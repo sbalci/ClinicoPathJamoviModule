@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(raincloud_test, package = "ClinicoPath", envir = environment())
@@ -19,7 +18,6 @@ data(raincloud_skewed, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud combines facet and color variables", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -33,7 +31,6 @@ test_that("raincloud combines facet and color variables", {
 })
 
 test_that("raincloud handles facet without color", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -46,7 +43,6 @@ test_that("raincloud handles facet without color", {
 })
 
 test_that("raincloud handles color without facet", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -63,7 +59,6 @@ test_that("raincloud handles color without facet", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud combines visualization components", {
-  devtools::load_all()
 
   # Violin + Box
   result_vb <- raincloud(
@@ -115,7 +110,6 @@ test_that("raincloud combines visualization components", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud combines themes with palettes", {
-  devtools::load_all()
 
   # Clinical theme + viridis palette
   result1 <- raincloud(
@@ -163,7 +157,6 @@ test_that("raincloud combines themes with palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud combines statistical tests with display options", {
-  devtools::load_all()
 
   # Normality test + mean
   result1 <- raincloud(
@@ -215,7 +208,6 @@ test_that("raincloud combines statistical tests with display options", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud combines size and alpha parameters", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -237,7 +229,6 @@ test_that("raincloud combines size and alpha parameters", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud combines faceting with components and statistics", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -260,7 +251,6 @@ test_that("raincloud combines faceting with components and statistics", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud combines color variable with theme and components", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_test,
@@ -282,7 +272,6 @@ test_that("raincloud combines color variable with theme and components", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles complete clinical lab analysis workflow", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_clinical,
@@ -313,7 +302,6 @@ test_that("raincloud handles complete clinical lab analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles complete treatment effect analysis", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_clinical,
@@ -341,7 +329,6 @@ test_that("raincloud handles complete treatment effect analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles complete biomarker expression workflow", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_biomarker,
@@ -371,7 +358,6 @@ test_that("raincloud handles complete biomarker expression workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles minimal configuration", {
-  devtools::load_all()
 
   result_min <- raincloud(
     data = raincloud_test,
@@ -383,7 +369,6 @@ test_that("raincloud handles minimal configuration", {
 })
 
 test_that("raincloud handles maximum configuration", {
-  devtools::load_all()
 
   result_max <- raincloud(
     data = raincloud_test,
@@ -417,7 +402,6 @@ test_that("raincloud handles maximum configuration", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud applies all themes consistently", {
-  devtools::load_all()
 
   themes <- c("clinical", "minimal", "classic", "publication", "tidyquant",
               "prism", "prism_whitespace", "prism_light")
@@ -439,7 +423,6 @@ test_that("raincloud applies all themes consistently", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud applies all palettes consistently", {
-  devtools::load_all()
 
   palettes <- c("default", "viridis", "magma", "plasma", "floral",
                 "candy_bright", "office", "pastels", "colorblind_safe",
@@ -462,7 +445,6 @@ test_that("raincloud applies all palettes consistently", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles different distribution types with consistent parameters", {
-  devtools::load_all()
 
   distributions <- c("normal", "right_skewed", "left_skewed", "bimodal", "lognormal")
 
@@ -488,7 +470,6 @@ test_that("raincloud handles different distribution types with consistent parame
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles progressive feature addition", {
-  devtools::load_all()
 
   # Step 1: Minimal
   result1 <- raincloud(

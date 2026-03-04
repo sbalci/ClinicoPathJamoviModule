@@ -10,9 +10,9 @@ description:
         time period given that a patient has already survived a certain time. Essential for 
         long-term prognosis and dynamic patient counseling in clinical practice.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             condsurvival(
                 time = "time_variable",
                 status = "status_variable",

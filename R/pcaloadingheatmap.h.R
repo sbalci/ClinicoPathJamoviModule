@@ -278,7 +278,7 @@ pcaloadingheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "pcaloadingheatmap",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = pcaloadingheatmapResults$new(options=options),
                 data = data,
@@ -307,6 +307,7 @@ pcaloadingheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example with mtcars dataset
 #' data("mtcars")
 #'
@@ -321,7 +322,7 @@ pcaloadingheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   textvalues = TRUE,
 #'   gradientcolor = TRUE
 #' )
-#'
+#'}
 #' @section References:
 #' Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812.
 #'

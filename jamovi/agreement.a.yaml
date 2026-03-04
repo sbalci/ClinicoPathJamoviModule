@@ -3,7 +3,7 @@ name:  agreement
 title: Interrater Reliability
 menuGroup: meddecide
 menuSubgroup: Agreement
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -40,7 +40,7 @@ options:
       description:
           R: >
             Confidence level for Bland-Altman limits of agreement (LoA).
-            Typically 0.95 for 95% confidence intervals.
+            Typically 0.95 for 95 percent confidence intervals.
 
     - name: confLevel
       title: 'Confidence Level for CIs'
@@ -51,7 +51,7 @@ options:
       description:
           R: >
             Confidence level for confidence intervals in ICC, CCC, bootstrap CIs,
-            and other agreement statistics. Default is 0.95 (95% CI).
+            and other agreement statistics. Default is 0.95 (95 percent CI).
 
     - name: proportionalBias
       title: 'Test for Proportional Bias'
@@ -401,15 +401,15 @@ options:
             automated measurements or between different measurement platforms.
 
     - name: tdiCoverage
-      title: "Coverage Probability (%)"
+      title: "Coverage Probability ( percent)"
       type: Number
       default: 90
       min: 50
       max: 99
       description:
           R: >
-            The proportion of differences that should fall within TDI limits (default: 90%).
-            Common values: 90% for general agreement, 95% for stringent requirements.
+            The proportion of differences that should fall within TDI limits (default: 90 percent).
+            Common values: 90 percent for general agreement, 95 percent for stringent requirements.
             This defines what percentage of future measurements must fall within acceptable limits.
 
     - name: tdiLimit
@@ -943,8 +943,8 @@ options:
       description:
           R: >
             Number of bootstrap resamples for confidence interval estimation.
-            1000 is adequate for 95% CIs. Use 5000-10000 for publication-quality
-            99% CIs or when metrics are near boundary values (0 or 1).
+            1000 is adequate for 95 percent CIs. Use 5000-10000 for publication-quality
+            99 percent CIs or when metrics are near boundary values (0 or 1).
 
     - name: showBootstrapCIGuide
       title: "When to use Bootstrap CIs"
@@ -1031,7 +1031,7 @@ options:
       default: true
       description:
           R: >
-            Calculate 95% confidence intervals for specific agreement indices using
+            Calculate 95 percent confidence intervals for specific agreement indices using
             Wilson score method. Recommended for publication and when sample sizes vary
             across categories. Helps distinguish true differences in category-specific
             agreement from random variation.
@@ -1084,17 +1084,17 @@ options:
       title: "Consensus Rule"
       type: List
       options:
-        - title: 'Simple Majority (>50%)'
+        - title: 'Simple Majority (>50 percent)'
           name: majority
-        - title: 'Supermajority (≥75%)'
+        - title: 'Supermajority (≥75 percent)'
           name: supermajority
-        - title: 'Unanimous (100%)'
+        - title: 'Unanimous (100 percent)'
           name: unanimous
       default: majority
       description:
           R: >
-            Rule for defining consensus. Simple majority = modal category with >50% of votes.
-            Supermajority requires ≥75% agreement. Unanimous requires 100% agreement.
+            Rule for defining consensus. Simple majority = modal category with >50 percent of votes.
+            Supermajority requires ≥75 percent agreement. Unanimous requires 100 percent agreement.
             Cases not meeting threshold are set to NA in consensus variable.
 
     - name: tieBreaker
@@ -1139,20 +1139,20 @@ options:
       default: detailed
       description:
           R: >
-            Simple mode: All Agreed (100%), Majority Agreed (≥threshold%), No Agreement (<threshold%).
-            Detailed mode: Absolute (100%), High, Moderate, Low, Poor (based on custom/data-driven thresholds).
+            Simple mode: All Agreed (100 percent), Majority Agreed (≥threshold percent), No Agreement (<threshold percent).
+            Detailed mode: Absolute (100 percent), High, Moderate, Low, Poor (based on custom/data-driven thresholds).
             Simple mode replicates the former "Agreement Status" feature.
 
     - name: simpleThreshold
-      title: "Majority Threshold (%) - Simple Mode"
+      title: "Majority Threshold ( percent) - Simple Mode"
       type: Number
       default: 50
       min: 50
       max: 100
       description:
           R: >
-            For Simple mode only: Minimum % for "Majority Agreed" status.
-            50% = simple majority, 75% = supermajority, 100% = unanimous.
+            For Simple mode only: Minimum  percent for "Majority Agreed" status.
+            50 percent = simple majority, 75 percent = supermajority, 100 percent = unanimous.
 
     - name: loaThresholds
       title: "Categorization Method - Detailed Mode"
@@ -1171,7 +1171,7 @@ options:
             Custom = user-defined cutpoints. Quartiles/Tertiles = data-driven splits.
 
     - name: loaHighThreshold
-      title: "High Threshold (%) - Detailed Mode"
+      title: "High Threshold ( percent) - Detailed Mode"
       type: Number
       default: 75
       min: 50
@@ -1179,11 +1179,11 @@ options:
       description:
           R: >
             For Detailed mode with Custom thresholds only:
-            Minimum % for "High" classification (e.g., 75% = ≥12/16 raters).
+            Minimum  percent for "High" classification (e.g., 75 percent = ≥12/16 raters).
             Cases ≥ this threshold are "High Agreement".
 
     - name: loaLowThreshold
-      title: "Low Threshold (%) - Detailed Mode"
+      title: "Low Threshold ( percent) - Detailed Mode"
       type: Number
       default: 56
       min: 30
@@ -1191,7 +1191,7 @@ options:
       description:
           R: >
             For Detailed mode with Custom thresholds only:
-            Minimum % for "Low" classification (e.g., 56% = ≥9/16 raters).
+            Minimum  percent for "Low" classification (e.g., 56 percent = ≥9/16 raters).
             Below = "Poor", between Low and High = "Moderate".
 
     - name: loaVariableName
@@ -1374,7 +1374,7 @@ options:
             For categorical data:
             - Agreement-based: Distance = 1 - pairwise agreement proportion
             Correlation is recommended for most applications as it captures rating pattern similarity
-            regardless of systematic shifts (one rater consistently 10% higher).
+            regardless of systematic shifts (one rater consistently 10 percent higher).
 
     - name: clusterLinkage
       title: "Linkage Method (Hierarchical)"

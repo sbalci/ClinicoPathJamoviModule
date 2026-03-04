@@ -136,6 +136,7 @@ Implements bivariate meta-analysis of diagnostic accuracy with
 between-study heterogeneity and correlation structures.
 }
 \examples{
+\donttest{
 # Example: Hierarchical Bayesian diagnostic meta-analysis
 hierarchicalbayes(
     data = multicenter_data,
@@ -146,5 +147,5 @@ hierarchicalbayes(
     study_id = center,
     model_type = "bivariate_normal"
 )
-
+}
 }

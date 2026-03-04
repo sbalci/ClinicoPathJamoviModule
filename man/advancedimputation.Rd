@@ -153,6 +153,7 @@ regulatory-compliant clinical research where missing data handling must be
 thoroughly documented and validated.
 }
 \examples{
+\donttest{
 data('clinical_trial_data')
 
 advancedimputation(
@@ -162,5 +163,5 @@ advancedimputation(
     sensitivity_analysis = TRUE,
     mnar_methods = TRUE
 )
-
+}
 }

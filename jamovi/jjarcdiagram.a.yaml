@@ -3,7 +3,7 @@ name: jjarcdiagram
 title: Arc Diagram
 menuGroup: JJStatsPlot
 menuSubgroup: Network
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -146,13 +146,13 @@ options:
         - name: custom
           title: Custom Network
         - name: gene_interaction  
-          title: Gene Interaction Network (🧬 Recommended)
+          title: Gene Interaction Network ( Recommended)
         - name: patient_network
-          title: Patient Similarity Network (👥 Clinical)
+          title: Patient Similarity Network ( Clinical)
         - name: pathway_network
-          title: Biological Pathway Network (🔬 Research)
+          title: Biological Pathway Network ( Research)
         - name: comorbidity_network
-          title: Disease Co-occurrence Network (🏥 Epidemiology)
+          title: Disease Co-occurrence Network ( Epidemiology)
       default: custom
       description:
           R: >

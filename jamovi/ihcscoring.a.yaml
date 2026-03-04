@@ -51,7 +51,7 @@ options:
         - numeric
       description:
           R: >
-            percentage of positive cells (0-100%)
+            percentage of positive cells (0-100 percent)
 
     - name: sample_id_var
       title: Sample ID Variable (Optional)
@@ -223,7 +223,7 @@ options:
             analyze biomarker positivity across multiple pre-specified cut-off values
 
     - name: cutoff_values
-      title: Cut-off Values (%)
+      title: Cut-off Values ( percent)
       type: String
       default: "1, 5, 10, 25, 50"
       description:
@@ -450,7 +450,7 @@ options:
             secondary marker for subtype refinement
 
     - name: classification_cutoffs
-      title: Classification Cut-off Values (%)
+      title: Classification Cut-off Values ( percent)
       type: String
       default: "20, 20, 70"
       description:
@@ -482,7 +482,7 @@ options:
             PD-L1 expression scores for immune checkpoint analysis
 
     - name: checkpoint_cutoffs
-      title: Checkpoint Inhibitor Cut-offs (%)
+      title: Checkpoint Inhibitor Cut-offs ( percent)
       type: String
       default: "1, 10"
       description:

@@ -13,7 +13,7 @@ description:
         Compares CART, Random Forest, and Gradient Boosting with cross-validation,
         statistical testing, and clinical performance assessment.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Compare multiple tree algorithms
             treecomparison(

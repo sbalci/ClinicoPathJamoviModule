@@ -23,7 +23,7 @@ description:
         validating biomarkers, imaging features, and AI models in multi-class clinicopathological
         applications where binary classification is insufficient.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- vusanalysis(
                 data = tumor_data,

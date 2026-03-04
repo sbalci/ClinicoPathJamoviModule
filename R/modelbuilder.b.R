@@ -58,9 +58,8 @@
 #' @importFrom htmltools HTML
 #' @importFrom glmnet glmnet cv.glmnet
 #' @importFrom rms rcs
-
-# Null-coalescing operator helper
-`%||%` <- function(x, y) if (is.null(x)) y else x
+#' @noRd
+NULL
 
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
@@ -121,7 +120,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 instructions <- paste0(
                     "<html><head></head><body>",
                     "<div class='instructions' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
-                    "<h3 style='color: #2e7d32; margin-top: 0;'>🏗️ ", "Prediction Model Builder", "</h3>",
+                    "<h3 style='color: #2e7d32; margin-top: 0;'> ", "Prediction Model Builder", "</h3>",
                     "<p><strong>", "Build and validate prediction models for medical decision making.", "</strong></p>",
                     "<p>", "Creates logistic regression models that output predicted probabilities for use in Decision Curve Analysis.", "</p>",
                     
@@ -457,7 +456,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             perf_html <- paste0(
                 "<html><body>",
                 "<div style='background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #17a2b8;'>",
-                "<h5 style='color: #17a2b8; margin-top: 0;'>⚡ ", "Performance Metrics", "</h5>",
+                "<h5 style='color: #17a2b8; margin-top: 0;'> ", "Performance Metrics", "</h5>",
                 "<table style='width: 100%; font-size: 12px;'>",
                 "<tr><th>", "Operation", "</th><th>", "Time (s)", "</th><th>", "Timestamp", "</th></tr>"
             )
@@ -1474,7 +1473,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 error_report <- paste0(
                     "<html><body>",
                     "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>⚠️ Analysis Error</h4>",
+                    "<h4 style='color: #856404; margin-top: 0;'> Analysis Error</h4>",
                     "<p><strong>Error Message:</strong> ", e$message, "</p>",
                     "<p><strong>Location:</strong> ", deparse(e$call)[1], "</p>",
                     if (length(private$.warnings) > 0) {
@@ -1529,7 +1528,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             data_summary <- paste0(
                 "<html><body>",
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>📊 ", "Data Summary", "</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> ", "Data Summary", "</h4>",
                 "<p><strong>", "Total Sample Size:", "</strong> ", n_total, "</p>",
                 "<p><strong>", "Training Set:", "</strong> ", n_training, " (", round(n_training/n_total*100, 1), "%)</p>",
                 if (n_validation > 0) paste0("<p><strong>", "Validation Set:", "</strong> ", n_validation, " (", round(n_validation/n_total*100, 1), "%)</p>") else "",
@@ -1986,7 +1985,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             performance_summary <- paste0(
                 "<html><body>",
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>✅ Analysis Complete</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> Analysis Complete</h4>",
                 "<p><strong>Models Built:</strong> ", length(models_built), "</p>",
                 "<p><strong>Model Types:</strong> ", paste(models_built, collapse = ", "), "</p>",
                 if (length(private$.warnings) > 0) {
@@ -2528,7 +2527,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             guidance <- paste0(
                 "<html><body>",
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #4caf50;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>🩺 ", "Clinical Best Practices", "</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> ", "Clinical Best Practices", "</h4>",
                 "<h5 style='color: #388e3c;'>", "Sample Size Guidelines:", "</h5>",
                 "<ul>",
                 "<li>", "Minimum 10 events per predictor variable (EPV rule)", "</li>",
@@ -2558,7 +2557,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             glossary <- paste0(
                 "<html><body>",
                 "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #9c27b0;'>",
-                "<h4 style='color: #7b1fa2; margin-top: 0;'>📚 ", "Statistical Terms for Clinicians", "</h4>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'> ", "Statistical Terms for Clinicians", "</h4>",
                 "<dl style='margin: 0;'>",
                 "<dt style='font-weight: bold; color: #7b1fa2; margin-top: 10px;'>", "AUC (Area Under Curve)", "</dt>",
                 "<dd style='margin-left: 20px;'>", "Probability that model ranks a random patient with outcome higher than a random patient without outcome. Range: 0.5 (no better than chance) to 1.0 (perfect).", "</dd>",
@@ -2610,7 +2609,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 clinical_summary <- paste0(
                     "<html><body>",
                     "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #2196f3;'>",
-                    "<h4 style='color: #1976d2; margin-top: 0;'>📋 ", "Clinical Interpretation", "</h4>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'> ", "Clinical Interpretation", "</h4>",
                     paste(summary_parts, collapse = ""),
                     "<hr style='margin: 15px 0; border: none; border-top: 1px solid #ccc;'>",
                     "<p><strong>", "Clinical Recommendation:", "</strong> ",
@@ -2661,7 +2660,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 report_html <- paste0(
                     "<html><body>",
                     "<div style='padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #6c757d;'>",
-                    "<h4 style='color: #495057; margin-top: 0;'>📝 ", "Copy-Ready Report Sentences", "</h4>",
+                    "<h4 style='color: #495057; margin-top: 0;'> ", "Copy-Ready Report Sentences", "</h4>",
                     "<p style='font-style: italic; color: #6c757d; font-size: 14px;'>", 
                     "Copy and paste these sentences into your manuscript:", "</p>",
                     paste(report_parts, collapse = ""),
@@ -2681,26 +2680,26 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             export_html <- paste0(
                 "<html><body>",
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #6c757d;'>",
-                "<h4 style='color: #495057; margin-top: 0;'>💾 ", "Export & Download Options", "</h4>",
+                "<h4 style='color: #495057; margin-top: 0;'> ", "Export & Download Options", "</h4>",
                 "<p style='color: #6c757d; font-size: 14px;'>", 
                 "Download model results and visualizations for reports and presentations:", "</p>",
                 
                 "<div style='display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0;'>",
                 "<button onclick='exportModelSummary()' ",
                 "style='padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
-                "📄 ", "Export Model Summary (CSV)", "</button>",
+                " ", "Export Model Summary (CSV)", "</button>",
                 
                 "<button onclick='exportPerformanceMetrics()' ",
                 "style='padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
-                "📉 ", "Export Performance (CSV)", "</button>",
+                " ", "Export Performance (CSV)", "</button>",
                 
                 "<button onclick='exportROCData()' ",
                 "style='padding: 8px 16px; background-color: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
-                "📊 ", "Export ROC Data (CSV)", "</button>",
+                " ", "Export ROC Data (CSV)", "</button>",
                 
                 "<button onclick='exportPredictions()' ",
                 "style='padding: 8px 16px; background-color: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;'>",
-                "📅 ", "Export Predictions (CSV)", "</button>",
+                " ", "Export Predictions (CSV)", "</button>",
                 "</div>",
                 
                 
@@ -2774,7 +2773,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (preset == "cardiac_risk") {
                 preset_guidance <- paste0(
                     "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #0ea5e9;'>",
-                    "<h4 style='color: #0369a1; margin-top: 0;'>💗 ", "Cardiac Risk Assessment Preset", "</h4>",
+                    "<h4 style='color: #0369a1; margin-top: 0;'> ", "Cardiac Risk Assessment Preset", "</h4>",
                     "<h5>", "Recommended Variables:", "</h5>",
                     "<ul>",
                     "<li><strong>", "Basic Clinical:", "</strong> ", "Age, Sex, Smoking, Diabetes, Hypertension, Family History", "</li>",
@@ -2792,7 +2791,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else if (preset == "cancer_prognosis") {
                 preset_guidance <- paste0(
                     "<div style='background-color: #fef3e2; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #f59e0b;'>",
-                    "<h4 style='color: #d97706; margin-top: 0;'>🎗️ ", "Cancer Prognosis Preset", "</h4>",
+                    "<h4 style='color: #d97706; margin-top: 0;'> ", "Cancer Prognosis Preset", "</h4>",
                     "<h5>", "Recommended Variables:", "</h5>",
                     "<ul>",
                     "<li><strong>", "Basic Clinical:", "</strong> ", "Age, Sex, Stage, Grade, Histology", "</li>",
@@ -2810,7 +2809,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else if (preset == "biomarker_validation") {
                 preset_guidance <- paste0(
                     "<div style='background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #22c55e;'>",
-                    "<h4 style='color: #15803d; margin-top: 0;'>🧬 ", "Biomarker Validation Preset", "</h4>",
+                    "<h4 style='color: #15803d; margin-top: 0;'> ", "Biomarker Validation Preset", "</h4>",
                     "<h5>", "Recommended Variables:", "</h5>",
                     "<ul>",
                     "<li><strong>", "Basic Clinical:", "</strong> ", "Age, Sex, Disease Duration", "</li>",
@@ -2827,7 +2826,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else if (preset == "diagnostic_test") {
                 preset_guidance <- paste0(
                     "<div style='background-color: #fef2f2; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ef4444;'>",
-                    "<h4 style='color: #dc2626; margin-top: 0;'>🔍 ", "Diagnostic Test Preset", "</h4>",
+                    "<h4 style='color: #dc2626; margin-top: 0;'> ", "Diagnostic Test Preset", "</h4>",
                     "<h5>", "Recommended Variables:", "</h5>",
                     "<ul>",
                     "<li><strong>", "Test Results:", "</strong> ", "Primary Test Result, Reference Standard", "</li>",

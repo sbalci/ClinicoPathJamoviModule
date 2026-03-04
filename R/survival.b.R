@@ -106,7 +106,7 @@
 #' @examples
 #' \donttest{
 #' # Basic survival analysis
-#' data("histopathologySurvival", package = "ClinicoPathJamoviModule")
+#' data("histopathologySurvival", package = "ClinicoPath")
 #' 
 #' # Standard survival analysis with median and survival probabilities
 #' survival_result <- survival(
@@ -198,7 +198,8 @@
 #' @import finalfit
 #' @importFrom dplyr mutate filter
 #' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme
-#'
+#' @noRd
+NULL
 
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
@@ -2056,14 +2057,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (ph_violated) {
                         html <- paste0(html,
                             "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
-                            "<strong style='color: #856404;'>⚠️ WARNING: Proportional Hazards Assumption May Be Violated</strong><br/>",
+                            "<strong style='color: #856404;'> WARNING: Proportional Hazards Assumption May Be Violated</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p < 0.05 suggests violation)</p>", p_value),
                             "</div>"
                         )
                     } else {
                         html <- paste0(html,
                             "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
-                            "<strong style='color: #155724;'>✓ Proportional Hazards Assumption Appears Satisfied</strong><br/>",
+                            "<strong style='color: #155724;'> Proportional Hazards Assumption Appears Satisfied</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p ≥ 0.05)</p>", p_value),
                             "</div>"
                         )
@@ -2085,7 +2086,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (ph_violated) {
                         html <- paste0(html,
                             "<div style='background-color: #e7f3ff; padding: 15px; border-radius: 4px; margin: 15px 0;'>",
-                            "<h5 style='color: #0056b3; margin-top: 0;'>📋 Recommended Solutions:</h5>",
+                            "<h5 style='color: #0056b3; margin-top: 0;'> Recommended Solutions:</h5>",
                             "<ol style='line-height: 1.8; margin: 10px 0;'>",
                             "<li><strong>Stratified Cox Model:</strong> Stratify by '", covariate_name, "' if it has few categories",
                             "<pre style='background: #fff; padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3;'>",
@@ -2107,7 +2108,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else {
                         html <- paste0(html,
                             "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 4px; margin: 15px 0;'>",
-                            "<h5 style='color: #2e7d32; margin-top: 0;'>✓ Next Steps:</h5>",
+                            "<h5 style='color: #2e7d32; margin-top: 0;'> Next Steps:</h5>",
                             "<p style='margin: 5px 0;'>The Cox proportional hazards model appears appropriate for your data. ",
                             "You can proceed with confidence in interpreting the hazard ratios as constant effects over time.</p>",
                             "<p style='margin: 10px 0 0 0;'><em>Note: Also examine the Schoenfeld residual plot above for visual confirmation.</em></p>",
@@ -3597,10 +3598,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Median Survival Explanation
                 private$.setExplanationContent("medianSurvivalExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #17a2b8;">
-                    <h4>📊 Understanding Your Median Survival Results</h4>
+                    <h4> Understanding Your Median Survival Results</h4>
                     <p><strong>What is Median Survival?</strong> The median survival time tells you when half of your study population experienced the event you are studying.</p>
                     
-                    <h5>🔍 How to Read Your Results:</h5>
+                    <h5> How to Read Your Results:</h5>
                     <table style="width:100%; margin: 10px 0;">
                         <tr style="background-color: #f8f9fa;">
                             <td style="padding: 5px;"><strong>Records</strong></td>
@@ -3624,7 +3625,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </tr>
                     </table>
                     
-                    <h5>💡 Practical Example:</h5>
+                    <h5> Practical Example:</h5>
                     <p>If median survival = 24 months with 95% CI (18-30):</p>
                     <ul>
                         <li>Half your patients survived longer than 24 months</li>
@@ -3632,7 +3633,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <li>This helps predict typical patient outcomes for treatment planning</li>
                     </ul>
                     
-                    <h5>⚠️ Important Notes:</h5>
+                    <h5> Important Notes:</h5>
                     <ul>
                         <li>Median is better than mean for survival data as it is not affected by extreme values</li>
                         <li>Wide confidence intervals suggest more uncertainty (often due to small sample size)</li>
@@ -3644,10 +3645,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Cox Regression Explanation
                 private$.setExplanationContent("coxRegressionExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
-                    <h4>⚖️ Understanding Your Cox Regression Results</h4>
+                    <h4> Understanding Your Cox Regression Results</h4>
                     <p><strong>What is Cox Regression?</strong> This analysis compares the risk of experiencing an event between different groups, adjusting for time.</p>
                     
-                    <h5>🎯 Key Metric: Hazard Ratio (HR)</h5>
+                    <h5> Key Metric: Hazard Ratio (HR)</h5>
                     <p>The hazard ratio tells you how much more (or less) likely one group is to experience the event compared to another.</p>
                     
                     <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
@@ -3683,14 +3684,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </tr>
                     </table>
                     
-                    <h5>📈 Statistical Significance:</h5>
+                    <h5> Statistical Significance:</h5>
                     <ul>
                         <li><strong>P-value < 0.05:</strong> The difference is statistically significant (likely real, not due to chance)</li>
                         <li><strong>95% CI includes 1.0:</strong> The difference is NOT statistically significant</li>
                         <li><strong>95% CI excludes 1.0:</strong> The difference IS statistically significant</li>
                     </ul>
                     
-                    <h5>💊 Clinical Example:</h5>
+                    <h5> Clinical Example:</h5>
                     <p>If Treatment A vs Treatment B shows HR = 0.60 (95% CI: 0.40-0.85, p=0.004):</p>
                     <ul style="background-color: #e8f5e9; padding: 10px; border-radius: 5px;">
                         <li>Treatment A reduces risk by 40% compared to Treatment B</li>
@@ -3698,7 +3699,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <li>We can be 95% confident the true risk reduction is between 15% and 60%</li>
                     </ul>
                     
-                    <h5>⚠️ Important Considerations:</h5>
+                    <h5> Important Considerations:</h5>
                     <ul>
                         <li>HR assumes proportional hazards (risk ratio stays constant over time)</li>
                         <li>Wide confidence intervals suggest uncertainty (often from small sample size)</li>
@@ -3710,10 +3711,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Survival Tables Explanation
                 private$.setExplanationContent("survivalTablesExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745;">
-                    <h4>📋 Understanding Your Survival Probability Tables</h4>
+                    <h4> Understanding Your Survival Probability Tables</h4>
                     <p><strong>What are Survival Tables?</strong> These tables show the percentage of patients surviving at key time points, which are standard benchmarks in medical research.</p>
                     
-                    <h5>📊 How to Read the Table Columns:</h5>
+                    <h5> How to Read the Table Columns:</h5>
                     <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
                         <tr style="background-color: #f8f9fa;">
                             <th style="padding: 8px; text-align: left;">Column</th>
@@ -3747,7 +3748,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </tr>
                     </table>
                     
-                    <h5>🏥 Common Medical Benchmarks:</h5>
+                    <h5> Common Medical Benchmarks:</h5>
                     <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
                         <ul style="margin: 5px 0;">
                             <li><strong>1-year survival:</strong> Short-term prognosis indicator</li>
@@ -3757,7 +3758,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </ul>
                     </div>
                     
-                    <h5>💡 Practical Example:</h5>
+                    <h5> Practical Example:</h5>
                     <p>If your table shows:</p>
                     <table style="background-color: #f8f9fa; padding: 5px; margin: 10px 0;">
                         <tr>
@@ -3771,7 +3772,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <li>This can be compared to published rates for similar populations</li>
                     </ul>
                     
-                    <h5>⚠️ Key Points to Remember:</h5>
+                    <h5> Key Points to Remember:</h5>
                     <ul>
                         <li>Decreasing "n.risk" over time is normal (patients complete follow-up)</li>
                         <li>Wider confidence intervals at later times reflect fewer patients at risk</li>
@@ -3829,10 +3830,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Survival Plots Explanation
                 private$.setExplanationContent("survivalPlotsExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #d1ecf1; border-left: 4px solid #bee5eb;">
-                    <h4>📈 Understanding Your Survival Curves and Plots</h4>
+                    <h4> Understanding Your Survival Curves and Plots</h4>
                     <p><strong>What are Survival Curves?</strong> These graphs show how the probability of survival changes over time for different groups.</p>
                     
-                    <h5>🎨 Types of Plots Available:</h5>
+                    <h5> Types of Plots Available:</h5>
                     <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
                         <tr style="background-color: #f8f9fa;">
                             <th style="padding: 8px; text-align: left;">Plot Type</th>
@@ -3861,7 +3862,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </tr>
                     </table>
                     
-                    <h5>📖 How to Read Survival Curves:</h5>
+                    <h5> How to Read Survival Curves:</h5>
                     <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
                         <ul style="margin: 5px 0;">
                             <li><strong>Y-axis (0-1 or 0-100%):</strong> Probability of survival</li>
@@ -3872,22 +3873,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </ul>
                     </div>
                     
-                    <h5>🔍 What to Look For:</h5>
+                    <h5> What to Look For:</h5>
                     <table style="width:100%; margin: 10px 0;">
                         <tr>
-                            <td style="padding: 8px; background-color: #e8f5e9;"><strong>✓ Curves separate early</strong></td>
+                            <td style="padding: 8px; background-color: #e8f5e9;"><strong> Curves separate early</strong></td>
                             <td style="padding: 8px;">Groups differ significantly</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #ffebee;"><strong>✗ Curves overlap</strong></td>
+                            <td style="padding: 8px; background-color: #ffebee;"><strong> Curves overlap</strong></td>
                             <td style="padding: 8px;">No significant difference</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #e3f2fd;"><strong>↕ Curves cross</strong></td>
+                            <td style="padding: 8px; background-color: #e3f2fd;"><strong> Curves cross</strong></td>
                             <td style="padding: 8px;">Effect changes over time</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #fff3cd;"><strong>⬇ Steep drop</strong></td>
+                            <td style="padding: 8px; background-color: #fff3cd;"><strong> Steep drop</strong></td>
                             <td style="padding: 8px;">High early event rate</td>
                         </tr>
                         <tr>
@@ -3896,7 +3897,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         </tr>
                     </table>
                     
-                    <h5>📊 Risk Table (Below Plot):</h5>
+                    <h5> Risk Table (Below Plot):</h5>
                     <p>Shows how many patients are still being followed at each time point:</p>
                     <ul>
                         <li>Helps assess reliability of estimates</li>
@@ -3904,7 +3905,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <li>Important for interpreting late time points</li>
                     </ul>
                     
-                    <h5>💡 Clinical Interpretation Tips:</h5>
+                    <h5> Clinical Interpretation Tips:</h5>
                     <ul>
                         <li><strong>Median survival:</strong> Where curve crosses 50% line</li>
                         <li><strong>1-year survival:</strong> Height of curve at 12 months</li>
@@ -4117,7 +4118,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .generateClinicalGlossary = function() {
                 glossary_html <- '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
-                    <h4>📖 Clinical Terminology Glossary</h4>
+                    <h4> Clinical Terminology Glossary</h4>
                     
                     <div style="display: grid; gap: 10px; margin-top: 15px;">
                         <div style="background-color: white; padding: 10px; border-radius: 5px;">
@@ -4388,7 +4389,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$showSummaries && length(clinical_interpretations) > 0) {
                     interpretation_html <- paste(
                         '<div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #007bff;">',
-                        '<h4>🏥 Clinical Interpretation</h4>',
+                        '<h4> Clinical Interpretation</h4>',
                         paste(lapply(clinical_interpretations, function(x) paste('<p>', x, '</p>')), collapse = ""),
                         '</div>'
                     )
@@ -4398,7 +4399,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Add Copy-Ready Clinical Report Sentences
                 if (self$options$showSummaries && length(copy_sentences) > 0) {
-                    copy_html <- '<div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;"><h4>📝 Copy-Ready Clinical Report Sentences</h4>'
+                    copy_html <- '<div style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;"><h4> Copy-Ready Clinical Report Sentences</h4>'
                     
                     for (section_name in names(copy_sentences)) {
                         copy_html <- paste0(copy_html, '<h5>', tools::toTitleCase(gsub("_", " ", section_name)), ':</h5><div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">')

@@ -14,7 +14,7 @@ description:
         up to a specific time point (tau), representing the average survival time 
         within the restriction period.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage will be added
 

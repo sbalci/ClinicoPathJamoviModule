@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load all test datasets
 data(raincloud_test, package = "ClinicoPath", envir = environment())
@@ -21,7 +20,6 @@ data(raincloud_skewed, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles complete clinical lab analysis workflow", {
-  devtools::load_all()
 
   # Step 1: Basic distribution
   result1 <- raincloud(
@@ -87,7 +85,6 @@ test_that("raincloud handles complete clinical lab analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles complete treatment effect workflow", {
-  devtools::load_all()
 
   # Step 1: Tumor size by treatment
   result1 <- raincloud(
@@ -151,7 +148,6 @@ test_that("raincloud handles complete treatment effect workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles complete biomarker expression workflow", {
-  devtools::load_all()
 
   # Step 1: Ki67 by grade
   result1 <- raincloud(
@@ -214,7 +210,6 @@ test_that("raincloud handles complete biomarker expression workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles all datasets with consistent parameters", {
-  devtools::load_all()
 
   # raincloud_test
   result1 <- raincloud(
@@ -288,7 +283,6 @@ test_that("raincloud handles all datasets with consistent parameters", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud produces consistent results across themes", {
-  devtools::load_all()
 
   themes <- c("clinical", "minimal", "classic", "publication", "tidyquant",
               "prism", "prism_whitespace", "prism_light")
@@ -317,7 +311,6 @@ test_that("raincloud produces consistent results across themes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud produces consistent results across palettes", {
-  devtools::load_all()
 
   palettes <- c("default", "viridis", "magma", "plasma", "floral",
                 "candy_bright", "office", "pastels", "colorblind_safe",
@@ -346,7 +339,6 @@ test_that("raincloud produces consistent results across palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles progressive feature addition", {
-  devtools::load_all()
 
   # Step 1: Minimal
   result1 <- raincloud(
@@ -450,7 +442,6 @@ test_that("raincloud handles progressive feature addition", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles multiple analyses from same dataset", {
-  devtools::load_all()
 
   variables <- c("symptom_score", "quality_of_life", "pain_intensity", "response_time")
 
@@ -477,7 +468,6 @@ test_that("raincloud handles multiple analyses from same dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud produces consistent results on repeated calls", {
-  devtools::load_all()
 
   # Run same analysis 3 times
   result1 <- raincloud(
@@ -517,7 +507,6 @@ test_that("raincloud produces consistent results on repeated calls", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles multi-panel comparative analysis workflow", {
-  devtools::load_all()
 
   # Overall distribution
   result_overall <- raincloud(
@@ -563,7 +552,6 @@ test_that("raincloud handles multi-panel comparative analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles different distribution types in systematic comparison", {
-  devtools::load_all()
 
   distribution_types <- c("normal", "right_skewed", "left_skewed", "bimodal", "lognormal")
 
@@ -596,7 +584,6 @@ test_that("raincloud handles different distribution types in systematic comparis
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles complete clinical trial reporting workflow", {
-  devtools::load_all()
 
   # Primary endpoint analysis
   result_primary <- raincloud(

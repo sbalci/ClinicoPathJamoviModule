@@ -901,6 +901,7 @@ costeffectivenessBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- costeffectiveness(
 #'     data = diagnostic_study,
 #'     strategy = "test_strategy",
@@ -908,7 +909,7 @@ costeffectivenessBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'     effectiveness = "correct_diagnoses",
 #'     comparator = "standard_care"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param strategy Variable indicating which diagnostic strategy was used for
 #'   each observation. Should have at least 2 levels (e.g., "New Test" vs.
@@ -959,8 +960,8 @@ costeffectivenessBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   deterministic sensitivity analysis. These should be column names in the
 #'   data.
 #' @param sensitivity_range_pct Percentage variation around base case for
-#'   sensitivity analysis. For example, 20\% means vary parameters from 80\% to
-#'   120\% of base value.
+#'   sensitivity analysis. For example, 20 percent means vary parameters from 80
+#'   percent to 120 percent of base value.
 #' @param probabilistic_sensitivity Monte Carlo simulation to propagate
 #'   uncertainty in all parameters simultaneously. Generates cost-effectiveness
 #'   acceptability curve (CEAC) showing probability of cost-effectiveness at
@@ -997,7 +998,7 @@ costeffectivenessBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param discount_costs Apply discounting to future costs (relevant for
 #'   multi-year time horizons).
 #' @param discount_rate_costs Annual discount rate for future costs (typically
-#'   3-5\% in health economics).
+#'   3-5 percent in health economics).
 #' @param discount_effects Apply discounting to future health effects (QALYs,
 #'   life-years).
 #' @param discount_rate_effects Annual discount rate for future effects (often

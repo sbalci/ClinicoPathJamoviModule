@@ -11,9 +11,9 @@ description:
         and various prior specifications for continuous and binary outcome data.
         Essential for Bayesian statistical inference in clinical research.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             bayesianci(
                 outcome = "response",
                 credible_level = 0.95,

@@ -15,7 +15,7 @@ description:
         an alternative to step-function approaches in standard time-varying Cox
         models and complementing Aalen's additive hazard methodology.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Spline-based time-varying effects
             library(timereg)

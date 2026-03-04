@@ -161,6 +161,7 @@ accuracy and clinical decision support through evidence-based pattern
 recognition and cross-modality validation.
 }
 \examples{
+\donttest{
 data('clinicaldata', package='ClinicoPath')
 
 # Basic imaging correlation analysis
@@ -170,5 +171,5 @@ imagingcorrelation(clinicaldata,
                  clinicalVars = c('Symptoms', 'Signs'),
                  correlation_analysis = TRUE,
                  concordance_assessment = TRUE)
-
+}
 }

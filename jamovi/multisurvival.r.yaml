@@ -95,7 +95,7 @@ items:
 
     # Statistical Glossary Panel
     - name: glossaryPanel
-      title: '📖 Statistical Glossary'
+      title: ' Statistical Glossary'
       type: Html
       visible: (showExplanations)
 

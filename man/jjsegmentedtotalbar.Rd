@@ -59,8 +59,8 @@ composition.}
 
 \item{show_plot}{Show segmented total bar chart.}
 
-\item{plot_type}{Type of visualization - traditional 100\\% stacked bars or
-Flerlage-style segmented total bars.}
+\item{plot_type}{Type of visualization - traditional 100 percent stacked
+bars or Flerlage-style segmented total bars.}
 
 \item{chart_style}{Overall visual style for the chart.}
 
@@ -72,7 +72,8 @@ Flerlage-style segmented total bars.}
 
 \item{show_counts}{Whether to display raw count values on segments.}
 
-\item{label_threshold}{Minimum percentage for showing labels (0-50\\%).}
+\item{label_threshold}{Minimum percentage for showing labels (0-50
+percent).}
 
 \item{orientation}{Orientation of the bars.}
 
@@ -145,15 +146,15 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Create segmented total bar charts (100\\% stacked bars) that show
+Create segmented total bar charts (100 percent stacked bars) that show
 proportional
 breakdowns within categories. Perfect for displaying composition data where
-each bar represents 100\\% and segments show relative proportions.
+each bar represents 100 percent and segments show relative proportions.
 }
 \examples{
 \donttest{
 # Example usage for segmented total bar charts:
 # Shows proportional composition within categories
-# Each bar totals to 100\\% with segments showing relative proportions
+# Each bar totals to 100 percent with segments showing relative proportions
 }
 }

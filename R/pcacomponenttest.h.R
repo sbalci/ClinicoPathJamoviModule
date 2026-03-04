@@ -376,6 +376,7 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example with mtcars dataset
 #' data("mtcars")
 #'
@@ -390,7 +391,7 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   conflevel = 0.95,
 #'   adjustmethod = "BH"
 #' )
-#'
+#'}
 #' @section References:
 #' Buja A, Eyuboglu N. (1992). Remarks on Parallel Analysis. Multivariate Behavioral Research, 27(4):509-540.
 #'
@@ -414,7 +415,7 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param scale Scale variables to have standard deviation = 1 before PCA.
 #'   Recommended: TRUE when variables have different units or scales.
 #' @param conflevel Confidence level for confidence intervals (0.80-0.99).
-#'   Default: 0.95 for 95\% CI.
+#'   Default: 0.95 for 95 percent CI.
 #' @param adjustmethod Method for adjusting p-values for multiple testing. BH
 #'   (Benjamini-Hochberg) controls false discovery rate.
 #' @param showpercent Display variance accounted for (VAF) as percentage

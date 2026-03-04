@@ -114,10 +114,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           # Map notice types to colors and icons
           typeStyles <- list(
-            ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
-            STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
-            WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
-            INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+            ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+            STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+            WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+            INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
           )
 
           html <- "<div style='margin: 10px 0;'>"
@@ -1395,7 +1395,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<br><br>",
           .("This tool creates waterfall and spider plots for tumor response analysis following RECIST criteria."),
           "<br><br>",
-          "<b>📊 ", .("Visualization Types:"), "</b>",
+          "<b> ", .("Visualization Types:"), "</b>",
           "<br><br>",
           "<b>1. ", .("Waterfall Plot"), "</b>",
           "<br>- ", .("Shows best response for each patient as vertical bars"),
@@ -1407,7 +1407,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<br>- ", .("Requires multiple measurements per patient with time variable"),
           "<br>- ", .("Best for longitudinal follow-up data"),
           "<br><br>",
-          "<b>📝 ", .("Data Input Options:"), "</b>",
+          "<b> ", .("Data Input Options:"), "</b>",
           "<br><br>",
           "<b>", .("Percentage Changes:"), "</b>",
           "<br>- ", .("Pre-calculated percent changes from baseline"),
@@ -1419,7 +1419,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<br>- ", .("Tool automatically calculates percent changes"),
           "<br>- ", .("Baseline assumed at Time = 0"),
           "<br><br>",
-          "<b>🎯 ", .("RECIST v1.1 Categories:"), "</b>",
+          "<b> ", .("RECIST v1.1 Categories:"), "</b>",
           sprintf("<br>- <b>%s</b> ≤ %d%% (%s)", .("Complete Response (CR):"), private$RECIST_CR_THRESHOLD, .("complete disappearance")),
           sprintf("<br>- <b>%s</b> ≤ %d%% %s", .("Partial Response (PR):"), private$RECIST_PR_THRESHOLD, .("decrease")),
           sprintf("<br>- <b>%s</b> %d%% %s +%d%% %s", .("Stable Disease (SD):"), private$RECIST_PR_THRESHOLD, .("to"), private$RECIST_PD_THRESHOLD, .("change")),

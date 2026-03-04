@@ -47,7 +47,8 @@ observations) - Independence: no correlation (equivalent to GLM)}
 \item{robust_se}{sandwich estimator for standard errors (recommended).
 Provides valid inference even if correlation structure is misspecified.}
 
-\item{conf_level}{confidence level for confidence intervals (default 95\\%)}
+\item{conf_level}{confidence level for confidence intervals (default 95
+percent)}
 
 \item{qic}{Quasi-likelihood under Independence Model Criterion. Lower QIC
 indicates better model fit. Use for comparing models.}
@@ -110,6 +111,7 @@ patient).
 }
 }
 \examples{
+\donttest{
 # Example: Multiple liver samples per dog
 geemodel(
   data = liver_data,
@@ -120,5 +122,5 @@ geemodel(
   corstr = 'exchangeable',
   robust_se = TRUE
 )
-
+}
 }

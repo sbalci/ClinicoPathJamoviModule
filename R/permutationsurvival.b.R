@@ -15,9 +15,9 @@ permutationsurvivalClass <- R6::R6Class(
                 "<b>Permutation Tests for Survival</b>
                 <br><br>
                 Select variables:
-                <br>• Time Variable: {ifelse(is.null(self$options$elapsedtime), '❌ Not selected', '✅ Selected')}
-                <br>• Event Variable: {ifelse(is.null(self$options$outcome), '❌ Not selected', '✅ Selected')}  
-                <br>• Group Variable: {ifelse(is.null(self$options$explanatory), '❌ Not selected', '✅ Selected')}
+                <br>• Time Variable: {ifelse(is.null(self$options$elapsedtime), ' Not selected', ' Selected')}
+                <br>• Event Variable: {ifelse(is.null(self$options$outcome), ' Not selected', ' Selected')}  
+                <br>• Group Variable: {ifelse(is.null(self$options$explanatory), ' Not selected', ' Selected')}
                 <br><br>
                 <b>About Permutation Tests:</b>
                 <br>• Non-parametric alternative to traditional log-rank tests

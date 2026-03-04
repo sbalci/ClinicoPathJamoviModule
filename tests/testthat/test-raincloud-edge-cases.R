@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(raincloud_test, package = "ClinicoPath", envir = environment())
@@ -18,7 +17,6 @@ data(raincloud_skewed, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles very small datasets", {
-  devtools::load_all()
 
   # n=30
   result <- raincloud(
@@ -31,7 +29,6 @@ test_that("raincloud handles very small datasets", {
 })
 
 test_that("raincloud handles single group level", {
-  devtools::load_all()
 
   # Create data with only one level
   single_level_data <- raincloud_small %>%
@@ -52,7 +49,6 @@ test_that("raincloud handles single group level", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles very unbalanced group sizes", {
-  devtools::load_all()
 
   # Create highly unbalanced data
   unbalanced_data <- raincloud_test %>%
@@ -75,7 +71,6 @@ test_that("raincloud handles very unbalanced group sizes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles missing values in dependent variable", {
-  devtools::load_all()
 
   test_data_na <- raincloud_test
   test_data_na$symptom_score[1:20] <- NA
@@ -90,7 +85,6 @@ test_that("raincloud handles missing values in dependent variable", {
 })
 
 test_that("raincloud handles missing values in grouping variable", {
-  devtools::load_all()
 
   test_data_na_group <- raincloud_test
   test_data_na_group$treatment_group[1:25] <- NA
@@ -105,7 +99,6 @@ test_that("raincloud handles missing values in grouping variable", {
 })
 
 test_that("raincloud handles missing values in facet variable", {
-  devtools::load_all()
 
   test_data_na_facet <- raincloud_test
   test_data_na_facet$disease_severity[1:30] <- NA
@@ -121,7 +114,6 @@ test_that("raincloud handles missing values in facet variable", {
 })
 
 test_that("raincloud handles missing values in color variable", {
-  devtools::load_all()
 
   test_data_na_color <- raincloud_test
   test_data_na_color$gender[1:35] <- NA
@@ -141,7 +133,6 @@ test_that("raincloud handles missing values in color variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles data with many outliers", {
-  devtools::load_all()
 
   outlier_data <- raincloud_test
   # Add 20% outliers
@@ -159,7 +150,6 @@ test_that("raincloud handles data with many outliers", {
 })
 
 test_that("raincloud handles constant variable", {
-  devtools::load_all()
 
   constant_data <- raincloud_small
   constant_data$constant_var <- 50  # All same value
@@ -175,7 +165,6 @@ test_that("raincloud handles constant variable", {
 })
 
 test_that("raincloud handles very narrow range", {
-  devtools::load_all()
 
   narrow_data <- raincloud_small
   narrow_data$narrow_var <- rnorm(nrow(narrow_data), mean = 50, sd = 0.001)
@@ -190,7 +179,6 @@ test_that("raincloud handles very narrow range", {
 })
 
 test_that("raincloud handles very wide range", {
-  devtools::load_all()
 
   wide_data <- raincloud_test
   wide_data$wide_var <- rnorm(nrow(wide_data), mean = 50000, sd = 20000)
@@ -209,7 +197,6 @@ test_that("raincloud handles very wide range", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles Inf values", {
-  devtools::load_all()
 
   inf_data <- raincloud_small
   inf_data$measurement[1:3] <- Inf
@@ -226,7 +213,6 @@ test_that("raincloud handles Inf values", {
 })
 
 test_that("raincloud handles NaN values", {
-  devtools::load_all()
 
   nan_data <- raincloud_small
   nan_data$measurement[1:4] <- NaN
@@ -245,7 +231,6 @@ test_that("raincloud handles NaN values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles variable names with spaces", {
-  devtools::load_all()
 
   test_data_spaces <- raincloud_small
   names(test_data_spaces)[names(test_data_spaces) == "measurement"] <- "measurement value"
@@ -260,7 +245,6 @@ test_that("raincloud handles variable names with spaces", {
 })
 
 test_that("raincloud handles variable names with special characters", {
-  devtools::load_all()
 
   test_data_special <- raincloud_small
   names(test_data_special)[names(test_data_special) == "measurement"] <- "measurement-2024"
@@ -279,7 +263,6 @@ test_that("raincloud handles variable names with special characters", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud errors on non-existent dependent variable", {
-  devtools::load_all()
 
   expect_error(
     raincloud(
@@ -293,7 +276,6 @@ test_that("raincloud errors on non-existent dependent variable", {
 })
 
 test_that("raincloud errors on non-existent group variable", {
-  devtools::load_all()
 
   expect_error(
     raincloud(
@@ -307,7 +289,6 @@ test_that("raincloud errors on non-existent group variable", {
 })
 
 test_that("raincloud errors on categorical dependent variable", {
-  devtools::load_all()
 
   expect_error(
     raincloud(
@@ -321,7 +302,6 @@ test_that("raincloud errors on categorical dependent variable", {
 })
 
 test_that("raincloud errors on numeric grouping variable", {
-  devtools::load_all()
 
   expect_error(
     raincloud(
@@ -339,7 +319,6 @@ test_that("raincloud errors on numeric grouping variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud errors on empty dataset", {
-  devtools::load_all()
 
   empty_data <- raincloud_small[0, ]
 
@@ -359,7 +338,6 @@ test_that("raincloud errors on empty dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles duplicate rows", {
-  devtools::load_all()
 
   test_data_dup <- rbind(raincloud_small, raincloud_small)
 
@@ -377,7 +355,6 @@ test_that("raincloud handles duplicate rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles all observations in one group", {
-  devtools::load_all()
 
   single_group_data <- raincloud_small %>%
     mutate(group = factor("Same Group"))
@@ -397,7 +374,6 @@ test_that("raincloud handles all observations in one group", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles tibble input", {
-  devtools::load_all()
 
   test_tibble <- tibble::as_tibble(raincloud_small)
 
@@ -411,7 +387,6 @@ test_that("raincloud handles tibble input", {
 })
 
 test_that("raincloud handles data.frame input", {
-  devtools::load_all()
 
   test_df <- as.data.frame(raincloud_small)
 
@@ -429,7 +404,6 @@ test_that("raincloud handles data.frame input", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles many categorical levels", {
-  devtools::load_all()
 
   # Create data with many levels (10+)
   test_many_levels <- raincloud_test
@@ -450,7 +424,6 @@ test_that("raincloud handles many categorical levels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles same variable for group and facet", {
-  devtools::load_all()
 
   # Using same variable for group and facet (should error or warn)
   expect_condition(
@@ -464,7 +437,6 @@ test_that("raincloud handles same variable for group and facet", {
 })
 
 test_that("raincloud handles same variable for group and color", {
-  devtools::load_all()
 
   # Using same variable for group and color
   result <- raincloud(
@@ -483,7 +455,6 @@ test_that("raincloud handles same variable for group and color", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles negative values", {
-  devtools::load_all()
 
   negative_data <- raincloud_small
   negative_data$measurement <- negative_data$measurement - 100  # Make negative
@@ -502,7 +473,6 @@ test_that("raincloud handles negative values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles zero values", {
-  devtools::load_all()
 
   zero_data <- raincloud_small
   zero_data$measurement[1:10] <- 0
@@ -517,7 +487,6 @@ test_that("raincloud handles zero values", {
 })
 
 test_that("raincloud handles all zero values", {
-  devtools::load_all()
 
   all_zero_data <- raincloud_small
   all_zero_data$zero_var <- 0
@@ -537,7 +506,6 @@ test_that("raincloud handles all zero values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles extremely skewed distributions", {
-  devtools::load_all()
 
   # Test with right-skewed data
   result_right <- raincloud(
@@ -563,7 +531,6 @@ test_that("raincloud handles extremely skewed distributions", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles bimodal distributions", {
-  devtools::load_all()
 
   result <- raincloud(
     data = raincloud_skewed,
@@ -581,7 +548,6 @@ test_that("raincloud handles bimodal distributions", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles very few observations per group", {
-  devtools::load_all()
 
   # Create data with only 3 observations per group
   few_points_data <- raincloud_small %>%
@@ -604,7 +570,6 @@ test_that("raincloud handles very few observations per group", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles factor levels with no observations", {
-  devtools::load_all()
 
   # Create factor with levels but some unused
   test_empty_levels <- raincloud_small
@@ -627,7 +592,6 @@ test_that("raincloud handles factor levels with no observations", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("raincloud handles invalid width/size/alpha parameters", {
-  devtools::load_all()
 
   # Zero width (should error or warn)
   expect_condition(

@@ -729,6 +729,7 @@ featurequalityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinical_data')
 #'
 #' featurequality(
@@ -737,7 +738,7 @@ featurequalityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     outlier_detection = TRUE,
 #'     correlation_analysis = TRUE
 #' )
-#'
+#'}
 #' @param data .
 #' @param features .
 #' @param group_var .

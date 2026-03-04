@@ -15,7 +15,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         .init = function() {
             if (is.null(self$data) || length(self$options$features) == 0) {
                 self$results$overview$setContent(
-                    "<h3>🔍 Explainable AI Analysis</h3>
+                    "<h3> Explainable AI Analysis</h3>
                     <p><strong>Making Machine Learning Models Interpretable</strong></p>
                     
                     <h4>Available Analysis Methods:</h4>
@@ -183,7 +183,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             warning_content <- paste(
                 "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 10px; border-radius: 5px;'>",
-                "<h4 style='color: #856404;'>⚠️ ", package_name, " Not Available</h4>",
+                "<h4 style='color: #856404;'> ", package_name, " Not Available</h4>",
                 "<p style='color: #856404;'>", message, "</p>",
                 install_instructions,
                 "<p style='color: #856404; font-style: italic;'>Currently using simulation mode for demonstration purposes. Install the required packages for full functionality.</p>",
@@ -192,7 +192,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             current_content <- self$results$overview$content
             if (is.null(current_content) || current_content == "") {
-                current_content <- "<h3>🔍 Explainable AI Analysis</h3>"
+                current_content <- "<h3> Explainable AI Analysis</h3>"
             }
             self$results$overview$setContent(paste(current_content, warning_content))
         },
@@ -688,7 +688,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 # Update overview with save status
                 save_message <- paste(
                     "<div style='background-color: #d4edda; padding: 10px; border: 1px solid #c3e6cb; margin: 5px 0;'>",
-                    "<strong>✅ Explanations Saved:</strong> ", file_path,
+                    "<strong> Explanations Saved:</strong> ", file_path,
                     "</div>"
                 )
                 
@@ -699,7 +699,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 # Show error message
                 error_message <- paste(
                     "<div style='background-color: #f8d7da; padding: 10px; border: 1px solid #f5c6cb; margin: 5px 0;'>",
-                    "<strong>❌ Save Error:</strong> ", e$message,
+                    "<strong> Save Error:</strong> ", e$message,
                     "</div>"
                 )
                 
@@ -739,7 +739,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             summary_content <- paste(
                 "<div style='background-color: #f0f8f0; padding: 15px; border-left: 5px solid #28a745; margin: 10px 0;'>",
-                "<h4>✅ Analysis Complete</h4>",
+                "<h4> Analysis Complete</h4>",
                 "<p>", results_summary, "</p>",
                 "<ul>",
                 "<li><strong>Method:</strong> ", toupper(gsub("_", " ", analysis_type)), "</li>",

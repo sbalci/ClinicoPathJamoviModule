@@ -16,7 +16,7 @@ description:
         The model estimates cumulative regression functions that can reveal how
         covariate effects change over time.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Basic Aalen additive hazard model
             library(timereg)

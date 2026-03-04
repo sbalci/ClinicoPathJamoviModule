@@ -533,7 +533,8 @@ rmstregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' rmstregression(
 #'     elapsedtime = "time_to_event",
 #'     outcome = "event_status",
@@ -541,7 +542,7 @@ rmstregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'     tau = 60,
 #'     analysis_type = "comparison"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (1 = event, 0 = censored)

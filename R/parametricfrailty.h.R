@@ -544,6 +544,7 @@ parametricfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('lung', package='survival')
 #'
 #' parametricfrailty(data = lung,
@@ -553,7 +554,7 @@ parametricfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'                  frailty_variable = 'inst',
 #'                  baseline_distribution = 'weibull',
 #'                  frailty_distribution = 'gamma')
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable. Should
 #'   contain positive  numeric values representing the time to event or

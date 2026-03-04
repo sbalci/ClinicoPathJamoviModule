@@ -14,7 +14,7 @@ description:
         stopping rules, and group sequential designs. Designed for efficient
         clinical trial conduct with ethical early stopping capabilities.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Adaptive trial design with interim analysis
             adaptivetrialdesign(

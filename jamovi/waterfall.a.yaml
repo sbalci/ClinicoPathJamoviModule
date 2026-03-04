@@ -4,7 +4,7 @@ title: Treatment Response Analysis
 menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -47,11 +47,11 @@ options:
             pre-calculated percentage changes from baseline.
             For raw measurements: requires time variable with baseline at time = 0.
             For percentages: negative values = tumor shrinkage (good response),
-            positive values = tumor growth (poor response). Example: -30 means 30% decrease.
+            positive values = tumor growth (poor response). Example: -30 means 30 percent decrease.
           jamovi: >
             Response variable: tumor measurements or percentage changes from baseline.
             • Raw measurements: actual tumor sizes (mm, cm, sum of diameters)
-            • Percentage changes: pre-calculated changes (-30 = 30% shrinkage = good response)
+            • Percentage changes: pre-calculated changes (-30 = 30 percent shrinkage = good response)
             Tip: Use percentage format if changes already calculated, raw format for actual measurements.
 
 
@@ -102,7 +102,7 @@ options:
             or 'percentage' for pre-calculated percentage changes from baseline
           jamovi: >
             Choose your data format:
-            • Percentage Changes: Pre-calculated changes from baseline (-30 = 30% shrinkage)
+            • Percentage Changes: Pre-calculated changes from baseline (-30 = 30 percent shrinkage)
             • Raw Measurements: Actual tumor sizes (requires Time Variable for baseline calculation)
             Most oncology studies use percentage changes. Use raw measurements only if you have
             actual tumor measurements and want automatic percentage calculation.
@@ -156,12 +156,12 @@ options:
       default: true
       description:
           R: >
-            Show +20% and -30% RECIST v1.1 thresholds as dashed lines.
+            Show +20 percent and -30 percent RECIST v1.1 thresholds as dashed lines.
             Helps identify Progressive Disease (PD) and Partial Response (PR) cutoffs.
           jamovi: >
             Show RECIST v1.1 threshold lines on plots:
-            • -30% line: Partial Response (PR) cutoff - tumor shrinkage threshold
-            • +20% line: Progressive Disease (PD) cutoff - tumor growth threshold
+            • -30 percent line: Partial Response (PR) cutoff - tumor shrinkage threshold
+            • +20 percent line: Progressive Disease (PD) cutoff - tumor growth threshold
             Recommended: Keep enabled for clinical interpretation
 
     - name: labelOutliers
@@ -195,7 +195,7 @@ options:
             Show confidence interval around median response.
 
     - name: minResponseForLabel
-      title: Minimum Response for Labels (%)
+      title: Minimum Response for Labels ( percent)
       type: Number
       default: 50
       min: 0
@@ -369,7 +369,7 @@ options:
             Display clinical significance interpretations for ORR and DCR
           jamovi: >
             Add clinical significance context to results:
-            • ORR thresholds: <15% (low), 15-30% (moderate), >30% (promising)
+            • ORR thresholds: <15 percent (low), 15-30 percent (moderate), >30 percent (promising)
             • DCR interpretations with clinical relevance
             • Sample size adequacy assessment
             Helps interpret results in clinical context

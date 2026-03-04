@@ -3,7 +3,6 @@ library(testthat)
 
 test_that("treatmentmeta basic functionality works", {
   # Load package
-  devtools::load_all()
   
   # Create synthetic meta-analysis data (continuous)
   set.seed(123)
@@ -52,7 +51,6 @@ test_that("treatmentmeta basic functionality works", {
 })
 
 test_that("treatmentmeta binary outcomes work", {
-  devtools::load_all()
   
   # Create synthetic meta-analysis data (binary)
   set.seed(456)
@@ -86,7 +84,6 @@ test_that("treatmentmeta binary outcomes work", {
   expect_true(nrow(pooled_table) >= 1)
 })
 test_that("treatmentmeta correlation outcomes work", {
-  devtools::load_all()
   
   # Create synthetic correlation data
   set.seed(789)
@@ -114,7 +111,6 @@ test_that("treatmentmeta correlation outcomes work", {
 })
 
 test_that("treatmentmeta advanced features work", {
-  devtools::load_all()
   
   # Comprehensive test data
   set.seed(111)

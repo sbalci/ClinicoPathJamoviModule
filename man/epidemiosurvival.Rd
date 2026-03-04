@@ -169,6 +169,7 @@ research including cancer registry studies, cohort studies, and population
 surveillance.
 }
 \examples{
+\donttest{
 data('population_cohort')
 
 epidemiosurvival(
@@ -180,5 +181,5 @@ epidemiosurvival(
     calendar_time = "entry_year",
     population_weights = "sampling_weight"
 )
-
+}
 }

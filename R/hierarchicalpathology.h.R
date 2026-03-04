@@ -512,6 +512,7 @@ hierarchicalpathologyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('histopathology')
 #'
 #' hierarchicalpathology(data = histopathology,
@@ -519,7 +520,7 @@ hierarchicalpathologyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #'                      level_3 = patient_id,
 #'                      level_2 = slide_id,
 #'                      level_1 = roi_id)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param dependent The dependent variable from \code{data}, variable must be
 #'   numeric

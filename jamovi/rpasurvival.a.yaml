@@ -15,7 +15,7 @@ description:
         with risk group assignments. Useful for developing prognostic staging systems
         by integrating multiple predictors.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Develop RPA staging system for survival data
             # Generate example survival data with multiple predictors

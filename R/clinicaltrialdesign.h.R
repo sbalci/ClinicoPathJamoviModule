@@ -605,6 +605,7 @@ clinicaltrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('your_data')
 #'
 #' clinicaltrialdesign(
@@ -615,7 +616,7 @@ clinicaltrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     alpha = 0.05,
 #'     power = 0.80
 #' )
-#'
+#'}
 #' @param data the data as a data frame (optional for power calculations)
 #' @param trial_type Type of clinical trial design for appropriate power
 #'   calculations

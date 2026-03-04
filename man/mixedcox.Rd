@@ -210,6 +210,7 @@ capture cluster-specific variation while estimating population-level  fixed
 effects.
 }
 \examples{
+\donttest{
 # Example 1: Patients clustered within hospitals
 library(survival)
 library(coxme)
@@ -236,5 +237,5 @@ mixedcox(
     random_effects = "slope",
     random_slope_var = "treatment"
 )
-
+}
 }

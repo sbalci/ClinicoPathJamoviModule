@@ -34,14 +34,14 @@ variability in the \code{consortdiagram} function.
 This dataset simulates a realistic multi-center trial with:
 \itemize{
 \item 600 participants assessed across 4 sites
-\item 25\\% screening failure rate (higher than single-center for realism)
-\item 5\\% enrollment exclusion rate
+\item 25 percent screening failure rate (higher than single-center for realism)
+\item 5 percent enrollment exclusion rate
 \item 1:1 randomization to Experimental vs Control
-\item 3\\% allocation exclusion rate
-\item 15\\% follow-up loss rate (varies by site)
-\item 2\\% analysis exclusion rate
-\item Final retention: 57.7\\% (346 participants analyzed)
-\item Site-specific retention rates: 52.5\\% to 60.1\\%
+\item 3 percent allocation exclusion rate
+\item 15 percent follow-up loss rate (varies by site)
+\item 2 percent analysis exclusion rate
+\item Final retention: 57.7 percent (346 participants analyzed)
+\item Site-specific retention rates: 52.5 percent to 60.1 percent
 }
 
 The dataset demonstrates realistic site variability in retention rates, which is
@@ -66,8 +66,8 @@ data(multicenter_trial_data)
 
 # Site-specific retention
 library(dplyr)
-multicenter_trial_data \%>\%
-  group_by(site) \%>\%
+multicenter_trial_data |>
+  group_by(site) |>
   summarise(
     total = n(),
     analyzed = sum(is.na(screening_failure) &

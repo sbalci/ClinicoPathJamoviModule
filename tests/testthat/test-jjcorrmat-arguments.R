@@ -3,14 +3,12 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(jjcorrmat_test)
 data(jjcorrmat_biomarker)
 data(jjcorrmat_labvalues)
 data(jjcorrmat_mixed)
 
 test_that("jjcorrmat respects all statistical type options", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -27,7 +25,6 @@ test_that("jjcorrmat respects all statistical type options", {
 })
 
 test_that("jjcorrmat respects all matrix type options", {
-  devtools::load_all()
 
   matrix_types <- c("upper", "lower", "full")
 
@@ -44,7 +41,6 @@ test_that("jjcorrmat respects all matrix type options", {
 })
 
 test_that("jjcorrmat respects all matrix method options", {
-  devtools::load_all()
 
   matrix_methods <- c("square", "circle")
 
@@ -61,7 +57,6 @@ test_that("jjcorrmat respects all matrix method options", {
 })
 
 test_that("jjcorrmat respects all p-value adjustment methods", {
-  devtools::load_all()
 
   adjust_methods <- c("holm", "none", "hochberg", "hommel", "bonferroni", "BH", "BY")
 
@@ -78,7 +73,6 @@ test_that("jjcorrmat respects all p-value adjustment methods", {
 })
 
 test_that("jjcorrmat respects missing data handling options", {
-  devtools::load_all()
 
   na_methods <- c("listwise", "pairwise")
 
@@ -95,7 +89,6 @@ test_that("jjcorrmat respects missing data handling options", {
 })
 
 test_that("jjcorrmat respects partial correlation option", {
-  devtools::load_all()
 
   # Without partial correlations
   result1 <- jjcorrmat(
@@ -115,7 +108,6 @@ test_that("jjcorrmat respects partial correlation option", {
 })
 
 test_that("jjcorrmat respects significance level parameter", {
-  devtools::load_all()
 
   sig_levels <- c(0.001, 0.01, 0.05, 0.10)
 
@@ -132,7 +124,6 @@ test_that("jjcorrmat respects significance level parameter", {
 })
 
 test_that("jjcorrmat respects confidence level parameter", {
-  devtools::load_all()
 
   conf_levels <- c(0.80, 0.90, 0.95, 0.99)
 
@@ -149,7 +140,6 @@ test_that("jjcorrmat respects confidence level parameter", {
 })
 
 test_that("jjcorrmat respects decimal places parameter", {
-  devtools::load_all()
 
   k_values <- c(0, 1, 2, 3, 4, 5)
 
@@ -166,7 +156,6 @@ test_that("jjcorrmat respects decimal places parameter", {
 })
 
 test_that("jjcorrmat respects custom color parameters", {
-  devtools::load_all()
 
   color_schemes <- list(
     list(low = "blue", mid = "white", high = "red"),
@@ -190,7 +179,6 @@ test_that("jjcorrmat respects custom color parameters", {
 })
 
 test_that("jjcorrmat respects custom title parameters", {
-  devtools::load_all()
 
   result <- jjcorrmat(
     data = jjcorrmat_test,
@@ -204,7 +192,6 @@ test_that("jjcorrmat respects custom title parameters", {
 })
 
 test_that("jjcorrmat respects plot dimension parameters", {
-  devtools::load_all()
 
   dimensions <- list(
     list(width = 300, height = 300),
@@ -226,7 +213,6 @@ test_that("jjcorrmat respects plot dimension parameters", {
 })
 
 test_that("jjcorrmat respects show explanations option", {
-  devtools::load_all()
 
   # Without explanations
   result1 <- jjcorrmat(
@@ -246,7 +232,6 @@ test_that("jjcorrmat respects show explanations option", {
 })
 
 test_that("jjcorrmat handles different variable counts", {
-  devtools::load_all()
 
   # 2 variables (minimum)
   result1 <- jjcorrmat(
@@ -280,7 +265,6 @@ test_that("jjcorrmat handles different variable counts", {
 })
 
 test_that("jjcorrmat handles combinations of matrix type and method", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     matrixtype = c("upper", "lower", "full"),
@@ -303,7 +287,6 @@ test_that("jjcorrmat handles combinations of matrix type and method", {
 })
 
 test_that("jjcorrmat handles combinations of statistical type and adjustment", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     typestatistics = c("parametric", "nonparametric", "robust"),
@@ -326,7 +309,6 @@ test_that("jjcorrmat handles combinations of statistical type and adjustment", {
 })
 
 test_that("jjcorrmat handles comprehensive argument combinations", {
-  devtools::load_all()
 
   result <- jjcorrmat(
     data = jjcorrmat_test,
@@ -355,7 +337,6 @@ test_that("jjcorrmat handles comprehensive argument combinations", {
 })
 
 test_that("jjcorrmat handles grouped analysis with different statistical types", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -373,7 +354,6 @@ test_that("jjcorrmat handles grouped analysis with different statistical types",
 })
 
 test_that("jjcorrmat handles grouped analysis with different matrix types", {
-  devtools::load_all()
 
   matrix_types <- c("upper", "lower", "full")
 
@@ -391,7 +371,6 @@ test_that("jjcorrmat handles grouped analysis with different matrix types", {
 })
 
 test_that("jjcorrmat handles partial correlations with different statistical types", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust")
 
@@ -409,7 +388,6 @@ test_that("jjcorrmat handles partial correlations with different statistical typ
 })
 
 test_that("jjcorrmat handles missing data with different adjustment methods", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     naHandling = c("listwise", "pairwise"),

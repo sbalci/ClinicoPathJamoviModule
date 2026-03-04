@@ -4,7 +4,7 @@ title: Scatter Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 
@@ -490,7 +490,7 @@ options:
 # Type of association between paired samples required (""parametric": Pearson's product moment correlation coefficient" or ""nonparametric": Spearman's rho" or ""robust": percentage bend correlation coefficient" or ""bayes": Bayes Factor for Pearson's r"). Corresponding abbreviations are also accepted: "p" (for parametric/pearson), "np" (nonparametric/spearman), "r" (robust), "bf" (for bayes factor), resp.
 #
 # conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+# Scalar between 0 and 1. If unspecified, the defaults return 95 percent confidence/credible intervals (0.95).
 #
 # bf.prior
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
@@ -539,7 +539,7 @@ options:
 # A list of additional aesthetic arguments to be passed to ggplot2::geom_point geom used to display the raw data points.
 #
 # point.width.jitter, point.height.jitter
-# Degree of jitter in x and y direction, respectively. Defaults to 0 (0%) of the resolution of the data. Note that the jitter should not be specified in the point.args because this information will be passed to two different geoms: one displaying the points and the other displaying the labels for these points.
+# Degree of jitter in x and y direction, respectively. Defaults to 0 (0 percent) of the resolution of the data. Note that the jitter should not be specified in the point.args because this information will be passed to two different geoms: one displaying the points and the other displaying the labels for these points.
 #
 # marginal
 # Decides whether ggExtra::ggMarginal() plots will be displayed; the default is TRUE.
@@ -654,10 +654,10 @@ options:
 # Decides whether ggExtra::ggMarginal() plots will be displayed; the default is TRUE.
 #
 # point.width.jitter
-# Degree of jitter in x and y direction, respectively. Defaults to 0 (0%) of the resolution of the data. Note that the jitter should not be specified in the point.args because this information will be passed to two different geoms: one displaying the points and the other displaying the labels for these points.
+# Degree of jitter in x and y direction, respectively. Defaults to 0 (0 percent) of the resolution of the data. Note that the jitter should not be specified in the point.args because this information will be passed to two different geoms: one displaying the points and the other displaying the labels for these points.
 #
 # point.height.jitter
-# Degree of jitter in x and y direction, respectively. Defaults to 0 (0%) of the resolution of the data. Note that the jitter should not be specified in the point.args because this information will be passed to two different geoms: one displaying the points and the other displaying the labels for these points.
+# Degree of jitter in x and y direction, respectively. Defaults to 0 (0 percent) of the resolution of the data. Note that the jitter should not be specified in the point.args because this information will be passed to two different geoms: one displaying the points and the other displaying the labels for these points.
 #
 # marginal.type
 # Type of marginal distribution to be plotted on the axes ("histogram", "boxplot", "density", "violin", "densigram").
@@ -675,7 +675,7 @@ options:
 # Type of association between paired samples required (""parametric": Pearson's product moment correlation coefficient" or ""nonparametric": Spearman's rho" or ""robust": percentage bend correlation coefficient" or ""bayes": Bayes Factor for Pearson's r"). Corresponding abbreviations are also accepted: "p" (for parametric/pearson), "np" (nonparametric/spearman), "r" (robust), "bf" (for bayes factor), resp.
 #
 # conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+# Scalar between 0 and 1. If unspecified, the defaults return 95 percent confidence/credible intervals (0.95).
 #
 # bf.prior
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.

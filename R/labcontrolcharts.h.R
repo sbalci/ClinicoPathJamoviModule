@@ -680,14 +680,15 @@ labcontrolchartsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' labcontrolcharts(
 #'     measurement = "glucose_value",
 #'     run_number = "run_id",
 #'     chart_type = "shewhart",
 #'     control_limits = "3sigma"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param measurement Laboratory measurement values to monitor
 #' @param run_number Sequential run number or time point identifier

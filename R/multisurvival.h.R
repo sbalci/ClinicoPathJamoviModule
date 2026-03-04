@@ -659,7 +659,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossaryPanel",
-                title="\uD83D\uDCD6 Statistical Glossary",
+                title=" Statistical Glossary",
                 visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -1215,7 +1215,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,
@@ -1240,6 +1240,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' influence event rates relative to the person-time at risk in each subgroup.
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: Basic multivariable Cox regression
 #' library(survival)
 #' data(colon)
@@ -1325,7 +1326,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     time_intervals = "180, 365, 730",  # 6mo, 1yr, 2yr
 #'     rate_multiplier = 1000  # Rate per 1000 person-days
 #' )
-#'
+#'}
 #' @param data The dataset to be analyzed, provided as a data frame. Must
 #'   contain the variables specified in the options below.
 #' @param elapsedtime The numeric variable representing follow-up time until
@@ -1390,8 +1391,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{timetypeoutput}) to display on survival plots.
 #' @param byplot The interval (in units defined by \code{timetypeoutput}) at
 #'   which time points or labels are shown on plots.
-#' @param ci95 If true, displays 95\% confidence intervals around the survival
-#'   estimates on plots.
+#' @param ci95 If true, displays 95 percent confidence intervals around the
+#'   survival estimates on plots.
 #' @param risktable If true, displays the number of subjects at risk at each
 #'   time point below the survival plot.
 #' @param censored If true, marks censored observations (e.g., using tick

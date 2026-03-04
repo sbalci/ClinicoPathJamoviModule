@@ -647,7 +647,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 <!-- Categorical Data Methods -->
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 20px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 15px 0; color: #333;'>📊 Categorical/Ordinal Data</h3>
+                    <h3 style='margin: 0 0 15px 0; color: #333;'> Categorical/Ordinal Data</h3>
 
                     <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>Cohen's/Fleiss' Kappa (Standard Method)</h4>
@@ -672,7 +672,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Fibrosis stage</strong> - F0, F1, F2, F3, F4</li>
                         </ul>
                         <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
-                            <strong>⚠️ Important:</strong> Use \"Show Level Ordering Information\" to verify proper ordering (e.g., F0 → F1 → F2 → F3 → F4)
+                            <strong> Important:</strong> Use \"Show Level Ordering Information\" to verify proper ordering (e.g., F0 → F1 → F2 → F3 → F4)
                         </p>
                     </div>
 
@@ -686,7 +686,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Quality control studies</strong> - Most cases straightforward, few difficult</li>
                         </ul>
                         <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
-                            <strong>💡 Tip:</strong> Run both Kappa and Gwet's AC - if they differ substantially, Gwet's AC is more reliable
+                            <strong> Tip:</strong> Run both Kappa and Gwet's AC - if they differ substantially, Gwet's AC is more reliable
                         </p>
                     </div>
 
@@ -703,7 +703,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 <!-- Continuous Data Methods -->
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 20px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 15px 0; color: #333;'>📏 Continuous/Numeric Data</h3>
+                    <h3 style='margin: 0 0 15px 0; color: #333;'> Continuous/Numeric Data</h3>
 
                     <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>ICC (Intraclass Correlation Coefficient)</h4>
@@ -717,7 +717,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Continuous scores</strong> - Visual analog scales (0-100)</li>
                         </ul>
                         <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
-                            <strong>📋 Model selection:</strong> Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists
+                            <strong> Model selection:</strong> Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists
                         </p>
                     </div>
 
@@ -731,14 +731,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Define acceptable limits</strong> - What range of disagreement is clinically acceptable?</li>
                         </ul>
                         <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
-                            <strong>✅ Best practice:</strong> Always use ICC + Bland-Altman together for continuous data
+                            <strong> Best practice:</strong> Always use ICC + Bland-Altman together for continuous data
                         </p>
                     </div>
                 </div>
 
                 <!-- Quick Decision Guide -->
                 <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 15px 0;'>🎯 Quick Decision Guide</h3>
+                    <h3 style='margin: 0 0 15px 0;'> Quick Decision Guide</h3>
                     <table style='width: 100%; background: white; color: #333; border-radius: 4px; overflow: hidden;'>
                         <tr style='background: #f8f9fa;'>
                             <th style='padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;'>Your Data Type</th>
@@ -769,7 +769,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 <!-- Sample Size Recommendations -->
                 <div style='margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid #333;'>
-                    <h4 style='margin: 0 0 10px 0; color: #333;'>📊 Sample Size Recommendations</h4>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'> Sample Size Recommendations</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>
                         <li><strong>Minimum:</strong> 30 cases for stable kappa/ICC estimates</li>
                         <li><strong>Recommended:</strong> 50-100 cases for categorical data, 30-50 for continuous</li>
@@ -2641,7 +2641,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </div>
 
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Considerations</h4>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'> Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Sample size:</strong> Minimum 30 paired observations; 100+ preferred for stable estimates</li>
                         <li><strong>Outliers:</strong> CCC is sensitive to outliers; investigate extreme values before analysis</li>
@@ -3052,8 +3052,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         # Determine if methods meet acceptability criteria
                         meets_criteria <- tdi_estimate <= acceptable_limit
                         acceptable_text <- ifelse(meets_criteria,
-                                                 "✓ Yes (Acceptable)",
-                                                 "✗ No (Not Acceptable)")
+                                                 " Yes (Acceptable)",
+                                                 " No (Not Acceptable)")
 
                         # Interpretation
                         if (meets_criteria) {
@@ -3470,7 +3470,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             html <- paste0(html, '<li>G1 diagonal: Dark (strong agreement on well-differentiated)</li>')
             html <- paste0(html, '<li>G3 diagonal: Dark (strong agreement on poorly-differentiated)</li>')
             html <- paste0(html, '<li>G2 diagonal: Light (poor agreement on moderately-differentiated)</li>')
-            html <- paste0(html, '<li>G2↔G1 and G2↔G3 cells: Moderately dark (G2 confused with both)</li>')
+            html <- paste0(html, '<li>G2G1 and G2G3 cells: Moderately dark (G2 confused with both)</li>')
             html <- paste0(html, '</ul>')
             html <- paste0(html, '<p><strong>Interpretation:</strong> Raters agree on extreme grades but have difficulty ',
                           'with intermediate grade 2. The G2 category is ambiguous and problematic.</p>')
@@ -3496,7 +3496,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             html <- paste0(html, '<li>0 diagonal: Very dark (excellent agreement on negative cases)</li>')
             html <- paste0(html, '<li>3+ diagonal: Very dark (excellent agreement on strong positive)</li>')
             html <- paste0(html, '<li>1+ and 2+ diagonal: Light (poor agreement on intermediate categories)</li>')
-            html <- paste0(html, '<li>2+↔1+ and 2+↔3+ cells: Both dark (2+ confused with neighbors)</li>')
+            html <- paste0(html, '<li>2+1+ and 2+3+ cells: Both dark (2+ confused with neighbors)</li>')
             html <- paste0(html, '</ul>')
             html <- paste0(html, '<p><strong>Interpretation:</strong> Excellent agreement on clinically critical categories ',
                           '(0 = no treatment, 3+ = treatment), but poor agreement on equivocal 2+ which requires FISH testing.</p>')
@@ -3754,7 +3754,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </div>
 
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Interpretation Notes</h4>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'> Important Interpretation Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Distribution differences ≠ poor agreement:</strong> Raters can have different distributions
                             but still agree well on relative rankings</li>
@@ -3803,7 +3803,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </table>
 
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #333;'>✓ Best Practices</h4>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'> Best Practices</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Use alongside agreement statistics (kappa/ICC) - not a replacement</li>
                         <li>Violin plots better than box plots for detecting bimodality and distribution shape</li>
@@ -4886,7 +4886,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </div>
 
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Considerations</h4>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'> Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Data requirements:</strong> Requires 2+ raters/methods with repeated or paired measurements</li>
                         <li><strong>Interpretation context:</strong> RE alone doesn't indicate good/bad reliability - must consider
@@ -5300,7 +5300,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </div>
 
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Considerations</h4>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'> Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Blinding:</strong> Raters should be blinded to their previous assessments to measure true reproducibility</li>
                         <li><strong>Time interval:</strong> Balance between too short (memory effects) and too long (true biological changes)</li>
@@ -5792,10 +5792,10 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Relationship to Agreement Measures</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         Rater bias is <strong>independent from agreement</strong>. You can have:<br><br>
-                        ✅ <strong>High agreement + No bias:</strong> Ideal situation<br>
-                        ⚠️ <strong>High agreement + Bias:</strong> All raters systematically lenient/strict together<br>
-                        ⚠️ <strong>Low agreement + No bias:</strong> Random disagreement but no systematic patterns<br>
-                        ❌ <strong>Low agreement + Bias:</strong> Both random and systematic errors present
+                         <strong>High agreement + No bias:</strong> Ideal situation<br>
+                         <strong>High agreement + Bias:</strong> All raters systematically lenient/strict together<br>
+                         <strong>Low agreement + No bias:</strong> Random disagreement but no systematic patterns<br>
+                         <strong>Low agreement + Bias:</strong> Both random and systematic errors present
                     </p>
                 </div>
 
@@ -6054,9 +6054,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     <p style='margin: 0; font-size: 13px;'>
                         Use Bhapkar test <strong>together with</strong>:<br><br>
 
-                        ✅ <strong>Cohen's Kappa:</strong> Measures agreement (Bhapkar tests marginal homogeneity)<br>
-                        ✅ <strong>Confusion matrix:</strong> Shows specific disagreement patterns<br>
-                        ✅ <strong>Marginal frequency tables:</strong> Identify which categories differ most<br><br>
+                         <strong>Cohen's Kappa:</strong> Measures agreement (Bhapkar tests marginal homogeneity)<br>
+                         <strong>Confusion matrix:</strong> Shows specific disagreement patterns<br>
+                         <strong>Marginal frequency tables:</strong> Identify which categories differ most<br><br>
 
                         <strong>Ideal scenario:</strong> High kappa (good agreement) + Non-significant Bhapkar (no bias)
                     </p>
@@ -6334,10 +6334,10 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     <p style='margin: 0; font-size: 13px;'>
                         <strong>Complementary analyses:</strong><br><br>
 
-                        ✅ <strong>Cohen's Kappa:</strong> Measures agreement (Stuart-Maxwell tests marginal distributions)<br>
-                        ✅ <strong>Contingency table:</strong> Shows exact disagreement patterns cell-by-cell<br>
-                        ✅ <strong>McNemar-Bowker:</strong> Provides cell-by-cell symmetry test<br>
-                        ✅ <strong>Marginal frequency comparison:</strong> Identifies which categories differ most<br><br>
+                         <strong>Cohen's Kappa:</strong> Measures agreement (Stuart-Maxwell tests marginal distributions)<br>
+                         <strong>Contingency table:</strong> Shows exact disagreement patterns cell-by-cell<br>
+                         <strong>McNemar-Bowker:</strong> Provides cell-by-cell symmetry test<br>
+                         <strong>Marginal frequency comparison:</strong> Identifies which categories differ most<br><br>
 
                         <strong>Ideal outcome:</strong> High kappa (good agreement) + Non-significant Stuart-Maxwell
                         (no systematic bias in category usage)
@@ -6513,22 +6513,22 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>κ < 0.40</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor to fair</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>⚠️ Needs significant training</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Needs significant training</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40-0.60</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>⚠️ Additional training recommended</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Additional training recommended</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.60-0.75</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>✅ Acceptable performance</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Acceptable performance</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px;'><strong>κ > 0.75</strong></td>
                             <td style='padding: 8px;'>Excellent</td>
-                            <td style='padding: 8px;'>✅ Certified/Expert level</td>
+                            <td style='padding: 8px;'> Certified/Expert level</td>
                         </tr>
                     </table>
                 </div>
@@ -6565,11 +6565,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         <strong>Scenario:</strong> Five pathology residents (Raters 1-5) grade 100 tumor samples.
                         A senior pathologist provides reference diagnoses.<br><br>
                         <strong>Results:</strong><br>
-                        • Resident 1: κ = 0.82 (Excellent) ✅ Ready for certification<br>
-                        • Resident 2: κ = 0.68 (Substantial) ✅ Acceptable, continue monitoring<br>
-                        • Resident 3: κ = 0.52 (Moderate) ⚠️ Additional training needed<br>
-                        • Resident 4: κ = 0.45 (Moderate) ⚠️ Review difficult cases with expert<br>
-                        • Resident 5: κ = 0.28 (Poor) ❌ Requires intensive retraining<br><br>
+                        • Resident 1: κ = 0.82 (Excellent)  Ready for certification<br>
+                        • Resident 2: κ = 0.68 (Substantial)  Acceptable, continue monitoring<br>
+                        • Resident 3: κ = 0.52 (Moderate)  Additional training needed<br>
+                        • Resident 4: κ = 0.45 (Moderate)  Review difficult cases with expert<br>
+                        • Resident 5: κ = 0.28 (Poor)  Requires intensive retraining<br><br>
                         <strong>Action:</strong> Residents 1-2 certified. Residents 3-5 receive targeted training
                         based on specific error patterns, then retest after 3 months.
                     </p>
@@ -6580,9 +6580,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     <p style='margin: 0; font-size: 13px;'>
                         When <strong>Rank Raters by Performance</strong> is enabled, raters are sorted from highest
                         to lowest kappa. This identifies:<br><br>
-                        ✅ <strong>Top performers:</strong> Candidates for senior roles, teaching positions, or gold standard rating<br>
-                        ⚠️ <strong>Middle performers:</strong> Acceptable but could benefit from continued training<br>
-                        ❌ <strong>Low performers:</strong> Require immediate intervention or exclusion from study
+                         <strong>Top performers:</strong> Candidates for senior roles, teaching positions, or gold standard rating<br>
+                         <strong>Middle performers:</strong> Acceptable but could benefit from continued training<br>
+                         <strong>Low performers:</strong> Require immediate intervention or exclusion from study
                     </p>
                 </div>
 
@@ -7446,7 +7446,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                     if (is_ordered) {
                         data_type <- "Ordinal (ordered factor)"
-                        note <- "✓ Suitable for weighted kappa"
+                        note <- " Suitable for weighted kappa"
                     } else {
                         data_type <- "Nominal (unordered factor)"
                         note <- "Use unweighted kappa or convert to ordinal"

@@ -255,7 +255,7 @@ options:
       default: errorbar
 
     - name: showCI
-      title: Show 95% Confidence Interval
+      title: Show 95 percent Confidence Interval
       type: Bool
       default: false
 

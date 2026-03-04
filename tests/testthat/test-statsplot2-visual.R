@@ -3,7 +3,6 @@
 # Validates that all 8 dispatch paths render correctly
 
 library(testthat)
-devtools::load_all()
 
 # Helper function to check if vdiffr is installed
 skip_if_not_installed_vdiffr <- function() {
@@ -44,7 +43,6 @@ context("statsplot2 - Dispatch Path Visual Tests")
 
 test_that("Path 1: Independent Factor × Continuous renders ggbetweenstats", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   skip_if_not_installed_vdiffr()
   skip_if_not_installed_ggstatsplot()
 

@@ -855,6 +855,7 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- grouplasso(
 #'     data = mydata,
 #'     time = "time_to_event",
@@ -864,7 +865,7 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     penalty_type = "group_lasso",
 #'     cv_folds = 10
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

@@ -61,7 +61,7 @@ or exclude  (depending on selection method). Leave blank to use all
 coefficients.}
 
 \item{ci_level}{Confidence level for coefficient confidence intervals
-(e.g., 0.95 for 95\\% CI).}
+(e.g., 0.95 for 95 percent CI).}
 
 \item{inner_ci_level}{Optional inner confidence interval for enhanced
 visualization. Set to 0 to disable inner CI. Common values are 0.8 or 0.9.}

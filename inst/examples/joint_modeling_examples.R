@@ -4,7 +4,7 @@
 
 # Load required packages
 suppressPackageStartupMessages({
-  devtools::load_all()
+  library(ClinicoPath)
   library(dplyr)
   library(ggplot2)
   library(survival)

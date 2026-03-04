@@ -7,7 +7,6 @@ context("test-jjhistostats-correctness")
 # 3. Default test.value warning (testing mean = 0 is rarely relevant)
 # 4. Overall functionality across statistical methods
 
-devtools::load_all()
 
 # ============================================================================
 # SELECTIVE NA OMISSION TESTS
@@ -15,7 +14,6 @@ devtools::load_all()
 
 test_that("jjhistostats uses selective NA omission, not global", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create data with NAs in different columns
   data_with_nas <- data.frame(
     biomarker = rnorm(100, mean = 50, sd = 10),

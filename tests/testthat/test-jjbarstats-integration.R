@@ -8,7 +8,6 @@
 library(testthat)
 
 test_that("jjbarstats integrates with test datasets", {
-  devtools::load_all()
 
   # Test comprehensive dataset loads
   data(jjbarstats_test, package = "ClinicoPath")
@@ -33,7 +32,6 @@ test_that("jjbarstats integrates with test datasets", {
 })
 
 test_that("jjbarstats test datasets have proper structure", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -52,7 +50,6 @@ test_that("jjbarstats test datasets have proper structure", {
 })
 
 test_that("jjbarstats scenario: Clinical trial response analysis", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -74,7 +71,6 @@ test_that("jjbarstats scenario: Clinical trial response analysis", {
 })
 
 test_that("jjbarstats scenario: Diagnostic test validation", {
-  devtools::load_all()
 
   data(jjbarstats_diagnostic)
 
@@ -94,7 +90,6 @@ test_that("jjbarstats scenario: Diagnostic test validation", {
 })
 
 test_that("jjbarstats scenario: Treatment effect over time (paired)", {
-  devtools::load_all()
 
   data(jjbarstats_paired)
 
@@ -112,7 +107,6 @@ test_that("jjbarstats scenario: Treatment effect over time (paired)", {
 })
 
 test_that("jjbarstats scenario: Biomarker expression by subtype", {
-  devtools::load_all()
 
   data(jjbarstats_biomarker)
 
@@ -131,7 +125,6 @@ test_that("jjbarstats scenario: Biomarker expression by subtype", {
 })
 
 test_that("jjbarstats scenario: Risk factor association", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -150,7 +143,6 @@ test_that("jjbarstats scenario: Risk factor association", {
 })
 
 test_that("jjbarstats scenario: Subgroup analysis by demographics", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -176,7 +168,6 @@ test_that("jjbarstats scenario: Subgroup analysis by demographics", {
 })
 
 test_that("jjbarstats scenario: Disease severity stratification", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -194,7 +185,6 @@ test_that("jjbarstats scenario: Disease severity stratification", {
 })
 
 test_that("jjbarstats scenario: Comorbidity impact analysis", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -212,7 +202,6 @@ test_that("jjbarstats scenario: Comorbidity impact analysis", {
 })
 
 test_that("jjbarstats scenario: Multiple biomarker analysis", {
-  devtools::load_all()
 
   data(jjbarstats_biomarker)
 
@@ -242,7 +231,6 @@ test_that("jjbarstats scenario: Multiple biomarker analysis", {
 })
 
 test_that("jjbarstats scenario: Treatment comparison by subgroups", {
-  devtools::load_all()
 
   data(jjbarstats_paired)
 
@@ -258,7 +246,6 @@ test_that("jjbarstats scenario: Treatment comparison by subgroups", {
 })
 
 test_that("jjbarstats scenario: Aggregated clinical trial data", {
-  devtools::load_all()
 
   data(jjbarstats_aggregated)
 
@@ -276,7 +263,6 @@ test_that("jjbarstats scenario: Aggregated clinical trial data", {
 })
 
 test_that("jjbarstats scenario: Bayesian evidence assessment", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -293,7 +279,6 @@ test_that("jjbarstats scenario: Bayesian evidence assessment", {
 })
 
 test_that("jjbarstats scenario: Fisher's exact test for small samples", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   small_sample <- jjbarstats_test[1:25, ]
@@ -310,7 +295,6 @@ test_that("jjbarstats scenario: Fisher's exact test for small samples", {
 })
 
 test_that("jjbarstats scenario: Proportion test with expected ratios", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -328,7 +312,6 @@ test_that("jjbarstats scenario: Proportion test with expected ratios", {
 })
 
 test_that("jjbarstats works with filtered data", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -346,7 +329,6 @@ test_that("jjbarstats works with filtered data", {
 })
 
 test_that("jjbarstats works with subsetted data", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -367,7 +349,6 @@ test_that("jjbarstats works with CSV imported data", {
   skip_if_not(file.exists("data/jjbarstats_test.csv"),
               "CSV test file not available")
 
-  devtools::load_all()
 
   # Read from CSV
   csv_data <- read.csv("data/jjbarstats_test.csv", stringsAsFactors = TRUE)
@@ -387,7 +368,6 @@ test_that("jjbarstats works with OMV imported data", {
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
-  devtools::load_all()
 
   # Read from OMV
   omv_data <- jmvReadWrite::read_omv("data/jjbarstats_test.omv")
@@ -402,7 +382,6 @@ test_that("jjbarstats works with OMV imported data", {
 })
 
 test_that("jjbarstats preserves data integrity", {
-  devtools::load_all()
 
   data(jjbarstats_test)
   original_data <- jjbarstats_test
@@ -419,7 +398,6 @@ test_that("jjbarstats preserves data integrity", {
 })
 
 test_that("jjbarstats handles multiple consecutive analyses", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -449,7 +427,6 @@ test_that("jjbarstats handles multiple consecutive analyses", {
 })
 
 test_that("jjbarstats handles comprehensive multi-outcome report", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 

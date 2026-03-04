@@ -8,7 +8,6 @@ source("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/patientsim
 
 test_that("Reproducibility works with seed", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     if (!requireNamespace("umap", quietly = TRUE)) skip("umap package required")
     data(iris)
     # Use a mixed subset for complexity (Setosa, Versicolor, Virginica)

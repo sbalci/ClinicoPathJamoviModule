@@ -84,6 +84,7 @@ Informative than the ROC Plot When Evaluating Binary Classifiers on
 Imbalanced Datasets." PLoS ONE 10(3): e0118432.
 }
 \examples{
+\donttest{
 # Basic PRC curve
 precisionrecall(data = mydata, outcome = 'disease', score = 'biomarker')
 
@@ -91,5 +92,5 @@ precisionrecall(data = mydata, outcome = 'disease', score = 'biomarker')
 precisionrecall(data = mydata, outcome = 'disease',
                scores = c('model1', 'model2', 'model3'),
                comparison = TRUE)
-
+}
 }

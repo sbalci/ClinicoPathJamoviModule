@@ -8,7 +8,7 @@ ppv(percTrue = 50, alpha = 0.05, power = 0.8, percHack = 0)
 }
 \arguments{
 \item{percTrue}{The pre-study probability that the tested relationships are
-true. In exploratory research fields, this may be 10\\% or lower. In
+true. In exploratory research fields, this may be 10 percent or lower. In
 confirmatory research with strong theoretical basis, it may be higher.}
 
 \item{alpha}{The significance level (Type I error rate) used in the
@@ -16,8 +16,8 @@ studies. Standard value is 0.05, but may be lower for multiple testing
 situations.}
 
 \item{power}{Statistical power of the studies to detect true effects.
-Well-designed studies typically have 80\\% power or higher. Many published
-studies have much lower actual power.}
+Well-designed studies typically have 80 percent power or higher. Many
+published studies have much lower actual power.}
 
 \item{percHack}{Percentage of studies with questionable research practices
 (p-hacking, selective reporting, data dredging). This represents bias in
@@ -45,12 +45,13 @@ actually true, considering factors like prior probability, statistical
 power, and research biases.
 }
 \examples{
+\donttest{
 # Calculate PPV for a typical medical research scenario
 ppv(
-    percTrue = 10,    # 10\\% of tested hypotheses are true
-    alpha = 0.05,     # 5\\% significance level
-    power = 0.80,     # 80\\% power
-    percHack = 30     # 30\\% of studies have some bias
+    percTrue = 10,    # 10 percent of tested hypotheses are true
+    alpha = 0.05,     # 5 percent significance level
+    power = 0.80,     # 80 percent power
+    percHack = 30     # 30 percent of studies have some bias
 )
-
+}
 }

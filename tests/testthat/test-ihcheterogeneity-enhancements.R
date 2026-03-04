@@ -2,7 +2,6 @@ context("ihcheterogeneity enhancements")
 
 test_that("escapeVar handles variables with special characters", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Load test data
   test_data <- read.csv(system.file("data", "ihc_heterogeneity_test.csv",
                                     package = "ClinicoPath"))

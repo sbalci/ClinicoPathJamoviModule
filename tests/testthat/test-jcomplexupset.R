@@ -1,6 +1,5 @@
 test_that("jcomplexupset works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Load test data
   data("jcomplexupset_test_data")

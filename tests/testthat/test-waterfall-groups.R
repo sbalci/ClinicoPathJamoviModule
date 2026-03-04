@@ -1,7 +1,6 @@
 # Tests for group-based colouring options in waterfall analysis
 
 library(testthat)
-devtools::load_all()
 
 set.seed(123)
 test_data <- data.frame(
@@ -13,7 +12,6 @@ test_data <- data.frame(
 
 test_that("waterfall handles default RECIST colouring", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   result <- suppressMessages(
     waterfall(
       data = test_data,

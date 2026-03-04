@@ -15,7 +15,7 @@ description:
         Multiple modeling approaches are supported including Aalen additive models, 
         Cox-Aalen hybrid models, and dynamic regression with time-updated coefficients.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # example will be added
 

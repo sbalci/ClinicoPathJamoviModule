@@ -6,7 +6,6 @@
 # (Groome Staging System Comparison using 2001 criteria)
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(groomecompare_test, package = "ClinicoPath")

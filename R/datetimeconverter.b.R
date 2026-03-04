@@ -56,10 +56,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Map notice types to colors and icons
             typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
-                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
-                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
             )
 
             html <- "<div style='margin: 10px 0;'>"
@@ -821,10 +821,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.na(original[i])) {
                 status <- "<span style='color: #6c757d;'>-</span>"
             } else if (is.na(parsed[i])) {
-                status <- "<span style='color: #dc3545;'>✗</span>"
+                status <- "<span style='color: #dc3545;'></span>"
                 row_bg <- "#ffebee"
             } else {
-                status <- "<span style='color: #28a745;'>✓</span>"
+                status <- "<span style='color: #28a745;'></span>"
             }
 
                 table_html <- paste0(table_html,
@@ -952,7 +952,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             quality_html <- glue::glue("
                 <div style='background-color: #f0f7ff; padding: 15px; border-left: 4px solid #2196F3;'>
-                    <h4 style='margin-top: 0; color: #1565c0;'>📊 Data Quality Assessment</h4>
+                    <h4 style='margin-top: 0; color: #1565c0;'> Data Quality Assessment</h4>
 
                     <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
                         <tr style='background-color: #e3f2fd;'>
@@ -983,7 +983,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </table>
 
                     <p style='margin-top: 10px;'><strong>Quality Score:</strong> {quality_summary}</p>
-                    {if (length(misuse_warnings) > 0) paste0('<div style=\"background-color: #fff3cd; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong>⚠️ Warnings:</strong><ul>', paste0('<li>', misuse_warnings, '</li>', collapse=''), '</ul></div>') else ''}
+                    {if (length(misuse_warnings) > 0) paste0('<div style=\"background-color: #fff3cd; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong> Warnings:</strong><ul>', paste0('<li>', misuse_warnings, '</li>', collapse=''), '</ul></div>') else ''}
                 </div>
             ")
 
@@ -1022,7 +1022,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             summary_html <- glue::glue("
                 <div style='background-color: #f0f7ff; padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px;'>
-                    <h4 style='margin-top: 0;'>📄 Analysis Summary</h4>
+                    <h4 style='margin-top: 0;'> Analysis Summary</h4>
                     <p><strong>Source column:</strong> {datetime_var}</p>
                     <p><strong>Format detected/used:</strong> {detected_format}</p>
                     <p><strong>Timezone:</strong> {tz_display}</p>
@@ -1030,7 +1030,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <p><strong>Components extracted:</strong> {extraction_text}</p>
 
                     <div style='background-color: #e8f4f8; padding: 10px; margin-top: 15px; border-radius: 3px;'>
-                        <p style='margin: 0;'><strong>📋 Copy-Ready Summary:</strong></p>
+                        <p style='margin: 0;'><strong> Copy-Ready Summary:</strong></p>
                         <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>
                         We extracted {extraction_text} from {quality$total_observations} datetime values in column '{datetime_var}' using {detected_format} format, with {round(quality$success_rate, 1)}% successful parsing.
                         </p>
@@ -1050,7 +1050,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # About Panel
             about_html <- "
             <div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px;'>
-                <h4 style='margin-top: 0;'>📖 What This Function Does</h4>
+                <h4 style='margin-top: 0;'> What This Function Does</h4>
                 <p>The DateTime Converter extracts components (year, month, day, hour, etc.)
                 from datetime columns and creates new variables for downstream analysis.</p>
 
@@ -1080,7 +1080,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Caveats Panel
             caveats_html <- "
             <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 3px;'>
-                <h4 style='margin-top: 0;'>⚠️ Important Considerations</h4>
+                <h4 style='margin-top: 0;'> Important Considerations</h4>
                 <ul>
                     <li><strong>Format matching:</strong> Date format selection must match your data.
                     Incorrect format leads to parsing failures or wrong dates.</li>
@@ -1091,10 +1091,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Numeric datetime (Unix epoch):</strong> The corrected datetime numeric output
                     represents seconds since 1970-01-01 00:00:00 UTC. This value is:
                         <ul>
-                            <li>✅ OS-independent (same on Windows, Mac, Linux)</li>
-                            <li>✅ Timezone-independent (same datetime = same number)</li>
-                            <li>✅ Suitable for calculations and comparisons</li>
-                            <li>⚠️ Very large numbers (billions) - use scientific notation if needed</li>
+                            <li> OS-independent (same on Windows, Mac, Linux)</li>
+                            <li> Timezone-independent (same datetime = same number)</li>
+                            <li> Suitable for calculations and comparisons</li>
+                            <li> Very large numbers (billions) - use scientific notation if needed</li>
                         </ul>
                     </li>
 
@@ -1115,7 +1115,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     but be aware when working with precise time calculations.</li>
                 </ul>
 
-                <p style='margin-top: 15px;'><strong>💡 Best Practice:</strong> Always review the
+                <p style='margin-top: 15px;'><strong> Best Practice:</strong> Always review the
                 Quality Assessment and Preview tables before adding columns to your dataset.</p>
             </div>
             "
@@ -1130,7 +1130,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             glossary_html <- "
             <div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px;'>
-                <h4 style='margin-top: 0;'>📚 Key Terms & Concepts</h4>
+                <h4 style='margin-top: 0;'> Key Terms & Concepts</h4>
                 <dl style='line-height: 1.6;'>
                     <dt style='font-weight: bold; margin-top: 10px;'>Excel Serial Date</dt>
                     <dd style='margin-left: 20px;'>Number of days since January 1, 1900 (Windows) or
@@ -1230,7 +1230,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$datetime_var) || self$options$datetime_var == "") {
                 welcome_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #1976d2; margin-top: 0;'>📅 Welcome to DateTime Converter!</h3>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to DateTime Converter!</h3>
                 <p><strong>Convert datetime variables and extract components for analysis</strong></p>
 
                 <h4 style='color: #1976d2;'>Quick Start:</h4>
@@ -1259,7 +1259,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 </ul>
 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Perfect for preparing temporal data for survival analysis, time series, and longitudinal studies</em>
+                 <em>Perfect for preparing temporal data for survival analysis, time series, and longitudinal studies</em>
                 </p>
                 </div>"
 

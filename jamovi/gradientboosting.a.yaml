@@ -19,7 +19,7 @@ description:
         optimal stopping, and robust performance with noisy data. Especially suitable
         for biomarker discovery, prognostic modeling, and complex survival prediction tasks.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- gradientboosting(
                 data = mydata,

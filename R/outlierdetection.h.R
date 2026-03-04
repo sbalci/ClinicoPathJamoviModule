@@ -270,7 +270,7 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "outlierdetection",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = outlierdetectionResults$new(options=options),
                 data = data,
@@ -323,17 +323,17 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   Default 0.5 means observations  classified as outliers by at least half of
 #'   the methods are considered outliers.
 #' @param zscore_threshold Threshold for Z-score based methods. CLINICAL
-#'   EXAMPLES: 3.0 = 99.7\% confidence (standard screening for most lab values),
-#'   3.29 = 99.9\% confidence (stringent, for critical values like cardiac
-#'   enzymes), 2.5 = 98.8\% confidence (sensitive detection for research).
-#'   Recommended: 3.29 for clinical quality control.
+#'   EXAMPLES: 3.0 = 99.7 percent confidence (standard screening for most lab
+#'   values), 3.29 = 99.9 percent confidence (stringent, for critical values
+#'   like cardiac enzymes), 2.5 = 98.8 percent confidence (sensitive detection
+#'   for research). Recommended: 3.29 for clinical quality control.
 #' @param iqr_multiplier Multiplier for IQR-based outlier detection. CLINICAL
-#'   EXAMPLES: 1.5 = Tukey's standard (sensitive, may flag ~0.7\% of normal
-#'   data), 1.7 = conservative (recommended for clinical screening), 2.0 = very
-#'   conservative (for critical biomarkers). Useful for non-normal distributions
-#'   common in clinical data.
+#'   EXAMPLES: 1.5 = Tukey's standard (sensitive, may flag ~0.7 percent of
+#'   normal data), 1.7 = conservative (recommended for clinical screening), 2.0
+#'   = very conservative (for critical biomarkers). Useful for non-normal
+#'   distributions common in clinical data.
 #' @param confidence_level Confidence level for interval-based methods (ETI,
-#'   HDI). Default 99.9\% identifies the most extreme observations.
+#'   HDI). Default 99.9 percent identifies the most extreme observations.
 #' @param show_outlier_table Display a comprehensive table of outlier
 #'   detection results including outlier scores, distances, and classification
 #'   for each observation.

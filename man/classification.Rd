@@ -111,8 +111,8 @@ intervals.}
 \item{reportClinicalMetrics}{Report sensitivity, specificity, PPV, NPV, and
 likelihood ratios.}
 
-\item{reportConfidenceIntervals}{Include 95\\% confidence intervals for
-clinical metrics.}
+\item{reportConfidenceIntervals}{Include 95 percent confidence intervals
+for clinical metrics.}
 
 \item{reportMCC}{Calculate Matthews Correlation Coefficient (MCC), a
 balanced metric for imbalanced datasets. MCC ranges from -1 (perfect

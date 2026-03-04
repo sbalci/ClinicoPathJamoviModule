@@ -16,7 +16,6 @@ psychopdaROC <- function(...) {
 # Basic Tests: psychopdaROC
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(psychopdaROC_test, package = "ClinicoPath")
 data(psychopdaROC_screening, package = "ClinicoPath")
 data(psychopdaROC_cardiac, package = "ClinicoPath")

@@ -1,11 +1,9 @@
 # Integration tests for pcaloadingtest module
 # Tests the permV permutation test implementation
 
-devtools::load_all()
 
 test_that("permV permutation test is mathematically sound", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
 
     # Create test data with known structure

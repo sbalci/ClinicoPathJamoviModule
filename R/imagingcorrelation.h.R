@@ -778,6 +778,7 @@ imagingcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinicaldata', package='ClinicoPath')
 #'
 #' # Basic imaging correlation analysis
@@ -787,7 +788,7 @@ imagingcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'                  clinicalVars = c('Symptoms', 'Signs'),
 #'                  correlation_analysis = TRUE,
 #'                  concordance_assessment = TRUE)
-#'
+#'}
 #' @param data .
 #' @param imagingFindings Imaging findings from various modalities (CT, MRI,
 #'   PET, ultrasound, X-ray)

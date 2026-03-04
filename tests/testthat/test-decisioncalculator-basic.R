@@ -6,7 +6,6 @@
 # decisioncalculator (Medical Decision Calculator) jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(decisioncalculator_scenarios, package = "ClinicoPath")

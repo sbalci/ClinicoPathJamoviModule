@@ -35,7 +35,7 @@ majority population.}
 event_type variable.}
 
 \item{frequency_threshold}{Maximum frequency to consider an event as "rare"
-(default 5\\%).}
+(default 5 percent).}
 
 \item{calculate_nnd}{Calculate distances between each rare event and its
 nearest neighbor.}

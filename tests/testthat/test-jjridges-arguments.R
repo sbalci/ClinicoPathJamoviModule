@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(jjridges_test, package = "ClinicoPath", envir = environment())
@@ -19,7 +18,6 @@ data(jjridges_treatment, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges combines plot types with scale values", {
-  devtools::load_all()
 
   plot_types <- c("ridgeline", "density_ridges", "density_ridges_gradient", "histogram_ridges", "violin_ridges")
   scales <- c(0.5, 1.0, 2.0)
@@ -44,7 +42,6 @@ test_that("jjridges combines plot types with scale values", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges combines boxplot with quantiles", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -59,7 +56,6 @@ test_that("jjridges combines boxplot with quantiles", {
 })
 
 test_that("jjridges combines mean and median lines", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -73,7 +69,6 @@ test_that("jjridges combines mean and median lines", {
 })
 
 test_that("jjridges combines points with boxplot", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -88,7 +83,6 @@ test_that("jjridges combines points with boxplot", {
 })
 
 test_that("jjridges combines all advanced features", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -109,7 +103,6 @@ test_that("jjridges combines all advanced features", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges combines parametric test with Cohen's d", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -124,7 +117,6 @@ test_that("jjridges combines parametric test with Cohen's d", {
 })
 
 test_that("jjridges combines nonparametric test with Cliff's Delta", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -139,7 +131,6 @@ test_that("jjridges combines nonparametric test with Cliff's Delta", {
 })
 
 test_that("jjridges combines robust test with Hedge's g", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_clinical,
@@ -154,7 +145,6 @@ test_that("jjridges combines robust test with Hedge's g", {
 })
 
 test_that("jjridges handles p-value adjustments with statistics", {
-  devtools::load_all()
 
   # Bonferroni
   result_bonf <- jjridges(
@@ -184,7 +174,6 @@ test_that("jjridges handles p-value adjustments with statistics", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges combines fill and facet variables", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -198,7 +187,6 @@ test_that("jjridges combines fill and facet variables", {
 })
 
 test_that("jjridges handles fill with legend options", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -217,7 +205,6 @@ test_that("jjridges handles fill with legend options", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges combines themes with palettes", {
-  devtools::load_all()
 
   themes <- c("theme_ridges", "theme_minimal", "theme_classic", "theme_pubr")
   palettes <- c("clinical_colorblind", "viridis", "Set1")
@@ -242,7 +229,6 @@ test_that("jjridges combines themes with palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges combines density gradient with statistical comparisons", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -259,7 +245,6 @@ test_that("jjridges combines density gradient with statistical comparisons", {
 })
 
 test_that("jjridges combines histogram with quantiles", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -275,7 +260,6 @@ test_that("jjridges combines histogram with quantiles", {
 })
 
 test_that("jjridges combines violin with boxplot", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -293,7 +277,6 @@ test_that("jjridges combines violin with boxplot", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges combines sample size with statistics", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_test,
@@ -312,7 +295,6 @@ test_that("jjridges combines sample size with statistics", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles complete clinical laboratory analysis", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_clinical,
@@ -342,7 +324,6 @@ test_that("jjridges handles complete clinical laboratory analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles complete biomarker analysis", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_biomarker,
@@ -371,7 +352,6 @@ test_that("jjridges handles complete biomarker analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles complete treatment response analysis", {
-  devtools::load_all()
 
   result <- jjridges(
     data = jjridges_treatment,
@@ -400,7 +380,6 @@ test_that("jjridges handles complete treatment response analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles minimal configuration", {
-  devtools::load_all()
 
   result_min <- jjridges(
     data = jjridges_test,
@@ -412,7 +391,6 @@ test_that("jjridges handles minimal configuration", {
 })
 
 test_that("jjridges handles maximum configuration", {
-  devtools::load_all()
 
   result_max <- jjridges(
     data = jjridges_test,
@@ -455,7 +433,6 @@ test_that("jjridges handles maximum configuration", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges produces consistent results across plot types", {
-  devtools::load_all()
 
   plot_types <- c("ridgeline", "density_ridges", "density_ridges_gradient", "histogram_ridges", "violin_ridges")
 
@@ -477,7 +454,6 @@ test_that("jjridges produces consistent results across plot types", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges produces consistent results across statistical tests", {
-  devtools::load_all()
 
   test_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -499,7 +475,6 @@ test_that("jjridges produces consistent results across statistical tests", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges handles progressive feature addition", {
-  devtools::load_all()
 
   # Step 1: Minimal
   result1 <- jjridges(
@@ -574,7 +549,6 @@ test_that("jjridges handles progressive feature addition", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjridges applies clinical presets appropriately", {
-  devtools::load_all()
 
   # Biomarker distribution preset
   result_biomarker <- jjridges(

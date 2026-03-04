@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(jjpiestats_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jjpiestats_aggregated, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats combines statistical tests with grouping", {
-  devtools::load_all()
 
   # Parametric + group
   result_param <- jjpiestats(
@@ -55,7 +53,6 @@ test_that("jjpiestats combines statistical tests with grouping", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats combines statistical tests with split variable", {
-  devtools::load_all()
 
   # Parametric + split
   result1 <- jjpiestats(
@@ -81,7 +78,6 @@ test_that("jjpiestats combines statistical tests with split variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles group and split variables together", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -99,7 +95,6 @@ test_that("jjpiestats handles group and split variables together", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats combines labels with display options", {
-  devtools::load_all()
 
   # Percentage labels + subtitle
   result1 <- jjpiestats(
@@ -138,7 +133,6 @@ test_that("jjpiestats combines labels with display options", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats combines clinical presets with other options", {
-  devtools::load_all()
 
   # Diagnostic preset + results subtitle
   result_diag <- jjpiestats(
@@ -178,7 +172,6 @@ test_that("jjpiestats combines clinical presets with other options", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats combines theme options with donut chart", {
-  devtools::load_all()
 
   # Original theme + donut
   result1 <- jjpiestats(
@@ -206,7 +199,6 @@ test_that("jjpiestats combines theme options with donut chart", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats combines all statistical tests with all display options", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -231,7 +223,6 @@ test_that("jjpiestats combines all statistical tests with all display options", 
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles proportion test with expected ratios", {
-  devtools::load_all()
 
   # Equal proportions (2 levels)
   result_equal2 <- jjpiestats(
@@ -257,7 +248,6 @@ test_that("jjpiestats handles proportion test with expected ratios", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles paired/repeated measures analysis", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_diagnostic,
@@ -274,7 +264,6 @@ test_that("jjpiestats handles paired/repeated measures analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats combines confidence levels with decimal digits", {
-  devtools::load_all()
 
   # High confidence + high precision
   result_high <- jjpiestats(
@@ -302,7 +291,6 @@ test_that("jjpiestats combines confidence levels with decimal digits", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles complete diagnostic test workflow", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_diagnostic,
@@ -329,7 +317,6 @@ test_that("jjpiestats handles complete diagnostic test workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles complete treatment comparison workflow", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_treatment,
@@ -356,7 +343,6 @@ test_that("jjpiestats handles complete treatment comparison workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles complete biomarker distribution workflow", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_biomarker,
@@ -383,7 +369,6 @@ test_that("jjpiestats handles complete biomarker distribution workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles minimal configuration", {
-  devtools::load_all()
 
   result_min <- jjpiestats(
     data = jjpiestats_test,
@@ -394,7 +379,6 @@ test_that("jjpiestats handles minimal configuration", {
 })
 
 test_that("jjpiestats handles maximum configuration", {
-  devtools::load_all()
 
   result_max <- jjpiestats(
     data = jjpiestats_test,
@@ -427,7 +411,6 @@ test_that("jjpiestats handles maximum configuration", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles different numbers of categorical levels", {
-  devtools::load_all()
 
   # 2 levels
   result_2 <- jjpiestats(

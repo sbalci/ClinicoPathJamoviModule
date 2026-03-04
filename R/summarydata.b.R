@@ -9,6 +9,8 @@
 #' @importFrom htmltools HTML
 #' @import moments
 #' @importFrom utils packageVersion
+#' @noRd
+NULL
 
 # Variable name escaping utility for handling special characters
 .escapeVar <- function(x) {
@@ -416,8 +418,8 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<p><strong>", .("Data Quality Assessment"), ":</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
                 "<li>", paste0("Average missing data: ", avg_missing, "%"), "</li>",
-                if (avg_missing > 20) paste0("<li style='color: #d32f2f;'>", .("⚠️ High missing data rate may affect interpretation"), "</li>") else "",
-                if (avg_missing <= 5) paste0("<li style='color: #388e3c;'>", .("✓ Excellent data completeness"), "</li>") else "",
+                if (avg_missing > 20) paste0("<li style='color: #d32f2f;'>", .(" High missing data rate may affect interpretation"), "</li>") else "",
+                if (avg_missing <= 5) paste0("<li style='color: #388e3c;'>", .(" Excellent data completeness"), "</li>") else "",
                 "</ul>",
                 
                 "<p><strong>", .("Clinical Applications"), ":</strong></p>",
@@ -429,7 +431,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "</ul>",
                 
                 if (any(sapply(dataset[variables], function(x) any(!is.finite(x), na.rm = TRUE)))) 
-                    paste0("<p style='color: #d32f2f;'><strong>", .("⚠️ Data Quality Alert"), ":</strong> ", 
+                    paste0("<p style='color: #d32f2f;'><strong>", .(" Data Quality Alert"), ":</strong> ", 
                            .("Some variables contain infinite or extreme values that may require investigation"), "</p>") else "",
                 
                 "</div>"

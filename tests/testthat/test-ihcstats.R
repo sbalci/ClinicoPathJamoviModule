@@ -1,6 +1,5 @@
 test_that("ihcstats module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("ihcstatsClass"))
   expect_true(is.function(ihcstats))
 })

@@ -114,12 +114,13 @@ for demographic factors. Essential for laboratory standardization and
 clinical interpretation of test results.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 referenceintervals(
     measurement = "laboratory_value",
     age = "patient_age",
     gender = "patient_gender",
     method = "robust_nonparametric"
 )
-
+}
 }

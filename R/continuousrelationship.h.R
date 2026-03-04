@@ -372,6 +372,7 @@ continuousrelationshipBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Analyzing BMI vs mortality risk
 #' continuousrelationship(
 #'     data = clinical_data,
@@ -381,7 +382,7 @@ continuousrelationshipBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #'     nKnots = 4,
 #'     showGuidance = TRUE
 #' )
-#'
+#'}
 #' @param data The dataset containing clinical variables
 #' @param outcome The outcome/dependent variable (can be continuous or binary)
 #' @param predictor The continuous predictor variable to analyze
@@ -394,7 +395,7 @@ continuousrelationshipBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' @param plotType Type of visualization to create
 #' @param referenceValue Reference value for the predictor (e.g., BMI=25).  If
 #'   not specified, uses median value.
-#' @param showCI Display 95\% confidence intervals on plots
+#' @param showCI Display 95 percent confidence intervals on plots
 #' @param showRug Show rug plot of actual data points
 #' @param showGuidance Display educational guidance based on BMJ best
 #'   practices to help interpret results and avoid common mistakes

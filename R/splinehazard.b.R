@@ -22,7 +22,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </style>
                 </head>
                 <body>
-                <h2>📊 Spline-based Hazard Functions Analysis</h2>
+                <h2> Spline-based Hazard Functions Analysis</h2>
                 <div class='status'>
                 <p><strong>Module:</strong> Flexible Parametric Survival Models</p>
                 <p><strong>Status:</strong> <span class='pending'>Configure variables and options to begin analysis</span></p>
@@ -50,7 +50,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$todo$setContent(
                     "<html>
                     <body>
-                    <h3>⚠️ Missing Required Variables</h3>
+                    <h3> Missing Required Variables</h3>
                     <p>Please specify:</p>
                     <ul>
                     <li><strong>Time Variable:</strong> Time to event or censoring</li>
@@ -72,10 +72,10 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$todo$setContent(
                 "<html>
                 <body>
-                <h3>✅ Analysis Complete</h3>
+                <h3> Analysis Complete</h3>
                 <p><strong>Spline-based hazard modeling completed successfully!</strong></p>
-                <p>📈 Models fitted with flexible spline basis functions</p>
-                <p>📊 Results include hazard functions, survival curves, and model comparison</p>
+                <p> Models fitted with flexible spline basis functions</p>
+                <p> Results include hazard functions, survival curves, and model comparison</p>
                 </body>
                 </html>"
             )
@@ -121,7 +121,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$todo$setContent(
-                    paste0("<html><body><h3>❌ Analysis Error</h3><p>", 
+                    paste0("<html><body><h3> Analysis Error</h3><p>", 
                            e$message, "</p></body></html>")
                 )
             })
@@ -502,7 +502,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             summary_text <- paste0(
                 "<html><body>",
-                "<h3>📊 Spline-based Hazard Analysis Summary</h3>",
+                "<h3> Spline-based Hazard Analysis Summary</h3>",
                 "<p><strong>Model Configuration:</strong></p>",
                 "<ul>",
                 "<li>Number of internal knots: ", n_knots, "</li>",
@@ -526,7 +526,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             explanation_text <- paste0(
                 "<html><body>",
-                "<h3>📖 Spline-based Hazard Functions Methodology</h3>",
+                "<h3> Spline-based Hazard Functions Methodology</h3>",
                 
                 "<h4>Overview</h4>",
                 "<p>Spline-based hazard functions provide flexible parametric modeling of survival data by representing the log hazard (or hazard on other scales) as smooth piecewise polynomial functions.</p>",

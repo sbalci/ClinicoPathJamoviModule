@@ -147,7 +147,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (preset == "biomarker_discovery") {
                 preset_message <- paste0(
                     "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Biomarker Discovery</h4>",
+                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Biomarker Discovery</h4>",
                     "<p><strong>The following settings have been automatically configured:</strong></p>",
                     "<ul>",
                     "<li>Cutoff threshold: <strong>0.4</strong></li>",
@@ -170,7 +170,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (preset == "disease_subtyping") {
                 preset_message <- paste0(
                     "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Disease Subtyping</h4>",
+                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Disease Subtyping</h4>",
                     "<p><strong>The following settings have been automatically configured:</strong></p>",
                     "<ul>",
                     "<li>Cutoff threshold: <strong>0.3</strong> (more variables shown)</li>",
@@ -307,7 +307,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         warning_msgs <- c(
                             warning_msgs,
                             paste0(
-                                "<p>⚠️ Variable '<code>", var_name, "</code>' has only ",
+                                "<p> Variable '<code>", var_name, "</code>' has only ",
                                 unique_vals, " unique values. It may be categorical rather than ",
                                 "continuous. PCA assumes continuous variables.</p>"
                             )
@@ -325,7 +325,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 error_msg <- paste0(
                     "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#ff6f00; margin-top:0;'>❌ Categorical Variables Detected</h4>",
+                    "<h4 style='color:#ff6f00; margin-top:0;'> Categorical Variables Detected</h4>",
                     "<p><strong>PCA requires continuous numeric variables only.</strong></p>",
                     "<p>The following variables are categorical/non-numeric:</p>",
                     "<ul>",
@@ -353,7 +353,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 warning_msgs <- c(
                     warning_msgs,
                     paste0(
-                        "<p>⚠️ The following variables have zero variance and were removed before PCA: ",
+                        "<p> The following variables have zero variance and were removed before PCA: ",
                         paste0("<code>", zero_var_names, "</code>", collapse = ", "),
                         ".</p>"
                     )
@@ -394,7 +394,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     warning_msgs,
                     paste0(
                         "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
-                        "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Component Number Out of Bounds</h4>",
+                        "<h4 style='color:#ff6f00; margin-top:0;'> Component Number Out of Bounds</h4>",
                         "<p><strong>Requested component ", requested_component,
                         " exceeds available components.</strong></p>",
                         "<p>PCA with ", length(vars), " variables produced ", n_components,

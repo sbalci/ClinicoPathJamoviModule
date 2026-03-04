@@ -34,7 +34,7 @@ jcorrelation(
 
 \item{ci}{TRUE (default) or FALSE, provide confidence intervals.}
 
-\item{ciWidth}{Confidence interval level (default: 95\\%).}
+\item{ciWidth}{Confidence interval level (default: 95 percent).}
 
 \item{flag}{TRUE (default) or FALSE, flag significant correlations.}
 
@@ -75,6 +75,7 @@ language  reporting. Suitable for exploring relationships between
 continuous variables.
 }
 \examples{
+\donttest{
 # Basic correlation analysis
 jcorrelation(
     data = histopathology,
@@ -87,5 +88,5 @@ jcorrelation(
     vars = c("Age", "OverallTime", "MeasurementA"),
     group = "Sex"
 )
-
+}
 }

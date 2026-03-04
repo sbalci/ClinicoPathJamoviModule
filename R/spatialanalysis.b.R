@@ -967,7 +967,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Start building summary
                 summary_text <- paste0(
                     "<div style='border: 1px solid #ddd; padding: 15px; margin: 10px 0; background-color: #f9f9f9;'>",
-                    "<h4>📋 Copy-Ready Summary</h4>",
+                    "<h4> Copy-Ready Summary</h4>",
                     "<p><strong>Spatial Analysis Results Summary:</strong></p>",
                     "<p>We analyzed the spatial distribution of ", n_points, " cells"
                 )
@@ -1040,7 +1040,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Add copy instruction
                 summary_text <- paste0(summary_text, 
                     "</p>",
-                    "<p><em>💡 Tip: This summary can be copied and pasted into reports, manuscripts, or clinical notes.</em></p>",
+                    "<p><em> Tip: This summary can be copied and pasted into reports, manuscripts, or clinical notes.</em></p>",
                     "</div>"
                 )
                 

@@ -73,7 +73,7 @@ options:
           - continuous
       permitted:
           - numeric
-      description: 'H-scores (0-300), % positivity (0-100) - must match training markers'
+      description: 'H-scores (0-300),  percent positivity (0-100) - must match training markers'
       default: NULL
 
     - name: caseId

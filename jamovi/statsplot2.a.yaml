@@ -4,13 +4,13 @@ title: Automatic Plot Selection
 menuGroup: JJStatsPlot
 menuSubgroup: All-In-One
 menuSubtitle: Automatic Plot Selection Based on Variable Types
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
     main: 'Automatically selects and generates the most appropriate statistical visualization based on variable data types. Features enhanced error messages with contextual guidance, robust data validation, and comprehensive fallback options. Supports both independent and repeated measures designs with various plot types including violin plots, scatter plots, bar charts, and alluvial diagrams.'
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Automatic plot selection for factor vs continuous variables
             statsplot2(

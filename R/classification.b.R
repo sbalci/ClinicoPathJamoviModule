@@ -28,10 +28,10 @@ private = list(
     # Add warning/notice to the warnings panel
     .addWarning = function(message, type = "INFO") {
         icon <- switch(type,
-            "ERROR" = "🚫",
-            "WARNING" = "⚠️",
-            "INFO" = "ℹ️",
-            "ℹ️"
+            "ERROR" = "",
+            "WARNING" = "",
+            "INFO" = "",
+            ""
         )
         private$.warnings <- c(private$.warnings, paste0("<p>", icon, " <strong>", type, ":</strong> ", message, "</p>"))
     },

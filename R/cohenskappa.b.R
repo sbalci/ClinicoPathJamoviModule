@@ -683,7 +683,7 @@ cohenskappaClass <- R6::R6Class(
                 </ul>
 
                 <p><b>Statistical Significance:</b> p = {sprintf('%.4f', p_value)}</p>
-                <p>{ifelse(p_value < 0.05, '✓ Agreement is significantly better than chance', '✗ Agreement not significantly different from chance')}</p>
+                <p>{ifelse(p_value < 0.05, ' Agreement is significantly better than chance', ' Agreement not significantly different from chance')}</p>
                 ")
 
                 self$results$multiRaterSummary$setContent(summary_html)

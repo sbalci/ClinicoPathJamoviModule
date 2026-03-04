@@ -127,7 +127,8 @@ patterns in the data. The method supports various PCA approaches including
 standard PCA, sparse PCA, and supervised PCA for survival data.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 principalcox(
     elapsedtime = "time_to_event",
     outcome = "event_status",
@@ -135,5 +136,5 @@ principalcox(
     n_components = 5,
     pca_method = "standard"
 )
-
+}
 }

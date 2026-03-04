@@ -659,11 +659,11 @@ clinicalnomogramsClass <- R6::R6Class(
             
             html <- paste0(html, "<h4>Pre-Implementation Checklist</h4>")
             html <- paste0(html, "<ul>")
-            html <- paste0(html, "<li>✓ Model has been externally validated</li>")
-            html <- paste0(html, "<li>✓ Performance metrics are clinically acceptable</li>")
-            html <- paste0(html, "<li>✓ Clinical team has been trained on nomogram use</li>")
-            html <- paste0(html, "<li>✓ Integration with electronic health records planned</li>")
-            html <- paste0(html, "<li>✓ Quality assurance procedures established</li>")
+            html <- paste0(html, "<li> Model has been externally validated</li>")
+            html <- paste0(html, "<li> Performance metrics are clinically acceptable</li>")
+            html <- paste0(html, "<li> Clinical team has been trained on nomogram use</li>")
+            html <- paste0(html, "<li> Integration with electronic health records planned</li>")
+            html <- paste0(html, "<li> Quality assurance procedures established</li>")
             html <- paste0(html, "</ul>")
             
             html <- paste0(html, "<h4>Implementation Steps</h4>")

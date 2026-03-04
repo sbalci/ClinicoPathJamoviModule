@@ -110,13 +110,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(num_vals) < 3) {
                     # ACCUMULATE instead of overwrite
                     private$.appendMessage(
-                        glue::glue(.("<br>⚠️ Warning: {var} has less than 3 valid observations<br>"))
+                        glue::glue(.("<br> Warning: {var} has less than 3 valid observations<br>"))
                     )
                 }
                 if (length(unique(num_vals)) < 2) {
                     # ACCUMULATE instead of overwrite
                     private$.appendMessage(
-                        glue::glue(.("<br>⚠️ Warning: {var} has no variation (all values are the same)<br>"))
+                        glue::glue(.("<br> Warning: {var} has no variation (all values are the same)<br>"))
                     )
                 }
             }
@@ -227,24 +227,24 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (num_endpoints > 1 && self$options$multiEndpointCorrection == "none") {
                 actual_alpha <- 1 - (1 - 0.05)^num_endpoints
                 warnings <- c(warnings, sprintf(
-                    .("🔴 <strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT CORRECTION</strong><br>You are testing %d dependent variables simultaneously without adjustment. This inflates your family-wise error rate from 5%% to approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a correction method below to see guidance, or interpret all p-values cautiously acknowledging this inflated error rate."),
+                    .(" <strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT CORRECTION</strong><br>You are testing %d dependent variables simultaneously without adjustment. This inflates your family-wise error rate from 5%% to approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a correction method below to see guidance, or interpret all p-values cautiously acknowledging this inflated error rate."),
                     num_endpoints, actual_alpha * 100
                 ))
             } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "bonferroni") {
                 adjusted_alpha <- 0.05 / num_endpoints
                 warnings <- c(warnings, sprintf(
-                    .("📊 <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = %.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT 0.05)<br>• Only results with p < %.4f should be considered statistically significant<br>• Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br>⚠️ <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
+                    .(" <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = %.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT 0.05)<br>• Only results with p < %.4f should be considered statistically significant<br>• Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
                     num_endpoints, adjusted_alpha, adjusted_alpha, adjusted_alpha, adjusted_alpha
                 ))
             } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "holm") {
                 warnings <- c(warnings, sprintf(
-                    .("📊 <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br>⚠️ <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
+                    .(" <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br> <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
                     num_endpoints, num_endpoints, 0.05/num_endpoints,
                     num_endpoints - 1, 0.05/(num_endpoints - 1)
                 ))
             } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "fdr") {
                 warnings <- c(warnings, sprintf(
-                    .("📊 <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ ≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br>⚠️ <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
+                    .(" <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ ≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
                     num_endpoints, num_endpoints, num_endpoints
                 ))
             }
@@ -258,7 +258,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min_group_size <- min(group_counts)
 
                 if (min_group_size < 3) {
-                    warnings <- c(warnings, sprintf(.("⚠️ {var}: Minimum group size is {size} (recommend ≥3)"), var = var, size = min_group_size))
+                    warnings <- c(warnings, sprintf(.(" {var}: Minimum group size is {size} (recommend ≥3)"), var = var, size = min_group_size))
                 }
 
                 if (test_type == "parametric" && min_group_size >= 3) {
@@ -271,7 +271,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                             if (levene_p < 0.05 && !self$options$varequal) {
                                 warnings <- c(warnings, sprintf(
-                                    .("⚠️ {var}: Variances differ significantly between groups (Levene's test p = %.3f). Consider enabling 'Equal Variances = FALSE' or using non-parametric test."),
+                                    .(" {var}: Variances differ significantly between groups (Levene's test p = %.3f). Consider enabling 'Equal Variances = FALSE' or using non-parametric test."),
                                     var, levene_p
                                 ))
                             }
@@ -290,7 +290,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             p_val <- tryCatch(shapiro.test(group_subset)$p.value, error = function(e) 1)
                             if (p_val < 0.05) {
                                 warnings <- c(warnings, sprintf(
-                                    .("⚠️ {var}: Data may not be normally distributed in group '{level}' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
+                                    .(" {var}: Data may not be normally distributed in group '{level}' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
                                     var, level, p_val
                                 ))
                             }
@@ -307,7 +307,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                             if (abs(skewness) > 1) {
                                 warnings <- c(warnings, sprintf(
-                                    .("⚠️ {var}: Large sample (n = %d) in group '{level}' shows substantial skewness (%.2f). Visual inspection recommended."),
+                                    .(" {var}: Large sample (n = %d) in group '{level}' shows substantial skewness (%.2f). Visual inspection recommended."),
                                     var, n_subset, level, skewness
                                 ))
                             }
@@ -372,7 +372,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Report NA removal for auditability
             if (n_before > n_after) {
                 n_dropped <- n_before - n_after
-                na_message <- glue::glue(.("<br>ℹ️ Info: {n_dropped} rows with missing values in analysis variables were excluded.<br>"))
+                na_message <- glue::glue(.("<br> Info: {n_dropped} rows with missing values in analysis variables were excluded.<br>"))
                 # ACCUMULATE instead of overwrite
                 private$.appendMessage(na_message)
             }
@@ -404,7 +404,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         }
                         # ACCUMULATE instead of overwrite
                         private$.appendMessage(
-                            glue::glue(.("<br>ℹ️ {var} has {n_outliers} potential outlier(s) detected<br>"))
+                            glue::glue(.("<br> {var} has {n_outliers} potential outlier(s) detected<br>"))
                         )
                     }
                 }
@@ -554,7 +554,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 .generateAboutContent = function() {
     about_content <- paste0(
         "<div style='padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff; margin: 10px 0;'>",
-        "<h4 style='color: #007bff; margin-top: 0;'>📊 About Between-Group Comparison</h4>",
+        "<h4 style='color: #007bff; margin-top: 0;'> About Between-Group Comparison</h4>",
         "<p><strong>Purpose:</strong> Compare a continuous variable across different groups to identify significant differences.</p>",
         "<p><strong>When to Use:</strong></p>",
         "<ul>",
@@ -597,7 +597,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         multi_var_note <- ""
     } else {
         multi_var_note <- paste0(
-            "<p><strong>⚠️ Note:</strong> ", length(self$options$dep),
+            "<p><strong> Note:</strong> ", length(self$options$dep),
             " dependent variables analyzed. Each variable is tested separately. ",
             "Results in plots show statistics for each individual variable.</p>"
         )
@@ -605,7 +605,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     summary_content <- paste0(
         "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>",
-        "<h4 style='color: #28a745; margin-top: 0;'>📋 Analysis Summary</h4>",
+        "<h4 style='color: #28a745; margin-top: 0;'> Analysis Summary</h4>",
         "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", self$options$group, "</p>",
         multi_var_note,  # Add multi-variable clarification
         "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
@@ -636,7 +636,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     if (length(self$options$dep) > 1) {
         multi_endpoint_note <- paste0(
             "<div style='background-color: #ffe5e5; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0;'>",
-            "<p><strong>⚠️ Multiple Endpoint Testing:</strong> You are analyzing ",
+            "<p><strong> Multiple Endpoint Testing:</strong> You are analyzing ",
             length(self$options$dep), " dependent variables. Each test uses the standard α = 0.05 threshold. ",
             "The 'Multiple Endpoint Correction Guidance' option above provides instructions for manual p-value adjustment. ",
             "<strong>Important:</strong> Corrections are NOT applied automatically by this analysis.</p>",
@@ -646,7 +646,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     assumptions_content <- paste0(
         "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-        "<h4 style='color: #856404; margin-top: 0;'>⚠️ Statistical Assumptions & Warnings</h4>",
+        "<h4 style='color: #856404; margin-top: 0;'> Statistical Assumptions & Warnings</h4>",
 
         multi_endpoint_note,
 
@@ -672,7 +672,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 .generateInterpretationGuide = function() {
     interpretation_content <- paste0(
         "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; margin: 10px 0;'>",
-        "<h4 style='color: #0c5460; margin-top: 0;'>📖 How to Interpret Results</h4>",
+        "<h4 style='color: #0c5460; margin-top: 0;'> How to Interpret Results</h4>",
         
         "<p><strong>Statistical Significance:</strong></p>",
         "<ul>",
@@ -713,7 +713,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     } else {
         dep_vars <- paste(self$options$dep, collapse = ", ")
         multi_var_note <- paste0(
-            "<p><strong>⚠️ Note:</strong> ", length(self$options$dep),
+            "<p><strong> Note:</strong> ", length(self$options$dep),
             " dependent variables analyzed. Each variable is tested separately. ",
             "Results in plots show statistics for each individual variable.</p>"
         )
@@ -729,7 +729,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     
     report_template <- paste0(
         "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; margin: 10px 0;'>",
-        "<h4 style='color: #495057; margin-top: 0;'>📄 Copy-Ready Report Template</h4>",
+        "<h4 style='color: #495057; margin-top: 0;'> Copy-Ready Report Template</h4>",
         
         "<div style='background-color: #ffffff; padding: 15px; border: 1px dashed #6c757d; margin: 10px 0;'>",
         "<h5>Methods:</h5>",
@@ -757,7 +757,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         "<button onclick='navigator.clipboard.writeText(this.parentElement.querySelector(\"div\").innerText)' ",
         "style='background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'>",
-        "📋 Copy Template to Clipboard</button>",
+        " Copy Template to Clipboard</button>",
         "</div>"
     )
     

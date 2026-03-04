@@ -1,5 +1,4 @@
 library(testthat)
-devtools::load_all()
 
 # ==============================================================================
 # CRITICAL TESTS: Beta-Binomial PMF Validation
@@ -17,7 +16,6 @@ devtools::load_all()
 
 test_that("Beta-Binomial PMF matches VGAM::dbetabinom - basic cases", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   skip_if_not_installed("VGAM")
 
   # Test case 1: Moderate parameters

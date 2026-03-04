@@ -380,7 +380,7 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
 
                 # Determine significance
                 p_to_use <- if (self$options$adjustPValues) row$adj_pvalue else row$pvalue
-                sig_symbol <- if (p_to_use < alpha) "✓" else ""
+                sig_symbol <- if (p_to_use < alpha) "" else ""
 
                 # Format CI text
                 ci_text <- sprintf("%.2f - %.2f", row$ci_lower, row$ci_upper)

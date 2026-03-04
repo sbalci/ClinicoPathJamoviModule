@@ -14,7 +14,7 @@ description:
         Automatically calculates participant numbers from patient-level data with exclusion columns.
         Follows the approach described by Riinu Ots (https://www.riinu.me/2024/02/consort/).
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Prepare data with exclusion columns
             # Each row = one participant

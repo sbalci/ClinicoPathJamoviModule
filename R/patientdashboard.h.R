@@ -733,6 +733,7 @@ patientdashboardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('patient_monitoring', package='ClinicoPath')
 #'
 #' # Basic patient monitoring dashboard
@@ -742,7 +743,7 @@ patientdashboardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'                labValues = c('Glucose', 'Creatinine', 'Hemoglobin'),
 #'                realtime_monitoring = TRUE,
 #'                alert_system = TRUE)
-#'
+#'}
 #' @param data .
 #' @param patientID Unique patient identifier for individual patient tracking
 #' @param vitals Vital signs parameters (heart rate, blood pressure,

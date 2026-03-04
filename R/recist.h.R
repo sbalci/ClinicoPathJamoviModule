@@ -685,6 +685,7 @@ recistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data <- data.frame(
 #'     patient = rep(c("P01", "P02"), each = 6),
 #'     time = rep(c(0, 8, 16), 4),
@@ -701,7 +702,7 @@ recistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     lesionType = "lesion_type",
 #'     lesionDiameter = "diameter"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param patientId Patient identifier variable
 #' @param assessmentTime Time from baseline (weeks or months)
@@ -715,8 +716,10 @@ recistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   RECIST 1.1)
 #' @param maxPerOrgan Maximum target lesions per organ (default: 2 per RECIST
 #'   1.1)
-#' @param prThreshold Percent decrease for partial response (default: 30\%)
-#' @param pdThreshold Percent increase for progressive disease (default: 20\%)
+#' @param prThreshold Percent decrease for partial response (default: 30
+#'   percent)
+#' @param pdThreshold Percent increase for progressive disease (default: 20
+#'   percent)
 #' @param pdAbsolute Absolute increase required for PD (default: 5mm)
 #' @param requireConfirmation Require 2 consecutive assessments for CR/PR
 #' @param confirmationWindow Minimum weeks between confirmation assessments

@@ -200,6 +200,7 @@ survival analysis with automatic variable selection, model averaging, and
 uncertainty quantification for clinical biomarker discovery.
 }
 \examples{
+\donttest{
 # Spike-and-slab variable selection
 spikeslabpriors(
     data = biomarker_data,
@@ -208,5 +209,5 @@ spikeslabpriors(
     model_type = "regression",
     prior_inclusion_prob = 0.1
 )
-
+}
 }

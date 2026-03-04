@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("linechart integrates with all test datasets", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "linechart_simple", x = "time_point", y = "value", group = NULL),
@@ -46,7 +44,6 @@ test_that("linechart integrates with all test datasets", {
 })
 
 test_that("linechart produces consistent results across data formats", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -72,7 +69,6 @@ test_that("linechart produces consistent results across data formats", {
 })
 
 test_that("linechart handles complete clinical trial workflow", {
-  devtools::load_all()
 
   data(linechart_clinical)
 
@@ -126,7 +122,6 @@ test_that("linechart handles complete clinical trial workflow", {
 })
 
 test_that("linechart handles exploratory time series workflow", {
-  devtools::load_all()
 
   data(linechart_long)
 
@@ -161,7 +156,6 @@ test_that("linechart handles exploratory time series workflow", {
 })
 
 test_that("linechart handles treatment comparison workflow", {
-  devtools::load_all()
 
   data(linechart_multiple)
 
@@ -213,7 +207,6 @@ test_that("linechart handles treatment comparison workflow", {
 })
 
 test_that("linechart handles response assessment workflow", {
-  devtools::load_all()
 
   data(linechart_short)
 
@@ -240,7 +233,6 @@ test_that("linechart handles response assessment workflow", {
 })
 
 test_that("linechart handles different time scales consistently", {
-  devtools::load_all()
 
   # Short time series (months)
   data(linechart_short)
@@ -273,7 +265,6 @@ test_that("linechart handles different time scales consistently", {
 })
 
 test_that("linechart handles different group counts consistently", {
-  devtools::load_all()
 
   # Two groups
   data(linechart_short)
@@ -310,7 +301,6 @@ test_that("linechart handles different group counts consistently", {
 })
 
 test_that("linechart handles all color palettes consistently", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -332,7 +322,6 @@ test_that("linechart handles all color palettes consistently", {
 })
 
 test_that("linechart handles all plot themes consistently", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -354,7 +343,6 @@ test_that("linechart handles all plot themes consistently", {
 })
 
 test_that("linechart handles combinations of all features", {
-  devtools::load_all()
 
   data(linechart_clinical)
 
@@ -382,7 +370,6 @@ test_that("linechart handles combinations of all features", {
 })
 
 test_that("linechart handles irregular intervals with smoothing", {
-  devtools::load_all()
 
   data(linechart_irregular)
 
@@ -401,7 +388,6 @@ test_that("linechart handles irregular intervals with smoothing", {
 })
 
 test_that("linechart handles pattern comparison workflow", {
-  devtools::load_all()
 
   data(linechart_patterns)
 
@@ -439,7 +425,6 @@ test_that("linechart handles pattern comparison workflow", {
 })
 
 test_that("linechart handles progressive feature addition", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -471,7 +456,6 @@ test_that("linechart handles progressive feature addition", {
 })
 
 test_that("linechart handles all datasets with consistent parameters", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "linechart_grouped", x = "time_point", y = "lab_value", group = "treatment"),
@@ -502,7 +486,6 @@ test_that("linechart handles all datasets with consistent parameters", {
 })
 
 test_that("linechart output structure is consistent across all datasets", {
-  devtools::load_all()
 
   datasets <- c("linechart_simple", "linechart_grouped", "linechart_clinical")
 
@@ -548,7 +531,6 @@ test_that("linechart output structure is consistent across all datasets", {
 })
 
 test_that("linechart handles repeated analyses with same data", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -567,7 +549,6 @@ test_that("linechart handles repeated analyses with same data", {
 })
 
 test_that("linechart handles biomarker monitoring workflow", {
-  devtools::load_all()
 
   data(linechart_clinical)
 
@@ -591,7 +572,6 @@ test_that("linechart handles biomarker monitoring workflow", {
 })
 
 test_that("linechart handles multiple biomarker workflow", {
-  devtools::load_all()
 
   data(linechart_multiple)
 

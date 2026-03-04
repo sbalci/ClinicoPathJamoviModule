@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(jjpiestats_test, package = "ClinicoPath", envir = environment())
@@ -17,7 +16,6 @@ data(jjpiestats_small, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles very small datasets", {
-  devtools::load_all()
 
   # n=20
   result <- jjpiestats(
@@ -29,7 +27,6 @@ test_that("jjpiestats handles very small datasets", {
 })
 
 test_that("jjpiestats handles single category level", {
-  devtools::load_all()
 
   # Create data with only one level
   single_level_data <- jjpiestats_small %>%
@@ -49,7 +46,6 @@ test_that("jjpiestats handles single category level", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles very unbalanced category distributions", {
-  devtools::load_all()
 
   # Create highly unbalanced data
   unbalanced_data <- jjpiestats_test %>%
@@ -71,7 +67,6 @@ test_that("jjpiestats handles very unbalanced category distributions", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles factor variables", {
-  devtools::load_all()
 
   test_data_factor <- jjpiestats_test
   test_data_factor$treatment_response <- as.factor(test_data_factor$treatment_response)
@@ -85,7 +80,6 @@ test_that("jjpiestats handles factor variables", {
 })
 
 test_that("jjpiestats handles character variables", {
-  devtools::load_all()
 
   test_data_char <- jjpiestats_test
   test_data_char$disease_severity <- as.character(test_data_char$disease_severity)
@@ -103,7 +97,6 @@ test_that("jjpiestats handles character variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles missing values in dependent variable", {
-  devtools::load_all()
 
   test_data_na <- jjpiestats_test
   test_data_na$treatment_response[1:10] <- NA
@@ -118,7 +111,6 @@ test_that("jjpiestats handles missing values in dependent variable", {
 })
 
 test_that("jjpiestats handles missing values in grouping variable", {
-  devtools::load_all()
 
   test_data_na_group <- jjpiestats_test
   test_data_na_group$treatment_arm[1:15] <- NA
@@ -133,7 +125,6 @@ test_that("jjpiestats handles missing values in grouping variable", {
 })
 
 test_that("jjpiestats handles missing values in split variable", {
-  devtools::load_all()
 
   test_data_na_split <- jjpiestats_test
   test_data_na_split$hospital_site[1:20] <- NA
@@ -152,7 +143,6 @@ test_that("jjpiestats handles missing values in split variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles variable names with spaces", {
-  devtools::load_all()
 
   test_data_spaces <- jjpiestats_small
   names(test_data_spaces)[names(test_data_spaces) == "category"] <- "category variable"
@@ -166,7 +156,6 @@ test_that("jjpiestats handles variable names with spaces", {
 })
 
 test_that("jjpiestats handles long category names", {
-  devtools::load_all()
 
   test_data_long <- jjpiestats_small
   test_data_long$category <- paste0(
@@ -189,7 +178,6 @@ test_that("jjpiestats handles long category names", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats errors on non-existent variables", {
-  devtools::load_all()
 
   expect_error(
     jjpiestats(
@@ -202,7 +190,6 @@ test_that("jjpiestats errors on non-existent variables", {
 })
 
 test_that("jjpiestats errors on numeric dependent variable", {
-  devtools::load_all()
 
   test_data_numeric <- jjpiestats_test
   test_data_numeric$numeric_var <- rnorm(nrow(test_data_numeric))
@@ -222,7 +209,6 @@ test_that("jjpiestats errors on numeric dependent variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats errors on empty dataset", {
-  devtools::load_all()
 
   empty_data <- jjpiestats_small[0, ]
 
@@ -241,7 +227,6 @@ test_that("jjpiestats errors on empty dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles invalid ratio specifications", {
-  devtools::load_all()
 
   # Wrong number of ratios
   expect_condition(
@@ -269,7 +254,6 @@ test_that("jjpiestats handles invalid ratio specifications", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles duplicate rows", {
-  devtools::load_all()
 
   test_data_dup <- rbind(jjpiestats_small, jjpiestats_small)
 
@@ -286,7 +270,6 @@ test_that("jjpiestats handles duplicate rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles boundary confidence levels", {
-  devtools::load_all()
 
   # Minimum confidence (0.50)
   result_min <- jjpiestats(
@@ -312,7 +295,6 @@ test_that("jjpiestats handles boundary confidence levels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles boundary decimal digits", {
-  devtools::load_all()
 
   # Minimum digits (0)
   result_min <- jjpiestats(
@@ -336,7 +318,6 @@ test_that("jjpiestats handles boundary decimal digits", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles tibble input", {
-  devtools::load_all()
 
   test_tibble <- tibble::as_tibble(jjpiestats_small)
 
@@ -349,7 +330,6 @@ test_that("jjpiestats handles tibble input", {
 })
 
 test_that("jjpiestats handles data.frame input", {
-  devtools::load_all()
 
   test_df <- as.data.frame(jjpiestats_small)
 
@@ -366,7 +346,6 @@ test_that("jjpiestats handles data.frame input", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles many categorical levels", {
-  devtools::load_all()
 
   # Create data with many levels (10+)
   test_many_levels <- jjpiestats_test
@@ -386,7 +365,6 @@ test_that("jjpiestats handles many categorical levels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles same variable for dep and group", {
-  devtools::load_all()
 
   # Using same variable for dep and group (should error or warn)
   expect_condition(
@@ -403,7 +381,6 @@ test_that("jjpiestats handles same variable for dep and group", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles perfectly balanced categorical distributions", {
-  devtools::load_all()
 
   # Create perfectly balanced data
   n_per_group <- 50
@@ -426,7 +403,6 @@ test_that("jjpiestats handles perfectly balanced categorical distributions", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles categories with all levels defined but some with zero counts", {
-  devtools::load_all()
 
   # Create factor with levels but some unused
   test_zero_counts <- jjpiestats_small
@@ -448,7 +424,6 @@ test_that("jjpiestats handles categories with all levels defined but some with z
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles constant categorical variable", {
-  devtools::load_all()
 
   test_constant <- jjpiestats_small
   test_constant$constant_cat <- factor("Same Value")
@@ -467,7 +442,6 @@ test_that("jjpiestats handles constant categorical variable", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles aggregated data with zero counts", {
-  devtools::load_all()
 
   data_with_zeros <- tibble(
     category = c("A", "B", "C", "D"),

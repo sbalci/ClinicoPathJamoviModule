@@ -574,8 +574,9 @@ marginalrecurrentBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' within-subject correlation.
 #'
 #' @examples
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
-#'
+#'}
 #' @param data .
 #' @param subjectID .
 #' @param time .

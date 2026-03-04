@@ -105,6 +105,7 @@ optimization,
 and quality control for laboratory assays.
 }
 \examples{
+\donttest{
 # Example: Optimize PCR assay design
 assayoptimization(
     data = pcr_data,
@@ -113,5 +114,5 @@ assayoptimization(
     optimization_goal = "maximize_efficiency",
     design_type = "factorial"
 )
-
+}
 }

@@ -438,7 +438,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "sequentialtests",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = sequentialtestsResults$new(options=options),
                 data = data,
@@ -469,6 +469,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # COVID-19 testing: Rapid antigen followed by RT-PCR confirmation
 #' # Shows how serial positive strategy improves specificity
 #' data(sequential_testing_examples)
@@ -498,7 +499,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' data(cost_effectiveness_examples)  # Economic analysis examples
 #' data(teaching_examples)            # Educational scenarios
 #' data(common_test_combinations)     # Reference test characteristics
-#'
+#'}
 #' @param preset Select a clinical preset or use custom values. Presets load
 #'   evidence-based test parameters and optimal strategies from medical
 #'   literature.

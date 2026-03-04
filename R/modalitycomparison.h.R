@@ -428,6 +428,7 @@ modalitycomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic modality comparison
 #' result1 <- modalitycomparison(
 #'   data = data,
@@ -445,7 +446,7 @@ modalitycomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   score_categories = "her2_5cat",
 #'   show_discordance_analysis = TRUE
 #' )
-#'
+#'}
 #' @param data The data as a data frame with paired observations from two
 #'   modalities.
 #' @param modality1_var Variable containing scores/ratings from the first
@@ -466,8 +467,8 @@ modalitycomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   between modalities.
 #' @param calculate_weighted_kappa Calculate weighted kappa for ordinal scores
 #'   (requires ordered categories).
-#' @param confidence_intervals Calculate and display 95\% confidence intervals
-#'   for agreement statistics.
+#' @param confidence_intervals Calculate and display 95 percent confidence
+#'   intervals for agreement statistics.
 #' @param directional_analysis Analyze systematic bias in one direction (e.g.,
 #'   higher scores on digital vs glass).
 #' @param low_end_focus Perform specialized analysis focusing on agreement at

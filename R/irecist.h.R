@@ -733,6 +733,7 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data <- data.frame(
 #'     patient = c("P01", "P01", "P01", "P02", "P02"),
 #'     time = c(0, 8, 16, 0, 8),
@@ -747,7 +748,7 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     targetLesionSum = "target_sum",
 #'     newLesions = "new_lesions"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param patientId Patient identifier variable
 #' @param assessmentTime Time from baseline (weeks or months)
@@ -760,10 +761,10 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param confirmationWindowMax Maximum time window for iUPD confirmation
 #'   (default: 12 weeks)
 #' @param baselineReference Reference point for baseline measurements
-#' @param prThreshold Percent decrease for partial response (default: 30\% per
-#'   RECIST)
-#' @param pdThreshold Percent increase for progressive disease (default: 20\%
-#'   per RECIST)
+#' @param prThreshold Percent decrease for partial response (default: 30
+#'   percent per RECIST)
+#' @param pdThreshold Percent increase for progressive disease (default: 20
+#'   percent per RECIST)
 #' @param pdAbsolute Absolute increase required for PD (default: 5mm per
 #'   RECIST)
 #' @param trackPseudoprogression Flag and track iUPD (unconfirmed progression)

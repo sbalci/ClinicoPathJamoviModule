@@ -1,5 +1,5 @@
 
-devtools::load_all()
+library(ClinicoPath)
 library(survival)
 
 set.seed(42)

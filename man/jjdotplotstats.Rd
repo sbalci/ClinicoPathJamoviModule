@@ -85,10 +85,10 @@ meaningful value.}
 when using Bayesian analysis. BF > 3 indicates moderate evidence, BF > 10
 strong evidence.}
 
-\item{conflevel}{Confidence level for intervals (0.95 = 95\\% confidence
-interval). This represents the probability that the true population
-parameter lies within the calculated interval. 95\\% is standard for most
-analyses.}
+\item{conflevel}{Confidence level for intervals (0.95 = 95 percent
+confidence interval). This represents the probability that the true
+population parameter lies within the calculated interval. 95 percent is
+standard for most analyses.}
 
 \item{k}{Number of decimal places for statistical results (p-values, effect
 sizes). More decimal places show greater precision but may not be
@@ -132,6 +132,7 @@ comparisons of continuous variables between groups with
 statistical annotations and significance testing.
 }
 \examples{
+\donttest{
 # Basic dot plot with iris dataset
 jjdotplotstats(
     data = iris,
@@ -179,5 +180,5 @@ jjdotplotstats(
     centralityparameter = "mean",
     mytitle = "Tooth Growth by Supplement Type"
 )
-
+}
 }

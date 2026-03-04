@@ -324,6 +324,7 @@ esquisseautoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' intelligent defaults.
 #'
 #' @examples
+#' \donttest{
 #' # Auto-select plot type based on variables
 #' esquisseauto(
 #'     data = mtcars,
@@ -338,7 +339,7 @@ esquisseautoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     yvar = "Sepal.Length",
 #'     colorvar = "Species"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param xvar Variable for x-axis. Can be continuous, discrete, or
 #'   time-based.

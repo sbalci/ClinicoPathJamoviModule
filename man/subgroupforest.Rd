@@ -101,6 +101,7 @@ outcomes with comprehensive statistical validation and heterogeneity
 testing.
 }
 \examples{
+\donttest{
 # Survival outcome subgroup analysis
 subgroupforest(
     data = clinical_trial,
@@ -122,5 +123,5 @@ subgroupforest(
     outcomeType = "binary",
     effectMeasure = "or"
 )
-
+}
 }

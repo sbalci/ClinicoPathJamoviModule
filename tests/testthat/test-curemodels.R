@@ -3,7 +3,6 @@
 
 # Load required libraries for testing
 library(testthat)
-devtools::load_all()
 
 # Test data setup
 setup_cure_test_data <- function() {
@@ -43,7 +42,6 @@ setup_cure_test_data <- function() {
 # Test 1: Basic mixture cure model (most common use case)
 test_that("Basic mixture cure model runs without error", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   skip_if_not_installed("smcure")
 
   test_data <- setup_cure_test_data()

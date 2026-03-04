@@ -422,6 +422,7 @@ frailtysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Multi-center survival with shared frailty
 #' frailtysurvival(
 #'     data = multicenter_data,
@@ -431,7 +432,7 @@ frailtysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'     covariates = c("age", "stage", "treatment"),
 #'     frailty_type = "shared"
 #' )
-#'
+#'}
 #' @param time_var Survival time variable
 #' @param status_var Event status indicator variable
 #' @param cluster_var Variable defining clusters for frailty modeling

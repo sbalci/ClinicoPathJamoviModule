@@ -3,21 +3,21 @@ name: jjsegmentedtotalbar
 title: "Segmented Total Bar Charts"
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
-# menuSubtitle: "100% Stacked Bar Charts for Proportional Data"
-version: '0.0.36'
+# menuSubtitle: "100 percent Stacked Bar Charts for Proportional Data"
+version: '0.0.37'
 jas: '1.2'
 
 description:
     main: |
-        Create segmented total bar charts (100% stacked bars) that show proportional 
+        Create segmented total bar charts (100 percent stacked bars) that show proportional 
         breakdowns within categories. Perfect for displaying composition data where 
-        each bar represents 100% and segments show relative proportions.
+        each bar represents 100 percent and segments show relative proportions.
     R:
         dontrun: true
         usage: |
             # Example usage for segmented total bar charts:
             # Shows proportional composition within categories
-            # Each bar totals to 100% with segments showing relative proportions
+            # Each bar totals to 100 percent with segments showing relative proportions
 
 options:
     - name: data
@@ -96,13 +96,13 @@ options:
       title: "Plot Type"
       type: List
       options:
-        - title: "100% Stacked Bars (Traditional)"
+        - title: "100 percent Stacked Bars (Traditional)"
           name: stacked
         - title: "Flerlage Segmented Total Bars"
           name: flerlage
       default: stacked
       description:
-        R: Type of visualization - traditional 100% stacked bars or Flerlage-style segmented total bars.
+        R: Type of visualization - traditional 100 percent stacked bars or Flerlage-style segmented total bars.
         jamovi: Choose between traditional percentage-based stacking or Kevin Flerlage's segmented total bar design that emphasizes both totals and composition.
 
     - name: chart_style
@@ -169,11 +169,11 @@ options:
       title: "Percentage Format"
       type: List
       options:
-        - title: "No Decimals (80%)"
+        - title: "No Decimals (80 percent)"
           name: integer
-        - title: "1 Decimal (80.5%)"
+        - title: "1 Decimal (80.5 percent)"
           name: decimal1
-        - title: "2 Decimals (80.50%)"
+        - title: "2 Decimals (80.50 percent)"
           name: decimal2
       default: integer
       description:
@@ -189,13 +189,13 @@ options:
         jamovi: Show raw count values in addition to percentages.
 
     - name: label_threshold
-      title: "Min Segment Size for Labels (%)"
+      title: "Min Segment Size for Labels ( percent)"
       type: Number
       min: 0
       max: 50
       default: 5
       description:
-        R: Minimum percentage for showing labels (0-50%).
+        R: Minimum percentage for showing labels (0-50 percent).
         jamovi: Only show labels for segments above this percentage threshold.
 
     - name: orientation

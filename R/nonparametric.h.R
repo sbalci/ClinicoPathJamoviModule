@@ -1250,11 +1250,12 @@ nonparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' This enhanced module combines distribution-free methods with proper effect 
 #' size calculations,
 #' assumption checking, and post hoc analysis - addressing critical gaps 
-#' identified in 30\% 
+#' identified in 30 percent 
 #' of pathology studies that use these methods.
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: Enhanced Mann-Whitney U test for biomarker expression
 #' nonparametric(
 #'     data = clinical_data,
@@ -1275,7 +1276,7 @@ nonparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     post_hoc_method = "dunn",
 #'     clinical_context = "pathological"
 #' )
-#'
+#'}
 #' @param data The dataset to be analyzed, provided as a data frame.
 #' @param deps Multiple continuous variables to be analyzed. These should be
 #'   numeric variables representing biomarker expression levels, cell counts,

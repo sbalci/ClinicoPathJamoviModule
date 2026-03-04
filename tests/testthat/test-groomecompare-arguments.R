@@ -3,7 +3,6 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(groomecompare_test)
 
 test_that("groomecompare bootstrap validation works", {

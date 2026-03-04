@@ -344,4 +344,4 @@ options:
       default: false
       description:
         R: Whether to display confidence interval for regression line.
-        jamovi: Display 95% confidence interval around regression line.
+        jamovi: Display 95 percent confidence interval around regression line.

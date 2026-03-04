@@ -365,7 +365,7 @@ diagnosticmetaClass <- R6::R6Class(
             if (is.null(coefficients) || !is.matrix(coefficients)) {
                 self$results$bivariateresults$setNote("model_error", "Reitsma model failed - coefficient matrix missing")
                 private$.appendInstructionMessage(
-                    "<div class='alert alert-warning'><h4>⚠️ Bivariate Output Missing</h4><p>The Reitsma model did not return coefficient estimates, so pooled sensitivity and specificity are unavailable.</p></div>"
+                    "<div class='alert alert-warning'><h4> Bivariate Output Missing</h4><p>The Reitsma model did not return coefficient estimates, so pooled sensitivity and specificity are unavailable.</p></div>"
                 )
                 return()
             }
@@ -397,7 +397,7 @@ diagnosticmetaClass <- R6::R6Class(
                     "Reitsma model returned unexpected coefficient structure"
                 )
                 private$.appendInstructionMessage(
-                    "<div class='alert alert-warning'><h4>⚠️ Bivariate Output Missing</h4><p>The Reitsma model did not return the expected coefficient estimates, so pooled sensitivity and specificity are unavailable.</p></div>"
+                    "<div class='alert alert-warning'><h4> Bivariate Output Missing</h4><p>The Reitsma model did not return the expected coefficient estimates, so pooled sensitivity and specificity are unavailable.</p></div>"
                 )
                 return()
             }
@@ -775,7 +775,7 @@ diagnosticmetaClass <- R6::R6Class(
                 # Add message when meta-regression is enabled but no covariate is selected
                 if (isTRUE(self$options$meta_regression)) {
                     private$.appendInstructionMessage(
-                        "<div class='alert alert-info'><h4>ℹ️ Meta-Regression Requires a Covariate</h4><p>To perform meta-regression analysis, please select a covariate variable (e.g., study year, population type, method) that may explain heterogeneity between studies. The covariate should be a study-level characteristic that varies across included studies.</p></div>"
+                        "<div class='alert alert-info'><h4> Meta-Regression Requires a Covariate</h4><p>To perform meta-regression analysis, please select a covariate variable (e.g., study year, population type, method) that may explain heterogeneity between studies. The covariate should be a study-level characteristic that varies across included studies.</p></div>"
                     )
                 }
                 return()
@@ -786,7 +786,7 @@ diagnosticmetaClass <- R6::R6Class(
 
             if (!"row_id" %in% names(meta_data)) {
                 private$.appendInstructionMessage(
-                    "<div class='alert alert-warning'><h4>⚠️ Meta-Regression Skipped</h4><p>Row identifiers were not preserved during preprocessing, so the covariate could not be aligned with the filtered studies.</p></div>"
+                    "<div class='alert alert-warning'><h4> Meta-Regression Skipped</h4><p>Row identifiers were not preserved during preprocessing, so the covariate could not be aligned with the filtered studies.</p></div>"
                 )
                 return()
             }
@@ -829,7 +829,7 @@ diagnosticmetaClass <- R6::R6Class(
                                  mods = ~ covariate, data = analysis_data, method = "REML")
                 }, error = function(e) {
                     private$.appendInstructionMessage(
-                        paste0("<div class='alert alert-warning'><h4>⚠️ Sensitivity Meta-Regression Failed</h4><p>",
+                        paste0("<div class='alert alert-warning'><h4> Sensitivity Meta-Regression Failed</h4><p>",
                                e$message, "</p></div>")
                     )
                     return(NULL)
@@ -840,7 +840,7 @@ diagnosticmetaClass <- R6::R6Class(
                                  mods = ~ covariate, data = analysis_data, method = "REML")
                 }, error = function(e) {
                     private$.appendInstructionMessage(
-                        paste0("<div class='alert alert-warning'><h4>⚠️ Specificity Meta-Regression Failed</h4><p>",
+                        paste0("<div class='alert alert-warning'><h4> Specificity Meta-Regression Failed</h4><p>",
                                e$message, "</p></div>")
                     )
                     return(NULL)
@@ -902,7 +902,7 @@ diagnosticmetaClass <- R6::R6Class(
 
                 if (nrow(analysis_data) < 10) {
                     private$.appendInstructionMessage(
-                        "<div class='alert alert-info'><h4>ℹ️ Publication Bias Caution</h4><p>Deeks' test is unreliable with fewer than 10 studies; interpret asymmetry results cautiously.</p></div>"
+                        "<div class='alert alert-info'><h4> Publication Bias Caution</h4><p>Deeks' test is unreliable with fewer than 10 studies; interpret asymmetry results cautiously.</p></div>"
                     )
                 }
 
@@ -1364,11 +1364,11 @@ diagnosticmetaClass <- R6::R6Class(
             <div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>
                 <p><strong>Before running analysis, verify:</strong></p>
                 <ul>
-                    <li>✅ No missing values in TP, FP, FN, TN columns</li>
-                    <li>✅ All values are non-negative integers</li>
-                    <li>✅ At least 2 studies with complete data</li>
-                    <li>✅ Study identifiers are unique</li>
-                    <li>✅ Sample sizes are realistic (TP+FP+FN+TN = total cases per study)</li>
+                    <li> No missing values in TP, FP, FN, TN columns</li>
+                    <li> All values are non-negative integers</li>
+                    <li> At least 2 studies with complete data</li>
+                    <li> Study identifiers are unique</li>
+                    <li> Sample sizes are realistic (TP+FP+FN+TN = total cases per study)</li>
                 </ul>
             </div>
             
@@ -1419,7 +1419,7 @@ diagnosticmetaClass <- R6::R6Class(
                     <li><strong>Variance Components:</strong> Specialized approach for variance component estimation, typically used in advanced methodological research.</li>
                     <li><strong>DerSimonian-Laird:</strong> Popular classical method familiar to many researchers (automatically optimized to use REML for better performance).</li>
                 </ul>
-                <p><strong>💡 Recommendation:</strong> Start with REML unless you have specific methodological requirements. It provides the best balance of statistical properties and computational stability for diagnostic test meta-analysis.</p>
+                <p><strong> Recommendation:</strong> Start with REML unless you have specific methodological requirements. It provides the best balance of statistical properties and computational stability for diagnostic test meta-analysis.</p>
             </div>
             
             <h3>Clinical Applications</h3>
@@ -1470,7 +1470,7 @@ diagnosticmetaClass <- R6::R6Class(
             html <- "
             <h2>Clinical Interpretation Guidelines</h2>
             
-            <h3>📊 Primary Results Interpretation</h3>
+            <h3> Primary Results Interpretation</h3>
             
             <h4>Pooled Sensitivity and Specificity</h4>
             <ul>
@@ -1537,7 +1537,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <li><strong>DOR < 5:</strong> Limited discriminative ability</li>
             </ul>
             
-            <h3>🔍 Heterogeneity Assessment</h3>
+            <h3> Heterogeneity Assessment</h3>
             
             <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
                 <h4>I² Statistic Interpretation:</h4>
@@ -1557,7 +1557,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <li><strong>Geographic/Temporal:</strong> Population differences, technology evolution</li>
             </ul>
             
-            <h3>📈 Publication Bias Assessment</h3>
+            <h3> Publication Bias Assessment</h3>
             
             <h4>Deeks' Funnel Plot Test:</h4>
             <ul>
@@ -1566,7 +1566,7 @@ diagnosticmetaClass <- R6::R6Class(
             </ul>
             
             <div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;'>
-                <p><strong>⚠️ When Publication Bias is Detected:</strong></p>
+                <p><strong> When Publication Bias is Detected:</strong></p>
                 <ul>
                     <li>Pooled estimates may be overoptimistic</li>
                     <li>Search for unpublished studies or negative results</li>
@@ -1575,7 +1575,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </ul>
             </div>
             
-            <h3>🏥 Clinical Application Guidance</h3>
+            <h3> Clinical Application Guidance</h3>
             
             <h4>IHC Marker Validation:</h4>
             <ul>
@@ -1617,21 +1617,21 @@ diagnosticmetaClass <- R6::R6Class(
                 </tr>
             </table>
             
-            <h3>📋 Reporting Recommendations</h3>
+            <h3> Reporting Recommendations</h3>
             
             <p>When reporting your meta-analysis results, include:</p>
             <ul>
-                <li>✅ <strong>Study Selection:</strong> Number of studies included and excluded</li>
-                <li>✅ <strong>Pooled Estimates:</strong> Sensitivity and specificity with 95% confidence intervals</li>
-                <li>✅ <strong>Likelihood Ratios:</strong> For clinical decision-making context</li>
-                <li>✅ <strong>Heterogeneity:</strong> I² values and potential sources investigated</li>
-                <li>✅ <strong>Publication Bias:</strong> Deeks' test results and visual assessment</li>
-                <li>✅ <strong>Clinical Implications:</strong> Population-specific predictive values</li>
-                <li>✅ <strong>Limitations:</strong> Study quality, missing data, generalizability</li>
+                <li> <strong>Study Selection:</strong> Number of studies included and excluded</li>
+                <li> <strong>Pooled Estimates:</strong> Sensitivity and specificity with 95% confidence intervals</li>
+                <li> <strong>Likelihood Ratios:</strong> For clinical decision-making context</li>
+                <li> <strong>Heterogeneity:</strong> I² values and potential sources investigated</li>
+                <li> <strong>Publication Bias:</strong> Deeks' test results and visual assessment</li>
+                <li> <strong>Clinical Implications:</strong> Population-specific predictive values</li>
+                <li> <strong>Limitations:</strong> Study quality, missing data, generalizability</li>
             </ul>
             
             <div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #17a2b8; margin: 10px 0;'>
-                <p><strong>💡 Pro Tip:</strong> Always interpret meta-analysis results in the context of your specific clinical population and intended use. A test excellent for one application may be inappropriate for another.</p>
+                <p><strong> Pro Tip:</strong> Always interpret meta-analysis results in the context of your specific clinical population and intended use. A test excellent for one application may be inappropriate for another.</p>
             </div>
             "
             
@@ -1762,7 +1762,7 @@ diagnosticmetaClass <- R6::R6Class(
 
                     correction_disclosure <- sprintf(
                         "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                            <h5>⚠️ Zero-Cell Correction Applied</h5>
+                            <h5> Zero-Cell Correction Applied</h5>
                             <p><strong>Method:</strong> %s</p>
                             <p><strong>Studies corrected:</strong> %d of %d (%s)</p>
                             <p><em>Note:</em> Zero-cell corrections can introduce bias, especially in large studies. Results should be interpreted with caution.</p>
@@ -2060,56 +2060,56 @@ diagnosticmetaClass <- R6::R6Class(
 
             html <- "
             <div class='about-panel' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
-                <h4>🎯 About Diagnostic Test Meta-Analysis</h4>
+                <h4> About Diagnostic Test Meta-Analysis</h4>
 
                 <div style='margin: 15px 0;'>
                     <h5>What This Analysis Does</h5>
                     <p>Combines results from multiple diagnostic accuracy studies to estimate overall test performance through:</p>
                     <ul>
-                        <li>📊 <strong>Bivariate modeling</strong> - Jointly analyzes sensitivity and specificity</li>
-                        <li>📈 <strong>HSROC curves</strong> - Models the trade-off between sensitivity and specificity</li>
-                        <li>🔍 <strong>Heterogeneity assessment</strong> - Evaluates consistency across studies</li>
-                        <li>📉 <strong>Publication bias</strong> - Checks for selective reporting</li>
+                        <li> <strong>Bivariate modeling</strong> - Jointly analyzes sensitivity and specificity</li>
+                        <li> <strong>HSROC curves</strong> - Models the trade-off between sensitivity and specificity</li>
+                        <li> <strong>Heterogeneity assessment</strong> - Evaluates consistency across studies</li>
+                        <li> <strong>Publication bias</strong> - Checks for selective reporting</li>
                     </ul>
                 </div>
 
                 <div style='margin: 15px 0; background-color: #e3f2fd; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3;'>
-                    <h5>📘 Understanding Bivariate vs HSROC Models</h5>
+                    <h5> Understanding Bivariate vs HSROC Models</h5>
                     <p><strong>Both models are valuable and provide complementary information:</strong></p>
 
                     <p><strong>Bivariate Random-Effects Model (Recommended Primary Approach):</strong></p>
                     <ul>
-                        <li>✅ Provides <em>intuitive</em> pooled sensitivity and specificity estimates</li>
-                        <li>✅ Accounts for correlation between sensitivity and specificity</li>
-                        <li>✅ Directly interpretable for clinical decision-making</li>
-                        <li>✅ Preferred for meta-analyses with <em>homogeneous thresholds</em></li>
-                        <li>📊 <strong>Use this when:</strong> Studies use the same diagnostic threshold</li>
+                        <li> Provides <em>intuitive</em> pooled sensitivity and specificity estimates</li>
+                        <li> Accounts for correlation between sensitivity and specificity</li>
+                        <li> Directly interpretable for clinical decision-making</li>
+                        <li> Preferred for meta-analyses with <em>homogeneous thresholds</em></li>
+                        <li> <strong>Use this when:</strong> Studies use the same diagnostic threshold</li>
                     </ul>
 
                     <p><strong>HSROC Model (Hierarchical Summary ROC):</strong></p>
                     <ul>
-                        <li>✅ Models the <em>entire ROC curve</em> across different thresholds</li>
-                        <li>✅ Provides threshold-independent accuracy estimates (Λ parameter)</li>
-                        <li>✅ Captures asymmetry in diagnostic accuracy (β parameter)</li>
-                        <li>✅ Better for studies with <em>varying cutoffs or thresholds</em></li>
-                        <li>📊 <strong>Use this when:</strong> Studies use different diagnostic thresholds</li>
+                        <li> Models the <em>entire ROC curve</em> across different thresholds</li>
+                        <li> Provides threshold-independent accuracy estimates (Λ parameter)</li>
+                        <li> Captures asymmetry in diagnostic accuracy (β parameter)</li>
+                        <li> Better for studies with <em>varying cutoffs or thresholds</em></li>
+                        <li> <strong>Use this when:</strong> Studies use different diagnostic thresholds</li>
                     </ul>
 
-                    <p><strong>💡 Clinical Insight:</strong> The SROC plot shown by this module is derived from the <em>bivariate model</em>, which provides a simpler and more intuitive visualization. The HSROC table provides additional parametric information (θ = threshold, Λ = accuracy) that can be useful for understanding test performance across different threshold scenarios. <strong>Both approaches are statistically valid</strong> - the choice depends on your research question and whether thresholds vary across studies.</p>
+                    <p><strong> Clinical Insight:</strong> The SROC plot shown by this module is derived from the <em>bivariate model</em>, which provides a simpler and more intuitive visualization. The HSROC table provides additional parametric information (θ = threshold, Λ = accuracy) that can be useful for understanding test performance across different threshold scenarios. <strong>Both approaches are statistically valid</strong> - the choice depends on your research question and whether thresholds vary across studies.</p>
                 </div>
 
                 <div style='margin: 15px 0;'>
                     <h5>When to Use This Analysis</h5>
                     <ul>
-                        <li>✅ Evaluating AI algorithms for pathology diagnosis</li>
-                        <li>✅ Assessing biomarker diagnostic accuracy</li>
-                        <li>✅ Comparing imaging modalities</li>
-                        <li>✅ Synthesizing evidence for clinical guidelines</li>
+                        <li> Evaluating AI algorithms for pathology diagnosis</li>
+                        <li> Assessing biomarker diagnostic accuracy</li>
+                        <li> Comparing imaging modalities</li>
+                        <li> Synthesizing evidence for clinical guidelines</li>
                     </ul>
                 </div>
 
                 <div style='margin: 15px 0; background-color: #fff3cd; padding: 15px; border-radius: 5px;'>
-                    <h5>⚠️ Key Requirements & Assumptions</h5>
+                    <h5> Key Requirements & Assumptions</h5>
                     <ul>
                         <li>Minimum 3 studies with 2×2 diagnostic data</li>
                         <li>Studies should evaluate the same test and target condition</li>
@@ -2119,7 +2119,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='margin: 15px 0;'>
-                    <h5>📖 Quick Start Guide</h5>
+                    <h5> Quick Start Guide</h5>
                     <ol>
                         <li><strong>Step 1:</strong> Select your study identifier variable</li>
                         <li><strong>Step 2:</strong> Assign TP, FP, FN, TN count variables</li>
@@ -2130,7 +2130,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0;'>
-                    <p><strong>💡 Tip:</strong> Start with the bivariate model and forest plot to understand overall performance, then explore heterogeneity sources with meta-regression if needed.</p>
+                    <p><strong> Tip:</strong> Start with the bivariate model and forest plot to understand overall performance, then explore heterogeneity sources with meta-regression if needed.</p>
                 </div>
             </div>
             "
@@ -2240,7 +2240,7 @@ diagnosticmetaClass <- R6::R6Class(
         .populateForestPlotExplanation = function() {
             html <- "
             <div class='plot-explanation' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
-                <h4>🌳 Forest Plot Interpretation Guide</h4>
+                <h4> Forest Plot Interpretation Guide</h4>
 
                 <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>What This Plot Shows</h5>
@@ -2265,7 +2265,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>💡 Quick Assessment Tips</h5>
+                    <h5> Quick Assessment Tips</h5>
                     <ul>
                         <li>Look for outlier studies (points far from others)</li>
                         <li>Check if confidence intervals overlap substantially</li>
@@ -2282,7 +2282,7 @@ diagnosticmetaClass <- R6::R6Class(
         .populateSROCPlotExplanation = function() {
             html <- "
             <div class='plot-explanation' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
-                <h4>📈 Summary ROC Plot Interpretation Guide</h4>
+                <h4> Summary ROC Plot Interpretation Guide</h4>
 
                 <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>What This Plot Shows</h5>
@@ -2307,7 +2307,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>💡 Quick Assessment Tips</h5>
+                    <h5> Quick Assessment Tips</h5>
                     <ul>
                         <li>Closer to upper-left corner = better overall diagnostic accuracy</li>
                         <li>Wide scatter of points = substantial between-study heterogeneity</li>
@@ -2317,7 +2317,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>🎯 Clinical Decision Making</h5>
+                    <h5> Clinical Decision Making</h5>
                     <p><strong>Use this plot to:</strong> Visualize test performance trade-offs, identify optimal operating points, and assess consistency across different study populations and settings.</p>
                 </div>
             </div>
@@ -2329,7 +2329,7 @@ diagnosticmetaClass <- R6::R6Class(
         .populateFunnelPlotExplanation = function() {
             html <- "
             <div class='plot-explanation' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;'>
-                <h4>🔍 Funnel Plot Interpretation Guide</h4>
+                <h4> Funnel Plot Interpretation Guide</h4>
 
                 <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>
                     <h5>What This Plot Shows</h5>
@@ -2344,7 +2344,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>⚠️ Publication Bias Indicators</h5>
+                    <h5> Publication Bias Indicators</h5>
                     <ul>
                         <li><strong>Asymmetric Funnel:</strong> Missing studies on one side (usually left = negative results)</li>
                         <li><strong>Gap in Lower Region:</strong> Small studies with negative/null results missing</li>
@@ -2353,7 +2353,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>✅ No Bias Indicators</h5>
+                    <h5> No Bias Indicators</h5>
                     <ul>
                         <li><strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides</li>
                         <li><strong>Deeks' Test p ≥ 0.05:</strong> No statistical evidence of asymmetry</li>
@@ -2362,7 +2362,7 @@ diagnosticmetaClass <- R6::R6Class(
                 </div>
 
                 <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>💡 Interpretation Caveats</h5>
+                    <h5> Interpretation Caveats</h5>
                     <ul>
                         <li><strong>Small Sample:</strong> Funnel plot unreliable with <10 studies</li>
                         <li><strong>Heterogeneity:</strong> Clinical differences can mimic publication bias</li>

@@ -762,7 +762,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncompare",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = decisioncompareResults$new(options=options),
                 data = data,
@@ -785,6 +785,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic comparison of two diagnostic tests
 #' library(ClinicoPath)
 #' data('histopathology')
@@ -827,10 +828,10 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'     test2 = "Rater 1",
 #'     test2Positive = "1",
 #'     pp = TRUE,
-#'     pprob = 0.15,  # 15\% prevalence in screening population
+#'     pprob = 0.15,  # 15 percent prevalence in screening population
 #'     od = TRUE      # Show original frequency tables
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param gold The gold standard reference variable representing true disease
 #'   status.
@@ -860,8 +861,8 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   visualization.
 #' @param heatmap Generate concordance heatmap comparing per-case test results
 #'   against gold standard.
-#' @param opa Show overall percent agreement with 95\% confidence intervals
-#'   for each test.
+#' @param opa Show overall percent agreement with 95 percent confidence
+#'   intervals for each test.
 #' @param niMargin Noninferiority margin as percentage (default 75). Used when
 #'   OPA is enabled.
 #' @param ciMethod CI method: wilson, logit, or exact (Clopper-Pearson).

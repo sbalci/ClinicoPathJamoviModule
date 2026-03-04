@@ -6,7 +6,6 @@ library(jmvcore)
 
 # Load the package
 if (requireNamespace("devtools", quietly = TRUE)) {
-  devtools::load_all()
 }
 
 # Helper functions with input validation

@@ -1,11 +1,7 @@
-#' Stage Migration Analysis - Core Utility Functions
-#'
-#' @description
-#' Core utility functions for consistent variable handling, safe execution,
-#' and common operations across stage migration analysis modules.
-#'
-#' @keywords internal
-#' @noRd
+# Stage Migration Analysis - Core Utility Functions
+#
+# Core utility functions for consistent variable handling, safe execution,
+# and common operations across stage migration analysis modules.
 
 # =============================================================================
 # VARIABLE HANDLING UTILITIES

@@ -520,6 +520,7 @@ generalizedrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example with continuous Ki67 percentage
 #' data <- data.frame(
 #'   outcome = factor(sample(c("Low", "High"), 100, replace=TRUE)),
@@ -533,7 +534,7 @@ generalizedrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   assume_equal_variance = FALSE,
 #'   transformation = 'none'
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome a string naming the outcome variable (binary or ordinal)
 #' @param predictor a string naming the continuous predictor variable
@@ -547,7 +548,7 @@ generalizedrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param ci_method method for confidence interval calculation
 #' @param bootstrap_samples number of bootstrap samples for CI calculation
 #' @param confidence_level confidence level for intervals (default: 0.95 for
-#'   95\% CI)
+#'   95 percent CI)
 #' @param show_diagnostics show diagnostic tests for normality and variance
 #'   equality
 #' @param variance_test test for equality of variances across groups

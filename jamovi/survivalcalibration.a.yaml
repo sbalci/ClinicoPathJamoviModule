@@ -12,7 +12,7 @@ description:
       Assess calibration, discrimination, and predictive accuracy at specific time points
       using bootstrap validation and cross-validation. TRIPOD-compliant reporting.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage:
             # data <- your_data

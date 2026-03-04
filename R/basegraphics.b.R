@@ -64,7 +64,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Initialize instructions
             instructions_html <- paste(
                 "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ff9800;'>",
-                "<h4 style='color: #e65100; margin-top: 0;'>⚠️ IMPORTANT: Exploratory Visualization Only</h4>",
+                "<h4 style='color: #e65100; margin-top: 0;'> IMPORTANT: Exploratory Visualization Only</h4>",
                 "<p style='margin: 5px 0; color: #d84315;'><strong>This module provides DESCRIPTIVE and EXPLORATORY visualization only.</strong></p>",
                 "<p style='margin: 5px 0;'><strong>NOT intended for:</strong></p>",
                 "<ul style='margin: 5px 0; padding-left: 20px;'>",
@@ -102,7 +102,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<div style='background-color: #fff8e1; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                 "<p style='margin: 0; color: #f57c00;'><strong>Performance Note:</strong> Base R graphics are blazing fast and require no external dependencies, making them ideal for large datasets and rapid exploration.</p>",
                 "</div>",
-                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'>💡 This module implements GitHub Issue #75 showcasing the power of base R graphics.</p>",
+                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements GitHub Issue #75 showcasing the power of base R graphics.</p>",
                 "</div>"
             )
             
@@ -759,7 +759,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Important reminder
             summary_html <- paste0(summary_html, "<p style='margin-top: 10px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107;'>")
-            summary_html <- paste0(summary_html, "<strong>⚠️ Important:</strong> This is an <em>exploratory</em> analysis. ")
+            summary_html <- paste0(summary_html, "<strong> Important:</strong> This is an <em>exploratory</em> analysis. ")
             summary_html <- paste0(summary_html, "Correlation does not prove causation. Formal hypothesis testing is needed before using these findings for clinical decisions.")
             summary_html <- paste0(summary_html, "</p>")
 

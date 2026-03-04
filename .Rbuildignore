@@ -107,3 +107,105 @@
 ^_updateModules.R
 ^updateModules_config.yaml
 ^module-updates.R
+^\.claude$
+^\.claude_prompts$
+^\.tmp$
+^CLAUDE\.md$
+^CITATION\.cff$
+
+# =============================================================================
+# Non-standard top-level markdown/summary files
+# =============================================================================
+^COMPILATION_SUCCESS_REPORT\.md$
+^COMPREHENSIVE_REVIEW_FIXES_SUMMARY\.md$
+^CONTRIBUTING\.md$
+^DATA_ORGANIZATION\.md$
+^FIXES_APPLIED_SUMMARY\.md$
+^IMPLEMENTATION_SUMMARY\.md$
+^TESTING_GUIDE\.md$
+^UI_REORGANIZATION_SUMMARY\.md$
+^VALIDATION_CHECKLIST\.md$
+^README_NEW_FEATURES\.md$
+^README\.Rmd$
+^LICENSE\.md$
+
+# GROOMECOMPARE_* markdown files
+^GROOMECOMPARE_.*\.md$
+
+# RPASURVIVAL_* markdown files
+^RPASURVIVAL_.*\.md$
+
+# STAGEMIGRATION_* markdown files
+^STAGEMIGRATION_.*\.md$
+
+# enhancedROC_* markdown files
+^enhancedROC_.*\.md$
+
+# Other review/report markdown files
+^psychopdaROC_team_review\.md$
+^stagemigration_function_check_report\.md$
+^TEST_DATA_.*\.md$
+
+# =============================================================================
+# Non-standard top-level R scripts (dev/debug/fix/utility)
+# =============================================================================
+^INSTALL_FMSB\.R$
+^add_targeted_wrappers\.R$
+^clean_untracked\.R$
+^debug_.*\.R$
+^fix_.*\.R$
+^patch_add_items\.R$
+^remove_.*\.R$
+^update_tests\.R$
+^test_groomecompare_.*\.R$
+
+# =============================================================================
+# Non-standard config/data files
+# =============================================================================
+^_updateModules_config\.yaml$
+^_updateModules_utils\.R$
+^groomecompare_test_data\.omv$
+^generate_function_list\.py$
+^PATCHES$
+^ClinicoPath_.*\.tar\.gz$
+
+# =============================================================================
+# Log and text output files
+# =============================================================================
+^args_output\.txt$
+^build_log\.txt$
+^classical_failure\.log$
+^comp_output\.txt$
+^doc_log\.txt$
+^edge_output\.txt$
+^log\.txt$
+^psychopda_basic_log\.txt$
+^test_output.*\.txt$
+
+# =============================================================================
+# Development directories
+# =============================================================================
+^development-LLM/
+^development-diagrams/
+^development-documentations-dev\.jamovi\.org-master/
+^development-ideas/
+^development-scripts/
+^i18n/
+^i18n-plans/
+^legacy/
+^literature/
+^tutorials/
+^scripts/
+^_snaps/
+^image/
+
+# Vignettes support files
+^vignettes/developer_guide_files/
+^vignettes/\.quarto/
+^vignettes/_quarto\.yaml$
+^vignettes/README\.md$
+^vignettes/README_GUIDES\.md$
+^vignettes/function_list\.md$
+^vignettes/social-media-shares\.md$
+^vignettes/rpa-survival-staging-workflow\.md$
+^vignettes/.*_guide\.md$

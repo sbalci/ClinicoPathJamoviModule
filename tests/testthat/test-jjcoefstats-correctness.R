@@ -8,7 +8,6 @@ context("test-jjcoefstats-correctness")
 # 4. Input validation for logistic and Cox models
 # 5. Overall functionality across model types
 
-devtools::load_all()
 
 # ============================================================================
 # PRECOMPUTED MODE TESTS
@@ -16,7 +15,6 @@ devtools::load_all()
 
 test_that("jjcoefstats precomputed mode with z-distribution (no df)", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create precomputed coefficient data
   coef_data <- data.frame(
     term = c("intercept", "age", "treatment"),

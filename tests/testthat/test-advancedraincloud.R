@@ -7,7 +7,6 @@ run_advancedraincloud_analysis <- function(data, ...) {
 
 test_that("advancedraincloud module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("advancedraincloudClass"))
   expect_true(is.function(advancedraincloud))
 })

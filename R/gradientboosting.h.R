@@ -479,6 +479,7 @@ gradientboostingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- gradientboosting(
 #'     data = mydata,
 #'     time = "time_to_event",
@@ -490,7 +491,7 @@ gradientboostingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'     max_depth = 3,
 #'     cv_folds = 5
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

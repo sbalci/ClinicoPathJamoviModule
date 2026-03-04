@@ -334,7 +334,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Build HTML for successful data quality check
             paste0(
                 "<div style='background-color: #e8f5e9; padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0;'>",
-                "<h4>Data Quality Check ✓</h4>",
+                "<h4>Data Quality Check </h4>",
                 "<p><strong>Sample size:</strong> N = ", n_final, "</p>",
                 "<p><strong>Complete cases:</strong> ", round(100 - missing_pct_original, 1), "%</p>",
                 "<p><em>No major data quality issues detected.</em></p>",
@@ -430,7 +430,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
                 # Exclusion warning if applicable
                 if (excluded_n > 0) {
-                    paste0("<p style='color: #d9534f;'><strong>⚠️ Case exclusion:</strong> ",
+                    paste0("<p style='color: #d9534f;'><strong> Case exclusion:</strong> ",
                            excluded_n, " cases (", round(100 * excluded_n / n_original, 1),
                            "%) excluded due to missing values. <strong>Final N = ", n_final,
                            "</strong></p>",
@@ -440,7 +440,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 } else {
                     paste0("<p><strong>Analysis sample:</strong> ", n_final, " cases (no exclusions applied)</p>",
                            if (missing_pct_original > 0) {
-                               "<p style='color: #856404; background-color: #fff3cd; padding: 8px; border-radius: 4px;'><em>⚠️ Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling 'Exclude Missing Values' for consistent denominators.</em></p>"
+                               "<p style='color: #856404; background-color: #fff3cd; padding: 8px; border-radius: 4px;'><em> Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling 'Exclude Missing Values' for consistent denominators.</em></p>"
                            } else "")
                 },
 
@@ -473,7 +473,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Check sample size (clinical thresholds)
             if (n_final < 10) {
                 # STRONG_WARNING: Very small sample
-                warnings <- c(warnings, paste0("<strong>⚠️ Very small final sample size (N = ", n_final, ").</strong> Results may be unreliable with fewer than 10 cases. Consider collecting more data or using exact tests."))
+                warnings <- c(warnings, paste0("<strong> Very small final sample size (N = ", n_final, ").</strong> Results may be unreliable with fewer than 10 cases. Consider collecting more data or using exact tests."))
             } else if (n_final < 30) {
                 # WARNING: Small sample
                 recommendations <- c(recommendations, paste0("<em>Small final sample size (N = ", n_final, ").</em> Consider reporting exact values rather than summary statistics. Confidence intervals may be wide."))
@@ -483,7 +483,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             missing_pct_original <- round(100 * (1 - sum(complete.cases(original_data)) / n_original), 1)
             if (missing_pct_original > 50) {
                 # STRONG_WARNING: High missing data
-                warnings <- c(warnings, paste0("<strong>⚠️ High missing data rate in original dataset (", missing_pct_original, "%).</strong> More than half of cases have at least one missing value. Results may not be representative of the full population. Consider data cleaning, imputation, or reporting missing data patterns."))
+                warnings <- c(warnings, paste0("<strong> High missing data rate in original dataset (", missing_pct_original, "%).</strong> More than half of cases have at least one missing value. Results may not be representative of the full population. Consider data cleaning, imputation, or reporting missing data patterns."))
             } else if (missing_pct_original > 20) {
                 # WARNING: Moderate missing data
                 recommendations <- c(recommendations, paste0("<em>Moderate missing data in original dataset (", missing_pct_original, "%).</em> Consider reporting missing data patterns or using multiple imputation. Compare characteristics of complete vs. incomplete cases."))
@@ -494,7 +494,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 excluded_pct <- round(100 * (n_original - n_final) / n_original, 1)
                 if (excluded_pct > 30) {
                     # STRONG_WARNING: Large exclusion
-                    warnings <- c(warnings, paste0("<strong>⚠️ Large case loss due to missing data (", excluded_pct, "% excluded).</strong> Excluded: ", n_original - n_final, " cases | Retained: ", n_final, " cases. Results may not be representative of the full sample. Consider multiple imputation or sensitivity analyses."))
+                    warnings <- c(warnings, paste0("<strong> Large case loss due to missing data (", excluded_pct, "% excluded).</strong> Excluded: ", n_original - n_final, " cases | Retained: ", n_final, " cases. Results may not be representative of the full sample. Consider multiple imputation or sensitivity analyses."))
                 } else if (excluded_pct > 10) {
                     # WARNING: Notable exclusion
                     recommendations <- c(recommendations, paste0("<em>Notable case loss (", excluded_pct, "% excluded).</em> Excluded: ", n_original - n_final, " cases | Retained: ", n_final, " cases. Compare characteristics of excluded vs. included cases to assess potential bias."))
@@ -585,7 +585,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Format with copy button styling
             html_output <- paste0(
                 "<div style='background-color: #f0f8ff; border: 2px solid #4682b4; border-radius: 5px; padding: 15px; margin: 10px 0;'>",
-                "<h4 style='margin-top: 0; color: #2c5aa0;'>📋 Copy-Ready Report Sentence</h4>",
+                "<h4 style='margin-top: 0; color: #2c5aa0;'> Copy-Ready Report Sentence</h4>",
                 "<p style='font-family: Georgia, serif; font-size: 14px; line-height: 1.6; color: #333;'>",
                 htmltools::htmlEscape(report_text),
                 "</p>",

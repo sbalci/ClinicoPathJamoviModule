@@ -882,6 +882,7 @@ illnessdeathBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- illnessdeath(
 #'     data = mydata,
 #'     time_entry = "entry_time",
@@ -891,7 +892,7 @@ illnessdeathBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     covariates = c("age", "treatment", "stage"),
 #'     reversible_illness = FALSE
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time_entry Time of entry into the current state. For interval data,
 #'   this is the start time of the observation interval.

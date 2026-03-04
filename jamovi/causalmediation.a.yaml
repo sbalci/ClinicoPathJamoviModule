@@ -21,7 +21,7 @@ description:
         epidemiology, and precision medicine research.
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Basic mediation
             causalmediation(

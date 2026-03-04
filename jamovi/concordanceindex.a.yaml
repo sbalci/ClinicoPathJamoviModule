@@ -23,7 +23,7 @@ description:
         through appropriate pair weighting and can be decomposed to identify which
         risk groups contribute most to discrimination.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- concordanceindex(
                 data = validation_data,

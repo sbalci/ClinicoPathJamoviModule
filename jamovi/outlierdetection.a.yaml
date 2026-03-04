@@ -3,7 +3,7 @@ name: outlierdetection
 title: Outlier Detection
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -121,9 +121,9 @@ options:
       default: 3.29
       description:
           R: >
-            Threshold for Z-score based methods. CLINICAL EXAMPLES: 3.0 = 99.7% confidence
-            (standard screening for most lab values), 3.29 = 99.9% confidence (stringent,
-            for critical values like cardiac enzymes), 2.5 = 98.8% confidence (sensitive
+            Threshold for Z-score based methods. CLINICAL EXAMPLES: 3.0 = 99.7 percent confidence
+            (standard screening for most lab values), 3.29 = 99.9 percent confidence (stringent,
+            for critical values like cardiac enzymes), 2.5 = 98.8 percent confidence (sensitive
             detection for research). Recommended: 3.29 for clinical quality control.
 
     - name: iqr_multiplier
@@ -135,7 +135,7 @@ options:
       description:
           R: >
             Multiplier for IQR-based outlier detection. CLINICAL EXAMPLES: 1.5 = Tukey's
-            standard (sensitive, may flag ~0.7% of normal data), 1.7 = conservative
+            standard (sensitive, may flag ~0.7 percent of normal data), 1.7 = conservative
             (recommended for clinical screening), 2.0 = very conservative (for critical
             biomarkers). Useful for non-normal distributions common in clinical data.
 
@@ -147,7 +147,7 @@ options:
       default: 0.999
       description:
           R: >
-            Confidence level for interval-based methods (ETI, HDI). Default 99.9% identifies
+            Confidence level for interval-based methods (ETI, HDI). Default 99.9 percent identifies
             the most extreme observations.
 
     - name: show_outlier_table

@@ -552,10 +552,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Helper function to add messages
             add_message <- function(type, content) {
                 color <- switch(type,
-                    "error" = list(bg = "#f8d7da", border = "#dc3545", text = "#721c24", icon = "❌"),
-                    "strong_warning" = list(bg = "#fff3cd", border = "#ff8800", text = "#856404", icon = "⚠️"),
-                    "warning" = list(bg = "#fff3cd", border = "#ffc107", text = "#856404", icon = "⚠️"),
-                    "info" = list(bg = "#d1ecf1", border = "#17a2b8", text = "#0c5460", icon = "ℹ️"),
+                    "error" = list(bg = "#f8d7da", border = "#dc3545", text = "#721c24", icon = ""),
+                    "strong_warning" = list(bg = "#fff3cd", border = "#ff8800", text = "#856404", icon = ""),
+                    "warning" = list(bg = "#fff3cd", border = "#ffc107", text = "#856404", icon = ""),
+                    "info" = list(bg = "#d1ecf1", border = "#17a2b8", text = "#0c5460", icon = ""),
                     list(bg = "#e2e3e5", border = "#6c757d", text = "#383d41", icon = "•")
                 )
                 messages <<- c(messages, list(sprintf(
@@ -645,21 +645,21 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     # Add debug message
                     self$results$todo$setContent(
-                        paste("<p><strong>✅ Success:</strong> Added", length(time_values_for_output), "calculated time values to data output.</p>")
+                        paste("<p><strong> Success:</strong> Added", length(time_values_for_output), "calculated time values to data output.</p>")
                     )
                 } else {
                     self$results$todo$setContent(
-                        "<p><strong>⚠️ Warning:</strong> No valid time values available to add to data output.</p>"
+                        "<p><strong> Warning:</strong> No valid time values available to add to data output.</p>"
                     )
                 }
             } else {
                 if (!self$options$add_times) {
                     self$results$todo$setContent(
-                        "<p><strong>ℹ️ Note:</strong> add_times option is disabled. Enable it to add calculated times to data.</p>"
+                        "<p><strong> Note:</strong> add_times option is disabled. Enable it to add calculated times to data.</p>"
                     )
                 } else {
                     self$results$todo$setContent(
-                        "<p><strong>⚠️ Warning:</strong> calculated_times is null, cannot add to data output.</p>"
+                        "<p><strong> Warning:</strong> calculated_times is null, cannot add to data output.</p>"
                     )
                 }
             }
@@ -693,10 +693,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Populate About panel
             about_html <- "
                 <div style='background-color: #f0f7ff; padding: 15px; border-left: 4px solid #0066cc; margin: 15px 0;'>
-                    <h4 style='margin-top: 0; color: #004085;'>📘 What does this analysis do?</h4>
+                    <h4 style='margin-top: 0; color: #004085;'> What does this analysis do?</h4>
                     <p>Calculates time intervals between two dates, designed for survival analysis and epidemiological studies.</p>
 
-                    <h4 style='color: #004085;'>🎯 When to use:</h4>
+                    <h4 style='color: #004085;'> When to use:</h4>
                     <ul style='margin: 5px 0;'>
                         <li>Computing follow-up time for survival analysis (e.g., diagnosis to death/last contact)</li>
                         <li>Calculating person-time denominators for incidence rate studies</li>
@@ -704,7 +704,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <li>Preparing time variables for Cox regression or Kaplan-Meier analysis</li>
                     </ul>
 
-                    <h4 style='color: #004085;'>📊 Key outputs:</h4>
+                    <h4 style='color: #004085;'> Key outputs:</h4>
                     <ul style='margin: 5px 0;'>
                         <li><strong>Calculated intervals:</strong> Time between dates in your chosen units (days/weeks/months/years)</li>
                         <li><strong>Summary statistics:</strong> Mean, median, range, and confidence intervals</li>
@@ -712,7 +712,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <li><strong>Quality assessment:</strong> Flags negative intervals, missing values, and outliers</li>
                     </ul>
 
-                    <h4 style='color: #004085;'>⚡ Quick start:</h4>
+                    <h4 style='color: #004085;'> Quick start:</h4>
                     <ol style='margin: 5px 0;'>
                         <li>Select your <strong>start date</strong> variable (e.g., diagnosis date, study entry)</li>
                         <li>Select your <strong>end date</strong> variable (e.g., death date, last follow-up)</li>
@@ -823,7 +823,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                                     <div style='background-color: #e8f5e9; padding: 12px; margin-top: 12px; border-left: 3px solid #4caf50;'>
 
-                                        <strong>💡 Interpretation Example:</strong><br>
+                                        <strong> Interpretation Example:</strong><br>
 
                                         With a mean follow-up of {round(summary_stats$mean, 1)} {self$options$output_unit}
 
@@ -861,7 +861,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Handle case with no valid calculated times
                 error_summary <- "
                     <div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0;'>
-                        <h4 style='margin-top: 0; color: #721c24;'>⚠️ No Valid Time Intervals</h4>
+                        <h4 style='margin-top: 0; color: #721c24;'> No Valid Time Intervals</h4>
                         <p>No valid time intervals could be calculated from the provided data.</p>
                         <p><strong>Please check:</strong></p>
                         <ul>
@@ -907,7 +907,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 summary_html <- glue::glue("
                     <div style='background-color: #e8f4f8; padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0;'>
-                        <h3 style='margin-top: 0; color: #004080;'>📋 Clinical Summary</h3>
+                        <h3 style='margin-top: 0; color: #004080;'> Clinical Summary</h3>
                         <p style='font-size: 1.1em; line-height: 1.6;'>
                         <strong>Time interval analysis</strong> was performed on <strong>{n_obs} participants</strong>{landmark_text}.
                         The mean follow-up was <strong>{mean_time} {unit}</strong> (median: {median_time} {unit}),
@@ -916,7 +916,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         <div style='background-color: #f0f7ff; padding: 15px; margin-top: 15px; border-radius: 5px;'>
                             <p style='font-size: 0.95em; color: #333; margin: 0;'>
-                            <strong>📄 Copy-Ready Sentence:</strong><br>
+                            <strong> Copy-Ready Sentence:</strong><br>
                             <em style='color: #555;'>\"Follow-up data were available for {n_obs} participants
                             (mean {mean_time} {unit}, median {median_time} {unit}), contributing {total_pt} person-{unit}
                             of observation time.\"</em>
@@ -932,7 +932,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$show_glossary) {
                 glossary_html <- "
                     <div style='background-color: #f3e5f5; padding: 15px; border-left: 4px solid #9c27b0; margin: 15px 0;'>
-                        <h4 style='margin-top: 0; color: #4a148c;'>📖 Key Terms Explained</h4>
+                        <h4 style='margin-top: 0; color: #4a148c;'> Key Terms Explained</h4>
 
                         <dl style='margin: 5px 0;'>
                             <dt style='font-weight: bold; margin-top: 10px;'>Person-Time</dt>
@@ -995,7 +995,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 quality_html <- glue::glue(
                     "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0;'>",
-                        "<h4 style='margin-top: 0; color: #004085;'>📊 Data Quality Assessment</h4>",
+                        "<h4 style='margin-top: 0; color: #004085;'> Data Quality Assessment</h4>",
 
                         "<p><strong>Overall Quality:</strong> {quality$overall_quality}</p>",
 
@@ -1034,7 +1034,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         "{if (length(filter_lines) > 0) paste0('<p><strong>Filters applied:</strong> ', filter_text, '</p>') else ''}",
 
-                        "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong>⚠️ Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
+                        "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong> Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
                     "</div>"
                 )
 
@@ -1043,7 +1043,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Populate Caveats panel (only when quality metrics enabled)
                 caveats_html <- "
                     <div style='background-color: #fff8e1; padding: 15px; border-left: 4px solid #ff9800; margin: 15px 0;'>
-                        <h4 style='margin-top: 0; color: #7f5006;'>⚠️ Important Assumptions</h4>
+                        <h4 style='margin-top: 0; color: #7f5006;'> Important Assumptions</h4>
                         <ul style='margin: 5px 0;'>
                             <li><strong>Time Units (Months/Years):</strong> To ensure statistical consistency for survival analysis, this tool uses <strong>standardized durations</strong> (1 month = 30.4375 days, 1 year = 365.25 days) rather than calendar units. This prevents bias from varying month lengths (28-31 days).</li>
                             <li><strong>End dates should occur on or after start dates</strong> - Negative intervals usually indicate data entry errors</li>
@@ -1052,7 +1052,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             <li><strong>Missing dates produce missing intervals</strong> - These are excluded from summary statistics</li>
                         </ul>
 
-                        <h4 style='color: #7f5006;'>🔍 Common Pitfalls</h4>
+                        <h4 style='color: #7f5006;'> Common Pitfalls</h4>
                         <ul style='margin: 5px 0;'>
                             <li><strong>Mixed date formats:</strong> DD/MM/YYYY vs MM/DD/YYYY in same column → Use manual format selection</li>
                             <li><strong>Text vs numeric dates:</strong> Ensure dates are stored consistently (all text or all numeric)</li>
@@ -1060,7 +1060,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             <li><strong>Extreme outliers:</strong> Very long intervals may be real (long follow-up) or errors</li>
                         </ul>
 
-                        <h4 style='color: #7f5006;'>💡 Troubleshooting</h4>
+                        <h4 style='color: #7f5006;'> Troubleshooting</h4>
                         <ul style='margin: 5px 0;'>
                             <li>If auto-detection fails, manually select your date format</li>
                             <li>Check for negative intervals - these indicate date column errors</li>

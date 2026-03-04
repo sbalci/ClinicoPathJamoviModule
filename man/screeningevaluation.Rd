@@ -226,6 +226,7 @@ development using
 standardized epidemiological methods and performance indicators.
 }
 \examples{
+\donttest{
 data('screening_data')
 
 screeningevaluation(
@@ -235,5 +236,5 @@ screeningevaluation(
     age_var = "age",
     screening_round = "round_number"
 )
-
+}
 }

@@ -10,7 +10,7 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
         private = list(
             .init = function() {
                 todo <- paste0(
-                    "<h4>📋 Conditional Inference Trees for Survival Analysis</h4>",
+                    "<h4> Conditional Inference Trees for Survival Analysis</h4>",
                     "<p><b>Required Variables:</b></p>",
                     "<ul>",
                     "<li>Time variable (numeric, time-to-event)</li>",
@@ -85,7 +85,7 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                     
                 }, error = function(e) {
                     self$results$todo$setContent(paste0(
-                        "<h4>⚠️ Analysis Error</h4>",
+                        "<h4> Analysis Error</h4>",
                         "<p>Error in conditional inference tree analysis: ", e$message, "</p>",
                         "<p>Please check your data and parameter settings.</p>"
                     ))

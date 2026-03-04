@@ -2,7 +2,6 @@
 # Argument Tests: nogoldstandard
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(nogoldstandard_test, package = "ClinicoPath")
 data(nogoldstandard_pathology, package = "ClinicoPath")
 data(nogoldstandard_validation, package = "ClinicoPath")

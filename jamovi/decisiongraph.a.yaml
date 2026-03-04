@@ -262,7 +262,7 @@ options:
       max: 0.20
       description:
           ui: >
-            Annual discount rate for future costs and benefits (0-20%). Use when same rate applies to both.
+            Annual discount rate for future costs and benefits (0-20 percent). Use when same rate applies to both.
           R: >
             Annual discount rate for future costs and benefits when same rate for both.
 
@@ -284,7 +284,7 @@ options:
       max: 0.20
       description:
           ui: >
-            Annual discount rate specifically for costs (0-20%). Only used when separate rates enabled.
+            Annual discount rate specifically for costs (0-20 percent). Only used when separate rates enabled.
           R: >
             Annual discount rate for costs.
 
@@ -296,7 +296,7 @@ options:
       max: 0.20
       description:
           ui: >
-            Annual discount rate specifically for health utilities/QALYs (0-20%). Often set lower than cost rate. Only used when separate rates enabled.
+            Annual discount rate specifically for health utilities/QALYs (0-20 percent). Often set lower than cost rate. Only used when separate rates enabled.
           R: >
             Annual discount rate for utilities and QALYs.
 
@@ -600,7 +600,7 @@ options:
       max: 1.0
       description:
           ui: >
-            Expected market penetration rate for new intervention (0-100%).
+            Expected market penetration rate for new intervention (0-100 percent).
           R: >
             Expected market penetration rate for new intervention.
 

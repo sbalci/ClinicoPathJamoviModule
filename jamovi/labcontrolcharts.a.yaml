@@ -11,9 +11,9 @@ description:
         charts for detecting systematic errors, shifts, and trends in laboratory measurements.
         Essential for ISO 15189 compliance and quality assurance programs.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             labcontrolcharts(
                 measurement = "glucose_value",
                 run_number = "run_id",
@@ -97,9 +97,9 @@ options:
       type: List
       options:
         - name: 3sigma
-          title: 3 Sigma (99.7%)
+          title: 3 Sigma (99.7 percent)
         - name: 2sigma
-          title: 2 Sigma (95%)
+          title: 2 Sigma (95 percent)
         - name: custom
           title: Custom Limits
         - name: westgard

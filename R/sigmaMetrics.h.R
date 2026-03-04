@@ -700,14 +700,15 @@ sigmametricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' sigmametrics(
 #'     bias = "method_bias",
 #'     cv = "coefficient_variation",
 #'     tea = "total_allowable_error",
 #'     analyte = "test_name"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param bias Method bias as percentage from target value
 #' @param cv Coefficient of variation (precision) as percentage

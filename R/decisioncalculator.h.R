@@ -574,7 +574,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncalculator",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = decisioncalculatorResults$new(options=options),
                 data = data,
@@ -599,6 +599,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic diagnostic test evaluation with known counts
 #' result1 <- decisioncalculator(
 #'   TP = 90,  # True positives
@@ -607,7 +608,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   FP = 20   # False positives
 #' )
 #'
-#' # Include 95\% confidence intervals
+#' # Include 95 percent confidence intervals
 #' result2 <- decisioncalculator(
 #'   TP = 90, FN = 10, TN = 80, FP = 20,
 #'   ci = TRUE
@@ -618,7 +619,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   TP = 90, FN = 10, TN = 80, FP = 20,
 #'   ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
 #' )
-#'
+#'}
 #' @param TP True Positive count: cases with disease that tested positive.
 #' @param TN True Negative count: cases without disease that tested negative.
 #' @param FP False Positive count: cases without disease that tested positive.
@@ -628,7 +629,8 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   Requires a value between 0.001 and 0.999, default 0.300.
 #' @param fnote Boolean selection whether to show detailed explanatory
 #'   footnotes.
-#' @param ci Boolean selection whether to calculate 95\% confidence intervals.
+#' @param ci Boolean selection whether to calculate 95 percent confidence
+#'   intervals.
 #' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
 #' @param showWelcome Boolean selection whether to show welcome message.
 #' @param showSummary Boolean selection whether to show plain-language summary

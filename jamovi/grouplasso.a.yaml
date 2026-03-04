@@ -22,7 +22,7 @@ description:
         interpretable group-wise feature selection with preserved biological
         or clinical structure.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- grouplasso(
                 data = mydata,

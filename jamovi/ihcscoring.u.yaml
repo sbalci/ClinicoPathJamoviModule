@@ -6,7 +6,7 @@ compilerMode: tame
 children:
   # ============ GUIDED ANALYSIS ============
   - type: CollapseBox
-    label: 🧭 Guided Analysis (Recommended for New Users)
+    label:  Guided Analysis (Recommended for New Users)
     collapsed: false
     children:
       - type: LayoutBox
@@ -90,7 +90,7 @@ children:
             margin: large
             children:
               - type: Label
-                label: "💡 Common Clinical Cutpoints:"
+                label: " Common Clinical Cutpoints:"
               - type: Label
                 label: "• ER/PR: H-score ≥100 (FDA approved)"
               - type: Label
@@ -299,7 +299,7 @@ children:
 
   # ============ ACCESSIBILITY & LANGUAGE ============
   - type: CollapseBox
-    label: "🌐 Accessibility & Language"
+    label: " Accessibility & Language"
     collapsed: true
     children:
       - type: LayoutBox

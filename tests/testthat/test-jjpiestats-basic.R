@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jjpiestats_test, package = "ClinicoPath", envir = environment())
@@ -21,7 +20,6 @@ data(jjpiestats_small, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats function exists and runs with minimal arguments", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -36,7 +34,6 @@ test_that("jjpiestats function exists and runs with minimal arguments", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats creates basic pie chart with single categorical variable", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -51,7 +48,6 @@ test_that("jjpiestats creates basic pie chart with single categorical variable",
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles parametric statistics", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -63,7 +59,6 @@ test_that("jjpiestats handles parametric statistics", {
 })
 
 test_that("jjpiestats handles nonparametric statistics", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -75,7 +70,6 @@ test_that("jjpiestats handles nonparametric statistics", {
 })
 
 test_that("jjpiestats handles robust statistics", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -87,7 +81,6 @@ test_that("jjpiestats handles robust statistics", {
 })
 
 test_that("jjpiestats handles Bayesian statistics", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -103,7 +96,6 @@ test_that("jjpiestats handles Bayesian statistics", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles grouping variable for contingency table", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -115,7 +107,6 @@ test_that("jjpiestats handles grouping variable for contingency table", {
 })
 
 test_that("jjpiestats handles 2x2 contingency table", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_diagnostic,
@@ -131,7 +122,6 @@ test_that("jjpiestats handles 2x2 contingency table", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles split variable for separate pie charts", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -143,7 +133,6 @@ test_that("jjpiestats handles split variable for separate pie charts", {
 })
 
 test_that("jjpiestats handles both group and split variables", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -160,7 +149,6 @@ test_that("jjpiestats handles both group and split variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles percentage labels", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -172,7 +160,6 @@ test_that("jjpiestats handles percentage labels", {
 })
 
 test_that("jjpiestats handles count labels", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -184,7 +171,6 @@ test_that("jjpiestats handles count labels", {
 })
 
 test_that("jjpiestats handles both percentage and count labels", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -200,7 +186,6 @@ test_that("jjpiestats handles both percentage and count labels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles diagnostic clinical preset", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_diagnostic,
@@ -213,7 +198,6 @@ test_that("jjpiestats handles diagnostic clinical preset", {
 })
 
 test_that("jjpiestats handles treatment clinical preset", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_treatment,
@@ -226,7 +210,6 @@ test_that("jjpiestats handles treatment clinical preset", {
 })
 
 test_that("jjpiestats handles biomarker clinical preset", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_biomarker,
@@ -242,7 +225,6 @@ test_that("jjpiestats handles biomarker clinical preset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles statistical results subtitle", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -255,7 +237,6 @@ test_that("jjpiestats handles statistical results subtitle", {
 })
 
 test_that("jjpiestats handles Bayes factor message", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -272,7 +253,6 @@ test_that("jjpiestats handles Bayes factor message", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles original ggstatsplot theme", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -284,7 +264,6 @@ test_that("jjpiestats handles original ggstatsplot theme", {
 })
 
 test_that("jjpiestats handles jamovi default theme", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -300,7 +279,6 @@ test_that("jjpiestats handles jamovi default theme", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles donut chart with ggpubr", {
-  devtools::load_all()
 
   result <- jjpiestats(
     data = jjpiestats_test,
@@ -312,7 +290,6 @@ test_that("jjpiestats handles donut chart with ggpubr", {
 })
 
 test_that("jjpiestats handles donut chart palettes", {
-  devtools::load_all()
 
   # JCO palette
   result_jco <- jjpiestats(
@@ -347,7 +324,6 @@ test_that("jjpiestats handles donut chart palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats works with all test datasets", {
-  devtools::load_all()
 
   # jjpiestats_test
   result1 <- jjpiestats(data = jjpiestats_test, dep = "treatment_response")
@@ -375,7 +351,6 @@ test_that("jjpiestats works with all test datasets", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles different confidence levels", {
-  devtools::load_all()
 
   # 90% confidence
   result_90 <- jjpiestats(
@@ -410,7 +385,6 @@ test_that("jjpiestats handles different confidence levels", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjpiestats handles different decimal digits", {
-  devtools::load_all()
 
   # 0 digits
   result_0 <- jjpiestats(

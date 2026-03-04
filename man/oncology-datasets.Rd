@@ -4,27 +4,6 @@
 \name{oncology-datasets}
 \alias{oncology-datasets}
 \title{Oncology Datasets from OncoDataSets Package}
-\usage{
-# Load a specific dataset
-data("Melanoma_df")
-
-# View all available oncology datasets
-data("oncology_datasets_summary")
-View(oncology_datasets_summary)
-
-# Example analyses:
-# Survival analysis with Melanoma data
-data("Melanoma_df")
-# Use in jsurvival module
-
-# ROC analysis with PSA data  
-data("PSAProstateCancer_df")
-# Use in meddecide module
-
-# Descriptive statistics with Breast Cancer data
-data("BreastCancerWI_df") 
-# Use in ClinicoPathDescriptives module
-}
 \description{
 A collection of 55 oncology datasets imported from the OncoDataSets package
 for use in ClinicoPath analyses. These datasets cover various cancer types,

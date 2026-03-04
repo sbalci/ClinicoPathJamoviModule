@@ -194,6 +194,7 @@ present. The regularization helps with variable selection and prevents
 overfitting.
 }
 \examples{
+\donttest{
 # Example 1: LASSO penalized Cox regression
 library(survival)
 library(glmnet)
@@ -220,5 +221,5 @@ penalizedcox(
     lambda_selection = "1se",
     variable_selection = TRUE
 )
-
+}
 }

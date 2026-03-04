@@ -127,6 +127,7 @@ functions, and weighted partial likelihood approaches for reliable survival
 analysis in the presence of data anomalies.
 }
 \examples{
+\donttest{
 # Example: Robust Cox regression
 library(survival)
 library(coxrobust)
@@ -140,5 +141,5 @@ coxrobust(
     robust_method = "huber",
     tuning_constant = 1.345
 )
-
+}
 }

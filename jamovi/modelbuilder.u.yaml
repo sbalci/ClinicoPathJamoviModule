@@ -13,7 +13,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: 🎯 Outcome Variable
+        label:  Outcome Variable
         children:
           - type: VariablesListBox
             name: outcome
@@ -25,7 +25,7 @@ children:
             enable: (outcome)
 
       - type: TargetLayoutBox
-        label: 🩺 Basic Clinical Variables 
+        label:  Basic Clinical Variables 
         children:
           - type: VariablesListBox
             name: basicPredictors
@@ -33,7 +33,7 @@ children:
             height: normal
             
       - type: TargetLayoutBox
-        label: 🩺+ Enhanced Clinical Variables 
+        label: + Enhanced Clinical Variables 
         children:
           - type: VariablesListBox
             name: enhancedPredictors
@@ -41,7 +41,7 @@ children:
             height: normal
             
       - type: TargetLayoutBox
-        label: 🧬 Biomarker Variables 
+        label:  Biomarker Variables 
         children:
           - type: VariablesListBox
             name: biomarkerPredictors
@@ -49,7 +49,7 @@ children:
             height: normal
             
       - type: TargetLayoutBox
-        label: 🎛️ Custom Variables 
+        label:  Custom Variables 
         children:
           - type: VariablesListBox
             name: customPredictors
@@ -61,7 +61,7 @@ children:
   # CLINICAL PRESETS - Quick setup for common scenarios  
   # =============================================================================
   - type: CollapseBox
-    label: 🎯 Clinical Presets (Quick Setup)
+    label:  Clinical Presets (Quick Setup)
     margin: normal
     collapsed: false
     children:
@@ -69,7 +69,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🎨 Predefined Clinical Scenarios
+            label:  Predefined Clinical Scenarios
             children:
               - type: ComboBox
                 name: clinicalPreset
@@ -82,7 +82,7 @@ children:
   # DATA PREPARATION - Essential setup
   # =============================================================================
   - type: CollapseBox
-    label: 📊 Data Preparation
+    label:  Data Preparation
     margin: normal
     collapsed: false
     children:
@@ -119,7 +119,7 @@ children:
   # MODEL SELECTION - Core functionality
   # =============================================================================
   - type: CollapseBox
-    label: 🏗️ Model Types to Build
+    label:  Model Types to Build
     margin: normal
     collapsed: false
     children:
@@ -127,7 +127,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🩺 Basic Clinical Model
+            label:  Basic Clinical Model
             children:
               - type: CheckBox
                 name: buildBasicModel
@@ -142,7 +142,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🩺+ Enhanced Clinical Model
+            label: + Enhanced Clinical Model
             children:
               - type: CheckBox
                 name: buildEnhancedModel
@@ -157,7 +157,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🧬 Biomarker Model
+            label:  Biomarker Model
             children:
               - type: CheckBox
                 name: buildBiomarkerModel
@@ -172,7 +172,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🎛️ Custom Model
+            label:  Custom Model
             children:
               - type: CheckBox
                 name: buildCustomModel
@@ -187,7 +187,7 @@ children:
   # MODELING METHOD - Algorithm selection
   # =============================================================================
   - type: CollapseBox
-    label: 🔬 Modeling Method
+    label:  Modeling Method
     margin: normal
     collapsed: true
     children:
@@ -195,7 +195,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 📈 Regression Type
+            label:  Regression Type
             children:
               - type: CheckBox
                 name: penalizedRegression
@@ -209,7 +209,7 @@ children:
   # FEATURE ENGINEERING - Advanced preprocessing
   # =============================================================================
   - type: CollapseBox
-    label: ⚙️ Feature Engineering
+    label:  Feature Engineering
     margin: normal
     collapsed: true
     children:
@@ -217,7 +217,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🔄 Variable Transformations
+            label:  Variable Transformations
             children:
               - type: CheckBox
                 name: transformVariables
@@ -231,7 +231,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🔗 Variable Interactions
+            label:  Variable Interactions
             children:
               - type: CheckBox
                 name: includeInteractions
@@ -246,7 +246,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 📊 Variable Selection
+            label:  Variable Selection
             children:
               - type: CheckBox
                 name: useStepwise
@@ -264,7 +264,7 @@ children:
   # MODEL VALIDATION - Performance assessment
   # =============================================================================
   - type: CollapseBox
-    label: ✅ Model Validation
+    label:  Model Validation
     margin: normal
     collapsed: true
     children:
@@ -272,7 +272,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🔄 Cross-Validation
+            label:  Cross-Validation
             children:
               - type: CheckBox
                 name: crossValidation
@@ -287,7 +287,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 🔁 Bootstrap Validation
+            label:  Bootstrap Validation
             children:
               - type: CheckBox
                 name: bootstrapValidation
@@ -302,7 +302,7 @@ children:
   # MODEL COMPARISON - Advanced metrics
   # =============================================================================
   - type: CollapseBox
-    label: ⚖️ Model Comparison
+    label:  Model Comparison
     margin: normal
     collapsed: true
     children:
@@ -310,7 +310,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 📊 Improvement Metrics
+            label:  Improvement Metrics
             children:
               - type: CheckBox
                 name: calculateNRI
@@ -328,7 +328,7 @@ children:
   # OUTPUT OPTIONS - What to display/export
   # =============================================================================
   - type: CollapseBox
-    label: 📋 Output Options
+    label:  Output Options
     margin: normal
     collapsed: true
     children:
@@ -336,7 +336,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 📊 Tables & Performance
+            label:  Tables & Performance
             children:
               - type: CheckBox
                 name: showModelSummary
@@ -352,7 +352,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 📈 Plots & Visualizations
+            label:  Plots & Visualizations
             children:
               - type: CheckBox
                 name: showROCCurves
@@ -365,7 +365,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 💾 Data Export & Integration
+            label:  Data Export & Integration
             children:
               - type: CheckBox
                 name: createPredictions
@@ -378,7 +378,7 @@ children:
   # CLINICAL RISK SCORE - Practical application
   # =============================================================================
   - type: CollapseBox
-    label: 🏥 Clinical Risk Score
+    label:  Clinical Risk Score
     margin: normal
     collapsed: true
     children:
@@ -386,7 +386,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: 📋 Risk Score Generation
+            label:  Risk Score Generation
             children:
               - type: CheckBox
                 name: generateRiskScore

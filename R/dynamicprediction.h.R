@@ -619,7 +619,8 @@ dynamicpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' dynamicprediction(
 #'     elapsedtime = "time_to_event",
 #'     outcome = "event_status",
@@ -628,7 +629,7 @@ dynamicpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'     time_var = "measurement_time",
 #'     prediction_horizon = 24
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (1 = event, 0 = censored)

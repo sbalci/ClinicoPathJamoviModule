@@ -13,7 +13,7 @@ description:
         with specialized metrics for pathology applications including discordance pattern analysis
         and HER2 scoring validation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic modality comparison
             result1 <- modalitycomparison(
@@ -126,12 +126,12 @@ options:
             Calculate weighted kappa for ordinal scores (requires ordered categories).
 
     - name: confidence_intervals
-      title: Show 95% Confidence Intervals
+      title: Show 95 percent Confidence Intervals
       type: Bool
       default: true
       description:
           R: >
-            Calculate and display 95% confidence intervals for agreement statistics.
+            Calculate and display 95 percent confidence intervals for agreement statistics.
 
     - name: directional_analysis
       title: Directional Bias Analysis

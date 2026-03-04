@@ -28,7 +28,7 @@ description:
         - Customizable color palettes
         - Grouping and faceting options
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Box plot with statistical comparison
             jjpubr(

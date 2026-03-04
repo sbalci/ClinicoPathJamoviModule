@@ -15,9 +15,9 @@ rmstClass <- R6::R6Class(
                 "<b>Restricted Mean Survival Time Tests</b>
                 <br><br>
                 Select variables:
-                <br>• Time Variable: {ifelse(is.null(self$options$elapsedtime), '❌ Not selected', '✅ Selected')}
-                <br>• Event Variable: {ifelse(is.null(self$options$outcome), '❌ Not selected', '✅ Selected')}  
-                <br>• Group Variable: {ifelse(is.null(self$options$explanatory), '❌ Not selected', '✅ Selected')}
+                <br>• Time Variable: {ifelse(is.null(self$options$elapsedtime), ' Not selected', ' Selected')}
+                <br>• Event Variable: {ifelse(is.null(self$options$outcome), ' Not selected', ' Selected')}  
+                <br>• Group Variable: {ifelse(is.null(self$options$explanatory), ' Not selected', ' Selected')}
                 <br><br>
                 <b>About RMST Analysis:</b>
                 <br>• Compares average survival time within a specified period (tau)

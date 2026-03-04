@@ -747,7 +747,7 @@ ihcpredictBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param trainingDiagnosis Name of the diagnosis variable in training dataset
 #' @param catVars Binary (pos/neg) or ordinal (0/1/2/3) stain results - must
 #'   match training markers
-#' @param contVars H-scores (0-300), \% positivity (0-100) - must match
+#' @param contVars H-scores (0-300),  percent positivity (0-100) - must match
 #'   training markers
 #' @param caseId Case identifier for tracking predictions
 #' @param predictionMethod Algorithm for predicting diagnoses

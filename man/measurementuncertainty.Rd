@@ -137,12 +137,13 @@ for clinical laboratory measurements. Essential for laboratory
 accreditation and quality assurance.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 measurementuncertainty(
     measurement = "glucose_result",
     reference_value = "certified_value",
     replicate_group = "measurement_run",
     uncertainty_method = "gum_approach"
 )
-
+}
 }

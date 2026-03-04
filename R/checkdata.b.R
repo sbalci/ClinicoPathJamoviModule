@@ -941,12 +941,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         # Per-method flags
                         method_flags <- outlier_analysis$detection_matrix[i, ]
-                        zscore_flag <- ifelse(method_flags["zscore"], "✓", "—")
-                        iqr_flag <- ifelse(method_flags["iqr"], "✓", "—")
+                        zscore_flag <- ifelse(method_flags["zscore"], "", "—")
+                        iqr_flag <- ifelse(method_flags["iqr"], "", "—")
                         mad_flag <- if (is.null(outlier_analysis$all_methods$mad)) {
                             "N/A"
                         } else {
-                            ifelse(method_flags["mad"], "✓", "—")
+                            ifelse(method_flags["mad"], "", "—")
                         }
 
                         self$results$outliers$addRow(rowKey=i, values=list(
@@ -1108,10 +1108,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Enhanced input validation with user guidance
             if (is.null(self$options$var)) {
                 todo_content <- "
-                <h3>📊 ClinicoPath Data Quality Assessment</h3>
+                <h3> ClinicoPath Data Quality Assessment</h3>
                 <p><strong>Purpose:</strong> Comprehensive evaluation of data completeness, accuracy, and patterns for clinical research.</p>
 
-                <p><strong>⚠️ IMPORTANT:</strong> Outlier detection uses a <strong>consensus approach</strong> -
+                <p><strong> IMPORTANT:</strong> Outlier detection uses a <strong>consensus approach</strong> -
                 points are only flagged if detected by ≥2 of 3 methods (Z-score, IQR, Modified Z-score).
                 Points flagged by only 1 method are <strong>not shown</strong>, even if they exceed |z|>3.</p>
 
@@ -1120,7 +1120,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Variable to Check:</strong> Select any variable for quality assessment</li>
                 </ul>
 
-                <h4>⚙️ Analysis Options:</h4>
+                <h4> Analysis Options:</h4>
                 <ul>
                     <li><strong>Outlier Analysis:</strong> Consensus-based detection (≥2 of 3 methods: Z-score |z|>3, IQR 1.5×rule, Modified Z-score |z|>3.5)</li>
                     <li><strong>Distribution Analysis:</strong> Descriptive statistics and normality assessment</li>
@@ -1128,7 +1128,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Pattern Analysis:</strong> Missing data mechanisms and systematic issues</li>
                 </ul>
 
-                <h4>🔬 Assessment Dimensions:</h4>
+                <h4> Assessment Dimensions:</h4>
                 <ul>
                     <li><strong>Completeness:</strong> Missing data evaluation and impact assessment</li>
                     <li><strong>Accuracy:</strong> Outlier detection and range validation</li>
@@ -1136,7 +1136,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Clinical Validity:</strong> Context-specific validation (age, lab values, etc.)</li>
                 </ul>
 
-                <h4>📈 Quality Grading:</h4>
+                <h4> Quality Grading:</h4>
                 <ul>
                     <li><strong>Grade A:</strong> Excellent quality - ready for analysis</li>
                     <li><strong>Grade B:</strong> Good quality - minor issues documented</li>
@@ -1144,7 +1144,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <li><strong>Grade D:</strong> Poor quality - major intervention required</li>
                 </ul>
 
-                <h4>🏥 Clinical Applications:</h4>
+                <h4> Clinical Applications:</h4>
                 <ul>
                     <li><strong>Clinical Trials:</strong> Regulatory compliance and data monitoring</li>
                     <li><strong>Observational Studies:</strong> Data integrity assessment</li>
@@ -1720,8 +1720,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "Poor (<70)"
             }
 
-            quality_text <- paste0(quality_text, sprintf("📊 HEURISTIC QUALITY: Grade %s — %s\n", quality_grade, score_band))
-            quality_text <- paste0(quality_text, "\n⚠️  IMPORTANT: This is a HEURISTIC (rule-of-thumb) assessment, NOT a validated metric.\n")
+            quality_text <- paste0(quality_text, sprintf(" HEURISTIC QUALITY: Grade %s — %s\n", quality_grade, score_band))
+            quality_text <- paste0(quality_text, "\n  IMPORTANT: This is a HEURISTIC (rule-of-thumb) assessment, NOT a validated metric.\n")
             quality_text <- paste0(quality_text, "The score uses arbitrary thresholds. Apply clinical judgment, not automated rules.\n\n")
 
             # Show scoring breakdown for transparency
@@ -1760,7 +1760,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             quality_text <- paste0(quality_text, sprintf("• Unique Values: %d (%.1f%% of complete cases)\n\n", n_unique, unique_pct))
             
             # Completeness assessment
-            quality_text <- paste0(quality_text, "🔍 COMPLETENESS ASSESSMENT:\n")
+            quality_text <- paste0(quality_text, " COMPLETENESS ASSESSMENT:\n")
             quality_text <- paste0(quality_text, sprintf("• Missing Data Rate: %.1f%% (%d/%d observations)\n", 
                                                         missing_pct, n_missing, n_total))
             quality_text <- paste0(quality_text, sprintf("• Completeness Grade: %s\n", 
@@ -1793,7 +1793,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 skewness <- ifelse(sd_val > 0, mean((clean_var - mean_val)^3) / sd_val^3, 0)
 
-                quality_text <- paste0(quality_text, "📈 DISTRIBUTION ASSESSMENT:\n")
+                quality_text <- paste0(quality_text, " DISTRIBUTION ASSESSMENT:\n")
                 quality_text <- paste0(quality_text, sprintf("• Central Tendency: Mean = %.3f, Median = %.3f\n",
                                                             mean_val, median(clean_var)))
 
@@ -1821,7 +1821,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Categorical data assessment
             if (is_categorical && n_complete > 0) {
                 categorical_assessment <- private$.analyzeCategoricalQuality(variable)
-                quality_text <- paste0(quality_text, "🏷️  CATEGORICAL DATA ASSESSMENT:\n")
+                quality_text <- paste0(quality_text, "  CATEGORICAL DATA ASSESSMENT:\n")
                 quality_text <- paste0(quality_text, sprintf("• Number of Categories: %d\n", n_unique))
                 
                 if (!is.null(categorical_assessment)) {
@@ -1846,7 +1846,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Enhanced recommendations based on grade and context
-            quality_text <- paste0(quality_text, "💡 RECOMMENDATIONS:\n")
+            quality_text <- paste0(quality_text, " RECOMMENDATIONS:\n")
             
             if (quality_grade == "A") {
                 quality_text <- paste0(quality_text, "INTERPRETATION: High-Quality Data (by heuristic rules)\n")
@@ -1880,7 +1880,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Specific actionable recommendations
-            quality_text <- paste0(quality_text, "\n🔧 SPECIFIC ACTIONS:\n")
+            quality_text <- paste0(quality_text, "\n SPECIFIC ACTIONS:\n")
             
             if (missing_pct > 15) {
                 quality_text <- paste0(quality_text, "• MISSING DATA: Investigate missing data mechanisms (MCAR/MAR/MNAR)\n")
@@ -1920,7 +1920,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add context-specific limitations section
             quality_text <- paste0(quality_text, "\n")
-            quality_text <- paste0(quality_text, "⚠️  LIMITATIONS OF THIS ASSESSMENT:\n\n")
+            quality_text <- paste0(quality_text, "  LIMITATIONS OF THIS ASSESSMENT:\n\n")
 
             limitations_added <- FALSE
 
@@ -1989,7 +1989,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # General limitation footer
             if (limitations_added) {
-                quality_text <- paste0(quality_text, "\n⚡ CRITICAL REMINDER: This is an automated SCREENING tool to identify potential issues.\n")
+                quality_text <- paste0(quality_text, "\n CRITICAL REMINDER: This is an automated SCREENING tool to identify potential issues.\n")
                 quality_text <- paste0(quality_text, "   Final data quality decisions MUST incorporate:\n")
                 quality_text <- paste0(quality_text, "   - Clinical/domain expertise for context\n")
                 quality_text <- paste0(quality_text, "   - Manual verification of flagged values\n")
@@ -2106,7 +2106,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Caveats & Assumptions panel
             if (self$options$showCaveats) {
                 caveats_html <- "<div style='font-family: Arial, sans-serif; line-height: 1.6; padding: 15px; background-color: #fff8dc; border-left: 4px solid #ffa500;'>"
-                caveats_html <- paste0(caveats_html, "<h3 style='color: #d2691e; margin-top: 0;'>⚠️ Important Caveats & Assumptions</h3>")
+                caveats_html <- paste0(caveats_html, "<h3 style='color: #d2691e; margin-top: 0;'> Important Caveats & Assumptions</h3>")
 
                 caveats_html <- paste0(caveats_html, "<h4>Heuristic-Based Assessment</h4>")
                 caveats_html <- paste0(caveats_html, "<ul>")
@@ -2156,7 +2156,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 caveats_html <- paste0(caveats_html, "</p>")
 
                 caveats_html <- paste0(caveats_html, "<p style='font-size: 0.9em; color: #d2691e; margin-top: 15px; font-weight: bold;'>")
-                caveats_html <- paste0(caveats_html, "⚡ CRITICAL: Automated quality assessment is a starting point, not a substitute for statistical and clinical judgment. Always combine algorithmic screening with expert review before making data cleaning decisions.")
+                caveats_html <- paste0(caveats_html, " CRITICAL: Automated quality assessment is a starting point, not a substitute for statistical and clinical judgment. Always combine algorithmic screening with expert review before making data cleaning decisions.")
                 caveats_html <- paste0(caveats_html, "</p>")
 
                 caveats_html <- paste0(caveats_html, "</div>")

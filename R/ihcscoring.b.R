@@ -7,7 +7,7 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .init = function() {
             if (is.null(self$data) || is.null(self$options$intensity_var) || is.null(self$options$proportion_var)) {
                 self$results$interpretation$setContent(
-                    "<h3>🔬 IHC Scoring Standardization and Validation</h3>
+                    "<h3> IHC Scoring Standardization and Validation</h3>
                     <p><strong>Purpose:</strong> Comprehensive immunohistochemical scoring analysis with standardized 
                     methodologies for clinical and research applications, including H-score, Allred score, and digital validation frameworks.</p>
                     
@@ -661,7 +661,7 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             correlation <- cor(hscore, allred_total, use = "complete.obs")
             
             interpretation <- paste0(
-                "<h3>🔬 IHC Scoring Analysis Results</h3>",
+                "<h3> IHC Scoring Analysis Results</h3>",
                 "<p><strong>Sample Size:</strong> ", n, " cases analyzed</p>",
                 
                 "<h4>Scoring Distribution:</h4>",
@@ -1001,7 +1001,7 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .showAutomatedAnalysisError = function() {
             error_msg <- paste(
                 "<div style='color: orange; padding: 10px; border: 1px solid orange; margin: 10px;'>",
-                "<h4>⚠️ Automated Analysis Unavailable</h4>",
+                "<h4> Automated Analysis Unavailable</h4>",
                 "<p>The following R packages are required for automated image analysis:</p>",
                 "<ul>",
                 "<li><code>reticulate</code> - Python integration</li>",
@@ -1931,7 +1931,7 @@ def segment_nuclei(image_path):
         .initializeAboutAnalysis = function() {
             about_html <- paste0(
                 "<div style='background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
-                "<h4>🔬 About IHC Scoring Analysis</h4>",
+                "<h4> About IHC Scoring Analysis</h4>",
                 "<p><strong>Purpose:</strong> Standardize immunohistochemistry scoring using validated clinical methods (H-score and Allred score)</p>",
                 "<p><strong>When to Use:</strong></p>",
                 "<ul>",
@@ -1957,7 +1957,7 @@ def segment_nuclei(image_path):
         .initializeAssumptions = function() {
             assumptions_html <- paste0(
                 "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #ffc107;'>",
-                "<h4>⚠️ Important Assumptions & Caveats</h4>",
+                "<h4> Important Assumptions & Caveats</h4>",
                 "<p><strong>Data Requirements:</strong></p>",
                 "<ul>",
                 "<li>Intensity scores: Typically 0-3 scale (0=negative, 1=weak, 2=moderate, 3=strong)</li>",
@@ -1977,7 +1977,7 @@ def segment_nuclei(image_path):
                 "<li>Agreement statistics require paired observations</li>",
                 "<li>Bootstrap intervals assume representative sampling</li>",
                 "</ul>",
-                "<p><strong>⚠️ Contextual Warnings:</strong></p>",
+                "<p><strong> Contextual Warnings:</strong></p>",
                 "<div id='contextual-warnings' style='color: #d73502; font-weight: bold;'></div>",
                 "</div>"
             )
@@ -2054,7 +2054,7 @@ def segment_nuclei(image_path):
 
             summary_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #28a745;'>",
-                "<h4>📋 Analysis Summary</h4>",
+                "<h4> Analysis Summary</h4>",
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                 "<h5>Key Findings (Copy-Ready)</h5>",
                 "<p style='font-family: monospace; background-color: #f8f9fa; padding: 10px; border-radius: 3px;'>",
@@ -2199,7 +2199,7 @@ def segment_nuclei(image_path):
                 current_content <- self$results$interpretation$content %||% ""
                 warning_content <- paste0(
                     "<div style='background-color: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #dc3545;'>",
-                    "<strong>⚠️ Analysis Warnings:</strong><br>", warning_html,
+                    "<strong> Analysis Warnings:</strong><br>", warning_html,
                     "</div>"
                 )
                 self$results$interpretation$setContent(paste0(current_content, warning_content))

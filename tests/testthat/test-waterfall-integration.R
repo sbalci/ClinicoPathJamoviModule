@@ -5,7 +5,6 @@
 # Tests integration with other functions and realistic workflows
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(waterfall_test, package = "ClinicoPath")

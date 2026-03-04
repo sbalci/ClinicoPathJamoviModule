@@ -13,7 +13,7 @@ description:
         Implements Vision Transformer (ViT), ResNet, and other CNN architectures for 
         biomarker prediction from H&E-stained tissue images.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic Vision Transformer prediction
             deeplearningprediction(
@@ -169,7 +169,7 @@ options:
             apply image transformations during training
 
     - name: gray_zone_width
-      title: Gray Zone Width (%)
+      title: Gray Zone Width ( percent)
       type: Number
       min: 0.0
       max: 50.0

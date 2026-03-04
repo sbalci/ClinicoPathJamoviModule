@@ -155,7 +155,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 length(self$options$y_var) == 0 || length(self$options$x_var) == 0) {
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #1976d2; margin-top: 0;'>🌧️ Welcome to Advanced Raincloud Plots!</h3>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Advanced Raincloud Plots!</h3>
                 <p><strong>Enhanced distribution visualization with longitudinal connections</strong> using ggrain</p>
                 <p>Complements the existing Raincloud Plot module with advanced features and customization</p>
                 
@@ -192,7 +192,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 </ul>
                 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Advanced raincloud plots for complex research designs and longitudinal data analysis</em>
+                 <em>Advanced raincloud plots for complex research designs and longitudinal data analysis</em>
                 </p>
                 </div>"
                 
@@ -326,7 +326,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 # Add timing info for complex calculations
                 if (elapsed > 1) {
                     effect_size_html <- paste0(effect_size_html, 
-                        "<p style='font-size:10px;color:#666;margin-top:10px;'>⏱️ Computed in ", elapsed, "s</p>")
+                        "<p style='font-size:10px;color:#666;margin-top:10px;'> Computed in ", elapsed, "s</p>")
                 }
                 
                 self$results$effect_sizes$setContent(effect_size_html)
@@ -971,7 +971,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             stats_html <- private$.build_html_table(
                 table_data, 
-                .("📊 Advanced Raincloud Statistics"), 
+                .(" Advanced Raincloud Statistics"), 
                 headers
             )
             
@@ -1035,7 +1035,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             if (n_groups > 2) {
                 post_hoc_warning <- paste0(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin-top: 10px;'>",
-                    "<p style='margin: 0;'><strong>⚠️ IMPORTANT:</strong> This is an <strong>omnibus test only</strong>. ",
+                    "<p style='margin: 0;'><strong> IMPORTANT:</strong> This is an <strong>omnibus test only</strong>. ",
                     "A significant result indicates <em>at least one</em> group differs, but does NOT identify which specific groups differ. ",
                     "For pairwise comparisons, use post-hoc tests with multiplicity adjustment (e.g., Dunn's test with Holm or Bonferroni correction) ",
                     "in dedicated statistical software.</p>",
@@ -1045,7 +1045,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
 
             comparison_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📊 Group Comparison Results</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> Group Comparison Results</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Method:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_name, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Statistic:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_details, "</td></tr>",
@@ -1079,7 +1079,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             interpretation_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>🌧️ Advanced Raincloud Plot Guide</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'> Advanced Raincloud Plot Guide</h3>",
                 
                 "<h4 style='color: #2e7d32;'>Current Configuration:</h4>",
                 "<ul>",
@@ -1127,7 +1127,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 "</ul>",
                 
                 "<p style='font-size: 12px; color: #2e7d32; margin-top: 15px;'>",
-                "<em>🌧️ Advanced raincloud plots provide enhanced visualization capabilities for complex research designs</em>",
+                "<em> Advanced raincloud plots provide enhanced visualization capabilities for complex research designs</em>",
                 "</p></div>"
             )
             
@@ -1180,7 +1180,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             html <- paste0(
                 "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>📈 Effect Size Analysis</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'> Effect Size Analysis</h3>",
                 "<p>Effect size type: <strong>", effect_type, "</strong></p>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<thead><tr style='background-color: #4caf50; color: white;'>",
@@ -1221,7 +1221,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                             "<td style='padding: 8px; border: 1px solid #ddd;'>",
                             groups[i], " vs ", groups[j], "</td>",
                             "<td colspan='3' style='padding: 8px; border: 1px solid #ddd; text-align: center;'>",
-                            "⚠️ ", error_msg, "</td>",
+                            " ", error_msg, "</td>",
                             "</tr>"
                         )
                     } else {
@@ -1358,7 +1358,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 return(list(
                     html = paste0(
                         "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
                         "<p>", .("Change analysis requires both a longitudinal ID variable and a baseline group specification."), "</p>",
                         "</div>"
                     ),
@@ -1377,7 +1377,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             if (excluded_n > 0) {
                 cleaning_report <- paste0(
                     "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #1976d2; margin-top: 0;'>📊 ", .("Data Cleaning Summary"), "</h4>",
+                    "<h4 style='color: #1976d2; margin-top: 0;'> ", .("Data Cleaning Summary"), "</h4>",
                     "<p><strong>", .("Original dataset:"), "</strong> ", original_n, .(") observations"), "</p>",
                     "<p><strong>", .("Complete cases:"), "</strong> ", nrow(complete_data), .(") observations"), "</p>",
                     "<p><strong>", .("Excluded (missing data):"), "</strong> ", excluded_n, .(") observations ("), 
@@ -1394,7 +1394,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     html = paste0(
                         cleaning_report,
                         "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
                         "<p>", .("Baseline group '"), baseline_group, .("' not found in complete data. Available groups: "), available_groups, "</p>",
                         "</div>"
                     ),
@@ -1408,7 +1408,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     html = paste0(
                         cleaning_report,
                         "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
                         "<p>", .("No repeated observations found in complete data. Change analysis requires subjects with multiple measurements."), "</p>",
                         "</div>"
                     ),
@@ -1425,7 +1425,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     html = paste0(
                         cleaning_report,
                         "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
                         "<p>", .("Insufficient baseline or follow-up observations to compute change scores."), "</p>",
                         "</div>"
                     ),
@@ -1455,7 +1455,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     html = paste0(
                         cleaning_report,
                         "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                        "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                        "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
                         "<p>", .("No paired observations found for change analysis in complete data."), "</p>",
                         "</div>"
                     ),
@@ -1505,7 +1505,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             html <- paste0(
                 cleaning_report,
                 "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #856404; margin-top: 0;'>📊 Change Score Analysis</h3>",
+                "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
                 "<h4>", .("Analysis Parameters"), "</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Baseline group:"), "</strong></td>",
@@ -1565,7 +1565,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             html <- paste0(
                 "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #1565c0; margin-top: 0;'>📋 Clinical Analysis Report</h3>",
+                "<h3 style='color: #1565c0; margin-top: 0;'> Clinical Analysis Report</h3>",
                 "<h4>Study Population</h4>",
                 "<p>Analysis population: <strong>", pop_label, "</strong></p>",
                 "<p>Total N: <strong>", nrow(data), "</strong></p>",
@@ -1589,7 +1589,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
         .generate_methods_text = function(options) {
             html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #495057; margin-top: 0;'>📝 Methods Section</h3>",
+                "<h3 style='color: #495057; margin-top: 0;'> Methods Section</h3>",
                 "<p style='text-align: justify;'>",
                 "Data were visualized using advanced raincloud plots, which combine ",
                 "violin plots, boxplots, and individual data points to provide a comprehensive ",
@@ -1684,7 +1684,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             html <- paste0(
                 "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; margin-top: 20px;'>",
-                "<h3 style='color: #e65100; margin-top: 0;'>📊 ", .("Missing Data Information"), "</h3>",
+                "<h3 style='color: #e65100; margin-top: 0;'> ", .("Missing Data Information"), "</h3>",
                 "<h4>", .("Data Exclusions"), "</h4>",
                 "<p><strong>", .("Original dataset:"), "</strong> ", n_original, " ", .("observations"), "</p>",
                 "<p><strong>", .("Analysis dataset:"), "</strong> ", n_analysis, " ", .("observations"), "</p>",

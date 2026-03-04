@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load all test datasets
 data(jjscatterstats_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jjscatterstats_survival, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles complete biomarker analysis workflow", {
-  devtools::load_all()
 
   # Step 1: Basic scatter plot
   result1 <- jjscatterstats(
@@ -88,7 +86,6 @@ test_that("jjscatterstats handles complete biomarker analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles complete clinical lab analysis workflow", {
-  devtools::load_all()
 
   # Step 1: Basic glucose-HbA1c correlation
   result1 <- jjscatterstats(
@@ -153,7 +150,6 @@ test_that("jjscatterstats handles complete clinical lab analysis workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles complete dose-response workflow", {
-  devtools::load_all()
 
   # Step 1: Basic dose-response scatter
   result1 <- jjscatterstats(
@@ -217,7 +213,6 @@ test_that("jjscatterstats handles complete dose-response workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles complete gene expression workflow", {
-  devtools::load_all()
 
   # Step 1: Co-regulated genes
   result1 <- jjscatterstats(
@@ -280,7 +275,6 @@ test_that("jjscatterstats handles complete gene expression workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles complete survival biomarker workflow", {
-  devtools::load_all()
 
   # Step 1: Basic Ki67-survival correlation
   result1 <- jjscatterstats(
@@ -342,7 +336,6 @@ test_that("jjscatterstats handles complete survival biomarker workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles all datasets with consistent parameters", {
-  devtools::load_all()
 
   # Test dataset
   result1 <- jjscatterstats(
@@ -400,7 +393,6 @@ test_that("jjscatterstats handles all datasets with consistent parameters", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats produces consistent results across statistical tests", {
-  devtools::load_all()
 
   test_types <- c("parametric", "nonparametric", "robust", "bayes")
   results <- list()
@@ -425,7 +417,6 @@ test_that("jjscatterstats produces consistent results across statistical tests",
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats produces consistent results across smooth methods", {
-  devtools::load_all()
 
   smooth_methods <- c("lm", "loess", "gam")
   results <- list()
@@ -449,7 +440,6 @@ test_that("jjscatterstats produces consistent results across smooth methods", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles multiple analyses from same dataset", {
-  devtools::load_all()
 
   # Strong positive correlation
   result1 <- jjscatterstats(
@@ -489,7 +479,6 @@ test_that("jjscatterstats handles multiple analyses from same dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats produces consistent results on repeated calls", {
-  devtools::load_all()
 
   result1 <- jjscatterstats(
     data = jjscatterstats_clinical,

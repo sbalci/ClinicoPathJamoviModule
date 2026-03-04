@@ -860,6 +860,7 @@ explainableaiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # SHAP analysis for feature importance
 #' explainableai(
 #'     data = model_data,
@@ -877,7 +878,7 @@ explainableaiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     method = "attention_analysis",
 #'     overlay_original = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param analysis_type type of explainability analysis to perform
 #' @param features features/variables for importance analysis

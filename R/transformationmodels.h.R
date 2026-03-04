@@ -620,6 +620,7 @@ transformationmodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' transformation selection and validation.
 #'
 #' @examples
+#' \donttest{
 #' # Example: Transformation model with Box-Cox transformation
 #' library(survival)
 #' library(tram)
@@ -634,7 +635,7 @@ transformationmodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #'     distribution = "normal",
 #'     method = "ml"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

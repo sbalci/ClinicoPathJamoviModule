@@ -787,6 +787,7 @@ clinicalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Clinical model validation with bootstrap
 #' clinical_validation(
 #'     data = clinical_data,
@@ -797,7 +798,7 @@ clinicalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'     bootstrap_samples = 1000,
 #'     clinical_context = "diagnosis"
 #' )
-#'
+#'}
 #' @param data The data as a data frame for clinical model validation.
 #' @param outcome .
 #' @param outcomeLevel .

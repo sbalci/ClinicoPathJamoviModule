@@ -3,7 +3,6 @@
 
 test_that("decisiongraph .escapeVar() utility handles special characters", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     skip_if_not_installed("ClinicoPath")
 
     # Create mock object with .escapeVar method

@@ -1,5 +1,5 @@
 
-devtools::load_all()
+library(ClinicoPath)
 
 test_eurostat_data <- data.frame(
   geo = c("AT", "BE", "DE", "FR"),

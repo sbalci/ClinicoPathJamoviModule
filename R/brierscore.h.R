@@ -661,16 +661,16 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Brier Score & Integrated Brier Score
 #'
-#' ⚠️ IMPORTANT LIMITATIONS: This is a BASIC implementation for single 
-#' time-point Brier score evaluation. It requires PRE-COMPUTED survival 
-#' probabilities (not raw Cox models). Many features listed below are NOT 
-#' IMPLEMENTED or STATISTICALLY INVALID.
+#' IMPORTANT LIMITATIONS: This is a BASIC implementation for single time-point 
+#' Brier score evaluation. It requires PRE-COMPUTED survival probabilities 
+#' (not raw Cox models). Many features listed below are NOT IMPLEMENTED or 
+#' STATISTICALLY INVALID.
 #' Brier Score analysis evaluates calibration accuracy by measuring the mean 
 #' squared difference between predicted survival probabilities and observed 
 #' outcomes at a SINGLE specified time point. Lower Brier scores indicate 
 #' better prediction accuracy (perfect prediction = 0, worst = 1). Includes 
 #' scaled Brier scores relative to null model (Kaplan-Meier curve).
-#' ⚠️ NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS), 
+#' NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS), 
 #' competing risks, linear predictor inputs, formula inputs, temporal/external 
 #' validation flags. These features may appear in the UI but will generate 
 #' errors if used.
@@ -680,6 +680,7 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- brierscore(
 #'     data = validation_data,
 #'     time = "follow_up_time",
@@ -687,7 +688,7 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     predictions = "predicted_survival_prob",
 #'     prediction_time = 60
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time Time-to-event or censoring variable. For survival analysis,
 #'   this is the follow-up time in days, months, or years.

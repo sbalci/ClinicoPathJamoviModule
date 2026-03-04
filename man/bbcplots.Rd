@@ -139,6 +139,7 @@ gridlines, and standardized chart dimensions optimized for digital
 publication.
 }
 \examples{
+\donttest{
 # Basic BBC-style visualization
 library(bbplot)
 library(ggplot2)
@@ -150,5 +151,5 @@ plot <- ggplot(data, aes(x = category, y = value)) +
 
 # Finalize with BBC branding
 finalise_plot(plot, "Source: Data source", "output.png")
-
+}
 }

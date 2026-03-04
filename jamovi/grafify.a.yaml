@@ -15,7 +15,7 @@ description:
         and scientific publications. Features scatter plots with error bars, distribution plots,
         before-after comparisons, and factorial designs with professional styling.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Scientific scatter plot with error bars
             data(clinical_data)
@@ -140,7 +140,7 @@ options:
           name: sd
         - title: "Standard Error of Mean (SEM)"
           name: sem
-        - title: "95% Confidence Interval"
+        - title: "95 percent Confidence Interval"
           name: ci95
         - title: "None"
           name: none

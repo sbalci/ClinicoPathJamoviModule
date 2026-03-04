@@ -2,7 +2,7 @@
 % Please edit documentation in R/stagemigration-competing-risks.R
 \name{stagemigration_competingRisksAnalysis}
 \alias{stagemigration_competingRisksAnalysis}
-\title{Stage Migration Analysis - Competing Risks Methods}
+\title{Perform Competing Risks Analysis for Stage Migration}
 \usage{
 stagemigration_competingRisksAnalysis(
   data,
@@ -33,9 +33,6 @@ stagemigration_competingRisksAnalysis(
 List with competing risks analysis results
 }
 \description{
-Competing risks analysis for stage migration when patients can experience
-multiple types of events (e.g., cancer death vs. other causes).
-
 Analyzes stage migration accounting for competing risks using cumulative
 incidence functions (CIF) and Fine-Gray models.
 }

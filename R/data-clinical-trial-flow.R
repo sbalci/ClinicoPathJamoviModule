@@ -27,13 +27,13 @@
 #' This dataset simulates a realistic Phase III clinical trial with:
 #' \itemize{
 #'   \item 500 participants initially assessed for eligibility
-#'   \item 20\% screening exclusion rate (age, performance, comorbidity)
-#'   \item 10\% enrollment exclusion rate (consent, eligibility)
+#'   \item 20 percent screening exclusion rate (age, performance, comorbidity)
+#'   \item 10 percent enrollment exclusion rate (consent, eligibility)
 #'   \item 1:1 randomization to Treatment A vs Treatment B
-#'   \item 5\% allocation exclusion rate (intervention not received)
-#'   \item 12\% follow-up loss rate (lost to follow-up, death, withdrawal)
-#'   \item 3\% analysis exclusion rate (missing data, protocol violations)
-#'   \item Final retention: 58.4\% (292 participants analyzed)
+#'   \item 5 percent allocation exclusion rate (intervention not received)
+#'   \item 12 percent follow-up loss rate (lost to follow-up, death, withdrawal)
+#'   \item 3 percent analysis exclusion rate (missing data, protocol violations)
+#'   \item Final retention: 58.4 percent (292 participants analyzed)
 #' }
 #'
 #' Exclusion variables use NA for participants who continued to the next stage.
@@ -114,10 +114,10 @@
 #' This dataset simulates a realistic observational cohort study with:
 #' \itemize{
 #'   \item 350 participants initially enrolled
-#'   \item 15\% initial exclusion rate (incomplete records, duplicates)
-#'   \item 8\% consent exclusion rate (declined, unable to contact)
-#'   \item 10\% follow-up loss rate (lost, moved, death, withdrew)
-#'   \item Final retention: 70.6\% (247 participants in final analysis)
+#'   \item 15 percent initial exclusion rate (incomplete records, duplicates)
+#'   \item 8 percent consent exclusion rate (declined, unable to contact)
+#'   \item 10 percent follow-up loss rate (lost, moved, death, withdrew)
+#'   \item Final retention: 70.6 percent (247 participants in final analysis)
 #' }
 #'
 #' Unlike the RCT dataset (\code{clinical_trial_consort_data}), this represents
@@ -182,14 +182,14 @@
 #' This dataset simulates a realistic multi-center trial with:
 #' \itemize{
 #'   \item 600 participants assessed across 4 sites
-#'   \item 25\% screening failure rate (higher than single-center for realism)
-#'   \item 5\% enrollment exclusion rate
+#'   \item 25 percent screening failure rate (higher than single-center for realism)
+#'   \item 5 percent enrollment exclusion rate
 #'   \item 1:1 randomization to Experimental vs Control
-#'   \item 3\% allocation exclusion rate
-#'   \item 15\% follow-up loss rate (varies by site)
-#'   \item 2\% analysis exclusion rate
-#'   \item Final retention: 57.7\% (346 participants analyzed)
-#'   \item Site-specific retention rates: 52.5\% to 60.1\%
+#'   \item 3 percent allocation exclusion rate
+#'   \item 15 percent follow-up loss rate (varies by site)
+#'   \item 2 percent analysis exclusion rate
+#'   \item Final retention: 57.7 percent (346 participants analyzed)
+#'   \item Site-specific retention rates: 52.5 percent to 60.1 percent
 #' }
 #'
 #' The dataset demonstrates realistic site variability in retention rates, which is
@@ -218,8 +218,8 @@
 #'
 #' # Site-specific retention
 #' library(dplyr)
-#' multicenter_trial_data %>%
-#'   group_by(site) %>%
+#' multicenter_trial_data |>
+#'   group_by(site) |>
 #'   summarise(
 #'     total = n(),
 #'     analyzed = sum(is.na(screening_failure) &

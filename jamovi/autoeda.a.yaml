@@ -94,7 +94,7 @@ options:
           Add plots to the analysis.
 
     - name: missing_threshold
-      title: "Missing Value Threshold (%)"
+      title: "Missing Value Threshold (percent)"
       type: Number
       min: 0
       max: 100

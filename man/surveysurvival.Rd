@@ -101,7 +101,7 @@ regression.}
 design effects.}
 
 \item{ci_level}{Confidence level for confidence intervals (e.g., 0.95 for
-95\\% CI).}
+95 percent CI).}
 
 \item{population_totals}{Calculate population-level survival estimates and
 totals.}
@@ -173,6 +173,7 @@ standard errors and confidence intervals, enabling proper population-level
 survival estimates from survey data.
 }
 \examples{
+\donttest{
 # Example 1: Basic survey-weighted Kaplan-Meier
 library(survival)
 library(survey)
@@ -216,5 +217,5 @@ surveysurvival(
     design_type = "multistage",
     nest_clusters = TRUE
 )
-
+}
 }

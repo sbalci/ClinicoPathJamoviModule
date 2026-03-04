@@ -37,7 +37,8 @@ pathology scenarios}
 
 \item{bootstrap_n}{number of bootstrap replicates for confidence intervals}
 
-\item{conf_level}{confidence level for intervals (default 0.95 for 95\\% CI)}
+\item{conf_level}{confidence level for intervals (default 0.95 for 95
+percent CI)}
 
 \item{show_plots}{show scatter plot and Bland-Altman plot}
 

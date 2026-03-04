@@ -48,8 +48,8 @@ performance.}
 
 \item{cutpointMethod}{Method for determining positive/negative cutpoints}
 
-\item{confidenceLevel}{Confidence level for performance metrics (0.95 =
-95\\% confidence intervals). Higher values give wider, more conservative
+\item{confidenceLevel}{Confidence level for performance metrics (0.95 = 95
+percent confidence intervals). Higher values give wider, more conservative
 intervals.}
 
 \item{crossValidation}{Use 5-fold cross-validation for more reliable
@@ -85,11 +85,12 @@ markers. Designed for differential diagnosis and antibody panel
 optimization.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 ihcdiagnostic(
     markers = c("ER", "PR", "HER2", "Ki67"),
     diagnosis = "tumor_type",
     differentialDiagnosis = TRUE
 )
-
+}
 }

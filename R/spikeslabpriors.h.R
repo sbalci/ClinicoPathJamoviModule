@@ -925,6 +925,7 @@ spikeslabpriorsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Spike-and-slab variable selection
 #' spikeslabpriors(
 #'     data = biomarker_data,
@@ -933,7 +934,7 @@ spikeslabpriorsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'     model_type = "regression",
 #'     prior_inclusion_prob = 0.1
 #' )
-#'
+#'}
 #' @param data The data as a data frame for spike-and-slab variable selection.
 #' @param outcome .
 #' @param predictors .

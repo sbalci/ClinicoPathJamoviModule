@@ -2,7 +2,6 @@
 test_that('biomarkerresponse: Basic Analysis Works', {
     skip_if_not_installed('jmvReadWrite')
     skip_if_not_installed('pROC')
-    devtools::load_all()
     
     # Generate synthetic data
     set.seed(123)

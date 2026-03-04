@@ -886,6 +886,7 @@ spatialbayesiansurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Spatial Bayesian survival analysis
 #' spatialbayesiansurvival(
 #'     data = clinical_data,
@@ -896,7 +897,7 @@ spatialbayesiansurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #'     spatial_model = "car",
 #'     mcmc_samples = 5000
 #' )
-#'
+#'}
 #' @param data The data as a data frame for spatial Bayesian survival
 #'   analysis.
 #' @param time .

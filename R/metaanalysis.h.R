@@ -872,14 +872,15 @@ metaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' metaanalysis(
 #'     effect_size = "effect",
 #'     variance = "variance",
 #'     analysis_type = "generic",
 #'     model_type = "random_effects"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param effect_size Effect size variable (e.g., log odds ratio, Cohen's d,
 #'   log hazard ratio)

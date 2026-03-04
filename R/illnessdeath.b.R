@@ -17,11 +17,11 @@ illnessdeathClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h2>🔄 Illness-Death Multi-State Models</h2>
+                    <h2> Illness-Death Multi-State Models</h2>
                     <p><strong>Three-state models for disease progression with recovery and mortality analysis</strong></p>
                     
                     <div class='step'>
-                    <strong>📊 Required Data:</strong>
+                    <strong> Required Data:</strong>
                     <ul>
                         <li><span class='highlight'>Entry Time</span>: Time of entry into current state</li>
                         <li><span class='highlight'>Exit Time</span>: Time of exit from current state or censoring</li>
@@ -32,7 +32,7 @@ illnessdeathClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🔧 Model Structures:</strong>
+                    <strong> Model Structures:</strong>
                     <ul>
                         <li><strong>Standard:</strong> 0→1, 1→2, 0→2 (illness onset, mortality from each state)</li>
                         <li><strong>Reversible:</strong> Add 1→0 (recovery from illness to healthy)</li>
@@ -42,7 +42,7 @@ illnessdeathClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>⚙️ State Definitions:</strong>
+                    <strong> State Definitions:</strong>
                     <ul>
                         <li><strong>State 0 (Healthy):</strong> Baseline healthy state</li>
                         <li><strong>State 1 (Ill):</strong> Disease/illness state</li>
@@ -51,29 +51,29 @@ illnessdeathClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🎨 Key Features:</strong>
+                    <strong> Key Features:</strong>
                     <ul>
-                        <li>📈 Transition-specific hazard modeling with covariates</li>
-                        <li>🎯 State occupation probabilities over time</li>
-                        <li>📊 Expected sojourn times in each state</li>
-                        <li>🔄 Transition probability matrices</li>
-                        <li>⚕️ Clinical interpretation with confidence intervals</li>
-                        <li>🏗️ Model validation and residual analysis</li>
+                        <li> Transition-specific hazard modeling with covariates</li>
+                        <li> State occupation probabilities over time</li>
+                        <li> Expected sojourn times in each state</li>
+                        <li> Transition probability matrices</li>
+                        <li> Clinical interpretation with confidence intervals</li>
+                        <li> Model validation and residual analysis</li>
                     </ul>
                     </div>
                     
                     <div class='step'>
-                    <strong>💡 Clinical Applications:</strong>
+                    <strong> Clinical Applications:</strong>
                     <ul>
-                        <li>🏥 Hospital readmission analysis</li>
-                        <li>🧬 Cancer progression and remission studies</li>
-                        <li>💊 Chronic disease management outcomes</li>
-                        <li>🎯 Treatment effectiveness with intermediate states</li>
-                        <li>📊 Health economic modeling with disease states</li>
+                        <li> Hospital readmission analysis</li>
+                        <li> Cancer progression and remission studies</li>
+                        <li> Chronic disease management outcomes</li>
+                        <li> Treatment effectiveness with intermediate states</li>
+                        <li> Health economic modeling with disease states</li>
                     </ul>
                     </div>
                     
-                    <p><em>💡 Tip: Use standard model for most applications, enable reversible if recovery is possible, and include relevant covariates for transition-specific effects.</em></p>
+                    <p><em> Tip: Use standard model for most applications, enable reversible if recovery is possible, and include relevant covariates for transition-specific effects.</em></p>
                     </body>
                     </html>"
                 )

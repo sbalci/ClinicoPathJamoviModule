@@ -31,7 +31,7 @@ description:
         when exposures change during follow-up. Simon-Makuch methods properly account for the timing
         of exposure changes, providing unbiased survival estimates and valid statistical comparisons.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Load example data
             data("simon_makuch_simple")

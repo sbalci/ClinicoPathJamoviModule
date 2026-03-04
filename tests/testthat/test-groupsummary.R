@@ -11,7 +11,6 @@ test_that("groupsummary module files exist", {
 test_that("groupsummary class and function availability", {
   
   # Load the package functions quietly
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   # Test that groupsummary class exists after loading
   expect_true(exists("groupsummaryClass"))
@@ -105,7 +104,6 @@ test_that("groupsummary test datasets exist and are properly structured", {
 test_that("groupsummary handles basic categorical grouping", {
   
   # Load package quietly
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load simple test data
@@ -125,7 +123,6 @@ test_that("groupsummary handles basic categorical grouping", {
 
 test_that("groupsummary with multiple grouping variables", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load sales data
@@ -146,7 +143,6 @@ test_that("groupsummary with multiple grouping variables", {
 
 test_that("groupsummary with date aggregation", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load sales data with dates
@@ -182,7 +178,6 @@ test_that("groupsummary with date aggregation", {
 
 test_that("groupsummary with timestamp data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load financial data with timestamps
@@ -218,7 +213,6 @@ test_that("groupsummary with timestamp data", {
 
 test_that("groupsummary statistics options", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     load("data/groupsummary_simple.rda")
@@ -249,7 +243,6 @@ test_that("groupsummary statistics options", {
 
 test_that("groupsummary with survey data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load survey data
@@ -281,7 +274,6 @@ test_that("groupsummary with survey data", {
 
 test_that("groupsummary with manufacturing data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load manufacturing data
@@ -314,7 +306,6 @@ test_that("groupsummary with manufacturing data", {
 
 test_that("groupsummary with web analytics data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load web analytics data
@@ -348,7 +339,6 @@ test_that("groupsummary with web analytics data", {
 
 test_that("groupsummary with medical research data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load medical data
@@ -382,7 +372,6 @@ test_that("groupsummary with medical research data", {
 
 test_that("groupsummary with hospital hourly data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Load hourly hospital data
@@ -405,7 +394,6 @@ test_that("groupsummary with hospital hourly data", {
 
 test_that("groupsummary display options", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     load("data/groupsummary_simple.rda")
@@ -451,7 +439,6 @@ test_that("groupsummary display options", {
 
 test_that("groupsummary with missing data", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Create data with missing values
@@ -487,7 +474,6 @@ test_that("groupsummary with missing data", {
 
 test_that("groupsummary date format options", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     # Create test data with different date formats
@@ -516,7 +502,6 @@ test_that("groupsummary date format options", {
 
 test_that("groupsummary time aggregation options", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     load("data/groupsummary_sales_data.rda")
@@ -548,7 +533,6 @@ test_that("groupsummary dependency handling", {
   for (pkg in required_packages) {
     if (requireNamespace(pkg, quietly = TRUE)) {
       expect_error({
-        suppressMessages(suppressWarnings(devtools::load_all()))
         if (exists("groupsummary")) {
           load("data/groupsummary_simple.rda")
           result <- groupsummary(
@@ -567,7 +551,6 @@ test_that("groupsummary dependency handling", {
 
 test_that("groupsummary required methods exist", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     load("data/groupsummary_simple.rda")
@@ -587,7 +570,6 @@ test_that("groupsummary required methods exist", {
 
 test_that("groupsummary parameter validation", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     load("data/groupsummary_simple.rda")
@@ -614,7 +596,6 @@ test_that("groupsummary parameter validation", {
 
 test_that("groupsummary comprehensive parameter combinations", {
   
-  suppressMessages(suppressWarnings(devtools::load_all()))
   
   if (exists("groupsummary")) {
     load("data/groupsummary_sales_data.rda")

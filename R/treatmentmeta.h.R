@@ -1152,6 +1152,7 @@ treatmentmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('meta_studies')
 #'
 #' treatmentmeta(
@@ -1161,7 +1162,7 @@ treatmentmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     outcome_type = "continuous",
 #'     model_type = "random"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param study_id Variable containing study names or identifiers
 #' @param year Year of publication for chronological analyses

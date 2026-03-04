@@ -1,11 +1,7 @@
-#' Stage Migration Analysis - Data Validation Functions
-#'
-#' @description
-#' Comprehensive data validation, cleaning, and preparation functions for
-#' stage migration analysis.
-#'
-#' @keywords internal
-#' @noRd
+# Stage Migration Analysis - Data Validation Functions
+#
+# Comprehensive data validation, cleaning, and preparation functions for
+# stage migration analysis.
 
 # =============================================================================
 # DATA VALIDATION AND PREPARATION

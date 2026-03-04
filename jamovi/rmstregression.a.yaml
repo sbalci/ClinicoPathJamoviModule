@@ -16,9 +16,9 @@ description:
         RMST represents the area under the survival curve up to time tau and can be compared between
         groups or modeled with covariates using regression techniques.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             rmstregression(
                 elapsedtime = "time_to_event",
                 outcome = "event_status",

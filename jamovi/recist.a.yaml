@@ -13,7 +13,7 @@ description:
         lesion sums and best overall response. Processes individual lesion measurements
         and applies RECIST 1.1 criteria (Eisenhauer et al., 2009) for response classification.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data <- data.frame(
                 patient = rep(c("P01", "P02"), each = 6),
@@ -144,24 +144,24 @@ options:
         Maximum target lesions per organ (default: 2 per RECIST 1.1)
 
   - name: prThreshold
-    title: PR Threshold (%)
+    title: PR Threshold ( percent)
     type: Number
     min: 0
     max: 100
     default: 30
     description:
       R: >
-        Percent decrease for partial response (default: 30%)
+        Percent decrease for partial response (default: 30 percent)
 
   - name: pdThreshold
-    title: PD Threshold (%)
+    title: PD Threshold ( percent)
     type: Number
     min: 0
     max: 100
     default: 20
     description:
       R: >
-        Percent increase for progressive disease (default: 20%)
+        Percent increase for progressive disease (default: 20 percent)
 
   - name: pdAbsolute
     title: PD Absolute Increase (mm)

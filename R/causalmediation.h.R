@@ -539,6 +539,7 @@ causalmediationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Basic mediation
 #' causalmediation(
 #'     data = mydata,
@@ -558,7 +559,7 @@ causalmediationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'     mediation_tier = 'hd',
 #'     hd_method = 'hdmax2'
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome Outcome variable (Y)
 #' @param treatment Treatment or exposure variable (X)

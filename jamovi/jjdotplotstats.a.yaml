@@ -4,7 +4,7 @@ title: Dot Chart
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 # menuSubtitle: Dot Chart
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 
@@ -16,7 +16,7 @@ description:
         comparisons of continuous variables between groups with
         statistical annotations and significance testing.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic dot plot with iris dataset
             jjdotplotstats(
@@ -248,9 +248,9 @@ options:
       max: 1
       description:
           R: >
-            Confidence level for intervals (0.95 = 95% confidence interval).
+            Confidence level for intervals (0.95 = 95 percent confidence interval).
             This represents the probability that the true population parameter
-            lies within the calculated interval. 95% is standard for most analyses.
+            lies within the calculated interval. 95 percent is standard for most analyses.
 
     - name: k
       title: Statistical Precision (Decimal Places)

@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjcorrmat integrates with all test datasets", {
-  devtools::load_all()
 
   # Load all jjcorrmat test datasets
   data(jjcorrmat_test, package = "ClinicoPath")
@@ -26,7 +24,6 @@ test_that("jjcorrmat integrates with all test datasets", {
 })
 
 test_that("jjcorrmat works with data.frame vs tibble", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -47,7 +44,6 @@ test_that("jjcorrmat works with data.frame vs tibble", {
 })
 
 test_that("jjcorrmat produces consistent results across multiple runs", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -70,7 +66,6 @@ test_that("jjcorrmat produces consistent results across multiple runs", {
 })
 
 test_that("jjcorrmat statistical types match data distributions", {
-  devtools::load_all()
 
   # Parametric for normally distributed clinical data
   data(jjcorrmat_test)
@@ -101,7 +96,6 @@ test_that("jjcorrmat statistical types match data distributions", {
 })
 
 test_that("jjcorrmat handles complete clinical workflows", {
-  devtools::load_all()
 
   # Workflow 1: Tumor pathology markers
   data(jjcorrmat_test)
@@ -166,7 +160,6 @@ test_that("jjcorrmat handles complete clinical workflows", {
 })
 
 test_that("jjcorrmat handles grouped analysis across different datasets", {
-  devtools::load_all()
 
   # Group by tumor stage
   data(jjcorrmat_test)
@@ -220,7 +213,6 @@ test_that("jjcorrmat handles grouped analysis across different datasets", {
 })
 
 test_that("jjcorrmat partial vs zero-order correlations", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -244,7 +236,6 @@ test_that("jjcorrmat partial vs zero-order correlations", {
 })
 
 test_that("jjcorrmat listwise vs pairwise deletion comparisons", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -268,7 +259,6 @@ test_that("jjcorrmat listwise vs pairwise deletion comparisons", {
 })
 
 test_that("jjcorrmat multiple testing correction comparisons", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -310,7 +300,6 @@ test_that("jjcorrmat multiple testing correction comparisons", {
 })
 
 test_that("jjcorrmat handles publication-ready configurations", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -352,7 +341,6 @@ test_that("jjcorrmat handles publication-ready configurations", {
 })
 
 test_that("jjcorrmat handles different correlation strength scenarios", {
-  devtools::load_all()
 
   data(jjcorrmat_mixed)
 
@@ -390,7 +378,6 @@ test_that("jjcorrmat handles different correlation strength scenarios", {
 })
 
 test_that("jjcorrmat maintains data integrity through analysis", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
 
@@ -410,7 +397,6 @@ test_that("jjcorrmat maintains data integrity through analysis", {
 })
 
 test_that("jjcorrmat handles cross-dataset analysis patterns", {
-  devtools::load_all()
 
   # Pattern 1: Clinical pathology metrics
   data(jjcorrmat_test)
@@ -464,7 +450,6 @@ test_that("jjcorrmat handles cross-dataset analysis patterns", {
 })
 
 test_that("jjcorrmat statistical method comparisons on same data", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
   variables <- c("tumor_size", "ki67_index", "mitotic_count", "necrosis_percent")
@@ -503,7 +488,6 @@ test_that("jjcorrmat statistical method comparisons on same data", {
 })
 
 test_that("jjcorrmat matrix visualization comparisons", {
-  devtools::load_all()
 
   data(jjcorrmat_test)
   variables <- c("tumor_size", "ki67_index", "mitotic_count")

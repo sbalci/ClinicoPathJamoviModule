@@ -788,13 +788,13 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       # Generate comprehensive explanation
       explanation <- paste0(
         "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
-        "<h4 style='color: #007bff; margin-top: 0;'>📊 Fixed ", tools::toTitleCase(analysis_type), " Analysis Guide</h4>",
+        "<h4 style='color: #007bff; margin-top: 0;'> Fixed ", tools::toTitleCase(analysis_type), " Analysis Guide</h4>",
         
-        "<h5 style='color: #495057; margin-top: 20px;'>🎯 Analysis Overview</h5>",
+        "<h5 style='color: #495057; margin-top: 20px;'> Analysis Overview</h5>",
         "<p>This analysis determines the <strong>cutpoint threshold</strong> that achieves a target ", analysis_type, " of <strong>", round(target_value, 3), "</strong> (", round(target_value * 100, 1), "%). ",
         "The corresponding ", if (analysis_type == "sensitivity") "specificity" else "sensitivity", " and other performance metrics are then calculated.</p>",
         
-        "<h5 style='color: #495057;'>🏥 Clinical Context</h5>"
+        "<h5 style='color: #495057;'> Clinical Context</h5>"
       )
       
       # Add clinical context based on analysis type
@@ -802,70 +802,70 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         explanation <- paste0(explanation,
           "<p><strong>High Sensitivity Strategy (Screening Focus):</strong></p>",
           "<ul>",
-          "<li>🔍 <strong>Screening Tests</strong>: Minimizes false negatives - few cases are missed</li>",
-          "<li>🚨 <strong>Rule-Out Tests</strong>: When a negative result effectively rules out the condition</li>",
-          "<li>⚡ <strong>Emergency Settings</strong>: When missing a case has severe consequences</li>",
-          "<li>💰 <strong>Cost Consideration</strong>: Accept more false positives to avoid missed diagnoses</li>",
+          "<li> <strong>Screening Tests</strong>: Minimizes false negatives - few cases are missed</li>",
+          "<li> <strong>Rule-Out Tests</strong>: When a negative result effectively rules out the condition</li>",
+          "<li> <strong>Emergency Settings</strong>: When missing a case has severe consequences</li>",
+          "<li> <strong>Cost Consideration</strong>: Accept more false positives to avoid missed diagnoses</li>",
           "</ul>",
           "<div style='background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-          "<strong>💡 Clinical Pearl:</strong> High sensitivity = \"SnOUT\" (Sensitivity rules OUT) - a negative test with high sensitivity confidently excludes the condition.",
+          "<strong> Clinical Pearl:</strong> High sensitivity = \"SnOUT\" (Sensitivity rules OUT) - a negative test with high sensitivity confidently excludes the condition.",
           "</div>"
         )
       } else {
         explanation <- paste0(explanation,
           "<p><strong>High Specificity Strategy (Confirmation Focus):</strong></p>",
           "<ul>",
-          "<li>✅ <strong>Confirmatory Tests</strong>: Minimizes false positives - few healthy patients are incorrectly diagnosed</li>",
-          "<li>🎯 <strong>Rule-In Tests</strong>: When a positive result confirms the condition</li>",
-          "<li>💊 <strong>Treatment Decision</strong>: Before starting costly or risky treatments</li>",
-          "<li>⚖️ <strong>Legal/Insurance</strong>: When false positives have significant consequences</li>",
+          "<li> <strong>Confirmatory Tests</strong>: Minimizes false positives - few healthy patients are incorrectly diagnosed</li>",
+          "<li> <strong>Rule-In Tests</strong>: When a positive result confirms the condition</li>",
+          "<li> <strong>Treatment Decision</strong>: Before starting costly or risky treatments</li>",
+          "<li> <strong>Legal/Insurance</strong>: When false positives have significant consequences</li>",
           "</ul>",
           "<div style='background-color: #d1ecf1; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-          "<strong>💡 Clinical Pearl:</strong> High specificity = \"SpIN\" (Specificity rules IN) - a positive test with high specificity confidently confirms the condition.",
+          "<strong> Clinical Pearl:</strong> High specificity = \"SpIN\" (Specificity rules IN) - a positive test with high specificity confidently confirms the condition.",
           "</div>"
         )
       }
       
       # Add interpolation method explanation
       explanation <- paste0(explanation,
-        "<h5 style='color: #495057;'>🔧 Interpolation Method: ", tools::toTitleCase(gsub("_", " ", interpolation_method)), "</h5>"
+        "<h5 style='color: #495057;'> Interpolation Method: ", tools::toTitleCase(gsub("_", " ", interpolation_method)), "</h5>"
       )
       
       if (interpolation_method == "linear") {
         explanation <- paste0(explanation,
           "<p><strong>Linear Interpolation:</strong> Smoothly estimates the cutpoint between observed data points using mathematical interpolation.</p>",
           "<ul>",
-          "<li>✅ <strong>Most Accurate</strong>: Provides precise cutpoint estimation</li>",
-          "<li>📐 <strong>Mathematical</strong>: Uses weighted average between nearest points</li>",
-          "<li>🎯 <strong>Recommended</strong>: Best for research and precise clinical applications</li>",
-          "<li>⚠️ <strong>Note</strong>: May produce cutpoints not observed in your data</li>",
+          "<li> <strong>Most Accurate</strong>: Provides precise cutpoint estimation</li>",
+          "<li> <strong>Mathematical</strong>: Uses weighted average between nearest points</li>",
+          "<li> <strong>Recommended</strong>: Best for research and precise clinical applications</li>",
+          "<li> <strong>Note</strong>: May produce cutpoints not observed in your data</li>",
           "</ul>"
         )
       } else if (interpolation_method == "nearest") {
         explanation <- paste0(explanation,
           "<p><strong>Nearest Point:</strong> Uses the observed cutpoint closest to the target value.</p>",
           "<ul>",
-          "<li>📊 <strong>Data-Driven</strong>: Only uses actually observed cutpoints</li>",
-          "<li>🔍 <strong>Conservative</strong>: No mathematical interpolation</li>",
-          "<li>⚡ <strong>Simple</strong>: Easy to understand and implement</li>",
-          "<li>📉 <strong>Trade-off</strong>: May not achieve exact target value</li>",
+          "<li> <strong>Data-Driven</strong>: Only uses actually observed cutpoints</li>",
+          "<li> <strong>Conservative</strong>: No mathematical interpolation</li>",
+          "<li> <strong>Simple</strong>: Easy to understand and implement</li>",
+          "<li> <strong>Trade-off</strong>: May not achieve exact target value</li>",
           "</ul>"
         )
       } else if (interpolation_method == "stepwise") {
         explanation <- paste0(explanation,
           "<p><strong>Stepwise (Conservative):</strong> Chooses the most conservative cutpoint that meets or exceeds the target.</p>",
           "<ul>",
-          "<li>🛡️ <strong>Conservative Approach</strong>: Errs on the side of caution</li>",
-          "<li>📊 <strong>Observed Data Only</strong>: Uses actual data points</li>",
-          "<li>🎯 <strong>Meets/Exceeds Target</strong>: Ensures target is achieved or surpassed</li>",
-          "<li>🏥 <strong>Clinical Safety</strong>: Preferred when patient safety is paramount</li>",
+          "<li> <strong>Conservative Approach</strong>: Errs on the side of caution</li>",
+          "<li> <strong>Observed Data Only</strong>: Uses actual data points</li>",
+          "<li> <strong>Meets/Exceeds Target</strong>: Ensures target is achieved or surpassed</li>",
+          "<li> <strong>Clinical Safety</strong>: Preferred when patient safety is paramount</li>",
           "</ul>"
         )
       }
       
       # Add interpretation of results
       explanation <- paste0(explanation,
-        "<h5 style='color: #495057;'>📋 Results Interpretation</h5>",
+        "<h5 style='color: #495057;'> Results Interpretation</h5>",
         "<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
         "<p><strong>Key Metrics to Review:</strong></p>",
         "<ul style='margin-bottom: 0;'>",
@@ -880,7 +880,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       
       # Add clinical decision framework
       explanation <- paste0(explanation,
-        "<h5 style='color: #495057;'>🎯 Clinical Decision Framework</h5>",
+        "<h5 style='color: #495057;'> Clinical Decision Framework</h5>",
         "<div style='background-color: #e2e3e5; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
         "<p><strong>Steps for Implementation:</strong></p>",
         "<ol style='margin-bottom: 0;'>",
@@ -895,7 +895,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       
       # Add warnings and considerations
       explanation <- paste0(explanation,
-        "<h5 style='color: #dc3545;'>⚠️ Important Considerations</h5>",
+        "<h5 style='color: #dc3545;'> Important Considerations</h5>",
         "<div style='background-color: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
         "<ul style='margin-bottom: 0;'>",
         "<li><strong>Population Specificity</strong>: Results may not generalize to different populations</li>",
@@ -909,7 +909,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       
       # Add references and further reading
       explanation <- paste0(explanation,
-        "<h5 style='color: #495057;'>📚 Further Reading</h5>",
+        "<h5 style='color: #495057;'> Further Reading</h5>",
         "<p style='font-size: 0.9em; color: #6c757d;'>",
         "For comprehensive guidance on ROC analysis and cutpoint selection, see: ",
         "<em>Youden WJ (1950). Index for rating diagnostic tests. Cancer 3:32-35</em> | ",
@@ -5021,17 +5021,17 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       if (!isTRUE(self$options$overrideMetaAnalysisWarning)) {
         error_html <- paste0(
           "<div style='padding: 15px; background-color: #f8d7da; border: 2px solid #f5c6cb; border-radius: 4px; color: #721c24;'>",
-          "<h4 style='margin-top: 0;'>⚠️ Meta-Analysis Not Recommended</h4>",
+          "<h4 style='margin-top: 0;'> Meta-Analysis Not Recommended</h4>",
           "<p><strong>Issue:</strong> Standard meta-analysis assumes <em>independent studies</em>. ",
           "Comparing multiple markers from the <strong>same dataset</strong> violates this fundamental assumption.</p>",
           "<p><strong>Consequences of proceeding:</strong></p>",
           "<ul>",
-          "<li>❌ Artificially narrow confidence intervals</li>",
-          "<li>❌ Inflated Type I error rate (false positives)</li>",
-          "<li>❌ Invalid pooled estimates</li>",
-          "<li>❌ Misleading conclusions</li>",
+          "<li> Artificially narrow confidence intervals</li>",
+          "<li> Inflated Type I error rate (false positives)</li>",
+          "<li> Invalid pooled estimates</li>",
+          "<li> Misleading conclusions</li>",
           "</ul>",
-          "<p><strong>✅ Recommended alternatives for within-study comparisons:</strong></p>",
+          "<p><strong> Recommended alternatives for within-study comparisons:</strong></p>",
           "<ul>",
           "<li><strong>DeLong's test</strong> - Statistically valid method for comparing AUCs from the same dataset</li>",
           "<li><strong>IDI/NRI analysis</strong> - Model improvement indices for comparing predictors</li>",
@@ -5057,7 +5057,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       # If user explicitly overrides, add strong warning
       self$results$metaAnalysisTable$setNote(
         key = "override_warning",
-        note = "⚠️ USER OVERRIDE ACTIVE: Meta-analysis performed on non-independent data despite violation of independence assumption. These results should NOT be used for formal statistical inference. Provided for exploratory purposes only with full awareness of statistical invalidity.",
+        note = " USER OVERRIDE ACTIVE: Meta-analysis performed on non-independent data despite violation of independence assumption. These results should NOT be used for formal statistical inference. Provided for exploratory purposes only with full awareness of statistical invalidity.",
         init = FALSE
       )
 

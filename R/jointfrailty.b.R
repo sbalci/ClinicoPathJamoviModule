@@ -29,7 +29,7 @@ jointfrailtyClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h1>🔗 Joint Frailty Models for Recurrent Events Analysis</h1>
+                    <h1> Joint Frailty Models for Recurrent Events Analysis</h1>
                     
                     <div class='info'>
                     <strong>Welcome to Joint Frailty Models Analysis</strong><br>
@@ -42,19 +42,19 @@ jointfrailtyClass <- R6::R6Class(
                     </ul>
                     </div>
 
-                    <h2>📋 Required Variables:</h2>
+                    <h2> Required Variables:</h2>
                     <div class='step'><strong>1. Subject ID:</strong> Unique identifier for each subject/patient</div>
                     <div class='step'><strong>2. Event Time:</strong> Time of each recurrent event occurrence</div>
                     <div class='step'><strong>3. Event Indicator:</strong> Binary indicator (1=event occurred, 0=censored)</div>
                     <div class='step'><strong>4. Terminal Event Time:</strong> Time to terminal event or censoring</div>
                     <div class='step'><strong>5. Terminal Event Indicator:</strong> Binary indicator for terminal event</div>
                     
-                    <h2>📊 Optional Variables:</h2>
+                    <h2> Optional Variables:</h2>
                     <div class='step'><strong>Shared Covariates:</strong> Variables affecting both processes</div>
                     <div class='step'><strong>Recurrent-Specific Covariates:</strong> Variables only affecting recurrent events</div>
                     <div class='step'><strong>Terminal-Specific Covariates:</strong> Variables only affecting terminal events</div>
 
-                    <h2>🔍 Joint Model Structure:</h2>
+                    <h2> Joint Model Structure:</h2>
                     <div class='formula'>
                     <strong>Recurrent Process:</strong> λᵣ(t|uᵢ,Xᵣᵢ) = uᵢ λ₀ᵣ(t) exp(βᵣᵀXᵣᵢ)<br>
                     <strong>Terminal Process:</strong> λₜ(t|vᵢ,Xₜᵢ) = vᵢ λ₀ₜ(t) exp(βₜᵀXₜᵢ)<br>
@@ -62,7 +62,7 @@ jointfrailtyClass <- R6::R6Class(
                     </div>
 
                     <div class='interpretation'>
-                    <strong>📊 Key Features:</strong><br>
+                    <strong> Key Features:</strong><br>
                     • Joint modeling of recurrent and terminal events<br>
                     • Flexible frailty distributions (Gamma, Log-normal, Positive Stable)<br>
                     • Multiple association structures (Shared frailty, Copula, Joint random effects)<br>
@@ -70,7 +70,7 @@ jointfrailtyClass <- R6::R6Class(
                     • Comprehensive model diagnostics and residual analysis
                     </div>
 
-                    <p><strong>👆 Please assign the required variables to continue with the analysis.</strong></p>
+                    <p><strong> Please assign the required variables to continue with the analysis.</strong></p>
                     </body>
                     </html>"
                 )
@@ -595,7 +595,7 @@ jointfrailtyClass <- R6::R6Class(
             </head>
             <body>
             
-            <h3>📚 Understanding Joint Frailty Models</h3>
+            <h3> Understanding Joint Frailty Models</h3>
             
             <div class='section'>
             <strong>What are Joint Frailty Models?</strong><br>
@@ -670,7 +670,7 @@ jointfrailtyClass <- R6::R6Class(
             </head>
             <body>
             
-            <h3>📊 Joint Frailty Model Results Interpretation</h3>
+            <h3> Joint Frailty Model Results Interpretation</h3>
             
             <div class='summary'>
             <strong>Model Summary:</strong><br>
@@ -682,7 +682,7 @@ jointfrailtyClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>📈 Recurrent Process Coefficients:</strong><br>
+            <strong> Recurrent Process Coefficients:</strong><br>
             • Positive coefficients indicate increased recurrent event hazard<br>
             • Hazard ratios exp(β) show multiplicative effects on recurrent event rate<br>
             • Confidence intervals quantify uncertainty in covariate effects<br>
@@ -690,7 +690,7 @@ jointfrailtyClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>⚰️ Terminal Process Coefficients:</strong><br>
+            <strong> Terminal Process Coefficients:</strong><br>
             • Positive coefficients indicate increased terminal event hazard<br>
             • Effects are interpreted similarly to standard survival models<br>
             • Association with recurrent process is captured through frailty terms<br>
@@ -698,7 +698,7 @@ jointfrailtyClass <- R6::R6Class(
             </div>
 
             <div class='interpretation'>
-            <strong>🎯 Frailty Parameters:</strong><br>
+            <strong> Frailty Parameters:</strong><br>
             • <strong>Frailty variance:</strong> Measures unexplained heterogeneity between subjects<br>
             • <strong>Association parameter:</strong> Quantifies dependence between processes<br>
             • <strong>Individual frailties:</strong> Subject-specific risk multipliers<br>
@@ -706,7 +706,7 @@ jointfrailtyClass <- R6::R6Class(
             </div>
 
             <div class='warning'>
-            <strong>⚠️ Important Considerations:</strong><br>
+            <strong> Important Considerations:</strong><br>
             • Joint modeling accounts for informative censoring by terminal events<br>
             • Frailty estimates are shrinkage estimates (borrowing strength across subjects)<br>
             • Model selection should consider goodness-of-fit and biological plausibility<br>

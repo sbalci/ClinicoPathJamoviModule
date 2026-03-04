@@ -526,6 +526,7 @@ survivalendpointsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data <- data.frame(
 #'     patient = c("P01", "P02", "P03"),
 #'     start_date = as.Date(c("2023-01-01", "2023-02-01", "2023-03-01")),
@@ -543,7 +544,7 @@ survivalendpointsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'     deathEvent = "death",
 #'     progressionEvent = "progression"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param patientId Patient identifier variable
 #' @param startDate Treatment start date or baseline time (Date or numeric)

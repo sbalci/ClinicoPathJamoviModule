@@ -1184,6 +1184,7 @@ clinicalpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinical_data')
 #'
 #' clinicalprediction(
@@ -1194,7 +1195,7 @@ clinicalpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'     interpretability = TRUE,
 #'     validation_method = "cv_10fold"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome_var Target variable for prediction (binary, continuous, or
 #'   survival)
@@ -1210,7 +1211,7 @@ clinicalpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param selection_method Method for automatic feature selection
 #' @param feature_engineering Perform automated feature engineering
 #' @param handle_missing Method for handling missing data
-#' @param train_proportion Proportion of data for training (70\% = 0.7)
+#' @param train_proportion Proportion of data for training (70 percent = 0.7)
 #' @param validation_method Method for model validation
 #' @param hyperparameter_tuning Perform automated hyperparameter optimization
 #' @param tuning_method Method for hyperparameter tuning

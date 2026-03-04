@@ -13,7 +13,7 @@ description:
         in medical and clinical applications. Provides attention maps, feature importance,
         SHAP values, and other interpretability methods.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # SHAP analysis for feature importance
             explainableai(

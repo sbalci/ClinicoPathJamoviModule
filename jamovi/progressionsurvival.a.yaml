@@ -16,7 +16,7 @@ description:
         of progression patterns, censoring mechanisms, and clinical interpretation specific
         to cancer clinical trials and observational studies.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('cancer_trial')
             

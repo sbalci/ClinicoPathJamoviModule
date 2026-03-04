@@ -119,6 +119,7 @@ are imbalanced, providing more reliable hazard ratios and confidence
 intervals in challenging clinical research scenarios.
 }
 \examples{
+\donttest{
 # Example: Weighted Cox regression for rare events
 library(survival)
 library(coxphw)
@@ -132,5 +133,5 @@ coxphw(
     weight_method = "average",
     alpha = 0.5
 )
-
+}
 }

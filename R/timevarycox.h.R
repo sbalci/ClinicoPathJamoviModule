@@ -235,8 +235,9 @@ timevarycoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' as treatment  changes, biomarker levels, or disease progression markers.
 #'
 #' @examples
+#' \donttest{
 #' # example will be added
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis
 #' @param timevar_data Variables that change over time

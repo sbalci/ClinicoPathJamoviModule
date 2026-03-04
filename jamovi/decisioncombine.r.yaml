@@ -95,7 +95,7 @@ items:
           superTitle: '95% CI'
           type: number
           format: number
-      description: '95% confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios.'
+      description: '95 percent confidence intervals for diagnostic metrics. Wilson intervals are used for proportions, and log-scale intervals for likelihood ratios and diagnostic odds ratios.'
 
     - name: goldFreqTable
       title: 'Gold Standard Frequency Distribution'
@@ -286,7 +286,7 @@ items:
         - test3
         - filterStatistic
         - filterPattern
-      description: 'Forest plot displaying 95% confidence intervals for key diagnostic metrics'
+      description: 'Forest plot displaying 95 percent confidence intervals for key diagnostic metrics'
 
     - name: decisionTreePlot
       title: 'Decision Tree - Test Combination Strategy'

@@ -147,7 +147,7 @@ jppsClass <- R6::R6Class(
             </head>
             <body>
             <div class='main'>
-                <div class='header'>🎯 Predictive Power Score Analysis</div>"
+                <div class='header'> Predictive Power Score Analysis</div>"
             
             content <- switch(type,
                 "single" = "
@@ -198,7 +198,7 @@ jppsClass <- R6::R6Class(
                     relationships and can identify non-linear patterns that correlation analysis might miss.
                 </div>
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
-                    <strong>✓ Analysis configured correctly</strong><br>
+                    <strong> Analysis configured correctly</strong><br>
                     Review your settings and examine the results below.
                 </div>"
             )
@@ -237,7 +237,7 @@ jppsClass <- R6::R6Class(
             if (nrow(clean_data) == 0) {
                 self$results$instructions$setContent(
                     "<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ No complete cases</strong><br>
+                    <strong> No complete cases</strong><br>
                     All selected variables have missing values in combination.
                     </div>"
                 )
@@ -329,7 +329,7 @@ jppsClass <- R6::R6Class(
             if (!requireNamespace("ppsr", quietly = TRUE)) {
                 self$results$instructions$setContent(
                     "<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ Package Required</strong><br>
+                    <strong> Package Required</strong><br>
                     The 'ppsr' package is required for Predictive Power Score analysis.
                     </div>"
                 )
@@ -431,7 +431,7 @@ jppsClass <- R6::R6Class(
             }, error = function(e) {
                 self$results$instructions$setContent(
                     paste0("<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ PPS Analysis Error</strong><br>
+                    <strong> PPS Analysis Error</strong><br>
                     ", e$message, "
                     </div>")
                 )
@@ -580,7 +580,7 @@ jppsClass <- R6::R6Class(
             
             interpretation_html <- "
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
-                <h3 style='color: #3f51b5; margin-bottom: 15px;'>🔍 PPS Interpretation Guide</h3>
+                <h3 style='color: #3f51b5; margin-bottom: 15px;'> PPS Interpretation Guide</h3>
                 
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
                     <strong>PPS Score Interpretation:</strong><br>
@@ -600,7 +600,7 @@ jppsClass <- R6::R6Class(
                 </div>
                 
                 <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
-                    <strong>⚠️ Important Considerations:</strong><br>
+                    <strong> Important Considerations:</strong><br>
                     • PPS is a \"quick and dirty\" exploration tool<br>
                     • High PPS doesn't necessarily imply causation<br>
                     • Results may vary with different algorithms and sample sizes<br>

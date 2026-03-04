@@ -3,14 +3,12 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(jjwithinstats_test)
 data(jjwithinstats_paired)
 data(jjwithinstats_biomarker)
 data(jjwithinstats_laboratory)
 
 test_that("jjwithinstats respects all statistical type options", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -29,7 +27,6 @@ test_that("jjwithinstats respects all statistical type options", {
 })
 
 test_that("jjwithinstats respects all pairwise adjustment methods", {
-  devtools::load_all()
 
   adjust_methods <- c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none")
 
@@ -49,7 +46,6 @@ test_that("jjwithinstats respects all pairwise adjustment methods", {
 })
 
 test_that("jjwithinstats respects all centrality types", {
-  devtools::load_all()
 
   centrality_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -69,7 +65,6 @@ test_that("jjwithinstats respects all centrality types", {
 })
 
 test_that("jjwithinstats respects all clinical presets", {
-  devtools::load_all()
 
   presets <- c("custom", "biomarker", "treatment", "laboratory")
 
@@ -88,7 +83,6 @@ test_that("jjwithinstats respects all clinical presets", {
 })
 
 test_that("jjwithinstats respects all ggpubr plot types", {
-  devtools::load_all()
 
   plot_types <- c("boxplot", "violin", "paired")
 
@@ -108,7 +102,6 @@ test_that("jjwithinstats respects all ggpubr plot types", {
 })
 
 test_that("jjwithinstats respects all ggpubr palettes", {
-  devtools::load_all()
 
   palettes <- c("jco", "npg", "aaas", "lancet", "jama", "nejm", "grey", "default")
 
@@ -128,7 +121,6 @@ test_that("jjwithinstats respects all ggpubr palettes", {
 })
 
 test_that("jjwithinstats respects point path options", {
-  devtools::load_all()
 
   # With point paths
   result1 <- jjwithinstats(
@@ -152,7 +144,6 @@ test_that("jjwithinstats respects point path options", {
 })
 
 test_that("jjwithinstats respects centrality path options", {
-  devtools::load_all()
 
   # With centrality path
   result1 <- jjwithinstats(
@@ -178,7 +169,6 @@ test_that("jjwithinstats respects centrality path options", {
 })
 
 test_that("jjwithinstats respects plot element toggles", {
-  devtools::load_all()
 
   # Test violin, boxplot, point combinations
   combinations <- list(
@@ -209,7 +199,6 @@ test_that("jjwithinstats respects plot element toggles", {
 })
 
 test_that("jjwithinstats respects ggpubr statistical comparison options", {
-  devtools::load_all()
 
   # With statistics
   result1 <- jjwithinstats(
@@ -233,7 +222,6 @@ test_that("jjwithinstats respects ggpubr statistical comparison options", {
 })
 
 test_that("jjwithinstats respects ggpubr point overlay options", {
-  devtools::load_all()
 
   # With points
   result1 <- jjwithinstats(
@@ -257,7 +245,6 @@ test_that("jjwithinstats respects ggpubr point overlay options", {
 })
 
 test_that("jjwithinstats respects ggpubr line display options", {
-  devtools::load_all()
 
   # With lines
   result1 <- jjwithinstats(
@@ -285,7 +272,6 @@ test_that("jjwithinstats respects ggpubr line display options", {
 })
 
 test_that("jjwithinstats respects colorblind-safe palette option", {
-  devtools::load_all()
 
   # Colorblind-safe
   result1 <- jjwithinstats(
@@ -309,7 +295,6 @@ test_that("jjwithinstats respects colorblind-safe palette option", {
 })
 
 test_that("jjwithinstats respects Bayes Factor message option", {
-  devtools::load_all()
 
   # With BF message
   result1 <- jjwithinstats(
@@ -335,7 +320,6 @@ test_that("jjwithinstats respects Bayes Factor message option", {
 })
 
 test_that("jjwithinstats respects results subtitle option", {
-  devtools::load_all()
 
   # With subtitle
   result1 <- jjwithinstats(
@@ -359,7 +343,6 @@ test_that("jjwithinstats respects results subtitle option", {
 })
 
 test_that("jjwithinstats respects decimal places parameter", {
-  devtools::load_all()
 
   k_values <- c(0, 1, 2, 3, 4, 5)
 
@@ -378,7 +361,6 @@ test_that("jjwithinstats respects decimal places parameter", {
 })
 
 test_that("jjwithinstats respects confidence level parameter", {
-  devtools::load_all()
 
   conf_levels <- c(0.90, 0.95, 0.99)
 
@@ -397,7 +379,6 @@ test_that("jjwithinstats respects confidence level parameter", {
 })
 
 test_that("jjwithinstats respects plot dimension parameters", {
-  devtools::load_all()
 
   dimensions <- list(
     list(width = 300, height = 300),
@@ -421,7 +402,6 @@ test_that("jjwithinstats respects plot dimension parameters", {
 })
 
 test_that("jjwithinstats respects custom title parameters", {
-  devtools::load_all()
 
   result <- jjwithinstats(
     data = jjwithinstats_test,
@@ -437,7 +417,6 @@ test_that("jjwithinstats respects custom title parameters", {
 })
 
 test_that("jjwithinstats respects show explanations option", {
-  devtools::load_all()
 
   # With explanations
   result1 <- jjwithinstats(
@@ -461,7 +440,6 @@ test_that("jjwithinstats respects show explanations option", {
 })
 
 test_that("jjwithinstats handles comprehensive argument combinations", {
-  devtools::load_all()
 
   result <- jjwithinstats(
     data = jjwithinstats_test,

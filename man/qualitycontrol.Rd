@@ -96,8 +96,8 @@ reference interval estimation}
 
 \item{pt_target_value}{Target value for proficiency testing analysis}
 
-\item{pt_acceptable_range}{Acceptable range for proficiency testing (±\\% or
-± absolute units)}
+\item{pt_acceptable_range}{Acceptable range for proficiency testing (±
+percent or ± absolute units)}
 
 \item{validation_components}{Components of analytical method validation to
 assess}
@@ -162,11 +162,12 @@ protocols, and reference interval establishment for clinical laboratory
 management.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 qualitycontrol(
     measurement_var = "measurement",
     analysis_type = "control_charts",
     control_chart_type = "all_charts"
 )
-
+}
 }

@@ -29,7 +29,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> No Data Available</h4>",
                     "<p style='color: #721c24;'>", .("Data contains no (complete) rows."), "</p>",
                     "<p>", .("Please check your data for missing values or filtering issues."), "</p>",
                     "</div>"
@@ -46,7 +46,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (valid_count < 30) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Insufficient Data</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> Insufficient Data</h4>",
                     "<p style='color: #721c24;'>", .("Benford's Law analysis requires at least <strong>30 valid observations</strong> for meaningful results."), "</p>",
                     "<p><strong>", .("Current data:"), "</strong> ", valid_count, " ", .("valid observations"), "</p>",
                     "<hr style='border-color: #dc3545;'>",
@@ -71,7 +71,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Values Detected</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> Invalid Values Detected</h4>",
                     "<p style='color: #721c24;'><strong>", .("Benford's Law only applies to positive numbers."), "</strong></p>",
                     "<p>", .("Your data contains:"), "</p>",
                     "<ul style='margin-left: 20px;'>",
@@ -100,7 +100,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (magnitude_range < 1) {
                 html <- paste0(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Limited Data Range</h4>",
+                    "<h4 style='margin-top: 0; color: #856404;'> Limited Data Range</h4>",
                     "<p style='color: #856404;'><strong>", .("Warning: Data spans less than one order of magnitude."), "</strong></p>",
                     "<p>", .("Benford's Law works best when data spans multiple orders of magnitude (e.g., values ranging from 10 to 1000+)."), "</p>",
                     "<p><strong>", .("Your data range:"), "</strong> ", round(min_val, 2), " ", .("to"), " ", round(max_val, 2),

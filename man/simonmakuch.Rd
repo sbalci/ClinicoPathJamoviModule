@@ -259,6 +259,7 @@ timing of exposure changes, providing unbiased survival estimates and valid
 statistical comparisons.
 }
 \examples{
+\donttest{
 # Load example data
 data("simon_makuch_simple")
 
@@ -317,5 +318,5 @@ simonmakuch(
     performBootstrapValidation = TRUE,
     showMethodologyNotes = TRUE
 )
-
+}
 }

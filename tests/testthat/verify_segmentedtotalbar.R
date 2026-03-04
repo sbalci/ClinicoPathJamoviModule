@@ -14,7 +14,6 @@ source("R/jjsegmentedtotalbar.b.R")
 
 test_that("jjsegmentedtotalbar handles raw data correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   set.seed(123)
   data <- data.frame(

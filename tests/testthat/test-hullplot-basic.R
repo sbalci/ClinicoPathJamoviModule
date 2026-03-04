@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("hullplot function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("hullplot"))
 })
 
 test_that("hullplot runs with minimal required arguments", {
-  devtools::load_all()
 
   data(hullplot_test, package = "ClinicoPath")
 
@@ -27,7 +25,6 @@ test_that("hullplot runs with minimal required arguments", {
 })
 
 test_that("hullplot produces expected output structure", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -43,7 +40,6 @@ test_that("hullplot produces expected output structure", {
 })
 
 test_that("hullplot handles two-group visualization", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -59,7 +55,6 @@ test_that("hullplot handles two-group visualization", {
 })
 
 test_that("hullplot handles three-group visualization", {
-  devtools::load_all()
 
   data(hullplot_clusters)
 
@@ -74,7 +69,6 @@ test_that("hullplot handles three-group visualization", {
 })
 
 test_that("hullplot handles four-group visualization", {
-  devtools::load_all()
 
   data(hullplot_fourgroup)
 
@@ -89,7 +83,6 @@ test_that("hullplot handles four-group visualization", {
 })
 
 test_that("hullplot handles hull concavity parameter", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -110,7 +103,6 @@ test_that("hullplot handles hull concavity parameter", {
 })
 
 test_that("hullplot handles hull alpha transparency", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -131,7 +123,6 @@ test_that("hullplot handles hull alpha transparency", {
 })
 
 test_that("hullplot handles hull expand parameter", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -152,7 +143,6 @@ test_that("hullplot handles hull expand parameter", {
 })
 
 test_that("hullplot handles group labels", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -178,7 +168,6 @@ test_that("hullplot handles group labels", {
 })
 
 test_that("hullplot handles statistics display", {
-  devtools::load_all()
 
   data(hullplot_clusters)
 
@@ -204,7 +193,6 @@ test_that("hullplot handles statistics display", {
 })
 
 test_that("hullplot handles confidence ellipses", {
-  devtools::load_all()
 
   data(hullplot_overlap)
 
@@ -230,7 +218,6 @@ test_that("hullplot handles confidence ellipses", {
 })
 
 test_that("hullplot handles outlier detection", {
-  devtools::load_all()
 
   data(hullplot_outliers)
 
@@ -256,7 +243,6 @@ test_that("hullplot handles outlier detection", {
 })
 
 test_that("hullplot handles size variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -281,7 +267,6 @@ test_that("hullplot handles size variable", {
 })
 
 test_that("hullplot handles separate color variable", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -297,7 +282,6 @@ test_that("hullplot handles separate color variable", {
 })
 
 test_that("hullplot handles point size parameter", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -318,7 +302,6 @@ test_that("hullplot handles point size parameter", {
 })
 
 test_that("hullplot handles point alpha parameter", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -339,7 +322,6 @@ test_that("hullplot handles point alpha parameter", {
 })
 
 test_that("hullplot handles color palettes", {
-  devtools::load_all()
 
   data(hullplot_clusters)
 
@@ -360,7 +342,6 @@ test_that("hullplot handles color palettes", {
 })
 
 test_that("hullplot handles plot themes", {
-  devtools::load_all()
 
   data(hullplot_clusters)
 
@@ -381,7 +362,6 @@ test_that("hullplot handles plot themes", {
 })
 
 test_that("hullplot handles custom axis labels", {
-  devtools::load_all()
 
   data(hullplot_clinical)
 
@@ -399,7 +379,6 @@ test_that("hullplot handles custom axis labels", {
 })
 
 test_that("hullplot handles different datasets", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "hullplot_test", x = "x", y = "y", group = "group"),
@@ -429,7 +408,6 @@ test_that("hullplot handles different datasets", {
 })
 
 test_that("hullplot handles small sample size", {
-  devtools::load_all()
 
   data(hullplot_small)
 
@@ -444,7 +422,6 @@ test_that("hullplot handles small sample size", {
 })
 
 test_that("hullplot handles overlapping groups", {
-  devtools::load_all()
 
   data(hullplot_overlap)
 
@@ -461,7 +438,6 @@ test_that("hullplot handles overlapping groups", {
 })
 
 test_that("hullplot handles unbalanced groups", {
-  devtools::load_all()
 
   data(hullplot_unbalanced)
 
@@ -477,7 +453,6 @@ test_that("hullplot handles unbalanced groups", {
 })
 
 test_that("hullplot handles natural language summary", {
-  devtools::load_all()
 
   data(hullplot_clinical)
 
@@ -493,7 +468,6 @@ test_that("hullplot handles natural language summary", {
 })
 
 test_that("hullplot handles assumptions display", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -509,7 +483,6 @@ test_that("hullplot handles assumptions display", {
 })
 
 test_that("hullplot handles plot dimensions", {
-  devtools::load_all()
 
   data(hullplot_test)
 
@@ -526,7 +499,6 @@ test_that("hullplot handles plot dimensions", {
 })
 
 test_that("hullplot handles clinical trial data visualization", {
-  devtools::load_all()
 
   data(hullplot_clinical)
 

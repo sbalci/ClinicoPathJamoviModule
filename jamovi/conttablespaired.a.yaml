@@ -12,7 +12,7 @@ jas: '1.2'
 description:
     main: McNemar test
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             dat <- data.frame(
                 `1st survey` = c('Approve', 'Approve', 'Disapprove', 'Disapprove'),

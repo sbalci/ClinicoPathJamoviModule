@@ -163,7 +163,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "statsplot2",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = statsplot2Results$new(options=options),
                 data = data,
@@ -186,6 +186,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' plots, bar charts, and alluvial diagrams.
 #'
 #' @examples
+#' \donttest{
 #' # Automatic plot selection for factor vs continuous variables
 #' statsplot2(
 #'     data = mtcars,
@@ -209,7 +210,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # - Specific data requirement feedback
 #' # - Package installation instructions when needed
 #' # - Actionable suggestions for unsupported combinations
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param dep The dependent variable (y-axis, 1st measurement). Can be
 #'   continuous or categorical.

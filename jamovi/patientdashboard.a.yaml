@@ -14,7 +14,7 @@ description:
         patient care coordination and clinical workflow optimization.
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('patient_monitoring', package='ClinicoPath')
             

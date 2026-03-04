@@ -82,6 +82,7 @@ for genomics and high-dimensional clinical data where interpretable
 variable selection is crucial.
 }
 \examples{
+\donttest{
 ncvregcox(
     data = data,
     time = "time",
@@ -91,5 +92,5 @@ ncvregcox(
     cv_folds = 10,
     lambda_type = "min"
 )
-
+}
 }

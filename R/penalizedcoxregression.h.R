@@ -323,6 +323,7 @@ penalizedcoxregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Penalized Cox regression with LASSO
 #' penalizedcoxregression(
 #'     data = data,
@@ -332,7 +333,7 @@ penalizedcoxregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #'     penaltyType = "lasso",
 #'     crossValidation = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time the time variable for survival analysis
 #' @param status the status variable (0 = censored, 1 = event)

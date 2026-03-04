@@ -3,7 +3,6 @@
 # and suitable for analysis
 
 library(testthat)
-devtools::load_all()
 library(dplyr)
 
 # Helper function to test dataset structure
@@ -13,7 +12,6 @@ test_joint_dataset <- function(data, dataset_name, expected_vars,
   
   test_that(paste(dataset_name, "has correct structure"), {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     
     # Data frame structure
     expect_s3_class(data, "data.frame")

@@ -174,8 +174,8 @@ sizes for reliable analysis.}
 levels (e.g., different types of events or outcomes). This option is
 required for cause-specific and competing risk survival analyses.}
 
-\item{ci95}{Enable this option to display 95\\% confidence intervals around
-the survival estimates in the plots.}
+\item{ci95}{Enable this option to display 95 percent confidence intervals
+around the survival estimates in the plots.}
 
 \item{risktable}{Enable this option to display a table of risk estimates
 for each group in the survival analysis.}

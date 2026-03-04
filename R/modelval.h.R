@@ -345,6 +345,7 @@ modelvalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example usage:
 #' # data <- your_data
 #' # ClinicoPath::modelval(
@@ -354,7 +355,7 @@ modelvalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #   validationType = "external",
 #' #   subgroup = "hospital"
 #' # )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (observed events: yes/no).
 #' @param predicted Predicted probabilities from the existing model (0-1

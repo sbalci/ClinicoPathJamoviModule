@@ -5,7 +5,6 @@
 # Tests edge cases, error handling, and boundary conditions
 
 library(testthat)
-library(ClinicoPath)
 data(rpasurvival_test)
 data(rpasurvival_small)
 

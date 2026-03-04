@@ -550,6 +550,7 @@ causespecifichazardsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('mgus2', package='survival')
 #'
 #' causespecifichazards(data = mgus2,
@@ -558,7 +559,7 @@ causespecifichazardsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #'                     covariates = c('age', 'sex'),
 #'                     cause_variable = 'death',
 #'                     reference_cause = '1')
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable. Should
 #'   contain positive  numeric values representing the time to event or

@@ -16,7 +16,6 @@ psychopdaROC <- function(...) {
 # Edge Cases Tests: psychopdaROC
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(psychopdaROC_small, package = "ClinicoPath")
 data(psychopdaROC_perfect, package = "ClinicoPath")
 data(psychopdaROC_poor, package = "ClinicoPath")

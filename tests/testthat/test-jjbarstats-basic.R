@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("jjbarstats function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("jjbarstats"))
 })
 
 test_that("jjbarstats runs with minimal required arguments", {
-  devtools::load_all()
 
   data(jjbarstats_test, package = "ClinicoPath")
 
@@ -26,7 +24,6 @@ test_that("jjbarstats runs with minimal required arguments", {
 })
 
 test_that("jjbarstats produces expected output structure", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -41,7 +38,6 @@ test_that("jjbarstats produces expected output structure", {
 })
 
 test_that("jjbarstats handles 3×3 contingency table", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -56,7 +52,6 @@ test_that("jjbarstats handles 3×3 contingency table", {
 })
 
 test_that("jjbarstats handles 2×2 contingency table", {
-  devtools::load_all()
 
   data(jjbarstats_diagnostic)
 
@@ -71,7 +66,6 @@ test_that("jjbarstats handles 2×2 contingency table", {
 })
 
 test_that("jjbarstats handles parametric statistics", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -86,7 +80,6 @@ test_that("jjbarstats handles parametric statistics", {
 })
 
 test_that("jjbarstats handles nonparametric statistics", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -101,7 +94,6 @@ test_that("jjbarstats handles nonparametric statistics", {
 })
 
 test_that("jjbarstats handles robust statistics", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -116,7 +108,6 @@ test_that("jjbarstats handles robust statistics", {
 })
 
 test_that("jjbarstats handles Bayesian statistics", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -131,7 +122,6 @@ test_that("jjbarstats handles Bayesian statistics", {
 })
 
 test_that("jjbarstats handles paired/repeated measures", {
-  devtools::load_all()
 
   data(jjbarstats_paired)
 
@@ -146,7 +136,6 @@ test_that("jjbarstats handles paired/repeated measures", {
 })
 
 test_that("jjbarstats handles independent samples", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -161,7 +150,6 @@ test_that("jjbarstats handles independent samples", {
 })
 
 test_that("jjbarstats handles split-by variable", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -176,7 +164,6 @@ test_that("jjbarstats handles split-by variable", {
 })
 
 test_that("jjbarstats handles aggregated data with counts", {
-  devtools::load_all()
 
   data(jjbarstats_aggregated)
 
@@ -191,7 +178,6 @@ test_that("jjbarstats handles aggregated data with counts", {
 })
 
 test_that("jjbarstats handles pairwise comparisons", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -207,7 +193,6 @@ test_that("jjbarstats handles pairwise comparisons", {
 })
 
 test_that("jjbarstats handles label display modes", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -240,7 +225,6 @@ test_that("jjbarstats handles label display modes", {
 })
 
 test_that("jjbarstats handles proportion test", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -255,7 +239,6 @@ test_that("jjbarstats handles proportion test", {
 })
 
 test_that("jjbarstats handles clinical presets", {
-  devtools::load_all()
 
   data(jjbarstats_diagnostic)
 
@@ -280,7 +263,6 @@ test_that("jjbarstats handles clinical presets", {
 })
 
 test_that("jjbarstats handles two-level factors", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -294,7 +276,6 @@ test_that("jjbarstats handles two-level factors", {
 })
 
 test_that("jjbarstats handles three-level factors", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -308,7 +289,6 @@ test_that("jjbarstats handles three-level factors", {
 })
 
 test_that("jjbarstats handles four-level factors", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 

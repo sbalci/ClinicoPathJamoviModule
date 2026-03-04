@@ -45,7 +45,6 @@ stats_test_data <- data.frame(
 
 test_that("BBC Plots - Basic functionality and parameter validation", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test basic function exists and can be called
   expect_true(exists("bbcplotsClass"))

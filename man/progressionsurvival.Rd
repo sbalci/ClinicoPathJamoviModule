@@ -173,6 +173,7 @@ specific
 to cancer clinical trials and observational studies.
 }
 \examples{
+\donttest{
 data('cancer_trial')
 
 progressionsurvival(
@@ -183,5 +184,5 @@ progressionsurvival(
     treatment_var = "treatment",
     stratification_vars = c("stage", "histology")
 )
-
+}
 }

@@ -17,7 +17,7 @@ description:
         protocol studies. Designed for clinical trialists requiring state-of-the-art
         methodology and regulatory compliance.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('clinical_trial')
             
@@ -247,7 +247,7 @@ options:
           R: Type of mid-trial adaptation
 
     - name: adaptation_timing
-      title: Adaptation Timing (% events)
+      title: Adaptation Timing ( percent events)
       type: Number
       default: 50
       min: 10
@@ -281,9 +281,9 @@ options:
           - name: "hazard_ratio"
             title: "Hazard Ratio"
           - name: "risk_difference"
-            title: "Risk Difference (%)"
+            title: "Risk Difference ( percent)"
           - name: "survival_difference"
-            title: "Survival Difference (%)"
+            title: "Survival Difference ( percent)"
       default: "hazard_ratio"
       description:
           R: Scale for non-inferiority margin

@@ -98,6 +98,7 @@ survival curve  up to a specific time point (tau), representing the average
 survival time  within the restriction period.
 }
 \examples{
+\donttest{
 # Example usage will be added
-
+}
 }

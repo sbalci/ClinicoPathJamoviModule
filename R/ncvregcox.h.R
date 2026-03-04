@@ -401,6 +401,7 @@ ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' ncvregcox(
 #'     data = data,
 #'     time = "time",
@@ -410,7 +411,7 @@ ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     cv_folds = 10,
 #'     lambda_type = "min"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time survival time variable
 #' @param event event indicator (1=event, 0=censored)

@@ -86,9 +86,9 @@ correction when analyzing multiple dependent variables. IMPORTANT: This
 option does NOT automatically adjust p-values. It provides instructions for
 manual correction. When testing multiple endpoints (e.g., cholesterol,
 glucose, triglycerides), the family-wise error rate increases. For example,
-testing 3 variables at alpha=0.05 gives actual error rate of ~14\\%. Select
-a correction method to see step-by-step instructions for manually applying
-that correction to the p-values shown in the plots.}
+testing 3 variables at alpha=0.05 gives actual error rate of ~14 percent.
+Select a correction method to see step-by-step instructions for manually
+applying that correction to the p-values shown in the plots.}
 
 \item{plotwidth}{Width of the plot in pixels. Default is 650.}
 
@@ -135,6 +135,7 @@ for comparing continuous variables between groups with statistical
 annotations.
 }
 \examples{
+\donttest{
 # Basic comparison between groups
 jjbetweenstats(
     data = iris,
@@ -178,5 +179,5 @@ jjbetweenstats(
     xtitle = "Supplement",
     ytitle = "Tooth Length"
 )
-
+}
 }

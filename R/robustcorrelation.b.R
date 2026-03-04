@@ -444,7 +444,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!private$.packageWarningsShown) {
                 warning_msg <- glue::glue(
                     "<br><div style='background-color: #fff3cd; padding: 8px; border: 1px solid #ffeaa7; border-radius: 4px; margin: 5px 0;'>
-                    <strong>⚠️ Package Availability Notice:</strong><br>
+                    <strong> Package Availability Notice:</strong><br>
                     The {pkg_name} package is not available. Using {fallback_name} correlation instead of {method_name}.
                     <br>Install {pkg_name} with: <code>install.packages('{pkg_name}')</code>
                     </div>"

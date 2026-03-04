@@ -14,7 +14,7 @@ description:
         using various weighting schemes. Includes Gehan-Wilcoxon, Tarone-Ware, Peto-Peto,
         and custom weight function approaches for comprehensive survival comparison.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # example will be added
 

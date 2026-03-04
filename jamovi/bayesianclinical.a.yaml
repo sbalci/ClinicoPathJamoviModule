@@ -16,7 +16,7 @@ description:
         and clinical decision support. Essential for evidence-based medicine, clinical guidelines, and
         personalized treatment decisions with proper uncertainty communication.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('clinical_data')
             

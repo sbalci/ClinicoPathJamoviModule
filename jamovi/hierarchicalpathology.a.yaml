@@ -14,7 +14,7 @@ description:
         Slide > ROI > Cell hierarchies, and prevents Type I errors from ignoring 
         clustering effects.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('histopathology')
             

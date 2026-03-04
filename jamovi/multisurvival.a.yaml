@@ -4,7 +4,7 @@ title: Multivariable Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -17,7 +17,7 @@ description:
         the model accounts for how these factors influence event rates relative to the person-time at
         risk in each subgroup.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Basic multivariable Cox regression
             library(survival)
@@ -439,12 +439,12 @@ options:
 
 
     - name: ci95
-      title: '95% CI'
+      title: '95 percent CI'
       type: Bool
       default: false
       description:
         R: >
-          If true, displays 95% confidence intervals around the survival estimates on plots.
+          If true, displays 95 percent confidence intervals around the survival estimates on plots.
 
     - name: risktable
       title: risktable
@@ -858,7 +858,7 @@ options:
     #   description:
     #     R: >
     #       If true, adds a column to the AFT results table with natural language
-    #       interpretation of Time Ratios (e.g., "Associated with 50% longer survival time").
+    #       interpretation of Time Ratios (e.g., "Associated with 50 percent longer survival time").
     #     ui: >
     #       Add an interpretation column to the AFT results table with
     #       plain language explanations of the Time Ratios.
@@ -1198,8 +1198,8 @@ options:
     #   default: 0.05
     #   description: >-
     #     Significance level for hypothesis tests. Default 0.05 corresponds to
-    #     95% confidence. Adjust for multiple testing corrections or stricter
-    #     criteria (e.g., 0.01 for 99% confidence).
+    #     95 percent confidence. Adjust for multiple testing corrections or stricter
+    #     criteria (e.g., 0.01 for 99 percent confidence).
 
     # PLANNED FEATURE: Guided Wizard Mode
     # Priority: Medium

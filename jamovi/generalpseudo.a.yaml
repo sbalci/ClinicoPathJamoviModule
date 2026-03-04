@@ -16,9 +16,9 @@ description:
         that can be analyzed with conventional regression techniques. Supports various functionals
         including survival probabilities, cumulative incidence functions, and restricted mean survival times.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             generalpseudo(
                 elapsedtime = "time_to_event",
                 outcome = "event_status",

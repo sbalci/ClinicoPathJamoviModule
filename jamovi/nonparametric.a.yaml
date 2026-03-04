@@ -13,10 +13,10 @@ description:
         Friedman test, Mann-Whitney U test, and robust alternatives to classical procedures.
         Designed specifically for clinical research where normality assumptions are violated.
         This enhanced module combines distribution-free methods with proper effect size calculations,
-        assumption checking, and post hoc analysis - addressing critical gaps identified in 30% 
+        assumption checking, and post hoc analysis - addressing critical gaps identified in 30 percent 
         of pathology studies that use these methods.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Enhanced Mann-Whitney U test for biomarker expression
             nonparametric(

@@ -80,7 +80,7 @@ qtwistClass <- R6::R6Class(
                 "Q-TWiST Analysis: Quality-Adjusted Survival</h2>",
 
                 "<div style='background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #2c3e50;'>📊 What is Q-TWiST?</h3>",
+                "<h3 style='margin-top: 0; color: #2c3e50;'> What is Q-TWiST?</h3>",
                 "<p><strong>Q-TWiST</strong> (Quality-adjusted Time Without Symptoms or Toxicity) ",
                 "partitions overall survival into three health states with different quality-of-life weights:</p>",
                 "<ul style='margin: 10px 0;'>",
@@ -93,7 +93,7 @@ qtwistClass <- R6::R6Class(
                 "</div>",
 
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #856404;'>⚠️ IMPORTANT: Time Variables Required</h3>",
+                "<h3 style='margin-top: 0; color: #856404;'> IMPORTANT: Time Variables Required</h3>",
                 "<p><strong>Q-TWiST analysis requires PRECALCULATED time durations</strong> (in months), not dates.</p>",
 
                 "<h4 style='color: #856404; margin-top: 15px;'>If you have DATES instead of durations:</h4>",
@@ -109,15 +109,15 @@ qtwistClass <- R6::R6Class(
                 "<div style='background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
                 "<strong>Example:</strong>",
                 "<ul style='margin: 5px 0; list-style-type: none;'>",
-                "<li>📅 <em>Have:</em> enrollment_date, death_date, progression_date</li>",
-                "<li>⚙️ <em>Calculate:</em> os_months = (death_date - enrollment_date) / 30.44</li>",
-                "<li>⚙️ <em>Calculate:</em> pfs_months = (progression_date - enrollment_date) / 30.44</li>",
-                "<li>✅ <em>Use:</em> os_months and pfs_months in Q-TWiST analysis</li>",
+                "<li> <em>Have:</em> enrollment_date, death_date, progression_date</li>",
+                "<li> <em>Calculate:</em> os_months = (death_date - enrollment_date) / 30.44</li>",
+                "<li> <em>Calculate:</em> pfs_months = (progression_date - enrollment_date) / 30.44</li>",
+                "<li> <em>Use:</em> os_months and pfs_months in Q-TWiST analysis</li>",
                 "</ul>",
                 "</div>",
                 "</div>",
 
-                "<h3 style='color: #2c3e50; margin-top: 20px;'>📋 Variable Selection Checklist:</h3>",
+                "<h3 style='color: #2c3e50; margin-top: 20px;'> Variable Selection Checklist:</h3>",
                 "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
                 "<tr style='background-color: #f8f9fa;'>",
                 "<th style='text-align: left; padding: 8px; border: 1px solid #dee2e6;'>Variable Type</th>",
@@ -128,7 +128,7 @@ qtwistClass <- R6::R6Class(
                 "<tr>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Overall Survival Time</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
-                ifelse(has_os_time, "✅", "❌"),
+                ifelse(has_os_time, "", ""),
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Time to death or censoring (months)</td>",
                 "</tr>",
@@ -136,7 +136,7 @@ qtwistClass <- R6::R6Class(
                 "<tr style='background-color: #f8f9fa;'>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>OS Event Indicator</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
-                ifelse(has_os_event, "✅", "❌"),
+                ifelse(has_os_event, "", ""),
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>1 = death, 0 = censored (or factor)</td>",
                 "</tr>",
@@ -144,7 +144,7 @@ qtwistClass <- R6::R6Class(
                 "<tr>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>PFS Time</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
-                ifelse(has_pfs_time, "✅", "❌"),
+                ifelse(has_pfs_time, "", ""),
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Time to progression/death (months)</td>",
                 "</tr>",
@@ -152,7 +152,7 @@ qtwistClass <- R6::R6Class(
                 "<tr style='background-color: #f8f9fa;'>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>PFS Event Indicator</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
-                ifelse(has_pfs_event, "✅", "❌"),
+                ifelse(has_pfs_event, "", ""),
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>1 = progression/death, 0 = censored</td>",
                 "</tr>",
@@ -160,7 +160,7 @@ qtwistClass <- R6::R6Class(
                 "<tr>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Treatment Variable</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
-                ifelse(has_treatment, "✅", "❌"),
+                ifelse(has_treatment, "", ""),
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Exactly 2 treatment groups required</td>",
                 "</tr>",
@@ -168,7 +168,7 @@ qtwistClass <- R6::R6Class(
                 "<tr style='background-color: #f8f9fa;'>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Toxicity Definition</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
-                ifelse(has_toxicity, "✅", "❌"),
+                ifelse(has_toxicity, "", ""),
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>",
                 "Method: ", tox_method,
@@ -177,7 +177,7 @@ qtwistClass <- R6::R6Class(
                 "</table>",
 
                 "<div style='background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #155724;'>✨ Key Features:</h3>",
+                "<h3 style='margin-top: 0; color: #155724;'> Key Features:</h3>",
                 "<ul style='margin: 10px 0; line-height: 1.6;'>",
                 "<li>Accounts for both <strong>quantity</strong> and <strong>quality</strong> of survival time</li>",
                 "<li>Three toxicity definition methods (fixed window, individual durations, time periods)</li>",
@@ -189,7 +189,7 @@ qtwistClass <- R6::R6Class(
                 "</div>",
 
                 "<div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #17a2b8; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #0c5460;'>📚 Clinical Applications:</h3>",
+                "<h3 style='margin-top: 0; color: #0c5460;'> Clinical Applications:</h3>",
                 "<ul style='margin: 10px 0; line-height: 1.6;'>",
                 "<li><strong>Adjuvant Therapy:</strong> Balance survival benefit vs. toxicity burden</li>",
                 "<li><strong>Treatment Comparison:</strong> When OS similar but quality differs</li>",
@@ -202,15 +202,15 @@ qtwistClass <- R6::R6Class(
                 ifelse(has_os_time && has_os_event && has_pfs_time && has_pfs_event && has_treatment && has_toxicity,
                     paste0(
                         "<div style='background-color: #d4edda; padding: 15px; border: 2px solid #28a745; margin: 15px 0; border-radius: 5px;'>",
-                        "<h3 style='margin-top: 0; color: #155724;'>✅ Ready to Analyze!</h3>",
+                        "<h3 style='margin-top: 0; color: #155724;'> Ready to Analyze!</h3>",
                         "<p style='margin: 0;'>All required variables are selected. ",
                         "Configure utility weights and analysis options, then click <strong>Run Analysis</strong>.</p>",
                         "</div>"
                     ),
                     paste0(
                         "<div style='background-color: #f8d7da; padding: 15px; border: 2px solid #dc3545; margin: 15px 0; border-radius: 5px;'>",
-                        "<h3 style='margin-top: 0; color: #721c24;'>⚠️ Incomplete Selection</h3>",
-                        "<p style='margin: 0;'>Please select all required variables (marked with ❌ above) to begin analysis.</p>",
+                        "<h3 style='margin-top: 0; color: #721c24;'> Incomplete Selection</h3>",
+                        "<p style='margin: 0;'>Please select all required variables (marked with  above) to begin analysis.</p>",
                         "</div>"
                     )
                 ),
@@ -1205,7 +1205,7 @@ qtwistClass <- R6::R6Class(
                 "Clinical Interpretation of Q-TWiST Results</h2>",
 
                 "<div style='background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #155724;'>📊 Interpreting Q-TWiST Differences</h3>",
+                "<h3 style='margin-top: 0; color: #155724;'> Interpreting Q-TWiST Differences</h3>",
 
                 "<h4>What is a Clinically Meaningful Difference?</h4>",
                 "<ul style='line-height: 1.8;'>",
@@ -1224,7 +1224,7 @@ qtwistClass <- R6::R6Class(
                 "</div>",
 
                 "<div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #17a2b8; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #0c5460;'>🔍 Analyzing Health State Contributions</h3>",
+                "<h3 style='margin-top: 0; color: #0c5460;'> Analyzing Health State Contributions</h3>",
 
                 "<p><strong>Look at the state-specific differences table to understand WHY treatments differ:</strong></p>",
 
@@ -1243,7 +1243,7 @@ qtwistClass <- R6::R6Class(
                 "</div>",
 
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #856404;'>⚖️ Role of Sensitivity Analysis</h3>",
+                "<h3 style='margin-top: 0; color: #856404;'> Role of Sensitivity Analysis</h3>",
 
                 "<p><strong>Sensitivity analysis is essential because utility weights are subjective.</strong></p>",
 
@@ -1261,7 +1261,7 @@ qtwistClass <- R6::R6Class(
                 "</div>",
 
                 "<div style='background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #0c5460;'>💡 Clinical Application Examples</h3>",
+                "<h3 style='margin-top: 0; color: #0c5460;'> Clinical Application Examples</h3>",
 
                 "<h4>Adjuvant Chemotherapy Decision</h4>",
                 "<p style='margin-left: 20px;'><em>Scenario:</em> Standard chemo vs. dose-dense regimen</p>",
@@ -1287,7 +1287,7 @@ qtwistClass <- R6::R6Class(
                 "</div>",
 
                 "<div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #721c24;'>⚠️ Important Caveats</h3>",
+                "<h3 style='margin-top: 0; color: #721c24;'> Important Caveats</h3>",
 
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Utility weights are subjective:</strong> Always perform sensitivity analysis</li>",
@@ -1306,7 +1306,7 @@ qtwistClass <- R6::R6Class(
                 "</div>",
 
                 "<div style='background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;'>",
-                "<h3 style='margin-top: 0; color: #155724;'>✅ Reporting Q-TWiST Results</h3>",
+                "<h3 style='margin-top: 0; color: #155724;'> Reporting Q-TWiST Results</h3>",
 
                 "<p><strong>A complete Q-TWiST report should include:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
@@ -1531,7 +1531,7 @@ qtwistClass <- R6::R6Class(
                 "</ol>",
 
                 "<div style='background-color: #e8f4f8; padding: 15px; margin-top: 30px; border-left: 4px solid #3498db;'>",
-                "<h3 style='margin-top: 0; color: #0c5460;'>📚 Additional Resources</h3>",
+                "<h3 style='margin-top: 0; color: #0c5460;'> Additional Resources</h3>",
 
                 "<p><strong>R Packages:</strong></p>",
                 "<ul>",

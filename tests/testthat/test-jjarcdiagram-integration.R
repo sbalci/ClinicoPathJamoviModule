@@ -8,7 +8,6 @@
 library(testthat)
 
 test_that("jjarcdiagram integrates with test datasets", {
-  devtools::load_all()
 
   # Test comprehensive dataset loads
   data(jjarcdiagram_test, package = "ClinicoPath")
@@ -37,7 +36,6 @@ test_that("jjarcdiagram integrates with test datasets", {
 })
 
 test_that("jjarcdiagram test datasets have proper structure", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -56,7 +54,6 @@ test_that("jjarcdiagram test datasets have proper structure", {
 })
 
 test_that("jjarcdiagram scenario: Gene regulatory network analysis", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -84,7 +81,6 @@ test_that("jjarcdiagram scenario: Gene regulatory network analysis", {
 })
 
 test_that("jjarcdiagram scenario: Patient similarity clustering", {
-  devtools::load_all()
 
   data(jjarcdiagram_patient_network)
 
@@ -111,7 +107,6 @@ test_that("jjarcdiagram scenario: Patient similarity clustering", {
 })
 
 test_that("jjarcdiagram scenario: Disease comorbidity analysis", {
-  devtools::load_all()
 
   data(jjarcdiagram_disease_network)
 
@@ -139,7 +134,6 @@ test_that("jjarcdiagram scenario: Disease comorbidity analysis", {
 })
 
 test_that("jjarcdiagram scenario: Protein interaction network", {
-  devtools::load_all()
 
   data(jjarcdiagram_protein_network)
 
@@ -165,7 +159,6 @@ test_that("jjarcdiagram scenario: Protein interaction network", {
 })
 
 test_that("jjarcdiagram scenario: Treatment pathway sequencing", {
-  devtools::load_all()
 
   data(jjarcdiagram_treatment_network)
 
@@ -191,7 +184,6 @@ test_that("jjarcdiagram scenario: Treatment pathway sequencing", {
 })
 
 test_that("jjarcdiagram works with filtered networks", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -211,7 +203,6 @@ test_that("jjarcdiagram works with filtered networks", {
 })
 
 test_that("jjarcdiagram works with subsetted networks", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -230,7 +221,6 @@ test_that("jjarcdiagram works with subsetted networks", {
 })
 
 test_that("jjarcdiagram handles combined network types", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -253,7 +243,6 @@ test_that("jjarcdiagram works with CSV imported data", {
   skip_if_not(file.exists("data/jjarcdiagram_test.csv"),
               "CSV test file not available")
 
-  devtools::load_all()
 
   # Read from CSV
   csv_data <- read.csv("data/jjarcdiagram_test.csv", stringsAsFactors = TRUE)
@@ -274,7 +263,6 @@ test_that("jjarcdiagram works with OMV imported data", {
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
-  devtools::load_all()
 
   # Read from OMV
   omv_data <- jmvReadWrite::read_omv("data/jjarcdiagram_test.omv")
@@ -290,7 +278,6 @@ test_that("jjarcdiagram works with OMV imported data", {
 })
 
 test_that("jjarcdiagram preserves data integrity", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
   original_data <- jjarcdiagram_test
@@ -307,7 +294,6 @@ test_that("jjarcdiagram preserves data integrity", {
 })
 
 test_that("jjarcdiagram handles multiple visualization styles", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -343,7 +329,6 @@ test_that("jjarcdiagram handles multiple visualization styles", {
 })
 
 test_that("jjarcdiagram handles derived network metrics", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -371,7 +356,6 @@ test_that("jjarcdiagram handles derived network metrics", {
 })
 
 test_that("jjarcdiagram generates complete outputs", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -396,7 +380,6 @@ test_that("jjarcdiagram generates complete outputs", {
 })
 
 test_that("jjarcdiagram handles real-world network sizes", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 

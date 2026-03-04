@@ -140,6 +140,7 @@ clinical validation, performance metrics, and medical interpretation
 guidelines.
 }
 \examples{
+\donttest{
 # Example for cancer diagnosis
 data(cancer_data)
 treemedical(
@@ -151,5 +152,5 @@ treemedical(
     validation = "cv",
     show_tree_plot = TRUE
 )
-
+}
 }

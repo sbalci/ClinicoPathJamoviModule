@@ -939,11 +939,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <h3>Understanding LASSO Cox Regression</h3>
             
             <div class='alert alert-info'>
-                <h4>🎯 What is LASSO Cox Regression?</h4>
+                <h4> What is LASSO Cox Regression?</h4>
                 <p>LASSO (Least Absolute Shrinkage and Selection Operator) Cox regression combines the Cox proportional hazards model with LASSO regularization for automatic variable selection in survival analysis.</p>
             </div>
             
-            <h4>🔑 Key Concepts:</h4>
+            <h4> Key Concepts:</h4>
             <ul>
                 <li><strong>Regularization (λ):</strong> A penalty parameter that controls the strength of variable selection
                     <ul>
@@ -960,7 +960,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Shrinkage:</strong> Coefficients of selected variables are shrunk toward zero, reducing overfitting</li>
             </ul>
             
-            <h4>📊 How to Interpret Results:</h4>
+            <h4> How to Interpret Results:</h4>
             <ul>
                 <li><strong>Selected Variables:</strong> Variables with non-zero coefficients at optimal λ</li>
                 <li><strong>Coefficients:</strong> Log hazard ratios (positive = increased risk, negative = decreased risk)</li>
@@ -969,7 +969,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </ul>
             
             <div class='alert alert-success'>
-                <h4>✅ Advantages of LASSO Cox:</h4>
+                <h4> Advantages of LASSO Cox:</h4>
                 <ul>
                     <li>Automatic variable selection eliminates manual stepwise procedures</li>
                     <li>Reduces overfitting in high-dimensional data</li>
@@ -980,7 +980,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div class='alert alert-warning'>
-                <h4>⚠️ Important Considerations:</h4>
+                <h4> Important Considerations:</h4>
                 <ul>
                     <li>Variable selection depends on the specific dataset and may vary with new data</li>
                     <li>Standardization is typically required for fair penalization across variables</li>
@@ -997,7 +997,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             html_content <- "
             <h3>LASSO Cox Methodology Notes</h3>
             
-            <h4>🔬 Technical Details:</h4>
+            <h4> Technical Details:</h4>
             
             <div class='alert alert-primary'>
                 <h5>Mathematical Foundation</h5>
@@ -1010,7 +1010,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </ul>
             </div>
             
-            <h4>📋 Algorithm Steps:</h4>
+            <h4> Algorithm Steps:</h4>
             <ol>
                 <li><strong>Data Preprocessing:</strong>
                     <ul>
@@ -1046,14 +1046,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </li>
             </ol>
             
-            <h4>🎛️ Hyperparameter Selection:</h4>
+            <h4> Hyperparameter Selection:</h4>
             <ul>
                 <li><strong>λ.min:</strong> Lambda that minimizes CV error</li>
                 <li><strong>λ.1se:</strong> Largest lambda within 1 SE of minimum (more parsimonious)</li>
                 <li><strong>Choice:</strong> λ.1se often preferred for better generalizability</li>
             </ul>
             
-            <h4>📈 Variable Importance Metrics:</h4>
+            <h4> Variable Importance Metrics:</h4>
             <ul>
                 <li><strong>Coefficient Magnitude:</strong> Larger |β| indicates stronger effect</li>
                 <li><strong>Selection Frequency:</strong> How often variable is selected across CV folds</li>
@@ -1062,7 +1062,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </ul>
             
             <div class='alert alert-info'>
-                <h5>💡 Implementation Notes</h5>
+                <h5> Implementation Notes</h5>
                 <ul>
                     <li>Uses coordinate descent algorithm for optimization</li>
                     <li>Handles ties in survival times using Efron approximation</li>
@@ -1080,7 +1080,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <h3>Clinical Interpretation Guidance</h3>
             
             <div class='alert alert-success'>
-                <h4>🏥 Clinical Applications</h4>
+                <h4> Clinical Applications</h4>
                 <ul>
                     <li><strong>Prognostic Models:</strong> Identify key factors affecting patient survival</li>
                     <li><strong>Risk Stratification:</strong> Classify patients into risk groups for treatment planning</li>
@@ -1089,11 +1089,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </ul>
             </div>
             
-            <h4>📊 Interpreting Model Results:</h4>
+            <h4> Interpreting Model Results:</h4>
             
             <div class='row'>
                 <div class='col-md-6'>
-                    <h5>🔢 Coefficients & Hazard Ratios</h5>
+                    <h5> Coefficients & Hazard Ratios</h5>
                     <ul>
                         <li><strong>Positive coefficient:</strong> Higher values increase hazard (worse prognosis)</li>
                         <li><strong>Negative coefficient:</strong> Higher values decrease hazard (better prognosis)</li>
@@ -1103,7 +1103,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div class='col-md-6'>
-                    <h5>📈 Risk Scores</h5>
+                    <h5> Risk Scores</h5>
                     <ul>
                         <li><strong>Higher risk score:</strong> Worse expected survival</li>
                         <li><strong>Lower risk score:</strong> Better expected survival</li>
@@ -1113,7 +1113,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
             </div>
             
-            <h4>⚕️ Clinical Decision Making:</h4>
+            <h4> Clinical Decision Making:</h4>
             <ul>
                 <li><strong>Treatment Selection:</strong> High-risk patients may benefit from aggressive therapy</li>
                 <li><strong>Follow-up Intensity:</strong> Adjust monitoring frequency based on risk</li>
@@ -1121,7 +1121,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Clinical Trial Stratification:</strong> Balance risk factors between treatment arms</li>
             </ul>
             
-            <h4>🎯 Model Performance Assessment:</h4>
+            <h4> Model Performance Assessment:</h4>
             <table class='table table-sm'>
                 <thead>
                     <tr><th>C-index Range</th><th>Discrimination</th><th>Clinical Utility</th></tr>
@@ -1136,7 +1136,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </table>
             
             <div class='alert alert-warning'>
-                <h4>⚠️ Clinical Validation Requirements:</h4>
+                <h4> Clinical Validation Requirements:</h4>
                 <ul>
                     <li><strong>External Validation:</strong> Test model in different populations</li>
                     <li><strong>Temporal Validation:</strong> Verify performance over time</li>
@@ -1146,7 +1146,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div class='alert alert-info'>
-                <h4>📋 Reporting Recommendations:</h4>
+                <h4> Reporting Recommendations:</h4>
                 <ul>
                     <li>Report both λ.min and λ.1se results</li>
                     <li>Describe variable selection process and stability</li>
@@ -1157,7 +1157,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </ul>
             </div>
             
-            <h4>🔄 Model Updating and Maintenance:</h4>
+            <h4> Model Updating and Maintenance:</h4>
             <ul>
                 <li><strong>Regular Validation:</strong> Monitor performance with new data</li>
                 <li><strong>Model Recalibration:</strong> Update when performance degrades</li>
@@ -1171,7 +1171,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .populateCrossValidationExplanation = function() {
             html_content <- "
-            <h4>📊 Understanding the Cross-Validation Plot</h4>
+            <h4> Understanding the Cross-Validation Plot</h4>
             
             <div class='alert alert-info'>
                 <p>The cross-validation plot shows how model performance varies with different levels of regularization (λ values).</p>
@@ -1198,7 +1198,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .populateRegularizationPathExplanation = function() {
             html_content <- "
-            <h4>🛤️ Understanding the Regularization Path</h4>
+            <h4> Understanding the Regularization Path</h4>
             
             <div class='alert alert-info'>
                 <p>The coefficient plot shows how variable coefficients change as regularization increases.</p>
@@ -1225,7 +1225,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .populateRiskScoreExplanation = function() {
             html_content <- "
-            <h4>📈 Understanding Risk Scores and Survival Curves</h4>
+            <h4> Understanding Risk Scores and Survival Curves</h4>
             
             <div class='alert alert-info'>
                 <p>Risk scores combine selected variables to predict individual patient risk. Survival curves show outcomes for different risk groups.</p>

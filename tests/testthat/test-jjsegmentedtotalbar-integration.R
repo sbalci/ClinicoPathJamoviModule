@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load all test datasets
 data(jjsegmentedtotalbar_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jjsegmentedtotalbar_temporal, package = "ClinicoPath", envir = environment(
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles complete treatment response workflow", {
-  devtools::load_all()
 
   # Step 1: Basic visualization
   result1 <- jjsegmentedtotalbar(
@@ -90,7 +88,6 @@ test_that("jjsegmentedtotalbar handles complete treatment response workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles complete demographics workflow", {
-  devtools::load_all()
 
   # Demographics analysis: age distribution by center and gender
   result <- jjsegmentedtotalbar(
@@ -112,7 +109,6 @@ test_that("jjsegmentedtotalbar handles complete demographics workflow", {
 })
 
 test_that("jjsegmentedtotalbar handles ethnicity distribution analysis", {
-  devtools::load_all()
 
   # Ethnicity distribution across centers
   result <- jjsegmentedtotalbar(
@@ -137,7 +133,6 @@ test_that("jjsegmentedtotalbar handles ethnicity distribution analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles complete biomarker workflow", {
-  devtools::load_all()
 
   # Biomarker expression by disease stage
   result <- jjsegmentedtotalbar(
@@ -160,7 +155,6 @@ test_that("jjsegmentedtotalbar handles complete biomarker workflow", {
 })
 
 test_that("jjsegmentedtotalbar handles biomarker by tumor type analysis", {
-  devtools::load_all()
 
   # Biomarker distribution by tumor type
   result <- jjsegmentedtotalbar(
@@ -185,7 +179,6 @@ test_that("jjsegmentedtotalbar handles biomarker by tumor type analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles complete quality metrics workflow", {
-  devtools::load_all()
 
   # Quality grades by hospital with flerlage plot
   result <- jjsegmentedtotalbar(
@@ -210,7 +203,6 @@ test_that("jjsegmentedtotalbar handles complete quality metrics workflow", {
 })
 
 test_that("jjsegmentedtotalbar handles quality metrics by type analysis", {
-  devtools::load_all()
 
   # Quality distribution by metric type
   result <- jjsegmentedtotalbar(
@@ -236,7 +228,6 @@ test_that("jjsegmentedtotalbar handles quality metrics by type analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles complete temporal progression workflow", {
-  devtools::load_all()
 
   # Disease status progression over time by intervention
   result <- jjsegmentedtotalbar(
@@ -260,7 +251,6 @@ test_that("jjsegmentedtotalbar handles complete temporal progression workflow", 
 })
 
 test_that("jjsegmentedtotalbar handles intervention comparison analysis", {
-  devtools::load_all()
 
   # Compare interventions with horizontal layout
   result <- jjsegmentedtotalbar(
@@ -285,7 +275,6 @@ test_that("jjsegmentedtotalbar handles intervention comparison analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar produces consistent results across all palettes", {
-  devtools::load_all()
 
   palettes <- c("default", "viridis", "set1", "dark2", "paired",
                 "clinical", "colorblind", "bbc_multi",
@@ -313,7 +302,6 @@ test_that("jjsegmentedtotalbar produces consistent results across all palettes",
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar produces valid results for both plot types", {
-  devtools::load_all()
 
   # Traditional stacked plot
   result_stacked <- jjsegmentedtotalbar(
@@ -344,7 +332,6 @@ test_that("jjsegmentedtotalbar produces valid results for both plot types", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles all test datasets consistently", {
-  devtools::load_all()
 
   # Test dataset
   result1 <- jjsegmentedtotalbar(
@@ -400,7 +387,6 @@ test_that("jjsegmentedtotalbar handles all test datasets consistently", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar produces publication-ready treatment response figure", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -424,7 +410,6 @@ test_that("jjsegmentedtotalbar produces publication-ready treatment response fig
 })
 
 test_that("jjsegmentedtotalbar produces publication-ready biomarker figure", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_biomarker,

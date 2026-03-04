@@ -6,7 +6,6 @@
 # agreement (Interrater Reliability Analysis) jamovi function
 
 library(testthat)
-devtools::load_all()
 
 # Load basic test data
 data(agreement_pathology, package = "ClinicoPath")

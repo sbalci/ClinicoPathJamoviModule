@@ -9,7 +9,7 @@ competingRisksPowerClass <- R6::R6Class(
 
         .init = function() {
             todo <- paste0(
-                "<h4>📋 Competing Risks Power Analysis</h4>",
+                "<h4> Competing Risks Power Analysis</h4>",
                 "<p><b>Required Setup:</b></p>",
                 "<ul>",
                 "<li>Select analysis type (power, sample size, effect size, or detectable difference)</li>",
@@ -35,7 +35,7 @@ competingRisksPowerClass <- R6::R6Class(
 
             if (is.null(allocation_ratio)) {
                 self$results$todo$setContent(
-                    "<h4>⚠️ Invalid Allocation Ratio</h4>
+                    "<h4> Invalid Allocation Ratio</h4>
                     <p>Please specify allocation ratio in format '1:1', '2:1', etc.</p>"
                 )
                 return()
@@ -50,7 +50,7 @@ competingRisksPowerClass <- R6::R6Class(
             # Validate event rates
             if (event_rate1 + competing_rate1 > 0.95 || event_rate2 + competing_rate2 > 0.95) {
                 self$results$todo$setContent(
-                    "<h4>⚠️ High Total Event Rates</h4>
+                    "<h4> High Total Event Rates</h4>
                     <p>Combined event and competing risk rates exceed 95%.
                     Please adjust rates to allow for censoring.</p>"
                 )
@@ -103,7 +103,7 @@ competingRisksPowerClass <- R6::R6Class(
 
             }, error = function(e) {
                 error_msg <- paste0(
-                    "<h4>❌ Analysis Error</h4>",
+                    "<h4> Analysis Error</h4>",
                     "<p>Error in power analysis: ", e$message, "</p>",
                     "<p><b>Common solutions:</b></p>",
                     "<ul>",
@@ -300,7 +300,7 @@ competingRisksPowerClass <- R6::R6Class(
         .populateEducationalInfo = function() {
             educational_content <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
-                "<h4>📚 Competing Risks Power Analysis</h4>",
+                "<h4> Competing Risks Power Analysis</h4>",
                 "<p><b>Purpose:</b> Power analysis for competing risks studies helps determine adequate ",
                 "sample sizes for detecting clinically meaningful differences in cumulative incidence ",
                 "when multiple event types can occur.</p>",
@@ -660,7 +660,7 @@ competingRisksPowerClass <- R6::R6Class(
             diagnostics_data <- data.frame(
                 metric = c("Simulation Convergence", "Monte Carlo Error", "Confidence Interval Width"),
                 value = c("Converged", "< 0.01", "±0.05"),
-                status = c("✓ Good", "✓ Good", "✓ Good"),
+                status = c(" Good", " Good", " Good"),
                 recommendation = c("Results reliable", "Sufficient precision", "Adequate precision"),
                 stringsAsFactors = FALSE
             )
@@ -674,7 +674,7 @@ competingRisksPowerClass <- R6::R6Class(
 
             methods_content <- paste0(
                 "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
-                "<h4>📊 Statistical Methods</h4>",
+                "<h4> Statistical Methods</h4>",
                 "<p><b>Analysis Type:</b> ", switch(params$analysis_type,
                     "power" = "Power calculation for competing risks studies",
                     "samplesize" = "Sample size determination for competing risks studies",
@@ -708,13 +708,13 @@ competingRisksPowerClass <- R6::R6Class(
 
             recommendations <- paste0(
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-                "<h4>💡 Study Design Recommendations</h4>"
+                "<h4> Study Design Recommendations</h4>"
             )
 
             if (result$type == "power") {
                 if (result$power < 0.8) {
                     recommendations <- paste0(recommendations,
-                        "<p><b>⚠️ Power Warning:</b> Current design provides only ",
+                        "<p><b> Power Warning:</b> Current design provides only ",
                         round(result$power * 100, 1), "% power, below the conventional 80% threshold.</p>",
                         "<p><b>Suggestions to improve power:</b></p><ul>",
                         "<li>Increase sample size by ", round((0.8/result$power)^2 * 100 - 100), "%</li>",
@@ -723,14 +723,14 @@ competingRisksPowerClass <- R6::R6Class(
                     )
                 } else {
                     recommendations <- paste0(recommendations,
-                        "<p><b>✅ Adequate Power:</b> Current design provides ",
+                        "<p><b> Adequate Power:</b> Current design provides ",
                         round(result$power * 100, 1), "% power, meeting conventional standards.</p>"
                     )
                 }
             } else if (result$type == "sample_size") {
                 if (result$sample_size > 1000) {
                     recommendations <- paste0(recommendations,
-                        "<p><b>⚠️ Large Sample Required:</b> The required sample size of ",
+                        "<p><b> Large Sample Required:</b> The required sample size of ",
                         result$sample_size, " may be challenging to achieve.</p>",
                         "<p><b>Alternative approaches:</b></p><ul>",
                         "<li>Reduce target power to 70-75% (requires ", round(result$sample_size * 0.7), " participants)</li>",
@@ -739,33 +739,33 @@ competingRisksPowerClass <- R6::R6Class(
                     )
                 } else {
                     recommendations <- paste0(recommendations,
-                        "<p><b>✅ Feasible Sample Size:</b> Required sample size of ",
+                        "<p><b> Feasible Sample Size:</b> Required sample size of ",
                         result$sample_size, " is realistic for most study settings.</p>"
                     )
                 }
             } else if (result$type == "effect_size") {
                 if (result$effect_size > 2.0) {
                     recommendations <- paste0(recommendations,
-                        "<p><b>⚠️ Large Effect Required:</b> Minimum detectable hazard ratio of ",
+                        "<p><b> Large Effect Required:</b> Minimum detectable hazard ratio of ",
                         round(result$effect_size, 2), " represents a large clinical effect.</p>",
                         "<p><b>Consider:</b> Smaller, clinically relevant effects may not be detectable with current design.</p>"
                     )
                 } else {
                     recommendations <- paste0(recommendations,
-                        "<p><b>✅ Reasonable Sensitivity:</b> Can detect hazard ratios ≥ ",
+                        "<p><b> Reasonable Sensitivity:</b> Can detect hazard ratios ≥ ",
                         round(result$effect_size, 2), ", which is clinically meaningful.</p>"
                     )
                 }
             } else if (result$type == "detectable_difference") {
                 if (result$difference > 0.2) {
                     recommendations <- paste0(recommendations,
-                        "<p><b>⚠️ Large Difference Required:</b> Minimum detectable difference of ",
+                        "<p><b> Large Difference Required:</b> Minimum detectable difference of ",
                         round(result$difference * 100, 1), "% is quite large.</p>",
                         "<p><b>Consider:</b> Smaller differences may be clinically important but undetectable.</p>"
                     )
                 } else {
                     recommendations <- paste0(recommendations,
-                        "<p><b>✅ Good Sensitivity:</b> Can detect cumulative incidence differences ≥ ",
+                        "<p><b> Good Sensitivity:</b> Can detect cumulative incidence differences ≥ ",
                         round(result$difference * 100, 1), "%, which is clinically relevant.</p>"
                     )
                 }
@@ -775,13 +775,13 @@ competingRisksPowerClass <- R6::R6Class(
             total_competing_rate <- (params$competing_rate1 + params$competing_rate2) / 2
             if (total_competing_rate > 0.3) {
                 recommendations <- paste0(recommendations,
-                    "<p><b>📊 Competing Risks Impact:</b> High competing event rates (", 
+                    "<p><b> Competing Risks Impact:</b> High competing event rates (", 
                     round(total_competing_rate * 100, 1), "%) reduce power. Consider cause-specific analyses.</p>"
                 )
             }
 
             recommendations <- paste0(recommendations, 
-                "<p><b>📚 Additional Considerations:</b></p><ul>",
+                "<p><b> Additional Considerations:</b></p><ul>",
                 "<li>Validate assumptions with pilot data if available</li>",
                 "<li>Consider interim analyses for large studies</li>",
                 "<li>Account for potential loss to follow-up</li></ul>",

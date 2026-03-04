@@ -12,7 +12,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Initialize Summary section
                 self$results$summary$setContent(
                     "<div class='summary-placeholder' style='background-color: #f8f9fa; padding: 15px; border: 1px dashed #dee2e6; border-radius: 5px;'>
-                    <h4>📊 Analysis Summary</h4>
+                    <h4> Analysis Summary</h4>
                     <p style='color: #6c757d; font-style: italic;'>Summary will appear here after running the analysis with your texture feature data.</p>
                     <p><small>This section will provide a copy-ready summary of key findings, statistical results, and clinical interpretation.</small></p>
                     </div>"
@@ -21,7 +21,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Initialize interpretation section
                 self$results$interpretation$setContent(
                     "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>
-                    <h4>🔬 Getting Started</h4>
+                    <h4> Getting Started</h4>
                     <p>Select your Haralick texture features to begin the analysis. This function will provide comprehensive statistical analysis and clinical interpretation of spatial texture heterogeneity.</p>
                     <p><strong>Next steps:</strong></p>
                     <ol>
@@ -44,7 +44,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (is.null(self$options$texture_features) || length(self$options$texture_features) == 0) {
                 self$results$interpretation$setContent(
                     "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
-                    <h4>⚠️ No Texture Features Selected</h4>
+                    <h4> No Texture Features Selected</h4>
                     <p>To perform Haralick texture analysis, you need to:</p>
                     <ol>
                     <li><strong>Select Texture Features</strong>: Drag texture feature columns (entropy, contrast, correlation, energy, homogeneity, etc.) from your data into the 'Haralick Texture Features' box</li>
@@ -66,7 +66,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }, error = function(e) {
                 self$results$interpretation$setContent(
                     paste0("<div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;'>
-                    <h4>❌ Data Validation Error</h4>
+                    <h4> Data Validation Error</h4>
                     <p><strong>Problem:</strong> ", e$message, "</p>
                     <p><strong>Common solutions:</strong></p>
                     <ul>
@@ -93,7 +93,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Set initial processing message
             self$results$summary$setContent(
                 paste0("<div style='background-color: #d4edda; padding: 10px; border-left: 4px solid #28a745; margin: 10px 0;'>
-                <p>🔄 <strong>Processing texture analysis...</strong></p>
+                <p> <strong>Processing texture analysis...</strong></p>
                 <p>Analyzing ", nrow(texture_data), " cases with ", length(self$options$texture_features), " texture features.</p>
                 </div>")
             )
@@ -298,7 +298,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         .generateAboutContent = function() {
             return(paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3>🔬 About Haralick Texture Analysis</h3>",
+                "<h3> About Haralick Texture Analysis</h3>",
                 
                 "<h4>What This Analysis Does:</h4>",
                 "<p>Haralick texture analysis quantifies spatial patterns in digital pathology images using ",
@@ -316,11 +316,11 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 "<h4>Key Haralick Features Explained:</h4>",
                 "<div style='margin-left: 20px;'>",
-                "<p><strong>🎯 Entropy:</strong> Measures randomness/disorder. High entropy = heterogeneous tissue patterns</p>",
-                "<p><strong>⚡ Contrast:</strong> Measures local intensity variations. High contrast = sharp edges/boundaries</p>",
-                "<p><strong>🔗 Correlation:</strong> Measures linear dependency of intensities. High correlation = organized patterns</p>",
-                "<p><strong>💡 Energy/ASM:</strong> Measures uniformity. High energy = homogeneous regions</p>",
-                "<p><strong>🏠 Homogeneity:</strong> Measures closeness to diagonal. High homogeneity = similar intensities</p>",
+                "<p><strong> Entropy:</strong> Measures randomness/disorder. High entropy = heterogeneous tissue patterns</p>",
+                "<p><strong> Contrast:</strong> Measures local intensity variations. High contrast = sharp edges/boundaries</p>",
+                "<p><strong> Correlation:</strong> Measures linear dependency of intensities. High correlation = organized patterns</p>",
+                "<p><strong> Energy/ASM:</strong> Measures uniformity. High energy = homogeneous regions</p>",
+                "<p><strong> Homogeneity:</strong> Measures closeness to diagonal. High homogeneity = similar intensities</p>",
                 "</div>",
                 
                 "<h4>Data Requirements:</h4>",
@@ -333,17 +333,17 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 "<h4>How to Interpret Results:</h4>",
                 "<div style='background-color: #e8f5e8; padding: 10px; border-left: 3px solid #4caf50; margin: 10px 0;'>",
-                "<p><strong>✅ High Heterogeneity (CV > 1.0):</strong></p>",
+                "<p><strong> High Heterogeneity (CV > 1.0):</strong></p>",
                 "<ul><li>Complex tissue architecture</li><li>May indicate aggressive biology</li><li>Requires comprehensive sampling</li></ul>",
                 "</div>",
                 
                 "<div style='background-color: #fff3cd; padding: 10px; border-left: 3px solid #ffc107; margin: 10px 0;'>",
-                "<p><strong>⚠️ Moderate Heterogeneity (CV 0.5-1.0):</strong></p>",
+                "<p><strong> Moderate Heterogeneity (CV 0.5-1.0):</strong></p>",
                 "<ul><li>Mixed tissue patterns</li><li>Standard for most biomarkers</li><li>Good for prognostic analysis</li></ul>",
                 "</div>",
                 
                 "<div style='background-color: #f8d7da; padding: 10px; border-left: 3px solid #dc3545; margin: 10px 0;'>",
-                "<p><strong>⚪ Low Heterogeneity (CV < 0.5):</strong></p>",
+                "<p><strong> Low Heterogeneity (CV < 0.5):</strong></p>",
                 "<ul><li>Uniform tissue patterns</li><li>May need different features</li><li>Consider sampling adequacy</li></ul>",
                 "</div>",
                 
@@ -355,10 +355,10 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 "<h4>Quality Control Checklist:</h4>",
                 "<ul style='margin-left: 20px;'>",
-                "<li>✓ Verify texture features are from same image processing pipeline</li>",
-                "<li>✓ Check for extreme outliers that may indicate processing errors</li>",
-                "<li>✓ Ensure adequate sampling (>5 regions per case recommended)</li>",
-                "<li>✓ Validate against histopathologist assessment when possible</li>",
+                "<li> Verify texture features are from same image processing pipeline</li>",
+                "<li> Check for extreme outliers that may indicate processing errors</li>",
+                "<li> Ensure adequate sampling (>5 regions per case recommended)</li>",
+                "<li> Validate against histopathologist assessment when possible</li>",
                 "</ul>",
                 
                 "<p><em>This implementation follows validated Haralick methodology from Haralick et al. (1973) ",
@@ -1117,7 +1117,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 biomarker_interpretation <- paste0(biomarker_interpretation,
                     "<p><strong>Ki67 Spatial Heterogeneity Assessment:</strong></p>",
                     if (has_entropy && entropy_mean > 2.5) {
-                        paste0("<p>🔴 <strong>High Ki67 entropy</strong> (mean = ", round(entropy_mean, 2), 
+                        paste0("<p> <strong>High Ki67 entropy</strong> (mean = ", round(entropy_mean, 2), 
                                ") suggests <strong>aggressive tumor behavior</strong> with spatially heterogeneous proliferation patterns. This may indicate:</p>",
                                "<ul>",
                                "<li>Higher grade tumor biology</li>",
@@ -1125,7 +1125,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                                "<li>Need for comprehensive sampling strategies</li>",
                                "</ul>")
                     } else if (has_entropy && entropy_mean > 1.5) {
-                        paste0("<p>🟡 <strong>Moderate Ki67 entropy</strong> (mean = ", round(entropy_mean, 2), 
+                        paste0("<p> <strong>Moderate Ki67 entropy</strong> (mean = ", round(entropy_mean, 2), 
                                ") indicates <strong>mixed proliferation patterns</strong>:</p>",
                                "<ul>",
                                "<li>Focal areas of high proliferation</li>",
@@ -1133,7 +1133,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                                "<li>Consider regional sampling variation</li>",
                                "</ul>")
                     } else if (has_entropy) {
-                        paste0("<p>🟢 <strong>Low Ki67 entropy</strong> (mean = ", round(entropy_mean, 2), 
+                        paste0("<p> <strong>Low Ki67 entropy</strong> (mean = ", round(entropy_mean, 2), 
                                ") suggests <strong>uniform proliferation</strong>:</p>",
                                "<ul>",
                                "<li>Homogeneous tumor growth pattern</li>",
@@ -1141,7 +1141,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                                "<li>Good prognostic consistency</li>",
                                "</ul>")
                     } else {
-                        "<p>⚠️ No entropy features detected. Consider including entropy measurements for comprehensive Ki67 spatial analysis.</p>"
+                        "<p> No entropy features detected. Consider including entropy measurements for comprehensive Ki67 spatial analysis.</p>"
                     },
                     
                     if (highest_cv > 1.0) {
@@ -1155,14 +1155,14 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 biomarker_interpretation <- paste0(biomarker_interpretation,
                     "<p><strong>HER2 Expression Spatial Analysis:</strong></p>",
                     if (has_entropy && entropy_mean > 2.0) {
-                        paste0("<p>🔴 <strong>High HER2 spatial heterogeneity</strong> (entropy = ", round(entropy_mean, 2), ") suggests:</p>",
+                        paste0("<p> <strong>High HER2 spatial heterogeneity</strong> (entropy = ", round(entropy_mean, 2), ") suggests:</p>",
                                "<ul>",
                                "<li>Potential for <strong>heterogeneous therapeutic response</strong></li>",
                                "<li>Need for comprehensive tumor sampling</li>",
                                "<li>Consider complementary molecular testing</li>",
                                "</ul>")
                     } else if (has_entropy) {
-                        paste0("<p>🟢 <strong>Homogeneous HER2 pattern</strong> (entropy = ", round(entropy_mean, 2), "):</p>",
+                        paste0("<p> <strong>Homogeneous HER2 pattern</strong> (entropy = ", round(entropy_mean, 2), "):</p>",
                                "<ul>",
                                "<li>Uniform expression across tumor regions</li>",
                                "<li>Reliable therapeutic target prediction</li>",
@@ -1177,14 +1177,14 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 biomarker_interpretation <- paste0(biomarker_interpretation,
                     "<p><strong>PD-L1 Expression Heterogeneity:</strong></p>",
                     if (has_entropy && entropy_mean > 2.2) {
-                        paste0("<p>🔴 <strong>High PD-L1 spatial variability</strong> may impact immunotherapy response prediction:</p>",
+                        paste0("<p> <strong>High PD-L1 spatial variability</strong> may impact immunotherapy response prediction:</p>",
                                "<ul>",
                                "<li>Regional variation in immune landscape</li>",
                                "<li>Multiple sampling recommended</li>",
                                "<li>Consider combined predictive scores (CPS/TPS)</li>",
                                "</ul>")
                     } else if (has_entropy) {
-                        "<p>🟢 <strong>Consistent PD-L1 spatial pattern</strong> supports reliable therapeutic decision-making.</p>"
+                        "<p> <strong>Consistent PD-L1 spatial pattern</strong> supports reliable therapeutic decision-making.</p>"
                     } else {
                         "<p>PD-L1 spatial assessment benefits from entropy analysis for immunotherapy stratification.</p>"
                     }
@@ -1194,14 +1194,14 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 biomarker_interpretation <- paste0(biomarker_interpretation,
                     "<p><strong>CD8+ T-cell Spatial Distribution:</strong></p>",
                     if (highest_cv > 1.5) {
-                        paste0("<p>🔵 <strong>Heterogeneous immune infiltration</strong> patterns detected:</p>",
+                        paste0("<p> <strong>Heterogeneous immune infiltration</strong> patterns detected:</p>",
                                "<ul>",
                                "<li>Focal immune activation zones</li>",
                                "<li>Potential for immune escape mechanisms</li>",
                                "<li>Comprehensive spatial analysis recommended</li>",
                                "</ul>")
                     } else {
-                        "<p>🟢 <strong>Uniform CD8+ distribution</strong> suggests consistent immune surveillance.</p>"
+                        "<p> <strong>Uniform CD8+ distribution</strong> suggests consistent immune surveillance.</p>"
                     }
                 )
             }
@@ -1486,7 +1486,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             return(paste0(
                 "<div class='copy-ready-summary' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;'>",
-                "<h4>📋 Copy-Ready Summary</h4>",
+                "<h4> Copy-Ready Summary</h4>",
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #e9ecef; margin: 10px 0;'>",
                 "<p style='margin: 0; line-height: 1.6;'>", copy_text, "</p>",
                 "</div>",
@@ -1494,11 +1494,11 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "<div style='margin-top: 15px;'>",
                 "<button onclick='navigator.clipboard.writeText(`", gsub('"', "'", copy_text), "`)' ",
                 "style='background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;'>",
-                "📋 Copy to Clipboard</button>",
+                " Copy to Clipboard</button>",
                 "<small style='color: #6c757d;'>Click to copy this summary for your clinical report or manuscript</small>",
                 "</div>",
                 
-                "<h5 style='margin-top: 20px; margin-bottom: 10px;'>📊 Key Statistics:</h5>",
+                "<h5 style='margin-top: 20px; margin-bottom: 10px;'> Key Statistics:</h5>",
                 "<ul style='margin-left: 20px; line-height: 1.8;'>",
                 "<li><strong>Sample Size:</strong> ", n_cases, " cases</li>",
                 "<li><strong>Texture Features:</strong> ", n_features, " Haralick measurements</li>",
@@ -1522,7 +1522,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "</ul>",
                 
                 "<div style='margin-top: 15px; padding: 10px; background-color: #e8f4fd; border-left: 4px solid #2196f3; border-radius: 4px;'>",
-                "<p style='margin: 0; font-size: 0.9em;'><strong>📚 Reference:</strong> ",
+                "<p style='margin: 0; font-size: 0.9em;'><strong> Reference:</strong> ",
                 "Haralick texture features computed following validated methodology (Haralick et al., 1973) ",
                 "with clinical applications in digital pathology biomarker assessment.</p>",
                 "</div>",
@@ -1538,13 +1538,13 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             n_cases <- nrow(texture_data)
             if (n_cases < 5) {
                 warnings <- c(warnings, paste0(
-                    "⚠️ <strong>Small Sample Warning:</strong> Only ", n_cases, " cases detected. ",
+                    " <strong>Small Sample Warning:</strong> Only ", n_cases, " cases detected. ",
                     "Texture analysis typically requires at least 5 cases for reliable statistical inference. ",
                     "Results should be interpreted with caution and validated in a larger cohort."
                 ))
             } else if (n_cases < 30) {
                 warnings <- c(warnings, paste0(
-                    "⚠️ <strong>Limited Sample Size:</strong> ", n_cases, " cases may be insufficient for robust statistical analysis. ",
+                    " <strong>Limited Sample Size:</strong> ", n_cases, " cases may be insufficient for robust statistical analysis. ",
                     "Consider collecting additional cases or interpreting results as preliminary findings."
                 ))
             }
@@ -1553,7 +1553,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             n_features <- length(texture_features)
             if (n_features > n_cases) {
                 warnings <- c(warnings, paste0(
-                    "⚠️ <strong>High-Dimensional Data Warning:</strong> ", n_features, " features with only ", n_cases, " cases. ",
+                    " <strong>High-Dimensional Data Warning:</strong> ", n_features, " features with only ", n_cases, " cases. ",
                     "This high feature-to-sample ratio may lead to overfitting. Consider feature selection or dimensionality reduction."
                 ))
             }
@@ -1562,7 +1562,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             analysis_focus <- self$options$analysis_focus
             if (analysis_focus == "spatial" && (is.null(self$options$x_coord) || is.null(self$options$y_coord))) {
                 warnings <- c(warnings, paste0(
-                    "⚠️ <strong>Spatial Analysis Warning:</strong> Spatial focus selected but X/Y coordinates not provided. ",
+                    " <strong>Spatial Analysis Warning:</strong> Spatial focus selected but X/Y coordinates not provided. ",
                     "Spatial heterogeneity analysis requires coordinate data. Please add spatial coordinates or change analysis focus."
                 ))
             }
@@ -1570,7 +1570,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Check for prognostic analysis without outcomes
             if (analysis_focus == "prognostic" && is.null(self$options$outcome_var)) {
                 warnings <- c(warnings, paste0(
-                    "⚠️ <strong>Prognostic Analysis Warning:</strong> Prognostic focus selected but no outcome variable provided. ",
+                    " <strong>Prognostic Analysis Warning:</strong> Prognostic focus selected but no outcome variable provided. ",
                     "Add a clinical outcome variable or change analysis focus to descriptive or correlation analysis."
                 ))
             }
@@ -1582,7 +1582,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 has_entropy <- any(grepl("entropy", texture_features, ignore.case = TRUE))
                 if (!has_entropy) {
                     warnings <- c(warnings, paste0(
-                        "💡 <strong>Biomarker Analysis Recommendation:</strong> ", 
+                        " <strong>Biomarker Analysis Recommendation:</strong> ", 
                         switch(biomarker_context,
                             "ki67" = "Ki67",
                             "her2" = "HER2", 
@@ -1599,12 +1599,12 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             if (missing_rate > 50) {
                 warnings <- c(warnings, paste0(
-                    "🔴 <strong>High Missing Data Warning:</strong> ", round(missing_rate, 1), "% of cases have missing texture data. ",
+                    " <strong>High Missing Data Warning:</strong> ", round(missing_rate, 1), "% of cases have missing texture data. ",
                     "High missingness may severely compromise analysis validity. Review data collection and preprocessing procedures."
                 ))
             } else if (missing_rate > 20) {
                 warnings <- c(warnings, paste0(
-                    "🟡 <strong>Moderate Missing Data:</strong> ", round(missing_rate, 1), "% of cases have incomplete texture data. ",
+                    " <strong>Moderate Missing Data:</strong> ", round(missing_rate, 1), "% of cases have incomplete texture data. ",
                     "Consider imputation methods or sensitivity analysis to assess impact on results."
                 ))
             }
@@ -1613,7 +1613,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             feature_selection <- self$options$feature_selection
             if (n_cases < 20 && feature_selection != "all") {
                 warnings <- c(warnings, paste0(
-                    "⚠️ <strong>Feature Selection Warning:</strong> Feature selection with <20 cases may be unreliable. ",
+                    " <strong>Feature Selection Warning:</strong> Feature selection with <20 cases may be unreliable. ",
                     "Consider using all available features or collecting additional cases before applying feature selection."
                 ))
             }
@@ -1622,7 +1622,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             correlation_threshold <- self$options$correlation_threshold
             if (correlation_threshold < 0.8 && feature_selection == "correlation_filter") {
                 warnings <- c(warnings, paste0(
-                    "💡 <strong>Correlation Threshold Recommendation:</strong> Threshold of ", correlation_threshold, 
+                    " <strong>Correlation Threshold Recommendation:</strong> Threshold of ", correlation_threshold, 
                     " may remove moderately correlated but clinically relevant features. ",
                     "Consider using threshold ≥0.8 for texture features unless specifically investigating redundancy."
                 ))
@@ -1641,7 +1641,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 low_variance_features <- sum(feature_cvs < 0.1)
                 if (low_variance_features > length(texture_features) * 0.5) {
                     warnings <- c(warnings, paste0(
-                        "⚠️ <strong>Low Variability Warning:</strong> ", low_variance_features, "/", length(texture_features), 
+                        " <strong>Low Variability Warning:</strong> ", low_variance_features, "/", length(texture_features), 
                         " features show very low variability (CV < 0.1). ",
                         "This may indicate processing artifacts, insufficient tissue heterogeneity, or inappropriate feature selection. ",
                         "Review image preprocessing and sampling strategies."
@@ -1752,7 +1752,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             warning_html <- paste0(
                 "<div style='background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0;'>",
-                "<h4 style='color: #856404; margin-top: 0;'>⚠️ Clinical Usage Warnings & Recommendations</h4>",
+                "<h4 style='color: #856404; margin-top: 0;'> Clinical Usage Warnings & Recommendations</h4>",
                 "<div style='line-height: 1.6;'>",
                 paste(warnings, collapse = "<br><br>"),
                 "</div>",

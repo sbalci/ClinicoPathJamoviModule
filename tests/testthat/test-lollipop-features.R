@@ -1,7 +1,6 @@
 
 test_that("lollipop handles warnings and validation correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     
     # Test 1: Small Sample Size Warning
     # ---------------------------------

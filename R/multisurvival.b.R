@@ -48,7 +48,7 @@ if (!exists(".")) {
       available = FALSE,
       message = paste0("
         <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-          <h4 style='color: #856404; margin-top: 0;'>⚠️ ", method_name, " ", .("Package Not Available"), "</h4>
+          <h4 style='color: #856404; margin-top: 0;'> ", method_name, " ", .("Package Not Available"), "</h4>
           <p><strong>", .("Issue:"), "</strong> ", .("The"), " '", package_name, "' ", .("package is required but not installed."), "</p>
           <p><strong>", .("Solution:"), "</strong> ", .("Install the package using:"), " <code>install.packages('", package_name, "')</code></p>
           <p><strong>", .("Alternative:"), "</strong> ", .("Automatically switching to"), " ", alternative_method, " ", .("analysis."), "</p>
@@ -528,7 +528,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .formatErrorMessage = function(title, message, suggestions = NULL) {
         error_html <- paste0(
           "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 10px;'>",
-          "<h4 style='color: #856404; margin-top: 0;'>⚠️ ", title, "</h4>",
+          "<h4 style='color: #856404; margin-top: 0;'> ", title, "</h4>",
           "<p style='color: #856404; margin: 10px 0;'>", message, "</p>"
         )
 
@@ -1284,7 +1284,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (length(validation_results$issues) > 0) {
           issue_message <- paste0(
             "<div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-            "<h4 style='color: #721c24; margin-top: 0;'>🚨 ", .("Data Validation Issues"), "</h4>",
+            "<h4 style='color: #721c24; margin-top: 0;'> ", .("Data Validation Issues"), "</h4>",
             "<ul style='margin: 5px 0; padding-left: 20px;'>",
             paste(lapply(validation_results$issues, function(x) paste0("<li>", x, "</li>")), collapse = ""),
             "</ul>",
@@ -1298,7 +1298,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (length(validation_results$warnings) > 0) {
           warning_message <- paste0(
             "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-            "<h4 style='color: #856404; margin-top: 0;'>⚠️ ", .("Data Validation Warnings"), "</h4>",
+            "<h4 style='color: #856404; margin-top: 0;'> ", .("Data Validation Warnings"), "</h4>",
             "<ul style='margin: 5px 0; padding-left: 20px;'>",
             paste(lapply(validation_results$warnings, function(x) paste0("<li>", x, "</li>")), collapse = ""),
             "</ul>",
@@ -6964,19 +6964,19 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Multivariable Cox Regression Explanation
         private$.setExplanationContent("multivariableCoxExplanation", '
         <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-            <h3 style="color: #2c5282; margin-top: 0;">🔬 Understanding Multivariable Cox Regression</h3>
+            <h3 style="color: #2c5282; margin-top: 0;"> Understanding Multivariable Cox Regression</h3>
 
             <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                 <h4 style="color: #2d3748; margin-top: 0;">What is Multivariable Survival Analysis?</h4>
                 <p style="margin: 8px 0;">Multivariable Cox regression analyzes <strong>multiple risk factors simultaneously</strong> to identify which factors independently affect survival when all others are held constant.</p>
 
                 <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>🎯 Key Advantage:</strong> Separates the <strong>independent effect</strong> of each variable from the effects of other variables
+                    <strong> Key Advantage:</strong> Separates the <strong>independent effect</strong> of each variable from the effects of other variables
                 </div>
             </div>
 
             <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                <h4 style="color: #d68910; margin-top: 0;">📊 Adjusted vs Unadjusted Hazard Ratios</h4>
+                <h4 style="color: #d68910; margin-top: 0;"> Adjusted vs Unadjusted Hazard Ratios</h4>
                 <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                     <tr style="background-color: #fff3cd;">
                         <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Type</th>
@@ -6997,7 +6997,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             </div>
 
             <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                <h4 style="color: #2e7d32; margin-top: 0;">💡 Clinical Examples</h4>
+                <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Examples</h4>
 
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Example: Cancer Survival Model</strong>
@@ -7012,7 +7012,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 </div>
 
                 <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>🔍 Confounding Example:</strong>
+                    <strong> Confounding Example:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Unadjusted:</strong> Age HR = 1.05 (appears strongly associated)</li>
                         <li><strong>Adjusted for stage:</strong> Age HR = 1.01 (much weaker effect)</li>
@@ -7022,7 +7022,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             </div>
 
             <div style="background-color: #e3f2fd; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                <h4 style="color: #1976d2; margin-top: 0;">🎯 Model Building Strategy</h4>
+                <h4 style="color: #1976d2; margin-top: 0;"> Model Building Strategy</h4>
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>1. Variable Selection:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
@@ -7041,7 +7041,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             </div>
 
             <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                <strong>💡 Clinical Applications:</strong>
+                <strong> Clinical Applications:</strong>
                 <ul style="margin: 5px 0; padding-left: 20px;">
                     <li><strong>Prognostic models:</strong> Identify independent risk factors</li>
                     <li><strong>Treatment decisions:</strong> Assess benefit after controlling for confounders</li>
@@ -7130,10 +7130,10 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Survival Plots Explanation
         private$.setExplanationContent("survivalPlotsExplanation", '
         <div class="explanation-box" style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 10px 0;">
-            <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Adjusted Survival Curves and Hazard Ratio Plots</h3>
+            <h3 style="color: #2c5282; margin-top: 0;"> Understanding Adjusted Survival Curves and Hazard Ratio Plots</h3>
 
             <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                <h4 style="color: #2e7d32; margin-top: 0;">🎯 Adjusted Survival Curves</h4>
+                <h4 style="color: #2e7d32; margin-top: 0;"> Adjusted Survival Curves</h4>
                 <p style="margin: 8px 0;">Adjusted survival curves show survival probabilities after <strong>controlling for confounding variables</strong>, providing a fair comparison between groups.</p>
 
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -7147,7 +7147,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 </div>
 
                 <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>📈 Interpretation Guide:</strong>
+                    <strong> Interpretation Guide:</strong>
                     <table style="width: 100%; border-collapse: collapse; margin: 5px 0;">
                         <tr style="background-color: #bbdefb;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #2196f3;">Curve Pattern</th>
@@ -7170,7 +7170,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             </div>
 
             <div style="background-color: #fff3e0; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                <h4 style="color: #d68910; margin-top: 0;">🎯 Hazard Ratio (Forest) Plots</h4>
+                <h4 style="color: #d68910; margin-top: 0;"> Hazard Ratio (Forest) Plots</h4>
                 <p style="margin: 8px 0;">Forest plots visualize <strong>hazard ratios and confidence intervals</strong> for multiple variables simultaneously, enabling quick assessment of relative risk factors.</p>
 
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
@@ -7185,7 +7185,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 </div>
 
                 <div style="background-color: #fef5e7; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>🔍 Clinical Example - Cancer Study:</strong>
+                    <strong> Clinical Example - Cancer Study:</strong>
                     <table style="width: 100%; margin: 5px 0;">
                         <tr><td><strong>Age (per year):</strong></td><td>HR = 1.02 [0.99-1.05] → Minimal age effect</td></tr>
                         <tr><td><strong>Stage III vs I:</strong></td><td>HR = 3.2 [2.1-4.8] → Strong predictor of poor survival</td></tr>
@@ -7195,7 +7195,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             </div>
 
             <div style="background-color: #e6f7ff; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                <h4 style="color: #1976d2; margin-top: 0;">⚕️ Clinical Applications</h4>
+                <h4 style="color: #1976d2; margin-top: 0;"> Clinical Applications</h4>
 
                 <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>1. Treatment Comparison:</strong>
@@ -7222,7 +7222,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             </div>
 
             <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #9c27b0;">
-                <strong>💡 Best Practices:</strong>
+                <strong> Best Practices:</strong>
                 <ul style="margin: 5px 0; padding-left: 20px;">
                     <li><strong>Always report confidence intervals:</strong> Shows precision of estimates</li>
                     <li><strong>Check proportional hazards:</strong> Ensure model assumptions are met</li>
@@ -7851,7 +7851,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 # Generate main summary text
                 summary_html <- paste0(
                     '<div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">',
-                    '<h4 style="color: #2c5282; margin-top: 0;">📊 ', .("Multivariable Cox Regression Summary"), '</h4>',
+                    '<h4 style="color: #2c5282; margin-top: 0;"> ', .("Multivariable Cox Regression Summary"), '</h4>',
                     '<p style="margin: 10px 0;"><strong>', .("Analysis Overview:"), '</strong> ', .("Multivariable Cox proportional hazards regression was performed to examine the relationship between"), ' ',
                     length(explanatory_vars), ' ', .("explanatory variable(s) and the time-to-event outcome"), ' <em>', outcome_var, '</em>.</p>'
                 )
@@ -7971,7 +7971,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             # Generate interpretation guide
             summary_html <- paste0(
                 '<div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-top: 10px;">',
-                '<strong>💡 ', .("Interpretation Guide:"), '</strong>',
+                '<strong> ', .("Interpretation Guide:"), '</strong>',
                 '<ul style="margin: 5px 0; padding-left: 20px; font-size: 0.95em;">',
                 '<li>', .("HR > 1: Factor increases the hazard (risk) of the event"), '</li>',
                 '<li>', .("HR < 1: Factor decreases the hazard (risk) of the event"), '</li>',
@@ -8087,7 +8087,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             # Format for display
             summary_html <- paste0(
               "<div style='background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 20px; border-radius: 8px; margin: 15px 0;'>",
-              "<h3 style='color: #0056b3; margin-top: 0; margin-bottom: 15px;'>📊 ", .("Clinical Summary"), "</h3>",
+              "<h3 style='color: #0056b3; margin-top: 0; margin-bottom: 15px;'> ", .("Clinical Summary"), "</h3>",
               "<div style='background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #0056b3;'>",
               "<p style='font-size: 16px; line-height: 1.6; margin: 0;'>", clinical_summary$summary, "</p>",
               "</div>"
@@ -8111,7 +8111,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             if (n_events < 10) {
               summary_html <- paste0(summary_html,
                 "<div style='margin-top: 15px; padding: 10px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;'>",
-                "<p style='margin: 0; color: #856404;'><strong>⚠️ ", .("Recommendation:"), "</strong> ",
+                "<p style='margin: 0; color: #856404;'><strong> ", .("Recommendation:"), "</strong> ",
                 .("With fewer than 10 events, results should be interpreted cautiously. Consider longer follow-up or pooled analysis."),
                 "</p>",
                 "</div>"

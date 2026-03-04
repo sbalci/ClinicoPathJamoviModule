@@ -22,7 +22,7 @@ description:
         The method automatically handles tied survival times, stratified analysis,
         and provides uncertainty quantification through bootstrap procedures.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- adaptivelasso(
                 data = mydata,

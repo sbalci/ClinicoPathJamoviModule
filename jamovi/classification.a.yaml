@@ -263,7 +263,7 @@ options:
       default: false
       description:
           R: >
-            Include 95% confidence intervals for clinical metrics.
+            Include 95 percent confidence intervals for clinical metrics.
 
     - name: reportMCC
       title: Matthews Correlation Coefficient

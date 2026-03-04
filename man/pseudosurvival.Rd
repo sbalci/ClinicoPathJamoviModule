@@ -99,6 +99,7 @@ survival probability at specific time points and RMST with standard
 statistical methods.
 }
 \examples{
+\donttest{
 # Example: RMST regression with covariates
 pseudosurvival(
     data = cancer_data,
@@ -108,5 +109,5 @@ pseudosurvival(
     analysis_type = "rmst_regression",
     tau_rmst = 60
 )
-
+}
 }

@@ -22,7 +22,7 @@ description:
         model development and validation in cardiovascular, oncology, and other
         clinical domains where risk stratification drives treatment decisions.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- netreclassification(
                 data = mydata,
@@ -115,7 +115,7 @@ options:
       default: "0.05, 0.10, 0.20"
       description:
           R: >
-            Comma-separated risk thresholds for categorical NRI (e.g., 5%, 10%, 20%).
+            Comma-separated risk thresholds for categorical NRI (e.g., 5 percent, 10 percent, 20 percent).
             These define clinically meaningful risk categories for decision making.
 
     - name: custom_categories
@@ -146,7 +146,7 @@ options:
       description:
           R: >
             Confidence level for NRI confidence intervals and hypothesis testing.
-            0.95 provides 95% confidence intervals.
+            0.95 provides 95 percent confidence intervals.
 
     - name: bootstrap_samples
       title: Bootstrap Samples
@@ -391,7 +391,7 @@ options:
       description:
           R: >
             Type I error rate for hypothesis testing and confidence intervals.
-            Standard value is 0.05 for 95% confidence.
+            Standard value is 0.05 for 95 percent confidence.
 
     - name: random_seed
       title: Random Seed

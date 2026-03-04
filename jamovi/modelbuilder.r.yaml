@@ -13,7 +13,7 @@ items:
       visible: true
 
     - name: clinicalGuidance
-      title: 🩺 Clinical Guidance
+      title:  Clinical Guidance
       type: Html
       visible: true
       
@@ -23,12 +23,12 @@ items:
       visible: true
       
     - name: clinicalSummary
-      title: 📋 Clinical Interpretation Summary
+      title:  Clinical Interpretation Summary
       type: Html
       visible: true
       
     - name: glossary
-      title: 📚 Statistical Glossary
+      title:  Statistical Glossary
       type: Html
       visible: true
 
@@ -38,12 +38,12 @@ items:
       visible: (createPredictions)
       
     - name: reportSentences
-      title: 📝 Copy-Ready Report Sentences
+      title:  Copy-Ready Report Sentences
       type: Html
       visible: true
       
     - name: exportOptions
-      title: 💾 Export Options
+      title:  Export Options
       type: Html
       visible: true
 

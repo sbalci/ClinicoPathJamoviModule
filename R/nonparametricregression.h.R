@@ -865,6 +865,7 @@ nonparametricregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Kernel regression with automatic bandwidth selection
 #' nonparametricregression(
 #'     data = clinical_data,
@@ -873,7 +874,7 @@ nonparametricregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #'     regression_type = "kernel",
 #'     bandwidth_method = "cross_validation"
 #' )
-#'
+#'}
 #' @param data The data as a data frame for non-parametric regression
 #'   analysis.
 #' @param outcome .

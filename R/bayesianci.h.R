@@ -792,14 +792,15 @@ bayesianciBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' bayesianci(
 #'     outcome = "response",
 #'     credible_level = 0.95,
 #'     prior_type = "uniform",
 #'     mcmc_method = "gibbs"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome Outcome variable for credible interval estimation
 #' @param group_var Grouping variable for stratified analysis

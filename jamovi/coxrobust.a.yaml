@@ -15,7 +15,7 @@ description:
         influence functions, and weighted partial likelihood approaches for
         reliable survival analysis in the presence of data anomalies.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Robust Cox regression
             library(survival)

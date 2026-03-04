@@ -389,7 +389,7 @@ options:
       default: true
       description: >
         Use theoretical geometric model confidence intervals when bootstrap
-        shows ceiling effect (100% bounds). Provides more realistic uncertainty estimates.
+        shows ceiling effect (100 percent bounds). Provides more realistic uncertainty estimates.
 
     - name: ciMethod
       title: Confidence Interval Method
@@ -478,4 +478,4 @@ options:
       default: true
       description: >
         Automatically analyze and report if sample types have significantly different
-        detection probabilities. Requires Sample Type variable. Warns if CV > 30%.
+        detection probabilities. Requires Sample Type variable. Warns if CV > 30 percent.

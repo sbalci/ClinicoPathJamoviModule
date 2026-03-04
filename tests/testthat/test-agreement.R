@@ -1,5 +1,4 @@
 # Prepare common test data
-devtools::load_all()
 data("histopathology", package = "ClinicoPath")
 histopathology <- histopathology[1:30, ]
 histopathology$`Rater A` <- ordered(histopathology$`Rater A`)

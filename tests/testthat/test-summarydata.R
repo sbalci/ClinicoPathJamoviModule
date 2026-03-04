@@ -15,7 +15,6 @@ test_data <- data.frame(
 
 test_that("summarydata - Basic functionality", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     # Run the analysis
     results <- summarydata(
         data = test_data,

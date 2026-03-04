@@ -78,7 +78,7 @@ ihccluster(
 
 \item{catVars}{Binary (pos/neg) or ordinal (0/1/2/3) stain results}
 
-\item{contVars}{H-scores (0-300), \\% positivity (0-100), or other
+\item{contVars}{H-scores (0-300),  percent positivity (0-100), or other
 continuous measures}
 
 \item{caseId}{Case identifier for tracking}
@@ -296,7 +296,8 @@ Clusters cases based on immunohistochemistry (IHC) staining patterns.
 \strong{Variable Types:}
 \itemize{
 \item Categorical: pos/neg, intensity levels (0/1/2/3), ordinal scales
-\item Continuous: H-scores (0-300), \\% positivity (0-100), expression levels
+\item Continuous: H-scores (0-300),  percent positivity (0-100), expression
+levels
 \item Mixed: Any combination of categorical and continuous markers
 }
 

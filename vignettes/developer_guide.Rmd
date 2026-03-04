@@ -1,11 +1,11 @@
 ---
 title: "jamovi Module Development Guide"
 author: "Serdar Balci"
-format:
-  html:
-    toc: true
-    toc-depth: 3
-    number-sections: true
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{jamovi Module Development Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 # Introduction

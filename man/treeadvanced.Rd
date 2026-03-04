@@ -204,6 +204,7 @@ performance
 assessment for medical research and clinical decision support.
 }
 \examples{
+\donttest{
 # Advanced analysis with hyperparameter tuning
 tree_advanced(
     data = clinical_data,
@@ -216,5 +217,5 @@ tree_advanced(
     show_cp_analysis = TRUE,
     cost_sensitive = TRUE
 )
-
+}
 }

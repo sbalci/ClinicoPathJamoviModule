@@ -528,7 +528,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjwithinstats",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = jjwithinstatsResults$new(options=options),
                 data = data,
@@ -550,6 +550,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic within-subjects analysis with iris dataset (simulated repeated measures)
 #' data(iris)
 #' iris_wide <- data.frame(
@@ -622,7 +623,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     centralityplotting = TRUE,
 #'     mytitle = "Tooth Growth Over Time"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param dep1 .
 #' @param dep2 .

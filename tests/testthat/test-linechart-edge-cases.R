@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("linechart handles missing data in x variable", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -26,7 +24,6 @@ test_that("linechart handles missing data in x variable", {
 })
 
 test_that("linechart handles missing data in y variable", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -46,7 +43,6 @@ test_that("linechart handles missing data in y variable", {
 })
 
 test_that("linechart handles missing data in group variable", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -67,7 +63,6 @@ test_that("linechart handles missing data in group variable", {
 })
 
 test_that("linechart handles two time points", {
-  devtools::load_all()
 
   # Minimal time series
   minimal_data <- data.frame(
@@ -85,7 +80,6 @@ test_that("linechart handles two time points", {
 })
 
 test_that("linechart handles single time point", {
-  devtools::load_all()
 
   # Only one time point
   single_point <- data.frame(
@@ -106,7 +100,6 @@ test_that("linechart handles single time point", {
 })
 
 test_that("linechart handles constant y values", {
-  devtools::load_all()
 
   # All y values the same
   const_data <- data.frame(
@@ -124,7 +117,6 @@ test_that("linechart handles constant y values", {
 })
 
 test_that("linechart handles Inf values in y", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -142,7 +134,6 @@ test_that("linechart handles Inf values in y", {
 })
 
 test_that("linechart handles -Inf values", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -160,7 +151,6 @@ test_that("linechart handles -Inf values", {
 })
 
 test_that("linechart handles NaN values", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -178,7 +168,6 @@ test_that("linechart handles NaN values", {
 })
 
 test_that("linechart handles very small sample size", {
-  devtools::load_all()
 
   # Only 3 time points
   tiny_data <- data.frame(
@@ -196,7 +185,6 @@ test_that("linechart handles very small sample size", {
 })
 
 test_that("linechart handles single group", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -214,7 +202,6 @@ test_that("linechart handles single group", {
 })
 
 test_that("linechart handles many groups", {
-  devtools::load_all()
 
   # Create data with 8 groups
   many_groups_data <- data.frame(
@@ -234,7 +221,6 @@ test_that("linechart handles many groups", {
 })
 
 test_that("linechart handles variable names with spaces", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -252,7 +238,6 @@ test_that("linechart handles variable names with spaces", {
 })
 
 test_that("linechart handles variable names with special characters", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -270,7 +255,6 @@ test_that("linechart handles variable names with special characters", {
 })
 
 test_that("linechart handles very long group names", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -296,7 +280,6 @@ test_that("linechart handles very long group names", {
 })
 
 test_that("linechart handles extreme y values (very large)", {
-  devtools::load_all()
 
   # Very large scale
   large_data <- data.frame(
@@ -314,7 +297,6 @@ test_that("linechart handles extreme y values (very large)", {
 })
 
 test_that("linechart handles extreme y values (very small)", {
-  devtools::load_all()
 
   # Very small scale
   small_data <- data.frame(
@@ -332,7 +314,6 @@ test_that("linechart handles extreme y values (very small)", {
 })
 
 test_that("linechart handles negative y values", {
-  devtools::load_all()
 
   # All negative values
   negative_data <- data.frame(
@@ -350,7 +331,6 @@ test_that("linechart handles negative y values", {
 })
 
 test_that("linechart handles mixed positive and negative y values", {
-  devtools::load_all()
 
   # Centered around zero
   mixed_data <- data.frame(
@@ -368,7 +348,6 @@ test_that("linechart handles mixed positive and negative y values", {
 })
 
 test_that("linechart handles non-sequential x values", {
-  devtools::load_all()
 
   # X values with gaps
   gap_data <- data.frame(
@@ -386,7 +365,6 @@ test_that("linechart handles non-sequential x values", {
 })
 
 test_that("linechart handles duplicate x values", {
-  devtools::load_all()
 
   # Multiple measurements at same time point
   duplicate_data <- data.frame(
@@ -404,7 +382,6 @@ test_that("linechart handles duplicate x values", {
 })
 
 test_that("linechart handles unequal group sizes", {
-  devtools::load_all()
 
   # Very unbalanced groups
   unbalanced_data <- data.frame(
@@ -424,7 +401,6 @@ test_that("linechart handles unequal group sizes", {
 })
 
 test_that("linechart handles empty groups after filtering", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -444,7 +420,6 @@ test_that("linechart handles empty groups after filtering", {
 })
 
 test_that("linechart handles tibble vs data.frame", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -470,7 +445,6 @@ test_that("linechart handles tibble vs data.frame", {
 })
 
 test_that("linechart handles invalid dimension values", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -500,7 +474,6 @@ test_that("linechart handles invalid dimension values", {
 })
 
 test_that("linechart handles non-existent variables", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -540,7 +513,6 @@ test_that("linechart handles non-existent variables", {
 })
 
 test_that("linechart handles empty dataset", {
-  devtools::load_all()
 
   empty_data <- data.frame(
     time = numeric(0),
@@ -560,7 +532,6 @@ test_that("linechart handles empty dataset", {
 })
 
 test_that("linechart handles all missing data after filtering", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -580,7 +551,6 @@ test_that("linechart handles all missing data after filtering", {
 })
 
 test_that("linechart handles character x variable", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -598,7 +568,6 @@ test_that("linechart handles character x variable", {
 })
 
 test_that("linechart handles factor x variable", {
-  devtools::load_all()
 
   # Ordered factor x variable
   factor_data <- data.frame(
@@ -618,7 +587,6 @@ test_that("linechart handles factor x variable", {
 })
 
 test_that("linechart handles extreme outliers in grouped data", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -636,7 +604,6 @@ test_that("linechart handles extreme outliers in grouped data", {
 })
 
 test_that("linechart handles zero variance within groups", {
-  devtools::load_all()
 
   # Each group has constant value
   zero_var_data <- data.frame(
@@ -657,7 +624,6 @@ test_that("linechart handles zero variance within groups", {
 })
 
 test_that("linechart handles numeric group variable", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -676,7 +642,6 @@ test_that("linechart handles numeric group variable", {
 })
 
 test_that("linechart handles very high variance in y", {
-  devtools::load_all()
 
   # Extreme variance
   high_var_data <- data.frame(

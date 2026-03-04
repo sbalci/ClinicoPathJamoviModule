@@ -265,29 +265,29 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (is.null(sampleVar) || length(sampleVar) == 0) {
                 guidance_html <- paste0(guidance_html,
-                    "<h4 style='color: #0066cc; margin-top: 0;'>📊 Step 1: Select Sample ID Variable</h4>",
+                    "<h4 style='color: #0066cc; margin-top: 0;'> Step 1: Select Sample ID Variable</h4>",
                     "<p style='margin: 8px 0;'>Please choose a variable that contains unique identifiers for each sample (e.g., patient IDs, sample names).</p>",
-                    "<p style='margin: 8px 0; font-style: italic;'>👆 Look for variables like: SampleID, PatientID, Sample_Name</p>"
+                    "<p style='margin: 8px 0; font-style: italic;'> Look for variables like: SampleID, PatientID, Sample_Name</p>"
                 )
             } else {
                 guidance_html <- paste0(guidance_html,
-                    "<p style='color: #28a745; margin: 5px 0;'>✅ <strong>Sample ID Variable:</strong> ", sampleVar, " selected</p>"
+                    "<p style='color: #28a745; margin: 5px 0;'> <strong>Sample ID Variable:</strong> ", sampleVar, " selected</p>"
                 )
             }
             
             if (is.null(geneVars) || length(geneVars) == 0) {
                 guidance_html <- paste0(guidance_html,
-                    "<h4 style='color: #0066cc; margin-top: 15px;'>🧬 Step 2: Select Gene Variables</h4>",
+                    "<h4 style='color: #0066cc; margin-top: 15px;'> Step 2: Select Gene Variables</h4>",
                     "<p style='margin: 8px 0;'>Choose variables representing mutation status. These should use 0/1 coding:</p>",
                     "<ul style='margin: 8px 0; padding-left: 20px;'>",
                     "<li><strong>0</strong> = Wild-type (no mutation)</li>",
                     "<li><strong>1</strong> = Mutated</li>",
                     "</ul>",
-                    "<p style='margin: 8px 0; font-style: italic;'>👆 Look for gene names like: TP53, KRAS, PIK3CA, EGFR</p>"
+                    "<p style='margin: 8px 0; font-style: italic;'> Look for gene names like: TP53, KRAS, PIK3CA, EGFR</p>"
                 )
             } else {
                 guidance_html <- paste0(guidance_html,
-                    "<p style='color: #28a745; margin: 5px 0;'>✅ <strong>Gene Variables:</strong> ", length(geneVars), " genes selected</p>"
+                    "<p style='color: #28a745; margin: 5px 0;'> <strong>Gene Variables:</strong> ", length(geneVars), " genes selected</p>"
                 )
             }
             
@@ -305,17 +305,17 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (length(missing_vars) > 0) {
                     guidance_html <- paste0(guidance_html,
-                        "<h4 style='color: #dc3545; margin-top: 15px;'>🔍 Variable Check</h4>",
+                        "<h4 style='color: #dc3545; margin-top: 15px;'> Variable Check</h4>",
                         "<p style='margin: 8px 0;'>These variables were not found in your dataset:</p>",
                         "<p style='background-color: #ffe6e6; padding: 8px; border-radius: 4px; margin: 8px 0;'>",
                         paste(missing_vars, collapse=", "), "</p>",
-                        "<p style='margin: 8px 0;'><strong>💡 Tip:</strong> Check variable names for typos or case sensitivity</p>"
+                        "<p style='margin: 8px 0;'><strong> Tip:</strong> Check variable names for typos or case sensitivity</p>"
                     )
                 }
                 
                 if (nrow(data) < 2) {
                     guidance_html <- paste0(guidance_html,
-                        "<h4 style='color: #dc3545; margin-top: 15px;'>📈 Data Requirements</h4>",
+                        "<h4 style='color: #dc3545; margin-top: 15px;'> Data Requirements</h4>",
                         "<p style='margin: 8px 0;'>At least 2 samples are needed for oncoplot visualization.</p>",
                         "<p style='margin: 8px 0;'>Your dataset has ", nrow(data), " row(s).</p>"
                     )
@@ -324,7 +324,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(notes) > 0) {
                     guidance_html <- paste0(guidance_html,
                         "<div style='background-color: #fff3cd; border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0;'>",
-                        "<h4 style='color: #e67e22; margin-top: 0;'>⚠️ Data Warnings</h4>",
+                        "<h4 style='color: #e67e22; margin-top: 0;'> Data Warnings</h4>",
                         "<ul style='margin: 5px 0;'>",
                         paste0("<li>", notes, "</li>", collapse = ""),
                         "</ul>",
@@ -335,9 +335,9 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (is.null(data) || nrow(data) == 0) {
                 guidance_html <- paste0(guidance_html,
-                    "<h4 style='color: #ffc107; margin-top: 15px;'>📁 Data Status</h4>",
+                    "<h4 style='color: #ffc107; margin-top: 15px;'> Data Status</h4>",
                     "<p style='margin: 8px 0;'>Please load a dataset first to begin analysis.</p>",
-                    "<p style='margin: 8px 0;'><strong>💡 Tip:</strong> Use the CSV file from the data/ folder for testing</p>"
+                    "<p style='margin: 8px 0;'><strong> Tip:</strong> Use the CSV file from the data/ folder for testing</p>"
                 )
             }
             
@@ -345,7 +345,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(sampleVar) && !is.null(geneVars) && length(geneVars) > 0) {
                 guidance_html <- paste0(guidance_html,
                     "<div style='background-color: #d4edda; padding: 10px; border-radius: 4px; margin-top: 15px;'>",
-                    "<h4 style='color: #155724; margin-top: 0;'>🎉 Ready for Analysis!</h4>",
+                    "<h4 style='color: #155724; margin-top: 0;'> Ready for Analysis!</h4>",
                     "<p style='margin: 5px 0; color: #155724;'>Minimum requirements met. The oncoplot will appear below.</p>",
                     "</div>"
                 )
@@ -961,10 +961,10 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Set up clinical context and instructions
             instructions_html <- "
             <div style='background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 10px 0;'>
-            <h3 style='color: #2c3e50; margin-top: 0;'>🧬 Genomic Landscape Visualization for Clinical Research</h3>
+            <h3 style='color: #2c3e50; margin-top: 0;'> Genomic Landscape Visualization for Clinical Research</h3>
             
             <div style='background-color: #e8f4fd; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0;'>
-            <h4 style='color: #2980b9; margin-top: 0;'>📋 Clinical Applications</h4>
+            <h4 style='color: #2980b9; margin-top: 0;'> Clinical Applications</h4>
             <p><strong>Oncoplots</strong> help pathologists and oncologists visualize mutation landscapes across cancer samples to:</p>
             <ul style='margin-bottom: 5px;'>
             <li><strong>Identify Driver Mutations:</strong> Frequently mutated genes (e.g., TP53, KRAS) driving cancer progression</li>
@@ -976,7 +976,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             </div>
 
             <div style='background-color: #fff3cd; border-left: 4px solid #f39c12; padding: 10px; margin: 10px 0;'>
-            <h4 style='color: #e67e22; margin-top: 0;'>🔬 When to Use This Analysis</h4>
+            <h4 style='color: #e67e22; margin-top: 0;'> When to Use This Analysis</h4>
             <ul style='margin-bottom: 5px;'>
             <li><strong>Tumor Profiling:</strong> Characterizing mutation landscapes in cancer cohorts</li>
             <li><strong>Biomarker Discovery:</strong> Identifying prognostic or predictive molecular markers</li>
@@ -987,7 +987,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             </div>
 
             <div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 10px; margin: 10px 0;'>
-            <h4 style='color: #27ae60; margin-top: 0;'>📊 Data Requirements</h4>
+            <h4 style='color: #27ae60; margin-top: 0;'> Data Requirements</h4>
             <ul style='margin-bottom: 5px;'>
             <li><strong>Sample ID:</strong> Patient/tumor identifiers (e.g., TCGA-AA-3818, P001)</li>
             <li><strong>Gene Variables:</strong> Binary mutation status (0 = wild-type, 1 = mutated)</li>
@@ -997,7 +997,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             </div>
 
             <div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0;'>
-            <h4 style='color: #c0392b; margin-top: 0;'>⚠️ Important Considerations</h4>
+            <h4 style='color: #c0392b; margin-top: 0;'> Important Considerations</h4>
             <ul style='margin-bottom: 5px;'>
             <li><strong>Sample Size:</strong> Minimum 10 samples recommended for meaningful patterns</li>
             <li><strong>Data Quality:</strong> Ensure consistent mutation calling and annotation</li>
@@ -1249,13 +1249,13 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Overall summary
             clinical_text <- paste0(clinical_text, 
                 "<div style='background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 15px 0;'>\n",
-                "<h3 style='color: #2c3e50; margin-top: 0;'>🧬 Clinical Interpretation</h3>\n")
+                "<h3 style='color: #2c3e50; margin-top: 0;'> Clinical Interpretation</h3>\n")
             
             # Most frequently mutated genes
             if (nrow(top_genes) > 0) {
                 clinical_text <- paste0(clinical_text,
                     "<div style='background-color: #e8f4fd; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0;'>\n",
-                    "<h4 style='color: #2980b9; margin-top: 0;'>📊 Most Frequently Mutated Genes</h4>\n",
+                    "<h4 style='color: #2980b9; margin-top: 0;'> Most Frequently Mutated Genes</h4>\n",
                     "<ul style='margin-bottom: 5px;'>\n")
                 
                 for (i in 1:min(3, nrow(top_genes))) {
@@ -1284,18 +1284,18 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 clinical_text <- paste0(clinical_text,
                     "<div style='background-color: #e8f5e8; border-left: 4px solid #27ae60; padding: 10px; margin: 10px 0;'>\n",
-                    "<h4 style='color: #27ae60; margin-top: 0;'>🧬 Mutation Burden Analysis</h4>\n",
+                    "<h4 style='color: #27ae60; margin-top: 0;'> Mutation Burden Analysis</h4>\n",
                     "<p><strong>Average mutated genes per sample:</strong> ", round(avg_tmb, 2), "</p>\n",
                     "<p><strong>Samples with ≥10 mutated genes:</strong> ", high_tmb_samples, "/", total_samples, 
                     " (", round((high_tmb_samples/total_samples)*100, 1), "%)</p>\n",
-                    "<p style='font-style: italic; color: #666;'>💡 Counts are based on the selected genes (panel size dependent).</p>\n",
+                    "<p style='font-style: italic; color: #666;'> Counts are based on the selected genes (panel size dependent).</p>\n",
                     "</div>\n")
             }
             
             # Clinical recommendations based on mutation patterns
             clinical_text <- paste0(clinical_text,
                 "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0;'>\n",
-                "<h4 style='color: #856404; margin-top: 0;'>🎯 Clinical Recommendations</h4>\n")
+                "<h4 style='color: #856404; margin-top: 0;'> Clinical Recommendations</h4>\n")
             
             # Check for actionable mutations
             actionable_genes <- c("EGFR", "KRAS", "BRAF", "ALK", "ROS1", "NTRK1", "NTRK2", "NTRK3", "PIK3CA", "ERBB2", "MET")
@@ -1322,18 +1322,18 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (total_samples >= 10) {
                 clinical_text <- paste0(clinical_text,
                     "<div style='background-color: #f3e5f5; border-left: 4px solid #9c27b0; padding: 10px; margin: 10px 0;'>\n",
-                    "<h4 style='color: #7b1fa2; margin-top: 0;'>👥 Sample Stratification Insights</h4>\n",
+                    "<h4 style='color: #7b1fa2; margin-top: 0;'> Sample Stratification Insights</h4>\n",
                     "<p><strong>Sample size:</strong> ", total_samples, " samples analyzed</p>\n")
                 
                 if (total_samples >= 50) {
                     clinical_text <- paste0(clinical_text,
-                        "<p>✅ <strong>Adequate power</strong> for mutation frequency analysis and biomarker discovery</p>\n")
+                        "<p> <strong>Adequate power</strong> for mutation frequency analysis and biomarker discovery</p>\n")
                 } else if (total_samples >= 20) {
                     clinical_text <- paste0(clinical_text,
-                        "<p>⚠️ <strong>Moderate power</strong> - consider pooling with additional cohorts for robust statistics</p>\n")
+                        "<p> <strong>Moderate power</strong> - consider pooling with additional cohorts for robust statistics</p>\n")
                 } else {
                     clinical_text <- paste0(clinical_text,
-                        "<p>⚠️ <strong>Limited power</strong> - findings should be validated in larger cohorts</p>\n")
+                        "<p> <strong>Limited power</strong> - findings should be validated in larger cohorts</p>\n")
                 }
                 
                 clinical_text <- paste0(clinical_text, "</div>\n")
@@ -1381,7 +1381,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_text <- paste0(
                 "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0;'>\n",
                 "<h3 style='color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
-                "📄 Clinical Summary for Reports</h3>\n",
+                " Clinical Summary for Reports</h3>\n",
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745;'>\n",
                 "<p style='margin-bottom: 15px; font-weight: bold; color: #28a745;'>Copy-Ready Summary Text:</p>\n",
                 "<div style='font-family: Georgia, serif; line-height: 1.6; padding: 10px; background-color: #f8f9fa; border-radius: 3px;'>\n"

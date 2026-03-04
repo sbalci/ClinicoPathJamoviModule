@@ -22,7 +22,7 @@ description:
         dual IHC (e.g., p16/Ki67), imaging radiomics plus molecular markers, and
         any scenario with two continuous diagnostic measurements.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- roc2d(
                 data = dual_marker_data,

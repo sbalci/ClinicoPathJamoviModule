@@ -5,7 +5,12 @@
 \alias{\%!in\%}
 \title{Alternative not-in operator}
 \usage{
-lhs \%!in\% rhs
+x \%!in\% table
+}
+\arguments{
+\item{x}{Values to check}
+
+\item{table}{Values to check against}
 }
 \description{
 Alternative not-in operator

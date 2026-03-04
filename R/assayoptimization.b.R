@@ -280,10 +280,10 @@ assayoptimizationClass <- R6::R6Class(
                     # Power interpretation
                     html <- paste0(html, "<h4>Interpretation</h4>")
                     if (current_power >= power_level) {
-                        html <- paste0(html, "<p style='color: green;'><b>✓ Adequate Power:</b> The current sample size provides sufficient power (", round(current_power, 3), ") to detect the specified effect size.</p>")
+                        html <- paste0(html, "<p style='color: green;'><b> Adequate Power:</b> The current sample size provides sufficient power (", round(current_power, 3), ") to detect the specified effect size.</p>")
                     } else {
                         additional_n <- ceiling(required_n) - n_obs
-                        html <- paste0(html, "<p style='color: orange;'><b>⚠ Insufficient Power:</b> Current power is ", round(current_power, 3), ". Consider adding ", additional_n, " more observations to achieve target power of ", power_level, ".</p>")
+                        html <- paste0(html, "<p style='color: orange;'><b> Insufficient Power:</b> Current power is ", round(current_power, 3), ". Consider adding ", additional_n, " more observations to achieve target power of ", power_level, ".</p>")
                     }
                 }
                 

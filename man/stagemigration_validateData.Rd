@@ -2,7 +2,7 @@
 % Please edit documentation in R/stagemigration-validation.R
 \name{stagemigration_validateData}
 \alias{stagemigration_validateData}
-\title{Stage Migration Analysis - Data Validation Functions}
+\title{Validate and Prepare Analysis Data}
 \usage{
 stagemigration_validateData(data, options)
 }
@@ -15,9 +15,6 @@ stagemigration_validateData(data, options)
 List with validated data, warnings, errors, and metadata
 }
 \description{
-Comprehensive data validation, cleaning, and preparation functions for
-stage migration analysis.
-
 Master data validation function that performs comprehensive checks and
 preparations for stage migration analysis.
 }

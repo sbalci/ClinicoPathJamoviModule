@@ -567,14 +567,15 @@ pagetrendtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' pagetrendtest(
 #'     dependent = "measurement_value",
 #'     subject = "patient_id",
 #'     within = "time_point",
 #'     trend_direction = "increasing"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param dependent Continuous or ordinal dependent variable measured
 #'   repeatedly

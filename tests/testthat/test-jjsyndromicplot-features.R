@@ -1,6 +1,5 @@
 test_that("jjsyndromicplot handles missing data and reporting correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     
     # Create test data with NAs and Constant vars
     set.seed(123)

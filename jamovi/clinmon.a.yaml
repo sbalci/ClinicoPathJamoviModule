@@ -146,24 +146,24 @@ options:
         This can improve temporal resolution but increases computation time.
 
     - name: blockmin
-      title: 'Minimum Block Data (%)'
+      title: 'Minimum Block Data ( percent)'
       type: Number
       min: 0.1
       max: 1.0
       default: 0.5
       description: >-
         Minimum measurements required to create a block as a percentage.
-        Blocks with less data will be omitted. Default is 50%.
+        Blocks with less data will be omitted. Default is 50 percent.
 
     - name: epochmin
-      title: 'Minimum Epoch Data (%)'
+      title: 'Minimum Epoch Data ( percent)'
       type: Number
       min: 0.1
       max: 1.0
       default: 0.5
       description: >-
         Minimum blocks required to create an epoch as a percentage.
-        Epochs with fewer blocks will be omitted. Default is 50%.
+        Epochs with fewer blocks will be omitted. Default is 50 percent.
 
     - name: fast_processing
       title: 'Fast Processing'

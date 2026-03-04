@@ -57,12 +57,12 @@ sparsegrouplassoClass <- R6::R6Class(
                     <body>
                         <div class='main'>
                             <div class='todo'>
-                                <div class='todo-title'>⚠️ Setup Required</div>
-                                <div class='todo-item'>📊 Add at least 2 predictor variables for regularization</div>
-                                <div class='todo-item'>🏷️ Configure group definition method</div>
-                                <div class='todo-item'>⚙️ Adjust sparse group LASSO parameters (alpha, lambda)</div>
-                                <div class='todo-item'>📈 Select model validation approach</div>
-                                <div class='todo-item'>🎯 Choose optimal selection criteria</div>
+                                <div class='todo-title'> Setup Required</div>
+                                <div class='todo-item'> Add at least 2 predictor variables for regularization</div>
+                                <div class='todo-item'> Configure group definition method</div>
+                                <div class='todo-item'> Adjust sparse group LASSO parameters (alpha, lambda)</div>
+                                <div class='todo-item'> Select model validation approach</div>
+                                <div class='todo-item'> Choose optimal selection criteria</div>
                             </div>
                         </div>
                     </body>
@@ -95,7 +95,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 <body>
                     <div class='main'>
                         <div class='info'>
-                            <div class='info-title'>✅ Ready for Sparse Group LASSO Analysis</div>
+                            <div class='info-title'> Ready for Sparse Group LASSO Analysis</div>
                             <p>Analysis configured successfully. The sparse group LASSO will perform group-wise regularization with within-group sparsity for optimal variable selection in survival analysis.</p>
                         </div>
                     </div>
@@ -1119,17 +1119,17 @@ sparsegrouplassoClass <- R6::R6Class(
             </head>
             <body>
                 <div class='explanation'>
-                    <h3>🧬 Sparse Group LASSO Analysis Results</h3>
+                    <h3> Sparse Group LASSO Analysis Results</h3>
                     
                     <div class='method-info'>
-                        <h4>📊 Method Overview</h4>
+                        <h4> Method Overview</h4>
                         <p><strong>Sparse Group LASSO</strong> combines group-wise variable selection with individual sparsity within groups. 
                         With α=", format(alpha_sgl, digits = 3), ", the method emphasizes ", 
                         ifelse(alpha_sgl > 0.5, "individual variable sparsity", "group-wise selection"), ".</p>
                     </div>
 
                     <div class='result-section'>
-                        <h4>🎯 Variable Selection Results</h4>
+                        <h4> Variable Selection Results</h4>
                         <div class='interpretation'>
                             <p>Selected <span class='highlight'>", n_selected, " variables</span> out of ", length(optimal_coefs), " total variables.</p>
                             <p>This represents a <span class='highlight'>", round((1 - n_selected/length(optimal_coefs)) * 100, 1), "% reduction</span> in model complexity.</p>
@@ -1137,7 +1137,7 @@ sparsegrouplassoClass <- R6::R6Class(
                     </div>
 
                     <div class='result-section'>
-                        <h4>🔧 Model Configuration</h4>
+                        <h4> Model Configuration</h4>
                         <ul>
                             <li><strong>Alpha Parameter:</strong> ", format(alpha_sgl, digits = 3), " (", 
                             ifelse(alpha_sgl > 0.8, "High individual sparsity", 
@@ -1149,20 +1149,20 @@ sparsegrouplassoClass <- R6::R6Class(
                     </div>
 
                     <div class='result-section'>
-                        <h4>📈 Clinical Interpretation</h4>
+                        <h4> Clinical Interpretation</h4>
                         <div class='interpretation'>
                             <p><strong>Sparse Group LASSO</strong> is particularly valuable for:</p>
                             <ul>
-                                <li>🧬 <strong>Genomic studies:</strong> Selecting important pathways while identifying key genes within pathways</li>
-                                <li>🏥 <strong>Clinical prediction:</strong> Balancing model complexity with interpretability</li>
-                                <li>📊 <strong>High-dimensional data:</strong> Managing correlated predictors through group structure</li>
-                                <li>🎯 <strong>Biomarker discovery:</strong> Identifying both important biological groups and specific markers</li>
+                                <li> <strong>Genomic studies:</strong> Selecting important pathways while identifying key genes within pathways</li>
+                                <li> <strong>Clinical prediction:</strong> Balancing model complexity with interpretability</li>
+                                <li> <strong>High-dimensional data:</strong> Managing correlated predictors through group structure</li>
+                                <li> <strong>Biomarker discovery:</strong> Identifying both important biological groups and specific markers</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class='result-section'>
-                        <h4>⚠️ Important Considerations</h4>
+                        <h4> Important Considerations</h4>
                         <ul>
                             <li><strong>Group Definition:</strong> Results depend heavily on how variables are grouped</li>
                             <li><strong>Alpha Selection:</strong> Higher α values favor individual sparsity, lower values favor group selection</li>

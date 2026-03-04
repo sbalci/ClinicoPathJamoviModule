@@ -342,14 +342,15 @@ ihcbasicBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' ihcbasic(
 #'     markers = c("ER", "PR", "HER2", "Ki67"),
 #'     clusterMethod = "hierarchical",
 #'     nClusters = 3,
 #'     computeHScore = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param markers IHC marker variables (categorical 0-3 or continuous
 #'   H-scores)

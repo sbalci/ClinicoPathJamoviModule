@@ -67,7 +67,7 @@ jforestmodelClass <- R6::R6Class(
                     </head>
                     <body>
                     <div class='main'>
-                        <div class='header'>🌲 Forest Plot Visualization</div>
+                        <div class='header'> Forest Plot Visualization</div>
                         <div class='description'>
                             Create professional forest plots from regression models including linear,
                             logistic, and survival models. Visualize coefficients, confidence intervals,
@@ -134,7 +134,7 @@ jforestmodelClass <- R6::R6Class(
                 } else {
                     self$results$instructions$setContent(
                         "<div style='padding: 20px; color: #d32f2f;'>
-                        <strong>⚠️ Missing Cox Model Variables</strong><br>
+                        <strong> Missing Cox Model Variables</strong><br>
                         Cox proportional hazards model requires both Time and Event variables.
                         </div>"
                     )
@@ -197,7 +197,7 @@ jforestmodelClass <- R6::R6Class(
                     } else {
                         self$results$instructions$setContent(
                             "<div style='padding: 20px; color: #d32f2f;'>
-                            <strong>❌ Package Required</strong><br>
+                            <strong> Package Required</strong><br>
                             The 'survival' package is required for Cox regression models.
                             </div>"
                         )
@@ -210,7 +210,7 @@ jforestmodelClass <- R6::R6Class(
             }, error = function(e) {
                 self$results$instructions$setContent(
                     paste0("<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ Model Fitting Error</strong><br>
+                    <strong> Model Fitting Error</strong><br>
                     ", e$message, "
                     </div>")
                 )
@@ -397,7 +397,7 @@ jforestmodelClass <- R6::R6Class(
             
             interpretation_html <- paste0("
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
-                <h3 style='color: #3f51b5; margin-bottom: 15px;'>🔍 Results Interpretation</h3>
+                <h3 style='color: #3f51b5; margin-bottom: 15px;'> Results Interpretation</h3>
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
                     <strong>Coefficient Interpretation:</strong><br>
                     ", interpretation, "
@@ -411,7 +411,7 @@ jforestmodelClass <- R6::R6Class(
                 </div>
                 
                 <div style='margin-top: 15px; padding: 15px; background-color: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;'>
-                    <strong>⚠️ Important Considerations:</strong><br>
+                    <strong> Important Considerations:</strong><br>
                     • Check model assumptions before interpreting results<br>
                     • Consider potential confounders not included in the model<br>
                     • Correlation does not imply causation<br>

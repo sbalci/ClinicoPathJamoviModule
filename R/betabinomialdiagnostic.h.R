@@ -842,6 +842,7 @@ betabinomialdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Beta-binomial diagnostic accuracy analysis
 #' betabinomialdiagnostic(
 #'     data = diagnostic_data,
@@ -850,7 +851,7 @@ betabinomialdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #'     study_id = study_center,
 #'     overdispersion_model = "beta_binomial"
 #' )
-#'
+#'}
 #' @param test_result Test result variable
 #' @param disease_status Gold standard disease status
 #' @param study_id Clustering variable for multi-center studies

@@ -34,7 +34,7 @@ description:
         - Regulatory submissions (FDA/EMA recognized endpoint)
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Load example data
             data("qtwist_breast_cancer")
@@ -353,7 +353,7 @@ options:
       min: 0.80
       max: 0.99
       description: >-
-        Confidence level for interval estimation (default: 0.95 for 95% CI).
+        Confidence level for interval estimation (default: 0.95 for 95 percent CI).
 
     - name: bootstrap_ci
       title: 'Bootstrap Confidence Intervals'

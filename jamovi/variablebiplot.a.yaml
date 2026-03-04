@@ -14,7 +14,7 @@ description:
         contribution strength. Inspired by Orange Data Mining's contribution analysis, adapted
         for clinical research with comprehensive variable importance metrics.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: PCA biplot for tumor staging
             variablebiplot(
@@ -113,7 +113,7 @@ options:
       options:
         - title: Absolute Loading
           name: loading
-        - title: Squared Loading (% Contribution)
+        - title: Squared Loading ( percent Contribution)
           name: squared
         - title: Correlation with Component
           name: correlation
@@ -169,7 +169,7 @@ options:
       default: false
 
     - name: minVariance
-      title: Minimum Cumulative Variance (%)
+      title: Minimum Cumulative Variance ( percent)
       type: Number
       default: 70
       min: 50

@@ -10,7 +10,6 @@ if (file.exists("../../R/categorize.h.R")) {
 
 test_that("categorize works with equal intervals", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create test data
   set.seed(123)
   data <- data.frame(

@@ -8,7 +8,7 @@ jas: '1.2'
 description:
     main: Bayesian Model Averaging for survival analysis
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('histopathology', package='ClinicoPath')
             

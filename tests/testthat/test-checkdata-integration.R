@@ -3,7 +3,6 @@
 
 test_that("checkdata basic integration works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     # Create simple test data
     set.seed(123)
     test_data <- data.frame(

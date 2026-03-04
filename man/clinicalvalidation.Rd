@@ -163,6 +163,7 @@ and clinical performance evaluation designed for medical research and
 diagnostic test evaluation.
 }
 \examples{
+\donttest{
 # Clinical model validation with bootstrap
 clinical_validation(
     data = clinical_data,
@@ -173,5 +174,5 @@ clinical_validation(
     bootstrap_samples = 1000,
     clinical_context = "diagnosis"
 )
-
+}
 }

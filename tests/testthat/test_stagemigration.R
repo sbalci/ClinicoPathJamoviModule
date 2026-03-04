@@ -2,7 +2,6 @@
 context("stagemigration")
 
 test_that("stagemigration works", {
-  devtools::load_all()
   library(jmv)
   
   # Load the test data

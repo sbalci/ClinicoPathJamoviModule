@@ -270,7 +270,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "timeinterval",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = timeintervalResults$new(options=options),
                 data = data,
@@ -293,6 +293,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' observation duration for accurate incidence rate calculations.
 #'
 #' @examples
+#' \donttest{
 #' # Basic time interval calculation:
 #' timeinterval(
 #'   data = study_data,
@@ -311,7 +312,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   landmark_time = 6,
 #'   output_unit = "months"
 #' )
-#'
+#'}
 #' @param data The data as a data frame containing date columns for interval
 #'   calculation.
 #' @param dx_date Column containing start dates (e.g., diagnosis date, study
@@ -349,7 +350,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   assessment including missing values, negative intervals, and distribution
 #'   statistics.
 #' @param confidence_level Confidence level for statistical intervals (mean
-#'   confidence intervals). Standard epidemiological practice uses 95\%
+#'   confidence intervals). Standard epidemiological practice uses 95 percent
 #'   confidence intervals.
 #' @param show_summary Generate a plain-language interpretation of results
 #'   suitable for copying into reports or clinical notes.

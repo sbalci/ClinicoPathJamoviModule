@@ -4,6 +4,8 @@
 #' @import ggplot2
 #' @importFrom utils combn
 #' @importFrom stats predict
+#' @noRd
+NULL
 
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
@@ -496,9 +498,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 } else {
                     welcome_html <- paste0(welcome_html,
                         "<div style='margin-bottom: 10px;'>",
-                        if(test_info$count >= 2) "[✓]" else "[ ]", " Tests: ", test_info$count, "/2 minimum</div>",
+                        if(test_info$count >= 2) "[]" else "[ ]", " Tests: ", test_info$count, "/2 minimum</div>",
                         "<div style='margin-bottom: 10px;'>",
-                        if(has_gold) "[✓]" else "[ ]", " Gold Standard: ", if(has_gold) "Selected" else "Not selected", "</div>"
+                        if(has_gold) "[]" else "[ ]", " Gold Standard: ", if(has_gold) "Selected" else "Not selected", "</div>"
                     )
                 }
                 
@@ -641,7 +643,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 
                 initial_summary <- paste0(
                     "<div style='text-align: center; padding: 20px;'>",
-                    "<h3 style='color: #059669;'>📊 Analysis Configuration</h3>",
+                    "<h3 style='color: #059669;'> Analysis Configuration</h3>",
                     "<div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; display: inline-block; text-align: left; margin: 15px;'>",
                     "<p style='margin: 0 0 15px 0;'><strong>Test Configuration:</strong></p>",
                     "<div style='margin-bottom: 15px; font-size: 14px;'>", test_level_info, "</div>",
@@ -848,7 +850,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 if (length(clinical_warnings) > 0) {
                     warnings_html <- paste0(
                         "<div style='background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='color: #856404; margin-top: 0;'>⚠️ Clinical Considerations</h4>",
+                        "<h4 style='color: #856404; margin-top: 0;'> Clinical Considerations</h4>",
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
                         paste("<li>", clinical_warnings, "</li>", collapse = ""),
                         "</ul>",
@@ -2101,7 +2103,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 
                 summary_html <- paste0(
                     "<div style='background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
-                    "<h4 style='color: #2c3e50; margin-top: 0;'>📋 Clinical Decision Summary</h4>",
+                    "<h4 style='color: #2c3e50; margin-top: 0;'> Clinical Decision Summary</h4>",
                     
                     "<div style='background: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                     "<strong>Recommended Test Panel:</strong><br>",
@@ -2147,7 +2149,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 
                 interpretation_html <- paste0(
                     "<div style='background: #fff8e1; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
-                    "<h4 style='color: #f57c00; margin-top: 0;'>🔍 Clinical Performance Analysis</h4>",
+                    "<h4 style='color: #f57c00; margin-top: 0;'> Clinical Performance Analysis</h4>",
                     
                     "<div style='margin: 15px 0;'>",
                     "<h5 style='color: #5d4037;'>Test Performance Meaning:</h5>",
@@ -2217,7 +2219,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 
                 report_html <- paste0(
                     "<div style='background: #f5f5f5; border: 2px dashed #999; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #333;'>📄 Copy-Ready Clinical Report</h4>",
+                    "<h4 style='margin-top: 0; color: #333;'> Copy-Ready Clinical Report</h4>",
                     "<div style='background: white; padding: 15px; border-radius: 5px; font-family: Times, serif; line-height: 1.6;'>",
                     report_text,
                     "</div>",

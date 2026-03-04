@@ -37,7 +37,6 @@ large_data <- test_data[rep(1:nrow(test_data), 10), ]  # 1000 rows
 
 test_that("BaseGraphics - Basic functionality and parameter validation", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test basic function call
   expect_error(

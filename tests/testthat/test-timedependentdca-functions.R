@@ -1,7 +1,6 @@
 test_that("timedependentdca runs with synthetic data", {
     skip_if_not_installed('jmvReadWrite')
     skip_if_not_installed('survival')
-    devtools::load_all()
     if (!exists("timedependentdca")) {
         source("../../R/timedependentdca.h.R")
         source("../../R/timedependentdca.b.R")

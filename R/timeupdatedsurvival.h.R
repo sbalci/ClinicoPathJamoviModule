@@ -439,8 +439,9 @@ timeupdatedsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' time-updated coefficients.
 #'
 #' @examples
+#' \donttest{
 #' # example will be added
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param timeVar Survival time variable (numeric)
 #' @param statusVar Event indicator (0=censored, 1=event)

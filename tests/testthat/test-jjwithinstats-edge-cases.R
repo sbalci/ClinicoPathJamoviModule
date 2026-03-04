@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjwithinstats handles missing data correctly", {
-  devtools::load_all()
 
   # Test data already has ~3% missing in week4 and week12
   data(jjwithinstats_test)
@@ -23,7 +21,6 @@ test_that("jjwithinstats handles missing data correctly", {
 })
 
 test_that("jjwithinstats handles data with high proportion of missing values", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -46,7 +43,6 @@ test_that("jjwithinstats handles data with high proportion of missing values", {
 })
 
 test_that("jjwithinstats handles small sample sizes", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -65,7 +61,6 @@ test_that("jjwithinstats handles small sample sizes", {
 })
 
 test_that("jjwithinstats handles minimal sample size (n=3)", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -84,7 +79,6 @@ test_that("jjwithinstats handles minimal sample size (n=3)", {
 })
 
 test_that("jjwithinstats handles no variance in a timepoint", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -104,7 +98,6 @@ test_that("jjwithinstats handles no variance in a timepoint", {
 })
 
 test_that("jjwithinstats handles extreme outliers", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -134,7 +127,6 @@ test_that("jjwithinstats handles extreme outliers", {
 })
 
 test_that("jjwithinstats handles negative values", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -155,7 +147,6 @@ test_that("jjwithinstats handles negative values", {
 })
 
 test_that("jjwithinstats handles zero values", {
-  devtools::load_all()
 
   data(jjwithinstats_paired)
 
@@ -170,7 +161,6 @@ test_that("jjwithinstats handles zero values", {
 })
 
 test_that("jjwithinstats handles perfect correlation (no change)", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -191,7 +181,6 @@ test_that("jjwithinstats handles perfect correlation (no change)", {
 })
 
 test_that("jjwithinstats handles very large effect size", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -211,7 +200,6 @@ test_that("jjwithinstats handles very large effect size", {
 })
 
 test_that("jjwithinstats handles variables with special characters in names", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -232,7 +220,6 @@ test_that("jjwithinstats handles variables with special characters in names", {
 })
 
 test_that("jjwithinstats handles all NA in optional third timepoint", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -252,7 +239,6 @@ test_that("jjwithinstats handles all NA in optional third timepoint", {
 })
 
 test_that("jjwithinstats handles reversed pattern (values increasing)", {
-  devtools::load_all()
 
   data(jjwithinstats_qol)  # QoL increases over time
 
@@ -268,7 +254,6 @@ test_that("jjwithinstats handles reversed pattern (values increasing)", {
 })
 
 test_that("jjwithinstats handles non-monotonic pattern (U-shaped)", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -288,7 +273,6 @@ test_that("jjwithinstats handles non-monotonic pattern (U-shaped)", {
 })
 
 test_that("jjwithinstats handles bounded data at limits", {
-  devtools::load_all()
 
   data(jjwithinstats_qol)  # Bounded 0-100
 
@@ -304,7 +288,6 @@ test_that("jjwithinstats handles bounded data at limits", {
 })
 
 test_that("jjwithinstats handles integer vs numeric variables", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -325,7 +308,6 @@ test_that("jjwithinstats handles integer vs numeric variables", {
 })
 
 test_that("jjwithinstats handles highly skewed data", {
-  devtools::load_all()
 
   data(jjwithinstats_biomarker)  # Log-normal distribution (right-skewed)
 
@@ -351,7 +333,6 @@ test_that("jjwithinstats handles highly skewed data", {
 })
 
 test_that("jjwithinstats handles wide range of values", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -372,7 +353,6 @@ test_that("jjwithinstats handles wide range of values", {
 })
 
 test_that("jjwithinstats handles very small decimal values", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -393,7 +373,6 @@ test_that("jjwithinstats handles very small decimal values", {
 })
 
 test_that("jjwithinstats handles mixed positive and negative changes", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -415,7 +394,6 @@ test_that("jjwithinstats handles mixed positive and negative changes", {
 })
 
 test_that("jjwithinstats handles Inf and -Inf values", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 
@@ -436,7 +414,6 @@ test_that("jjwithinstats handles Inf and -Inf values", {
 })
 
 test_that("jjwithinstats handles NaN values", {
-  devtools::load_all()
 
   data(jjwithinstats_test)
 

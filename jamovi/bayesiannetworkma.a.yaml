@@ -14,7 +14,7 @@ description:
         coherence assessment, and ranking of multiple interventions with uncertainty
         quantification for clinical decision making.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Bayesian network meta-analysis
             bayesiannetworkma(

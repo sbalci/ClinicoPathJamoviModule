@@ -132,7 +132,7 @@ kappaSizePowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "kappaSizePower",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = kappaSizePowerResults$new(options=options),
                 data = data,

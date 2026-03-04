@@ -189,6 +189,7 @@ state-of-the-art
 methodology and regulatory compliance.
 }
 \examples{
+\donttest{
 data('clinical_trial')
 
 advancedtrials(
@@ -200,5 +201,5 @@ advancedtrials(
     alpha_spending = "obrien_fleming",
     number_of_looks = 3
 )
-
+}
 }

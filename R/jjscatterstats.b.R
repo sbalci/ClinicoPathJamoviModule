@@ -99,7 +99,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (preset == "biomarker_correlation") {
                 preset_message <- paste0(
                     "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Biomarker Correlation</h4>",
+                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Biomarker Correlation</h4>",
                     "<p><strong>The following settings have been automatically configured:</strong></p>",
                     "<ul>",
                     "<li>Statistical test: <strong>Nonparametric (Spearman correlation)</strong></li>",
@@ -116,7 +116,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (preset == "treatment_response_analysis") {
                 preset_message <- paste0(
                     "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Treatment Response Analysis</h4>",
+                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Treatment Response Analysis</h4>",
                     "<p><strong>The following settings have been automatically configured:</strong></p>",
                     "<ul>",
                     "<li>Statistical test: <strong>Robust (trimmed mean correlation)</strong></li>",
@@ -131,7 +131,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (preset == "publication_ready") {
                 preset_message <- paste0(
                     "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'>ℹ️ Clinical Preset Applied: Publication Ready</h4>",
+                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Publication Ready</h4>",
                     "<p><strong>The following settings have been automatically configured:</strong></p>",
                     "<ul>",
                     "<li>Theme: <strong>Original ggstatsplot theme</strong></li>",
@@ -485,7 +485,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         cor_method <- "spearman"
                         method_label <- "Spearman (robust unavailable)"
                         warning_msg <- paste0(
-                            "⚠️ Robust correlation not fully implemented for enhanced plot. ",
+                            " Robust correlation not fully implemented for enhanced plot. ",
                             "Falling back to Spearman correlation. ",
                             "For robust analysis, use the main ggstatsplot plot (plot 1)."
                         )
@@ -493,7 +493,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         cor_method <- "pearson"
                         method_label <- "Pearson (robust unavailable)"
                         warning_msg <- paste0(
-                            "⚠️ Robust correlation requires WRS2 package which is not available. ",
+                            " Robust correlation requires WRS2 package which is not available. ",
                             "Falling back to Pearson correlation."
                         )
                     }
@@ -502,7 +502,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     cor_method <- "pearson"
                     method_label <- "Pearson (Bayesian unavailable)"
                     warning_msg <- paste0(
-                        "⚠️ Bayesian correlation not implemented for enhanced plot. ",
+                        " Bayesian correlation not implemented for enhanced plot. ",
                         "Falling back to Pearson correlation. ",
                         "For Bayesian analysis, use the main ggstatsplot plot (plot 1)."
                     )
@@ -511,7 +511,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     cor_method <- "pearson"
                     method_label <- "Pearson (default)"
                     warning_msg <- paste0(
-                        "⚠️ Unknown correlation method '", test_type, "'. ",
+                        " Unknown correlation method '", test_type, "'. ",
                         "Falling back to Pearson correlation."
                     )
                 }
@@ -547,7 +547,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p <- p + ggplot2::labs(subtitle = cor_text)
             }, error = function(e) {
                 # If correlation fails, continue without it
-                warning_msg <- paste0("⚠️ Correlation calculation failed: ", e$message)
+                warning_msg <- paste0(" Correlation calculation failed: ", e$message)
                 self$results$warnings$setContent(warning_msg)
                 self$results$warnings$setVisible(TRUE)
             })

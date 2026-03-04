@@ -95,6 +95,7 @@ which staging system performs better. Includes C-index comparison, radar
 charts, and side-by-side Kaplan-Meier curves.
 }
 \examples{
+\donttest{
 # Example: Compare ypTNM vs RPA staging systems
 # Generate sample survival data with two staging systems
 set.seed(12345)
@@ -139,5 +140,5 @@ groomecompare(
     nboot = 100,
     seed = 12345
 )
-
+}
 }

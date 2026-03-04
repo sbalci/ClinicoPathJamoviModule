@@ -530,7 +530,8 @@ condsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' condsurvival(
 #'     time = "time_variable",
 #'     status = "status_variable",
@@ -538,7 +539,7 @@ condsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     conditional_times = c(1, 2, 5),
 #'     prediction_times = c(1, 3, 5)
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time Time-to-event or follow-up time variable (numeric)
 #' @param status Event indicator variable (1/TRUE = event occurred, 0/FALSE =

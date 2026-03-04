@@ -484,7 +484,7 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGuidance",
-                title="\uD83E\uDE7A Clinical Guidance",
+                title="Clinical Guidance",
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -494,12 +494,12 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalSummary",
-                title="\uD83D\uDCCB Clinical Interpretation Summary",
+                title="Clinical Interpretation Summary",
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossary",
-                title="\uD83D\uDCDA Statistical Glossary",
+                title="Statistical Glossary",
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -509,12 +509,12 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentences",
-                title="\uD83D\uDCDD Copy-Ready Report Sentences",
+                title="Copy-Ready Report Sentences",
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="exportOptions",
-                title="\uD83D\uDCBE Export Options",
+                title="Export Options",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -998,8 +998,8 @@ modelbuilderBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   adverse event occurrence).
 #' @param outcomePositive Which level of the outcome variable represents the
 #'   positive case.
-#' @param splitData Split data into training (70\%) and validation (30\%) sets
-#'   for unbiased model evaluation.
+#' @param splitData Split data into training (70 percent) and validation (30
+#'   percent) sets for unbiased model evaluation.
 #' @param randomSeed Random seed for reproducible data splitting and results.
 #' @param buildBasicModel Build a basic clinical model using demographic and
 #'   primary risk factors.

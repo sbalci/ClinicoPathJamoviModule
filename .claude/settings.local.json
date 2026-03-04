@@ -226,7 +226,8 @@
       "Bash(codex:*)",
       "Bash(unset:*)",
       "Bash(claude mcp list:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(do:*)"
     ],
     "deny": [],
     "ask": [],

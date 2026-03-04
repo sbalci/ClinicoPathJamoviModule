@@ -406,13 +406,13 @@ digitalvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 "<h4>Clinical Validation Assessment:</h4>",
                 "<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff;'>",
                 if (correlation >= 0.95 && systematic_p >= 0.05 && prop_bias_p >= 0.05) {
-                    "<p><strong>✓ VALIDATION PASSED:</strong> The test method demonstrates excellent analytical performance 
+                    "<p><strong> VALIDATION PASSED:</strong> The test method demonstrates excellent analytical performance 
                     with no significant bias. <span style='color: green;'>Suitable for clinical implementation.</span></p>"
                 } else if (correlation >= 0.90 && abs(mean_diff) < sd_diff) {
-                    "<p><strong>⚠ VALIDATION CONDITIONAL:</strong> Good correlation but some bias detected. 
+                    "<p><strong> VALIDATION CONDITIONAL:</strong> Good correlation but some bias detected. 
                     <span style='color: orange;'>Consider bias correction or additional validation.</span></p>"
                 } else {
-                    "<p><strong>✗ VALIDATION CONCERNS:</strong> Significant performance issues detected. 
+                    "<p><strong> VALIDATION CONCERNS:</strong> Significant performance issues detected. 
                     <span style='color: red;'>Additional development required before clinical use.</span></p>"
                 },
                 "</div>",
@@ -420,14 +420,14 @@ digitalvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 "<h4>Regulatory Considerations:</h4>",
                 "<ul>",
                 if (n >= 40) {
-                    "<li>✓ Sample size adequate for FDA/CE submission (n≥40)</li>"
+                    "<li> Sample size adequate for FDA/CE submission (n≥40)</li>"
                 } else {
-                    "<li>⚠ Sample size below recommended minimum for regulatory submission</li>"
+                    "<li> Sample size below recommended minimum for regulatory submission</li>"
                 },
                 if (correlation >= 0.95) {
-                    "<li>✓ Correlation meets clinical laboratory standards</li>"
+                    "<li> Correlation meets clinical laboratory standards</li>"
                 } else {
-                    "<li>⚠ Correlation below recommended threshold for clinical use</li>"
+                    "<li> Correlation below recommended threshold for clinical use</li>"
                 },
                 "</ul>",
                 

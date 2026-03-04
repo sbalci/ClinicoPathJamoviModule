@@ -5,14 +5,12 @@
 library(testthat)
 
 test_that("advancedraincloud function exists and loads", {
-  devtools::load_all()
 
   # Function should be accessible
   expect_true(exists("advancedraincloud"))
 })
 
 test_that("advancedraincloud runs with minimal required arguments", {
-  devtools::load_all()
 
   # Load test data
   data(advancedraincloud_test, package = "ClinicoPath")
@@ -30,7 +28,6 @@ test_that("advancedraincloud runs with minimal required arguments", {
 })
 
 test_that("advancedraincloud produces expected output structure", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -50,7 +47,6 @@ test_that("advancedraincloud produces expected output structure", {
 })
 
 test_that("advancedraincloud handles cross-sectional data", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -66,7 +62,6 @@ test_that("advancedraincloud handles cross-sectional data", {
 })
 
 test_that("advancedraincloud handles longitudinal data", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -83,7 +78,6 @@ test_that("advancedraincloud handles longitudinal data", {
 })
 
 test_that("advancedraincloud handles different rain_side options", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -105,7 +99,6 @@ test_that("advancedraincloud handles different rain_side options", {
 })
 
 test_that("advancedraincloud handles Likert mode", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -120,7 +113,6 @@ test_that("advancedraincloud handles Likert mode", {
 })
 
 test_that("advancedraincloud handles optional fill variable", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -143,7 +135,6 @@ test_that("advancedraincloud handles optional fill variable", {
 })
 
 test_that("advancedraincloud handles color palettes", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -164,7 +155,6 @@ test_that("advancedraincloud handles color palettes", {
 })
 
 test_that("advancedraincloud respects visual parameter settings", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -184,7 +174,6 @@ test_that("advancedraincloud respects visual parameter settings", {
 })
 
 test_that("advancedraincloud handles custom labels", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")

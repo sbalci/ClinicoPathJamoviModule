@@ -887,6 +887,7 @@ treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Advanced analysis with hyperparameter tuning
 #' tree_advanced(
 #'     data = clinical_data,
@@ -899,7 +900,7 @@ treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     show_cp_analysis = TRUE,
 #'     cost_sensitive = TRUE
 #' )
-#'
+#'}
 #' @param data The data as a data frame for advanced tree analysis.
 #' @param vars .
 #' @param facs .

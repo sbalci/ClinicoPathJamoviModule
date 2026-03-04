@@ -440,14 +440,15 @@ measurementuncertaintyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' measurementuncertainty(
 #'     measurement = "glucose_result",
 #'     reference_value = "certified_value",
 #'     replicate_group = "measurement_run",
 #'     uncertainty_method = "gum_approach"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param measurement Laboratory measurement values for uncertainty analysis
 #' @param reference_value Reference or certified values for bias estimation

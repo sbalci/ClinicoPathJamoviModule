@@ -64,7 +64,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <li>Provides p-values for objective component selection</li>
                 </ul>
                 <br>
-                <b>⚠️ CRITICAL REQUIREMENTS:</b>
+                <b> CRITICAL REQUIREMENTS:</b>
                 <ul>
                 <li><b>Numeric variables only:</b> Factors and characters will be REJECTED (no silent coercion)</li>
                 <li><b>Enable centering/scaling:</b> Required for correlation-based interpretation (standard parallel analysis)</li>
@@ -419,7 +419,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.ciHigh[i] * 100, private$.ciHigh[i])
                 row[['pvalue']] <- private$.pvalues[i]
                 row[['adjpvalue']] <- private$.adjPvalues[i]
-                row[['significant']] <- ifelse(private$.adjPvalues[i] < 0.05, '★', '')
+                row[['significant']] <- ifelse(private$.adjPvalues[i] < 0.05, '', '')
 
                 table$addRow(rowKey = i, values = row)
             }
@@ -471,7 +471,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <li><b>Cumulative VAF:</b> Total variance explained by this component plus all previous components</li>
                 <li><b>Permuted Mean VAF:</b> Expected variance by random chance (null hypothesis)</li>
                 <li><b>p-value:</b> Probability that a component's variance could occur by chance. p &lt; 0.05 indicates significance</li>
-                <li><b>★ (star):</b> Marks components significantly above chance level</li>
+                <li><b> (star):</b> Marks components significantly above chance level</li>
                 </ul>
                 <b>Clinical Use:</b> Significant components represent real patterns in your data (e.g., combined biomarker signatures, distinct patient subgroups). Use loadings to identify which variables drive each pattern.
                 <br><br>

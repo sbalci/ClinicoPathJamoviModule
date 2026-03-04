@@ -291,12 +291,12 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0) {
                 error_msg <- paste(
                     "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                    "<b>❌ Data Error:</b> No data available for survival analysis<br><br>",
-                    "<b>💡 Possible reasons:</b><br>",
+                    "<b> Data Error:</b> No data available for survival analysis<br><br>",
+                    "<b> Possible reasons:</b><br>",
                     "• Dataset has no rows<br>",
                     "• All rows contain missing values<br>",
                     "• Data filtering has removed all observations<br><br>",
-                    "<b>🔧 Solutions:</b><br>",
+                    "<b> Solutions:</b><br>",
                     "• Check your data import process<br>",
                     "• Verify variable selections<br>",
                     "• Review data quality and missing value patterns<br>",
@@ -319,9 +319,9 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (validation_results$should_stop) {
                 error_msg <- paste(
                     "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                    "<b>❌ Critical Error(s) Detected:</b><br>",
+                    "<b> Critical Error(s) Detected:</b><br>",
                     paste(validation_results$errors, collapse = "<br>"),
-                    "<br><br><b>💡 Suggestions:</b><br>",
+                    "<br><br><b> Suggestions:</b><br>",
                     "• Verify that selected variables exist in your dataset<br>",
                     "• Ensure time variable contains positive numeric values<br>",
                     "• Ensure status variable is binary (0/1) or can be converted<br>",
@@ -337,14 +337,14 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(validation_results$warnings) > 0) {
                 validation_summary <- paste0(validation_summary, 
                     "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
-                    "<b>⚠️ Warnings:</b><br>", 
+                    "<b> Warnings:</b><br>", 
                     paste(validation_results$warnings, collapse = "<br>"),
                     "</div>")
             }
             if (length(validation_results$info) > 0) {
                 validation_summary <- paste0(validation_summary,
                     "<div style='background-color: #d1ecf1; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
-                    "<b>ℹ️ Information:</b><br>", 
+                    "<b> Information:</b><br>", 
                     paste(validation_results$info, collapse = "<br>"),
                     "</div>")
             }
@@ -388,14 +388,14 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 detailed_error <- paste(
                     "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                    "<b>🔧 Survival Analysis Error:</b><br>",
+                    "<b> Survival Analysis Error:</b><br>",
                     paste("Technical error:", e$message), "<br><br>",
-                    "<b>💡 Common causes and solutions:</b><br>",
+                    "<b> Common causes and solutions:</b><br>",
                     "• Invalid survival times: Check for negative or non-numeric time values<br>",
                     "• All subjects censored: Ensure some events have occurred<br>",
                     "• Data format issues: Verify time and status variables are correctly formatted<br>",
                     "• Insufficient data: Need adequate sample size for survival analysis<br><br>",
-                    "<b>🔄 Suggested next steps:</b><br>",
+                    "<b> Suggested next steps:</b><br>",
                     "• Review your time and status variable definitions<br>",
                     "• Check data quality and completeness<br>",
                     "• Ensure proper coding of event indicator (0 = censored, 1 = event)<br>",

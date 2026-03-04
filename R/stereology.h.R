@@ -473,7 +473,7 @@ stereologyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Requires object count data.
 #' @param calculateSv Surface density: surface area per unit volume. Formula:
 #'   Sv = 2 × Ba (for isotropic sections).
-#' @param showConfidenceIntervals Calculate and display 95\% confidence
+#' @param showConfidenceIntervals Calculate and display 95 percent confidence
 #'   intervals for stereological estimates using bootstrap methods.
 #' @param bootstrapIterations Number of bootstrap iterations for confidence
 #'   interval estimation.

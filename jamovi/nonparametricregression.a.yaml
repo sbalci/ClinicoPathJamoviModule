@@ -13,7 +13,7 @@ description:
         local polynomial smoothing (LOESS), spline regression, and robust regression
         techniques designed for clinical research where parametric assumptions are violated.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Kernel regression with automatic bandwidth selection
             nonparametricregression(

@@ -574,7 +574,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "advancedraincloud",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = advancedraincloudResults$new(options=options),
                 data = data,
@@ -666,10 +666,10 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param outlier_method Method for handling outliers in the data.
 #' @param show_cv_bands Display coefficient of variation bands for assay
 #'   variability.
-#' @param cv_band_1 First CV band percentage (typically 15\% for analytical
-#'   variability).
-#' @param cv_band_2 Second CV band percentage (typically 20\% for biological
-#'   variability).
+#' @param cv_band_1 First CV band percentage (typically 15 percent for
+#'   analytical variability).
+#' @param cv_band_2 Second CV band percentage (typically 20 percent for
+#'   biological variability).
 #' @param p_value_position Where to display p-values from group comparisons.
 #' @param journal_style Apply journal-specific formatting guidelines.
 #' @param generate_report Generate comprehensive clinical analysis report.

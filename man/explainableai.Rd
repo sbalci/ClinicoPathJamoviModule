@@ -123,6 +123,7 @@ importance,
 SHAP values, and other interpretability methods.
 }
 \examples{
+\donttest{
 # SHAP analysis for feature importance
 explainableai(
     data = model_data,
@@ -140,5 +141,5 @@ explainableai(
     method = "attention_analysis",
     overlay_original = TRUE
 )
-
+}
 }

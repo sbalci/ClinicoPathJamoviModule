@@ -17,7 +17,7 @@ description:
         Implements PCA visualization, ComBat correction, feature quality assessment,
         and comprehensive quality control metrics for high-dimensional data.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('your_data')
             
@@ -147,7 +147,7 @@ options:
           R: Number of principal components to compute and visualize
 
     - name: missing_threshold
-      title: Missing Data Threshold (%)
+      title: Missing Data Threshold ( percent)
       type: Number
       min: 0
       max: 100

@@ -531,7 +531,7 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjpubr",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = jjpubrResults$new(options=options),
                 data = data,
@@ -566,6 +566,7 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Box plot with statistical comparison
 #' jjpubr(
 #'     data = mtcars,
@@ -594,7 +595,7 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     addDensity = TRUE,
 #'     fillColor = "#0073C2FF"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param plotType Type of plot: boxplot, violin, scatter, histogram, density,
 #'   barplot, dotplot, line, errorplot

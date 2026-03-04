@@ -14,13 +14,13 @@ description:
         when the negative class vastly outnumbers the positive class, PR curves focus on the performance
         in the minority (positive) class. The area under the PR curve (PR-AUC or Average Precision)
         provides a single-number summary of model performance. PR analysis is essential for evaluating
-        rare event detection (mitotic figures <1%, rare tumor cells, micrometastases), cancer screening
+        rare event detection (mitotic figures <1 percent, rare tumor cells, micrometastases), cancer screening
         where positives are rare, quality control in digital pathology where defects are uncommon,
         and AI triage systems where abnormal cases are infrequent. This module provides comprehensive
         PR analysis with optimal threshold selection, comparison to baseline (random classifier),
         and F-score optimization for different precision-recall trade-offs.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- prauc(
                 data = pathology_data,

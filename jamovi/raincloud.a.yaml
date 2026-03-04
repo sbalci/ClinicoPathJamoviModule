@@ -3,7 +3,7 @@ name: raincloud
 title: Raincloud Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -15,7 +15,7 @@ description:
     that reveals patterns traditional box plots might miss, including multimodality
     and distribution shape. Based on the ggdist R-Bloggers tutorial.
   R:
-    dontrun: false
+    dontrun: true
     usage: |
       # Load example dataset
       data(histopathology)

@@ -4,7 +4,6 @@
 context("Eurostat Map - Turkey Data Tests")
 
 library(testthat)
-devtools::load_all()
 library(dplyr)
 
 # Load Turkey datasets
@@ -15,7 +14,6 @@ data("turkey_nuts1_aggregated")
 # Test 1: Basic Turkey NUTS-2 population map
 test_that("Turkey NUTS-2 population map works correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   skip_if_not_installed("eurostat")
   skip_if_not_installed("ggplot2")
   

@@ -1011,7 +1011,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             <p><b>Willingness-to-Pay Threshold:</b> %s %s per %s</p>
 
-            <p><b>⚠️ IMPORTANT NOTE:</b> The current implementation uses complete-case analysis (missing values removed)
+            <p><b> IMPORTANT NOTE:</b> The current implementation uses complete-case analysis (missing values removed)
             without discounting from a healthcare perspective. Some options (discounting, alternative perspectives,
             imputation methods) are displayed in the interface but <b>DO NOT affect the current analysis</b> - they are
             placeholders for future implementation. All costs and effects are analyzed as provided in the data without

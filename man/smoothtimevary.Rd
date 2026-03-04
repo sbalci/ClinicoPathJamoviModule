@@ -108,6 +108,7 @@ alternative to step-function approaches in standard time-varying Cox models
 and complementing Aalen's additive hazard methodology.
 }
 \examples{
+\donttest{
 # Example 1: Spline-based time-varying effects
 library(timereg)
 library(survival)
@@ -121,5 +122,5 @@ smoothtimevary(
     time_varying_covariates = c("diagtime"),
     smoothing_method = "spline"
 )
-
+}
 }

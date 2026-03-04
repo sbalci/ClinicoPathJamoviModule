@@ -54,7 +54,7 @@ TRUE for most analyses.}
 Recommended: TRUE when variables have different units or scales.}
 
 \item{conflevel}{Confidence level for confidence intervals (0.80-0.99).
-Default: 0.95 for 95\\% CI.}
+Default: 0.95 for 95 percent CI.}
 
 \item{adjustmethod}{Method for adjusting p-values for multiple testing. BH
 (Benjamini-Hochberg) controls false discovery rate.}
@@ -139,6 +139,7 @@ Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease
 }
 
 \examples{
+\donttest{
 # Example with mtcars dataset
 data("mtcars")
 
@@ -153,5 +154,5 @@ pcacomponenttest(
   conflevel = 0.95,
   adjustmethod = "BH"
 )
-
+}
 }

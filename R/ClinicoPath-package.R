@@ -171,7 +171,7 @@
 #' 
 #' @seealso
 #' \itemize{
-#'   \item \code{\link[survival]{survival-package}} for survival analysis fundamentals
+#'   \item \code{\link[survival]{Surv}} for survival analysis fundamentals
 #'   \item \code{\link[pROC]{pROC-package}} for ROC analysis
 #'   \item \code{\link[tableone]{tableone}} for descriptive tables
 #'   \item \code{\link[ggplot2]{ggplot2-package}} for visualization

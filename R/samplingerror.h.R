@@ -290,14 +290,15 @@ samplingerrorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param data .
 #' @param detectionSensitivity Probability of correctly detecting/identifying
-#'   an event (e.g., tumor cell). 100\% means perfect detection, 95\% means 5\%
-#'   false negative rate.
+#'   an event (e.g., tumor cell). 100 percent means perfect detection, 95
+#'   percent means 5 percent false negative rate.
 #' @param biologicalVarianceCV Coefficient of variation representing tissue
-#'   heterogeneity. Low (5-10\%) = homogeneous tissue, Medium (15-25\%) =
-#'   moderate heterogeneity, High (>30\%) = highly heterogeneous tissue.
+#'   heterogeneity. Low (5-10 percent) = homogeneous tissue, Medium (15-25
+#'   percent) = moderate heterogeneity, High (>30 percent) = highly
+#'   heterogeneous tissue.
 #' @param sampleSize Number of samples/sections/areas examined.
 #' @param eventFrequency Proportion of sample containing the event of interest
-#'   (e.g., \% of tissue with tumor, \% positive cells).
+#'   (e.g.,  percent of tissue with tumor,  percent positive cells).
 #' @param referenceVolume Total reference space being sampled (e.g., organ
 #'   volume, total tissue area).
 #' @param sampleVolume Volume/area of each sample examined (same units as

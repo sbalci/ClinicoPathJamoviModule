@@ -33,13 +33,13 @@ ihcheterogeneity(
 \item{wholesection}{Optional reference measurement for comparison with
 regional measurements. Can be whole section average, hotspot area, or
 overall tumor measurement. Leave empty for inter-regional comparison
-studies. Example: Ki67 proliferation index (0-100\\%), ER H-score (0-300),
-PR percentage (0-100\\%).}
+studies. Example: Ki67 proliferation index (0-100 percent), ER H-score
+(0-300), PR percentage (0-100 percent).}
 
 \item{biopsy1}{Continuous biomarker measurement from first tissue region or
 area. Should represent same biomarker as reference measurement for
-heterogeneity comparison. Example: Ki67 \\% from tumor periphery, ER H-score
-from invasive front.}
+heterogeneity comparison. Example: Ki67  percent from tumor periphery, ER
+H-score from invasive front.}
 
 \item{biopsy2}{Second tissue region biomarker measurement for heterogeneity
 analysis}
@@ -67,10 +67,10 @@ differences.}
 \item{sampling_strategy}{biopsy sampling strategy used}
 
 \item{cv_threshold}{Coefficient of variation threshold for acceptable
-sampling variability. Typical clinical values: 15-25\\% for
-immunohistochemistry (Ki67, ER, PR), 10-20\\% for molecular assays, 20-30\\%
-for heterogeneous markers (HER2, PD-L1). Lower values indicate more
-stringent quality requirements.}
+sampling variability. Typical clinical values: 15-25 percent for
+immunohistochemistry (Ki67, ER, PR), 10-20 percent for molecular assays,
+20-30 percent for heterogeneous markers (HER2, PD-L1). Lower values
+indicate more stringent quality requirements.}
 
 \item{correlation_threshold}{Minimum Spearman correlation between biopsy
 and whole section measurements. Clinical guidelines: ≥0.80 excellent

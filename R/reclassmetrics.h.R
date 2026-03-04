@@ -430,6 +430,7 @@ reclassmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example usage - Binary outcome:
 #' # ClinicoPath::reclassmetrics(
 #' #   data = data,
@@ -450,7 +451,7 @@ reclassmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' #   outcomeType = "survival",
 #' #   timePoint = 60
 #' # )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome (for binary analysis) or event indicator (for
 #'   survival).

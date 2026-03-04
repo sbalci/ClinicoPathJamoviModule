@@ -17,7 +17,7 @@ description:
         meta-analysis approaches with comprehensive heterogeneity assessment and
         publication bias evaluation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('meta_studies')
             

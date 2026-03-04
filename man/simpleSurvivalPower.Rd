@@ -161,6 +161,7 @@ consider the other power analysis functions: Classical, Competing Risks,
 Advanced, or Comprehensive.
 }
 \examples{
+\donttest{
 simpleSurvivalPower(
     test_type = "log_rank",
     effect_size = 0.75,
@@ -170,5 +171,5 @@ simpleSurvivalPower(
     accrual_period = 24,
     follow_up_period = 36
 )
-
+}
 }

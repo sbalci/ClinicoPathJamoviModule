@@ -29,7 +29,6 @@ clinical_outlier_data <- data.frame(
 
 test_that("AutoEDA - Basic functionality and parameter validation", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test basic function call
   expect_error(

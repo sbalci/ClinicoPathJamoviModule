@@ -249,8 +249,8 @@ remains constant.</p>
 <li><strong>If CV > 30%</strong>: Add more sample areas or check staining quality</li>
 </ul>
 
-<h4>Implementation (EAMUS™ System)</h4>
-<p>This algorithm is successfully implemented in the automated EAMUS™ (Evaluation and
+<h4>Implementation (EAMUS System)</h4>
+<p>This algorithm is successfully implemented in the automated EAMUS (Evaluation and
 Measurement System) developed by Kayser et al. for standardized IHC quantification.</p>
 "
             self$results$methodology$setContent(html)

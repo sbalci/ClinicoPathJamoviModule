@@ -8,7 +8,6 @@ context("test-jjcorrmat-correctness")
 # 4. Partial correlation handling in summary text
 # 5. Overall functionality across correlation types
 
-devtools::load_all()
 
 # ============================================================================
 # SELECTIVE NA OMISSION TESTS
@@ -16,7 +15,6 @@ devtools::load_all()
 
 test_that("jjcorrmat uses selective NA omission, not global", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create data with NAs in different columns
   data_with_nas <- data.frame(
     var1 = rnorm(50, mean = 10, sd = 2),

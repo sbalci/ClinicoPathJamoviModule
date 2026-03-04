@@ -40,27 +40,6 @@
 #' Molecular/Genomic, Experimental, Case-Control Studies, Risk Factors,
 #' Clinical Outcomes, and Specialized Studies.
 #'
-#' @usage
-#' # Load a specific dataset
-#' data("Melanoma_df")
-#' 
-#' # View all available oncology datasets
-#' data("oncology_datasets_summary")
-#' View(oncology_datasets_summary)
-#' 
-#' # Example analyses:
-#' # Survival analysis with Melanoma data
-#' data("Melanoma_df")
-#' # Use in jsurvival module
-#' 
-#' # ROC analysis with PSA data  
-#' data("PSAProstateCancer_df")
-#' # Use in meddecide module
-#' 
-#' # Descriptive statistics with Breast Cancer data
-#' data("BreastCancerWI_df") 
-#' # Use in ClinicoPathDescriptives module
-#'
 #' @references
 #' Caceres Rossi, R. (2024). OncoDataSets: A Rich Collection of Data Focused on Cancer Research.
 #' R package version 0.1.0. https://CRAN.R-project.org/package=OncoDataSets
@@ -110,9 +89,6 @@ NULL
 #'   \item{category}{Character. Analysis category (e.g., "Survival Analysis", "Diagnostic/Decision Analysis")}
 #'   \item{primary_use}{Character. Primary analytical use case}
 #' }
-#'
-#' @usage
-#' data("oncology_datasets_summary")
 #'
 #' @examples
 #' \dontrun{

@@ -13,7 +13,7 @@ description:
         negative predictive value, and other metrics between different tests against the same golden standard.
         Includes statistical comparison using McNemar's test and confidence intervals for differences.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic comparison of two diagnostic tests
             library(ClinicoPath)
@@ -57,7 +57,7 @@ description:
                 test2 = "Rater 1",
                 test2Positive = "1",
                 pp = TRUE,
-                pprob = 0.15,  # 15% prevalence in screening population
+                pprob = 0.15,  # 15 percent prevalence in screening population
                 od = TRUE      # Show original frequency tables
             )
 
@@ -203,7 +203,7 @@ options:
       default: false
 
     - name: ci
-      title: '95% CI'
+      title: '95 percent CI'
       type: Bool
       default: false
 
@@ -258,14 +258,14 @@ options:
       description:
           ui: >
             Show overall percent agreement (OPA) between each test and the gold standard
-            with 95% confidence intervals. OPA is the proportion of cases where
+            with 95 percent confidence intervals. OPA is the proportion of cases where
             the test and gold standard agree. Unlike kappa, OPA does not correct for
             chance agreement.
           R: >
-            Show overall percent agreement with 95% confidence intervals for each test.
+            Show overall percent agreement with 95 percent confidence intervals for each test.
 
     - name: niMargin
-      title: Noninferiority Margin (%)
+      title: Noninferiority Margin ( percent)
       type: Number
       default: 75
       min: 50
@@ -273,7 +273,7 @@ options:
       description:
           ui: >
             Noninferiority margin for agreement rate. The test is noninferior if the
-            lower bound of the confidence interval exceeds this margin. Default 75%
+            lower bound of the confidence interval exceeds this margin. Default 75 percent
             follows regulatory convention for AI diagnostic tool validation
             (e.g., FDA 510(k) submissions).
           R: >

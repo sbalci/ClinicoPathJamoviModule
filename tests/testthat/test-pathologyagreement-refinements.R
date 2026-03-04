@@ -9,7 +9,6 @@ source('/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pathologya
 
 test_that("Sample size warning triggers for N < 30", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     data <- data.frame(
         m1 = rnorm(20),
         m2 = rnorm(20) + 0.5

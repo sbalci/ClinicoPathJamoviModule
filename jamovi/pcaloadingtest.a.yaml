@@ -19,7 +19,7 @@ description:
         indeterminacy issues.
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example with pcaloadingtest_data (simulated dataset with known structure)
             data("pcaloadingtest_data")

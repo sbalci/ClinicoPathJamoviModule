@@ -107,7 +107,7 @@ options:
           name: dodge
         - title: "Stacked"
           name: stack
-        - title: "Filled (100%)"
+        - title: "Filled (100 percent)"
           name: fill
         - title: "Identity"
           name: identity
@@ -145,7 +145,7 @@ options:
           name: se
         - title: "Standard Deviation"
           name: sd
-        - title: "95% Confidence Interval"
+        - title: "95 percent Confidence Interval"
           name: ci95
         - title: "Custom Interval"
           name: custom

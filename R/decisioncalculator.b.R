@@ -1206,12 +1206,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
 
             warning_html <- if (length(warnings) > 0) {
                 sprintf("<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #f0ad4e;'>
-                <h4 style='margin-top: 0; color: #856404;'>⚠ Warnings</h4>
+                <h4 style='margin-top: 0; color: #856404;'> Warnings</h4>
                 <ul style='margin: 10px 0; padding-left: 20px;'>%s</ul>
                 </div>", paste(warnings, collapse = "\n"))
             } else {
                 "<div style='background: #d4edda; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745;'>
-                <p style='margin: 0; color: #155724;'><strong>✓ No issues detected</strong> - Sample size and distribution appear adequate.</p>
+                <p style='margin: 0; color: #155724;'><strong> No issues detected</strong> - Sample size and distribution appear adequate.</p>
                 </div>"
             }
 

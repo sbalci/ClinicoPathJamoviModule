@@ -83,7 +83,6 @@ describe("modelbuilder Basic Functionality", {
     
     test_that("modelbuilder data validation works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
         data <- create_simple_clinical_data(n = 100)
         
         # Test basic data structure

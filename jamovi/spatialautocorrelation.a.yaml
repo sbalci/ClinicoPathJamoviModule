@@ -11,9 +11,9 @@ description:
         detecting spatial clustering and patterns in histopathological data. Essential for analyzing
         spatial dependencies in tissue architecture and cellular distributions.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             spatialautocorrelation(
                 measurement = "biomarker_intensity",
                 x_coordinate = "cell_x",

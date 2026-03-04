@@ -711,13 +711,14 @@ concordanceindexBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- concordanceindex(
 #'     data = validation_data,
 #'     time = "follow_up_months",
 #'     event = "death",
 #'     predictor = "risk_score"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time Time-to-event or censoring variable (days, months, years). For
 #'   time-dependent concordance, this is the follow-up time.

@@ -4,7 +4,7 @@ title: Box-Violin Plots to Compare Within Groups
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 
@@ -16,7 +16,7 @@ description:
         for repeated measurements and within-subjects analysis with
         statistical annotations and significance testing.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic within-subjects analysis with iris dataset (simulated repeated measures)
             data(iris)
@@ -500,7 +500,7 @@ options:
 # Number of digits after decimal point (should be an integer) (Default: k = 2L).
 #
 # conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+# Scalar between 0 and 1. If unspecified, the defaults return 95 percent confidence/credible intervals (0.95).
 #
 # nboot
 # Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).
@@ -509,7 +509,7 @@ options:
 # Trim level for the mean when carrying out robust tests. If you get error stating "Standard error cannot be computed because of Winsorized variance of 0 (e.g., due to ties). Try to decrease the trimming level.", try to play around with the value of tr, which is by default set to 0.1. Lowering the value might help.
 
 # mean.ci
-# Logical that decides whether 95% confidence interval for mean is to be displayed (Default: FALSE).
+# Logical that decides whether 95 percent confidence interval for mean is to be displayed (Default: FALSE).
 #
 # mean.point.args
 # A list of additional aesthetic arguments to be passed to ggplot2::geom_point and ggrepel::geom_label_repel geoms involved mean value plotting.
@@ -524,7 +524,7 @@ options:
 # A list of additional aesthetic arguments passed on to geom_path connecting raw data points and mean points.
 #
 # notch
-# A logical. If FALSE (default), a standard box plot will be displayed. If TRUE, a notched box plot will be used. Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different. In a notched box plot, the notches extend 1.58 * IQR / sqrt(n). This gives a roughly 95% confidence interval for comparing medians. IQR: Inter-Quartile Range.
+# A logical. If FALSE (default), a standard box plot will be displayed. If TRUE, a notched box plot will be used. Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different. In a notched box plot, the notches extend 1.58 * IQR / sqrt(n). This gives a roughly 95 percent confidence interval for comparing medians. IQR: Inter-Quartile Range.
 #
 # notchwidth
 # For a notched box plot, width of the notch relative to the body (default 0.5).
@@ -666,7 +666,7 @@ options:
 # Number of digits after decimal point (should be an integer) (Default: k = 2L).
 #
 # conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+# Scalar between 0 and 1. If unspecified, the defaults return 95 percent confidence/credible intervals (0.95).
 #
 # nboot
 # Number of bootstrap samples for computing confidence interval for the effect size (Default: 100).
@@ -678,7 +678,7 @@ options:
 # Logical that decides whether mean is to be highlighted and its value to be displayed (default: false).
 #
 # mean.ci
-# Logical that decides whether 95% confidence interval for mean is to be displayed (Default: FALSE).
+# Logical that decides whether 95 percent confidence interval for mean is to be displayed (Default: FALSE).
 #
 # mean.point.args
 # A list of additional aesthetic arguments to be passed to ggplot2::geom_point and ggrepel::geom_label_repel geoms involved mean value plotting.
@@ -687,7 +687,7 @@ options:
 # A list of additional aesthetic arguments to be passed to ggplot2::geom_point and ggrepel::geom_label_repel geoms involved mean value plotting.
 #
 # notch
-# A logical. If FALSE (default), a standard box plot will be displayed. If TRUE, a notched box plot will be used. Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different. In a notched box plot, the notches extend 1.58 * IQR / sqrt(n). This gives a roughly 95% confidence interval for comparing medians. IQR: Inter-Quartile Range.
+# A logical. If FALSE (default), a standard box plot will be displayed. If TRUE, a notched box plot will be used. Notches are used to compare groups; if the notches of two boxes do not overlap, this suggests that the medians are significantly different. In a notched box plot, the notches extend 1.58 * IQR / sqrt(n). This gives a roughly 95 percent confidence interval for comparing medians. IQR: Inter-Quartile Range.
 #
 # notchwidth
 # For a notched box plot, width of the notch relative to the body (default 0.5).

@@ -15,11 +15,11 @@ grouplassoClass <- R6::R6Class(
                     </style>
                     </head>
                     <body>
-                    <h2>🎯 Group LASSO for Survival Analysis</h2>
+                    <h2> Group LASSO for Survival Analysis</h2>
                     <p><strong>Penalized regression with group-wise variable selection and structure preservation</strong></p>
                     
                     <div class='step'>
-                    <strong>📊 Required Data:</strong>
+                    <strong> Required Data:</strong>
                     <ul>
                         <li><span class='highlight'>Time Variable</span>: Time to event or censoring</li>
                         <li><span class='highlight'>Event Indicator</span>: 0 = censored, 1 = event</li>
@@ -28,7 +28,7 @@ grouplassoClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🔧 Group Definition Methods:</strong>
+                    <strong> Group Definition Methods:</strong>
                     <ul>
                         <li><strong>Automatic:</strong> Groups by variable type (continuous, categorical)</li>
                         <li><strong>Factor-Based:</strong> Dummy variables from same factor grouped together</li>
@@ -38,7 +38,7 @@ grouplassoClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>⚙️ Penalty Types:</strong>
+                    <strong> Penalty Types:</strong>
                     <ul>
                         <li><strong>Group LASSO:</strong> Selects entire groups simultaneously</li>
                         <li><strong>Sparse Group LASSO:</strong> Combines group and individual penalties</li>
@@ -48,28 +48,28 @@ grouplassoClass <- R6::R6Class(
                     </div>
                     
                     <div class='step'>
-                    <strong>🎨 Key Features:</strong>
+                    <strong> Key Features:</strong>
                     <ul>
-                        <li>📈 Cross-validation for optimal penalty selection</li>
-                        <li>🎯 Stability selection for robust group identification</li>
-                        <li>📊 Nested CV for unbiased performance assessment</li>
-                        <li>🔄 Multiple optimization algorithms (coordinate descent, ADMM)</li>
-                        <li>⚕️ Clinical interpretation with group importance measures</li>
-                        <li>🏗️ Permutation testing for statistical significance</li>
+                        <li> Cross-validation for optimal penalty selection</li>
+                        <li> Stability selection for robust group identification</li>
+                        <li> Nested CV for unbiased performance assessment</li>
+                        <li> Multiple optimization algorithms (coordinate descent, ADMM)</li>
+                        <li> Clinical interpretation with group importance measures</li>
+                        <li> Permutation testing for statistical significance</li>
                     </ul>
                     </div>
                     
                     <div class='step'>
-                    <strong>💡 Clinical Applications:</strong>
+                    <strong> Clinical Applications:</strong>
                     <ul>
-                        <li>🧬 Genomic pathway analysis in survival studies</li>
-                        <li>🏥 Clinical domain groupings (demographics, lab values, imaging)</li>
-                        <li>💊 Treatment group comparisons with structured covariates</li>
-                        <li>🎯 Biomarker panel selection with biological structure</li>
+                        <li> Genomic pathway analysis in survival studies</li>
+                        <li> Clinical domain groupings (demographics, lab values, imaging)</li>
+                        <li> Treatment group comparisons with structured covariates</li>
+                        <li> Biomarker panel selection with biological structure</li>
                     </ul>
                     </div>
                     
-                    <p><em>💡 Tip: Use factor-based grouping for categorical variables and custom grouping for domain-specific applications like gene pathways.</em></p>
+                    <p><em> Tip: Use factor-based grouping for categorical variables and custom grouping for domain-specific applications like gene pathways.</em></p>
                     </body>
                     </html>"
                 )

@@ -167,7 +167,7 @@ options:
       type: Bool
       default: true
       description: >
-        Calculate and display 95% confidence intervals for
+        Calculate and display 95 percent confidence intervals for
         stereological estimates using bootstrap methods.
 
     - name: bootstrapIterations

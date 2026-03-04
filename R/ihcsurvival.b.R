@@ -5,9 +5,6 @@
 #' @importFrom cluster daisy
 #' @import ggplot2
 
-# Define null coalescing operator
-`%||%` <- function(x, y) if (!is.null(x)) x else y
-
 ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "ihcsurvivalClass",
     inherit = ihcsurvivalBase,

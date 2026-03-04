@@ -812,7 +812,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         list(
                             k = as.integer(kVals[i]),
                             avg_silhouette = as.numeric(silhouettes[i]),
-                            selected = if (selected[i]) "✓" else ""
+                            selected = if (selected[i]) "" else ""
                         )
                     )
                 }
@@ -2012,10 +2012,10 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (totalVars < 2) {
                 html <- '
                 <div style="background-color: #f0f8ff; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #2196F3;">
-                <h3 style="margin-top: 0; color: #1976D2;">🧪 Welcome to IHC Clustering Analysis</h3>
+                <h3 style="margin-top: 0; color: #1976D2;"> Welcome to IHC Clustering Analysis</h3>
                 
                 <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-                <h4>📋 Step 1: Select Your Variables</h4>
+                <h4> Step 1: Select Your Variables</h4>
                 <table style="width: 100%; border-collapse: collapse;">
                 <tr style="background-color: #f8f9fa;">
                 <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Variable Type</th>
@@ -2041,16 +2041,16 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-                <h4>⚙️ Step 2: Choose Clustering Method</h4>
+                <h4> Step 2: Choose Clustering Method</h4>
                 <ul style="list-style-type: none; padding-left: 0;">
-                <li style="margin: 8px 0;">🎯 <b>PAM (k-medoids):</b> Robust to outliers, identifies representative cases (medoids)</li>
-                <li style="margin: 8px 0;">🌳 <b>Hierarchical:</b> Shows cluster relationships, good for exploratory analysis</li>
-                <li style="margin: 8px 0;">📊 <b>MCA/PCA + k-means:</b> Dimension reduction followed by clustering</li>
+                <li style="margin: 8px 0;"> <b>PAM (k-medoids):</b> Robust to outliers, identifies representative cases (medoids)</li>
+                <li style="margin: 8px 0;"> <b>Hierarchical:</b> Shows cluster relationships, good for exploratory analysis</li>
+                <li style="margin: 8px 0;"> <b>MCA/PCA + k-means:</b> Dimension reduction followed by clustering</li>
                 </ul>
                 </div>
                 
                 <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-                <h4>🔧 Step 3: Configure Analysis</h4>
+                <h4> Step 3: Configure Analysis</h4>
                 <ul>
                 <li><b>Number of Clusters:</b> Enable auto-selection to find optimal k using silhouette analysis</li>
                 <li><b>Data Preprocessing:</b> Scale continuous variables, handle missing data</li>
@@ -2060,7 +2060,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ffc107;">
-                <p style="margin: 0;"><b>💡 Note:</b> This analysis uses Gower distance to appropriately handle mixed categorical and continuous data.</p>
+                <p style="margin: 0;"><b> Note:</b> This analysis uses Gower distance to appropriately handle mixed categorical and continuous data.</p>
                 </div>
                 </div>'
             } else {
@@ -2068,18 +2068,18 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Analysis will run automatically once minimum requirements are met
                 html <- paste0(
                     '<div style="background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;">',
-                    '<h4 style="margin-top: 0; color: #1976D2;">✅ Analysis Configuration</h4>',
+                    '<h4 style="margin-top: 0; color: #1976D2;"> Analysis Configuration</h4>',
                     '<p><b>Variables Selected:</b> ', nCat, ' categorical + ', nCont, ' continuous markers</p>'
                 )
 
                 if (self$options$autoSelectK) {
-                    html <- paste0(html, '<p>🎯 <b>Cluster Selection:</b> Automatic (optimal k will be determined)</p>')
+                    html <- paste0(html, '<p> <b>Cluster Selection:</b> Automatic (optimal k will be determined)</p>')
                 } else {
-                    html <- paste0(html, '<p>🎯 <b>Clusters:</b> ', self$options$nClusters, ' (fixed)</p>')
+                    html <- paste0(html, '<p> <b>Clusters:</b> ', self$options$nClusters, ' (fixed)</p>')
                 }
 
                 html <- paste0(html,
-                    '<p>📊 <b>Method:</b> ', toupper(self$options$method), '</p>',
+                    '<p> <b>Method:</b> ', toupper(self$options$method), '</p>',
                     '<p><em>Analysis will run automatically. You can adjust settings in the panel as needed.</em></p>',
                     '</div>'
                 )
@@ -2094,10 +2094,10 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .initTechnicalNotes = function() {
             html <- '
             <div style="background-color: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border: 1px solid #dee2e6;">
-            <h3 style="margin-top: 0; color: #495057;">🔬 Technical Implementation Details</h3>
+            <h3 style="margin-top: 0; color: #495057;"> Technical Implementation Details</h3>
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>📐 Distance Metrics & Data Handling</h4>
+            <h4> Distance Metrics & Data Handling</h4>
             <ul>
             <li><b>Gower Distance:</b> Specially designed for mixed data types</li>
             <li><b>Categorical Variables:</b> Simple matching coefficient (0 = different, 1 = same)</li>
@@ -2108,7 +2108,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>🔄 Clustering Algorithms</h4>
+            <h4> Clustering Algorithms</h4>
             <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
             <tr style="background-color: #e9ecef;">
             <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6;">Algorithm</th>
@@ -2134,7 +2134,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>📊 Quality Assessment & Validation</h4>
+            <h4> Quality Assessment & Validation</h4>
             <ul>
             <li><b>Silhouette Analysis:</b> Measures cluster cohesion (within) vs separation (between)</li>
             <li><b>Optimal k Selection:</b> Maximizes average silhouette width across k-range</li>
@@ -2153,7 +2153,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>📚 R Package Dependencies</h4>
+            <h4> R Package Dependencies</h4>
             <code style="background-color: #f1f3f4; padding: 8px; border-radius: 3px; display: block; margin: 5px 0;">
             cluster (PAM, Gower distance), FactoMineR (MCA/PCA), factoextra (visualization),<br>
             ComplexHeatmap (advanced heatmaps), survival (survival analysis)
@@ -2161,7 +2161,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: #f0fdf4; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #22c55e;">
-            <p style="margin: 0;"><b>📖 Reference:</b> Gower, J.C. (1971). A general coefficient of similarity and some of its properties. <em>Biometrics</em>, 27(4), 857-871.</p>
+            <p style="margin: 0;"><b> Reference:</b> Gower, J.C. (1971). A general coefficient of similarity and some of its properties. <em>Biometrics</em>, 27(4), 857-871.</p>
             </div>
             </div>'
             
@@ -2174,12 +2174,12 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .initInterpretationGuide = function() {
             html <- '
             <div style="background-color: #fff8e1; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #ffc107;">
-            <h3 style="margin-top: 0; color: #e65100;">🏥 Clinical Interpretation Guide</h3>'
+            <h3 style="margin-top: 0; color: #e65100;"> Clinical Interpretation Guide</h3>'
 
             html <- paste0(html, '
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>🎯 Understanding Your Results</h4>
+            <h4> Understanding Your Results</h4>
             <table style="width: 100%; border-collapse: collapse;">
             <tr style="background-color: #f8f9fa;">
             <th style="padding: 12px; text-align: left; border: 1px solid #dee2e6;">Output</th>
@@ -2210,10 +2210,10 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>🔬 Clinical Applications</h4>
+            <h4> Clinical Applications</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div>
-            <h5 style="color: #1976d2;">💊 Treatment Selection</h5>
+            <h5 style="color: #1976d2;"> Treatment Selection</h5>
             <ul>
             <li>Different clusters may respond to different therapies</li>
             <li>Precision medicine based on IHC patterns</li>
@@ -2221,7 +2221,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </ul>
             </div>
             <div>
-            <h5 style="color: #1976d2;">📈 Prognosis</h5>
+            <h5 style="color: #1976d2;"> Prognosis</h5>
             <ul>
             <li>Clusters may have different survival outcomes</li>
             <li>Risk stratification for clinical decisions</li>
@@ -2232,7 +2232,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>✅ Validation Checklist</h4>
+            <h4> Validation Checklist</h4>
             <ol style="margin: 10px 0;">
             <li><b>Quality Check:</b> Review silhouette plot - aim for average silhouette > 0.5</li>
             <li><b>Biological Plausibility:</b> Do clusters make biological sense?</li>
@@ -2243,7 +2243,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-            <h4>⚠️ Important Considerations</h4>
+            <h4> Important Considerations</h4>
             <div style="background-color: #fef2f2; padding: 12px; border-radius: 5px; border: 1px solid #fca5a5; margin: 10px 0;">
             <h5 style="margin-top: 0; color: #dc2626;">Limitations & Cautions</h5>
             <ul style="margin: 5px 0;">
@@ -2267,7 +2267,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             
             <div style="background-color: #e3f2fd; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #90caf9;">
-            <p style="margin: 0;"><b>💡 Next Steps:</b> Export cluster assignments and test associations with clinical variables using the survival analysis or cross-table modules.</p>
+            <p style="margin: 0;"><b> Next Steps:</b> Export cluster assignments and test associations with clinical variables using the survival analysis or cross-table modules.</p>
             </div>
             </div>')
 
@@ -5839,7 +5839,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</ol>",
 
                 "<p style='margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #f0ad4e;'>",
-                "<strong>⚠️ Important:</strong> IHC clustering results are exploratory and hypothesis-generating. ",
+                "<strong> Important:</strong> IHC clustering results are exploratory and hypothesis-generating. ",
                 "Clinical decisions should integrate clustering results with morphology, clinical context, and expert pathologist review.",
                 "</p>",
                 "</div>"
@@ -5968,7 +5968,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</p>",
 
                 "<p style='margin-top: 15px; padding: 10px; background-color: #d1ecf1; border-left: 4px solid #17a2b8;'>",
-                "<strong>ℹ️ Note:</strong> For reproducible research, document all analysis settings including the random seed, ",
+                "<strong> Note:</strong> For reproducible research, document all analysis settings including the random seed, ",
                 "clustering method, distance metric, and any data preprocessing steps (scaling, missing data handling).",
                 "</p>",
                 "</div>"
@@ -5982,7 +5982,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             glossary_html <- paste0(
                 "<div style='background-color: #fff8e1; border: 2px solid #ffc107; padding: 20px; margin: 10px 0;'>",
-                "<h3 style='color: #2c3e50; margin-top: 0;'>📚 Diagnostic Metrics Glossary</h3>",
+                "<h3 style='color: #2c3e50; margin-top: 0;'> Diagnostic Metrics Glossary</h3>",
 
                 "<h4 style='color: #34495e; margin-top: 15px;'>Understanding Marker Performance</h4>",
 
@@ -6071,7 +6071,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</tr>",
                 "</table>",
 
-                "<h4 style='color: #34495e; margin-top: 20px;'>📊 2×2 Confusion Matrix</h4>",
+                "<h4 style='color: #34495e; margin-top: 20px;'> 2×2 Confusion Matrix</h4>",
                 "<table style='width: 80%; margin: 15px auto; border-collapse: collapse; text-align: center;'>",
                 "<tr>",
                 "<td style='border: none;'></td>",
@@ -6097,7 +6097,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</tr>",
                 "</table>",
 
-                "<h4 style='color: #34495e; margin-top: 20px;'>⚠️ Key Considerations</h4>",
+                "<h4 style='color: #34495e; margin-top: 20px;'> Key Considerations</h4>",
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Prevalence Matters:</strong> PPV and NPV depend heavily on disease prevalence in your cohort. ",
                 "A marker with 90% sensitivity/specificity has PPV=50% at 10% prevalence, but PPV=10% at 1% prevalence.</li>",
@@ -6119,7 +6119,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "Aim for CI width < 20% for robust markers.</li>",
                 "</ul>",
 
-                "<h4 style='color: #34495e; margin-top: 20px;'>📖 Recommended Reading</h4>",
+                "<h4 style='color: #34495e; margin-top: 20px;'> Recommended Reading</h4>",
                 "<ul style='line-height: 1.8;'>",
                 "<li>Altman DG, Bland JM. Diagnostic tests 1-3 series. <em>BMJ</em>. 1994.</li>",
                 "<li>Lalkhen AG, McCluskey A. Clinical tests: sensitivity and specificity. ",

@@ -3,7 +3,6 @@ context("nogoldstandard refinements")
 
 test_that("nogoldstandard enforces constraints and handles warnings", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     
     # Simulate structured data for better LCA convergence
     set.seed(123)

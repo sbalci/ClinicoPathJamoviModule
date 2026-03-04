@@ -780,13 +780,14 @@ ordinalrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- ordinalroc(
 #'     data = grading_data,
 #'     predictor = "biomarker_score",
 #'     ordinal_outcome = "tumor_grade",
 #'     outcome_order = c("well", "moderate", "poor")
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param predictor Continuous predictor variable (biomarker level, risk
 #'   score, imaging feature) used to predict the ordinal outcome. Should

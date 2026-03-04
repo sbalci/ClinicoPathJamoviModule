@@ -8,7 +8,6 @@
 library(testthat)
 
 test_that("statsplot2 integrates with test datasets", {
-  devtools::load_all()
 
   # Test comprehensive dataset loads
   data(statsplot2_test, package = "ClinicoPath")
@@ -33,7 +32,6 @@ test_that("statsplot2 integrates with test datasets", {
 })
 
 test_that("statsplot2 test datasets have proper structure", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -51,7 +49,6 @@ test_that("statsplot2 test datasets have proper structure", {
 })
 
 test_that("statsplot2 scenario: Clinical trial primary outcome", {
-  devtools::load_all()
 
   data(statsplot2_clinical)
 
@@ -72,7 +69,6 @@ test_that("statsplot2 scenario: Clinical trial primary outcome", {
 })
 
 test_that("statsplot2 scenario: Secondary outcomes analysis", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -98,7 +94,6 @@ test_that("statsplot2 scenario: Secondary outcomes analysis", {
 })
 
 test_that("statsplot2 scenario: Subgroup analysis by disease severity", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -117,7 +112,6 @@ test_that("statsplot2 scenario: Subgroup analysis by disease severity", {
 })
 
 test_that("statsplot2 scenario: Demographic subgroup analysis", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -143,7 +137,6 @@ test_that("statsplot2 scenario: Demographic subgroup analysis", {
 })
 
 test_that("statsplot2 scenario: Longitudinal symptom tracking", {
-  devtools::load_all()
 
   data(statsplot2_repeated)
 
@@ -163,7 +156,6 @@ test_that("statsplot2 scenario: Longitudinal symptom tracking", {
 })
 
 test_that("statsplot2 scenario: Treatment comparison over time", {
-  devtools::load_all()
 
   data(statsplot2_repeated)
 
@@ -182,7 +174,6 @@ test_that("statsplot2 scenario: Treatment comparison over time", {
 })
 
 test_that("statsplot2 scenario: Biomarker correlation analysis", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -201,7 +192,6 @@ test_that("statsplot2 scenario: Biomarker correlation analysis", {
 })
 
 test_that("statsplot2 scenario: Response rate comparison", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -218,7 +208,6 @@ test_that("statsplot2 scenario: Response rate comparison", {
 })
 
 test_that("statsplot2 scenario: Robust analysis with outliers", {
-  devtools::load_all()
 
   data(statsplot2_outliers)
 
@@ -235,7 +224,6 @@ test_that("statsplot2 scenario: Robust analysis with outliers", {
 })
 
 test_that("statsplot2 scenario: Nonparametric analysis for skewed data", {
-  devtools::load_all()
 
   data(statsplot2_skewed)
 
@@ -252,7 +240,6 @@ test_that("statsplot2 scenario: Nonparametric analysis for skewed data", {
 })
 
 test_that("statsplot2 scenario: Bayesian evidence assessment", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -269,7 +256,6 @@ test_that("statsplot2 scenario: Bayesian evidence assessment", {
 })
 
 test_that("statsplot2 works with filtered data", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -287,7 +273,6 @@ test_that("statsplot2 works with filtered data", {
 })
 
 test_that("statsplot2 works with subsetted data", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -308,7 +293,6 @@ test_that("statsplot2 works with CSV imported data", {
   skip_if_not(file.exists("data/statsplot2_test.csv"),
               "CSV test file not available")
 
-  devtools::load_all()
 
   # Read from CSV
   csv_data <- read.csv("data/statsplot2_test.csv", stringsAsFactors = TRUE)
@@ -328,7 +312,6 @@ test_that("statsplot2 works with OMV imported data", {
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
-  devtools::load_all()
 
   # Read from OMV
   omv_data <- jmvReadWrite::read_omv("data/statsplot2_test.omv")
@@ -343,7 +326,6 @@ test_that("statsplot2 works with OMV imported data", {
 })
 
 test_that("statsplot2 preserves data integrity", {
-  devtools::load_all()
 
   data(statsplot2_test)
   original_data <- statsplot2_test
@@ -360,7 +342,6 @@ test_that("statsplot2 preserves data integrity", {
 })
 
 test_that("statsplot2 handles multiple consecutive analyses", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -391,7 +372,6 @@ test_that("statsplot2 handles multiple consecutive analyses", {
 })
 
 test_that("statsplot2 handles comprehensive multi-outcome report", {
-  devtools::load_all()
 
   data(statsplot2_test)
 

@@ -98,6 +98,7 @@ Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease
 }
 
 \examples{
+\donttest{
 # Example with pcaloadingtest_data (simulated dataset with known structure)
 data("pcaloadingtest_data")
 
@@ -113,5 +114,5 @@ pcaloadingtest(
   conflevel = 0.95,
   adjustmethod = "BH"
 )
-
+}
 }

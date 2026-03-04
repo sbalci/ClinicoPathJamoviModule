@@ -15,7 +15,7 @@ description:
         of large coefficients while maintaining sparsity for small coefficients. Particularly useful
         for genomics and high-dimensional clinical data where interpretable variable selection is crucial.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             ncvregcox(
                 data = data,

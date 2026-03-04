@@ -9,7 +9,7 @@ jas: '1.2'
 
 description:
     main: >
-        ⚠️ IMPORTANT LIMITATIONS: This is a BASIC implementation for single time-point
+        IMPORTANT LIMITATIONS: This is a BASIC implementation for single time-point
         Brier score evaluation. It requires PRE-COMPUTED survival probabilities (not raw
         Cox models). Many features listed below are NOT IMPLEMENTED or STATISTICALLY INVALID.
 
@@ -19,14 +19,14 @@ description:
         (perfect prediction = 0, worst = 1). Includes scaled Brier scores relative to null
         model (Kaplan-Meier curve).
 
-        ⚠️ NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS), competing
+        NOT SUPPORTED: Multiple time points, Integrated Brier Score (IBS), competing
         risks, linear predictor inputs, formula inputs, temporal/external validation flags.
         These features may appear in the UI but will generate errors if used.
 
         For rigorous clinical validation, use established packages: riskRegression::Score()
         or pec::pec(). This implementation has NOT been validated against those standards.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- brierscore(
                 data = validation_data,

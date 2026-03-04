@@ -67,10 +67,10 @@ indices. This can improve temporal resolution but increases computation
 time.}
 
 \item{blockmin}{Minimum measurements required to create a block as a
-percentage. Blocks with less data will be omitted. Default is 50\\%.}
+percentage. Blocks with less data will be omitted. Default is 50 percent.}
 
 \item{epochmin}{Minimum blocks required to create an epoch as a percentage.
-Epochs with fewer blocks will be omitted. Default is 50\\%.}
+Epochs with fewer blocks will be omitted. Default is 50 percent.}
 
 \item{fast_processing}{Enable fast processing by aggregating data before
 analysis. This speeds up computation but may reduce precision.}

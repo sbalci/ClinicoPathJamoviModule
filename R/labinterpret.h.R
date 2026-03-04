@@ -668,6 +668,7 @@ labinterpretBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('clinicaldata', package='ClinicoPath')
 #'
 #' # Basic laboratory interpretation
@@ -676,7 +677,7 @@ labinterpretBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'             patientDemo = c('Age', 'Gender'),
 #'             reference_ranges = TRUE,
 #'             trend_analysis = TRUE)
-#'
+#'}
 #' @param data .
 #' @param labValues Laboratory test results and biomarker values for
 #'   interpretation

@@ -3,7 +3,6 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(agepyramid_test)
 data(agepyramid_pediatric)
 data(agepyramid_geriatric)

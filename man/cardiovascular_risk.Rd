@@ -92,6 +92,6 @@ result <- tree(
 }
 }
 \seealso{
-\code{\link{tree}}, \code{\link{tree_datasets}}
+\code{\link{tree_datasets}}
 }
 \keyword{datasets}

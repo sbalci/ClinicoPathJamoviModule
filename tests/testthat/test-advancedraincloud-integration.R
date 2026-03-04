@@ -8,7 +8,6 @@
 library(testthat)
 
 test_that("advancedraincloud integrates with test dataset", {
-  devtools::load_all()
 
   # Test data should load correctly
   data(advancedraincloud_test, package = "ClinicoPath")
@@ -20,7 +19,6 @@ test_that("advancedraincloud integrates with test dataset", {
 })
 
 test_that("advancedraincloud test data has proper structure", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -37,7 +35,6 @@ test_that("advancedraincloud test data has proper structure", {
 })
 
 test_that("advancedraincloud works with data subsets", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -73,7 +70,6 @@ test_that("advancedraincloud works with data subsets", {
 })
 
 test_that("advancedraincloud scenario: Basic group comparison", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -95,7 +91,6 @@ test_that("advancedraincloud scenario: Basic group comparison", {
 })
 
 test_that("advancedraincloud scenario: Longitudinal analysis", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -115,7 +110,6 @@ test_that("advancedraincloud scenario: Longitudinal analysis", {
 })
 
 test_that("advancedraincloud scenario: Likert scale survey", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -133,7 +127,6 @@ test_that("advancedraincloud scenario: Likert scale survey", {
 })
 
 test_that("advancedraincloud scenario: Clinical trial with effect sizes", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -158,7 +151,6 @@ test_that("advancedraincloud scenario: Clinical trial with effect sizes", {
 })
 
 test_that("advancedraincloud scenario: Biomarker analysis", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -183,7 +175,6 @@ test_that("advancedraincloud scenario: Biomarker analysis", {
 })
 
 test_that("advancedraincloud scenario: Subgroup analysis", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -204,7 +195,6 @@ test_that("advancedraincloud scenario: Subgroup analysis", {
 })
 
 test_that("advancedraincloud scenario: Paired comparison", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -229,7 +219,6 @@ test_that("advancedraincloud scenario: Paired comparison", {
 })
 
 test_that("advancedraincloud scenario: Publication-ready figure", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -253,7 +242,6 @@ test_that("advancedraincloud scenario: Publication-ready figure", {
 })
 
 test_that("advancedraincloud handles multiple continuous outcomes", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   baseline_data <- subset(advancedraincloud_test, timepoint == "Baseline")
@@ -284,7 +272,6 @@ test_that("advancedraincloud handles multiple continuous outcomes", {
 })
 
 test_that("advancedraincloud handles multiple grouping variables", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -322,7 +309,6 @@ test_that("advancedraincloud handles multiple grouping variables", {
 })
 
 test_that("advancedraincloud works with transformed data", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
 
@@ -348,7 +334,6 @@ test_that("advancedraincloud works with transformed data", {
 })
 
 test_that("advancedraincloud preserves data integrity", {
-  devtools::load_all()
 
   data(advancedraincloud_test)
   original_data <- advancedraincloud_test
@@ -368,7 +353,6 @@ test_that("advancedraincloud handles CSV imported data", {
   skip_if_not(file.exists("data/advancedraincloud_test.csv"),
               "CSV test file not available")
 
-  devtools::load_all()
 
   # Read from CSV (simulates user import)
   csv_data <- read.csv("data/advancedraincloud_test.csv", stringsAsFactors = TRUE)
@@ -388,7 +372,6 @@ test_that("advancedraincloud handles OMV imported data", {
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
-  devtools::load_all()
 
   # Read from OMV (simulates jamovi import)
   omv_data <- jmvReadWrite::read_omv("data/advancedraincloud_test.omv")

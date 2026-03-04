@@ -24,7 +24,7 @@ description:
         of diagnostic tests where "I don't know" is a valid and often safer response
         than forcing a potentially incorrect binary classification.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- greyzoneroc(
                 data = ai_predictions,

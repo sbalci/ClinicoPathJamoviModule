@@ -1,7 +1,6 @@
 # Tests for nogoldstandard function
 
 library(testthat)
-devtools::load_all()
 
 # Load test data
 data(nogoldstandard_test_data)
@@ -9,7 +8,6 @@ data(nogoldstandard_test_data_small)
 
 test_that("nogoldstandard basic functionality works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Test with basic parameters
   result <- nogoldstandard(
     data = nogoldstandard_test_data_small,

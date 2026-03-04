@@ -17,7 +17,7 @@ description:
         which variables contribute most strongly to each component.
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example with mtcars dataset
             data("mtcars")

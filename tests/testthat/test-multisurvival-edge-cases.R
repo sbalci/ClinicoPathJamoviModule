@@ -6,7 +6,6 @@
 # for the multisurvival jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(multisurvival_test, package = "ClinicoPath")

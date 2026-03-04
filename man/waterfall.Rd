@@ -44,7 +44,8 @@ proper analysis.}
 cm, sum of diameters) or pre-calculated percentage changes from baseline.
 For raw measurements: requires time variable with baseline at time = 0. For
 percentages: negative values = tumor shrinkage (good response), positive
-values = tumor growth (poor response). Example: -30 means 30\\% decrease.}
+values = tumor growth (poor response). Example: -30 means 30 percent
+decrease.}
 
 \item{timeVar}{Time point of measurement (e.g., months from baseline, days
 from treatment start). Required for spider plot and raw measurement
@@ -60,9 +61,9 @@ changes from baseline}
 
 \item{sortBy}{Sort the waterfall plot by best response or patient ID.}
 
-\item{showThresholds}{Show +20\\% and -30\\% RECIST v1.1 thresholds as dashed
-lines. Helps identify Progressive Disease (PD) and Partial Response (PR)
-cutoffs.}
+\item{showThresholds}{Show +20 percent and -30 percent RECIST v1.1
+thresholds as dashed lines. Helps identify Progressive Disease (PD) and
+Partial Response (PR) cutoffs.}
 
 \item{labelOutliers}{Label responses exceeding the specified threshold.}
 

@@ -396,6 +396,7 @@ geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Multiple liver samples per dog
 #' geemodel(
 #'   data = liver_data,
@@ -406,7 +407,7 @@ geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   corstr = 'exchangeable',
 #'   robust_se = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome outcome variable (dependent variable); can be continuous,
 #'   binary, or count
@@ -424,7 +425,8 @@ geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   observations) - Independence: no correlation (equivalent to GLM)
 #' @param robust_se sandwich estimator for standard errors (recommended).
 #'   Provides valid inference even if correlation structure is misspecified.
-#' @param conf_level confidence level for confidence intervals (default 95\%)
+#' @param conf_level confidence level for confidence intervals (default 95
+#'   percent)
 #' @param qic Quasi-likelihood under Independence Model Criterion. Lower QIC
 #'   indicates better model fit. Use for comparing models.
 #' @param posthoc compare levels of categorical predictors using estimated

@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("linechart function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("linechart"))
 })
 
 test_that("linechart runs with minimal required arguments", {
-  devtools::load_all()
 
   data(linechart_simple, package = "ClinicoPath")
 
@@ -26,7 +24,6 @@ test_that("linechart runs with minimal required arguments", {
 })
 
 test_that("linechart produces expected output structure", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -41,7 +38,6 @@ test_that("linechart produces expected output structure", {
 })
 
 test_that("linechart handles single line visualization", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -55,7 +51,6 @@ test_that("linechart handles single line visualization", {
 })
 
 test_that("linechart handles grouped visualization", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -70,7 +65,6 @@ test_that("linechart handles grouped visualization", {
 })
 
 test_that("linechart handles three groups", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -85,7 +79,6 @@ test_that("linechart handles three groups", {
 })
 
 test_that("linechart handles four groups", {
-  devtools::load_all()
 
   data(linechart_multiple)
 
@@ -100,7 +93,6 @@ test_that("linechart handles four groups", {
 })
 
 test_that("linechart handles confidence intervals", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -126,7 +118,6 @@ test_that("linechart handles confidence intervals", {
 })
 
 test_that("linechart handles trend lines", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -152,7 +143,6 @@ test_that("linechart handles trend lines", {
 })
 
 test_that("linechart handles point display", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -176,7 +166,6 @@ test_that("linechart handles point display", {
 })
 
 test_that("linechart handles smoothing", {
-  devtools::load_all()
 
   data(linechart_long)
 
@@ -200,7 +189,6 @@ test_that("linechart handles smoothing", {
 })
 
 test_that("linechart handles reference line", {
-  devtools::load_all()
 
   data(linechart_clinical)
 
@@ -226,7 +214,6 @@ test_that("linechart handles reference line", {
 })
 
 test_that("linechart handles color palettes", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -247,7 +234,6 @@ test_that("linechart handles color palettes", {
 })
 
 test_that("linechart handles plot themes", {
-  devtools::load_all()
 
   data(linechart_grouped)
 
@@ -268,7 +254,6 @@ test_that("linechart handles plot themes", {
 })
 
 test_that("linechart handles custom labels", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -285,7 +270,6 @@ test_that("linechart handles custom labels", {
 })
 
 test_that("linechart handles plot dimensions", {
-  devtools::load_all()
 
   data(linechart_simple)
 
@@ -301,7 +285,6 @@ test_that("linechart handles plot dimensions", {
 })
 
 test_that("linechart handles all test datasets", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "linechart_simple", x = "time_point", y = "value", group = NULL),
@@ -339,7 +322,6 @@ test_that("linechart handles all test datasets", {
 })
 
 test_that("linechart handles short time series", {
-  devtools::load_all()
 
   data(linechart_short)
 
@@ -354,7 +336,6 @@ test_that("linechart handles short time series", {
 })
 
 test_that("linechart handles long time series", {
-  devtools::load_all()
 
   data(linechart_long)
 
@@ -368,7 +349,6 @@ test_that("linechart handles long time series", {
 })
 
 test_that("linechart handles irregular time intervals", {
-  devtools::load_all()
 
   data(linechart_irregular)
 
@@ -383,7 +363,6 @@ test_that("linechart handles irregular time intervals", {
 })
 
 test_that("linechart handles multiple measurements per time point", {
-  devtools::load_all()
 
   data(linechart_multiple)
 
@@ -399,7 +378,6 @@ test_that("linechart handles multiple measurements per time point", {
 })
 
 test_that("linechart handles different trend patterns", {
-  devtools::load_all()
 
   data(linechart_patterns)
 
@@ -415,7 +393,6 @@ test_that("linechart handles different trend patterns", {
 })
 
 test_that("linechart handles clinical measurements", {
-  devtools::load_all()
 
   data(linechart_clinical)
 
@@ -432,7 +409,6 @@ test_that("linechart handles clinical measurements", {
 })
 
 test_that("linechart handles comprehensive feature combination", {
-  devtools::load_all()
 
   data(linechart_grouped)
 

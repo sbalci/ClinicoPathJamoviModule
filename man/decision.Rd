@@ -59,7 +59,7 @@ and 0.999.}
 \item{fnote}{Boolean selection whether to show detailed explanatory
 footnotes.}
 
-\item{ci}{Boolean selection whether to calculate and display 95\\%
+\item{ci}{Boolean selection whether to calculate and display 95 percent
 confidence intervals.}
 
 \item{fagan}{Boolean selection whether to generate a Fagan nomogram plot.}

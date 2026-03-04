@@ -51,8 +51,8 @@ statistical significance (smallest p-value first) - hazard: Sorts by effect
 size (hazard ratio furthest from 1) - cindex: Sorts by discriminative
 ability (highest C-index first)}
 
-\item{showCI}{If true, displays 95\\% confidence intervals for hazard ratios
-in the results table.}
+\item{showCI}{If true, displays 95 percent confidence intervals for hazard
+ratios in the results table.}
 
 \item{adjustPValues}{If true, applies multiple testing correction to
 p-values. Recommended when testing many features to control false discovery
@@ -135,6 +135,7 @@ biomarker screening, exploratory analysis, and feature selection before
 building multivariable models.
 }
 \examples{
+\donttest{
 # Example 1: Basic feature ranking
 library(survival)
 data(colon)
@@ -173,5 +174,5 @@ survivalfeaturerank(
     adjustPValues = TRUE,
     adjustMethod = "fdr"
 )
-
+}
 }

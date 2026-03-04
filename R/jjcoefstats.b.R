@@ -62,10 +62,10 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Map notice types to colors and icons
             typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
-                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
-                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
             )
 
             html <- "<div style='margin: 10px 0;'>"
@@ -953,7 +953,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             <p>This analysis examined <b>{n_coefs} predictors</b> using <b>{model_type_label}</b> (N = {n_obs} observations).
             Results are presented as <b>{scale_label}</b> with <b>{self$options$ciLevel * 100}% confidence intervals</b>.</p>
             {if (example_text != '') paste0('<p>', example_text, '</p>') else ''}
-            <p><i>💡 Copy this summary to your report and customize as needed.</i></p>
+            <p><i> Copy this summary to your report and customize as needed.</i></p>
             </div>
             ")
 

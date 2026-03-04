@@ -2,20 +2,14 @@
 % Please edit documentation in R/utils.R
 \name{print.sensSpecTable}
 \alias{print.sensSpecTable}
-\title{Print formatted HTML table for sensitivity/specificity results}
+\title{Format HTML table for sensitivity/specificity results}
 \usage{
-\method{print}{sensSpecTable}(Title, TP, FP, TN, FN)
+\method{print}{sensSpecTable}(x, ...)
 }
 \arguments{
-\item{Title}{Title for the confusion matrix table}
+\item{x}{A list with elements Title, TP, FP, TN, FN}
 
-\item{TP}{Number of true positives}
-
-\item{FP}{Number of false positives}
-
-\item{TN}{Number of true negatives}
-
-\item{FN}{Number of false negatives}
+\item{...}{Additional arguments (ignored)}
 }
 \value{
 HTML string containing the formatted table

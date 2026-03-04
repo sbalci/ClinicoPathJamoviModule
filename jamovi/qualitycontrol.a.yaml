@@ -9,9 +9,9 @@ description:
         Comprehensive laboratory quality control statistics including control charts (Shewhart, CUSUM, EWMA), 
         sigma metrics, method validation protocols, and reference interval establishment for clinical laboratory management.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
-            data %>%
+            data |>
             qualitycontrol(
                 measurement_var = "measurement",
                 analysis_type = "control_charts",
@@ -201,7 +201,7 @@ options:
             Method for calculating laboratory sigma metrics
 
     - name: allowable_error
-      title: Total Allowable Error (%)
+      title: Total Allowable Error ( percent)
       type: Number
       min: 0
       default: 10.0
@@ -231,11 +231,11 @@ options:
       type: List
       options:
         - name: '95'
-          title: 95% (2.5-97.5 percentiles)
+          title: 95 percent (2.5-97.5 percentiles)
         - name: '90'
-          title: 90% (5-95 percentiles)
+          title: 90 percent (5-95 percentiles)
         - name: '99'
-          title: 99% (0.5-99.5 percentiles)
+          title: 99 percent (0.5-99.5 percentiles)
       default: '95'
       description:
           R: >
@@ -271,7 +271,7 @@ options:
       min: 0
       description:
           R: >
-            Acceptable range for proficiency testing (±% or ± absolute units)
+            Acceptable range for proficiency testing (± percent or ± absolute units)
 
     - name: validation_components
       title: Method Validation Components

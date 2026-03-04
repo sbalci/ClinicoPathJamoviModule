@@ -2,7 +2,6 @@
 # Basic Tests: sequentialtests
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 
 test_that("sequentialtests returns proper class", {
   result <- sequentialtests(

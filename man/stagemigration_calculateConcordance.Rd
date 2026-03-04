@@ -2,7 +2,7 @@
 % Please edit documentation in R/stagemigration-discrimination.R
 \name{stagemigration_calculateConcordance}
 \alias{stagemigration_calculateConcordance}
-\title{Stage Migration Analysis - Discrimination Metrics}
+\title{Calculate Advanced Concordance Metrics}
 \usage{
 stagemigration_calculateConcordance(
   data,
@@ -36,10 +36,6 @@ stagemigration_calculateConcordance(
 List with concordance metrics and comparisons
 }
 \description{
-Advanced discrimination metrics for staging system comparison including
-NRI (Net Reclassification Improvement), IDI (Integrated Discrimination
-Improvement), and time-dependent metrics.
-
 Comprehensive concordance comparison with proper handling of correlated
 staging systems (same patients, two measurements).
 }

@@ -81,8 +81,8 @@ visualization.}
 \item{heatmap}{Generate concordance heatmap comparing per-case test results
 against gold standard.}
 
-\item{opa}{Show overall percent agreement with 95\\% confidence intervals
-for each test.}
+\item{opa}{Show overall percent agreement with 95 percent confidence
+intervals for each test.}
 
 \item{niMargin}{Noninferiority margin as percentage (default 75). Used when
 OPA is enabled.}
@@ -144,6 +144,7 @@ standard. Includes statistical comparison using McNemar's test and
 confidence intervals for differences.
 }
 \examples{
+\donttest{
 # Basic comparison of two diagnostic tests
 library(ClinicoPath)
 data('histopathology')
@@ -186,8 +187,8 @@ result3 <- decisioncompare(
     test2 = "Rater 1",
     test2Positive = "1",
     pp = TRUE,
-    pprob = 0.15,  # 15\\% prevalence in screening population
+    pprob = 0.15,  # 15 percent prevalence in screening population
     od = TRUE      # Show original frequency tables
 )
-
+}
 }

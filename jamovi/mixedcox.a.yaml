@@ -16,7 +16,7 @@ description:
         capture cluster-specific variation while estimating population-level 
         fixed effects.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Patients clustered within hospitals
             library(survival)

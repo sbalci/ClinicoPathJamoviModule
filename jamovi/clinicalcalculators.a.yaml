@@ -421,7 +421,7 @@ options:
       type: List
       options:
         - name: percentage
-          title: Percentage (%)
+          title: Percentage ( percent)
         - name: natural_frequency
           title: Natural Frequency (X out of 100)
         - name: odds_ratio

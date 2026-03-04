@@ -14,7 +14,7 @@ description:
         recognition and cross-modality validation.
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('clinicaldata', package='ClinicoPath')
             

@@ -153,6 +153,7 @@ evidence-based
 diagnostic decision-making and clinical assessment optimization.
 }
 \examples{
+\donttest{
 data('clinicaldata', package='ClinicoPath')
 
 # Basic laboratory interpretation
@@ -161,5 +162,5 @@ labinterpret(clinicaldata,
             patientDemo = c('Age', 'Gender'),
             reference_ranges = TRUE,
             trend_analysis = TRUE)
-
+}
 }

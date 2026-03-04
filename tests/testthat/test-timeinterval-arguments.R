@@ -3,7 +3,6 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 data(timeinterval_test, package = "ClinicoPath")
 data(timeinterval_landmark, package = "ClinicoPath")

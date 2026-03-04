@@ -306,7 +306,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     if (has_irrelevant_test) {
                         warnings <- c(warnings, paste0(
-                            "🚨 <strong>CRITICAL: TEST VALUE = 0 WARNING</strong> 🚨<br>",
+                            " <strong>CRITICAL: TEST VALUE = 0 WARNING</strong> <br>",
                             "Testing 'is the mean equal to 0?' is <strong>rarely clinically meaningful</strong> for biomedical data. ",
                             "Your data contains only positive or only negative values, making a test against 0 inappropriate.<br>",
                             "<strong>RECOMMENDED ACTION:</strong> Change the 'Test Value' to a clinically relevant threshold:<br>",
@@ -329,7 +329,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     # Sample size warnings
                     if (length(var_data) < 30) {
                         warnings <- c(warnings, paste0(
-                            "⚠️ Small sample size (n=", length(var_data), ") for '", var, 
+                            " Small sample size (n=", length(var_data), ") for '", var, 
                             "'. Consider nonparametric analysis or interpret results cautiously."
                         ))
                     }
@@ -342,7 +342,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             outliers <- sum(abs(var_data - med) > 3 * mad_val)
                             if (outliers > 0) {
                                 warnings <- c(warnings, paste0(
-                                    "⚠️ Detected ", outliers, " extreme outlier(s) in '", var, 
+                                    " Detected ", outliers, " extreme outlier(s) in '", var, 
                                     "'. Consider reviewing data quality or using robust methods."
                                 ))
                             }
@@ -352,14 +352,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     # Constant data warning
                     if (length(unique(var_data)) == 1) {
                         warnings <- c(warnings, paste0(
-                            "⚠️ Variable '", var, "' has constant values. Histogram analysis may not be meaningful."
+                            " Variable '", var, "' has constant values. Histogram analysis may not be meaningful."
                         ))
                     }
                     
                     # Very few unique values warning
                     if (length(unique(var_data)) < 5 && length(var_data) > 10) {
                         warnings <- c(warnings, paste0(
-                            "⚠️ Variable '", var, "' has only ", length(unique(var_data)), 
+                            " Variable '", var, "' has only ", length(unique(var_data)), 
                             " unique values. Consider treating as categorical or ordinal data."
                         ))
                     }
@@ -373,7 +373,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     if (any(group_sizes < 10)) {
                         small_groups <- names(group_sizes[group_sizes < 10])
                         warnings <- c(warnings, paste0(
-                            "⚠️ Small group size(s) detected: ", paste(small_groups, collapse = ", "), 
+                            " Small group size(s) detected: ", paste(small_groups, collapse = ", "), 
                             " (n < 10). Results may be unreliable for these groups."
                         ))
                     }
@@ -392,30 +392,30 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     
                     if (n_rows > 1000) {
                         warnings <- c(warnings, paste0(
-                            "🐌 <strong>SLOW COMPUTATION WARNING:</strong> Bayesian analysis with ", n_rows, 
+                            " <strong>SLOW COMPUTATION WARNING:</strong> Bayesian analysis with ", n_rows, 
                             " rows may take several minutes. Consider using 'parametric' or 'nonparametric' for faster results."
                         ))
                     } else if (n_rows > 500) {
                         warnings <- c(warnings, paste0(
-                            "⏱️ <strong>PERFORMANCE NOTE:</strong> Bayesian analysis with ", n_rows, 
+                            " <strong>PERFORMANCE NOTE:</strong> Bayesian analysis with ", n_rows, 
                             " rows may take 30-60 seconds. Be patient or switch to faster methods."
                         ))
                     } else {
                         warnings <- c(warnings, 
-                            "⏱️ <strong>BAYESIAN ANALYSIS:</strong> This method provides rich uncertainty quantification but requires 15-30 seconds to compute. Consider parametric/nonparametric for instant results."
+                            " <strong>BAYESIAN ANALYSIS:</strong> This method provides rich uncertainty quantification but requires 15-30 seconds to compute. Consider parametric/nonparametric for instant results."
                         )
                     }
                     
                     # Additional Bayesian guidance
                     warnings <- c(warnings, 
-                        "💡 <strong>Speed Tips:</strong> For similar insights with instant results, try 'Parametric (t-test)' for normally distributed data or 'Nonparametric (Mann-Whitney)' for skewed data."
+                        " <strong>Speed Tips:</strong> For similar insights with instant results, try 'Parametric (t-test)' for normally distributed data or 'Nonparametric (Mann-Whitney)' for skewed data."
                     )
                 }
                 
                 # Large dataset general warning
                 if (nrow(data) > 5000) {
                     warnings <- c(warnings, paste0(
-                        "📊 <strong>LARGE DATASET:</strong> Processing ", nrow(data), 
+                        " <strong>LARGE DATASET:</strong> Processing ", nrow(data), 
                         " rows may take extra time for plot generation and statistical calculations."
                     ))
                 }
@@ -484,7 +484,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0;'>",
                         "<h3>Clinical Interpretation</h3>",
                         "<div style='background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0;'>",
-                        "<strong>⚠️ Note:</strong> This interpretation uses simplified heuristics (skewness &lt; 0.5 and n ≥ 30) ",
+                        "<strong> Note:</strong> This interpretation uses simplified heuristics (skewness &lt; 0.5 and n ≥ 30) ",
                         "as initial screening guidance. These are <strong>rule-of-thumb approximations</strong>, not formal ",
                         "diagnostic criteria. Always supplement with formal normality tests (Shapiro-Wilk, Anderson-Darling) ",
                         "and expert clinical judgment before making analysis decisions.",
@@ -598,14 +598,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     todo <- glue::glue(
                     "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 20px; margin: 10px 0; border-radius: 5px;'>
-                    <h2 style='color: #495057; margin-top: 0;'>📊 Histogram Analysis</h2>
+                    <h2 style='color: #495057; margin-top: 0;'> Histogram Analysis</h2>
                     <p style='font-size: 16px; color: #6c757d; margin: 15px 0;'>
                     <strong>Welcome to ClinicoPath Histogram Tool!</strong><br>
                     Create statistical histograms with clinical interpretation and advanced visualization options.
                     </p>
                     
                     <div style='background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 15px 0;'>
-                    <h4 style='color: #1976d2; margin-top: 0;'>🎯 Getting Started:</h4>
+                    <h4 style='color: #1976d2; margin-top: 0;'> Getting Started:</h4>
                     <ol style='margin: 10px 0; padding-left: 20px;'>
                     <li><strong>Select Variables:</strong> Choose one or more continuous variables from the left panel</li>
                     <li><strong>Optional Grouping:</strong> Add a grouping variable to compare distributions between groups</li>
@@ -614,7 +614,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     </div>
                     
                     <div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0;'>
-                    <h4 style='color: #856404; margin-top: 0;'>🩺 Clinical Examples:</h4>
+                    <h4 style='color: #856404; margin-top: 0;'> Clinical Examples:</h4>
                     <ul style='margin: 10px 0; padding-left: 20px;'>
                     <li><strong>Lab Values:</strong> Cholesterol levels, blood glucose, biomarker concentrations</li>
                     <li><strong>Patient Characteristics:</strong> Age distribution, BMI, vital signs</li>
@@ -624,7 +624,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     </div>
                     
                     <p style='font-size: 14px; color: #868e96; margin: 20px 0 0 0;'>
-                    📚 <strong>Documentation:</strong> 
+                     <strong>Documentation:</strong> 
                     <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/gghistostats.html' target='_blank' style='color: #007bff;'>gghistostats</a> | 
                     <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_gghistostats.html' target='_blank' style='color: #007bff;'>grouped_gghistostats</a>
                     </p>

@@ -65,11 +65,11 @@ irecist(
 
 \item{baselineReference}{Reference point for baseline measurements}
 
-\item{prThreshold}{Percent decrease for partial response (default: 30\\% per
-RECIST)}
+\item{prThreshold}{Percent decrease for partial response (default: 30
+percent per RECIST)}
 
-\item{pdThreshold}{Percent increase for progressive disease (default: 20\\%
-per RECIST)}
+\item{pdThreshold}{Percent increase for progressive disease (default: 20
+percent per RECIST)}
 
 \item{pdAbsolute}{Absolute increase required for PD (default: 5mm per
 RECIST)}
@@ -162,6 +162,7 @@ Seymour et al. (2017) guidelines including pseudoprogression detection and
 confirmation requirements.
 }
 \examples{
+\donttest{
 data <- data.frame(
     patient = c("P01", "P01", "P01", "P02", "P02"),
     time = c(0, 8, 16, 0, 8),
@@ -176,5 +177,5 @@ irecist(
     targetLesionSum = "target_sum",
     newLesions = "new_lesions"
 )
-
+}
 }

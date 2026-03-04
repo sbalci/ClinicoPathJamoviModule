@@ -39,22 +39,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (warning$type == "ERROR") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
-                        "<strong style='color: #721c24;'>❌ ERROR:</strong> <span style='color: #721c24;'>", warning$message, "</span>",
+                        "<strong style='color: #721c24;'> ERROR:</strong> <span style='color: #721c24;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "STRONG_WARNING") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
-                        "<strong style='color: #856404;'>⚠️ STRONG WARNING:</strong> <span style='color: #856404;'>", warning$message, "</span>",
+                        "<strong style='color: #856404;'> STRONG WARNING:</strong> <span style='color: #856404;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "WARNING") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
-                        "<strong style='color: #664d03;'>⚠️ WARNING:</strong> <span style='color: #664d03;'>", warning$message, "</span>",
+                        "<strong style='color: #664d03;'> WARNING:</strong> <span style='color: #664d03;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "INFO") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 10px; margin: 5px 0; border-radius: 4px;'>",
-                        "<strong style='color: #0c5460;'>ℹ️ INFO:</strong> <span style='color: #0c5460;'>", warning$message, "</span>",
+                        "<strong style='color: #0c5460;'> INFO:</strong> <span style='color: #0c5460;'>", warning$message, "</span>",
                         "</div>")
                 }
             }
@@ -165,7 +165,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (n_before > n_after) {
                         n_dropped <- n_before - n_after
                         message_text <- paste0(
-                            .("<br>ℹ️ Info: "), n_dropped,
+                            .("<br> Info: "), n_dropped,
                             .(" rows excluded due to missing values in selected correlation variables.<br>"),
                             .("Rows with data: "), n_after, .(" of "), n_before,
                             .(" ("), round(100 * n_after / n_before, 1), .("%)<br><hr>")

@@ -3,13 +3,11 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(jjhistostats_test)
 data(jjhistostats_labvalues)
 data(jjhistostats_grouped)
 
 test_that("jjhistostats respects all statistical type options", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -26,7 +24,6 @@ test_that("jjhistostats respects all statistical type options", {
 })
 
 test_that("jjhistostats respects all centrality type options", {
-  devtools::load_all()
 
   centrality_types <- c("default", "parametric", "nonparametric", "robust", "bayes")
 
@@ -44,7 +41,6 @@ test_that("jjhistostats respects all centrality type options", {
 })
 
 test_that("jjhistostats respects all clinical preset options", {
-  devtools::load_all()
 
   presets <- c("custom", "lab_values", "biomarkers", "patient_chars", "pathology_scores")
 
@@ -61,7 +57,6 @@ test_that("jjhistostats respects all clinical preset options", {
 })
 
 test_that("jjhistostats respects centrality line option", {
-  devtools::load_all()
 
   # Without centrality line
   result1 <- jjhistostats(
@@ -81,7 +76,6 @@ test_that("jjhistostats respects centrality line option", {
 })
 
 test_that("jjhistostats respects results subtitle option", {
-  devtools::load_all()
 
   # Without subtitle
   result1 <- jjhistostats(
@@ -101,7 +95,6 @@ test_that("jjhistostats respects results subtitle option", {
 })
 
 test_that("jjhistostats respects one-sample test option", {
-  devtools::load_all()
 
   # Disabled
   result1 <- jjhistostats(
@@ -122,7 +115,6 @@ test_that("jjhistostats respects one-sample test option", {
 })
 
 test_that("jjhistostats respects Bayes Factor message option", {
-  devtools::load_all()
 
   # Without BF message
   result1 <- jjhistostats(
@@ -144,7 +136,6 @@ test_that("jjhistostats respects Bayes Factor message option", {
 })
 
 test_that("jjhistostats respects bin width customization", {
-  devtools::load_all()
 
   # Automatic
   result1 <- jjhistostats(
@@ -171,7 +162,6 @@ test_that("jjhistostats respects bin width customization", {
 })
 
 test_that("jjhistostats respects confidence level parameter", {
-  devtools::load_all()
 
   conf_levels <- c(0.80, 0.90, 0.95, 0.99)
 
@@ -188,7 +178,6 @@ test_that("jjhistostats respects confidence level parameter", {
 })
 
 test_that("jjhistostats respects decimal places parameter", {
-  devtools::load_all()
 
   digits_values <- c(0, 1, 2, 3, 4, 5)
 
@@ -206,7 +195,6 @@ test_that("jjhistostats respects decimal places parameter", {
 })
 
 test_that("jjhistostats respects custom title parameters", {
-  devtools::load_all()
 
   result <- jjhistostats(
     data = jjhistostats_test,
@@ -221,7 +209,6 @@ test_that("jjhistostats respects custom title parameters", {
 })
 
 test_that("jjhistostats respects plot dimension parameters", {
-  devtools::load_all()
 
   dimensions <- list(
     list(width = 300, height = 300),
@@ -244,7 +231,6 @@ test_that("jjhistostats respects plot dimension parameters", {
 })
 
 test_that("jjhistostats respects aesthetic parameters", {
-  devtools::load_all()
 
   result <- jjhistostats(
     data = jjhistostats_test,
@@ -258,7 +244,6 @@ test_that("jjhistostats respects aesthetic parameters", {
 })
 
 test_that("jjhistostats respects centrality line aesthetic parameters", {
-  devtools::load_all()
 
   line_types <- c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash")
 
@@ -278,7 +263,6 @@ test_that("jjhistostats respects centrality line aesthetic parameters", {
 })
 
 test_that("jjhistostats handles single vs multiple variables", {
-  devtools::load_all()
 
   # Single variable
   result1 <- jjhistostats(
@@ -303,7 +287,6 @@ test_that("jjhistostats handles single vs multiple variables", {
 })
 
 test_that("jjhistostats handles combinations of statistical type and centrality", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     typestatistics = c("parametric", "nonparametric", "robust"),
@@ -327,7 +310,6 @@ test_that("jjhistostats handles combinations of statistical type and centrality"
 })
 
 test_that("jjhistostats handles comprehensive argument combinations", {
-  devtools::load_all()
 
   result <- jjhistostats(
     data = jjhistostats_test,
@@ -359,7 +341,6 @@ test_that("jjhistostats handles comprehensive argument combinations", {
 })
 
 test_that("jjhistostats handles grouped analysis with different statistical types", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -377,7 +358,6 @@ test_that("jjhistostats handles grouped analysis with different statistical type
 })
 
 test_that("jjhistostats handles grouped analysis with centrality options", {
-  devtools::load_all()
 
   result <- jjhistostats(
     data = jjhistostats_grouped,
@@ -393,7 +373,6 @@ test_that("jjhistostats handles grouped analysis with centrality options", {
 })
 
 test_that("jjhistostats handles one-sample test with different statistical types", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust")
 
@@ -412,7 +391,6 @@ test_that("jjhistostats handles one-sample test with different statistical types
 })
 
 test_that("jjhistostats handles ggpubr plot options", {
-  devtools::load_all()
 
   # Without ggpubr plot
   result1 <- jjhistostats(
@@ -451,7 +429,6 @@ test_that("jjhistostats handles ggpubr plot options", {
 })
 
 test_that("jjhistostats handles distribution diagnostic options", {
-  devtools::load_all()
 
   # Without diagnostics
   result1 <- jjhistostats(
@@ -489,7 +466,6 @@ test_that("jjhistostats handles distribution diagnostic options", {
 })
 
 test_that("jjhistostats handles show interpretation option", {
-  devtools::load_all()
 
   # Without interpretation
   result1 <- jjhistostats(
@@ -509,7 +485,6 @@ test_that("jjhistostats handles show interpretation option", {
 })
 
 test_that("jjhistostats handles publication-ready configuration", {
-  devtools::load_all()
 
   result <- jjhistostats(
     data = jjhistostats_test,

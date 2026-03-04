@@ -375,7 +375,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (!requireNamespace("visdat", quietly = TRUE)) {
             return(paste0(
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-                "<strong>⚠️ Warning:</strong> visdat package not installed. Visual exploration disabled.<br>",
+                "<strong> Warning:</strong> visdat package not installed. Visual exploration disabled.<br>",
                 "Install via: <code>install.packages('visdat')</code>",
                 "</div>"
             ))
@@ -644,7 +644,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         summary_html <- paste0(
             "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
-            "<h3 style='color: #2e7d32; margin-top: 0;'>📊 Plain-Language Summary</h3>",
+            "<h3 style='color: #2e7d32; margin-top: 0;'> Plain-Language Summary</h3>",
 
             "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
             "<p style='font-size: 1.1em; line-height: 1.6;'>",
@@ -721,7 +721,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "</div>",
 
             "<p style='margin-top: 15px; font-size: 0.9em; color: #555;'>",
-            "<em>💡 This summary is written in plain language for clinical documentation. ",
+            "<em> This summary is written in plain language for clinical documentation. ",
             "Copy this text for inclusion in study reports, quality control logs, or data management plans.</em>",
             "</p>",
 
@@ -736,7 +736,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         recs_html <- paste0(
             "<div style='background-color: #fff3e0; padding: 20px; border-radius: 8px; border-left: 5px solid #ff8f00;'>",
-            "<h3 style='color: #e65100; margin-top: 0;'>⚡ Recommended Actions</h3>",
+            "<h3 style='color: #e65100; margin-top: 0;'> Recommended Actions</h3>",
 
             "<p style='font-size: 1.05em; margin-bottom: 20px;'>",
             "Based on the quality assessment, here are specific actions to improve your data before analysis:",
@@ -750,7 +750,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #e65100; margin-top: 0;'>🔴 High Missingness (>50%)</h4>",
+                "<h4 style='color: #e65100; margin-top: 0;'> High Missingness (>50%)</h4>",
                 "<p><strong>Variables affected:</strong> ", paste(high_missing_vars, collapse = ", "), "</p>",
                 "<p><strong>Actions:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
@@ -765,7 +765,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 "<li><strong>Alternative:</strong> Restrict to complete cases but report potential selection bias</li>",
                 "</ol>",
                 "<p style='background-color: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
-                "<strong>⚠️ Warning:</strong> Listwise deletion (complete-case analysis) with >50% missing can severely bias results. ",
+                "<strong> Warning:</strong> Listwise deletion (complete-case analysis) with >50% missing can severely bias results. ",
                 "Consult a statistician if you're uncertain about the best approach.",
                 "</p>",
                 "</div>"
@@ -782,7 +782,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #ff8f00; margin-top: 0;'>🟡 Moderate Missingness (10-50%)</h4>",
+                "<h4 style='color: #ff8f00; margin-top: 0;'> Moderate Missingness (10-50%)</h4>",
                 "<p><strong>Variables affected:</strong> ", paste(moderate_missing_vars, collapse = ", "), "</p>",
                 "<p><strong>Recommended approach:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
@@ -802,7 +802,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             dup_type <- if (self$options$complete_cases_only) "duplicate rows" else "duplicate values"
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #e65100; margin-top: 0;'>🔴 ", dup_count, " ", dup_type, " Detected</h4>",
+                "<h4 style='color: #e65100; margin-top: 0;'> ", dup_count, " ", dup_type, " Detected</h4>",
                 "<p><strong>Actions:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
                 if (self$options$complete_cases_only) {
@@ -829,7 +829,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #ff8f00; margin-top: 0;'>🟡 Near-Zero Variance Variables</h4>",
+                "<h4 style='color: #ff8f00; margin-top: 0;'> Near-Zero Variance Variables</h4>",
                 "<p><strong>Variables affected:</strong> ", paste(near_zero_vars, collapse = ", "), "</p>",
                 "<p><strong>Actions:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
@@ -847,7 +847,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #e65100; margin-top: 0;'>🔴 Very Small Sample Size (n=", n_total, ")</h4>",
+                "<h4 style='color: #e65100; margin-top: 0;'> Very Small Sample Size (n=", n_total, ")</h4>",
                 "<p><strong>Critical limitations:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Statistical power:</strong> Severely underpowered for most analyses</li>",
@@ -872,7 +872,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #ff8f00; margin-top: 0;'>🟡 Small Sample Size (n=", n_total, ")</h4>",
+                "<h4 style='color: #ff8f00; margin-top: 0;'> Small Sample Size (n=", n_total, ")</h4>",
                 "<p><strong>Recommendations:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Prefer exact tests:</strong> Use exact methods when possible (Fisher's exact, permutation tests)</li>",
@@ -889,7 +889,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (!has_recommendations) {
             recs_html <- paste0(recs_html,
                 "<div style='background-color: #d1f2eb; padding: 15px; border-radius: 5px;'>",
-                "<h4 style='color: #00695c; margin-top: 0;'>✅ No Critical Issues Detected</h4>",
+                "<h4 style='color: #00695c; margin-top: 0;'> No Critical Issues Detected</h4>",
                 "<p style='line-height: 1.8;'>",
                 "Your data quality appears acceptable for analysis. However, always:",
                 "</p>",
@@ -905,7 +905,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         recs_html <- paste0(recs_html,
             "<p style='margin-top: 20px; font-size: 0.9em; color: #555;'>",
-            "<em>💡 These recommendations are based on general statistical best practices. ",
+            "<em> These recommendations are based on general statistical best practices. ",
             "Consult with a biostatistician for guidance specific to your research question and study design.</em>",
             "</p>",
             "</div>"
@@ -919,7 +919,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         expl_html <- paste0(
             "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 5px solid #1976d2;'>",
-            "<h3 style='color: #0d47a1; margin-top: 0;'>📚 Understanding Quality Metrics</h3>",
+            "<h3 style='color: #0d47a1; margin-top: 0;'> Understanding Quality Metrics</h3>",
 
             "<p style='font-size: 1.05em; margin-bottom: 20px;'>",
             "This guide explains the quality metrics used in this analysis and how to interpret them.",
@@ -1113,7 +1113,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
             # Footer
             "<p style='margin-top: 20px; font-size: 0.9em; color: #555;'>",
-            "<em>📖 These explanations provide general guidance for clinical researchers. ",
+            "<em> These explanations provide general guidance for clinical researchers. ",
             "For detailed statistical consultation, work with a biostatistician familiar with your research domain.</em>",
             "</p>",
 

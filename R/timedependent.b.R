@@ -812,19 +812,19 @@ timedependentClass <- if (requireNamespace('jmvcore'))
         )
         
         if (self$options$test_proportional_hazards) {
-          summary_html <- paste0(summary_html, "<li>✓ Proportional hazards testing</li>")
+          summary_html <- paste0(summary_html, "<li> Proportional hazards testing</li>")
         }
         
         if (self$options$perform_landmark) {
-          summary_html <- paste0(summary_html, "<li>✓ Landmark analysis</li>")
+          summary_html <- paste0(summary_html, "<li> Landmark analysis</li>")
         }
         
         if (self$options$time_dependent_roc) {
-          summary_html <- paste0(summary_html, "<li>✓ Time-dependent ROC analysis</li>")
+          summary_html <- paste0(summary_html, "<li> Time-dependent ROC analysis</li>")
         }
         
         if (self$options$internal_validation) {
-          summary_html <- paste0(summary_html, "<li>✓ Cross-validation</li>")
+          summary_html <- paste0(summary_html, "<li> Cross-validation</li>")
         }
         
         summary_html <- paste0(summary_html, "</ul></div>")
@@ -931,7 +931,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           "</ul>",
           
           "<p style='font-size: 12px; color: #555; margin-top: 20px;'>",
-          "💡 <em>Start by selecting your patient ID, time variables, and covariates from the variable list.</em>",
+          " <em>Start by selecting your patient ID, time variables, and covariates from the variable list.</em>",
           "</p>",
           "</div>"
         )

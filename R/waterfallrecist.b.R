@@ -1014,10 +1014,10 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
 
                 if (target_validation$valid) {
                     html_content <- paste0(html_content,
-                        "<li style='color: green;'><strong>STATUS: ✓ COMPLIANT</strong> - All patients meet RECIST v1.1 target lesion criteria</li>")
+                        "<li style='color: green;'><strong>STATUS:  COMPLIANT</strong> - All patients meet RECIST v1.1 target lesion criteria</li>")
                 } else {
                     html_content <- paste0(html_content,
-                        "<li style='color: red;'><strong>STATUS: ✗ NON-COMPLIANT</strong> - ",
+                        "<li style='color: red;'><strong>STATUS:  NON-COMPLIANT</strong> - ",
                         length(target_validation$violations), " violation(s) detected:</li>",
                         "<ul style='color: red;'>")
                     for (violation in target_validation$violations) {

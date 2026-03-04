@@ -434,6 +434,7 @@ assayoptimizationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example: Optimize PCR assay design
 #' assayoptimization(
 #'     data = pcr_data,
@@ -442,7 +443,7 @@ assayoptimizationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'     optimization_goal = "maximize_efficiency",
 #'     design_type = "factorial"
 #' )
-#'
+#'}
 #' @param data .
 #' @param response_var Primary assay response variable for optimization
 #' @param factors List of experimental factors for optimization

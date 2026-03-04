@@ -3,7 +3,6 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("agepyramid handles missing data correctly", {
   # Create data with missing age values

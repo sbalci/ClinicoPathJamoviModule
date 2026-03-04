@@ -1,6 +1,5 @@
 test_that("advancedbarplot module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("advancedbarplotClass"))
   expect_true(is.function(advancedbarplot))
 })
@@ -20,7 +19,6 @@ test_that("advancedbarplot handles basic input validation", {
 
 test_that("advancedbarplot works with valid inputs", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test basic functionality
   result <- advancedbarplot(

@@ -219,7 +219,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "oddsratio",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = oddsratioResults$new(options=options),
                 data = data,
@@ -237,6 +237,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for Odds Ratio Table and Plot.
 #'
 #' @examples
+#' \donttest{
 #' # Basic odds ratio analysis with binary outcome
 #' library(ClinicoPath)
 #' data('histopathology')
@@ -269,7 +270,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     outcomeLevel = "Dead",
 #'     showSummaries = TRUE
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param explanatory The explanatory variables to be used in the analysis.
 #' @param outcome The outcome variable to be used in the analysis.

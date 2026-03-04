@@ -98,7 +98,8 @@ to hazard-based models. Particularly useful when interest lies in survival
 probabilities rather than hazard ratios.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 directregression(
     elapsedtime = "time_to_event",
     outcome = "event_status",
@@ -106,5 +107,5 @@ directregression(
     time_points = c(12, 24, 60),
     regression_type = "linear"
 )
-
+}
 }

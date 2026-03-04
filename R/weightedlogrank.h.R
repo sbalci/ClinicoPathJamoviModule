@@ -300,8 +300,9 @@ weightedlogrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' approaches for comprehensive survival comparison.
 #'
 #' @examples
+#' \donttest{
 #' # example will be added
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis
 #' @param outcome Event indicator variable

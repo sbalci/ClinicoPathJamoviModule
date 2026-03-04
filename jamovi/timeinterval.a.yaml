@@ -4,7 +4,7 @@ title: Comprehensive Time Interval Calculator
 menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: Advanced time interval analysis with quality assessment
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -15,7 +15,7 @@ description:
         foundation of person-time follow-up calculations, capturing both participant counts and 
         observation duration for accurate incidence rate calculations.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Basic time interval calculation:
             timeinterval(
@@ -204,7 +204,7 @@ options:
             negative intervals, and distribution statistics.
 
     - name: confidence_level
-      title: Confidence Level (%)
+      title: Confidence Level ( percent)
       type: Number
       default: 95
       min: 90
@@ -212,7 +212,7 @@ options:
       description:
           R: >
             Confidence level for statistical intervals (mean confidence intervals).
-            Standard epidemiological practice uses 95% confidence intervals.
+            Standard epidemiological practice uses 95 percent confidence intervals.
 
     - name: show_summary
       title: Show Natural-Language Summary

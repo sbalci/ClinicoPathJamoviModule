@@ -641,6 +641,7 @@ trichotomousrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- trichotomousroc(
 #'     data = her2_data,
 #'     predictor = "her2_score",
@@ -649,7 +650,7 @@ trichotomousrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'     indeterminate_level = "indeterminate",
 #'     negative_level = "negative"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param predictor Continuous predictor variable (e.g., IHC H-score, gene
 #'   expression level, AI probability score) used to classify cases into three

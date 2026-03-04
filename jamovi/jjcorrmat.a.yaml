@@ -4,7 +4,7 @@ title: Correlation Matrix
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 
@@ -363,7 +363,7 @@ options:
 # Significance level (Default: 0.05). If the p-value in p-value matrix is bigger than sig.level, then the corresponding correlation coefficient is regarded as insignificant and flagged as such in the plot. Relevant only when output = "plot".
 #
 # conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+# Scalar between 0 and 1. If unspecified, the defaults return 95 percent confidence/credible intervals (0.95).
 #
 # bf.prior
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.
@@ -474,7 +474,7 @@ options:
 # Number of digits after decimal point (should be an integer) (Default: k = 2L).
 #
 # conf.level
-# Scalar between 0 and 1. If unspecified, the defaults return 95% confidence/credible intervals (0.95).
+# Scalar between 0 and 1. If unspecified, the defaults return 95 percent confidence/credible intervals (0.95).
 #
 # bf.prior
 # A number between 0.5 and 2 (default 0.707), the prior width to use in calculating Bayes factors.

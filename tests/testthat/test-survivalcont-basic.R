@@ -2,7 +2,6 @@
 # Basic Tests: survivalcont
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(survivalcont_test, package = "ClinicoPath")
 data(survivalcont_ki67, package = "ClinicoPath")
 data(survivalcont_psa, package = "ClinicoPath")

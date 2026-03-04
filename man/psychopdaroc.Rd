@@ -283,8 +283,8 @@ net benefit curves, decision curve analysis, and clinical impact
 assessment.}
 
 \item{treatmentThreshold}{Treatment threshold range for decision curve
-analysis (min,max,step). Example: "0.05,0.5,0.05" creates thresholds from
-5\\% to 50\\% in 5\\% steps.}
+analysis (min,max,step). Example: "0.05,0.5,0.05" creates thresholds from 5
+percent to 50 percent in 5 percent steps.}
 
 \item{harmBenefitRatio}{Ratio of harm from unnecessary treatment to benefit
 from necessary treatment. Lower values favor more aggressive treatment

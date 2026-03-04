@@ -95,7 +95,7 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
                 <li>Proper Type I error control with Procrustes rotation</li>
                 </ul>
                 <br>
-                <b>⚠️ CRITICAL REQUIREMENTS:</b>
+                <b> CRITICAL REQUIREMENTS:</b>
                 <ul>
                 <li><b>Numeric variables only:</b> Factors and characters will be REJECTED (no silent coercion)</li>
                 <li><b>Enable centering/scaling:</b> Required for correlation-based loading interpretation</li>
@@ -483,13 +483,13 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
             copy_ready_html <- glue::glue("
 <div style='background:#f0f7ff; padding:15px; border:2px solid #0066cc; border-radius:5px; margin:15px 0;'>
-<h4 style='color:#0066cc; margin-top:0;'>📋 Copy-Ready Report Text</h4>
+<h4 style='color:#0066cc; margin-top:0;'> Copy-Ready Report Text</h4>
 <p style='background:white; padding:12px; border-radius:3px; font-family:serif; line-height:1.6;'>
 {report_text}
 </p>
 <button style='background:#0066cc; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:14px;'
-        onclick='navigator.clipboard.writeText(this.previousElementSibling.innerText).then(() => {{this.innerText=\"✓ Copied!\"; setTimeout(() => this.innerText=\"📋 Copy to Clipboard\", 2000);}})'>
-📋 Copy to Clipboard
+        onclick='navigator.clipboard.writeText(this.previousElementSibling.innerText).then(() => {{this.innerText=\" Copied!\"; setTimeout(() => this.innerText=\" Copy to Clipboard\", 2000);}})'>
+ Copy to Clipboard
 </button>
 
 <h5 style='color:#0066cc; margin-top:15px; margin-bottom:8px;'>Reference:</h5>
@@ -558,7 +558,7 @@ An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10
                     cihigh = row$ci_high,
                     pvalue = row$pvalue,
                     adjpvalue = row$adj_pvalue,
-                    significant = ifelse(row$adj_pvalue < 0.05, '★', '')
+                    significant = ifelse(row$adj_pvalue < 0.05, '', '')
                 ))
             }
 
@@ -614,7 +614,7 @@ An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10
                 p <- p + geom_text(data = sig_data,
                                   aes(x = .data$variable_display,
                                       y = .data$original * 1.1,
-                                      label = "★"),
+                                      label = ""),
                                   size = 6, color = "gold3")
             }
 

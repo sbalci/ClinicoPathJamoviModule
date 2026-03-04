@@ -161,13 +161,13 @@ options:
       title: 'Prevalence Range for Analysis'
       type: List
       options:
-          - title: 'Full range (1% to 99%)'
+          - title: 'Full range (1 percent to 99 percent)'
             name: full
-          - title: 'Clinical range (5% to 50%)'
+          - title: 'Clinical range (5 percent to 50 percent)'
             name: clinical
-          - title: 'Low prevalence (1% to 20%)'
+          - title: 'Low prevalence (1 percent to 20 percent)'
             name: low
-          - title: 'High prevalence (20% to 80%)'
+          - title: 'High prevalence (20 percent to 80 percent)'
             name: high
           - title: 'Custom range'
             name: custom
@@ -175,7 +175,7 @@ options:
       description: 'Range of disease prevalence for post-test probability analysis'
 
     - name: customPrevalenceMin
-      title: 'Minimum Prevalence (%)'
+      title: 'Minimum Prevalence ( percent)'
       type: Number
       min: 0.1
       max: 99
@@ -183,7 +183,7 @@ options:
       description: 'Minimum prevalence for custom range'
 
     - name: customPrevalenceMax
-      title: 'Maximum Prevalence (%)'
+      title: 'Maximum Prevalence ( percent)'
       type: Number
       min: 1
       max: 99.9
@@ -191,7 +191,7 @@ options:
       description: 'Maximum prevalence for custom range'
 
     - name: specificPrevalences
-      title: 'Specific Prevalences (%, comma-separated)'
+      title: 'Specific Prevalences ( percent, comma-separated)'
       type: String
       default: '10, 25, 50'
       description: 'Specific prevalence values for detailed analysis'

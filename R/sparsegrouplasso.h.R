@@ -887,6 +887,7 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' Sparse Group LASSO regularization for survival analysis
 #'
 #' @examples
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' sparsegrouplasso(data = histopathology,
@@ -896,7 +897,7 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'                group_definition = 'factor_based',
 #'                alpha_sgl = 0.95,
 #'                lambda_sequence = 'auto')
-#'
+#'}
 #' @param data the data as a data frame
 #' @param time_var the time-to-event variable
 #' @param event_var the event indicator variable (0/1 or FALSE/TRUE)

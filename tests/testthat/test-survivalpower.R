@@ -18,7 +18,6 @@ skip_if_not_available <- function() {
 
 test_that("survivalPower function exists and basic functionality works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   skip_if_not_available()
 
   # Test function existence

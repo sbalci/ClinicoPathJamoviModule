@@ -14,7 +14,7 @@ description:
         tables with AIC, BIC, R², C-index, and other metrics. Inspired by Orange Data Mining's
         Test & Score widget, adapted for clinical research with comprehensive model diagnostics.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Compare Cox models
             modelperformance(

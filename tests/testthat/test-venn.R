@@ -1,8 +1,6 @@
 test_that("venn works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Load the package
-  devtools::load_all()
   
   # Test with basic mtcars data
   mtcars_test <- mtcars
@@ -65,7 +63,6 @@ test_that("venn works", {
 })
 
 test_that("venn requires minimum variables", {
-  devtools::load_all()
   
   # Test error handling when insufficient variables provided
   expect_error(venn(data = mtcars,
@@ -104,7 +101,6 @@ test_that("venn requires minimum variables", {
 })
 
 test_that("venn handles factor conversion", {
-  devtools::load_all()
   
   # Test automatic factor conversion
   test_data <- data.frame(
@@ -132,7 +128,6 @@ test_that("venn handles factor conversion", {
 })
 
 test_that("venn works with clinical data example", {
-  devtools::load_all()
   
   # Test with clinical data as shown in examples
   clinical_data <- data.frame(
@@ -161,7 +156,6 @@ test_that("venn works with clinical data example", {
 })
 
 test_that("venn summary statistics work correctly", {
-  devtools::load_all()
   
   # Create test data with known proportions
   test_data <- data.frame(
@@ -193,7 +187,6 @@ test_that("venn summary statistics work correctly", {
 })
 
 test_that("venn handles edge cases", {
-  devtools::load_all()
   
   # Test with all TRUE values
   all_true <- data.frame(
@@ -263,7 +256,6 @@ test_that("venn handles edge cases", {
 })
 
 test_that("venn works with missing optional parameters", {
-  devtools::load_all()
   
   # Test with only required parameters
   test_data <- data.frame(
@@ -291,7 +283,6 @@ test_that("venn works with missing optional parameters", {
 })
 
 test_that("venn works with ComplexUpset options", {
-  devtools::load_all()
 
   # Test ComplexUpset functionality
   test_data <- data.frame(
@@ -323,7 +314,6 @@ test_that("venn works with ComplexUpset options", {
 })
 
 test_that("venn works with different upset sorting options", {
-  devtools::load_all()
   
   test_data <- data.frame(
     var1 = factor(c("A", "B", "A", "B")),
@@ -353,7 +343,6 @@ test_that("venn works with different upset sorting options", {
 })
 
 test_that("venn works with minimum size filtering", {
-  devtools::load_all()
 
   test_data <- data.frame(
     var1 = factor(c("A", "B", "A", "B", "A", "B")),
@@ -381,7 +370,6 @@ test_that("venn works with minimum size filtering", {
 })
 
 test_that("venn works with separate plot type options", {
-  devtools::load_all()
 
   test_data <- data.frame(
     var1 = factor(c("A", "B", "A", "B")),
@@ -478,7 +466,6 @@ test_that("venn works with separate plot type options", {
 })
 
 test_that("venn shows warning message for ggvenn with >4 variables", {
-  devtools::load_all()
 
   # Create test data with 5 variables
   test_data <- data.frame(
@@ -529,7 +516,6 @@ test_that("venn shows warning message for ggvenn with >4 variables", {
 })
 
 test_that("membership table populates when enabled", {
-  devtools::load_all()
 
   test_data <- data.frame(
     var1 = factor(c("A", "B", "A", "B")),

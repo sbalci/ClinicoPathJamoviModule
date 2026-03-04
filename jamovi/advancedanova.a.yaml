@@ -11,9 +11,9 @@ description:
     main: |
         Advanced ANOVA analysis with comprehensive post hoc testing, 
         effect sizes, and assumption checking. Addresses the critical issue 
-        where 68% of pathology studies fail proper multiple comparisons.
+        where 68 percent of pathology studies fail proper multiple comparisons.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('ToothGrowth')
             

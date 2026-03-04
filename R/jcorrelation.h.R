@@ -267,6 +267,7 @@ jcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic correlation analysis
 #' jcorrelation(
 #'     data = histopathology,
@@ -279,7 +280,7 @@ jcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     vars = c("Age", "OverallTime", "MeasurementA"),
 #'     group = "Sex"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param vars A vector of strings naming the variables to correlate.
 #' @param group Variable to split the analysis by.
@@ -288,7 +289,7 @@ jcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alternative The alternative hypothesis: 'two.sided' (default),
 #'   'greater', or 'less'.
 #' @param ci TRUE (default) or FALSE, provide confidence intervals.
-#' @param ciWidth Confidence interval level (default: 95\%).
+#' @param ciWidth Confidence interval level (default: 95 percent).
 #' @param flag TRUE (default) or FALSE, flag significant correlations.
 #' @param flagAlpha Alpha level for flagging significant correlations
 #'   (default: 0.05).

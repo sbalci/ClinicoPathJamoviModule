@@ -52,7 +52,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Populate welcome screen
             self$results$welcome$setContent("
                 <div class='jmv-welcome' style='padding: 20px; background: #f8f9fa; border-left: 4px solid #007bff;'>
-                    <h3 style='margin-top: 0;'>📊 IHC Heterogeneity Analysis</h3>
+                    <h3 style='margin-top: 0;'> IHC Heterogeneity Analysis</h3>
                     <p><strong>Get started:</strong></p>
                     <ol>
                         <li>Select <strong>Regional Measurement 1</strong> (required)</li>
@@ -212,7 +212,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (length(warnings) > 0) {
                 warning_html <- paste0(
                     "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>⚠️ Data Quality Warnings</h4>",
+                    "<h4 style='color: #856404; margin-top: 0;'> Data Quality Warnings</h4>",
                     "<ul style='color: #856404; margin: 5px 0; padding-left: 20px;'>",
                     paste0("<li>", warnings, "</li>", collapse = ""),
                     "</ul>",
@@ -1187,17 +1187,17 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             status_text <- if (is.na(metrics$overall_corr) || is.na(metrics$mean_cv)) {
-                "<p><strong>ℹ INSUFFICIENT DATA:</strong> Unable to evaluate sampling quality because correlation or variability estimates could not be computed.</p>"
+                "<p><strong> INSUFFICIENT DATA:</strong> Unable to evaluate sampling quality because correlation or variability estimates could not be computed.</p>"
             } else if (metrics$overall_corr >= correlation_threshold && metrics$mean_cv <= cv_threshold) {
-                paste0("<p><strong>✓ ADEQUATE SAMPLING:</strong> Regional measurements provide good representation of ",
+                paste0("<p><strong> ADEQUATE SAMPLING:</strong> Regional measurements provide good representation of ",
                        comparison_target, " (correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
                        "<span style='color: green;'>Current sampling approach is suitable for clinical use.</span></p>")
             } else if (metrics$overall_corr >= (correlation_threshold - 0.2) && metrics$mean_cv <= (cv_threshold * 1.5)) {
-                paste0("<p><strong>⚠ MODERATE SAMPLING:</strong> Regional measurements show moderate agreement with ",
+                paste0("<p><strong> MODERATE SAMPLING:</strong> Regional measurements show moderate agreement with ",
                        comparison_target, " (thresholds: correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
                        "<span style='color: orange;'>Consider additional samples or sampling optimization.</span></p>")
             } else {
-                paste0("<p><strong>✗ INADEQUATE SAMPLING:</strong> Sampling does not meet quality thresholds ",
+                paste0("<p><strong> INADEQUATE SAMPLING:</strong> Sampling does not meet quality thresholds ",
                        "(correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
                        "<span style='color: red;'>Review sampling strategy and consider increased sampling.</span></p>")
             }
@@ -1363,7 +1363,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 "</div>",
 
-                "<p><strong>📋 Usage:</strong> Click and drag to select text, then copy (Ctrl+C/Cmd+C) for use in reports.</p>"
+                "<p><strong> Usage:</strong> Click and drag to select text, then copy (Ctrl+C/Cmd+C) for use in reports.</p>"
             )
 
             return(report_sentences)
@@ -1419,7 +1419,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<h3>Methodology & Assumptions</h3>",
 
                 "<div style='margin: 15px 0;'>",
-                "<h4>🔬 Analysis Methodology</h4>",
+                "<h4> Analysis Methodology</h4>",
                 "<div style='background-color: #e3f2fd; padding: 12px; border-radius: 5px;'>",
                 "<ul>",
                 "<li><strong>IHC Heterogeneity:</strong> Quantitative comparison of biomarker measurements from regional tissue areas</li>",
@@ -1431,7 +1431,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0;'>",
-                "<h4>📋 Data Requirements & Assumptions</h4>",
+                "<h4> Data Requirements & Assumptions</h4>",
                 "<div style='background-color: #fff3e0; padding: 12px; border-radius: 5px;'>",
                 "<ul>",
                 "<li><strong>Sample Size:</strong> Minimum 5 cases required for statistical analysis (current: ", metrics$n_cases, " cases)</li>",
@@ -1444,7 +1444,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0;'>",
-                "<h4>⚠️ Important Limitations</h4>",
+                "<h4> Important Limitations</h4>",
                 "<div style='background-color: #ffebee; padding: 12px; border-radius: 5px;'>",
                 "<ul>",
                 "<li><strong>Simulation vs Reality:</strong> Results based on computational simulation, not actual tissue sampling</li>",
@@ -1457,7 +1457,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0;'>",
-                "<h4>🎯 Clinical Application Guidelines</h4>",
+                "<h4> Clinical Application Guidelines</h4>",
                 "<div style='background-color: #f3e5f5; padding: 12px; border-radius: 5px;'>",
                 "<ul>",
                 "<li><strong>Quality Thresholds:</strong> Correlation ≥0.80 and CV ≤20% recommended for routine clinical use</li>",
@@ -1470,7 +1470,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0;'>",
-                "<h4>📚 References & Standards</h4>",
+                "<h4> References & Standards</h4>",
                 "<div style='background-color: #e8f5e8; padding: 12px; border-radius: 5px;'>",
                 "<ul>",
                 "<li><strong>Primary Methodology:</strong> Zilenaite-Petrulaitiene et al. (Am J Clin Pathol 2025)</li>",
@@ -1491,7 +1491,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<h3 style='color: #2c5282; border-bottom: 2px solid #4a90e2; padding-bottom: 8px;'>Statistical Terms Glossary</h3>",
 
                 "<div style='margin: 15px 0; padding: 15px; background-color: #f8f9ff; border-left: 4px solid #4a90e2; border-radius: 4px;'>",
-                "<h4 style='color: #2c5282; margin-top: 0;'>📊 Correlation Measures</h4>",
+                "<h4 style='color: #2c5282; margin-top: 0;'> Correlation Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Spearman Correlation:</strong> Measures rank-order relationship between measurements. ",
                 "Range: -1 to +1. Not affected by outliers or non-normal distributions. ",
@@ -1501,7 +1501,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0; padding: 15px; background-color: #fff8f0; border-left: 4px solid #ff8c42; border-radius: 4px;'>",
-                "<h4 style='color: #b7410e; margin-top: 0;'>🎯 Reliability Measures</h4>",
+                "<h4 style='color: #b7410e; margin-top: 0;'> Reliability Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>ICC (Intraclass Correlation):</strong> Measures agreement between measurements from same subjects. ",
                 "ICC > 0.90 = excellent agreement, 0.75-0.90 = good, 0.50-0.75 = moderate, <0.50 = poor. ",
@@ -1512,7 +1512,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0; padding: 15px; background-color: #f0fff4; border-left: 4px solid #48bb78; border-radius: 4px;'>",
-                "<h4 style='color: #276749; margin-top: 0;'>📈 Variability Measures</h4>",
+                "<h4 style='color: #276749; margin-top: 0;'> Variability Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>CV (Coefficient of Variation):</strong> Standardized measure of variability = (SD/Mean) × 100%. ",
                 "CV < 10% = low variability (excellent), 10-20% = moderate, 20-30% = high, >30% = very high. ",
@@ -1523,7 +1523,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0; padding: 15px; background-color: #fefefe; border-left: 4px solid #805ad5; border-radius: 4px;'>",
-                "<h4 style='color: #553c9a; margin-top: 0;'>⚗️ IHC-Specific Terms</h4>",
+                "<h4 style='color: #553c9a; margin-top: 0;'> IHC-Specific Terms</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Spatial Heterogeneity:</strong> Variation in biomarker expression across different tissue regions.</li>",
                 "<li><strong>H-score:</strong> Immunohistochemical scoring method: (1×%weak) + (2×%moderate) + (3×%strong). Range: 0-300.</li>",
@@ -1533,7 +1533,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='margin: 15px 0; padding: 15px; background-color: #fffaf0; border-left: 4px solid #ed8936; border-radius: 4px;'>",
-                "<h4 style='color: #9c4221; margin-top: 0;'>📋 Clinical Interpretation Guidelines</h4>",
+                "<h4 style='color: #9c4221; margin-top: 0;'> Clinical Interpretation Guidelines</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Excellent Agreement (ICC > 0.90):</strong> Regional measurements highly representative of reference.</li>",
                 "<li><strong>Good Agreement (ICC 0.75-0.90):</strong> Regional measurements generally reliable.</li>",
@@ -1634,7 +1634,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             summary_content <- paste0(
                 "<div style='max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 8px; font-family: Arial, sans-serif;'>",
-                "<h3 style='color: #495057; margin-bottom: 15px; text-align: center;'>📊 Analysis Summary in Plain Language</h3>",
+                "<h3 style='color: #495057; margin-bottom: 15px; text-align: center;'> Analysis Summary in Plain Language</h3>",
 
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #007bff;'>",
                 "<p style='margin: 0; font-size: 16px; line-height: 1.6;'>",
@@ -1644,7 +1644,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #28a745;'>",
-                "<h4 style='color: #28a745; margin-top: 0;'>🎯 Key Findings:</h4>",
+                "<h4 style='color: #28a745; margin-top: 0;'> Key Findings:</h4>",
                 "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                 agreement_sentence,
                 variability_sentence,
@@ -1653,7 +1653,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;'>",
-                "<h4 style='color: #856404; margin-top: 0;'>💡 Clinical Implications:</h4>",
+                "<h4 style='color: #856404; margin-top: 0;'> Clinical Implications:</h4>",
                 "<p style='margin: 0; line-height: 1.6;'>",
                 clinical_sentence,
                 "</p>",

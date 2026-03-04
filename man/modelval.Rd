@@ -85,6 +85,7 @@ probabilities from existing models. Supports external validation, temporal
 validation, and subgroup analysis.
 }
 \examples{
+\donttest{
 # Example usage:
 # data <- your_data
 # ClinicoPath::modelval(
@@ -94,5 +95,5 @@ validation, and subgroup analysis.
 #   validationType = "external",
 #   subgroup = "hospital"
 # )
-
+}
 }

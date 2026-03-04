@@ -1,6 +1,5 @@
 testthat::test_that("retracted works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Skip if required packages are not available
   testthat::skip_if_not_installed("ClinicoPath")

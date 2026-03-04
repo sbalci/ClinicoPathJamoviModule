@@ -1,5 +1,4 @@
 # Test script for pairwise comparisons in crosstable
-devtools::load_all()
 
 # Create test data with 3 groups
 set.seed(123)

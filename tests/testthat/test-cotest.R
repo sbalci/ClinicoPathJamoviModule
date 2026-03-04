@@ -1,4 +1,3 @@
-devtools::load_all()
 
 test_that("cotest module loads correctly", {
   expect_true(exists("cotestClass"))

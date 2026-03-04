@@ -138,7 +138,7 @@ options:
       default: 0.95
       description:
         R: >
-          Confidence level for confidence intervals (e.g., 0.95 for 95% CI).
+          Confidence level for confidence intervals (e.g., 0.95 for 95 percent CI).
 
     - name: sort_by_hr
       title: Sort by Hazard Ratio

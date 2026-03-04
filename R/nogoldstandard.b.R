@@ -1,6 +1,8 @@
 #' @title Analysis Without Gold Standard
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @noRd
+NULL
 
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
@@ -157,7 +159,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 instructions <- paste0(
                     "<html><head></head><body>",
                     "<div class='instructions' style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>",
-                    "<h3 style='color: #2e7d32; margin-top: 0;'>🔬 ", .("Analysis Without Gold Standard"), "</h3>",
+                    "<h3 style='color: #2e7d32; margin-top: 0;'> ", .("Analysis Without Gold Standard"), "</h3>",
                     "<p><strong>", .("Analyze diagnostic test performance when no perfect reference test (gold standard) is available."), "</strong></p>",
                     "<p>", .("This analysis uses advanced statistical methods to estimate test sensitivity, specificity, and disease prevalence from imperfect test results."), "</p>",
                     
@@ -183,7 +185,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!is.null(private$.preset_info)) {
                         paste0(
                             "<div style='background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50;'>",
-                            "<h4 style='color: #2e7d32; margin-top: 0;'>🎯 ", .("Active Clinical Preset"), "</h4>",
+                            "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Active Clinical Preset"), "</h4>",
                             "<p><strong>", .("Scenario"), ":</strong> ", self$options$clinicalPreset, "</p>",
                             "<p><strong>", .("Description"), ":</strong> ", private$.preset_info$description, "</p>",
                             "<p><strong>", .("Guidance"), ":</strong> ", private$.preset_info$guidance, "</p>",
@@ -1419,45 +1421,45 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create comprehensive method selection guide in HTML
             guide_html <- paste0(
                 "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;'>",
-                "<h3 style='color: #007bff; margin-top: 0;'>📖 ", .("Method Selection Guide"), "</h3>",
+                "<h3 style='color: #007bff; margin-top: 0;'> ", .("Method Selection Guide"), "</h3>",
                 
                 "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>🏆 ", .("Latent Class Analysis (Recommended)"), "</h4>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Latent Class Analysis (Recommended)"), "</h4>",
                 "<p><strong>", .("Description"), ":</strong> ", .("Most robust method using mixture models. Estimates disease prevalence and test parameters simultaneously."), "</p>",
                 "<p><strong>", .("Best for"), ":</strong> ", .("Diagnostic validation studies with 3+ tests and N≥100"), "</p>",
                 "<p><strong>", .("Strengths"), ":</strong> ", .("Handles conditional dependence, provides model fit statistics, most statistically rigorous"), "</p>",
                 "</div>",
                 
                 "<div style='margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 5px;'>",
-                "<h4 style='color: #1565c0; margin-top: 0;'>📊 ", .("Bayesian Analysis"), "</h4>",
+                "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Bayesian Analysis"), "</h4>",
                 "<p><strong>", .("Description"), ":</strong> ", .("Incorporates prior knowledge about test performance using Bayesian methods."), "</p>",
                 "<p><strong>", .("Best for"), ":</strong> ", .("Studies where you have prior information about expected sensitivity/specificity"), "</p>",
                 "<p><strong>", .("Strengths"), ":</strong> ", .("Uses prior knowledge, handles uncertainty well, good for smaller samples"), "</p>",
                 "</div>",
                 
                 "<div style='margin: 15px 0; padding: 15px; background: #fff3e0; border-radius: 5px;'>",
-                "<h4 style='color: #ef6c00; margin-top: 0;'>🗳️ ", .("Composite Reference"), "</h4>",
+                "<h4 style='color: #ef6c00; margin-top: 0;'> ", .("Composite Reference"), "</h4>",
                 "<p><strong>", .("Description"), ":</strong> ", .("Uses majority vote of available tests as pseudo-gold standard."), "</p>",
                 "<p><strong>", .("Best for"), ":</strong> ", .("Inter-rater agreement studies with 3+ tests, exploratory analysis"), "</p>",
                 "<p><strong>", .("Strengths"), ":</strong> ", .("Simple and intuitive, requires minimal assumptions, good starting point"), "</p>",
                 "</div>",
                 
                 "<div style='margin: 15px 0; padding: 15px; background: #fce4ec; border-radius: 5px;'>",
-                "<h4 style='color: #c2185b; margin-top: 0;'>🔒 ", .("All Tests Positive"), "</h4>",
+                "<h4 style='color: #c2185b; margin-top: 0;'> ", .("All Tests Positive"), "</h4>",
                 "<p><strong>", .("Description"), ":</strong> ", .("Conservative approach - disease present only if ALL tests are positive."), "</p>",
                 "<p><strong>", .("Best for"), ":</strong> ", .("Highly specific diagnoses where false positives are very costly"), "</p>",
                 "<p><strong>", .("Strengths"), ":</strong> ", .("High specificity reference, minimizes false positives"), "</p>",
                 "</div>",
                 
                 "<div style='margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 5px;'>",
-                "<h4 style='color: #388e3c; margin-top: 0;'>🔓 ", .("Any Test Positive"), "</h4>",
+                "<h4 style='color: #388e3c; margin-top: 0;'> ", .("Any Test Positive"), "</h4>",
                 "<p><strong>", .("Description"), ":</strong> ", .("Liberal approach - disease present if ANY test is positive."), "</p>",
                 "<p><strong>", .("Best for"), ":</strong> ", .("Population screening scenarios where missing cases is costly"), "</p>",
                 "<p><strong>", .("Strengths"), ":</strong> ", .("High sensitivity reference, minimizes false negatives"), "</p>",
                 "</div>",
                 
                 "<div style='margin: 15px 0; padding: 10px; background: #fff8e1; border-radius: 5px; border-left: 3px solid #ffb300;'>",
-                "<h4 style='color: #e65100; margin-top: 0;'>💡 ", .("Selection Tips"), "</h4>",
+                "<h4 style='color: #e65100; margin-top: 0;'> ", .("Selection Tips"), "</h4>",
                 "<ul>",
                 "<li>", .("Start with Latent Class Analysis for most diagnostic studies"), "</li>",
                 "<li>", .("Use Composite Reference for quick exploratory analysis"), "</li>",
@@ -1556,7 +1558,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             summary_html <- paste0(
                 "<div class='clinical-summary' style='background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                "<h4 style='color: #1565c0; margin-top: 0;'>📋 ", .("Clinical Summary"), "</h4>",
+                "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Clinical Summary"), "</h4>",
                 "<p><strong>", .("Analysis:"), "</strong> ", sprintf(.("No gold standard analysis using %s method"), method), "</p>",
                 "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(tests, collapse = ", "), " (N=", n_tests, ")</p>",
                 "<p><strong>", .("Disease prevalence:"), "</strong> ", prev_pct, "</p>",

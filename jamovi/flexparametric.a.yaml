@@ -8,23 +8,23 @@ jas: '1.2'
 
 description:
     main: >-
-        🔬 ENHANCED: Comprehensive flexible parametric survival modeling combining 
-        traditional parametric distributions (Generalized Gamma, Weibull, etc.) with 
-        advanced spline-based approaches (Royston-Parmar, B-splines). Provides maximum 
-        flexibility for modeling complex hazard shapes, time-varying effects, and 
+        ENHANCED: Comprehensive flexible parametric survival modeling combining
+        traditional parametric distributions (Generalized Gamma, Weibull, etc.) with
+        advanced spline-based approaches (Royston-Parmar, B-splines). Provides maximum
+        flexibility for modeling complex hazard shapes, time-varying effects, and
         non-proportional hazards.
-        
-        ⚕️ CLINICAL USE: Model survival data when standard Cox models are inadequate. 
+
+        CLINICAL USE: Model survival data when standard Cox models are inadequate.
         Ideal for cancer research, health economics, and comparative effectiveness studies.
-        
-        📊 KEY FEATURES:
+
+        KEY FEATURES:
         • Traditional parametric and spline-based models in one function
         • Automatic model comparison and selection
         • Clinical interpretation of parameters
         • Comprehensive diagnostic plots
         • Copy-ready report templates
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage will be added
 

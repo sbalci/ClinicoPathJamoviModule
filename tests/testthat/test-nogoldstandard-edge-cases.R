@@ -2,7 +2,6 @@
 # Edge Cases Tests: nogoldstandard
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(nogoldstandard_small, package = "ClinicoPath")
 data(nogoldstandard_large, package = "ClinicoPath")
 data(nogoldstandard_highagreement, package = "ClinicoPath")

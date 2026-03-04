@@ -1,7 +1,6 @@
 # Load the necessary libraries
 library(jmv)
 library(jmv)
-if (requireNamespace("devtools")) devtools::load_all(".") else devtools::load_all()
 
 # Create a simple test data frame
 stage_migration_test_data <- data.frame(

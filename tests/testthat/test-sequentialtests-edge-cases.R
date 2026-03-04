@@ -2,7 +2,6 @@
 # Edge Cases Tests: sequentialtests
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 
 test_that("sequentialtests handles perfect sensitivity", {
   result <- sequentialtests(

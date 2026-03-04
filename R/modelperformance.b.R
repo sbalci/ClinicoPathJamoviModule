@@ -257,7 +257,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                     rsquared = rsq,
                     cindex = cindices[i],
                     loglik = logLik(model$fit)[1],
-                    recommended = if (i == best_idx) "✓" else ""
+                    recommended = if (i == best_idx) "" else ""
                 ))
             }
         },

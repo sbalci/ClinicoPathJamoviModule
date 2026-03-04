@@ -606,16 +606,17 @@ advancedanovaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Advanced ANOVA analysis with comprehensive post hoc testing, 
 #' effect sizes, and assumption checking. Addresses the critical issue 
-#' where 68\% of pathology studies fail proper multiple comparisons.
+#' where 68 percent of pathology studies fail proper multiple comparisons.
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('ToothGrowth')
 #'
 #' advancedanova(data = ToothGrowth,
 #'              dependent = len,
 #'              fixed = supp)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param dependent The dependent variable from \code{data}, variable must be
 #'   numeric

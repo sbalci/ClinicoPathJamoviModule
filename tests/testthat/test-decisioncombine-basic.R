@@ -6,7 +6,6 @@
 # for the decisioncombine jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(decisioncombine_pathology, package = "ClinicoPath")

@@ -1,6 +1,5 @@
 
 if (requireNamespace('jmvReadWrite') && requireNamespace('PMCMRplus') && requireNamespace('multcomp') && requireNamespace('pwr')) {
-  devtools::load_all()
 }
 
 test_that('advancedanova analysis works: Tukey & Assumptions', {

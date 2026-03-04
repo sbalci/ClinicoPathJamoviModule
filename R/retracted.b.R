@@ -29,8 +29,9 @@
 #' @importFrom utils URLencode
 #' @importFrom httr GET status_code content timeout
 #' @importFrom rcrossref id_converter
+NULL
 
-# Helper function to validate DOI format
+#' @noRd
 .validate_doi <- function(doi) {
     if (is.na(doi) || doi == "") return(FALSE)
     

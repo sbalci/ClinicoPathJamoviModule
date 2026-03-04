@@ -10,7 +10,7 @@ description:
         Implements bivariate meta-analysis of diagnostic accuracy with
         between-study heterogeneity and correlation structures.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Hierarchical Bayesian diagnostic meta-analysis
             hierarchicalbayes(

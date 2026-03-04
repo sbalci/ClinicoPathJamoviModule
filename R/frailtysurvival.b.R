@@ -486,10 +486,10 @@ frailtysurvivalClass <- R6::R6Class(
                     # Interpretation
                     html <- paste0(html, "<h4>Interpretation</h4>")
                     if (p_value < 0.05) {
-                        html <- paste0(html, "<p style='color: green;'><b>✓ Significant Frailty:</b> There is strong evidence for frailty effects (p < 0.05). ")
+                        html <- paste0(html, "<p style='color: green;'><b> Significant Frailty:</b> There is strong evidence for frailty effects (p < 0.05). ")
                         html <- paste0(html, "The frailty model provides a significantly better fit than the standard Cox model.</p>")
                     } else {
-                        html <- paste0(html, "<p style='color: orange;'><b>⚠ Non-significant Frailty:</b> There is insufficient evidence for frailty effects (p ≥ 0.05). ")
+                        html <- paste0(html, "<p style='color: orange;'><b> Non-significant Frailty:</b> There is insufficient evidence for frailty effects (p ≥ 0.05). ")
                         html <- paste0(html, "The standard Cox model may be adequate for this data.</p>")
                     }
                 } else {
@@ -619,11 +619,11 @@ frailtysurvivalClass <- R6::R6Class(
                 # Interpretation
                 html <- paste0(html, "<h4>Model Selection</h4>")
                 if (delta_aic < -2) {
-                    html <- paste0(html, "<p style='color: green;'><b>✓ Frailty Model Preferred:</b> The frailty model has substantially lower AIC (Δ AIC = ", round(delta_aic, 2), "), indicating better fit.</p>")
+                    html <- paste0(html, "<p style='color: green;'><b> Frailty Model Preferred:</b> The frailty model has substantially lower AIC (Δ AIC = ", round(delta_aic, 2), "), indicating better fit.</p>")
                 } else if (delta_aic < 2) {
                     html <- paste0(html, "<p style='color: orange;'><b>≈ Similar Performance:</b> Both models have similar AIC values (Δ AIC = ", round(delta_aic, 2), "). Consider parsimony.</p>")
                 } else {
-                    html <- paste0(html, "<p style='color: red;'><b>⚠ Standard Model Preferred:</b> The standard Cox model has lower AIC (Δ AIC = ", round(delta_aic, 2), ").</p>")
+                    html <- paste0(html, "<p style='color: red;'><b> Standard Model Preferred:</b> The standard Cox model has lower AIC (Δ AIC = ", round(delta_aic, 2), ").</p>")
                 }
                 
                 if (delta_bic < -2) {

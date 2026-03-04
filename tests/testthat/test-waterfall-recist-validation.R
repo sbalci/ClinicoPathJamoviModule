@@ -3,14 +3,12 @@
 # Purpose: Ensure RECIST category boundaries are mathematically correct
 
 library(testthat)
-devtools::load_all()
 
 context("waterfall RECIST Categorization Validation")
 
 # Test 1: RECIST Boundary Values ----
 test_that("RECIST boundaries are correctly implemented", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create test data with exact boundary values and representative samples
   test_data <- data.frame(
     PatientID = paste0("PT", sprintf("%02d", 1:14)),

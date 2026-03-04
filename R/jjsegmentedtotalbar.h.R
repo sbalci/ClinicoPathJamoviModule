@@ -603,7 +603,7 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjsegmentedtotalbar",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = jjsegmentedtotalbarResults$new(options=options),
                 data = data,
@@ -618,17 +618,17 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 
 #' Segmented Total Bar Charts
 #'
-#' Create segmented total bar charts (100\% stacked bars) that show 
+#' Create segmented total bar charts (100 percent stacked bars) that show 
 #' proportional 
 #' breakdowns within categories. Perfect for displaying composition data where 
-#' each bar represents 100\% and segments show relative proportions.
+#' each bar represents 100 percent and segments show relative proportions.
 #' 
 #'
 #' @examples
 #' \donttest{
 #' # Example usage for segmented total bar charts:
 #' # Shows proportional composition within categories
-#' # Each bar totals to 100\% with segments showing relative proportions
+#' # Each bar totals to 100 percent with segments showing relative proportions
 #'}
 #' @param data The data as a data frame.
 #' @param analysis_preset Predefined clinical analysis configurations.
@@ -638,14 +638,15 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   composition.
 #' @param facet_var Optional variable for creating multiple panels.
 #' @param show_plot Show segmented total bar chart.
-#' @param plot_type Type of visualization - traditional 100\% stacked bars or
-#'   Flerlage-style segmented total bars.
+#' @param plot_type Type of visualization - traditional 100 percent stacked
+#'   bars or Flerlage-style segmented total bars.
 #' @param chart_style Overall visual style for the chart.
 #' @param color_palette Color palette for segment fills.
 #' @param show_percentages Whether to display percentage labels on segments.
 #' @param percentage_format Format for percentage display.
 #' @param show_counts Whether to display raw count values on segments.
-#' @param label_threshold Minimum percentage for showing labels (0-50\%).
+#' @param label_threshold Minimum percentage for showing labels (0-50
+#'   percent).
 #' @param orientation Orientation of the bars.
 #' @param sort_categories How to sort the categories.
 #' @param plot_title Main title for the plot.

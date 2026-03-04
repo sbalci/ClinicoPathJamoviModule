@@ -141,6 +141,7 @@ trials, superiority trials, and observational studies with proper power
 calculations.
 }
 \examples{
+\donttest{
 data('your_data')
 
 clinicaltrialdesign(
@@ -151,5 +152,5 @@ clinicaltrialdesign(
     alpha = 0.05,
     power = 0.80
 )
-
+}
 }

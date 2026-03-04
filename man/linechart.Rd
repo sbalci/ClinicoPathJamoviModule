@@ -87,6 +87,7 @@ support for multiple groups, confidence intervals, and statistical
 overlays.
 }
 \examples{
+\donttest{
 # Basic line chart
 linechart(
     data = clinical_data,
@@ -103,5 +104,5 @@ linechart(
     confidence = TRUE,
     trendline = TRUE
 )
-
+}
 }

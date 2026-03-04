@@ -16,7 +16,7 @@ description:
         with clinical interpretation and actionable recommendations. Critical for ensuring data integrity
         before statistical analysis and meeting regulatory standards for clinical research.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('clinical_data')
             

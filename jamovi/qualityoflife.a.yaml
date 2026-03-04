@@ -17,7 +17,7 @@ description:
         and health economic outcomes. Essential for clinical trials, patient-centered care, and
         health technology assessment.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('qol_data')
 
@@ -290,7 +290,7 @@ options:
       max: 1.0
       default: 0.5
       description:
-          R: Maximum missing proportion for domain scoring (50% = 0.5)
+          R: Maximum missing proportion for domain scoring (50 percent = 0.5)
 
     - name: imputation_method
       title: Missing Data Imputation

@@ -39,7 +39,7 @@ children:
 
   # Plot Configuration Section
   - type: CollapseBox
-    label: "📊 Plot Configuration"
+    label: " Plot Configuration"
     collapsed: false
     children:
       - type: LayoutBox
@@ -69,7 +69,7 @@ children:
 
   # Statistical Analysis Section
   - type: CollapseBox
-    label: "📈 Statistical Analysis"
+    label: " Statistical Analysis"
     collapsed: false
     children:
       - type: LayoutBox
@@ -114,7 +114,7 @@ children:
 
   # Points and Geometry Section
   - type: CollapseBox
-    label: "🎯 Data Points & Geometry"
+    label: " Data Points & Geometry"
     collapsed: true
     children:
       - type: LayoutBox
@@ -162,7 +162,7 @@ children:
 
   # Plot Appearance Section
   - type: CollapseBox
-    label: "🎨 Plot Appearance & Labels"
+    label: " Plot Appearance & Labels"
     collapsed: true
     children:
       - type: LayoutBox
@@ -212,7 +212,7 @@ children:
 
   # Advanced Prism Features Section
   - type: CollapseBox
-    label: "⚙️ Advanced Prism Features"
+    label: " Advanced Prism Features"
     collapsed: true
     children:
       - type: LayoutBox
@@ -246,7 +246,7 @@ children:
 
   # Publication and Export Section
   - type: CollapseBox
-    label: "📄 Publication & Export"
+    label: " Publication & Export"
     collapsed: true
     children:
       - type: LayoutBox
@@ -273,7 +273,7 @@ children:
 
   # Clinical Help Section
   - type: CollapseBox
-    label: "🩺 Clinical Research Guide"
+    label: " Clinical Research Guide"
     collapsed: true
     children:
       - type: LayoutBox

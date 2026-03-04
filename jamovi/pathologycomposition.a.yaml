@@ -12,7 +12,7 @@ description:
         gastric cancer composition analysis. Performs component risk assessment, composition 
         pattern analysis, and optimal threshold identification.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('pathology_data')
             
@@ -120,7 +120,7 @@ options:
       max: 0.10
       default: 0.05
       description:
-          R: Maximum risk probability for low-risk classification (5% = 0.05)
+          R: Maximum risk probability for low-risk classification (5 percent = 0.05)
 
     - name: high_risk_threshold
       title: High Risk Threshold
@@ -129,7 +129,7 @@ options:
       max: 0.50
       default: 0.20
       description:
-          R: Minimum risk probability for high-risk classification (20% = 0.20)
+          R: Minimum risk probability for high-risk classification (20 percent = 0.20)
 
     - name: min_group_size
       title: Minimum Group Size
@@ -145,7 +145,7 @@ options:
       type: List
       options:
           - name: 'gastric_cancer'
-            title: Gastric Cancer Standard (0%, ≤10%, >10%-≤50%, >50%-<90%, ≥90%)
+            title: Gastric Cancer Standard (0 percent, ≤10 percent, >10 percent-≤50 percent, >50 percent-<90 percent, ≥90 percent)
           - name: 'simplified'
             title: Simplified (Low, Moderate, High)
           - name: 'custom'

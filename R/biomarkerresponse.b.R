@@ -28,7 +28,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (length(current_levels) != 2) {
                 html <- paste0(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Non-Binary Response Data</h4>",
+                    "<h4 style='margin-top: 0; color: #856404;'> Non-Binary Response Data</h4>",
                     "<p style='color: #856404;'>Binary response type selected but found ", length(current_levels), " levels.</p>",
                     "<p><strong>Current levels:</strong> ", paste(current_levels, collapse = ", "), "</p>",
                     "<p><strong>Solutions:</strong></p>",
@@ -49,7 +49,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 if (!(positive_level %in% current_levels)) {
                     html <- paste0(
                         "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>⚠️ Specified Positive Level Not Found</h4>",
+                        "<h4 style='margin-top: 0; color: #856404;'> Specified Positive Level Not Found</h4>",
                         "<p style='color: #856404;'>Positive level '<strong>", positive_level, "</strong>' not found in response data.</p>",
                         "<p><strong>Available levels:</strong> ", paste(current_levels, collapse = ", "), "</p>",
                         "<p><strong>Solutions:</strong></p>",
@@ -76,7 +76,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 error_notice$setContent(paste0(
-                    "⛔ <b>Positive Level Required:</b> For binary response analysis, you must specify ",
+                    " <b>Positive Level Required:</b> For binary response analysis, you must specify ",
                     "which level represents positive response (e.g., 'Responder', 'Yes', '1').<br/><br/>",
                     "<b>Available levels:</b> ", paste(current_levels, collapse = ", "), "<br/><br/>",
                     "<b>Current alphabetical ordering:</b><br/>",
@@ -190,7 +190,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (total_positive == 0 || total_negative == 0) {
                 html <- paste0(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'>⚠️ Single-Class Cohort Detected</h4>",
+                    "<h4 style='margin-top: 0; color: #856404;'> Single-Class Cohort Detected</h4>",
                     "<p style='color: #856404;'>All patients belong to a single response class. Cannot calculate classification metrics.</p>",
                     "<p><strong>Data distribution:</strong></p>",
                     "<ul style='margin-left: 20px;'>",
@@ -382,21 +382,21 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             # Enhanced guidance and documentation
             if (is.null(self$options$biomarker) || is.null(self$options$response)) {
                 todo <- "
-                <h3>🧬 ClinicoPath Biomarker Response Analysis</h3>
+                <h3> ClinicoPath Biomarker Response Analysis</h3>
                 <p><strong>Purpose:</strong> Analyze biomarker-response relationships for precision medicine and clinical decision support.</p>
                 
-                <h4>📋 Required Variables:</h4>
+                <h4> Required Variables:</h4>
                 <ul>
                     <li><strong>Biomarker Variable:</strong> Continuous measurement (expression, concentration, score)</li>
                     <li><strong>Response Variable:</strong> Treatment outcome (binary, categorical, or continuous)</li>
                 </ul>
                 
-                <h4>⚙️ Optional Variables:</h4>
+                <h4> Optional Variables:</h4>
                 <ul>
                     <li><strong>Grouping Variable:</strong> Stratification factor (treatment arm, disease stage)</li>
                 </ul>
                 
-                <h4>🔬 Analysis Features:</h4>
+                <h4> Analysis Features:</h4>
                 <ul>
                     <li><strong>ROC Analysis:</strong> Optimal threshold determination and performance metrics</li>
                     <li><strong>Statistical Testing:</strong> Appropriate tests for different response types</li>
@@ -405,7 +405,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     <li><strong>Data Quality:</strong> Outlier handling and transformation options</li>
                 </ul>
                 
-                <h4>🏥 Clinical Applications:</h4>
+                <h4> Clinical Applications:</h4>
                 <ul>
                     <li><strong>Predictive Biomarkers:</strong> Treatment selection (HER2, PD-L1, EGFR)</li>
                     <li><strong>Prognostic Biomarkers:</strong> Outcome prediction (Ki-67, p53)</li>
@@ -414,7 +414,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     <li><strong>Treatment Monitoring:</strong> Response assessment (PSA, HbA1c)</li>
                 </ul>
                 
-                <h4>📊 Interpretation Guide:</h4>
+                <h4> Interpretation Guide:</h4>
                 <ul>
                     <li><strong>AUC > 0.8:</strong> Excellent biomarker performance</li>
                     <li><strong>AUC 0.7-0.8:</strong> Good biomarker performance</li>
@@ -436,7 +436,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (nrow(self$data) == 0) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Data Available</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> No Data Available</h4>",
                     "<p style='color: #721c24;'>Dataset contains no rows.</p>",
                     "<p>Please load data for biomarker analysis.</p>",
                     "</div>"
@@ -465,7 +465,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (is.null(raw_biomarker_values)) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Variable Not Found</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
                     "<p style='color: #721c24;'>Biomarker variable '<strong>", biomarker_var, "</strong>' could not be found in the dataset.</p>",
                     "<p>Please check that the variable name is correct and exists in your data.</p>",
                     "</div>"
@@ -477,7 +477,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (is.null(raw_response_values)) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Variable Not Found</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
                     "<p style='color: #721c24;'>Response variable '<strong>", response_var, "</strong>' could not be found in the dataset.</p>",
                     "<p>Please check that the variable name is correct and exists in your data.</p>",
                     "</div>"
@@ -489,7 +489,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (all(is.na(raw_biomarker_values))) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ All Values Missing</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
                     "<p style='color: #721c24;'>Biomarker variable contains only missing values.</p>",
                     "<p><strong>Solutions:</strong></p>",
                     "<ol style='margin-left: 20px;'>",
@@ -506,7 +506,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (all(is.na(raw_response_values))) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ All Values Missing</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
                     "<p style='color: #721c24;'>Response variable contains only missing values.</p>",
                     "<p><strong>Solutions:</strong></p>",
                     "<ol style='margin-left: 20px;'>",
@@ -527,7 +527,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 }, error = function(e) {
                     html <- paste0(
                         "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Biomarker Data Type</h4>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> Invalid Biomarker Data Type</h4>",
                         "<p style='color: #721c24;'>Biomarker variable must be numeric or convertible to numeric.</p>",
                         "<p><strong>Current variable type:</strong> ", class(raw_biomarker_values)[1], "</p>",
                         "<p><strong>Solutions:</strong></p>",
@@ -564,7 +564,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     }, error = function(e) {
                         html <- paste0(
                             "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                            "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Response Data Type</h4>",
+                            "<h4 style='margin-top: 0; color: #721c24;'> Invalid Response Data Type</h4>",
                             "<p style='color: #721c24;'>Continuous response variable must be numeric or convertible to numeric.</p>",
                             "<p><strong>Current variable type:</strong> ", class(raw_response_values)[1], "</p>",
                             "<p><strong>Solutions:</strong></p>",
@@ -697,7 +697,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         type = jmvcore::NoticeType$STRONG_WARNING
                     )
                     outlier_notice$setContent(paste0(
-                        "⚠️ <b>Outliers Removed:</b> ", outlier_count, " data points (", outlier_pct, "% of total) ",
+                        " <b>Outliers Removed:</b> ", outlier_count, " data points (", outlier_pct, "% of total) ",
                         "identified as outliers and excluded from analysis.<br/><br/>",
                         "<b>Detection Method:</b> IQR-based (Tukey's fences)<br/>",
                         "• Lower bound: ", round(lower_bound, 2), "<br/>",
@@ -707,7 +707,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         round(max(outlier_values, na.rm = TRUE), 2), "<br/><br/>",
                         "<b>Impact:</b> All subsequent analyses (ROC, statistics, correlations) are based on ",
                         total_count - outlier_count, " remaining data points.<br/><br/>",
-                        "<b>⚠️ Important:</b> Outlier removal can bias results, especially in small samples or skewed distributions. ",
+                        "<b> Important:</b> Outlier removal can bias results, especially in small samples or skewed distributions. ",
                         "Consider reviewing excluded values to ensure they represent true outliers rather than valid extreme values."
                     ))
                     self$results$insert(999, outlier_notice)
@@ -723,7 +723,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (length(biomarker_values) == 0) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ No Valid Data Points</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> No Valid Data Points</h4>",
                     "<p style='color: #721c24;'>No valid data points remain after preprocessing.</p>",
                     "<p><strong>Possible causes:</strong></p>",
                     "<ul style='margin-left: 20px;'>",
@@ -762,7 +762,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (biomarker_range == 0) {
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Constant Biomarker Values</h4>",
+                    "<h4 style='margin-top: 0; color: #721c24;'> Constant Biomarker Values</h4>",
                     "<p style='color: #721c24;'>All biomarker values are identical. Cannot perform analysis.</p>",
                     "<p><strong>Current value:</strong> ", unique(biomarker_values)[1], "</p>",
                     "<p><strong>Solutions:</strong></p>",
@@ -818,7 +818,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         type = jmvcore::NoticeType$INFO
                     )
                     ppv_npv_notice$setContent(paste0(
-                        "ℹ️ <b>PPV/NPV Prevalence Dependence:</b> The reported PPV and NPV values are calculated ",
+                        " <b>PPV/NPV Prevalence Dependence:</b> The reported PPV and NPV values are calculated ",
                         "using the <b>observed prevalence</b> in your dataset (", round(observed_prevalence * 100, 1), "%). ",
                         "These values will differ in populations with different disease prevalence.<br/><br/>",
                         "<b>Important:</b> When applying this biomarker in a different clinical setting:<br/>",
@@ -1023,7 +1023,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                             type = jmvcore::NoticeType$INFO
                         )
                         strat_notice$setContent(paste0(
-                            "ℹ️ <b>Stratified Analysis Performed:</b> Biomarker performance evaluated separately for each level of '",
+                            " <b>Stratified Analysis Performed:</b> Biomarker performance evaluated separately for each level of '",
                             self$options$groupVariable, "'.<br/><br/>",
                             "<b>Groups analyzed:</b> ", length(stratified_results), " of ", length(group_levels), " total groups<br/><br/>",
                             "<b>Use case:</b> Compare biomarker performance across treatment arms, disease stages, or patient subgroups.<br/><br/>",
@@ -1133,7 +1133,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
                     html <- paste0(
                         "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #721c24;'>⚠️ Invalid Data for Log Transformation</h4>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> Invalid Data for Log Transformation</h4>",
                         "<p style='color: #721c24;'>Log transformation requires non-negative values.</p>",
                         "<p><strong>Your data contains:</strong></p>",
                         "<ul style='margin-left: 20px;'>",
@@ -1166,7 +1166,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
                     html <- paste0(
                         "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>⚠️ Log Transformation Issues</h4>",
+                        "<h4 style='margin-top: 0; color: #856404;'> Log Transformation Issues</h4>",
                         "<p style='color: #856404;'>Log transformation produced invalid values.</p>",
                         "<p><strong>Issues detected:</strong></p>",
                         "<ul style='margin-left: 20px;'>",

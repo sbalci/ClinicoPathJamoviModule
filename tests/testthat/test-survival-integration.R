@@ -6,7 +6,6 @@
 # and output consistency for the survival jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(survival_test, package = "ClinicoPath")

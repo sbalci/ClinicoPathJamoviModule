@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jjscatterstats_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jjscatterstats_survival, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles parametric + histogram marginals", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_clinical,
@@ -35,7 +33,6 @@ test_that("jjscatterstats handles parametric + histogram marginals", {
 })
 
 test_that("jjscatterstats handles nonparametric + density marginals", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_survival,
@@ -50,7 +47,6 @@ test_that("jjscatterstats handles nonparametric + density marginals", {
 })
 
 test_that("jjscatterstats handles robust + boxplot marginals", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -65,7 +61,6 @@ test_that("jjscatterstats handles robust + boxplot marginals", {
 })
 
 test_that("jjscatterstats handles bayes + histogram marginals", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_expression,
@@ -85,7 +80,6 @@ test_that("jjscatterstats handles bayes + histogram marginals", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles lm smooth + histogram", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -99,7 +93,6 @@ test_that("jjscatterstats handles lm smooth + histogram", {
 })
 
 test_that("jjscatterstats handles loess smooth + density", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_treatment,
@@ -113,7 +106,6 @@ test_that("jjscatterstats handles loess smooth + density", {
 })
 
 test_that("jjscatterstats handles gam smooth + boxplot", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_clinical,
@@ -131,7 +123,6 @@ test_that("jjscatterstats handles gam smooth + boxplot", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles grouping + parametric test", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -146,7 +137,6 @@ test_that("jjscatterstats handles grouping + parametric test", {
 })
 
 test_that("jjscatterstats handles grouping + nonparametric test", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_survival,
@@ -161,7 +151,6 @@ test_that("jjscatterstats handles grouping + nonparametric test", {
 })
 
 test_that("jjscatterstats handles grouping + bayes test", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_clinical,
@@ -181,7 +170,6 @@ test_that("jjscatterstats handles grouping + bayes test", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles grouping + marginals + statistics", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -201,7 +189,6 @@ test_that("jjscatterstats handles grouping + marginals + statistics", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles full customization", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_clinical,
@@ -232,7 +219,6 @@ test_that("jjscatterstats handles full customization", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles ggpubr + correlation + smooth", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -249,7 +235,6 @@ test_that("jjscatterstats handles ggpubr + correlation + smooth", {
 })
 
 test_that("jjscatterstats handles ggpubr with different palettes", {
-  devtools::load_all()
 
   palettes <- c("jco", "npg", "aaas", "lancet", "jama", "nejm")
 
@@ -271,7 +256,6 @@ test_that("jjscatterstats handles ggpubr with different palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles complete biomarker analysis", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -292,7 +276,6 @@ test_that("jjscatterstats handles complete biomarker analysis", {
 })
 
 test_that("jjscatterstats handles complete lab value analysis", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_clinical,
@@ -312,7 +295,6 @@ test_that("jjscatterstats handles complete lab value analysis", {
 })
 
 test_that("jjscatterstats handles complete dose-response analysis", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_treatment,
@@ -332,7 +314,6 @@ test_that("jjscatterstats handles complete dose-response analysis", {
 })
 
 test_that("jjscatterstats handles complete gene expression analysis", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_expression,
@@ -351,7 +332,6 @@ test_that("jjscatterstats handles complete gene expression analysis", {
 })
 
 test_that("jjscatterstats handles complete survival biomarker analysis", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_survival,
@@ -373,7 +353,6 @@ test_that("jjscatterstats handles complete survival biomarker analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles minimal configuration", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -385,7 +364,6 @@ test_that("jjscatterstats handles minimal configuration", {
 })
 
 test_that("jjscatterstats handles maximum configuration", {
-  devtools::load_all()
 
   result <- jjscatterstats(
     data = jjscatterstats_test,
@@ -423,7 +401,6 @@ test_that("jjscatterstats handles maximum configuration", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats produces consistent results across test types", {
-  devtools::load_all()
 
   test_types <- c("parametric", "nonparametric", "robust", "bayes")
   results <- list()
@@ -448,7 +425,6 @@ test_that("jjscatterstats produces consistent results across test types", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjscatterstats handles progressive feature addition", {
-  devtools::load_all()
 
   # Step 1: Basic scatter
   result1 <- jjscatterstats(

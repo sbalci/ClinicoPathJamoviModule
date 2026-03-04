@@ -1,11 +1,7 @@
-#' Stage Migration Analysis - Competing Risks Methods
-#'
-#' @description
-#' Competing risks analysis for stage migration when patients can experience
-#' multiple types of events (e.g., cancer death vs. other causes).
-#'
-#' @keywords internal
-#' @noRd
+# Stage Migration Analysis - Competing Risks Methods
+#
+# Competing risks analysis for stage migration when patients can experience
+# multiple types of events (e.g., cancer death vs. other causes).
 
 # =============================================================================
 # COMPETING RISKS ANALYSIS

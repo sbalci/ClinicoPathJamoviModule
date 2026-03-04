@@ -140,12 +140,13 @@ specifications for continuous and binary outcome data. Essential for
 Bayesian statistical inference in clinical research.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 bayesianci(
     outcome = "response",
     credible_level = 0.95,
     prior_type = "uniform",
     mcmc_method = "gibbs"
 )
-
+}
 }

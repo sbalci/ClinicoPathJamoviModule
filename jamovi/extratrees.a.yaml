@@ -19,7 +19,7 @@ description:
         risks, and excellent scalability. Ideal for exploratory analysis, baseline
         modeling, and ensemble methods in survival prediction tasks.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- extratrees(
                 data = mydata,

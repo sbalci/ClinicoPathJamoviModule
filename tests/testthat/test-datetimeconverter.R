@@ -1,5 +1,4 @@
 library(testthat)
-devtools::load_all()
 
 make_clean_data <- function() {
     data.frame(ts = c("2023-01-15 14:30:00", "2024-02-20 09:00:00", "2023-03-10 12:00:00"))
@@ -29,7 +28,6 @@ expect_datetime_numeric <- function(res, row, expected, tz = "UTC") {
 
 test_that("auto-detection parses clean ISO datetimes", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     data <- make_clean_data()
     res <- datetimeconverter(
         data = data,

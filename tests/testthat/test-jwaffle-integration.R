@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load all test datasets
 data(jwaffle_test, package = "ClinicoPath", envir = environment())
@@ -20,7 +19,6 @@ data(jwaffle_quality, package = "ClinicoPath", envir = environment())
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete treatment response workflow", {
-  devtools::load_all()
 
   # Step 1: Basic visualization
   result1 <- jwaffle(
@@ -79,7 +77,6 @@ test_that("jwaffle handles complete treatment response workflow", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete pathology workflow", {
-  devtools::load_all()
 
   # Tumor grade distribution by hospital
   result <- jwaffle(
@@ -99,7 +96,6 @@ test_that("jwaffle handles complete pathology workflow", {
 })
 
 test_that("jwaffle handles differentiation status analysis", {
-  devtools::load_all()
 
   # Differentiation status distribution
   result <- jwaffle(
@@ -122,7 +118,6 @@ test_that("jwaffle handles differentiation status analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete demographics workflow", {
-  devtools::load_all()
 
   # Age distribution by gender
   result <- jwaffle(
@@ -140,7 +135,6 @@ test_that("jwaffle handles complete demographics workflow", {
 })
 
 test_that("jwaffle handles ethnicity distribution analysis", {
-  devtools::load_all()
 
   # Ethnicity across regions
   result <- jwaffle(
@@ -158,7 +152,6 @@ test_that("jwaffle handles ethnicity distribution analysis", {
 })
 
 test_that("jwaffle handles smoking status analysis", {
-  devtools::load_all()
 
   # Smoking status by age group
   result <- jwaffle(
@@ -180,7 +173,6 @@ test_that("jwaffle handles smoking status analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete disease subtype workflow", {
-  devtools::load_all()
 
   # Histological subtypes by stage
   result <- jwaffle(
@@ -199,7 +191,6 @@ test_that("jwaffle handles complete disease subtype workflow", {
 })
 
 test_that("jwaffle handles molecular subtype analysis", {
-  devtools::load_all()
 
   # Molecular subtypes by stage
   result <- jwaffle(
@@ -221,7 +212,6 @@ test_that("jwaffle handles molecular subtype analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles complete quality metrics workflow", {
-  devtools::load_all()
 
   # Quality grades by institution type
   result <- jwaffle(
@@ -241,7 +231,6 @@ test_that("jwaffle handles complete quality metrics workflow", {
 })
 
 test_that("jwaffle handles compliance analysis", {
-  devtools::load_all()
 
   # Compliance levels over time
   result <- jwaffle(
@@ -259,7 +248,6 @@ test_that("jwaffle handles compliance analysis", {
 })
 
 test_that("jwaffle handles risk category analysis", {
-  devtools::load_all()
 
   # Risk categories by quarter
   result <- jwaffle(
@@ -281,7 +269,6 @@ test_that("jwaffle handles risk category analysis", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles all test datasets consistently", {
-  devtools::load_all()
 
   # Test dataset
   result1 <- jwaffle(
@@ -327,7 +314,6 @@ test_that("jwaffle handles all test datasets consistently", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle produces publication-ready treatment response figure", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_test,
@@ -347,7 +333,6 @@ test_that("jwaffle produces publication-ready treatment response figure", {
 })
 
 test_that("jwaffle produces publication-ready pathology figure", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_pathology,
@@ -365,7 +350,6 @@ test_that("jwaffle produces publication-ready pathology figure", {
 })
 
 test_that("jwaffle produces publication-ready demographics figure", {
-  devtools::load_all()
 
   result <- jwaffle(
     data = jwaffle_demographics,
@@ -386,7 +370,6 @@ test_that("jwaffle produces publication-ready demographics figure", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle produces consistent results across all palettes", {
-  devtools::load_all()
 
   palettes <- c("default", "colorblind", "professional", "presentation",
                 "journal", "pastel", "dark")
@@ -411,7 +394,6 @@ test_that("jwaffle produces consistent results across all palettes", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle handles various row configurations", {
-  devtools::load_all()
 
   # Test with 1, 3, 5, 10, 15, 20 rows
   row_values <- c(1, 3, 5, 10, 15, 20)
@@ -432,7 +414,6 @@ test_that("jwaffle handles various row configurations", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jwaffle produces valid results for both orientations", {
-  devtools::load_all()
 
   # Standard orientation
   result_standard <- jwaffle(

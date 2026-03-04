@@ -1,6 +1,5 @@
 
 test_that("Helper functions are available", {
-  devtools::load_all()
   
   expect_true(exists("validateDecisionAnalysisInputs"))
   expect_true(is.function(validateDecisionAnalysisInputs))

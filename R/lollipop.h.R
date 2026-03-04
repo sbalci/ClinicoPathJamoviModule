@@ -291,7 +291,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lollipop",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = lollipopResults$new(options=options),
                 data = data,
@@ -312,6 +312,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' geom_segment() and geom_point() for optimal visual presentation.
 #'
 #' @examples
+#' \donttest{
 #' # Load clinical lab data
 #' clinical_lab_data <- read.csv("clinical_lab_data.csv")
 #' # Or load from package: data("clinical_lab_data", package = "ClinicoPath")
@@ -377,7 +378,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     lineWidth = 2,
 #'     title = "WBC Count by Treatment (ULN: 11)"
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param dep The numeric variable for the values (lollipop heights/lengths).
 #' @param group The categorical variable for grouping (lollipop categories).

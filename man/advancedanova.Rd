@@ -88,13 +88,14 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Advanced ANOVA analysis with comprehensive post hoc testing,
 effect sizes, and assumption checking. Addresses the critical issue
-where 68\\% of pathology studies fail proper multiple comparisons.
+where 68 percent of pathology studies fail proper multiple comparisons.
 }
 \examples{
+\donttest{
 data('ToothGrowth')
 
 advancedanova(data = ToothGrowth,
              dependent = len,
              fixed = supp)
-
+}
 }

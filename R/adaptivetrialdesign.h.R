@@ -929,6 +929,7 @@ adaptivetrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Adaptive trial design with interim analysis
 #' adaptivetrialdesign(
 #'     data = trial_data,
@@ -938,7 +939,7 @@ adaptivetrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     interim_analysis = TRUE,
 #'     futility_boundary = 0.1
 #' )
-#'
+#'}
 #' @param data The data as a data frame for adaptive trial design analysis.
 #' @param outcome .
 #' @param treatment .

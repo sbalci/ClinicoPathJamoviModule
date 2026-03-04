@@ -704,8 +704,8 @@ classificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   intervals.
 #' @param reportClinicalMetrics Report sensitivity, specificity, PPV, NPV, and
 #'   likelihood ratios.
-#' @param reportConfidenceIntervals Include 95\% confidence intervals for
-#'   clinical metrics.
+#' @param reportConfidenceIntervals Include 95 percent confidence intervals
+#'   for clinical metrics.
 #' @param reportMCC Calculate Matthews Correlation Coefficient (MCC), a
 #'   balanced metric for imbalanced datasets. MCC ranges from -1 (perfect
 #'   disagreement) to +1 (perfect agreement), with 0 indicating random

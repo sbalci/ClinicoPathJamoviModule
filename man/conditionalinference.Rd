@@ -135,6 +135,7 @@ predictors. The method is particularly suitable for exploratory survival
 analysis and biomarker discovery in clinical research.
 }
 \examples{
+\donttest{
 result <- conditionalinference(
     data = mydata,
     time = "time_to_event",
@@ -145,5 +146,5 @@ result <- conditionalinference(
     minbucket = 7,
     maxdepth = 5
 )
-
+}
 }

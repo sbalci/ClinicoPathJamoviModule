@@ -19,7 +19,7 @@ description:
         standard errors and confidence intervals, enabling proper population-level
         survival estimates from survey data.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Basic survey-weighted Kaplan-Meier
             library(survival)
@@ -299,7 +299,7 @@ options:
       default: 0.95
       description:
         R: >
-          Confidence level for confidence intervals (e.g., 0.95 for 95% CI).
+          Confidence level for confidence intervals (e.g., 0.95 for 95 percent CI).
 
 # Population Estimates ----
 
@@ -348,7 +348,7 @@ options:
           Time interval for plot labels and risk tables.
 
     - name: ci95
-      title: '95% CI'
+      title: '95 percent CI'
       type: Bool
       default: true
       description:

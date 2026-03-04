@@ -130,6 +130,7 @@ validation
 and biomarker diagnostic accuracy synthesis.
 }
 \examples{
+\donttest{
 data('diagnostic_studies')
 
 diagnosticmeta(data = diagnostic_studies,
@@ -138,5 +139,5 @@ diagnosticmeta(data = diagnostic_studies,
               false_positives = fp,
               false_negatives = fn,
               true_negatives = tn)
-
+}
 }

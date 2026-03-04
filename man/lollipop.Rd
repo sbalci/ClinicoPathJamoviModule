@@ -103,6 +103,7 @@ patient timelines, treatment outcomes, and biomarker comparisons. Uses
 geom_segment() and geom_point() for optimal visual presentation.
 }
 \examples{
+\donttest{
 # Load clinical lab data
 clinical_lab_data <- read.csv("clinical_lab_data.csv")
 # Or load from package: data("clinical_lab_data", package = "ClinicoPath")
@@ -168,5 +169,5 @@ lollipop(
     lineWidth = 2,
     title = "WBC Count by Treatment (ULN: 11)"
 )
-
+}
 }

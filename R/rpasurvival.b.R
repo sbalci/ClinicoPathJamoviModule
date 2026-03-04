@@ -549,7 +549,7 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Plain-language summary (if enabled)
             if (self$options$showSummary) {
                 summary_html <- '<div style="font-family: Arial; padding: 15px; background-color: #e7f3ff; border-left: 4px solid #0066cc; border-radius: 3px; margin: 10px 0;">'
-                summary_html <- paste0(summary_html, '<h4 style="color: #0066cc; margin-top: 0;">📊 Analysis Summary</h4>')
+                summary_html <- paste0(summary_html, '<h4 style="color: #0066cc; margin-top: 0;"> Analysis Summary</h4>')
                 summary_html <- paste0(summary_html, sprintf('<p><b>RPA identified %d prognostic risk groups</b> from %d predictor variable(s).</p>', nGroups, nPredictors))
 
                 # Add details for each group
@@ -583,7 +583,7 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Interpretation guide (if enabled)
             if (self$options$showInterpretation) {
                 interp_html <- '<div style="font-family: Arial; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ffa726; border-radius: 3px; margin: 10px 0;">'
-                interp_html <- paste0(interp_html, '<h4 style="color: #f57c00; margin-top: 0;">📖 How to Interpret These Results</h4>')
+                interp_html <- paste0(interp_html, '<h4 style="color: #f57c00; margin-top: 0;"> How to Interpret These Results</h4>')
 
                 interp_html <- paste0(interp_html, '<p><b>Decision Tree:</b></p><ul>')
                 interp_html <- paste0(interp_html, '<li>Shows how RPA split patients into risk groups based on predictor variables</li>')
@@ -620,7 +620,7 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Report sentence (if enabled)
             if (self$options$showReport) {
                 report_html <- '<div style="font-family: Arial; padding: 15px; background-color: #e8f5e9; border-left: 4px solid #66bb6a; border-radius: 3px; margin: 10px 0;">'
-                report_html <- paste0(report_html, '<h4 style="color: #2e7d32; margin-top: 0;">📋 Report Sentence (Copy-Ready)</h4>')
+                report_html <- paste0(report_html, '<h4 style="color: #2e7d32; margin-top: 0;"> Report Sentence (Copy-Ready)</h4>')
                 report_html <- paste0(report_html, '<p style="background: white; padding: 10px; border: 1px dashed #66bb6a; border-radius: 3px;">')
 
                 report_text <- sprintf(
@@ -671,7 +671,7 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 report_html <- paste0(report_html, report_text)
                 report_html <- paste0(report_html, '</p>')
-                report_html <- paste0(report_html, '<p style="font-size: 0.9em; color: #666; margin-top: 10px;"><i>💡 Tip: Click in the box above and press Ctrl+A (or Cmd+A) to select all, then Ctrl+C (or Cmd+C) to copy.</i></p>')
+                report_html <- paste0(report_html, '<p style="font-size: 0.9em; color: #666; margin-top: 10px;"><i> Tip: Click in the box above and press Ctrl+A (or Cmd+A) to select all, then Ctrl+C (or Cmd+C) to copy.</i></p>')
                 report_html <- paste0(report_html, '</div>')
 
                 self$results$report$setContent(report_html)

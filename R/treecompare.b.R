@@ -1344,7 +1344,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px;'>",
                 "<h4>Clinical Algorithm Recommendations</h4>",
                 "<div style='background-color: #e8f5e8; padding: 10px; border-radius: 3px; margin: 10px 0;'>",
-                "<p><strong>🏆 Recommended Algorithm:</strong> ", top_algorithm, "</p>",
+                "<p><strong> Recommended Algorithm:</strong> ", top_algorithm, "</p>",
                 "<p><strong>Combined Score:</strong> ", round(top_combined_score, 3), 
                 " (Performance: ", round(top_performance_score, 3), 
                 ", Interpretability: ", round(top_interpretability_score, 3), ")</p>",

@@ -15,6 +15,9 @@
 #' @note Ensure the input data contains the required variables (elapsed time,
 #' outcome) and meets specified formatting criteria.
 
+#' @noRd
+NULL
+
 # Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
 .createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
@@ -24,25 +27,25 @@
         ERROR = list(
             bg = "#f8d7da",
             border = "#dc3545",
-            icon = "❌",
+            icon = "",
             title_color = "#721c24"
         ),
         STRONG_WARNING = list(
             bg = "#fff3cd",
             border = "#ff9800",
-            icon = "⚠️",
+            icon = "",
             title_color = "#856404"
         ),
         WARNING = list(
             bg = "#fff3cd",
             border = "#ffc107",
-            icon = "⚠️",
+            icon = "",
             title_color = "#856404"
         ),
         INFO = list(
             bg = "#d1ecf1",
             border = "#17a2b8",
-            icon = "ℹ️",
+            icon = "",
             title_color = "#0c5460"
         )
     )
@@ -1390,7 +1393,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (self$options$showExplanations) {
             median_explanation_html <- '
             <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Median Survival Analysis</h3>
+                <h3 style="color: #2c5282; margin-top: 0;"> Understanding Median Survival Analysis</h3>
                 
                 <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                     <h4 style="color: #2d3748; margin-top: 0;">What is Median Survival?</h4>
@@ -1398,7 +1401,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     Think of it as the "halfway point" in your patient population.</p>
                     
                     <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>💯 Key Concept:</strong> If median survival = 24 months, it means:
+                        <strong> Key Concept:</strong> If median survival = 24 months, it means:
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>At 24 months: 50% of patients have experienced the event</li>
                             <li>At 24 months: 50% of patients are still event-free</li>
@@ -1408,7 +1411,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                    <h4 style="color: #d68910; margin-top: 0;">📈 Understanding the Results Table</h4>
+                    <h4 style="color: #d68910; margin-top: 0;"> Understanding the Results Table</h4>
                     <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                         <tr style="background-color: #fff3cd;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Measure</th>
@@ -1434,10 +1437,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                    <h4 style="color: #2e7d32; margin-top: 0;">💬 Clinical Interpretation Guide</h4>
+                    <h4 style="color: #2e7d32; margin-top: 0;"> Clinical Interpretation Guide</h4>
                     
                     <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>✅ When Median is Reached:</strong>
+                        <strong> When Median is Reached:</strong>
                         <p style="margin: 5px 0;">"The median survival is 36 months (95% CI: 28-45 months)"</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>Half of patients survived longer than 3 years</li>
@@ -1447,7 +1450,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </div>
                     
                     <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>⚠️ When Median is "Not Reached" (NR):</strong>
+                        <strong> When Median is "Not Reached" (NR):</strong>
                         <p style="margin: 5px 0;">More than 50% of patients remain event-free</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>Excellent prognosis - most patients doing well</li>
@@ -1458,7 +1461,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                    <strong>💡 Practical Tips:</strong>
+                    <strong> Practical Tips:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Robust measure:</strong> Less affected by extreme values than mean survival</li>
                         <li><strong>Easy communication:</strong> "Half of patients lived longer than X months"</li>
@@ -1658,7 +1661,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (self$options$showExplanations) {
             survival_probability_explanation_html <- '
             <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                <h3 style="color: #2c5282; margin-top: 0;">📅 Understanding Survival Probability Tables</h3>
+                <h3 style="color: #2c5282; margin-top: 0;"> Understanding Survival Probability Tables</h3>
                 
                 <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
                     <h4 style="color: #2d3748; margin-top: 0;">What are Time-Specific Survival Probabilities?</h4>
@@ -1666,7 +1669,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     Common time points are 1, 3, and 5 years (corresponding to the default intervals).</p>
                     
                     <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>💯 Example Interpretation:</strong>
+                        <strong> Example Interpretation:</strong>
                         <p style="margin: 5px 0;">If 5-year survival = 75% (95% CI: 68-82%)</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>75% of patients are expected to be alive at 5 years</li>
@@ -1677,7 +1680,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #fef5e7; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                    <h4 style="color: #d68910; margin-top: 0;">📈 Understanding Each Column</h4>
+                    <h4 style="color: #d68910; margin-top: 0;"> Understanding Each Column</h4>
                     <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                         <tr style="background-color: #fff3cd;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Column</th>
@@ -1713,15 +1716,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                    <h4 style="color: #2e7d32; margin-top: 0;">💬 How to Use These Numbers Clinically</h4>
+                    <h4 style="color: #2e7d32; margin-top: 0;"> How to Use These Numbers Clinically</h4>
                     
                     <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>👥 Patient Counseling:</strong>
+                        <strong> Patient Counseling:</strong>
                         <p style="margin: 5px 0;">"Based on our data, about 8 out of 10 patients with your condition are doing well at 3 years"</p>
                     </div>
                     
                     <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>🔍 Treatment Planning:</strong>
+                        <strong> Treatment Planning:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>High early survival rates → consider less intensive follow-up</li>
                             <li>Declining rates over time → focus on long-term monitoring</li>
@@ -1730,7 +1733,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </div>
                     
                     <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>📋 Comparison with Standards:</strong>
+                        <strong> Comparison with Standards:</strong>
                         <p style="margin: 5px 0;">Compare your results with:</p>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li>Historical controls from your institution</li>
@@ -1741,7 +1744,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                    <strong>💡 Important Considerations:</strong>
+                    <strong> Important Considerations:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Sample size matters:</strong> Fewer patients at later time points = less reliable estimates</li>
                         <li><strong>Confidence intervals:</strong> Wider intervals = more uncertainty</li>
@@ -1964,14 +1967,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (self$options$showExplanations && (self$options$sc || self$options$ce || self$options$ch || self$options$kmunicate)) {
             survival_plots_explanation_html <- '
             <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Survival Curves and Plots</h3>
+                <h3 style="color: #2c5282; margin-top: 0;"> Understanding Survival Curves and Plots</h3>
                 
                 <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                    <h4 style="color: #2d3748; margin-top: 0;">📈 Kaplan-Meier Survival Curve</h4>
+                    <h4 style="color: #2d3748; margin-top: 0;"> Kaplan-Meier Survival Curve</h4>
                     <p style="margin: 8px 0;">The survival curve shows the <strong>probability of being event-free over time</strong>. It steps down each time an event occurs.</p>
                     
                     <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>📖 How to Read the Plot:</strong>
+                        <strong> How to Read the Plot:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
                             <li><strong>Y-axis:</strong> Survival probability (0-100%)</li>
                             <li><strong>X-axis:</strong> Time since study start</li>
@@ -1983,7 +1986,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
                 
                 <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                    <strong>💡 Clinical Interpretation Tips:</strong>
+                    <strong> Clinical Interpretation Tips:</strong>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         <li><strong>Median survival:</strong> Where curve crosses 50% line</li>
                         <li><strong>1-year survival:</strong> Height of curve at 12 months</li>
@@ -2114,7 +2117,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               
               summary_html <- glue::glue("
                 <div style='background-color: #fff9e6; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px;'>
-                  <p style='margin: 5px 0;'><strong>⚠️ Methodological Note:</strong>
+                  <p style='margin: 5px 0;'><strong> Methodological Note:</strong>
                   Hazard rates are estimated using finite-difference approximations of the cumulative hazard.
                   Confidence intervals are approximate and based on simplified variance estimates.
                   For rigorous hazard function analysis, consider using specialized survival analysis packages.</p>
@@ -2151,14 +2154,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (self$options$showExplanations) {
               explanation_html <- '
               <div class="explanation-box" style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                  <h3 style="color: #2c5282; margin-top: 0;">📊 Understanding Baseline Hazard Analysis</h3>
+                  <h3 style="color: #2c5282; margin-top: 0;"> Understanding Baseline Hazard Analysis</h3>
                   
                   <div style="background-color: white; padding: 12px; border-radius: 5px; margin: 10px 0;">
-                      <h4 style="color: #2d3748; margin-top: 0;">🔍 What is Baseline Hazard?</h4>
+                      <h4 style="color: #2d3748; margin-top: 0;"> What is Baseline Hazard?</h4>
                       <p style="margin: 8px 0;">The baseline hazard function shows the <strong>instantaneous risk of events</strong> over time for your study population.</p>
                       
                       <div style="background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                          <strong>📖 Key Concepts:</strong>
+                          <strong> Key Concepts:</strong>
                           <ul style="margin: 5px 0; padding-left: 20px;">
                               <li><strong>Hazard Rate:</strong> Risk per unit time (events per year)</li>
                               <li><strong>Cumulative Hazard:</strong> Total accumulated risk over time</li>
@@ -2169,7 +2172,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   </div>
                   
                   <div style="background-color: #ffe6f0; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #d63384;">
-                      <h4 style="color: #2d3748; margin-top: 0;">📈 Understanding the Two Hazard Plots</h4>
+                      <h4 style="color: #2d3748; margin-top: 0;"> Understanding the Two Hazard Plots</h4>
                       <p style="margin: 8px 0;"><strong>Why do the plots look different?</strong></p>
                       
                       <div style="margin-left: 15px;">
@@ -2198,7 +2201,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   </div>
                   
                   <div style="background-color: #fff3e0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800;">
-                      <strong>💡 Clinical Applications:</strong>
+                      <strong> Clinical Applications:</strong>
                       <ul style="margin: 5px 0; padding-left: 20px;">
                           <li><strong>Risk Patterns:</strong> Identify periods of high/low event risk</li>
                           <li><strong>Model Assumptions:</strong> Test if hazard is constant (exponential model)</li>
@@ -2209,7 +2212,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   </div>
                   
                   <div style="background-color: #f0fff0; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #4caf50;">
-                      <strong>🎯 Interpretation Guidelines:</strong>
+                      <strong> Interpretation Guidelines:</strong>
                       <ul style="margin: 5px 0; padding-left: 20px;">
                           <li><strong>Constant Hazard:</strong> Exponential survival, memoryless property</li>
                           <li><strong>Increasing Hazard:</strong> Risk rises over time (aging, disease progression)</li>
@@ -2834,23 +2837,23 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (self$options$showSummaries) {
           warning_text <- if (length(dq$warnings) > 0) {
             paste("<div style='background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
-                  "<strong>⚠️ Data Quality Considerations:</strong><ul>",
+                  "<strong> Data Quality Considerations:</strong><ul>",
                   paste0("<li>", dq$warnings, "</li>", collapse = ""),
                   "</ul></div>")
           } else {
             paste0("<div style='background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #28a745;'>",
-                   "<strong>✅ Data Quality: Good</strong> - No major concerns identified.</div>")
+                   "<strong> Data Quality: Good</strong> - No major concerns identified.</div>")
           }
 
           summary_html <- paste0(
             "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-            "<h4 style='color: #2c3e50; margin-top: 0;'>📊 Data Quality Assessment</h4>",
+            "<h4 style='color: #2c3e50; margin-top: 0;'> Data Quality Assessment</h4>",
             "<p>This analysis includes <strong>", dq$n_total, " subjects</strong> with <strong>", 
             dq$n_events, " events</strong> (", dq$event_rate, "% event rate) over a follow-up period of ",
             dq$min_time, " to ", dq$max_time, " ", self$options$timetypeoutput, ".</p>",
             warning_text,
             "<div style='background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-            "<strong>💡 Quality Enhancement Tips:</strong>",
+            "<strong> Quality Enhancement Tips:</strong>",
             "<ul style='margin: 5px 0; padding-left: 20px;'>",
             "<li><strong>Performance:</strong> Analysis results are cached for improved speed on re-runs</li>",
             "<li><strong>Reliability:</strong> Plots use systematic sampling for large datasets</li>",
@@ -2950,7 +2953,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Format the complete summary
           summary_html <- paste0(
             "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;'>",
-            "<h4 style='color: #2c3e50; margin-top: 0; margin-bottom: 15px;'>📋 ", .("Clinical Summary"), "</h4>",
+            "<h4 style='color: #2c3e50; margin-top: 0; margin-bottom: 15px;'> ", .("Clinical Summary"), "</h4>",
             "<p style='margin-bottom: 15px; font-size: 16px; line-height: 1.6;'>",
             "<strong>", preset_context, ":</strong> ", paste(summary_parts, collapse = " "), "</p>"
           )
@@ -2958,7 +2961,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (length(recommendations) > 0) {
             summary_html <- paste0(summary_html,
               "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 15px;'>",
-              "<h5 style='color: #1976d2; margin-top: 0; margin-bottom: 10px;'>💡 ", .("Clinical Considerations"), "</h5>",
+              "<h5 style='color: #1976d2; margin-top: 0; margin-bottom: 10px;'> ", .("Clinical Considerations"), "</h5>",
               "<ul style='margin: 0; padding-left: 20px;'>",
               paste0("<li>", recommendations, "</li>", collapse = ""),
               "</ul></div>"
@@ -2968,7 +2971,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Add copy button functionality
           summary_html <- paste0(summary_html,
             "<div style='text-align: right; margin-top: 15px;'>",
-            "<small style='color: #6c757d;'>", .("💾 Copy-ready for clinical reports"), "</small>",
+            "<small style='color: #6c757d;'>", .(" Copy-ready for clinical reports"), "</small>",
             "</div></div>"
           )
           

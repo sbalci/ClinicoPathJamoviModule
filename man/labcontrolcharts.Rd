@@ -119,12 +119,13 @@ and trends in laboratory measurements. Essential for ISO 15189 compliance
 and quality assurance programs.
 }
 \examples{
-data \\%>\\%
+\donttest{
+data |>
 labcontrolcharts(
     measurement = "glucose_value",
     run_number = "run_id",
     chart_type = "shewhart",
     control_limits = "3sigma"
 )
-
+}
 }

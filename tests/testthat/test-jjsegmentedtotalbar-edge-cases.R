@@ -6,7 +6,6 @@
 # Generated: 2026-01-06
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test datasets
 data(jjsegmentedtotalbar_test, package = "ClinicoPath", envir = environment())
@@ -18,7 +17,6 @@ data(jjsegmentedtotalbar_demographics, package = "ClinicoPath", envir = environm
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles small sample (n=30)", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_small,
@@ -31,7 +29,6 @@ test_that("jjsegmentedtotalbar handles small sample (n=30)", {
 })
 
 test_that("jjsegmentedtotalbar handles very small sample per category", {
-  devtools::load_all()
 
   # Small sample with faceting creates very small groups
   result <- jjsegmentedtotalbar(
@@ -50,7 +47,6 @@ test_that("jjsegmentedtotalbar handles very small sample per category", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles missing data in x_var", {
-  devtools::load_all()
 
   test_data_na <- jjsegmentedtotalbar_test
   test_data_na$timepoint[1:30] <- NA
@@ -66,7 +62,6 @@ test_that("jjsegmentedtotalbar handles missing data in x_var", {
 })
 
 test_that("jjsegmentedtotalbar handles missing data in y_var", {
-  devtools::load_all()
 
   test_data_na <- jjsegmentedtotalbar_test
   test_data_na$tumor_response_score[1:25] <- NA
@@ -82,7 +77,6 @@ test_that("jjsegmentedtotalbar handles missing data in y_var", {
 })
 
 test_that("jjsegmentedtotalbar handles missing data in fill_var", {
-  devtools::load_all()
 
   test_data_na <- jjsegmentedtotalbar_test
   test_data_na$response_category[1:40] <- NA
@@ -98,7 +92,6 @@ test_that("jjsegmentedtotalbar handles missing data in fill_var", {
 })
 
 test_that("jjsegmentedtotalbar handles missing data in facet_var", {
-  devtools::load_all()
 
   test_data_na <- jjsegmentedtotalbar_test
   test_data_na$treatment[1:35] <- NA
@@ -115,7 +108,6 @@ test_that("jjsegmentedtotalbar handles missing data in facet_var", {
 })
 
 test_that("jjsegmentedtotalbar handles missing data in multiple variables", {
-  devtools::load_all()
 
   test_data_na <- jjsegmentedtotalbar_test
   test_data_na$timepoint[1:20] <- NA
@@ -137,7 +129,6 @@ test_that("jjsegmentedtotalbar handles missing data in multiple variables", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar errors on non-existent x_var", {
-  devtools::load_all()
 
   expect_error(
     jjsegmentedtotalbar(
@@ -152,7 +143,6 @@ test_that("jjsegmentedtotalbar errors on non-existent x_var", {
 })
 
 test_that("jjsegmentedtotalbar errors on non-existent y_var", {
-  devtools::load_all()
 
   expect_error(
     jjsegmentedtotalbar(
@@ -167,7 +157,6 @@ test_that("jjsegmentedtotalbar errors on non-existent y_var", {
 })
 
 test_that("jjsegmentedtotalbar errors on non-existent fill_var", {
-  devtools::load_all()
 
   expect_error(
     jjsegmentedtotalbar(
@@ -182,7 +171,6 @@ test_that("jjsegmentedtotalbar errors on non-existent fill_var", {
 })
 
 test_that("jjsegmentedtotalbar errors on numeric x_var", {
-  devtools::load_all()
 
   # x_var should be categorical
   expect_error(
@@ -198,7 +186,6 @@ test_that("jjsegmentedtotalbar errors on numeric x_var", {
 })
 
 test_that("jjsegmentedtotalbar errors on numeric fill_var", {
-  devtools::load_all()
 
   # fill_var should be categorical
   expect_error(
@@ -214,7 +201,6 @@ test_that("jjsegmentedtotalbar errors on numeric fill_var", {
 })
 
 test_that("jjsegmentedtotalbar errors on empty dataset", {
-  devtools::load_all()
 
   empty_data <- jjsegmentedtotalbar_test[0, ]
 
@@ -235,7 +221,6 @@ test_that("jjsegmentedtotalbar errors on empty dataset", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles minimum label threshold (0%)", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -250,7 +235,6 @@ test_that("jjsegmentedtotalbar handles minimum label threshold (0%)", {
 })
 
 test_that("jjsegmentedtotalbar handles maximum label threshold (50%)", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -265,7 +249,6 @@ test_that("jjsegmentedtotalbar handles maximum label threshold (50%)", {
 })
 
 test_that("jjsegmentedtotalbar handles minimum flerlage label size (2)", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -281,7 +264,6 @@ test_that("jjsegmentedtotalbar handles minimum flerlage label size (2)", {
 })
 
 test_that("jjsegmentedtotalbar handles maximum flerlage label size (12)", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -297,7 +279,6 @@ test_that("jjsegmentedtotalbar handles maximum flerlage label size (12)", {
 })
 
 test_that("jjsegmentedtotalbar handles minimum flerlage alpha (0)", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -312,7 +293,6 @@ test_that("jjsegmentedtotalbar handles minimum flerlage alpha (0)", {
 })
 
 test_that("jjsegmentedtotalbar handles maximum flerlage alpha (1)", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_test,
@@ -331,7 +311,6 @@ test_that("jjsegmentedtotalbar handles maximum flerlage alpha (1)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles variable names with spaces", {
-  devtools::load_all()
 
   test_data_spaces <- jjsegmentedtotalbar_test
   names(test_data_spaces)[names(test_data_spaces) == "timepoint"] <- "Time Point"
@@ -352,7 +331,6 @@ test_that("jjsegmentedtotalbar handles variable names with spaces", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles tibble input", {
-  devtools::load_all()
 
   tibble_data <- tibble::as_tibble(jjsegmentedtotalbar_test)
 
@@ -367,7 +345,6 @@ test_that("jjsegmentedtotalbar handles tibble input", {
 })
 
 test_that("jjsegmentedtotalbar handles data.frame input", {
-  devtools::load_all()
 
   df_data <- as.data.frame(jjsegmentedtotalbar_test)
 
@@ -386,7 +363,6 @@ test_that("jjsegmentedtotalbar handles data.frame input", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles duplicate rows", {
-  devtools::load_all()
 
   test_data_dup <- rbind(jjsegmentedtotalbar_test, jjsegmentedtotalbar_test[1:50, ])
 
@@ -405,7 +381,6 @@ test_that("jjsegmentedtotalbar handles duplicate rows", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles zero values in y_var", {
-  devtools::load_all()
 
   test_data_zero <- jjsegmentedtotalbar_test
   test_data_zero$tumor_response_score[1:20] <- 0
@@ -421,7 +396,6 @@ test_that("jjsegmentedtotalbar handles zero values in y_var", {
 })
 
 test_that("jjsegmentedtotalbar handles all zero values in a category", {
-  devtools::load_all()
 
   test_data_zero <- jjsegmentedtotalbar_test
   # Set all baseline values to zero
@@ -443,7 +417,6 @@ test_that("jjsegmentedtotalbar handles all zero values in a category", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles unbalanced x_var categories", {
-  devtools::load_all()
 
   # Create highly unbalanced data
   test_data_unbal <- jjsegmentedtotalbar_test
@@ -462,7 +435,6 @@ test_that("jjsegmentedtotalbar handles unbalanced x_var categories", {
 })
 
 test_that("jjsegmentedtotalbar handles unbalanced fill_var categories", {
-  devtools::load_all()
 
   # Create highly unbalanced fill categories
   test_data_unbal <- jjsegmentedtotalbar_test
@@ -485,7 +457,6 @@ test_that("jjsegmentedtotalbar handles unbalanced fill_var categories", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles single x_var level", {
-  devtools::load_all()
 
   # Keep only one timepoint
   test_data_single <- jjsegmentedtotalbar_test[jjsegmentedtotalbar_test$timepoint == "Week 12", ]
@@ -501,7 +472,6 @@ test_that("jjsegmentedtotalbar handles single x_var level", {
 })
 
 test_that("jjsegmentedtotalbar handles single fill_var level", {
-  devtools::load_all()
 
   test_data_single <- jjsegmentedtotalbar_test
   test_data_single$response_category <- "Complete Response"  # All same category
@@ -521,7 +491,6 @@ test_that("jjsegmentedtotalbar handles single fill_var level", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles many fill_var levels", {
-  devtools::load_all()
 
   # Create data with many fill categories
   test_data_many <- jjsegmentedtotalbar_demographics
@@ -538,7 +507,6 @@ test_that("jjsegmentedtotalbar handles many fill_var levels", {
 })
 
 test_that("jjsegmentedtotalbar handles many fill_var levels with percentages", {
-  devtools::load_all()
 
   result <- jjsegmentedtotalbar(
     data = jjsegmentedtotalbar_demographics,
@@ -557,7 +525,6 @@ test_that("jjsegmentedtotalbar handles many fill_var levels with percentages", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("jjsegmentedtotalbar handles highly skewed proportions", {
-  devtools::load_all()
 
   # Create data where one segment dominates (95%+)
   test_data_skewed <- jjsegmentedtotalbar_test
@@ -577,7 +544,6 @@ test_that("jjsegmentedtotalbar handles highly skewed proportions", {
 })
 
 test_that("jjsegmentedtotalbar handles very small segment proportions", {
-  devtools::load_all()
 
   # Create data where some segments are <1%
   test_data_tiny <- jjsegmentedtotalbar_test

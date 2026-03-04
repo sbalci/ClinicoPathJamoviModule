@@ -6,7 +6,6 @@
 # including basic execution, required arguments, and expected outputs
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(waterfall_test, package = "ClinicoPath")

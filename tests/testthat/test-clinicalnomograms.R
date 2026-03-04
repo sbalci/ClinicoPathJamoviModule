@@ -1,7 +1,6 @@
 
 test_that('clinicalnomograms survival analysis works', {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
 
   # Synthetic data generation for survival
   set.seed(123)
@@ -49,7 +48,6 @@ test_that('clinicalnomograms survival analysis works', {
 
 test_that('clinicalnomograms logistic analysis works', {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
 
   # Synthetic data generation for logistic
   set.seed(123)

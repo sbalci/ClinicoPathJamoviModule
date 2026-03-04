@@ -3,7 +3,6 @@
 
 # Load required libraries for testing
 library(testthat)
-library(ClinicoPath)
 
 # Test data setup
 setup_test_data <- function() {
@@ -32,7 +31,6 @@ setup_test_data <- function() {
 # Test basic survival analysis
 test_that("Basic survival analysis works", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   test_data <- setup_test_data()
   
   # Test basic survival analysis

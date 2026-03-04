@@ -1,7 +1,6 @@
 
 test_that('trichotomousroc analysis works', {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
 
   # Synthetic data generation (Distinct distributions)
   set.seed(123)

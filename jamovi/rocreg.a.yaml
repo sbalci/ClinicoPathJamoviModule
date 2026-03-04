@@ -24,7 +24,7 @@ description:
         on ROC curves. Provides both population-averaged and covariate-specific
         diagnostic accuracy estimates.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- rocreg(
                 data = multi_center_data,

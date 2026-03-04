@@ -127,7 +127,7 @@ generate_test_for_module <- function(yaml_path, output_dir = "tests/testthat") {
     "",
     paste0("test_that('", module_name, " analysis works', {"),
     "  skip_if_not_installed('jmvReadWrite')",
-    "  devtools::load_all()",
+    "  # library loaded by devtools::test()",
     "",
     paste(data_gen_code, collapse = "\n"),
     "",

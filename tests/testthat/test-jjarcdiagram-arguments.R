@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("jjarcdiagram handles analysis presets", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -28,7 +27,6 @@ test_that("jjarcdiagram handles analysis presets", {
 })
 
 test_that("jjarcdiagram handles arc coloring modes", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -50,7 +48,6 @@ test_that("jjarcdiagram handles arc coloring modes", {
 })
 
 test_that("jjarcdiagram handles weight mode options", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -71,7 +68,6 @@ test_that("jjarcdiagram handles weight mode options", {
 })
 
 test_that("jjarcdiagram handles edge aggregation options", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -97,7 +93,6 @@ test_that("jjarcdiagram handles edge aggregation options", {
 })
 
 test_that("jjarcdiagram handles sort direction", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -123,7 +118,6 @@ test_that("jjarcdiagram handles sort direction", {
 })
 
 test_that("jjarcdiagram handles arc transparency levels", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -143,7 +137,6 @@ test_that("jjarcdiagram handles arc transparency levels", {
 })
 
 test_that("jjarcdiagram handles label size variations", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -163,7 +156,6 @@ test_that("jjarcdiagram handles label size variations", {
 })
 
 test_that("jjarcdiagram handles show/hide options", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -196,7 +188,6 @@ test_that("jjarcdiagram handles show/hide options", {
 })
 
 test_that("jjarcdiagram handles comprehensive parameter combinations", {
-  devtools::load_all()
 
   data(jjarcdiagram_gene_network)
 
@@ -234,7 +225,6 @@ test_that("jjarcdiagram handles comprehensive parameter combinations", {
 })
 
 test_that("jjarcdiagram handles NULL optional parameters", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 
@@ -251,7 +241,6 @@ test_that("jjarcdiagram handles NULL optional parameters", {
 })
 
 test_that("jjarcdiagram handles different network scenarios", {
-  devtools::load_all()
 
   # Gene regulatory network
   data(jjarcdiagram_gene_network)
@@ -320,7 +309,6 @@ test_that("jjarcdiagram handles different network scenarios", {
 })
 
 test_that("jjarcdiagram handles visual customization combinations", {
-  devtools::load_all()
 
   data(jjarcdiagram_test)
 

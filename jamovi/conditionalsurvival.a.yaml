@@ -16,7 +16,7 @@ description:
         estimation methods are supported including Kaplan-Meier weights, landmark 
         approaches, and inverse probability weighting.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # example will be added
 

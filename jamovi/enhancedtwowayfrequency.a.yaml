@@ -51,13 +51,13 @@ options:
     title: Show Row Percentages
     type: Bool
     default: false
-    description: Display row-wise percentages (sum to 100% across rows)
+    description: Display row-wise percentages (sum to 100 percent across rows)
 
   - name: colPercent
     title: Show Column Percentages
     type: Bool
     default: false
-    description: Display column-wise percentages (sum to 100% across columns)
+    description: Display column-wise percentages (sum to 100 percent across columns)
 
   - name: showCounts
     title: Show Observed Frequencies
@@ -182,7 +182,7 @@ options:
     options:
       - title: Decimal (0.25)
         name: decimal
-      - title: Percentage (25%)
+      - title: Percentage (25 percent)
         name: percentage
     default: percentage
     description: Format for displaying percentage values

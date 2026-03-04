@@ -20,10 +20,10 @@ description:
         • Evaluating diagnostic test chains in clinical workflows
         
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # COVID-19 rapid test in community screening (low prevalence)
-            # Sensitivity: 85%, Specificity: 95%, Prevalence: 2%
+            # Sensitivity: 85 percent, Specificity: 95 percent, Prevalence: 2 percent
             data(screening_examples)
             covid_community <- screening_examples[1, ]
             

@@ -721,6 +721,7 @@ deeplearningpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic Vision Transformer prediction
 #' deeplearningprediction(
 #'     data = image_data,
@@ -741,7 +742,7 @@ deeplearningpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #'     gray_zone_width = 5.0,
 #'     thresholds = c(5, 10, 15, 20)
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param image_path_var variable containing file paths to histological images
 #' @param target_var dependent variable to predict (biomarker status,

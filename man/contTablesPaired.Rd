@@ -61,6 +61,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 McNemar test
 }
 \examples{
+\donttest{
 dat <- data.frame(
     `1st survey` = c('Approve', 'Approve', 'Disapprove', 'Disapprove'),
     `2nd survey` = c('Approve', 'Disapprove', 'Approve', 'Disapprove'),
@@ -96,5 +97,5 @@ contTablesPaired(formula = Counts ~ `1st survey`:`2nd survey`, data = dat)
 # formula if each row represents a single observation:
 
 contTablesPaired(formula = ~ `1st survey`:`2nd survey`, data = dat)
-
+}
 }

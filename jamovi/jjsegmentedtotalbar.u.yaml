@@ -164,7 +164,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: '⚠️ Requirements: Value Variable must be integer counts for valid Chi-square tests.'
+            label: ' Requirements: Value Variable must be integer counts for valid Chi-square tests.'
             margin: small
             style: list-inline
           - type: CheckBox

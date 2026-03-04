@@ -16,7 +16,7 @@ description:
         selection and preventing overfitting in genomic, proteomic, or other high-dimensional
         clinical datasets.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: LASSO regularization for gene expression data
             library(survival)

@@ -478,22 +478,23 @@ flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Flexible Parametric Survival Models (Enhanced)
 #'
-#' 🔬 ENHANCED: Comprehensive flexible parametric survival modeling combining  
+#' ENHANCED: Comprehensive flexible parametric survival modeling combining 
 #' traditional parametric distributions (Generalized Gamma, Weibull, etc.) 
-#' with  advanced spline-based approaches (Royston-Parmar, B-splines). 
-#' Provides maximum  flexibility for modeling complex hazard shapes, 
-#' time-varying effects, and  non-proportional hazards.
-#' ⚕️ CLINICAL USE: Model survival data when standard Cox models are 
-#' inadequate.  Ideal for cancer research, health economics, and comparative 
-#' effectiveness studies.
-#' 📊 KEY FEATURES: • Traditional parametric and spline-based models in one 
+#' with advanced spline-based approaches (Royston-Parmar, B-splines). Provides 
+#' maximum flexibility for modeling complex hazard shapes, time-varying 
+#' effects, and non-proportional hazards.
+#' CLINICAL USE: Model survival data when standard Cox models are inadequate. 
+#' Ideal for cancer research, health economics, and comparative effectiveness 
+#' studies.
+#' KEY FEATURES: • Traditional parametric and spline-based models in one 
 #' function • Automatic model comparison and selection • Clinical 
 #' interpretation of parameters • Comprehensive diagnostic plots • Copy-ready 
 #' report templates
 #'
 #' @examples
+#' \donttest{
 #' # Example usage will be added
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis.
 #' @param outcome Event indicator variable.

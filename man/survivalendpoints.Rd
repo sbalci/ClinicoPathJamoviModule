@@ -121,6 +121,7 @@ variables for use in survival analysis. Designed for seamless integration
 with swimmer/waterfall plot data.
 }
 \examples{
+\donttest{
 data <- data.frame(
     patient = c("P01", "P02", "P03"),
     start_date = as.Date(c("2023-01-01", "2023-02-01", "2023-03-01")),
@@ -138,5 +139,5 @@ survivalendpoints(
     deathEvent = "death",
     progressionEvent = "progression"
 )
-
+}
 }

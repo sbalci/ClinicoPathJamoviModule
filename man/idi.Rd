@@ -82,10 +82,11 @@ differences. Mean difference is standard, median is robust to outliers,
 trimmed mean balances both approaches, robust uses M-estimators.}
 
 \item{trim_proportion}{Proportion of extreme values to trim when using
-trimmed mean. 0.1 trims 10\\% from each tail, providing robust estimation.}
+trimmed mean. 0.1 trims 10 percent from each tail, providing robust
+estimation.}
 
 \item{confidence_level}{Confidence level for IDI confidence intervals and
-hypothesis testing. 0.95 provides 95\\% confidence intervals.}
+hypothesis testing. 0.95 provides 95 percent confidence intervals.}
 
 \item{bootstrap_samples}{Number of bootstrap samples for confidence
 interval estimation. More samples provide more stable estimates but
@@ -179,7 +180,7 @@ calibration. Uses calibrated probabilities for more accurate assessment.}
 showing how discrimination improvement varies over time.}
 
 \item{alpha_level}{Type I error rate for hypothesis testing and confidence
-intervals. Standard value is 0.05 for 95\\% confidence.}
+intervals. Standard value is 0.05 for 95 percent confidence.}
 
 \item{random_seed}{Random seed for bootstrap sampling and cross-validation.
 Ensures reproducible results across analyses.}
@@ -246,6 +247,7 @@ valuable when numeric risk improvement is more relevant than categorical
 reclassification, such as in precision medicine applications.
 }
 \examples{
+\donttest{
 result <- idi(
     data = mydata,
     outcome = "event_indicator",
@@ -254,5 +256,5 @@ result <- idi(
     time_point = 5,
     bootstrap_samples = 1000
 )
-
+}
 }

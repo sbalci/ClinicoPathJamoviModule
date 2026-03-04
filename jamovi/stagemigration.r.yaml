@@ -17,7 +17,7 @@ items:
 
     # Copy-Ready Clinical Report (New Feature)
     - name: copyReadyReport
-      title: 📄 Copy-Ready Clinical Summary
+      title:  Copy-Ready Clinical Summary
       type: Html
       visible: (generateCopyReadyReport)
       clearWith:
@@ -31,7 +31,7 @@ items:
 
     # Guided Mode Progress Indicator (New Feature)
     - name: guidedModeProgress
-      title: 🧭 Analysis Progress
+      title:  Analysis Progress
       type: Html
       visible: (enableGuidedMode)
       clearWith:

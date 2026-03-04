@@ -185,7 +185,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           type = "ERROR"
                       )
                       self$results$diagram$setContent(
-                          "<div style='background:#ffebee; padding:15px; border-left:4px solid #f44336;'><h4>⚠️ Data Error Detected</h4><p>Participant counts must decrease or stay constant between sequential steps. Your data shows increases, which is illogical for a study flow diagram.</p><p><b>Action:</b> Check that your count variable is cumulative and in the correct order.</p></div>"
+                          "<div style='background:#ffebee; padding:15px; border-left:4px solid #f44336;'><h4> Data Error Detected</h4><p>Participant counts must decrease or stay constant between sequential steps. Your data shows increases, which is illogical for a study flow diagram.</p><p><b>Action:</b> Check that your count variable is cumulative and in the correct order.</p></div>"
                       )
                       return()
                  }
@@ -384,7 +384,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 warning_msg <- paste0(
                     "<div style='background: #fff3cd; padding: 15px; margin: 10px; border: 1px solid #ffc107;'>",
-                    "<h4>⚠️ Variable Selection Warning</h4>",
+                    "<h4> Variable Selection Warning</h4>",
                     paste0("<p>", warnings, "</p>", collapse = ""),
                     "<p>Please verify you have selected the correct data format.</p>",
                     "</div>"
@@ -656,7 +656,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Provide informative message to use the plot output instead
             return(paste0(
                 "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
-                "<h4>📊 CONSORT Diagram Available in Plot Output</h4>",
+                "<h4> CONSORT Diagram Available in Plot Output</h4>",
                 "<p>The interactive diagram is displayed in the <strong>Plot</strong> section above.</p>",
                 "<p>You can customize the appearance using the options panel:</p>",
                 "<ul style='text-align: left; display: inline-block;'>",
@@ -673,7 +673,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # ggconsort rendering handled in plot output
             return(paste0(
                 "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
-                "<h4>📊 CONSORT Diagram Available in Plot Output</h4>",
+                "<h4> CONSORT Diagram Available in Plot Output</h4>",
                 "<p>The diagram is displayed in the <strong>Plot</strong> section above using ggplot2.</p>",
                 "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
                 "</div>"
@@ -684,7 +684,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # consort package rendering handled in plot output
             return(paste0(
                 "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
-                "<h4>📊 Flow Diagram Available in Plot Output</h4>",
+                "<h4> Flow Diagram Available in Plot Output</h4>",
                 "<p>The diagram is displayed in the <strong>Plot</strong> section above.</p>",
                 "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
                 "</div>"
@@ -695,7 +695,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # ggplot rendering handled in plot output
             return(paste0(
                 "<div style='text-align: center; padding: 20px; background: #f0f8ff; border: 1px solid #ccc;'>",
-                "<h4>📊 Flow Diagram Available in Plot Output</h4>",
+                "<h4> Flow Diagram Available in Plot Output</h4>",
                 "<p>The diagram is displayed in the <strong>Plot</strong> section above using ggplot2.</p>",
                 "<p style='margin-top: 15px;'><em>Right-click the plot to save as image</em></p>",
                 "</div>"
@@ -916,7 +916,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (retention_pct < 50) {
                     warnings <- c(warnings, sprintf(
-                        "⚠️ <b>High Attrition:</b> Only %.1f%% of participants reached final analysis (%d/%d). Consider discussing attrition bias in your manuscript and performing sensitivity analyses.",
+                        " <b>High Attrition:</b> Only %.1f%% of participants reached final analysis (%d/%d). Consider discussing attrition bias in your manuscript and performing sensitivity analyses.",
                         retention_pct, summary$total_final, summary$total_initial
                     ))
                 }
@@ -932,7 +932,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(missing_reasons)) {
                     n_missing <- sum(missing_reasons)
                     warnings <- c(warnings, sprintf(
-                        "⚠️ <b>Missing Exclusion Reasons:</b> %d stage(s) have exclusions without documented reasons. CONSORT 2010 requires reporting all exclusion criteria and reasons.",
+                        " <b>Missing Exclusion Reasons:</b> %d stage(s) have exclusions without documented reasons. CONSORT 2010 requires reporting all exclusion criteria and reasons.",
                         n_missing
                     ))
                 }
@@ -940,7 +940,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for single-stage studies
                 if (length(flow_data) == 1) {
                     warnings <- c(warnings,
-                        "ℹ️ <b>Single Stage:</b> Only one stage detected. Flow diagrams are most useful for multi-stage studies."
+                        " <b>Single Stage:</b> Only one stage detected. Flow diagrams are most useful for multi-stage studies."
                     )
                 }
             }
@@ -957,7 +957,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$warnings$setContent(
                     paste0(
                     "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin: 10px 0;'>" ,
-                    "✅ <b>No data quality issues detected.</b> All stages have documented exclusions and retention is adequate." ,
+                    " <b>No data quality issues detected.</b> All stages have documented exclusions and retention is adequate." ,
                     "</div>"
                     )
                 )
@@ -987,7 +987,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_html <- sprintf(
                 paste0(
                     "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;'>" ,
-                    "<h4 style='margin-top: 0;'>📊 Study Flow Summary</h4>" ,
+                    "<h4 style='margin-top: 0;'> Study Flow Summary</h4>" ,
                     "<p><b>Initial participants:</b> %d</p>" ,
                     "<p><b>Exclusion stages:</b> %d</p>" ,
                     "<p><b>Total excluded:</b> %d (%.1f%%)</p>" ,
@@ -1031,7 +1031,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             report_html <- sprintf(
                 paste0(
                     "<div style='background-color: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 10px 0;'>" ,
-                    "<h4 style='margin-top: 0;'>📝 Copy-Ready Report Sentence</h4>" ,
+                    "<h4 style='margin-top: 0;'> Copy-Ready Report Sentence</h4>" ,
                     "<p style='font-family: \"Times New Roman\", serif; font-size: 14px; line-height: 1.6;' id='reportText'>" ,
                     "Figure X shows the participant flow through the study. Of %d individuals assessed, " ,
                     "%d (%s%%) completed all study stages and were included in the final analysis.%s" ,
@@ -1039,7 +1039,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<button onclick='navigator.clipboard.writeText(document.getElementById(\"reportText\").innerText)' " ,
                     "style='background-color: #0066cc; color: white; border: none; padding: 8px 16px; " ,
                     "border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 10px;'>" ,
-                    "📋 Copy to Clipboard</button>" ,
+                    " Copy to Clipboard</button>" ,
                     "</div>"
                 ),
                 initial_n,
@@ -1060,7 +1060,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             about_html <- sprintf(
                 paste0(
                     "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>" ,
-                    "<h4 style='margin-top: 0;'>ℹ️ About This Analysis</h4>" ,
+                    "<h4 style='margin-top: 0;'> About This Analysis</h4>" ,
                     "<p><b>Analysis Type:</b> %s</p>" ,
                     "<p><b>Purpose:</b> %s</p>" ,
                     "<p><b>When to Use:</b> %s</p>" ,
@@ -1072,7 +1072,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li>Data quality warnings for high attrition or missing documentation</li>" ,
                     "</ul>" ,
                     "<p style='margin-top: 10px; font-size: 12px; color: #6c757d;'>" ,
-                    "📚 <a href='https://www.consort-statement.org/' target='_blank' style='color: #0066cc;'>CONSORT 2010 Guidelines</a> | " ,
+                    " <a href='https://www.consort-statement.org/' target='_blank' style='color: #0066cc;'>CONSORT 2010 Guidelines</a> | " ,
                     "<a href='https://www.riinu.me/2024/02/consort/' target='_blank' style='color: #0066cc;'>Implementation Guide</a>" ,
                     "</p></div>"
                 ),
@@ -1109,10 +1109,10 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</ul>",
                 "<b>Common Pitfalls:</b>",
                 "<ul>",
-                "<li>⚠️ Overlapping exclusion criteria (participants excluded for multiple reasons)</li>",
-                "<li>⚠️ Missing data on exclusion timing (unclear which stage exclusion occurred)</li>",
-                "<li>⚠️ Inconsistent definitions across study sites in multi-center trials</li>",
-                "<li>⚠️ Confusing 'screened' with 'eligible' in initial counts</li>",
+                "<li> Overlapping exclusion criteria (participants excluded for multiple reasons)</li>",
+                "<li> Missing data on exclusion timing (unclear which stage exclusion occurred)</li>",
+                "<li> Inconsistent definitions across study sites in multi-center trials</li>",
+                "<li> Confusing 'screened' with 'eligible' in initial counts</li>",
                 "</ul>"
             )
 
@@ -1120,7 +1120,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(summary$retention_rate) && summary$retention_rate < 50) {
                 caveats <- c(caveats,
                     "<div style='background-color: #fff3cd; padding: 10px; margin-top: 10px; border-radius: 4px;'>",
-                    "<b>⚠️ High Attrition Alert:</b> Less than 50% of initial participants reached final analysis. ",
+                    "<b> High Attrition Alert:</b> Less than 50% of initial participants reached final analysis. ",
                     "Consider:",
                     "<ul style='margin-bottom: 0;'>",
                     "<li>Comparing baseline characteristics of included vs. excluded participants</li>",
@@ -1133,7 +1133,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             caveats_html <- paste0(
                 "<div style='background-color: #fff8e1; border-left: 4px solid #ff9800; padding: 15px;'>",
-                "<h4 style='margin-top: 0;'>⚠️ Caveats & Assumptions</h4>",
+                "<h4 style='margin-top: 0;'> Caveats & Assumptions</h4>",
                 paste(caveats, collapse = "\n"),
                 "</div>"
             )

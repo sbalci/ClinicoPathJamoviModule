@@ -1,7 +1,6 @@
 # Comprehensive Test Suite for oddsratio Function
 # Tests all features, options, and edge cases
 
-devtools::load_all()
 
 # Test 1: Load test data ----
 cat("\n=== Test 1: Loading test data ===\n")

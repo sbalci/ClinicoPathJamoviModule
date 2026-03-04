@@ -69,7 +69,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (is.null(self$options$dep_var) || is.null(self$options$group_var)) {
                 intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: #1976d2; margin-top: 0;'>☁️ Welcome to Raincloud Plot Visualization!</h3>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Raincloud Plot Visualization!</h3>
                 <p><strong>Comprehensive distribution analysis</strong> using ggdist raincloud plots</p>
                 <p>Based on R-Bloggers tutorial: 'Make a Raincloud Plot to Visualize Distribution in ggplot2'</p>
                 
@@ -96,7 +96,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 </ul>
                 
                 <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                💡 <em>Raincloud plots combine three visualization techniques for complete distribution understanding</em>
+                 <em>Raincloud plots combine three visualization techniques for complete distribution understanding</em>
                 </p>
                 </div>"
                 
@@ -536,7 +536,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             stats_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #495057; margin-top: 0;'>📊 Distribution Summary Statistics</h3>",
+                "<h3 style='color: #495057; margin-top: 0;'> Distribution Summary Statistics</h3>",
                 "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
                 "<th style='padding: 8px; border: 1px solid #dee2e6;'>Group</th>",
@@ -608,7 +608,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             outlier_html <- paste0(
                 "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #856404; margin-top: 0;'>⚠️ Outlier Detection (", stringr::str_to_title(outlier_method), " Method)</h3>",
+                "<h3 style='color: #856404; margin-top: 0;'> Outlier Detection (", stringr::str_to_title(outlier_method), " Method)</h3>",
                 "<ul>"
             )
             
@@ -643,7 +643,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             normality_html <- paste0(
                 "<div style='background-color: #d1ecf1; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #0c5460; margin-top: 0;'>📈 Normality Tests (Shapiro-Wilk)</h3>",
+                "<h3 style='color: #0c5460; margin-top: 0;'> Normality Tests (Shapiro-Wilk)</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr style='background-color: #e0e0e0;'>",
                 "<th style='padding: 8px; border: 1px solid #ddd;'>Group</th>",
@@ -802,7 +802,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             comparison_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'>📊 Group Comparison Test</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> Group Comparison Test</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Method:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_method, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Statistic:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_details, "</td></tr>",
@@ -832,7 +832,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             interpretation_html <- paste0(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'>📋 Raincloud Plot Interpretation Guide</h3>",
+                "<h3 style='color: #2e7d32; margin-top: 0;'> Raincloud Plot Interpretation Guide</h3>",
                 
                 "<h4 style='color: #2e7d32;'>Plot Summary:</h4>",
                 "<ul>",
@@ -873,7 +873,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 "</ul>",
                 
                 "<p style='font-size: 12px; color: #2e7d32; margin-top: 15px;'>",
-                "<em>💡 Raincloud plots reveal distribution nuances that traditional box plots miss, making them ideal for exploratory data analysis and publication-quality visualizations.</em>",
+                "<em> Raincloud plots reveal distribution nuances that traditional box plots miss, making them ideal for exploratory data analysis and publication-quality visualizations.</em>",
                 "</p></div>"
             )
             
@@ -896,11 +896,11 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             return(paste0(
                 "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-                "<h4 style='margin-top: 0; color: #1976d2;'>📝 Copy-Ready Result</h4>",
+                "<h4 style='margin-top: 0; color: #1976d2;'> Copy-Ready Result</h4>",
                 "<p style='font-family: monospace; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 3px;'>",
                 report_text,
                 "</p>",
-                "<small style='color: #666;'>💡 This sentence is ready to copy into your research report</small>",
+                "<small style='color: #666;'> This sentence is ready to copy into your research report</small>",
                 "</div>"
             ))
         }

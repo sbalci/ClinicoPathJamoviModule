@@ -6,7 +6,6 @@
 # for the swimmerplot jamovi function
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(swimmerplot_test, package = "ClinicoPath")

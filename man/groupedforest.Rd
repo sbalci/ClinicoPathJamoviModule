@@ -57,7 +57,7 @@ combined) in the forest plot.}
 hazard ratios, confidence intervals, and p-values.}
 
 \item{confidence_level}{Confidence level for confidence intervals (e.g.,
-0.95 for 95\\% CI).}
+0.95 for 95 percent CI).}
 
 \item{sort_by_hr}{If TRUE, sorts subgroups by hazard ratio magnitude in the
 forest plot.}

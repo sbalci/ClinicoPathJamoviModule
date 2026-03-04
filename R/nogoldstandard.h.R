@@ -375,7 +375,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "nogoldstandard",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = nogoldstandardResults$new(options=options),
                 data = data,
@@ -404,7 +404,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' n <- 200
 #'
 #' # Simulate disease status (latent, unknown)
-#' disease <- rbinom(n, 1, 0.3)  # 30\% prevalence
+#' disease <- rbinom(n, 1, 0.3)  # 30 percent prevalence
 #'
 #' # Simulate test results with known sensitivity/specificity
 #' test1_result <- ifelse(disease == 1,

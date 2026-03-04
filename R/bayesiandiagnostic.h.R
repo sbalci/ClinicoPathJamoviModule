@@ -1248,6 +1248,7 @@ bayesiandiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Bayesian diagnostic test evaluation
 #' bayesiandiagnostic(
 #'     data = diagnostic_data,
@@ -1256,7 +1257,7 @@ bayesiandiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'     prior_sensitivity_mean = 0.8,
 #'     prior_specificity_mean = 0.9
 #' )
-#'
+#'}
 #' @param data The data as a data frame for Bayesian diagnostic test
 #'   evaluation.
 #' @param test_results .

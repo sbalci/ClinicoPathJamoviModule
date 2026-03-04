@@ -553,13 +553,14 @@ vusanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- vusanalysis(
 #'     data = tumor_data,
 #'     predictor = "biomarker_score",
 #'     multiclass_outcome = "tumor_grade",
 #'     outcome_order = c("Grade 1", "Grade 2", "Grade 3")
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param predictor Continuous predictor variable (biomarker, risk score,
 #'   imaging feature). Should be numeric with higher values generally indicating

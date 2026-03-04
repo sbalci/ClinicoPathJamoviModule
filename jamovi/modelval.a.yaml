@@ -13,7 +13,7 @@ description:
       predicted probabilities from existing models. Supports external
       validation, temporal validation, and subgroup analysis.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example usage:
             # data <- your_data

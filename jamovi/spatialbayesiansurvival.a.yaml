@@ -14,7 +14,7 @@ description:
         disease mapping capabilities, and hierarchical Bayesian modeling for
         clinical research with geographic components.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Spatial Bayesian survival analysis
             spatialbayesiansurvival(

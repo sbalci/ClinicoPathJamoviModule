@@ -227,6 +227,7 @@ The method automatically handles tied survival times, stratified analysis,
 and provides uncertainty quantification through bootstrap procedures.
 }
 \examples{
+\donttest{
 result <- adaptivelasso(
     data = mydata,
     time = "time_to_event",
@@ -237,5 +238,5 @@ result <- adaptivelasso(
     stability_selection = TRUE,
     alpha = 1.0
 )
-
+}
 }

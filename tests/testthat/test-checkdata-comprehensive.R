@@ -2,7 +2,6 @@
 # Validates consensus outlier detection, quality grading, and all analysis outputs
 
 library(testthat)
-devtools::load_all()
 
 # Helper function to extract table data from jamovi results
 extract_table_data <- function(result, table_name) {
@@ -83,7 +82,6 @@ extract_quality_grade <- function(result) {
 
 test_that("Consensus outliers require 2 of 3 methods", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   # Create data with known outliers
   set.seed(123)
   data <- data.frame(

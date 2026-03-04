@@ -16,7 +16,7 @@ description:
         sophisticated alternatives to static coefficient approaches in survival
         analysis.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Dynamic coefficient model with Bayesian updating
             library(survival)

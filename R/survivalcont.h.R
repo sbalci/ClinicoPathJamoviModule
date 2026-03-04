@@ -1571,7 +1571,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survivalcont",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = survivalcontResults$new(options=options),
                 data = data,
@@ -1674,8 +1674,8 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param multievent Enable this option if your data includes multiple event
 #'   levels (e.g., different types of events or outcomes). This option is
 #'   required for cause-specific and competing risk survival analyses.
-#' @param ci95 Enable this option to display 95\% confidence intervals around
-#'   the survival estimates in the plots.
+#' @param ci95 Enable this option to display 95 percent confidence intervals
+#'   around the survival estimates in the plots.
 #' @param risktable Enable this option to display a table of risk estimates
 #'   for each group in the survival analysis.
 #' @param censored Enable this option to display censored observations in the

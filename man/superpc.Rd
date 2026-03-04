@@ -89,6 +89,7 @@ Particularly effective for genomics data where many features are
 correlated.
 }
 \examples{
+\donttest{
 superpc(
     data = data,
     time = "time",
@@ -97,5 +98,5 @@ superpc(
     threshold = 0.1,
     n_components = 5
 )
-
+}
 }

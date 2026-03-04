@@ -282,6 +282,7 @@ pathologycompositionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('pathology_data')
 #'
 #' pathologycomposition(data = pathology_data,
@@ -289,7 +290,7 @@ pathologycompositionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #'                     component1 = signet_ring_cells,
 #'                     component2 = poorly_differentiated,
 #'                     composition_analysis = TRUE)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome_variable Clinical outcome variable for composition analysis
 #' @param component1 First histologic component (proportion or category)
@@ -303,9 +304,9 @@ pathologycompositionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' @param trend_test Perform trend tests for dose-response relationships
 #' @param confidence_level Confidence level for risk estimates and intervals
 #' @param low_risk_threshold Maximum risk probability for low-risk
-#'   classification (5\% = 0.05)
+#'   classification (5 percent = 0.05)
 #' @param high_risk_threshold Minimum risk probability for high-risk
-#'   classification (20\% = 0.20)
+#'   classification (20 percent = 0.20)
 #' @param min_group_size Minimum number of cases required for composition
 #'   pattern analysis
 #' @param quantitative_categories Semi-quantitative categorization system for

@@ -1,6 +1,5 @@
 test_that("advancedtree module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("advancedtreeClass"))
   expect_true(is.function(advancedtree))
 })

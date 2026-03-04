@@ -107,6 +107,7 @@ including hazard ratios, cumulative incidence functions, and model
 comparisons across different causes of failure.
 }
 \examples{
+\donttest{
 data('mgus2', package='survival')
 
 causespecifichazards(data = mgus2,
@@ -115,5 +116,5 @@ causespecifichazards(data = mgus2,
                     covariates = c('age', 'sex'),
                     cause_variable = 'death',
                     reference_cause = '1')
-
+}
 }

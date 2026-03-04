@@ -768,6 +768,7 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- netreclassification(
 #'     data = mydata,
 #'     outcome = "event_indicator",
@@ -777,7 +778,7 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'     time_point = 5,
 #'     bootstrap_samples = 1000
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (0/1) indicating event occurrence.
 #'   For time-to-event data, this should be event status at the specified time
@@ -795,8 +796,8 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   thresholds, numeric (risk-free) compares all risk changes, both provides
 #'   comprehensive assessment.
 #' @param risk_thresholds Comma-separated risk thresholds for categorical NRI
-#'   (e.g., 5\%, 10\%, 20\%). These define clinically meaningful risk categories
-#'   for decision making.
+#'   (e.g., 5 percent, 10 percent, 20 percent). These define clinically
+#'   meaningful risk categories for decision making.
 #' @param custom_categories Use custom category labels instead of automatic
 #'   threshold-based naming. Allows for more clinically meaningful category
 #'   descriptions.
@@ -804,7 +805,7 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   using custom categories. Should match the number of categories defined by
 #'   thresholds.
 #' @param confidence_level Confidence level for NRI confidence intervals and
-#'   hypothesis testing. 0.95 provides 95\% confidence intervals.
+#'   hypothesis testing. 0.95 provides 95 percent confidence intervals.
 #' @param bootstrap_samples Number of bootstrap samples for confidence
 #'   interval estimation. More samples provide more stable estimates but
 #'   increase computation time.
@@ -857,7 +858,7 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param subgroup_var Variable defining subgroups for stratified analysis.
 #'   Each level will receive separate NRI calculation.
 #' @param alpha_level Type I error rate for hypothesis testing and confidence
-#'   intervals. Standard value is 0.05 for 95\% confidence.
+#'   intervals. Standard value is 0.05 for 95 percent confidence.
 #' @param random_seed Random seed for bootstrap sampling and cross-validation.
 #'   Ensures reproducible results across analyses.
 #' @param category_free_nri Calculate category-free (continuous) NRI without

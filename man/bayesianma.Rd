@@ -175,6 +175,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Bayesian Model Averaging for survival analysis
 }
 \examples{
+\donttest{
 data('histopathology', package='ClinicoPath')
 
 bayesianma(data = histopathology,
@@ -184,5 +185,5 @@ bayesianma(data = histopathology,
           prior_type = 'uniform',
           mcmc_chains = 3,
           mcmc_iterations = 5000)
-
+}
 }

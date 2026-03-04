@@ -250,7 +250,7 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "cotest",
-                version = c(0,0,34),
+                version = c(0,0,36),
                 options = options,
                 results = cotestResults$new(options=options),
                 data = data,
@@ -271,6 +271,7 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Basic co-testing analysis with independent tests
 #' cotest(
 #'     test1_sens = 0.80,
@@ -306,7 +307,7 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     fagan = TRUE,
 #'     fnote = TRUE
 #' )
-#'
+#'}
 #' @param test1_sens Sensitivity (true positive rate) of Test 1.
 #' @param test1_spec Specificity (true negative rate) of Test 1.
 #' @param test2_sens Sensitivity (true positive rate) of Test 2.

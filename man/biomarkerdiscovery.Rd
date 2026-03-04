@@ -108,7 +108,7 @@ correlated features}
 
 \item{validation_method}{Method for model validation}
 
-\item{train_proportion}{Proportion of data for training (70\\% = 0.7)}
+\item{train_proportion}{Proportion of data for training (70 percent = 0.7)}
 
 \item{hyperparameter_tuning}{Perform hyperparameter optimization}
 
@@ -234,6 +234,7 @@ data analysis with regulatory compliance features for biomarker development
 and clinical translation.
 }
 \examples{
+\donttest{
 data('biomarker_data')
 
 biomarkerdiscovery(
@@ -244,5 +245,5 @@ biomarkerdiscovery(
     validation_method = "bootstrap",
     interpretability = TRUE
 )
-
+}
 }

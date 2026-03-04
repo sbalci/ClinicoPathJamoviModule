@@ -522,7 +522,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 interpretText <- self$results$interpretText
                 errorHtml <- sprintf("<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong>⚠️ ERROR: No Valid Data</strong></p>
+                    <p style='margin: 0; %s'><strong> ERROR: No Valid Data</strong></p>
                     <p style='margin: 10px 0 0 0; %s'>
                         All %d cases in the dataset have missing values for total samples.
                     </p>
@@ -572,7 +572,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     interpretText <- self$results$interpretText
                     errorHtml <- sprintf("<div style='%s %s %s %s'>
-                        <p style='margin: 0; %s'><strong>⚠️ ERROR: Data Quality Issues</strong></p>
+                        <p style='margin: 0; %s'><strong> ERROR: Data Quality Issues</strong></p>
                         <p style='margin: 10px 0 0 0; %s'>
                             All %d remaining cases have invalid data (first detection > total samples).
                         </p>
@@ -664,7 +664,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 interpretText <- self$results$interpretText
                 errorHtml <- sprintf("<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong>⚠️ ERROR: No Positive Cases</strong></p>
+                    <p style='margin: 0; %s'><strong> ERROR: No Positive Cases</strong></p>
                     <p style='margin: 10px 0 0 0; %s'>
                         Analysis requires at least one case with detected lesions.
                         Current dataset has %d cases, but zero cases show lesion detection.
@@ -695,7 +695,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (nDetected < 10) {
                 interpretText <- self$results$interpretText
                 warningHtml <- sprintf("<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong>⚠️ WARNING: Small Sample Size</strong></p>
+                    <p style='margin: 0; %s'><strong> WARNING: Small Sample Size</strong></p>
                     <p style='margin: 10px 0 0 0; %s'>
                         Only %d cases with detected lesions. Results may be unreliable.
                     </p>
@@ -839,7 +839,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             if (!is.na(cv) && is.finite(cv)) {
                                 if (cv > 0.5) {
                                     # High heterogeneity - DISABLE BINOMIAL MODEL
-                                    private$.empiricalHeterogeneity <- sprintf("⚠️ HIGH HETEROGENEITY: Detection probability varies substantially across cases (CV=%.2f). Pooled estimate may not represent any individual case well. Consider stratified analysis or reporting case-specific estimates.", cv)
+                                    private$.empiricalHeterogeneity <- sprintf(" HIGH HETEROGENEITY: Detection probability varies substantially across cases (CV=%.2f). Pooled estimate may not represent any individual case well. Consider stratified analysis or reporting case-specific estimates.", cv)
 
                                     # CRITICAL FIX: Disable binomial model when independence violated
                                     binomialText <- self$results$binomialText
@@ -847,7 +847,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                     binomialRecommendTable <- self$results$binomialRecommendTable
 
                                     fmt <- "<div style='%s %s %s %s'>
-                                        <p style='margin: 0; %s'><strong>❌ Binomial Model Not Applicable</strong></p>
+                                        <p style='margin: 0; %s'><strong> Binomial Model Not Applicable</strong></p>
                                         <p style='margin: 10px 0 0 0; %s'>
                                             <b>High heterogeneity detected (CV=%.2f > 0.5)</b> indicates substantial variation in detection
                                             probability across cases. This violates the binomial model's assumption of <b>independent,
@@ -885,7 +885,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                     skipBinomial <- TRUE
                                 } else if (cv > 0.3) {
                                     # Moderate heterogeneity - warn but allow
-                                    private$.empiricalHeterogeneity <- sprintf("⚠️ MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
+                                    private$.empiricalHeterogeneity <- sprintf(" MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
                                 }
                             }
                         }
@@ -928,26 +928,26 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (is.na(pForCalc)) {
                         pForCalc <- NA_real_
                         dataQualityWarnings <- c(dataQualityWarnings,
-                            "⚠️ Could not estimate detection probability from data")
+                            " Could not estimate detection probability from data")
                     } else if (pForCalc <= 0) {
                         dataQualityWarnings <- c(dataQualityWarnings,
-                            "⚠️ DATA QUALITY ISSUE: Estimated probability ≤ 0. Check for data entry errors or insufficient positive cases.")
+                            " DATA QUALITY ISSUE: Estimated probability ≤ 0. Check for data entry errors or insufficient positive cases.")
                         # Set to NA instead of 0 to avoid log(0) errors in downstream calculations
                         pForCalc <- NA_real_
                     } else if (pForCalc >= 1) {
                         dataQualityWarnings <- c(dataQualityWarnings,
-                            "⚠️ DATA QUALITY ISSUE: Estimated probability ≥ 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity.")
+                            " DATA QUALITY ISSUE: Estimated probability ≥ 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity.")
                         # Cap at 0.9999 instead of 1 - 1e-12 to avoid extreme log calculations
                         # This represents practical certainty while maintaining numeric stability
                         pForCalc <- 0.9999
                     } else if (pForCalc < 0.0001) {
                         # Warn about very low probabilities that may cause numeric issues
                         dataQualityWarnings <- c(dataQualityWarnings,
-                            sprintf("⚠️ CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc))
+                            sprintf(" CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc))
                     } else if (pForCalc > 0.99) {
                         # Warn about very high probabilities
                         dataQualityWarnings <- c(dataQualityWarnings,
-                            sprintf("⚠️ CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc))
+                            sprintf(" CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc))
                     }
                 } else {
                     pForCalc <- NA_real_
@@ -959,7 +959,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (any(invalid_counts, na.rm = TRUE)) {
                         n_invalid <- sum(invalid_counts, na.rm = TRUE)
                         dataQualityWarnings <- c(dataQualityWarnings,
-                            sprintf("⚠️ DATA ERROR: %d cases have positive count > total samples. These have been excluded from analysis.", n_invalid))
+                            sprintf(" DATA ERROR: %d cases have positive count > total samples. These have been excluded from analysis.", n_invalid))
                     }
                 }
 
@@ -970,7 +970,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 if (analysisContext == "tumor") {
                     binomialWarning <- sprintf("<div style='background: #ffebee; border: 1px solid #ef5350; padding: 12px; margin: 10px 0; border-radius: 4px;'>
-                        <p style='%s margin: 0;'><b>⚠️ WARNING: Binomial Model May Underestimate Sensitivity for Tumor Sampling</b></p>
+                        <p style='%s margin: 0;'><b> WARNING: Binomial Model May Underestimate Sensitivity for Tumor Sampling</b></p>
                         <p style='%s margin: 8px 0 0 0;'>
                             Sequential tumor samples (blocks) are <b>not independent</b> - they are serial sections through the same lesion
                             with spatial clustering. The binomial model assumes each sample is an independent event, which leads to
@@ -990,7 +990,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary))
                 } else if (analysisContext == "margin") {
                     binomialWarning <- sprintf("<div style='background: #fff3e0; border: 1px solid #ff9800; padding: 12px; margin: 10px 0; border-radius: 4px;'>
-                        <p style='%s margin: 0;'><b>⚠️ Caution: Margin samples may show spatial clustering</b></p>
+                        <p style='%s margin: 0;'><b> Caution: Margin samples may show spatial clustering</b></p>
                         <p style='%s margin: 8px 0 0 0;'>
                             Consider using empirical methods if margin positivity is geographically clustered.
                         </p>
@@ -1004,7 +1004,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (length(dataQualityWarnings) > 0) {
                     warningList <- paste(sprintf("<li>%s</li>", dataQualityWarnings), collapse = "\n")
                     dataQualityWarningHTML <- sprintf("<div style='background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 10px 0; border-radius: 4px;'>
-                        <p style='%s margin: 0 0 10px 0;'><b>⚠️ DATA QUALITY WARNINGS</b></p>
+                        <p style='%s margin: 0 0 10px 0;'><b> DATA QUALITY WARNINGS</b></p>
                         <ul style='%s margin: 0;'>
                             %s
                         </ul>
@@ -1521,7 +1521,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             population_10 <- prevalence * conditional_10
 
             html <- sprintf("<div style='%s'>
-                <h4 style='%s'>📊 Two Ways to Measure Detection Performance</h4>
+                <h4 style='%s'> Two Ways to Measure Detection Performance</h4>
 
                 <p style='%s'>
                     This analysis reports probabilities in two ways, depending on the clinical question:
@@ -1529,7 +1529,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 <div style='%s'>
                     <h5 style='%s'>
-                        1️⃣ Conditional Detection (Sensitivity) - \"If metastasis is present\"
+                        1⃣ Conditional Detection (Sensitivity) - \"If metastasis is present\"
                     </h5>
                     <p style='%s'>
                         <strong>Clinical question:</strong> If metastasis is truly present, how many blocks do I need to detect it?
@@ -1557,7 +1557,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 <div style='%s'>
                     <h5 style='%s'>
-                        2️⃣ Population-Level Detection - \"Overall detection rate\"
+                        2⃣ Population-Level Detection - \"Overall detection rate\"
                     </h5>
                     <p style='%s'>
                         <strong>Clinical question:</strong> Across all specimens submitted (positive + negative), how often do we detect tumour with n blocks?
@@ -1585,7 +1585,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 <div style='%s'>
                     <p style='%s'>
-                        <strong>⚠️ Important:</strong> These are fundamentally different quantities!
+                        <strong> Important:</strong> These are fundamentally different quantities!
                     </p>
                     <p style='%s'>
                         • <strong>Conditional (sensitivity)</strong> assumes metastasis is present
@@ -1738,7 +1738,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (nDetected < 3) {
                     bootstrapText <- self$results$bootstrapText
                     errorHtml <- sprintf("<div style='%s %s %s %s'>
-                        <p style='margin: 0; %s'><strong>⚠️ ERROR: Insufficient Data for Bootstrap</strong></p>
+                        <p style='margin: 0; %s'><strong> ERROR: Insufficient Data for Bootstrap</strong></p>
                         <p style='margin: 10px 0 0 0; %s'>
                             Bootstrap analysis requires at least 3 positive cases.
                             Current dataset has only %d positive case%s.
@@ -1831,7 +1831,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING
                 )
                 selectionBiasNotice$setContent(
-                    '⚠️ SELECTION BIAS WARNING: Bootstrap resamples only DETECTED cases. Sensitivity estimates assume 100% of true positives were detected and will be OVEROPTIMISTIC if any cases were missed. These are CONDITIONAL estimates (probability of detection given lesion was eventually found). For unbiased population-level sensitivity, you must provide gold-standard total positive count or use external validation. Interpret sample size recommendations conservatively.'
+                    ' SELECTION BIAS WARNING: Bootstrap resamples only DETECTED cases. Sensitivity estimates assume 100% of true positives were detected and will be OVEROPTIMISTIC if any cases were missed. These are CONDITIONAL estimates (probability of detection given lesion was eventually found). For unbiased population-level sensitivity, you must provide gold-standard total positive count or use external validation. Interpret sample size recommendations conservatively.'
                 )
                 self$results$insert(2, selectionBiasNotice)
 
@@ -2401,7 +2401,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     contextNote <- ""
                     if (analysisContext == "tumor") {
                         contextNote <- sprintf("<div style='background: #fff3cd; border: 1px solid #ffc107; padding: 12px; margin: 10px 0; border-radius: 4px;'>
-                            <p style='%s margin: 0;'><b>⚠️ Note for Tumor Sampling:</b> Sequential tumor samples (blocks) are not independent -
+                            <p style='%s margin: 0;'><b> Note for Tumor Sampling:</b> Sequential tumor samples (blocks) are not independent -
                             they represent serial sections through the same lesion. Spatial clustering of features like venous invasion (VI) or
                             perineural invasion (PNI) is expected. The <b>empirical method is recommended</b> over parametric models (binomial/geometric)
                             which assume independence. This non-parametric approach accurately reflects real-world detection patterns without
@@ -2412,7 +2412,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary))
                     } else if (analysisContext == "margin") {
                         contextNote <- sprintf("<div style='background: #d1ecf1; border: 1px solid #0c5460; padding: 12px; margin: 10px 0; border-radius: 4px;'>
-                            <p style='%s margin: 0;'><b>ℹ️ Note for Margin Sampling:</b> Margin samples may show spatial clustering -
+                            <p style='%s margin: 0;'><b> Note for Margin Sampling:</b> Margin samples may show spatial clustering -
                             positive margins are often geographically close. Empirical approach recommended for accurate sensitivity estimates.</p>
                         </div>",
                         private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary))
@@ -3083,10 +3083,10 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # Check minimum requirements
                     if (length(totalPopulationData) < 2) {
-                        betaBinomNotes <- c(betaBinomNotes, "⚠️ Insufficient cases for parameter estimation (need ≥2)")
+                        betaBinomNotes <- c(betaBinomNotes, " Insufficient cases for parameter estimation (need ≥2)")
                         modelRejected <- TRUE
                     } else if (!requireNamespace("VGAM", quietly = TRUE)) {
-                        betaBinomNotes <- c(betaBinomNotes, "❌ VGAM package required for beta-binomial analysis. Please install: install.packages('VGAM')")
+                        betaBinomNotes <- c(betaBinomNotes, " VGAM package required for beta-binomial analysis. Please install: install.packages('VGAM')")
                         modelRejected <- TRUE
                     } else {
                         # Use VGAM for proper maximum likelihood estimation with varying N
@@ -3098,7 +3098,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                         # Check for invalid data (negative failures)
                         if (any(betaData$fail < 0, na.rm = TRUE)) {
-                            betaBinomNotes <- c(betaBinomNotes, "❌ Invalid data: success counts exceed total population in some cases")
+                            betaBinomNotes <- c(betaBinomNotes, " Invalid data: success counts exceed total population in some cases")
                             modelRejected <- TRUE
                         } else {
                             tryCatch({
@@ -3126,36 +3126,36 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                     alpha <- mu_fit * total_shape
                                     beta <- (1 - mu_fit) * total_shape
                                 } else {
-                                    betaBinomNotes <- c(betaBinomNotes, "⚠️ VGAM fit produced invalid rho (overdispersion parameter)")
+                                    betaBinomNotes <- c(betaBinomNotes, " VGAM fit produced invalid rho (overdispersion parameter)")
                                     modelRejected <- TRUE
                                 }
 
                                 # Validate estimated parameters
                                 if (!modelRejected && (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0)) {
                                     betaBinomNotes <- c(betaBinomNotes,
-                                        "⚠️ Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution.")
+                                        " Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution.")
                                     modelRejected <- TRUE
                                 } else if (!modelRejected) {
                                     # Check for extremely skewed parameters
                                     if (alpha < 0.01 || beta < 0.01) {
                                         betaBinomNotes <- c(betaBinomNotes,
-                                            sprintf("⚠️ CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta))
+                                            sprintf(" CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta))
                                     }
 
                                     # Check for zero variance (all identical)
                                     if (rho_fit < 0.001) {
                                         betaBinomNotes <- c(betaBinomNotes,
-                                            sprintf("⚠️ Very low overdispersion (ρ=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit))
+                                            sprintf(" Very low overdispersion (ρ=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit))
                                     }
 
                                     # Add note about N-weighted estimation
                                     betaBinomNotes <- c(betaBinomNotes,
-                                        sprintf("ℹ️ Parameters estimated using N-weighted MLE via VGAM (μ=%.3f, ρ=%.3f, α=%.3f, β=%.3f)", mu_fit, rho_fit, alpha, beta))
+                                        sprintf(" Parameters estimated using N-weighted MLE via VGAM (μ=%.3f, ρ=%.3f, α=%.3f, β=%.3f)", mu_fit, rho_fit, alpha, beta))
                                 }
 
                             }, error = function(e) {
                                 betaBinomNotes <- c(betaBinomNotes,
-                                    sprintf("❌ VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", e$message))
+                                    sprintf(" VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", e$message))
                                 modelRejected <- TRUE
                             })
                         }
@@ -3168,7 +3168,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
 
                         errorHtml <- sprintf("<div style='%s %s %s %s'>
-                            <p style='margin: 0; %s'><strong>⚠️ Beta-Binomial Model Not Applicable</strong></p>
+                            <p style='margin: 0; %s'><strong> Beta-Binomial Model Not Applicable</strong></p>
                             <p style='margin: 10px 0 0 0; %s'>%s</p>
                             <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong> Use alternative approaches:</p>
                             <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
@@ -4671,13 +4671,13 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Assessment
                 abs_diff <- abs(diff)
                 if (abs_diff < 0.05) {
-                    assess <- "✅ Excellent fit"
+                    assess <- " Excellent fit"
                 } else if (abs_diff < 0.10) {
-                    assess <- "✅ Good fit"
+                    assess <- " Good fit"
                 } else if (abs_diff < 0.15) {
-                    assess <- "⚠️ Fair fit"
+                    assess <- " Fair fit"
                 } else {
-                    assess <- "❌ Poor fit"
+                    assess <- " Poor fit"
                 }
 
                 results[i, ] <- list(i, obs, pred, diff, assess)
@@ -4813,12 +4813,12 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (warning_flag) {
                 severity <- if (cv_q > 0.50) "HIGH" else "MODERATE"
                 message <- sprintf(
-                    "⚠️ %s heterogeneity detected (CV = %.2f). Detection probability varies substantially across groups. Consider stratified analysis.",
+                    " %s heterogeneity detected (CV = %.2f). Detection probability varies substantially across groups. Consider stratified analysis.",
                     severity, cv_q
                 )
             } else {
                 message <- sprintf(
-                    "✅ Low heterogeneity (CV = %.2f). Pooled analysis is appropriate.",
+                    " Low heterogeneity (CV = %.2f). Pooled analysis is appropriate.",
                     cv_q
                 )
             }

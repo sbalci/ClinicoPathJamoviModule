@@ -237,6 +237,7 @@ contTablesPairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' McNemar test
 #'
 #' @examples
+#' \donttest{
 #' dat <- data.frame(
 #'     `1st survey` = c('Approve', 'Approve', 'Disapprove', 'Disapprove'),
 #'     `2nd survey` = c('Approve', 'Disapprove', 'Approve', 'Disapprove'),
@@ -272,7 +273,7 @@ contTablesPairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' # formula if each row represents a single observation:
 #'
 #' contTablesPaired(formula = ~ `1st survey`:`2nd survey`, data = dat)
-#'
+#'}
 #' @param data the data as a data frame
 #' @param rows the variable to use as the rows in the contingency table (not
 #'   necessary when providing a formula, see the examples)

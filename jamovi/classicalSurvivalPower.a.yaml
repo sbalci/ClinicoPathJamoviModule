@@ -149,7 +149,7 @@ options:
       default: 0.1
       description:
         R: Type II error rate (1 - power).
-        jamovi: Probability of false negative (0.1 = 90% power).
+        jamovi: Probability of false negative (0.1 = 90 percent power).
 
     - name: power
       title: "Statistical Power"

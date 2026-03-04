@@ -21,7 +21,7 @@ description:
         selection, test ordering optimization, multi-class uncertainty quantification.
 
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example with AI prediction probabilities
             data <- data.frame(

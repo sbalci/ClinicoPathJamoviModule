@@ -552,6 +552,7 @@ treatmentoptimBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' # Basic treatment optimization analysis
@@ -561,7 +562,7 @@ treatmentoptimBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'              responseVar = 'Response',
 #'              treatment_selection = TRUE,
 #'              dose_optimization = TRUE)
-#'
+#'}
 #' @param data .
 #' @param patientVars Patient characteristics for personalized treatment (age,
 #'   gender, comorbidities, biomarkers)

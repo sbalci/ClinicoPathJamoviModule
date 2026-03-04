@@ -15,7 +15,7 @@ description:
         to selected features, and finally fits a Cox model using the principal components.
         Particularly effective for genomics data where many features are correlated.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             superpc(
                 data = data,

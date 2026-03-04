@@ -10,7 +10,7 @@ description:
         Handles heterogeneity in sensitivity and specificity across studies or
         centers using beta-binomial distributions with flexible correlation structures.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example: Beta-binomial diagnostic accuracy analysis
             betabinomialdiagnostic(

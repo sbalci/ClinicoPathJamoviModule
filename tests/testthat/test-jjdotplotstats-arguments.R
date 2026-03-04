@@ -3,14 +3,12 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 data(jjdotplotstats_test)
 data(jjdotplotstats_twogroup)
 data(jjdotplotstats_fourgroup)
 data(jjdotplotstats_reference)
 
 test_that("jjdotplotstats respects all statistical type options", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -28,7 +26,6 @@ test_that("jjdotplotstats respects all statistical type options", {
 })
 
 test_that("jjdotplotstats respects all effect size type options", {
-  devtools::load_all()
 
   effect_types <- c("biased", "unbiased", "eta", "omega")
 
@@ -47,7 +44,6 @@ test_that("jjdotplotstats respects all effect size type options", {
 })
 
 test_that("jjdotplotstats respects all centrality type options", {
-  devtools::load_all()
 
   centrality_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -66,7 +62,6 @@ test_that("jjdotplotstats respects all centrality type options", {
 })
 
 test_that("jjdotplotstats respects centrality parameter options", {
-  devtools::load_all()
 
   centrality_params <- c("mean", "median", "none")
 
@@ -85,7 +80,6 @@ test_that("jjdotplotstats respects centrality parameter options", {
 })
 
 test_that("jjdotplotstats respects centrality plotting option", {
-  devtools::load_all()
 
   # Without centrality plotting
   result1 <- jjdotplotstats(
@@ -107,7 +101,6 @@ test_that("jjdotplotstats respects centrality plotting option", {
 })
 
 test_that("jjdotplotstats respects results subtitle option", {
-  devtools::load_all()
 
   # Without subtitle
   result1 <- jjdotplotstats(
@@ -129,7 +122,6 @@ test_that("jjdotplotstats respects results subtitle option", {
 })
 
 test_that("jjdotplotstats respects Bayes Factor message option", {
-  devtools::load_all()
 
   # Without BF message
   result1 <- jjdotplotstats(
@@ -153,7 +145,6 @@ test_that("jjdotplotstats respects Bayes Factor message option", {
 })
 
 test_that("jjdotplotstats respects test value line option", {
-  devtools::load_all()
 
   # Without reference line
   result1 <- jjdotplotstats(
@@ -177,7 +168,6 @@ test_that("jjdotplotstats respects test value line option", {
 })
 
 test_that("jjdotplotstats respects confidence level parameter", {
-  devtools::load_all()
 
   conf_levels <- c(0.80, 0.90, 0.95, 0.99)
 
@@ -195,7 +185,6 @@ test_that("jjdotplotstats respects confidence level parameter", {
 })
 
 test_that("jjdotplotstats respects decimal places parameter", {
-  devtools::load_all()
 
   k_values <- c(0, 1, 2, 3, 4, 5)
 
@@ -213,7 +202,6 @@ test_that("jjdotplotstats respects decimal places parameter", {
 })
 
 test_that("jjdotplotstats respects centrality k parameter", {
-  devtools::load_all()
 
   centrality_k_values <- c(0, 1, 2, 3)
 
@@ -232,7 +220,6 @@ test_that("jjdotplotstats respects centrality k parameter", {
 })
 
 test_that("jjdotplotstats respects custom title parameters", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_test,
@@ -247,7 +234,6 @@ test_that("jjdotplotstats respects custom title parameters", {
 })
 
 test_that("jjdotplotstats respects plot dimension parameters", {
-  devtools::load_all()
 
   dimensions <- list(
     list(width = 300, height = 300),
@@ -271,7 +257,6 @@ test_that("jjdotplotstats respects plot dimension parameters", {
 })
 
 test_that("jjdotplotstats handles different group counts", {
-  devtools::load_all()
 
   # Two groups
   result1 <- jjdotplotstats(
@@ -299,7 +284,6 @@ test_that("jjdotplotstats handles different group counts", {
 })
 
 test_that("jjdotplotstats handles combinations of statistical type and effect size", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     typestatistics = c("parametric", "nonparametric", "robust"),
@@ -323,7 +307,6 @@ test_that("jjdotplotstats handles combinations of statistical type and effect si
 })
 
 test_that("jjdotplotstats handles combinations of centrality options", {
-  devtools::load_all()
 
   combinations <- expand.grid(
     centralitytype = c("parametric", "nonparametric", "robust"),
@@ -348,7 +331,6 @@ test_that("jjdotplotstats handles combinations of centrality options", {
 })
 
 test_that("jjdotplotstats handles comprehensive argument combinations", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_test,
@@ -374,7 +356,6 @@ test_that("jjdotplotstats handles comprehensive argument combinations", {
 })
 
 test_that("jjdotplotstats handles grouped analysis with different statistical types", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust", "bayes")
 
@@ -393,7 +374,6 @@ test_that("jjdotplotstats handles grouped analysis with different statistical ty
 })
 
 test_that("jjdotplotstats handles test value with different statistical types", {
-  devtools::load_all()
 
   stat_types <- c("parametric", "nonparametric", "robust")
 
@@ -412,7 +392,6 @@ test_that("jjdotplotstats handles test value with different statistical types", 
 })
 
 test_that("jjdotplotstats handles test value with centrality plotting", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_reference,
@@ -428,7 +407,6 @@ test_that("jjdotplotstats handles test value with centrality plotting", {
 })
 
 test_that("jjdotplotstats handles grouped analysis with centrality plotting", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_test,
@@ -443,7 +421,6 @@ test_that("jjdotplotstats handles grouped analysis with centrality plotting", {
 })
 
 test_that("jjdotplotstats handles all display options combined", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_test,
@@ -460,7 +437,6 @@ test_that("jjdotplotstats handles all display options combined", {
 })
 
 test_that("jjdotplotstats handles Bayesian analysis with all options", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_test,
@@ -477,7 +453,6 @@ test_that("jjdotplotstats handles Bayesian analysis with all options", {
 })
 
 test_that("jjdotplotstats handles high precision display", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_reference,
@@ -493,7 +468,6 @@ test_that("jjdotplotstats handles high precision display", {
 })
 
 test_that("jjdotplotstats handles custom confidence with centrality", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_fourgroup,
@@ -508,7 +482,6 @@ test_that("jjdotplotstats handles custom confidence with centrality", {
 })
 
 test_that("jjdotplotstats handles publication-ready configuration", {
-  devtools::load_all()
 
   result <- jjdotplotstats(
     data = jjdotplotstats_test,

@@ -1,10 +1,8 @@
 context("test-crosstable")
 
 # Load required library
-devtools::load_all()
 
 test_that("crosstable works", {
-  devtools::load_all()
   skip_if_not_installed('jmvReadWrite')
   
   # Load test data

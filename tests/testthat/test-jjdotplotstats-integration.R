@@ -3,10 +3,8 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 test_that("jjdotplotstats integrates with all test datasets", {
-  devtools::load_all()
 
   datasets <- list(
     list(name = "jjdotplotstats_test", dep = "tumor_reduction", group = "treatment"),
@@ -35,7 +33,6 @@ test_that("jjdotplotstats integrates with all test datasets", {
 })
 
 test_that("jjdotplotstats data.frame vs tibble compatibility", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -59,7 +56,6 @@ test_that("jjdotplotstats data.frame vs tibble compatibility", {
 })
 
 test_that("jjdotplotstats consistency across runs with same data", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -84,7 +80,6 @@ test_that("jjdotplotstats consistency across runs with same data", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - tumor response", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -129,7 +124,6 @@ test_that("jjdotplotstats complete clinical workflow - tumor response", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - pain assessment", {
-  devtools::load_all()
 
   data(jjdotplotstats_twogroup)
 
@@ -167,7 +161,6 @@ test_that("jjdotplotstats complete clinical workflow - pain assessment", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - dose-response", {
-  devtools::load_all()
 
   data(jjdotplotstats_fourgroup)
 
@@ -205,7 +198,6 @@ test_that("jjdotplotstats complete clinical workflow - dose-response", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - biomarker analysis", {
-  devtools::load_all()
 
   data(jjdotplotstats_skewed)
 
@@ -243,7 +235,6 @@ test_that("jjdotplotstats complete clinical workflow - biomarker analysis", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - reference value testing", {
-  devtools::load_all()
 
   data(jjdotplotstats_reference)
 
@@ -286,7 +277,6 @@ test_that("jjdotplotstats complete clinical workflow - reference value testing",
 })
 
 test_that("jjdotplotstats statistical method comparison on same data", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -330,7 +320,6 @@ test_that("jjdotplotstats statistical method comparison on same data", {
 })
 
 test_that("jjdotplotstats effect size comparison on same data", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -378,7 +367,6 @@ test_that("jjdotplotstats effect size comparison on same data", {
 })
 
 test_that("jjdotplotstats centrality type comparison on same data", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -426,7 +414,6 @@ test_that("jjdotplotstats centrality type comparison on same data", {
 })
 
 test_that("jjdotplotstats handles different group count scenarios", {
-  devtools::load_all()
 
   # Two groups
   data(jjdotplotstats_twogroup)
@@ -465,7 +452,6 @@ test_that("jjdotplotstats handles different group count scenarios", {
 })
 
 test_that("jjdotplotstats grouped analysis across different datasets", {
-  devtools::load_all()
 
   # Tumor data stratified by hospital
   data(jjdotplotstats_test)
@@ -501,7 +487,6 @@ test_that("jjdotplotstats grouped analysis across different datasets", {
 })
 
 test_that("jjdotplotstats handles factor vs character group variables", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -528,7 +513,6 @@ test_that("jjdotplotstats handles factor vs character group variables", {
 })
 
 test_that("jjdotplotstats publication-ready configurations work correctly", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 
@@ -593,7 +577,6 @@ test_that("jjdotplotstats publication-ready configurations work correctly", {
 })
 
 test_that("jjdotplotstats handles complete analysis pipeline", {
-  devtools::load_all()
 
   data(jjdotplotstats_test)
 

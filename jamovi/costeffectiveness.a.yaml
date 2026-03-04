@@ -24,7 +24,7 @@ description:
         Particularly valuable for demonstrating value proposition of advanced diagnostics
         to hospital administrators, payers, and policy makers.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- costeffectiveness(
                 data = diagnostic_study,
@@ -246,7 +246,7 @@ options:
             analysis. These should be column names in the data.
 
     - name: sensitivity_range_pct
-      title: Sensitivity Analysis Range (%)
+      title: Sensitivity Analysis Range ( percent)
       type: Number
       default: 20
       min: 5
@@ -254,7 +254,7 @@ options:
       description:
           R: >
             Percentage variation around base case for sensitivity analysis.
-            For example, 20% means vary parameters from 80% to 120% of base value.
+            For example, 20 percent means vary parameters from 80 percent to 120 percent of base value.
 
     - name: probabilistic_sensitivity
       title: Probabilistic Sensitivity Analysis
@@ -396,14 +396,14 @@ options:
             Apply discounting to future costs (relevant for multi-year time horizons).
 
     - name: discount_rate_costs
-      title: Discount Rate for Costs (%)
+      title: Discount Rate for Costs ( percent)
       type: Number
       default: 3
       min: 0
       max: 10
       description:
           R: >
-            Annual discount rate for future costs (typically 3-5% in health economics).
+            Annual discount rate for future costs (typically 3-5 percent in health economics).
 
     - name: discount_effects
       title: Discount Future Effects
@@ -414,7 +414,7 @@ options:
             Apply discounting to future health effects (QALYs, life-years).
 
     - name: discount_rate_effects
-      title: Discount Rate for Effects (%)
+      title: Discount Rate for Effects ( percent)
       type: Number
       default: 3
       min: 0

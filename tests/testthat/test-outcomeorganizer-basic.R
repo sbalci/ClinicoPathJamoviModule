@@ -2,7 +2,6 @@
 # Basic Tests: outcomeorganizer
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(outcomeorganizer_os, package = "ClinicoPath")
 data(outcomeorganizer_compete, package = "ClinicoPath")
 data(outcomeorganizer_pfs, package = "ClinicoPath")

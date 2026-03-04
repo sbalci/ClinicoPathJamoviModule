@@ -403,7 +403,8 @@ pathologyagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param clinical_preset clinical analysis preset optimized for specific
 #'   pathology scenarios
 #' @param bootstrap_n number of bootstrap replicates for confidence intervals
-#' @param conf_level confidence level for intervals (default 0.95 for 95\% CI)
+#' @param conf_level confidence level for intervals (default 0.95 for 95
+#'   percent CI)
 #' @param show_plots show scatter plot and Bland-Altman plot
 #' @param icc_type type of intraclass correlation coefficient to calculate
 #' @param correlation_method correlation method(s) to calculate

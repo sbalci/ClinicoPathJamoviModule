@@ -411,6 +411,7 @@ survivalcalibrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example usage:
 #' # data <- your_data
 #' # ClinicoPath::survivalcalibration(
@@ -421,7 +422,7 @@ survivalcalibrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' #   calibrationTime = 60,
 #' #   validationMethod = "bootstrap"
 #' # )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param time Time to event or censoring (in months).
 #' @param event Event indicator (0 = censored, 1 = event).

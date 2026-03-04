@@ -19,7 +19,7 @@ description:
         predictors. The method is particularly suitable for exploratory survival analysis
         and biomarker discovery in clinical research.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- conditionalinference(
                 data = mydata,

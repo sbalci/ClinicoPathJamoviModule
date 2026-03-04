@@ -468,6 +468,7 @@ multiclassrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # Example with tumor subtype classification
 #' data <- data.frame(
 #'   true_class = factor(sample(c("TypeA", "TypeB", "TypeC"), 100, replace=TRUE)),
@@ -484,7 +485,7 @@ multiclassrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   calculate_macro_auc = TRUE,
 #'   confidence_intervals = TRUE
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param outcome a string naming the outcome variable (must have 3+ levels)
 #' @param predictors a vector of strings naming predictor variables
@@ -503,7 +504,7 @@ multiclassrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ci_method method for confidence interval calculation
 #' @param bootstrap_samples number of bootstrap samples for CI calculation
 #' @param confidence_level confidence level for intervals (default: 0.95 for
-#'   95\% CI)
+#'   95 percent CI)
 #' @param pairwise_comparisons show detailed results for all pairwise class
 #'   comparisons (OvO method)
 #' @param confusion_matrix show confusion matrix at optimal global threshold

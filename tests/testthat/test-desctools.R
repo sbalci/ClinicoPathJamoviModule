@@ -1,11 +1,9 @@
 context("test-desctools")
 
 # Load required library
-devtools::load_all()
 
 test_that("desctools function exists and is callable", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Load test data
   data("histopathology", package = "ClinicoPath")

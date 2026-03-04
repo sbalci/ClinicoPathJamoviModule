@@ -3,7 +3,6 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 # Load test data
 data(agepyramid_test, package = "ClinicoPath")

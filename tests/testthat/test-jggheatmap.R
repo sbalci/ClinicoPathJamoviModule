@@ -1,12 +1,10 @@
 # Comprehensive tests for jggheatmap function
-devtools::load_all()
 
 # Load test datasets
 data(histopathology, package = "ClinicoPath")
 
 test_that("jggheatmap module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   expect_true(exists("jggheatmapClass"))
   expect_true(is.function(jggheatmap))
 })

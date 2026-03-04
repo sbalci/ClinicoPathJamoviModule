@@ -67,7 +67,6 @@ benford_with_nas <- data.frame(
 # ==============================================================================
 test_that("benfordClass correctly identifies Benford-compliant data as Low concern", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     skip_if_not_installed("benford.analysis")
 
     # Run the actual benford function

@@ -23,7 +23,7 @@ description:
         staging are fundamental to diagnosis and prognosis (Gleason score, Nottingham grade,
         FIGO stage, etc.).
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- ordinalroc(
                 data = grading_data,

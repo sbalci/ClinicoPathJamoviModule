@@ -14,7 +14,7 @@ description:
         by statistical significance, hazard ratio, or concordance index. Useful for biomarker screening,
         exploratory analysis, and feature selection before building multivariable models.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Example 1: Basic feature ranking
             library(survival)
@@ -139,7 +139,7 @@ options:
       default: true
       description:
         R: >
-          If true, displays 95% confidence intervals for hazard ratios in the results table.
+          If true, displays 95 percent confidence intervals for hazard ratios in the results table.
 
     - name: adjustPValues
       title: Adjust P-values for Multiple Testing

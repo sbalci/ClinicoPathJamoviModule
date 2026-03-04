@@ -390,8 +390,9 @@ screeningcalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
+#' \donttest{
 #' # COVID-19 rapid test in community screening (low prevalence)
-#' # Sensitivity: 85\%, Specificity: 95\%, Prevalence: 2\%
+#' # Sensitivity: 85 percent, Specificity: 95 percent, Prevalence: 2 percent
 #' data(screening_examples)
 #' covid_community <- screening_examples[1, ]
 #'
@@ -413,7 +414,7 @@ screeningcalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' data(performance_demo)    # Test performance comparisons
 #' data(sequential_demo)     # Sequential testing examples
 #' data(common_tests)        # Reference test characteristics
-#'
+#'}
 #' @param sens .
 #' @param spec .
 #' @param prev .

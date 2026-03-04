@@ -67,10 +67,10 @@ enhancedROCClass <- R6::R6Class(
 
           # Map notice types to colors and icons
           typeStyles <- list(
-            ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
-            STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
-            WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
-            INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+            ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+            STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+            WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+            INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
           )
 
           html <- "<div style='margin: 10px 0;'>"
@@ -433,7 +433,7 @@ enhancedROCClass <- R6::R6Class(
                     
                     # Inform user
                     info_msg <- paste0("<div style='padding: 10px; background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; margin-top: 10px;'>",
-                                     "<h4 style='color: #0c5460; margin-top: 0;'>ℹ Multi-Class Analysis Enabled</h4>",
+                                     "<h4 style='color: #0c5460; margin-top: 0;'> Multi-Class Analysis Enabled</h4>",
                                      "<p>Outcome variable '<code>", private$.safeHtmlOutput(private$.outcome), "</code>' has ", levels_count, " levels.</p>",
                                      "<p>Multi-Class ROC metrics will be calculated.</p>",
                                      "<p>Standard ROC tables will show performance for Positive Class: '<code>", private$.safeHtmlOutput(private$.positiveClass), "</code>' vs Others.</p>",
@@ -482,7 +482,7 @@ enhancedROCClass <- R6::R6Class(
                     
                     # Inform user about the conversion
                     info_msg <- paste0("<div style='padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-top: 10px;'>",
-                                     "<h4 style='color: #155724; margin-top: 0;'>✓ Outcome Variable Converted to Binary</h4>",
+                                     "<h4 style='color: #155724; margin-top: 0;'> Outcome Variable Converted to Binary</h4>",
                                      "<p><strong>Positive Class:</strong> '<code>", private$.safeHtmlOutput(positive_class), "</code>' (cases of interest)</p>",
                                      "<p><strong>Negative Class:</strong> '<code>Other</code>' (combined: ",
                                      private$.safeHtmlOutput(paste(available_levels[available_levels != positive_class], collapse = ", ")), ")</p>",
@@ -2626,7 +2626,7 @@ enhancedROCClass <- R6::R6Class(
                 "<p><strong>Purpose:</strong> ROC (Receiver Operating Characteristic) analysis evaluates how well continuous variables (biomarkers, test scores) can distinguish between two outcome groups (e.g., disease vs. healthy).</p>",
                 "</div>",
                 
-                "<h3 style='color: #2c5530;'>📋 Setup Instructions:</h3>",
+                "<h3 style='color: #2c5530;'> Setup Instructions:</h3>",
                 "<ol style='margin-left: 20px;'>",
                 "<li><strong>Outcome Variable:</strong> Select your binary outcome (e.g., Disease Status, Survival Status)</li>",
                 "<ul style='margin-left: 20px; color: #6c757d;'>",
@@ -2637,7 +2637,7 @@ enhancedROCClass <- R6::R6Class(
                 "<li><strong>Clinical Context:</strong> Select appropriate context for tailored interpretation</li>",
                 "</ol>",
                 
-                "<h3 style='color: #2c5530;'>🔧 Quick Start Presets:</h3>",
+                "<h3 style='color: #2c5530;'> Quick Start Presets:</h3>",
                 "<div style='background: #e7f3ff; padding: 10px; border-radius: 4px; margin: 10px 0;'>",
                 "<p><strong>Clinical Presets</strong> automatically configure analysis settings:</p>",
                 "<ul style='margin-left: 20px;'>",
@@ -2648,7 +2648,7 @@ enhancedROCClass <- R6::R6Class(
                 "</ul>",
                 "</div>",
                 
-                "<h3 style='color: #2c5530;'>📊 Key Output Metrics:</h3>",
+                "<h3 style='color: #2c5530;'> Key Output Metrics:</h3>",
                 "<div style='display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0;'>",
                 "<div style='background: #fff3cd; padding: 10px; border-radius: 4px; flex: 1; min-width: 250px;'>",
                 "<strong>AUC (Area Under Curve):</strong><br>",
@@ -2667,7 +2667,7 @@ enhancedROCClass <- R6::R6Class(
                 "</div>",
                 
                 "<details style='margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 4px;'>",
-                "<summary style='cursor: pointer; font-weight: bold; color: #495057;'>📖 Statistical Terms Glossary</summary>",
+                "<summary style='cursor: pointer; font-weight: bold; color: #495057;'> Statistical Terms Glossary</summary>",
                 "<div style='margin-top: 10px; padding-left: 20px;'>",
                 "<p><strong>Sensitivity (True Positive Rate):</strong> Proportion of actual positives correctly identified</p>",
                 "<p><strong>Specificity (True Negative Rate):</strong> Proportion of actual negatives correctly identified</p>",
@@ -2679,7 +2679,7 @@ enhancedROCClass <- R6::R6Class(
                 "</details>",
                 
                 "<div style='background: #d4edda; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin: 10px 0;'>",
-                "<p style='margin: 0;'><strong>💡 Tip:</strong> For clinical decision making, consider both statistical significance and clinical relevance of the cutoff thresholds.</p>",
+                "<p style='margin: 0;'><strong> Tip:</strong> For clinical decision making, consider both statistical significance and clinical relevance of the cutoff thresholds.</p>",
                 "</div>",
                 
                 "</div>"

@@ -5,7 +5,7 @@
 \alias{swimmer_unified_events}
 \title{Event Markers Swimmer Plot Example Data}
 \format{
-A data frame with 20 rows and 8 variables:
+A data frame with 20 rows and 6 variables:
 \describe{
 \item{PatientID}{Character. Patient identifiers (multiple rows per patient)}
 \item{StartTime}{Numeric. Segment start time in months}
@@ -13,8 +13,6 @@ A data frame with 20 rows and 8 variables:
 \item{Response}{Character. Response during this segment (CR, PR, SD, PD)}
 \item{EventType}{Character. Type of clinical event (Treatment Start, Dose Escalation, etc.)}
 \item{EventTime}{Numeric. Time when the event occurred}
-\item{Severity}{Character. Event severity (None, Mild, Moderate, Severe)}
-\item{Cycle}{Numeric. Treatment cycle number}
 }
 }
 \source{

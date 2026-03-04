@@ -3,7 +3,6 @@
 # ═══════════════════════════════════════════════════════════
 
 library(testthat)
-library(ClinicoPath)
 
 data(timeinterval_quality, package = "ClinicoPath")
 data(timeinterval_extreme, package = "ClinicoPath")

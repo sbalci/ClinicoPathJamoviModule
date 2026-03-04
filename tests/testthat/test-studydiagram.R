@@ -1,7 +1,6 @@
 
 test_that("studydiagram works with participant_step format", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
     # Create test data
     set.seed(123)
     n <- 100

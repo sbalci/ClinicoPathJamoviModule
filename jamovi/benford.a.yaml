@@ -3,7 +3,7 @@ name:  benford
 title: Benford Analysis
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 options:

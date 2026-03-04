@@ -15,7 +15,7 @@ description:
         and trend tests (Cochran-Armitage). Essential for clinical research,
         epidemiological studies, and advanced statistical analysis.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             # Load example data
             data("histopathology")

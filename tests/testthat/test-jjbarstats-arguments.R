@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("jjbarstats handles all statistical types", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -25,7 +24,6 @@ test_that("jjbarstats handles all statistical types", {
 })
 
 test_that("jjbarstats handles all clinical presets", {
-  devtools::load_all()
 
   # Custom preset
   data(jjbarstats_test)
@@ -79,7 +77,6 @@ test_that("jjbarstats handles all clinical presets", {
 })
 
 test_that("jjbarstats handles all p-value adjustment methods", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -101,7 +98,6 @@ test_that("jjbarstats handles all p-value adjustment methods", {
 })
 
 test_that("jjbarstats handles all pairwise display modes", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -122,7 +118,6 @@ test_that("jjbarstats handles all pairwise display modes", {
 })
 
 test_that("jjbarstats handles split-by variable combinations", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -142,7 +137,6 @@ test_that("jjbarstats handles split-by variable combinations", {
 })
 
 test_that("jjbarstats handles proportion test with expected ratios", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -178,7 +172,6 @@ test_that("jjbarstats handles proportion test with expected ratios", {
 })
 
 test_that("jjbarstats handles confidence level variations", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -198,7 +191,6 @@ test_that("jjbarstats handles confidence level variations", {
 })
 
 test_that("jjbarstats handles digit precision options", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -238,7 +230,6 @@ test_that("jjbarstats handles digit precision options", {
 })
 
 test_that("jjbarstats handles output display options", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -268,7 +259,6 @@ test_that("jjbarstats handles output display options", {
 })
 
 test_that("jjbarstats handles theme and styling options", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -302,7 +292,6 @@ test_that("jjbarstats handles theme and styling options", {
 })
 
 test_that("jjbarstats handles balloon plot options", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -323,7 +312,6 @@ test_that("jjbarstats handles balloon plot options", {
 })
 
 test_that("jjbarstats handles comprehensive parameter combinations", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -354,7 +342,6 @@ test_that("jjbarstats handles comprehensive parameter combinations", {
 })
 
 test_that("jjbarstats handles NULL optional parameters", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -372,7 +359,6 @@ test_that("jjbarstats handles NULL optional parameters", {
 })
 
 test_that("jjbarstats handles factor vs character variables", {
-  devtools::load_all()
 
   data(jjbarstats_test)
 
@@ -400,7 +386,6 @@ test_that("jjbarstats handles factor vs character variables", {
 })
 
 test_that("jjbarstats handles different dataset types", {
-  devtools::load_all()
 
   # Comprehensive dataset
   data(jjbarstats_test)

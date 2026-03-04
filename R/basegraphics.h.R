@@ -403,7 +403,7 @@ basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "basegraphics",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = basegraphicsResults$new(options=options),
                 data = data,

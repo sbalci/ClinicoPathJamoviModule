@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("statsplot2 function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("statsplot2"))
 })
 
 test_that("statsplot2 runs with minimal required arguments", {
-  devtools::load_all()
 
   data(statsplot2_test, package = "ClinicoPath")
 
@@ -26,7 +24,6 @@ test_that("statsplot2 runs with minimal required arguments", {
 })
 
 test_that("statsplot2 produces expected output structure", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -42,7 +39,6 @@ test_that("statsplot2 produces expected output structure", {
 })
 
 test_that("statsplot2 handles continuous vs categorical (violin plot)", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -58,7 +54,6 @@ test_that("statsplot2 handles continuous vs categorical (violin plot)", {
 })
 
 test_that("statsplot2 handles categorical vs categorical (bar chart)", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -73,7 +68,6 @@ test_that("statsplot2 handles categorical vs categorical (bar chart)", {
 })
 
 test_that("statsplot2 handles continuous vs continuous (scatter)", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -88,7 +82,6 @@ test_that("statsplot2 handles continuous vs continuous (scatter)", {
 })
 
 test_that("statsplot2 handles parametric distribution", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -103,7 +96,6 @@ test_that("statsplot2 handles parametric distribution", {
 })
 
 test_that("statsplot2 handles nonparametric distribution", {
-  devtools::load_all()
 
   data(statsplot2_skewed)
 
@@ -118,7 +110,6 @@ test_that("statsplot2 handles nonparametric distribution", {
 })
 
 test_that("statsplot2 handles robust distribution", {
-  devtools::load_all()
 
   data(statsplot2_outliers)
 
@@ -133,7 +124,6 @@ test_that("statsplot2 handles robust distribution", {
 })
 
 test_that("statsplot2 handles Bayesian distribution", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -148,7 +138,6 @@ test_that("statsplot2 handles Bayesian distribution", {
 })
 
 test_that("statsplot2 handles independent direction", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -163,7 +152,6 @@ test_that("statsplot2 handles independent direction", {
 })
 
 test_that("statsplot2 handles repeated direction", {
-  devtools::load_all()
 
   data(statsplot2_repeated)
 
@@ -178,7 +166,6 @@ test_that("statsplot2 handles repeated direction", {
 })
 
 test_that("statsplot2 handles split-by variable (grvar)", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -194,7 +181,6 @@ test_that("statsplot2 handles split-by variable (grvar)", {
 })
 
 test_that("statsplot2 handles custom labels", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -211,7 +197,6 @@ test_that("statsplot2 handles custom labels", {
 })
 
 test_that("statsplot2 handles multi-level categorical grouping", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -227,7 +212,6 @@ test_that("statsplot2 handles multi-level categorical grouping", {
 })
 
 test_that("statsplot2 handles two-level factors", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -242,7 +226,6 @@ test_that("statsplot2 handles two-level factors", {
 })
 
 test_that("statsplot2 handles three-level factors", {
-  devtools::load_all()
 
   data(statsplot2_test)
 
@@ -257,7 +240,6 @@ test_that("statsplot2 handles three-level factors", {
 })
 
 test_that("statsplot2 handles multi-level factors", {
-  devtools::load_all()
 
   data(statsplot2_test)
 

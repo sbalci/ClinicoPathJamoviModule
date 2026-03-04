@@ -92,14 +92,14 @@ consider other specialized power functions.
 \examples{
 \donttest{
 # Example 1: Calculate required sample size for a cancer treatment study
-# Detect 30\\% reduction in hazard (HR=0.7) with 80\\% power
+# Detect 30 percent reduction in hazard (HR=0.7) with 80 percent power
 # advancedSurvivalPower(
 #   data = data.frame(),
 #   calc_type = "sample_size",
 #   hazard_ratio = 0.7,
 #   power = 0.8,
 #   alpha = 0.05,
-#   prob_event = 0.6,          # 60\\% event rate over study period
+#   prob_event = 0.6,          # 60 percent event rate over study period
 #   allocation_ratio = 1       # Equal allocation
 # )
 
@@ -110,7 +110,7 @@ consider other specialized power functions.
 #   hazard_ratio = 0.75,       # Modest treatment effect
 #   sample_size = 300,         # Available sample size
 #   alpha = 0.05,
-#   prob_event = 0.4,          # 40\\% event rate
+#   prob_event = 0.4,          # 40 percent event rate
 #   allocation_ratio = 2       # 2:1 control:treatment ratio
 # )
 
@@ -135,7 +135,7 @@ consider other specialized power functions.
 #   accrual_time = 3,          # 3 years to recruit patients
 #   follow_up_time = 2,        # 2 additional years follow-up
 #   median_survival = 5,       # 5 years median survival in control
-#   loss_followup = 0.05       # 5\\% annual loss to follow-up
+#   loss_followup = 0.05       # 5 percent annual loss to follow-up
 # )
 }
 }

@@ -2,7 +2,6 @@
 # Argument Tests: sequentialtests
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 
 test_that("sequentialtests respects all presets", {
   presets <- c(

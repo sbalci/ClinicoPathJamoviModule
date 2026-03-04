@@ -2,7 +2,6 @@
 # Edge Cases Tests: survivalcont
 # ═══════════════════════════════════════════════════════════
 library(testthat)
-library(ClinicoPath)
 data(survivalcont_small, package = "ClinicoPath")
 data(survivalcont_nocutoff, package = "ClinicoPath")
 data(survivalcont_extreme, package = "ClinicoPath")

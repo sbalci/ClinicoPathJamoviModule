@@ -308,10 +308,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Map notice types to colors and icons
             typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "⛔"),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "⚠️"),
-                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "⚡"),
-                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "ℹ️")
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
             )
 
             html <- "<div style='margin: 10px 0;'>"
@@ -354,26 +354,26 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Biomarker tracking: nonparametric, show individual trajectories
                     if (self$options$typestatistics == "parametric") {  # Only change if default
                         # Would need to update options through proper channels
-                        private$.accumulateMessage(.("💡 Biomarker preset: Consider using Nonparametric test for skewed biomarker data<br>"))
+                        private$.accumulateMessage(.(" Biomarker preset: Consider using Nonparametric test for skewed biomarker data<br>"))
                     }
-                    private$.accumulateMessage(.("🔬 <strong>Biomarker Tracking (Guidance Only):</strong> Optimized for laboratory values. Please manually ensure 'Nonparametric' is selected if data is skewed.<br>"))
+                    private$.accumulateMessage(.(" <strong>Biomarker Tracking (Guidance Only):</strong> Optimized for laboratory values. Please manually ensure 'Nonparametric' is selected if data is skewed.<br>"))
                 },
                 "treatment" = {
                     # Treatment response: parametric with pairwise comparisons
                     if (!self$options$pairwisecomparisons) {
-                        private$.accumulateMessage(.("💡 Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"))
+                        private$.accumulateMessage(.(" Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"))
                     }
-                    private$.accumulateMessage(.("💊 <strong>Treatment Response:</strong> Optimized for clinical treatment monitoring<br>"))
+                    private$.accumulateMessage(.(" <strong>Treatment Response:</strong> Optimized for clinical treatment monitoring<br>"))
                 },
                 "laboratory" = {
                     # Laboratory values: robust with centrality plotting
                     if (self$options$typestatistics == "parametric") {
-                        private$.accumulateMessage(.("💡 Laboratory preset: Consider Robust test to handle outliers common in lab values<br>"))
+                        private$.accumulateMessage(.(" Laboratory preset: Consider Robust test to handle outliers common in lab values<br>"))
                     }
                     if (!self$options$centralityplotting) {
-                        private$.accumulateMessage(.("💡 Laboratory preset: Enable centrality plotting to see overall trends<br>"))
+                        private$.accumulateMessage(.(" Laboratory preset: Enable centrality plotting to see overall trends<br>"))
                     }
-                    private$.accumulateMessage(.("🔬 <strong>Laboratory Values:</strong> Optimized for clinical lab value monitoring<br>"))
+                    private$.accumulateMessage(.(" <strong>Laboratory Values:</strong> Optimized for clinical lab value monitoring<br>"))
                 }
             )
         },
@@ -436,12 +436,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (length(num_vals) < 3) {
                     private$.accumulateMessage(
-                        glue::glue(.("<br>⚠️ <strong>Warning:</strong> {var} has less than 3 valid observations<br>"))
+                        glue::glue(.("<br> <strong>Warning:</strong> {var} has less than 3 valid observations<br>"))
                     )
                 }
                 if (length(unique(num_vals)) < 2) {
                     private$.accumulateMessage(
-                        glue::glue(.("<br>⚠️ <strong>Warning:</strong> {var} has no variation (all values identical)<br>"))
+                        glue::glue(.("<br> <strong>Warning:</strong> {var} has no variation (all values identical)<br>"))
                     )
                 }
             }
@@ -457,7 +457,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Small sample size warning
             if (total_subjects < 10) {
                 private$.accumulateMessage(
-                    .("<br>⚠️ <strong>Small Sample Size:</strong> With fewer than 10 subjects, results may be unreliable. Consider larger sample or descriptive analysis.<br>")
+                    .("<br> <strong>Small Sample Size:</strong> With fewer than 10 subjects, results may be unreliable. Consider larger sample or descriptive analysis.<br>")
                 )
             }
             
@@ -474,7 +474,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     if (outliers > length(num_vals) * 0.1) {  # More than 10% outliers
                         private$.accumulateMessage(
-                            .("<br>💡 <strong>Many Outliers Detected:</strong> Consider Robust test type to reduce outlier influence<br>")
+                            .("<br> <strong>Many Outliers Detected:</strong> Consider Robust test type to reduce outlier influence<br>")
                         )
                         break  # Only show this message once
                     }
@@ -494,7 +494,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         if (abs(mean_val - median_val) > sd(num_vals)) {  # Highly skewed
                             private$.accumulateMessage(
-                                .("<br>💡 <strong>Skewed Data Detected:</strong> Consider Nonparametric test for skewed biomarker or clinical data<br>")
+                                .("<br> <strong>Skewed Data Detected:</strong> Consider Nonparametric test for skewed biomarker or clinical data<br>")
                             )
                             break  # Only show this message once
                         }
@@ -561,7 +561,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for empty dataset
             if (nrow(mydata) == 0) {
                 private$.accumulateDataMessage(
-                    .("<br>❌ Dataset is empty (0 rows). Please load data first.<br>")
+                    .("<br> Dataset is empty (0 rows). Please load data first.<br>")
                 )
                 private$.prepared_data <- NULL
                 return(NULL)
@@ -576,7 +576,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             missing_vars <- vars[!safe_vars_check %in% names(mydata)]
             if (length(missing_vars) > 0) {
                 private$.accumulateDataMessage(
-                    paste0(.("<br>❌ Variables not found in dataset: "), paste(missing_vars, collapse = ", "), "<br>")
+                    paste0(.("<br> Variables not found in dataset: "), paste(missing_vars, collapse = ", "), "<br>")
                 )
                 private$.prepared_data <- NULL
                 return(NULL)
@@ -617,7 +617,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (complete_cases < 3) {
                 warning_msg <- paste0(
                     "<div style='background:#fff3cd; border-left:4px solid #ff9800; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#ff6f00; margin-top:0;'>⚠️ Insufficient Complete Cases for Paired Analysis</h4>",
+                    "<h4 style='color:#ff6f00; margin-top:0;'> Insufficient Complete Cases for Paired Analysis</h4>",
                     "<p><strong>Within-subjects analysis requires complete data across all measurements.</strong></p>",
                     "<p>Current status:</p>",
                     "<ul>",
@@ -636,7 +636,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (missing_pct > 50) {
                 warning_msg <- paste0(
                     "<div style='background:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#ff9800; margin-top:0;'>⚠️ High Missing Data Rate</h4>",
+                    "<h4 style='color:#ff9800; margin-top:0;'> High Missing Data Rate</h4>",
                     "<p><strong>Warning:</strong> ", round(missing_pct, 1), "% of subjects have incomplete measurements.</p>",
                     "<p>Paired analysis will only use the ", complete_cases, " subjects with complete data.</p>",
                     "<p>Consider investigating why so much data is missing.</p>",
@@ -665,17 +665,17 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (dropped_n > 0) {
                  private$.accumulateDataMessage(
-                    glue::glue(.("<br>ℹ️ <strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed.<br>"))
+                    glue::glue(.("<br> <strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed.<br>"))
                 )
             } else {
                  private$.accumulateDataMessage(
-                    glue::glue(.("<br>ℹ️ <strong>Data Processing:</strong> All {final_n} subjects retained (complete data).<br>"))
+                    glue::glue(.("<br> <strong>Data Processing:</strong> All {final_n} subjects retained (complete data).<br>"))
                 )
             }
             
             if (nrow(mydata) == 0) {
                 private$.accumulateDataMessage(
-                    .("<br>❌ No complete observations after removing missing values<br>")
+                    .("<br> No complete observations after removing missing values<br>")
                 )
                 private$.prepared_data <- NULL
                 return(NULL)
@@ -834,7 +834,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # What to look for
-            guidance <- .("🔍 <strong>What to look for:</strong><br>• Statistical significance (p < 0.05) indicates real changes over time<br>• Effect sizes show practical importance<br>• Individual trajectories reveal response patterns<br>• Outliers may indicate treatment non-responders or measurement errors")
+            guidance <- .(" <strong>What to look for:</strong><br>• Statistical significance (p < 0.05) indicates real changes over time<br>• Effect sizes show practical importance<br>• Individual trajectories reveal response patterns<br>• Outliers may indicate treatment non-responders or measurement errors")
             
             interpretation_parts <- list(
                 paste0("<div style='background-color:#f8f9fa;padding:15px;margin:10px 0;border-left:4px solid #007bff;'>"),
@@ -869,13 +869,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Configuration summary
             config_items <- character()
             if (opts$pairwisecomparisons) {
-                config_items <- c(config_items, .("✓ Pairwise comparisons enabled"))
+                config_items <- c(config_items, .(" Pairwise comparisons enabled"))
             }
             if (opts$centralityplotting) {
-                config_items <- c(config_items, .("✓ Central tendency displayed"))
+                config_items <- c(config_items, .(" Central tendency displayed"))
             }
             if (opts$pointpath) {
-                config_items <- c(config_items, .("✓ Individual trajectories shown"))
+                config_items <- c(config_items, .(" Individual trajectories shown"))
             }
             
             if (length(config_items) > 0) {
@@ -1002,7 +1002,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 })
 
                 ### todo ----
-                todo <- sprintf(.("<br>✅ Ready for analysis: Violin Plot comparing %d repeated measurements.<br><hr>"), 
+                todo <- sprintf(.("<br> Ready for analysis: Violin Plot comparing %d repeated measurements.<br><hr>"), 
                                num_measurements)
 
                 self$results$todo$setContent(todo)

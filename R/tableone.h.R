@@ -141,7 +141,7 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentence",
-                title="\uD83D\uDCCB Copy to Manuscript",
+                title=" Copy to Manuscript",
                 visible="(showReportSentence)",
                 clearWith=list(
                     "vars",
@@ -178,7 +178,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "tableone",
-                version = c(0,0,35),
+                version = c(0,0,36),
                 options = options,
                 results = tableoneResults$new(options=options),
                 data = data,

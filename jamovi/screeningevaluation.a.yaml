@@ -16,7 +16,7 @@ description:
         assessment, quality improvement, and evidence-based screening policy development using
         standardized epidemiological methods and performance indicators.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('screening_data')
             

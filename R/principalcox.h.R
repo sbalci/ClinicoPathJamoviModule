@@ -557,7 +557,8 @@ principalcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' data \%>\%
+#' \donttest{
+#' data |>
 #' principalcox(
 #'     elapsedtime = "time_to_event",
 #'     outcome = "event_status",
@@ -565,7 +566,7 @@ principalcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     n_components = 5,
 #'     pca_method = "standard"
 #' )
-#'
+#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (1 = event, 0 = censored)

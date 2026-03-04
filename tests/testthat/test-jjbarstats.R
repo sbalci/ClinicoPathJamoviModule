@@ -43,7 +43,6 @@ create_jjbarstats_analysis <- function(data, dep, group, grvar = NULL, ...) {
 # Test 1: Basic functionality with single dependent variable
 test_that("jjbarstats works with single dependent variable", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test with medical study data
   expect_no_error({

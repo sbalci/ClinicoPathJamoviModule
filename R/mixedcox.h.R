@@ -884,6 +884,7 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' effects.
 #'
 #' @examples
+#' \donttest{
 #' # Example 1: Patients clustered within hospitals
 #' library(survival)
 #' library(coxme)
@@ -910,7 +911,7 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     random_effects = "slope",
 #'     random_slope_var = "treatment"
 #' )
-#'
+#'}
 #' @param data The dataset for analysis, provided as a data frame. Should
 #'   contain survival variables, fixed effects, and clustering variables.
 #' @param elapsedtime The numeric variable representing follow-up time until

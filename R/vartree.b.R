@@ -97,7 +97,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li>", .("Quality improvement analysis"), "</li>",
                     "</ul>",
                     
-                    "<p><b>💡 ", .("Tip:"), "</b> ", .("Start with 2-3 most important variables. You can always add more complexity later."), "</p>",
+                    "<p><b> ", .("Tip:"), "</b> ", .("Start with 2-3 most important variables. You can always add more complexity later."), "</p>",
                     "</div>"
                 )
                 html <- self$results$todo

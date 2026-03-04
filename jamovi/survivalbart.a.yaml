@@ -27,7 +27,7 @@ description:
         supports both accelerated failure time and proportional hazards formulations
         with comprehensive posterior inference and model diagnostics.
     R:
-        dontrun: false
+        dontrun: true
         usage: >
             result <- survivalbart(
                 data = mydata,
@@ -296,7 +296,7 @@ options:
       description:
           R: >
             Level for posterior credible intervals on all estimates.
-            0.95 provides 95% credible intervals.
+            0.95 provides 95 percent credible intervals.
 
     # Model validation and diagnostics
     - name: cross_validation

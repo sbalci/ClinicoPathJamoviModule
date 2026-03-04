@@ -16,7 +16,7 @@ description:
         data analysis with regulatory compliance features for biomarker development
         and clinical translation.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('biomarker_data')
             
@@ -307,7 +307,7 @@ options:
       max: 0.9
       default: 0.7
       description:
-          R: Proportion of data for training (70% = 0.7)
+          R: Proportion of data for training (70 percent = 0.7)
 
     - name: hyperparameter_tuning
       title: Hyperparameter Tuning

@@ -150,7 +150,7 @@ preference changes. Identifies "break-even" points for clinical
 decision-making.}
 
 \item{confidence_level}{Confidence level for interval estimation (default:
-0.95 for 95\\% CI).}
+0.95 for 95 percent CI).}
 
 \item{bootstrap_ci}{Use bootstrap resampling to calculate confidence
 intervals for Q-TWiST treatment differences. Recommended for robust
@@ -281,6 +281,7 @@ quality-of-life weights:
 }
 }
 \examples{
+\donttest{
 # Load example data
 data("qtwist_breast_cancer")
 
@@ -317,5 +318,5 @@ qtwist(
     plot_partitioned_survival = TRUE,
     plot_sensitivity = TRUE
 )
-
+}
 }

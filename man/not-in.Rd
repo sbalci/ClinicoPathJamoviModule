@@ -5,7 +5,12 @@
 \alias{\%notin\%}
 \title{Not-in operator}
 \usage{
-lhs \%notin\% rhs
+x \%notin\% table
+}
+\arguments{
+\item{x}{Values to check}
+
+\item{table}{Values to check against}
 }
 \description{
 Not-in operator

@@ -16,7 +16,7 @@ description:
         FACT-G, etc.) and custom questionnaires with missing data handling and longitudinal analysis.
         Essential for patient-centered outcomes research and clinical trials.
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             data('pro_data')
             
@@ -268,7 +268,7 @@ options:
       max: 1.0
       default: 0.5
       description:
-          R: Maximum proportion of missing items allowed for scoring (50% = 0.5)
+          R: Maximum proportion of missing items allowed for scoring (50 percent = 0.5)
 
     # Clinical Interpretation
     - name: clinical_interpretation

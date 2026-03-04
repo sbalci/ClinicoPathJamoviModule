@@ -4,7 +4,7 @@ title: Advanced ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:
@@ -751,7 +751,7 @@ options:
       description:
           R: >
             Treatment threshold range for decision curve analysis (min,max,step).
-            Example: "0.05,0.5,0.05" creates thresholds from 5% to 50% in 5% steps.
+            Example: "0.05,0.5,0.05" creates thresholds from 5 percent to 50 percent in 5 percent steps.
 
     - name: harmBenefitRatio
       title: Harm-to-Benefit Ratio

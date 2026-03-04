@@ -244,7 +244,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             html <- "<h3>Brier Score & Integrated Brier Score</h3>
             <p>Calibration accuracy assessment for time-to-event predictions.</p>
 
-            <p><b>⚠️ IMPORTANT LIMITATION:</b> This implementation evaluates Brier score using
+            <p><b> IMPORTANT LIMITATION:</b> This implementation evaluates Brier score using
             <b>pre-computed survival probabilities</b> at a single time point. The predicted
             survival variable must contain probabilities specifically calculated for the
             'Prediction Time' you specify (e.g., if Prediction Time = 60 months, the
@@ -260,7 +260,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 (must match the time horizon used to generate the predicted survival probabilities)</li>
             </ul>
 
-            <h4>⚠️ NOT CURRENTLY SUPPORTED:</h4>
+            <h4> NOT CURRENTLY SUPPORTED:</h4>
             <ul>
                 <li>Multiple time points with single prediction variable</li>
                 <li>Integrated Brier Score (requires time-varying predictions)</li>
@@ -321,7 +321,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             using inverse probability of censoring weighting (IPCW). It has NOT been validated
             against established packages like <code>pec</code> or <code>riskRegression</code>.</p>
 
-            <p><b>⚠️ For clinical validation studies:</b> Consider using validated packages:
+            <p><b> For clinical validation studies:</b> Consider using validated packages:
             <code>riskRegression::Score()</code> or <code>pec::pec()</code> which provide
             rigorous implementations with comprehensive testing.</p>"
 

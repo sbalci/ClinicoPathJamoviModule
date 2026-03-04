@@ -108,7 +108,7 @@ jforesterClass <- R6::R6Class(
             </head>
             <body>
             <div class='main'>
-                <div class='header'>📊 Forest Plot Visualization</div>"
+                <div class='header'> Forest Plot Visualization</div>"
             
             content <- switch(type,
                 "setup" = "
@@ -138,7 +138,7 @@ jforesterClass <- R6::R6Class(
                     for visualization. Customize colors, labels, and layout options as needed.
                 </div>
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;'>
-                    <strong>✓ Analysis configured correctly</strong><br>
+                    <strong> Analysis configured correctly</strong><br>
                     Review your forest plot settings and examine the results below.
                 </div>"
             )
@@ -196,7 +196,7 @@ jforesterClass <- R6::R6Class(
             if (nrow(forest_data) == 0) {
                 self$results$instructions$setContent(
                     "<div style='padding: 20px; color: #d32f2f;'>
-                    <strong>❌ No complete data</strong><br>
+                    <strong> No complete data</strong><br>
                     All required variables have missing values.
                     </div>"
                 )
@@ -342,7 +342,7 @@ jforesterClass <- R6::R6Class(
             
             interpretation_html <- paste0("
             <div style='font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif; padding: 20px;'>
-                <h3 style='color: #2e7d32; margin-bottom: 15px;'>📊 Forest Plot Interpretation</h3>
+                <h3 style='color: #2e7d32; margin-bottom: 15px;'> Forest Plot Interpretation</h3>
                 
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
                     <strong>Effect Measure: ", effect_type, "</strong><br>
@@ -358,7 +358,7 @@ jforesterClass <- R6::R6Class(
                 </div>
                 
                 <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
-                    <strong>⚠️ Important Considerations:</strong><br>
+                    <strong> Important Considerations:</strong><br>
                     • Consider heterogeneity between studies when interpreting results<br>
                     • Check for outliers or studies with unusually wide confidence intervals<br>
                     • Publication bias may affect the pattern of results<br>

@@ -91,7 +91,6 @@ categorical_quality_data <- data.frame(
 
 test_that("Data Quality Assessment - Basic functionality and structure", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test basic function exists and can be called
   expect_true(exists("checkdataClass"))

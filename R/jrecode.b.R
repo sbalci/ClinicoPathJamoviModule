@@ -200,7 +200,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # If empty, return invalid
             if (rules_str == "") {
                 result$notices <- c(result$notices,
-                    "<span style='color: orange;'>⚠ No recoding rules defined</span>")
+                    "<span style='color: orange;'> No recoding rules defined</span>")
                 return(result)
             }
 
@@ -211,7 +211,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (length(lines) == 0) {
                 result$notices <- c(result$notices,
-                    "<span style='color: orange;'>⚠ No valid rules found</span>")
+                    "<span style='color: orange;'> No valid rules found</span>")
                 return(result)
             }
 
@@ -270,20 +270,20 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (length(invalid_lines) > 0) {
                 result$notices <- c(result$notices,
-                    paste0("<span style='color: red;'>✗ Invalid format in ", length(invalid_lines),
+                    paste0("<span style='color: red;'> Invalid format in ", length(invalid_lines),
                            " line(s). Expected: oldvalue -> newvalue</span>"))
                 has_errors <- TRUE
             }
 
             if (length(unknown_levels) > 0) {
                 result$notices <- c(result$notices,
-                    paste0("<span style='color: orange;'>⚠ Unknown levels: ",
+                    paste0("<span style='color: orange;'> Unknown levels: ",
                            paste(unknown_levels, collapse = ", "), "</span>"))
             }
 
             if (length(rules_map) == 0) {
                 result$notices <- c(result$notices,
-                    "<span style='color: red;'>✗ No valid recoding rules found</span>")
+                    "<span style='color: red;'> No valid recoding rules found</span>")
                 has_errors <- TRUE
             }
 
@@ -292,7 +292,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 result$valid <- TRUE
                 result$rules_map <- rules_map
                 result$notices <- c(result$notices,
-                    paste0("<span style='color: green;'>✓ ", length(rules_map),
+                    paste0("<span style='color: green;'> ", length(rules_map),
                            " recoding rule(s) parsed successfully</span>"))
             }
 
@@ -431,7 +431,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Validate variable name
             if (!grepl("^[a-zA-Z][a-zA-Z0-9_]*$", new_var_name)) {
                 notice <- paste0(
-                    "<span style='color: red;'>✗ Invalid variable name: '", new_var_name,
+                    "<span style='color: red;'> Invalid variable name: '", new_var_name,
                     "'. Must start with a letter and contain only letters, numbers, and underscores.</span>"
                 )
                 current_notices <- self$results$notices$content

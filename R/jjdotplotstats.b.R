@@ -43,32 +43,32 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     color = "#721c24",
                     bg = "#f8d7da",
                     border = "#f5c6cb",
-                    icon = "❌"
+                    icon = ""
                 ),
                 "STRONG_WARNING" = list(
                     color = "#856404",
                     bg = "#fff3cd",
                     border = "#ffeaa7",
-                    icon = "⚠️"
+                    icon = ""
                 ),
                 "WARNING" = list(
                     color = "#856404",
                     bg = "#fff3cd",
                     border = "#ffeaa7",
-                    icon = "⚠️"
+                    icon = ""
                 ),
                 "INFO" = list(
                     color = "#004085",
                     bg = "#cce5ff",
                     border = "#b8daff",
-                    icon = "ℹ️"
+                    icon = ""
                 ),
                 # Default
                 list(
                     color = "#004085",
                     bg = "#cce5ff",
                     border = "#b8daff",
-                    icon = "ℹ️"
+                    icon = ""
                 )
             )
 
@@ -278,13 +278,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 interpretation <- glue::glue(
                     "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
-                    "<h4 style='color: #007bff; margin-top: 0;'>📊 Clinical Interpretation</h4>",
+                    "<h4 style='color: #007bff; margin-top: 0;'> Clinical Interpretation</h4>",
                     "<p><strong>Analysis:</strong> This dot plot shows the distribution of {dep_var} across {n_groups} {group_var} ",
                     if (n_groups == 2) "groups" else "groups",
                     " using a {test_description}.</p>",
                     "<p><strong>Sample:</strong> {sample_desc}</p>",
                     "<p><strong>Results:</strong> {results_desc}</p>",
-                    "<p><em>💡 Tip: The statistical significance and effect size will be displayed in the plot subtitle when the analysis completes.</em></p>",
+                    "<p><em> Tip: The statistical significance and effect size will be displayed in the plot subtitle when the analysis completes.</em></p>",
                     "</div>"
                 )
                 
@@ -293,7 +293,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Provide basic interpretation if detailed fails
                 basic_interp <- glue::glue(
                     "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff;'>",
-                    "<h4 style='color: #007bff; margin-top: 0;'>📊 Clinical Interpretation</h4>",
+                    "<h4 style='color: #007bff; margin-top: 0;'> Clinical Interpretation</h4>",
                     "<p>This analysis compares {dep_var} across {group_var} groups using dot plots.</p>",
                     "<p>The plot will show the distribution and statistical comparison when completed.</p>",
                     "</div>"
@@ -315,12 +315,12 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for sufficient sample size
                 sample_warning <- if(min_n < 30) {
                     if(min_n < 10) {
-                        "⚠️ <strong>Small sample sizes</strong> (n < 10 in some groups). Consider descriptive analysis only."
+                        " <strong>Small sample sizes</strong> (n < 10 in some groups). Consider descriptive analysis only."
                     } else {
-                        "ℹ️ <strong>Moderate sample sizes</strong> (n < 30). Non-parametric tests may be more appropriate."
+                        " <strong>Moderate sample sizes</strong> (n < 30). Non-parametric tests may be more appropriate."
                     }
                 } else {
-                    "✓ <strong>Adequate sample sizes</strong> for statistical testing."
+                    " <strong>Adequate sample sizes</strong> for statistical testing."
                 }
                 
                 # Check data distribution characteristics
@@ -341,11 +341,11 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 distribution_note <- if(abs(skewness_rough) > 1) {
-                    "ℹ️ <strong>Skewed distribution</strong> detected. Non-parametric tests recommended."
+                    " <strong>Skewed distribution</strong> detected. Non-parametric tests recommended."
                 } else if(abs(skewness_rough) > 0.5) {
-                    "ℹ️ <strong>Moderately skewed</strong> distribution. Consider robust or non-parametric methods."
+                    " <strong>Moderately skewed</strong> distribution. Consider robust or non-parametric methods."
                 } else {
-                    "✓ <strong>Approximately normal</strong> distribution suitable for parametric tests."
+                    " <strong>Approximately normal</strong> distribution suitable for parametric tests."
                 }
                 
                 # Generate recommendations
@@ -353,19 +353,19 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "parametric" = if(abs(skewness_rough) > 1 || min_n < 10) {
                         # Add Notice for clinical safety
                         private$.addNotice(sprintf('Parametric test selected but data shows high skewness (%.2f) and/or small sample sizes (minimum n = %d). Parametric tests assume normality. Consider switching to nonparametric test (Mann-Whitney/Kruskal-Wallis) for more reliable results.', skewness_rough, min_n), "STRONG_WARNING")
-                        "💡 <strong>Recommendation:</strong> Consider switching to non-parametric test due to distribution or sample size."
+                        " <strong>Recommendation:</strong> Consider switching to non-parametric test due to distribution or sample size."
                     } else {
-                        "✓ <strong>Parametric test</strong> is appropriate for your data."
+                        " <strong>Parametric test</strong> is appropriate for your data."
                     },
-                    "nonparametric" = "✓ <strong>Non-parametric test</strong> is robust and suitable for most data types.",
-                    "robust" = "✓ <strong>Robust test</strong> handles outliers and non-normal distributions well.",
-                    "bayes" = "✓ <strong>Bayesian approach</strong> provides evidence strength regardless of distribution.",
+                    "nonparametric" = " <strong>Non-parametric test</strong> is robust and suitable for most data types.",
+                    "robust" = " <strong>Robust test</strong> handles outliers and non-normal distributions well.",
+                    "bayes" = " <strong>Bayesian approach</strong> provides evidence strength regardless of distribution.",
                     "Current test selection is reasonable."
                 )
                 
                 assumptions_content <- glue::glue(
                     "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>🔍 Data Assessment & Recommendations</h4>",
+                    "<h4 style='color: #856404; margin-top: 0;'> Data Assessment & Recommendations</h4>",
                     "<p>{sample_warning}</p>",
                     "<p>{distribution_note}</p>",
                     "<p>{test_recommendation}</p>",
@@ -380,7 +380,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 basic_assumptions <- glue::glue(
                     "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>🔍 Data Assessment</h4>",
+                    "<h4 style='color: #856404; margin-top: 0;'> Data Assessment</h4>",
                     "<p>Evaluating data characteristics for appropriate statistical testing...</p>",
                     "</div>"
                 )
@@ -393,7 +393,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #     preset <- self$options$clinicalPreset
         #     if (is.null(preset) || preset == "custom") {
         #         private$.currentPreset <- "custom"
-        #         private$.accumulateMessage("<br>📋 Using custom analysis settings.<br>")
+        #         private$.accumulateMessage("<br> Using custom analysis settings.<br>")
         #         return()
         #     }
         #
@@ -410,7 +410,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #     }
         #
         #     if (nchar(preset_message) > 0) {
-        #         private$.accumulateMessage(glue::glue("<br>📋 {preset_message}<br>"))
+        #         private$.accumulateMessage(glue::glue("<br> {preset_message}<br>"))
         #     }
         # },
         
@@ -455,13 +455,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             report_template <- glue::glue(
                 "<div style='background-color: #e7f3ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;'>",
-                "<h4 style='color: #0066cc; margin-top: 0;'>📝 Copy-Ready Report Sentence</h4>",
+                "<h4 style='color: #0066cc; margin-top: 0;'> Copy-Ready Report Sentence</h4>",
                 "<div style='background-color: white; padding: 10px; border: 1px dashed #0066cc; font-family: \"Times New Roman\", serif;'>",
                 "<p>A <strong>{test_name}</strong> was performed to compare <em>{dep_var}</em> {comparison_phrase} of <em>{group_var}</em>. ",
                 "The dot plot visualization shows the distribution and central tendencies across groups, ",
                 "with statistical results displayed in the plot subtitle including effect size and significance testing.</p>",
                 "</div>",
-                "<p><em>💡 Click to select the text above and copy to your report. Statistical values will be automatically filled when the analysis completes.</em></p>",
+                "<p><em> Click to select the text above and copy to your report. Statistical values will be automatically filled when the analysis completes.</em></p>",
                 "</div>"
             )
 
@@ -474,7 +474,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #
         #     steps <- glue::glue(
         #         "<div style='background-color: #e8f5e8; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;'>",
-        #         "<h4 style='color: #155724; margin-top: 0;'>🎯 Analysis Steps</h4>",
+        #         "<h4 style='color: #155724; margin-top: 0;'> Analysis Steps</h4>",
         #         "<ol style='margin: 10px 0; padding-left: 20px;'>",
         #         "<li><strong>Data Selection:</strong> Choose continuous variable and grouping variable</li>",
         #         "<li><strong>Test Selection:</strong> Review data assessment recommendations above</li>",
@@ -482,7 +482,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #         "<li><strong>Interpretation:</strong> Review clinical interpretation and assumptions</li>",
         #         "<li><strong>Report:</strong> Copy report template for documentation</li>",
         #         "</ol>",
-        #         "<p><em>💡 Tip: Follow these steps in order for best results. Check the Data Assessment panel for recommendations.</em></p>",
+        #         "<p><em> Tip: Follow these steps in order for best results. Check the Data Assessment panel for recommendations.</em></p>",
         #         "</div>"
         #     )
         #
@@ -498,19 +498,19 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #     recommendations <- switch(preset,
         #         "publication" = glue::glue(
         #             "<div style='background-color: #fff8e1; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-        #             "<h4 style='color: #856404; margin-top: 0;'>📚 Publication Checklist</h4>",
+        #             "<h4 style='color: #856404; margin-top: 0;'> Publication Checklist</h4>",
         #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
-        #             "<li>✓ Report effect size with confidence intervals</li>",
-        #             "<li>✓ Include assumption checking results</li>",
-        #             "<li>✓ State statistical test used and why</li>",
-        #             "<li>✓ Report exact p-values (not just p < 0.05)</li>",
-        #             "<li>✓ Consider multiple testing corrections if applicable</li>",
+        #             "<li> Report effect size with confidence intervals</li>",
+        #             "<li> Include assumption checking results</li>",
+        #             "<li> State statistical test used and why</li>",
+        #             "<li> Report exact p-values (not just p < 0.05)</li>",
+        #             "<li> Consider multiple testing corrections if applicable</li>",
         #             "</ul>",
         #             "</div>"
         #         ),
         #         "clinical" = glue::glue(
         #             "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>",
-        #             "<h4 style='color: #1976d2; margin-top: 0;'>🏥 Clinical Decision Points</h4>",
+        #             "<h4 style='color: #1976d2; margin-top: 0;'> Clinical Decision Points</h4>",
         #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
         #             "<li>Consider clinical significance vs. statistical significance</li>",
         #             "<li>Evaluate practical impact of observed differences</li>",
@@ -522,7 +522,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #         ),
         #         glue::glue(
         #             "<div style='background-color: #f3e5f5; padding: 15px; border-left: 4px solid #9c27b0; margin: 10px 0;'>",
-        #             "<h4 style='color: #7b1fa2; margin-top: 0;'>🔍 Next Steps</h4>",
+        #             "<h4 style='color: #7b1fa2; margin-top: 0;'> Next Steps</h4>",
         #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
         #             "<li>Review the statistical assumptions above</li>",
         #             "<li>Consider additional analyses if needed</li>",
@@ -543,12 +543,12 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (length(num_vals) < 3) {
                 private$.accumulateMessage(
-                    glue::glue("<br>⚠️ Warning: {dep_var} has less than 3 valid observations<br>")
+                    glue::glue("<br> Warning: {dep_var} has less than 3 valid observations<br>")
                 )
             }
             if (length(unique(num_vals)) < 2) {
                 private$.accumulateMessage(
-                    glue::glue("<br>⚠️ Warning: {dep_var} has no variation (all values are the same)<br>")
+                    glue::glue("<br> Warning: {dep_var} has no variation (all values are the same)<br>")
                 )
             }
         },
@@ -566,7 +566,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outliers <- which(data[[var]] < (Q1 - 1.5 * IQR) | data[[var]] > (Q3 + 1.5 * IQR))
                 if (length(outliers) > 0) {
                     private$.accumulateMessage(
-                        glue::glue("<br>ℹ️ {length(outliers)} potential outlier(s) detected in {var}<br>")
+                        glue::glue("<br> {length(outliers)} potential outlier(s) detected in {var}<br>")
                     )
                 }
             }
@@ -584,7 +584,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     n_groups <- length(summary_stats)
                     total_n <- sum(sapply(summary_stats, function(x) x["n"]), na.rm = TRUE)
                     private$.accumulateMessage(
-                        glue::glue("<br>📊 Analysis summary: {n_groups} groups, {total_n} total observations<br>")
+                        glue::glue("<br> Analysis summary: {n_groups} groups, {total_n} total observations<br>")
                     )
                 }, error = function(e) {
                     # Silently handle errors in summary calculation
@@ -648,7 +648,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (n_before > n_after) {
                     n_dropped <- n_before - n_after
                     private$.accumulateMessage(
-                        glue::glue("<br>ℹ️ Info: {n_dropped} rows excluded due to missing values in analysis variables.<br>",
+                        glue::glue("<br> Info: {n_dropped} rows excluded due to missing values in analysis variables.<br>",
                                   "Rows with data: {n_after} of {n_before} ({round(100 * n_after / n_before, 1)}%)<br>")
                     )
                 }
@@ -671,7 +671,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             elapsed <- difftime(Sys.time(), start_time, units = "secs")
             if (nrow(mydata) > 1000) {
                 private$.accumulateMessage(
-                    glue::glue("<br>✅ Large dataset processed in {round(elapsed, 2)} seconds<br>")
+                    glue::glue("<br> Large dataset processed in {round(elapsed, 2)} seconds<br>")
                 )
             }
 

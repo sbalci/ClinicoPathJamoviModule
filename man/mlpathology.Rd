@@ -97,6 +97,7 @@ segmentation quality assessment, and statistical model comparison for AI
 validation and algorithm comparison studies.
 }
 \examples{
+\donttest{
 data('classification_results')
 
 mlpathology(data = classification_results,
@@ -104,5 +105,5 @@ mlpathology(data = classification_results,
            actual_labels = actual,
            predicted_labels = predicted,
            predicted_probabilities = prob)
-
+}
 }

@@ -1,7 +1,6 @@
 
 test_that("Will Rogers Phenomenon is correctly detected", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   library(survival)
   library(dplyr)
   

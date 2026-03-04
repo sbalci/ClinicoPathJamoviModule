@@ -16,7 +16,6 @@ library(scales)
 
 test_that("Mathematical calculations are accurate", {
   skip_if_not_installed('jmvReadWrite')
-  devtools::load_all()
   
   # Test Case 1: Standard scenario with known values
   prevalence <- 0.30

@@ -5,13 +5,11 @@
 library(testthat)
 
 test_that("jjhistostats function exists and loads", {
-  devtools::load_all()
 
   expect_true(exists("jjhistostats"))
 })
 
 test_that("jjhistostats runs with minimal required arguments", {
-  devtools::load_all()
 
   data(jjhistostats_test, package = "ClinicoPath")
 
@@ -25,7 +23,6 @@ test_that("jjhistostats runs with minimal required arguments", {
 })
 
 test_that("jjhistostats produces expected output structure", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -39,7 +36,6 @@ test_that("jjhistostats produces expected output structure", {
 })
 
 test_that("jjhistostats handles parametric statistics (Shapiro-Wilk)", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -53,7 +49,6 @@ test_that("jjhistostats handles parametric statistics (Shapiro-Wilk)", {
 })
 
 test_that("jjhistostats handles nonparametric statistics (Anderson-Darling)", {
-  devtools::load_all()
 
   data(jjhistostats_skewed)
 
@@ -67,7 +62,6 @@ test_that("jjhistostats handles nonparametric statistics (Anderson-Darling)", {
 })
 
 test_that("jjhistostats handles robust statistics", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -81,7 +75,6 @@ test_that("jjhistostats handles robust statistics", {
 })
 
 test_that("jjhistostats handles Bayesian statistics", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -95,7 +88,6 @@ test_that("jjhistostats handles Bayesian statistics", {
 })
 
 test_that("jjhistostats handles single variable", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -108,7 +100,6 @@ test_that("jjhistostats handles single variable", {
 })
 
 test_that("jjhistostats handles multiple variables", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -121,7 +112,6 @@ test_that("jjhistostats handles multiple variables", {
 })
 
 test_that("jjhistostats handles centrality line", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -143,7 +133,6 @@ test_that("jjhistostats handles centrality line", {
 })
 
 test_that("jjhistostats handles different centrality types", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -163,7 +152,6 @@ test_that("jjhistostats handles different centrality types", {
 })
 
 test_that("jjhistostats handles results subtitle", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -185,7 +173,6 @@ test_that("jjhistostats handles results subtitle", {
 })
 
 test_that("jjhistostats handles one-sample test", {
-  devtools::load_all()
 
   data(jjhistostats_labvalues)
 
@@ -208,7 +195,6 @@ test_that("jjhistostats handles one-sample test", {
 })
 
 test_that("jjhistostats handles grouped analysis", {
-  devtools::load_all()
 
   data(jjhistostats_grouped)
 
@@ -222,7 +208,6 @@ test_that("jjhistostats handles grouped analysis", {
 })
 
 test_that("jjhistostats handles bin width customization", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -245,7 +230,6 @@ test_that("jjhistostats handles bin width customization", {
 })
 
 test_that("jjhistostats handles clinical presets", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -264,7 +248,6 @@ test_that("jjhistostats handles clinical presets", {
 })
 
 test_that("jjhistostats handles Bayes Factor message", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -279,7 +262,6 @@ test_that("jjhistostats handles Bayes Factor message", {
 })
 
 test_that("jjhistostats handles custom titles", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -296,7 +278,6 @@ test_that("jjhistostats handles custom titles", {
 })
 
 test_that("jjhistostats handles different datasets", {
-  devtools::load_all()
 
   datasets <- list(
     jjhistostats_test = "age_years",
@@ -325,7 +306,6 @@ test_that("jjhistostats handles different datasets", {
 })
 
 test_that("jjhistostats handles different confidence levels", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -344,7 +324,6 @@ test_that("jjhistostats handles different confidence levels", {
 })
 
 test_that("jjhistostats handles different decimal places", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -364,7 +343,6 @@ test_that("jjhistostats handles different decimal places", {
 })
 
 test_that("jjhistostats handles different plot dimensions", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -379,7 +357,6 @@ test_that("jjhistostats handles different plot dimensions", {
 })
 
 test_that("jjhistostats handles normally distributed data", {
-  devtools::load_all()
 
   data(jjhistostats_labvalues)
 
@@ -395,7 +372,6 @@ test_that("jjhistostats handles normally distributed data", {
 })
 
 test_that("jjhistostats handles skewed data", {
-  devtools::load_all()
 
   data(jjhistostats_skewed)
 
@@ -411,7 +387,6 @@ test_that("jjhistostats handles skewed data", {
 })
 
 test_that("jjhistostats handles bimodal distribution", {
-  devtools::load_all()
 
   data(jjhistostats_bimodal)
 
@@ -425,7 +400,6 @@ test_that("jjhistostats handles bimodal distribution", {
 })
 
 test_that("jjhistostats handles ggpubr plot addition", {
-  devtools::load_all()
 
   data(jjhistostats_test)
 
@@ -441,7 +415,6 @@ test_that("jjhistostats handles ggpubr plot addition", {
 })
 
 test_that("jjhistostats handles distribution diagnostics", {
-  devtools::load_all()
 
   data(jjhistostats_labvalues)
 

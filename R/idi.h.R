@@ -877,6 +877,7 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
+#' \donttest{
 #' result <- idi(
 #'     data = mydata,
 #'     outcome = "event_indicator",
@@ -885,7 +886,7 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     time_point = 5,
 #'     bootstrap_samples = 1000
 #' )
-#'
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (0/1) indicating event occurrence.
 #'   For time-to-event data, this should be event status at the specified time
@@ -906,9 +907,10 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   differences. Mean difference is standard, median is robust to outliers,
 #'   trimmed mean balances both approaches, robust uses M-estimators.
 #' @param trim_proportion Proportion of extreme values to trim when using
-#'   trimmed mean. 0.1 trims 10\% from each tail, providing robust estimation.
+#'   trimmed mean. 0.1 trims 10 percent from each tail, providing robust
+#'   estimation.
 #' @param confidence_level Confidence level for IDI confidence intervals and
-#'   hypothesis testing. 0.95 provides 95\% confidence intervals.
+#'   hypothesis testing. 0.95 provides 95 percent confidence intervals.
 #' @param bootstrap_samples Number of bootstrap samples for confidence
 #'   interval estimation. More samples provide more stable estimates but
 #'   increase computation time.
@@ -972,7 +974,7 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param time_dependent Calculate time-dependent IDI for survival models
 #'   showing how discrimination improvement varies over time.
 #' @param alpha_level Type I error rate for hypothesis testing and confidence
-#'   intervals. Standard value is 0.05 for 95\% confidence.
+#'   intervals. Standard value is 0.05 for 95 percent confidence.
 #' @param random_seed Random seed for bootstrap sampling and cross-validation.
 #'   Ensures reproducible results across analyses.
 #' @param relative_idi Calculate relative IDI as percentage improvement over

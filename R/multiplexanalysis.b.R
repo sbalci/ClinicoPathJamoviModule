@@ -7,7 +7,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         .init = function() {
             if (is.null(self$data) || length(self$options$marker_vars) == 0) {
                 self$results$interpretation$setContent(
-                    "<h3>🎯 Multiplex Immunofluorescence Statistical Analysis</h3>
+                    "<h3> Multiplex Immunofluorescence Statistical Analysis</h3>
                     <p><strong>Purpose:</strong> Comprehensive statistical analysis of multiplex immunofluorescence data 
                     including co-expression patterns, spatial proximity analysis, immune contexture scoring, and 
                     multi-parametric phenotyping for advanced tumor microenvironment characterization.</p>
@@ -860,7 +860,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
             
             interpretation <- paste0(
-                "<h3>🎯 Multiplex Immunofluorescence Analysis Summary</h3>",
+                "<h3> Multiplex Immunofluorescence Analysis Summary</h3>",
                 "<p><strong>Dataset Overview:</strong> ", n_samples, " samples analyzed with ", n_markers, " markers</p>",
                 
                 "<h4>Expression Profile:</h4>",
@@ -945,7 +945,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             # Generate copy-ready clinical report sentences
             clinical_report <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
-                "<h4>📋 Copy-Ready Clinical Report</h4>",
+                "<h4> Copy-Ready Clinical Report</h4>",
 
                 "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                 "<h5>Study Summary</h5>",
@@ -954,7 +954,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 sprintf("Co-expression analysis identified %d significant correlations among %d possible marker pairs (%.1f%%). ", n_correlations, total_pairs, correlation_percentage),
                 cluster_info, pca_info, spatial_info,
                 "</p>",
-                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Summary</button>",
+                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Summary</button>",
                 "</div>",
 
                 "<div style='background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
@@ -968,7 +968,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     sprintf("Independent expression patterns predominated with only %.1f%% of marker pairs showing significant correlation, suggesting diverse cellular phenotypes and limited functional redundancy.", correlation_percentage)
                 },
                 "</p>",
-                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Correlation</button>",
+                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Correlation</button>",
                 "</div>",
 
                 if (self$options$perform_clustering && !is.null(private$.cluster_data)) {
@@ -980,7 +980,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                         sprintf("Unsupervised clustering analysis identified %d distinct cell populations based on multiplex marker expression profiles. ", n_clusters),
                         "Each cluster exhibited characteristic marker expression patterns suggesting distinct cellular phenotypes and functional states relevant for tumor microenvironment characterization.",
                         "</p>",
-                        "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Clustering</button>",
+                        "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Clustering</button>",
                         "</div>"
                     )
                 } else { "" },
@@ -994,7 +994,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                         sprintf("Principal component analysis revealed structured variance in the multiplex data, with the first two components explaining %.1f%% of total expression variance. ", total_variance),
                         "This dimensionality reduction approach facilitated visualization of major expression patterns and identification of key marker relationships driving phenotypic diversity.",
                         "</p>",
-                        "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy PCA</button>",
+                        "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy PCA</button>",
                         "</div>"
                     )
                 } else { "" },
@@ -1005,7 +1005,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 "These multiplex immunofluorescence findings provide quantitative characterization of the tumor immune microenvironment suitable for biomarker discovery, therapeutic target identification, and patient stratification in precision oncology applications. ",
                 "The identified marker relationships and cellular populations warrant further validation in independent cohorts for clinical implementation.",
                 "</p>",
-                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'>📋 Copy Implications</button>",
+                "<button onclick='navigator.clipboard.writeText(this.previousElementSibling.textContent)' style='background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;'> Copy Implications</button>",
                 "</div>",
 
                 "</div>"

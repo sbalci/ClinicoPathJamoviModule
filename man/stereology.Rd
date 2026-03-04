@@ -75,7 +75,7 @@ Requires object count data.}
 \item{calculateSv}{Surface density: surface area per unit volume. Formula:
 Sv = 2 × Ba (for isotropic sections).}
 
-\item{showConfidenceIntervals}{Calculate and display 95\\% confidence
+\item{showConfidenceIntervals}{Calculate and display 95 percent confidence
 intervals for stereological estimates using bootstrap methods.}
 
 \item{bootstrapIterations}{Number of bootstrap iterations for confidence
