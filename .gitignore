@@ -63,3 +63,8 @@ jamovi_modules
 README.html
 .tmp/
 temp-books/
+temp/
+temp2/
+_snaps/
+tr/
+PATCHES/
