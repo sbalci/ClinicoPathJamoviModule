@@ -3,7 +3,7 @@ name: swimmerplot
 title: "Swimmer Plot"
 menuGroup: OncoPath
 menuSubgroup: Patient Follow-Up Plots
-version: '0.0.35'
+version: '0.0.36'
 jas: '1.2'
 
 description:

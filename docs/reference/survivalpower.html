@@ -11,7 +11,7 @@ statistical methods."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -242,9 +242,8 @@ ranges</p></dd>
 
 <dt id="arg-run-simulation-validation">run_simulation_validation<a class="anchor" aria-label="anchor" href="#arg-run-simulation-validation"></a></dt>
 <dd><p>Validate analytical power calculations
-using Monte Carlo simulation. Useful for verifying complex scenarios
-(Weibull, log-normal distributions). May take 10-60 seconds depending on
-simulation_runs setting.</p></dd>
+using Monte Carlo simulation. Currently validated for exponential log-rank
+settings only. May take 10-60 seconds depending on simulation_runs setting.</p></dd>
 
 
 <dt id="arg-simulation-runs">simulation_runs<a class="anchor" aria-label="anchor" href="#arg-simulation-runs"></a></dt>
@@ -286,13 +285,13 @@ Advanced, or Comprehensive.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">survivalPower</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    test_type <span class="op">=</span> <span class="st">"log_rank"</span>,</span></span>
 <span class="r-in"><span>    effect_size <span class="op">=</span> <span class="fl">0.75</span>,</span></span>
-<span class="r-in"><span>    alpha <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
-<span class="r-in"><span>    power <span class="op">=</span> <span class="fl">0.80</span>,</span></span>
+<span class="r-in"><span>    alpha_level <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
+<span class="r-in"><span>    power_level <span class="op">=</span> <span class="fl">0.80</span>,</span></span>
 <span class="r-in"><span>    allocation_ratio <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>    accrual_period <span class="op">=</span> <span class="fl">24</span>,</span></span>
 <span class="r-in"><span>    follow_up_period <span class="op">=</span> <span class="fl">36</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in survivalPower(test_type = "log_rank", effect_size = 0.75, alpha = 0.05,     power = 0.8, allocation_ratio = 1, accrual_period = 24, follow_up_period = 36):</span> argument 3 matches multiple formal arguments</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in item$visible &amp;&amp; !is(item, "Image"):</span> invalid 'x' type in 'x &amp;&amp; y'</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

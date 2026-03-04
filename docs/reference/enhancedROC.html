@@ -15,7 +15,7 @@ test evaluation, and clinical decision support in medical research."></head><bod
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ test evaluation, and clinical decision support in medical research."></head><bod
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Clinical ROC Analysis</h1>
-      <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/R/enhancedROC.h.R" class="external-link"><code>R/enhancedROC.h.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/R/enhancedroc.h.R" class="external-link"><code>R/enhancedroc.h.R</code></a></small>
       <div class="d-none name"><code>enhancedROC.Rd</code></div>
     </div>
 
@@ -65,8 +65,8 @@ test evaluation, and clinical decision support in medical research.</p>
 <span>  <span class="va">predictors</span>,</span>
 <span>  analysisType <span class="op">=</span> <span class="st">"single"</span>,</span>
 <span>  direction <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  youdenOptimization <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">customCutoffs</span>,</span>
+<span>  youdenOptimization <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  customCutoffs <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  sensitivityThreshold <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  specificityThreshold <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  confidenceLevel <span class="op">=</span> <span class="fl">95</span>,</span>
@@ -78,11 +78,11 @@ test evaluation, and clinical decision support in medical research.</p>
 <span>  stratifiedBootstrap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pairwiseComparisons <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  comparisonMethod <span class="op">=</span> <span class="st">"delong"</span>,</span>
-<span>  rocCurve <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  aucTable <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  rocCurve <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  aucTable <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cutoffTable <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  optimalCutoffs <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  diagnosticMetrics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  optimalCutoffs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  diagnosticMetrics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  clinicalMetrics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  smoothMethod <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  partialAuc <span class="op">=</span> <span class="cn">FALSE</span>,</span>

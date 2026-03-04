@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuTitle: Time-Dependent DCA
 menuSubtitle: Net benefit for survival and longitudinal data
-version: '0.0.35'
+version: '0.0.36'
 jas: '1.2'
 
 description:

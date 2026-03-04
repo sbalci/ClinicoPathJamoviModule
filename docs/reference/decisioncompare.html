@@ -15,7 +15,7 @@ confidence intervals for differences."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,6 +76,11 @@ confidence intervals for differences.</p>
 <span>  plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  excludeIndeterminate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  radarplot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  heatmap <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  opa <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  niMargin <span class="op">=</span> <span class="fl">75</span>,</span>
+<span>  ciMethod <span class="op">=</span> <span class="st">"wilson"</span>,</span>
+<span>  stratify <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  statComp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showSummary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -165,6 +170,30 @@ inflating specificity/NPV from equivocal results.</p></dd>
 visualization.</p></dd>
 
 
+<dt id="arg-heatmap">heatmap<a class="anchor" aria-label="anchor" href="#arg-heatmap"></a></dt>
+<dd><p>Generate concordance heatmap comparing per-case test results
+against gold standard.</p></dd>
+
+
+<dt id="arg-opa">opa<a class="anchor" aria-label="anchor" href="#arg-opa"></a></dt>
+<dd><p>Show overall percent agreement with 95\<!-- % confidence intervals -->
+for each test.</p></dd>
+
+
+<dt id="arg-nimargin">niMargin<a class="anchor" aria-label="anchor" href="#arg-nimargin"></a></dt>
+<dd><p>Noninferiority margin as percentage (default 75). Used when
+OPA is enabled.</p></dd>
+
+
+<dt id="arg-cimethod">ciMethod<a class="anchor" aria-label="anchor" href="#arg-cimethod"></a></dt>
+<dd><p>CI method: wilson, logit, or exact (Clopper-Pearson).</p></dd>
+
+
+<dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
+<dd><p>Optional stratification variable for subgroup-specific
+diagnostic accuracy analysis.</p></dd>
+
+
 <dt id="arg-statcomp">statComp<a class="anchor" aria-label="anchor" href="#arg-statcomp"></a></dt>
 <dd><p>Perform statistical comparison between tests (McNemar's
 test and confidence intervals for differences).</p></dd>
@@ -186,7 +215,7 @@ educational content.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cTable1</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable1</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cTable2</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable2</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cTable3</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable3</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$comparisonTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$mcnemarTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$diffTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot1</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotRadar</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$summaryReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$reportSentence</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$explanationsContent</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aboutAnalysis</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$text1</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$text2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cTable1</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable1</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cTable2</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable2</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cTable3</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$epirTable3</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$comparisonTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$opaTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stratifiedTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$mcnemarTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$diffTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plot1</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotRadar</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotHeatmap</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$summaryReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$reportSentence</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$explanationsContent</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$aboutAnalysis</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$cTable1$asDF</code></p>
 <p><code>as.data.frame(results$cTable1)</code></p>
     </div>

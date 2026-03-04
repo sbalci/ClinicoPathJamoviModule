@@ -11,7 +11,7 @@ new laboratory methods, diagnostic tests, and measurement techniques."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,6 +70,7 @@ new laboratory methods, diagnostic tests, and measurement techniques.</p>
 <span>  correlation_analysis <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  concordance_correlation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  regression_comparison <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  calibration_analysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  clinical_limits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  clinical_lower <span class="op">=</span> <span class="op">-</span><span class="fl">10</span>,</span>
 <span>  clinical_upper <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -161,6 +162,15 @@ coefficient for agreement assessment</p></dd>
 comparison regressions</p></dd>
 
 
+<dt id="arg-calibration-analysis">calibration_analysis<a class="anchor" aria-label="anchor" href="#arg-calibration-analysis"></a></dt>
+<dd><p>Compute calibration metrics assessing how well
+the test method tracks the reference method. Includes
+calibration-in-the-large (intercept; ideal = 0), calibration slope (ideal =
+1), and R-squared. A well-calibrated method has slope near 1 and intercept
+near 0. Useful for validating AI scoring tools, automated assays, and new
+measurement methods against gold standards.</p></dd>
+
+
 <dt id="arg-clinical-limits">clinical_limits<a class="anchor" aria-label="anchor" href="#arg-clinical-limits"></a></dt>
 <dd><p>Specify clinical acceptability criteria</p></dd>
 
@@ -209,7 +219,7 @@ intervals</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$descriptiveStats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$correlationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$concordanceTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$blandAltmanStats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$passingBablokResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$demingResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regressionComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$biasAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$outlierAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$clinicalAssessment</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$blandAltmanPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$scatterPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$residualPlots</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$mountainPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$methodGuidance</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$technicalNotes</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$descriptiveStats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$correlationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$concordanceTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$blandAltmanStats</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$passingBablokResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$demingResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regressionComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$biasAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$outlierAnalysis</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$clinicalAssessment</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$blandAltmanPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$scatterPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$residualPlots</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$mountainPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calibrationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$methodGuidance</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$technicalNotes</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$descriptiveStats$asDF</code></p>
 <p><code>as.data.frame(results$descriptiveStats)</code></p>
     </div>

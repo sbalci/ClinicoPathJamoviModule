@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +56,7 @@
 <span>  show_plots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  icc_type <span class="op">=</span> <span class="st">"consistency"</span>,</span>
 <span>  correlation_method <span class="op">=</span> <span class="st">"both"</span>,</span>
+<span>  ba_method <span class="op">=</span> <span class="st">"standard"</span>,</span>
 <span>  missing_data <span class="op">=</span> <span class="st">"listwise"</span>,</span>
 <span>  show_interpretation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_summary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -98,6 +99,10 @@ pathology scenarios</p></dd>
 <p>show_plotsshow scatter plot and Bland-Altman plot</p>
 <p>icc_typetype of intraclass correlation coefficient to calculate</p>
 <p>correlation_methodcorrelation method(s) to calculate</p>
+<p>ba_methodMethod for calculating limits of agreement in Bland-Altman
+analysis. Standard uses fixed limits (mean +/- 1.96*SD). Regression-based
+limits account for proportional bias where disagreement varies with
+magnitude.</p>
 <p>missing_datamethod for handling missing values</p>
 <p>show_interpretationprovide clinical interpretation of agreement
 statistics</p>

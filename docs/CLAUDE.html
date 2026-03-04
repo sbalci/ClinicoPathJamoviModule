@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.33.05</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -374,6 +374,26 @@
 <li>The error “attempt to apply non-function” during serialization was caused by using jmvcore::Notice objects that were dynamically inserted with self<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mi>e</mi><mi>s</mi><mi>u</mi><mi>l</mi><mi>t</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">results</annotation></semantics></math>insert(). These Notice objects contain function references that cannot be serialized by jamovi’s protobuf system.</li>
 <li>jmvtools::check() only locates jamovi program bin file location. it does not check anything regarding module structure or code.</li>
 </ul><p>Always use available ‘skills’ when possible. Keep the output organized. Use these skills to update text and analysis in the project: pubmed-database biopython biorxiv-database openalex-database citation-management scholar-evaluation clinical-decision-support clinical-reports exploratory-data-analysis hypogenic hypothesis-generation literature-review peer-review scientific-brainstorming scientific-critical-thinking scientific-visualization scientific-schematics generate-image scientific-slides scientific-writing research-grants statistical-analysis statsmodels paper-2-web matplotlib scikit-learn scikit-survival plotly seaborn aeon docx xlsx pptx latex-posters pdf markitdown histolab pathml shap omero-integration pydicom pytorch-lightning</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="multi-model-orchestration-protocol">Multi-Model Orchestration Protocol<a class="anchor" aria-label="anchor" href="#multi-model-orchestration-protocol"></a></h2>
+<p>When a bug fix, feature request, or complex task comes in, follow this workflow:</p>
+<div class="section level3">
+<h3 id="step-1--codex-analyze--plan">Step 1 — Codex: Analyze &amp; Plan<a class="anchor" aria-label="anchor" href="#step-1--codex-analyze--plan"></a></h3>
+<p>Call the Codex MCP tool and request: - Root cause analysis of the issue - A step-by-step solution plan - List of affected files - Potential risks and edge cases</p>
+</div>
+<div class="section level3">
+<h3 id="step-2--claude-implement">Step 2 — Claude: Implement<a class="anchor" aria-label="anchor" href="#step-2--claude-implement"></a></h3>
+<p>Take the plan from Codex and implement it yourself. Run tests after completing each step.</p>
+</div>
+<div class="section level3">
+<h3 id="step-3--fallback-delegate-to-codex">Step 3 — Fallback: Delegate to Codex<a class="anchor" aria-label="anchor" href="#step-3--fallback-delegate-to-codex"></a></h3>
+<p>If you fail to resolve a step after 2 attempts, delegate that specific step to Codex via MCP.</p>
+</div>
+<div class="section level3">
+<h3 id="step-4--verify">Step 4 — Verify<a class="anchor" aria-label="anchor" href="#step-4--verify"></a></h3>
+<p>Validate the final result by running build and test commands.</p>
 </div>
 </div>
 </div>

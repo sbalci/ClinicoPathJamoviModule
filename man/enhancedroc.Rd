@@ -12,7 +12,7 @@ enhancedROC(
   analysisType = "single",
   direction = "auto",
   youdenOptimization = TRUE,
-  customCutoffs,
+  customCutoffs = "",
   sensitivityThreshold = 0.8,
   specificityThreshold = 0.8,
   confidenceLevel = 95,

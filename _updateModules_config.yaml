@@ -8,6 +8,8 @@
 # Rscript -e "jmvtools::prepare()"
 # Rscript -e "devtools::document()"
 # Rscript -e "devtools::load_all()"
+# Rscript -e "devtools::check()"
+# Rscript -e "pkgdown::build_site()"
 
 # Rscript _updateModules.R
 
@@ -15,8 +17,8 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.35.03"
-new_date: "2026-03-03"
+new_version: "0.0.36"
+new_date: "2026-03-04"
 quick: false
 TEST: true
 meddecide: false
