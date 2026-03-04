@@ -58,6 +58,10 @@ items:
     #       - wght
     #       - exct
 
+    - name:  irrtableHeading
+      title: Interrater Reliability
+      type:  Preformatted
+
     - name:  irrtable
       title: 'Interrater Reliability'
       type: Table
@@ -92,6 +96,13 @@ items:
           - exct
 
 
+    - name:  contingencyTableHeading
+      title: Data Summary
+      type:  Preformatted
+      visible: (sft)
+      clearWith:
+          - sft
+
     - name:  contingencyTable
       title: 'Contingency Table (2 Raters)'
       type: Table
@@ -113,6 +124,19 @@ items:
           - vars
           - wght
           - exct
+
+    - name: contingencyTableExplanation
+      title: "About Contingency Table & Rating Combinations"
+      type: Html
+      visible: (sft && showAbout)
+
+    - name: blandAltmanHeading
+      title: Bland-Altman Method Comparison
+      type:  Preformatted
+      visible: (blandAltmanPlot || showBlandAltmanGuide)
+      clearWith:
+          - blandAltmanPlot
+          - showBlandAltmanGuide
 
     - name: blandAltman
       title: 'Bland-Altman Plot'
@@ -144,7 +168,16 @@ items:
     - name: agreementHeatmapExplanation
       title: "About Agreement Heatmap"
       type: Html
-      visible: ((agreementHeatmap || showAgreementHeatmapGuide) && showAbout)
+      visible: (showAgreementHeatmapGuide)
+      clearWith:
+          - showAgreementHeatmapGuide
+
+    - name: blandAltmanExplanation
+      title: "About Bland-Altman Analysis"
+      type: Html
+      visible: (showBlandAltmanGuide)
+      clearWith:
+          - showBlandAltmanGuide
 
     - name: blandAltmanStats
       title: 'Bland-Altman Statistics'
@@ -169,6 +202,13 @@ items:
           type: number
           format: zto,pvalue
           visible: (proportionalBias)
+        - name: normalityW
+          title: 'Shapiro-Wilk W'
+          type: number
+        - name: normalityP
+          title: 'Normality (p)'
+          type: number
+          format: zto,pvalue
       clearWith:
           - vars
           - baConfidenceLevel
@@ -190,6 +230,14 @@ items:
     #       - wght
     #       - exct
 
+
+    - name: krippTableHeading
+      title: "Krippendorff's Alpha"
+      type:  Preformatted
+      visible: (kripp || showKrippGuide)
+      clearWith:
+          - kripp
+          - showKrippGuide
 
     - name: krippTable
       title: "Krippendorff's Alpha Results"
@@ -217,10 +265,35 @@ items:
           title: 'CI Upper'
           type: number
           visible: (bootstrap)
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
       clearWith:
           - vars
           - krippMethod
           - bootstrap
+          - nBoot
+
+    - name: krippExplanation
+      title: "About Krippendorff's Alpha"
+      type: Html
+      visible: (showKrippGuide)
+      clearWith:
+          - showKrippGuide
+
+    - name: lightKappaTableHeading
+      title: Additional Categorical Agreement Measures
+      type:  Preformatted
+      visible: (lightKappa || showLightKappaGuide || finn || showFinnGuide || kendallW || showKendallWGuide || robinsonA || showRobinsonAGuide)
+      clearWith:
+          - lightKappa
+          - showLightKappaGuide
+          - finn
+          - showFinnGuide
+          - kendallW
+          - showKendallWGuide
+          - robinsonA
+          - showRobinsonAGuide
 
     - name: lightKappaTable
       title: "Light's Kappa Results"
@@ -250,7 +323,9 @@ items:
     - name: lightKappaExplanation
       title: "About Light's Kappa"
       type: Html
-      visible: (lightKappa && showAbout)
+      visible: (showLightKappaGuide)
+      clearWith:
+          - showLightKappaGuide
 
     - name: finnTable
       title: "Finn Coefficient Results (Variance-Based Agreement)"
@@ -294,7 +369,9 @@ items:
     - name: finnExplanation
       title: "About Finn Coefficient"
       type: Html
-      visible: (finn && showAbout)
+      visible: (showFinnGuide)
+      clearWith:
+          - showFinnGuide
 
     - name: kendallWTable
       title: "Kendall's Coefficient of Concordance (W) Results"
@@ -330,7 +407,9 @@ items:
     - name: kendallWExplanation
       title: "About Kendall's W"
       type: Html
-      visible: (kendallW && showAbout)
+      visible: (showKendallWGuide)
+      clearWith:
+          - showKendallWGuide
 
     - name: robinsonATable
       title: "Robinson's A (Ordinal Agreement Index) Results"
@@ -369,7 +448,9 @@ items:
     - name: robinsonAExplanation
       title: "About Robinson's A"
       type: Html
-      visible: ((robinsonA || showRobinsonAGuide) && showAbout)
+      visible: (showRobinsonAGuide)
+      clearWith:
+          - showRobinsonAGuide
 
     - name: meanSpearmanTable
       title: "Mean Spearman Rho (Average Rank Correlation) Results"
@@ -404,7 +485,21 @@ items:
     - name: meanSpearmanExplanation
       title: "About Mean Spearman Rho"
       type: Html
-      visible: ((meanSpearman || showMeanSpearmanGuide) && showAbout)
+      visible: (showMeanSpearmanGuide)
+      clearWith:
+          - showMeanSpearmanGuide
+
+    - name: raterBiasHeading
+      title: Marginal Homogeneity Tests
+      type:  Preformatted
+      visible: (raterBias || showRaterBiasGuide || bhapkar || showBhapkarGuide || stuartMaxwell || showStuartMaxwellGuide)
+      clearWith:
+          - raterBias
+          - showRaterBiasGuide
+          - bhapkar
+          - showBhapkarGuide
+          - stuartMaxwell
+          - showStuartMaxwellGuide
 
     - name: raterBiasTable
       title: "Rater Bias Test Results"
@@ -431,7 +526,9 @@ items:
     - name: raterBiasExplanation
       title: "About Rater Bias Test"
       type: Html
-      visible: (raterBias && showAbout)
+      visible: (showRaterBiasGuide)
+      clearWith:
+          - showRaterBiasGuide
 
     - name: bhapkarTable
       title: "Bhapkar Test for Marginal Homogeneity"
@@ -467,7 +564,9 @@ items:
     - name: bhapkarExplanation
       title: "About Bhapkar Test"
       type: Html
-      visible: (bhapkar && showAbout)
+      visible: (showBhapkarGuide)
+      clearWith:
+          - showBhapkarGuide
 
     - name: stuartMaxwellTable
       title: "Stuart-Maxwell Test for Marginal Homogeneity"
@@ -503,7 +602,9 @@ items:
     - name: stuartMaxwellExplanation
       title: "About Stuart-Maxwell Test"
       type: Html
-      visible: (stuartMaxwell && showAbout)
+      visible: (showStuartMaxwellGuide)
+      clearWith:
+          - showStuartMaxwellGuide
 
     - name: pairwiseKappaTable
       title: "Pairwise Kappa (Each Rater vs Reference)"
@@ -539,7 +640,17 @@ items:
     - name: pairwiseKappaExplanation
       title: "About Pairwise Kappa Analysis"
       type: Html
-      visible: (pairwiseKappa && showAbout)
+      visible: (showPairwiseKappaGuide)
+      clearWith:
+          - showPairwiseKappaGuide
+
+    - name: hierarchicalHeading
+      title: Hierarchical / Multilevel Agreement
+      type:  Preformatted
+      visible: (hierarchicalKappa || showHierarchicalGuide)
+      clearWith:
+          - hierarchicalKappa
+          - showHierarchicalGuide
 
     - name: hierarchicalOverallTable
       title: "Hierarchical Kappa - Overall Agreement"
@@ -688,7 +799,23 @@ items:
     - name: hierarchicalExplanation
       title: "About Hierarchical/Multilevel Kappa"
       type: Html
-      visible: (hierarchicalKappa && showAbout)
+      visible: (showHierarchicalGuide)
+      clearWith:
+          - showHierarchicalGuide
+
+    - name: advancedHeading
+      title: Advanced Agreement Analyses
+      type:  Preformatted
+      visible: (mixedEffectsComparison || showMixedEffectsGuide || confusionMatrix || showConfusionMatrixGuide || bootstrapCI || showBootstrapCIGuide || multiAnnotatorConcordance || showConcordanceF1Guide)
+      clearWith:
+          - mixedEffectsComparison
+          - showMixedEffectsGuide
+          - confusionMatrix
+          - showConfusionMatrixGuide
+          - bootstrapCI
+          - showBootstrapCIGuide
+          - multiAnnotatorConcordance
+          - showConcordanceF1Guide
 
     - name: mixedEffectsTable
       title: "Mixed-Effects Condition Comparison"
@@ -754,7 +881,9 @@ items:
     - name: mixedEffectsExplanation
       title: "About Mixed-Effects Condition Comparison"
       type: Html
-      visible: (mixedEffectsComparison && showAbout)
+      visible: (showMixedEffectsGuide)
+      clearWith:
+          - showMixedEffectsGuide
 
     - name: confusionMatrixTable
       title: "Confusion Matrix"
@@ -812,7 +941,9 @@ items:
     - name: confusionMatrixExplanation
       title: "About Confusion Matrix"
       type: Html
-      visible: (confusionMatrix && showAbout)
+      visible: (showConfusionMatrixGuide)
+      clearWith:
+          - showConfusionMatrixGuide
 
     - name: bootstrapCITable
       title: "Bootstrap Confidence Intervals for Agreement Metrics"
@@ -848,7 +979,9 @@ items:
     - name: bootstrapCIExplanation
       title: "About Bootstrap Confidence Intervals"
       type: Html
-      visible: (bootstrapCI && showAbout)
+      visible: (showBootstrapCIGuide)
+      clearWith:
+          - showBootstrapCIGuide
 
     - name: concordanceF1Table
       title: "Multi-Annotator Concordance Metrics"
@@ -901,7 +1034,19 @@ items:
     - name: concordanceF1Explanation
       title: "About Multi-Annotator Concordance"
       type: Html
-      visible: (multiAnnotatorConcordance && showAbout)
+      visible: (showConcordanceF1Guide)
+      clearWith:
+          - showConcordanceF1Guide
+
+    - name: gwetHeading
+      title: Chance-Corrected Agreement Variants
+      type:  Preformatted
+      visible: (gwet || showGwetGuide || pabak || showPABAKGuide)
+      clearWith:
+          - gwet
+          - showGwetGuide
+          - pabak
+          - showPABAKGuide
 
     - name: gwetTable
       title: "Gwet's AC1/AC2 Results"
@@ -941,7 +1086,58 @@ items:
     - name: gwetExplanation
       title: "About Gwet's AC Coefficient"
       type: Html
-      visible: (gwet && showAbout)
+      visible: (showGwetGuide)
+      clearWith:
+          - showGwetGuide
+
+    - name: pabakTable
+      title: "PABAK & Prevalence/Bias Indices"
+      type: Table
+      visible: (pabak)
+      rows: 1
+      columns:
+        - name: subjects
+          title: 'Cases'
+          type: integer
+        - name: observedAgreement
+          title: 'Observed Agreement'
+          type: number
+        - name: kappa
+          title: "Cohen's Kappa"
+          type: number
+        - name: pabak
+          title: 'PABAK'
+          type: number
+        - name: prevalenceIndex
+          title: 'Prevalence Index'
+          type: number
+        - name: biasIndex
+          title: 'Bias Index'
+          type: number
+        - name: interpretation
+          title: 'Interpretation'
+          type: text
+      clearWith:
+          - vars
+          - wght
+
+    - name: pabakExplanation
+      title: "About PABAK & Prevalence/Bias Indices"
+      type: Html
+      visible: (showPABAKGuide)
+      clearWith:
+          - showPABAKGuide
+
+    - name: iccHeading
+      title: Continuous Agreement Measures
+      type:  Preformatted
+      visible: (icc || showICCGuide || meanPearson || linCCC || tdi)
+      clearWith:
+          - icc
+          - showICCGuide
+          - meanPearson
+          - linCCC
+          - tdi
 
     - name: iccTable
       title: "Intraclass Correlation Coefficient (ICC) Results"
@@ -987,7 +1183,9 @@ items:
     - name: iccExplanation
       title: "About Intraclass Correlation Coefficient (ICC)"
       type: Html
-      visible: (icc && showAbout)
+      visible: (showICCGuide)
+      clearWith:
+          - showICCGuide
 
     - name: meanPearsonTable
       title: "Mean Pearson Correlation (Linear Association) Results"
@@ -1022,7 +1220,9 @@ items:
     - name: meanPearsonExplanation
       title: "About Mean Pearson Correlation"
       type: Html
-      visible: ((meanPearson || showMeanPearsonGuide) && showAbout)
+      visible: (showMeanPearsonGuide)
+      clearWith:
+          - showMeanPearsonGuide
 
     - name: linCCCTable
       title: "Lin's Concordance Correlation Coefficient (CCC)"
@@ -1060,7 +1260,9 @@ items:
     - name: linCCCExplanation
       title: "About Lin's Concordance Correlation Coefficient"
       type: Html
-      visible: ((linCCC || showLinCCCGuide) && showAbout)
+      visible: (showLinCCCGuide)
+      clearWith:
+          - showLinCCCGuide
 
     - name: tdiTable
       title: "Total Deviation Index (TDI) - Acceptable Agreement Limits"
@@ -1104,7 +1306,21 @@ items:
     - name: tdiExplanation
       title: "About Total Deviation Index (TDI)"
       type: Html
-      visible: ((tdi || showTDIGuide) && showAbout)
+      visible: (showTDIGuide)
+      clearWith:
+          - showTDIGuide
+
+    - name: maxwellREHeading
+      title: Error Decomposition & Reliability
+      type:  Preformatted
+      visible: (maxwellRE || showMaxwellREGuide || interIntraRater || showInterIntraRaterGuide || iota || showIotaGuide)
+      clearWith:
+          - maxwellRE
+          - showMaxwellREGuide
+          - interIntraRater
+          - showInterIntraRaterGuide
+          - iota
+          - showIotaGuide
 
     - name: maxwellRETable
       title: "Maxwell's Random Error (RE) Index - Error Decomposition"
@@ -1150,7 +1366,9 @@ items:
     - name: maxwellREExplanation
       title: "About Maxwell's Random Error Index"
       type: Html
-      visible: ((maxwellRE || showMaxwellREGuide) && showAbout)
+      visible: (showMaxwellREGuide)
+      clearWith:
+          - showMaxwellREGuide
 
     - name: interIntraRaterIntraTable
       title: "Intra-Rater Reliability (Test-Retest Consistency)"
@@ -1231,7 +1449,9 @@ items:
     - name: interIntraRaterExplanation
       title: "About Inter/Intra-Rater Reliability"
       type: Html
-      visible: ((interIntraRater || showInterIntraRaterGuide) && showAbout)
+      visible: (showInterIntraRaterGuide)
+      clearWith:
+          - showInterIntraRaterGuide
 
     - name: iotaTable
       title: "Iota Coefficient Results (Multivariate Agreement)"
@@ -1259,16 +1479,30 @@ items:
           type: text
       clearWith:
           - vars
+          - iotaStandardize
 
     - name: iotaExplanation
       title: "About Iota Coefficient"
       type: Html
-      visible: (iota && showAbout)
+      visible: (showIotaGuide)
+      clearWith:
+          - showIotaGuide
 
     - name: weightedKappaGuide
       title: "Weighted Kappa Interpretation Guide"
       type: Html
       visible: (showAbout && (wght:unweighted == FALSE))
+      clearWith:
+          - showAbout
+          - wght
+
+    - name: specificAgreementHeading
+      title: Category-Specific Agreement
+      type:  Preformatted
+      visible: (specificAgreement || showSpecificAgreementGuide)
+      clearWith:
+          - specificAgreement
+          - showSpecificAgreementGuide
 
     - name: specificAgreementTable
       title: "Specific Agreement Indices (Category-Focused Agreement)"
@@ -1308,7 +1542,9 @@ items:
     - name: specificAgreementExplanation
       title: "About Specific Agreement Indices"
       type: Html
-      visible: ((specificAgreement || showSpecificAgreementGuide) && showAbout)
+      visible: (showSpecificAgreementGuide)
+      clearWith:
+          - showSpecificAgreementGuide
 
     - name: levelInfoTable
       title: "Level Ordering Information"
@@ -1338,16 +1574,30 @@ items:
       title: "Summary"
       type: Html
       visible: (showSummary)
+      clearWith:
+          - showSummary
 
     - name: about
       title: "About This Analysis"
       type: Html
       visible: (showAbout)
+      clearWith:
+          - showAbout
 
     - name: clinicalUseCases
       title: "Clinical Use Cases & Method Selection Guide"
       type: Html
       visible: (showAbout)
+      clearWith:
+          - showAbout
+
+    - name: computedVariablesHeading
+      title: Computed Variables
+      type:  Preformatted
+      visible: (consensusVar || loaVariable)
+      clearWith:
+          - consensusVar
+          - loaVariable
 
     - name: consensusTable
       title: "Consensus Variable Summary"
@@ -1395,6 +1645,8 @@ items:
           type: text
       clearWith:
           - vars
+          - detailLevel
+          - simpleThreshold
           - loaThresholds
           - loaHighThreshold
           - loaLowThreshold
@@ -1423,6 +1675,8 @@ items:
           type: integer
       clearWith:
           - vars
+          - detailLevel
+          - simpleThreshold
           - loaThresholds
           - loaHighThreshold
           - loaLowThreshold
@@ -1431,6 +1685,9 @@ items:
       title: "Computed Variables Added to Dataset"
       type: Html
       visible: (consensusVar || loaVariable)
+      clearWith:
+          - consensusVar
+          - loaVariable
 
     # Output Variables (Computed Columns Added to Dataset)
     - name: consensusVar
@@ -1478,7 +1735,9 @@ items:
     - name: raterProfileExplanation
       title: "About Rater Profile Plots"
       type: Html
-      visible: ((raterProfiles || showRaterProfileGuide) && showAbout)
+      visible: (showRaterProfileGuide)
+      clearWith:
+          - showRaterProfileGuide
 
     # ---- Agreement by Subgroup ----
 
@@ -1531,9 +1790,19 @@ items:
     - name: subgroupExplanation
       title: "About Agreement by Subgroup"
       type: Html
-      visible: ((agreementBySubgroup || showSubgroupGuide) && showAbout)
+      visible: (showSubgroupGuide)
+      clearWith:
+          - showSubgroupGuide
 
     # ---- Rater Clustering ----
+
+    - name: raterClusterHeading
+      title: Rater & Case Clustering
+      type:  Preformatted
+      visible: (raterClustering || caseClustering)
+      clearWith:
+          - raterClustering
+          - caseClustering
 
     - name: raterClusterTable
       title: "Rater Cluster Assignments"
@@ -1591,7 +1860,9 @@ items:
     - name: raterClusterExplanation
       title: "About Rater Clustering"
       type: Html
-      visible: ((raterClustering || showRaterClusterGuide) && showAbout)
+      visible: (showRaterClusterGuide)
+      clearWith:
+          - showRaterClusterGuide
 
     - name: caseClusterTable
       title: "Case Cluster Assignments"
@@ -1608,6 +1879,12 @@ items:
         - name: avg_similarity
           title: 'Avg Within-Cluster Similarity'
           type: number
+      clearWith:
+          - vars
+          - caseClusterMethod
+          - caseClusterDistance
+          - caseClusterLinkage
+          - nCaseClusters
 
     - name: caseDendrogram
       title: 'Case Clustering Dendrogram'
@@ -1617,6 +1894,10 @@ items:
       renderFun: .caseDendrogram
       visible: (caseClustering && caseClusterMethod:hierarchical && showCaseDendrogram)
       requiresData: true
+      clearWith:
+          - vars
+          - caseClusterDistance
+          - caseClusterLinkage
 
     - name: caseClusterHeatmap
       title: 'Case Similarity Heatmap with Clusters'
@@ -1626,20 +1907,42 @@ items:
       renderFun: .caseClusterHeatmap
       visible: (caseClustering && showCaseClusterHeatmap)
       requiresData: true
+      clearWith:
+          - vars
+          - caseClusterMethod
+          - caseClusterDistance
+          - caseClusterLinkage
+          - nCaseClusters
 
     - name: caseClusterExplanation
       title: "About Case Clustering"
       type: Html
-      visible: ((caseClustering || showCaseClusterGuide) && showAbout)
+      visible: (showCaseClusterGuide)
+      clearWith:
+          - showCaseClusterGuide
 
     # ============================================================
     # PAIRED AGREEMENT COMPARISON
     # ============================================================
 
+    - name: pairedAgreementHeading
+      title: Paired Agreement & Sample Size
+      type:  Preformatted
+      visible: (pairedAgreementTest || showPairedAgreementGuide || agreementSampleSize || showSampleSizeGuide)
+      clearWith:
+          - pairedAgreementTest
+          - showPairedAgreementGuide
+          - agreementSampleSize
+          - showSampleSizeGuide
+
     - name: pairedAgreementTable
       title: "Paired Agreement Comparison"
       type: Table
       visible: (pairedAgreementTest)
+      clearWith:
+          - vars
+          - conditionBVars
+          - pairedBootN
       columns:
         - name: metric
           title: "Metric"
@@ -1675,7 +1978,9 @@ items:
     - name: pairedAgreementExplanation
       title: "About Paired Agreement Comparison"
       type: Html
-      visible: (pairedAgreementTest && showAbout)
+      visible: (showPairedAgreementGuide)
+      clearWith:
+          - showPairedAgreementGuide
 
     # ============================================================
     # SAMPLE SIZE FOR AGREEMENT STUDIES
@@ -1685,6 +1990,14 @@ items:
       title: "Sample Size for Agreement Study"
       type: Table
       visible: (agreementSampleSize)
+      clearWith:
+          - ssMetric
+          - ssKappaNull
+          - ssKappaAlt
+          - ssNRaters
+          - ssNCategories
+          - ssAlpha
+          - ssPower
       columns:
         - name: parameter
           title: "Parameter"
@@ -1696,7 +2009,9 @@ items:
     - name: agreementSampleSizeExplanation
       title: "About Agreement Sample Size"
       type: Html
-      visible: (agreementSampleSize && showAbout)
+      visible: (showSampleSizeGuide)
+      clearWith:
+          - showSampleSizeGuide
 
 refs:
     - irr

@@ -558,6 +558,116 @@ write_xlsx(enhancedroc_small, path = here::here("data", "enhancedroc_small.xlsx"
 jmvReadWrite::write_omv(enhancedroc_small, here::here("data", "enhancedroc_small.omv"))
 
 # ═══════════════════════════════════════════════════════════
+# Dataset 9: enhancedroc_validation
+# ═══════════════════════════════════════════════════════════
+# Data for internal validation, CROC, convex hull, and
+# probability-scale predictors for advanced calibration
+# Use case: Prediction model validation & advanced ROC methods
+# n = 350
+
+n <- 350
+prevalence <- 0.30
+
+enhancedroc_validation <- data.frame(
+  patient_id = sprintf("VAL-%03d", 1:n),
+  age = round(rnorm(n, 62, 11)),
+  sex = factor(sample(c("Male", "Female"), n, replace = TRUE, prob = c(0.55, 0.45))),
+  outcome = rbinom(n, 1, prevalence)
+)
+
+enhancedroc_validation$age <- pmax(30, pmin(enhancedroc_validation$age, 85))
+
+# Well-calibrated probability predictor (AUC ~ 0.80)
+enhancedroc_validation$model_prob <- with(enhancedroc_validation, {
+  logit <- -2 + 0.04 * age + 1.5 * outcome + rnorm(n, 0, 0.8)
+  prob <- 1 / (1 + exp(-logit))
+  pmax(0.01, pmin(0.99, prob))
+})
+
+# Poorly-calibrated probability predictor (miscalibrated)
+enhancedroc_validation$miscalibrated_prob <- with(enhancedroc_validation, {
+  logit <- -1 + 0.03 * age + 2.0 * outcome + rnorm(n, 0, 1.0)
+  prob <- 1 / (1 + exp(-0.4 * logit))  # Flattened calibration
+  pmax(0.01, pmin(0.99, prob))
+})
+
+# Continuous biomarker (for CROC / convex hull)
+enhancedroc_validation$biomarker <- with(enhancedroc_validation, {
+  ifelse(outcome == 1,
+         rnorm(n, 80, 18),
+         rnorm(n, 50, 15))
+})
+enhancedroc_validation$biomarker <- pmax(0, enhancedroc_validation$biomarker)
+
+# Clinical risk score (composite)
+enhancedroc_validation$risk_score <- with(enhancedroc_validation, {
+  0.5 * (biomarker / 10) + 0.3 * model_prob * 100 + 0.2 * (age / 10) + rnorm(n, 0, 2)
+})
+
+# Convert outcome to factor
+enhancedroc_validation$outcome <- factor(
+  enhancedroc_validation$outcome,
+  levels = c(0, 1),
+  labels = c("Negative", "Positive")
+)
+
+# Save in all formats
+save(enhancedroc_validation, file = here::here("data", "enhancedroc_validation.rda"))
+write.csv(enhancedroc_validation, file = here::here("data", "enhancedroc_validation.csv"), row.names = FALSE)
+write_xlsx(enhancedroc_validation, path = here::here("data", "enhancedroc_validation.xlsx"))
+jmvReadWrite::write_omv(enhancedroc_validation, here::here("data", "enhancedroc_validation.omv"))
+
+# ═══════════════════════════════════════════════════════════
+# Dataset 10: enhancedroc_tiedscores
+# ═══════════════════════════════════════════════════════════
+# Data with many tied predictor values for tied score handling tests
+# Use case: Ordinal scores, Likert scales, rounded lab values
+# n = 200
+
+n <- 200
+prevalence <- 0.35
+
+enhancedroc_tiedscores <- data.frame(
+  patient_id = sprintf("TIED-%03d", 1:n),
+  disease = rbinom(n, 1, prevalence)
+)
+
+# Ordinal score (1-10 with many ties)
+enhancedroc_tiedscores$ordinal_score <- with(enhancedroc_tiedscores, {
+  ifelse(disease == 1,
+         sample(1:10, n, replace = TRUE, prob = c(0.02, 0.03, 0.05, 0.08, 0.10, 0.12, 0.15, 0.18, 0.15, 0.12)),
+         sample(1:10, n, replace = TRUE, prob = c(0.15, 0.18, 0.15, 0.12, 0.12, 0.10, 0.08, 0.05, 0.03, 0.02)))
+})
+
+# Rounded lab value (many ties from rounding)
+enhancedroc_tiedscores$rounded_lab <- with(enhancedroc_tiedscores, {
+  raw <- ifelse(disease == 1, rnorm(n, 8.5, 2.0), rnorm(n, 5.5, 1.8))
+  round(raw)  # Integer rounding creates ties
+})
+
+# Likert-type composite (summed ordinal items, limited range)
+enhancedroc_tiedscores$composite_score <- with(enhancedroc_tiedscores, {
+  item1 <- ifelse(disease == 1, sample(1:5, n, replace = TRUE, prob = c(0.05, 0.10, 0.20, 0.30, 0.35)),
+                                sample(1:5, n, replace = TRUE, prob = c(0.35, 0.30, 0.20, 0.10, 0.05)))
+  item2 <- ifelse(disease == 1, sample(1:5, n, replace = TRUE, prob = c(0.08, 0.12, 0.20, 0.28, 0.32)),
+                                sample(1:5, n, replace = TRUE, prob = c(0.32, 0.28, 0.20, 0.12, 0.08)))
+  item1 + item2  # Range 2-10
+})
+
+# Convert disease to factor
+enhancedroc_tiedscores$disease <- factor(
+  enhancedroc_tiedscores$disease,
+  levels = c(0, 1),
+  labels = c("No Disease", "Disease")
+)
+
+# Save in all formats
+save(enhancedroc_tiedscores, file = here::here("data", "enhancedroc_tiedscores.rda"))
+write.csv(enhancedroc_tiedscores, file = here::here("data", "enhancedroc_tiedscores.csv"), row.names = FALSE)
+write_xlsx(enhancedroc_tiedscores, path = here::here("data", "enhancedroc_tiedscores.xlsx"))
+jmvReadWrite::write_omv(enhancedroc_tiedscores, here::here("data", "enhancedroc_tiedscores.omv"))
+
+# ═══════════════════════════════════════════════════════════
 # Summary
 # ═══════════════════════════════════════════════════════════
 
@@ -566,22 +676,20 @@ cat("═════════════════════════
 cat("Test Data Generation Complete: enhancedROC\n")
 cat("════════════════════════════════════════════════════════════════\n")
 cat("\n")
-cat("Generated 8 datasets with 4 formats each (32 files total):\n")
+cat("Generated 10 datasets with 4 formats each (40 files total):\n")
 cat("\n")
-cat("1. enhancedroc_biomarker      (n=300) - Single biomarker ROC (AUC ~0.80)\n")
-cat("2. enhancedroc_comparative    (n=400) - Multiple biomarkers for comparison\n")
-cat("3. enhancedroc_imbalanced     (n=500) - Rare disease (5% prevalence)\n")
-cat("4. enhancedroc_multiclass     (n=350) - Multi-class severity (4 levels)\n")
-cat("5. enhancedroc_calibration    (n=300) - Calibration assessment data\n")
-cat("6. enhancedroc_screening      (n=600) - Screening context (high sensitivity)\n")
-cat("7. enhancedroc_confirmatory   (n=250) - Confirmatory testing (high specificity)\n")
-cat("8. enhancedroc_small          (n=60)  - Quick testing dataset\n")
+cat(" 1. enhancedroc_biomarker      (n=300) - Single biomarker ROC (AUC ~0.80)\n")
+cat(" 2. enhancedroc_comparative    (n=400) - Multiple biomarkers for comparison\n")
+cat(" 3. enhancedroc_imbalanced     (n=500) - Rare disease (5% prevalence)\n")
+cat(" 4. enhancedroc_multiclass     (n=350) - Multi-class severity (4 levels)\n")
+cat(" 5. enhancedroc_calibration    (n=300) - Calibration assessment data\n")
+cat(" 6. enhancedroc_screening      (n=600) - Screening context (high sensitivity)\n")
+cat(" 7. enhancedroc_confirmatory   (n=250) - Confirmatory testing (high specificity)\n")
+cat(" 8. enhancedroc_small          (n=60)  - Quick testing dataset\n")
+cat(" 9. enhancedroc_validation     (n=350) - Validation / CROC / convex hull\n")
+cat("10. enhancedroc_tiedscores     (n=200) - Tied scores for handling methods\n")
 cat("\n")
 cat("Formats: RDA, CSV, XLSX, OMV\n")
-cat("Total patients across all datasets: 2,760\n")
+cat("Total patients across all datasets: 3,310\n")
 cat("\n")
-cat("Next steps:\n")
-cat("1. Create test files (test-enhancedROC-*.R)\n")
-cat("2. Create example file (inst/examples/enhancedROC_example.R)\n")
-cat("3. Create summary documentation (ENHANCEDROC_TEST_DATA_SUMMARY.md)\n")
 cat("════════════════════════════════════════════════════════════════\n")

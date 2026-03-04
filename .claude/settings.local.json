@@ -225,7 +225,8 @@
       "Bash(do basename \"$f\")",
       "Bash(codex:*)",
       "Bash(unset:*)",
-      "Bash(claude mcp list:*)"
+      "Bash(claude mcp list:*)",
+      "Bash(open:*)"
     ],
     "deny": [],
     "ask": [],

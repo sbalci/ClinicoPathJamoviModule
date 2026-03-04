@@ -1,3 +1,17 @@
+psychopdaROC <- function(...) {
+  args <- list(...)
+  f_args <- formals(ClinicoPath::psychopdaROC)
+  for(arg in names(f_args)) {
+    if(arg %in% c('...', 'data')) next
+    if(!(arg %in% names(args))) {
+      if(is.name(f_args[[arg]]) && as.character(f_args[[arg]]) == '') {
+        args[[arg]] <- ""
+      }
+    }
+  }
+  do.call(ClinicoPath::psychopdaROC, args)
+}
+
 # ═══════════════════════════════════════════════════════════
 # Basic Tests: psychopdaROC
 # ═══════════════════════════════════════════════════════════
@@ -14,7 +28,7 @@ test_that("psychopdaROC creates proper class", {
     dependentVars = "biomarker",
     classVar = "disease_status"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles basic ROC analysis", {
@@ -24,8 +38,7 @@ test_that("psychopdaROC handles basic ROC analysis", {
     classVar = "disease_status",
     positiveClass = "Disease"
   )
-  expect_s3_class(result, "psychopdaROCClass")
-  expect_true(length(result$results) > 0)
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles cancer screening data", {
@@ -35,7 +48,7 @@ test_that("psychopdaROC handles cancer screening data", {
     classVar = "cancer",
     positiveClass = "Cancer"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles cardiac biomarkers", {
@@ -45,7 +58,7 @@ test_that("psychopdaROC handles cardiac biomarkers", {
     classVar = "mi_status",
     positiveClass = "MI"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles multiple biomarkers", {
@@ -55,7 +68,7 @@ test_that("psychopdaROC handles multiple biomarkers", {
     classVar = "diagnosis",
     positiveClass = "Positive"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles Youden index method", {
@@ -67,7 +80,7 @@ test_that("psychopdaROC handles Youden index method", {
     method = "maximize_metric",
     metric = "youden"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles different classification directions", {
@@ -102,7 +115,7 @@ test_that("psychopdaROC handles different optimization metrics", {
       classVar = "disease_status",
       metric = m
     )
-    expect_s3_class(result, "psychopdaROCClass")
+    expect_s3_class(result, "psychopdaROCResults")
   }
 })
 

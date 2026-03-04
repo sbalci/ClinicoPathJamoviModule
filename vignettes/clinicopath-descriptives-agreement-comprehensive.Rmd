@@ -1,0 +1,1078 @@
+---
+title: "Interrater Reliability & Agreement Analysis - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interrater Reliability & Agreement Analysis - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+
+# Load the package
+devtools::load_all("../")
+
+# Base path for data files
+data_path <- "../data-raw/non-rda/"
+```
+
+# Interrater Reliability & Agreement Analysis
+
+## Overview
+
+The **Agreement** module (`agreement`) provides a comprehensive suite of interrater
+reliability and agreement statistics for clinicopathological research. It supports
+categorical, ordinal, and continuous data with 2 or more raters, and includes
+advanced features such as hierarchical kappa, mixed-effects comparisons,
+bootstrap confidence intervals, and built-in sample size calculators.
+
+All examples below use the bundled test datasets located in `data-raw/non-rda/`.
+In jamovi, open the corresponding `.omv` file. From R, read the `.csv` directly.
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | Type | Raters | Description |
+|---------|------|--------|-------------|
+| `agreement_pathology` | Categorical | 2 | Surgical pathology diagnoses (Benign/Low-grade/High-grade) |
+| `agreement_binary` | Binary | 2 | Positive/Negative classification |
+| `agreement_ordinal` | Ordinal | 2 | Tumor grading (Grade 1-3) |
+| `agreement_continuous` | Continuous | 2 | Continuous measurements |
+| `agreement_threeRater` | Categorical | 3 | Three-rater panel |
+| `agreement_multiRater` | Categorical | 5 | Five pathologists of varying experience |
+| `agreement_hierarchical` | Categorical | 6 | Multi-center (3 hospitals, 2 raters each) |
+| `agreement_testRetest` | Categorical | 6 | Test-retest (3 raters x 2 timepoints) |
+| `agreement_missing` | Categorical | 3 | Dataset with missing values |
+| `agreement_paired_comparison` | Categorical | 4 | Manual vs AI rater comparison |
+| `agreement_mixed_effects` | Continuous | 2 | Pre/Post training condition comparison |
+| `agreement_heatmap_test` | Ordinal | 3 | HER2 scoring for heatmap visualization |
+| `agreement_perfect` | Categorical | 2 | Perfect agreement (edge case) |
+| `agreement_poor` | Categorical | 2 | Poor agreement |
+| `agreement_small` | Binary | 2 | Small sample (n=30) |
+| `pathology_agreement_main` | Continuous | 3 | Ki-67 scoring (HALO, Aiforia, Manual) |
+| `pathology_agreement_multimethod` | Continuous | 4 | Ki-67 multi-platform |
+| `pathology_agreement_ai` | Continuous | 2 | AI vs pathologist Ki-67 |
+| `pathology_agreement_missing` | Continuous | 3 | Continuous data with NAs |
+| `comprehensive_agreement_data` | Categorical | 4 | Multi-specialty with metadata |
+| `digital_pathology_validation` | Continuous | 2 | Digital pathology AI validation |
+
+---
+
+## 1. Categorical Agreement (Default Kappa)
+
+The default analysis computes Cohen's kappa (2 raters) or Fleiss' kappa (3+ raters)
+with percent agreement.
+
+### Basic two-rater kappa
+
+```{r categorical-basic}
+# Dataset: agreement_pathology
+# Raters: Pathologist1, Pathologist2
+# Diagnoses: Benign, Low-grade malignant, High-grade malignant
+
+agreement_pathology <- read.csv(paste0(data_path, "agreement_pathology.csv"))
+
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2)
+)
+```
+
+### With frequency table and additional statistics
+
+```{r categorical-full}
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    sft = TRUE,                     # Show contingency (frequency) table
+    pabak = TRUE,                   # Prevalence-Adjusted Bias-Adjusted Kappa
+    gwet = TRUE,                    # Gwet's AC1/AC2 (stable with prevalence imbalance)
+    gwetWeights = "unweighted",     # or "linear", "quadratic"
+    specificAgreement = TRUE,       # Category-specific agreement (PSA/NSA)
+    specificAllCategories = TRUE,   # Show for all categories
+    specificConfidenceIntervals = TRUE,
+    raterBias = TRUE,               # McNemar test for systematic rater bias
+    bhapkar = TRUE,                 # Bhapkar test (multivariate extension)
+    stuartMaxwell = TRUE,           # Stuart-Maxwell marginal homogeneity test
+    agreementHeatmap = TRUE,        # Visual heatmap of cross-tabulation
+    heatmapColorScheme = "bluered", # Color scheme (bluered/viridis/heat/grayscale)
+    heatmapShowPercentages = TRUE,
+    heatmapShowCounts = TRUE,
+    heatmapAnnotationSize = 3.5
+)
+```
+
+### With subgroup analysis
+
+```{r categorical-subgroup}
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    agreementBySubgroup = TRUE,
+    subgroupVariable = specimen_type,   # Compare kappa across specimen types
+    subgroupForestPlot = TRUE,          # Forest plot of subgroup kappas
+    subgroupMinCases = 10               # Minimum cases per subgroup
+)
+```
+
+---
+
+## 2. Binary Agreement
+
+```{r binary}
+# Dataset: agreement_binary
+# Raters: PathologistX, PathologistY (Positive/Negative)
+
+agreement_binary <- read.csv(paste0(data_path, "agreement_binary.csv"))
+
+agreement(
+    data = agreement_binary,
+    conditionBVars = NULL,
+    vars = vars(PathologistX, PathologistY),
+    specificAgreement = TRUE,
+    specificPositiveCategory = "Positive",  # Category for PSA/NSA
+    specificConfidenceIntervals = TRUE,
+    pabak = TRUE,
+    agreementBySubgroup = TRUE,
+    subgroupVariable = specimen_quality
+)
+```
+
+---
+
+## 3. Ordinal / Weighted Kappa
+
+For ordinal data (e.g., tumor grades), weighted kappa accounts for the magnitude
+of disagreement. A Grade 1 vs Grade 3 mismatch is penalized more heavily than
+Grade 1 vs Grade 2.
+
+```{r ordinal-linear}
+# Dataset: agreement_ordinal
+# Raters: PathologistA, PathologistB (Grade 1/2/3)
+
+agreement_ordinal <- read.csv(paste0(data_path, "agreement_ordinal.csv"))
+
+# Convert to ordered factors (required for weighted kappa & rank-based methods)
+grade_levels <- c("Grade 1", "Grade 2", "Grade 3", "Grade 4")
+agreement_ordinal$PathologistA <- factor(agreement_ordinal$PathologistA,
+    levels = grade_levels, ordered = TRUE)
+agreement_ordinal$PathologistB <- factor(agreement_ordinal$PathologistB,
+    levels = grade_levels, ordered = TRUE)
+
+# Linear weights
+agreement(
+    data = agreement_ordinal,
+    conditionBVars = NULL,
+    vars = vars(PathologistA, PathologistB),
+    wght = "equal",              # Linear weights
+    showLevelInfo = TRUE,        # Show category-level details
+    kendallW = TRUE,             # Kendall's W (coefficient of concordance)
+    agreementBySubgroup = TRUE,
+    subgroupVariable = tumor_site
+)
+```
+
+```{r ordinal-quadratic}
+# Quadratic weights (more forgiving of near-misses)
+agreement(
+    data = agreement_ordinal,
+    conditionBVars = NULL,
+    vars = vars(PathologistA, PathologistB),
+    wght = "squared"
+)
+```
+
+---
+
+## 4. Three or More Raters (Fleiss' / Light's Kappa)
+
+When 3+ raters are present, the module automatically computes Fleiss' kappa.
+Light's kappa is the average of all pairwise Cohen's kappas.
+
+```{r three-raters}
+# Dataset: agreement_threeRater
+# Raters: Rater1, Rater2, Rater3
+
+agreement_threeRater <- read.csv(paste0(data_path, "agreement_threeRater.csv"))
+
+agreement(
+    data = agreement_threeRater,
+    conditionBVars = NULL,
+    vars = vars(Rater1, Rater2, Rater3),
+    exct = TRUE,                        # Exact kappa (small samples)
+    lightKappa = TRUE,                  # Light's Kappa (mean pairwise)
+    finn = TRUE,                        # Finn coefficient
+    finnLevels = 3,                     # Number of response categories
+    finnModel = "oneway",               # "oneway" or "twoway"
+    multiAnnotatorConcordance = TRUE,   # Multi-annotator concordance (F1)
+    predictionColumn = 1,               # Which rater is the "prediction"
+    agreementBySubgroup = TRUE,
+    subgroupVariable = tissue_site
+)
+```
+
+### Five raters with clustering and profiles
+
+```{r multi-rater}
+# Dataset: agreement_multiRater
+# Raters: SeniorPath1, SeniorPath2, MidLevelPath, JuniorPath1, JuniorPath2
+
+agreement_multiRater <- read.csv(paste0(data_path, "agreement_multiRater.csv"))
+
+agreement(
+    data = agreement_multiRater,
+    conditionBVars = NULL,
+    vars = vars(SeniorPath1, SeniorPath2, MidLevelPath, JuniorPath1, JuniorPath2),
+    lightKappa = TRUE,
+    # Rater clustering
+    raterClustering = TRUE,
+    clusterMethod = "hierarchical",     # or "kmeans"
+    clusterDistance = "correlation",     # or "euclidean", "manhattan"
+    clusterLinkage = "average",         # or "complete", "ward.D2"
+    nClusters = 2,
+    showDendrogram = TRUE,
+    showClusterHeatmap = TRUE,
+    # Case clustering
+    caseClustering = TRUE,
+    caseClusterMethod = "hierarchical",
+    caseClusterDistance = "correlation",
+    caseClusterLinkage = "average",
+    nCaseClusters = 2,
+    showCaseDendrogram = TRUE,
+    showCaseClusterHeatmap = TRUE,
+    # Rater profiles
+    raterProfiles = TRUE,
+    raterProfileType = "boxplot",       # "boxplot", "violin", or "barplot"
+    raterProfileShowPoints = TRUE,
+    # Subgroup
+    agreementBySubgroup = TRUE,
+    subgroupVariable = difficulty,
+    subgroupForestPlot = TRUE,
+    subgroupMinCases = 10
+)
+```
+
+---
+
+## 5. Continuous Data (ICC / Bland-Altman / CCC)
+
+For continuous measurements, kappa is not appropriate. The module automatically
+detects continuous data and suggests ICC, Bland-Altman, and CCC.
+
+### Two continuous raters
+
+```{r continuous-basic}
+# Dataset: agreement_continuous
+# Raters: MeasurementA, MeasurementB
+
+agreement_continuous <- read.csv(paste0(data_path, "agreement_continuous.csv"))
+
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    # Intraclass Correlation Coefficient
+    icc = TRUE,
+    iccType = "icc21",          # ICC(2,1) two-way random, single measures
+    # Bland-Altman analysis
+    blandAltmanPlot = TRUE,
+    baConfidenceLevel = 0.95,
+    proportionalBias = TRUE,    # Test for proportional bias
+    # Lin's Concordance Correlation Coefficient
+    linCCC = TRUE,
+    # Total Deviation Index
+    tdi = TRUE,
+    tdiCoverage = 90,           # Percentage coverage
+    tdiLimit = 10,              # Acceptable limit
+    # Additional methods
+    meanPearson = TRUE,         # Mean Pearson correlation
+    meanSpearman = TRUE,        # Mean Spearman correlation
+    robinsonA = TRUE,           # Robinson's A
+    maxwellRE = TRUE,           # Maxwell's Random Effect model
+    iota = TRUE,                # Iota index
+    iotaStandardize = TRUE,     # Standardize before computing
+    # Subgroup
+    agreementBySubgroup = TRUE,
+    subgroupVariable = tumor_type
+)
+```
+
+### Cycling through all ICC types
+
+```{r icc-types}
+# ICC(1,1): One-way random, single measures
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    icc = TRUE, iccType = "icc11"
+)
+
+# ICC(2,1): Two-way random, single measures (most common)
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    icc = TRUE, iccType = "icc21"
+)
+
+# ICC(3,1): Two-way mixed, single measures
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    icc = TRUE, iccType = "icc31"
+)
+
+# ICC(1,k): One-way random, average measures
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    icc = TRUE, iccType = "icc1k"
+)
+
+# ICC(2,k): Two-way random, average measures
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    icc = TRUE, iccType = "icc2k"
+)
+
+# ICC(3,k): Two-way mixed, average measures
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    icc = TRUE, iccType = "icc3k"
+)
+```
+
+### Three continuous raters (Ki-67)
+
+```{r continuous-three}
+# Dataset: pathology_agreement_multimethod (using 3 of 4 raters)
+# Raters: Ki67_HALO, Ki67_Aiforia, Ki67_ImageJ
+
+pathology_multi <- read.csv(paste0(data_path, "pathology_agreement_multimethod.csv"))
+
+agreement(
+    data = pathology_multi,
+    conditionBVars = NULL,
+    vars = vars(Ki67_HALO, Ki67_Aiforia, Ki67_ImageJ),
+    icc = TRUE,
+    meanPearson = TRUE,
+    raterProfiles = TRUE,
+    kripp = TRUE,
+    krippMethod = "interval"    # For continuous data
+)
+```
+
+### Four continuous raters with bootstrap
+
+```{r continuous-four}
+# Dataset: pathology_agreement_multimethod
+# Raters: Ki67_HALO, Ki67_Aiforia, Ki67_ImageJ, Ki67_Manual
+
+pathology_multi <- read.csv(paste0(data_path, "pathology_agreement_multimethod.csv"))
+
+agreement(
+    data = pathology_multi,
+    conditionBVars = NULL,
+    vars = vars(Ki67_HALO, Ki67_Aiforia, Ki67_ImageJ, Ki67_Manual),
+    icc = TRUE,
+    raterClustering = TRUE,
+    caseClustering = TRUE,
+    bootstrapCI = TRUE,
+    nBoot = 200
+)
+```
+
+---
+
+## 6. Krippendorff's Alpha
+
+Krippendorff's alpha handles missing data natively and supports all measurement
+levels. It is the recommended general-purpose agreement statistic.
+
+### Categorical with missing data
+
+```{r kripp-categorical}
+# Dataset: agreement_missing
+# Raters: Rater1, Rater2, Rater3 (with NAs)
+
+agreement_missing <- read.csv(paste0(data_path, "agreement_missing.csv"))
+
+agreement(
+    data = agreement_missing,
+    conditionBVars = NULL,
+    vars = vars(Rater1, Rater2, Rater3),
+    kripp = TRUE,
+    krippMethod = "nominal",    # "nominal", "ordinal", "interval", "ratio"
+    bootstrap = TRUE,           # Bootstrap CI for Krippendorff's alpha
+    bootstrapCI = TRUE,
+    nBoot = 200
+)
+```
+
+### Continuous with missing data
+
+```{r kripp-continuous}
+# Dataset: pathology_agreement_missing
+# Raters: HALO_Score, Aiforia_Score, ImageJ_Score
+
+pathology_missing <- read.csv(paste0(data_path, "pathology_agreement_missing.csv"))
+
+agreement(
+    data = pathology_missing,
+    conditionBVars = NULL,
+    vars = vars(HALO_Score, Aiforia_Score, ImageJ_Score),
+    kripp = TRUE,
+    krippMethod = "interval",   # Continuous measurement level
+    icc = TRUE                  # Compare with ICC
+)
+```
+
+---
+
+## 7. Gwet's AC and PABAK
+
+Gwet's AC1/AC2 is more stable than kappa when prevalence is skewed. PABAK
+adjusts for both prevalence and bias.
+
+```{r gwet-pabak}
+# Dataset: agreement_poor (low kappa due to prevalence, not poor raters)
+
+agreement_poor <- read.csv(paste0(data_path, "agreement_poor.csv"))
+
+agreement(
+    data = agreement_poor,
+    conditionBVars = NULL,
+    vars = vars(PathologistA, PathologistB),
+    gwet = TRUE,
+    gwetWeights = "unweighted",     # "unweighted", "linear", "quadratic"
+    pabak = TRUE,
+    agreementBySubgroup = TRUE,
+    subgroupVariable = difficulty_level
+)
+```
+
+---
+
+## 8. Hierarchical / Multi-Center Kappa
+
+For multi-center studies where raters are nested within institutions, hierarchical
+kappa decomposes agreement into within-center and between-center components.
+
+**Note:** Hierarchical mixed-effects decomposition (variance decomposition,
+hierarchical ICC) requires **continuous** numeric ratings. For categorical data,
+use standard kappa or cluster-specific kappa analyses.
+
+### Continuous data: Full hierarchical decomposition
+
+```{r hierarchical-continuous}
+# Dataset: digital_pathology_validation (continuous Ki-67 scores)
+# Raters: Ki67_Manual, Ki67_AI_Assisted
+# Cluster variable: Institution (4 centers)
+
+digital_path_hier <- read.csv(paste0(data_path, "digital_pathology_validation.csv"))
+
+agreement(
+    data = digital_path_hier,
+    conditionBVars = NULL,
+    vars = vars(Ki67_Manual, Ki67_AI_Assisted),
+    hierarchicalKappa = TRUE,
+    clusterVariable = Institution,           # Nesting variable
+    clusterSpecificKappa = TRUE,             # Kappa per center
+    varianceDecomposition = TRUE,            # Variance components
+    testClusterHomogeneity = TRUE,           # Test if agreement differs across centers
+    shrinkageEstimates = TRUE,               # Empirical Bayes shrinkage
+    clusterRankings = TRUE,                  # Rank centers by agreement
+    iccHierarchical = TRUE,                  # Hierarchical ICC
+    multipleTestCorrection = "bonferroni"    # "none", "bonferroni", "bh", "holm"
+)
+```
+
+### Categorical data: Pairwise and cluster-specific kappa
+
+```{r hierarchical-categorical}
+# Dataset: agreement_hierarchical (categorical diagnoses)
+# Raters: HospitalA_Rater1/2, HospitalB_Rater1/2, HospitalC_Rater1/2
+
+agreement_hierarchical <- read.csv(paste0(data_path, "agreement_hierarchical.csv"))
+
+agreement(
+    data = agreement_hierarchical,
+    conditionBVars = NULL,
+    vars = vars(
+        HospitalA_Rater1, HospitalA_Rater2,
+        HospitalB_Rater1, HospitalB_Rater2,
+        HospitalC_Rater1, HospitalC_Rater2
+    ),
+    pairwiseKappa = TRUE,
+    referenceRater = HospitalA_Rater1,
+    rankRaters = TRUE
+)
+```
+
+### Pairwise kappa with reference rater
+
+```{r pairwise}
+# Dataset: comprehensive_agreement_data
+# Raters: Rater_1, Rater_2, Rater_3, Rater_4
+
+comprehensive <- read.csv(paste0(data_path, "comprehensive_agreement_data.csv"))
+
+agreement(
+    data = comprehensive,
+    conditionBVars = NULL,
+    vars = vars(Rater_1, Rater_2, Rater_3, Rater_4),
+    pairwiseKappa = TRUE,
+    referenceRater = Rater_1,       # Compare all raters against this one
+    rankRaters = TRUE,              # Rank raters by agreement with reference
+    agreementBySubgroup = TRUE,
+    subgroupVariable = Difficulty
+)
+```
+
+---
+
+## 9. Test-Retest / Inter-Intra Rater Reliability
+
+Separates inter-rater from intra-rater reliability using time-point suffixes
+in variable names (e.g., `Rater1_T1`, `Rater1_T2`).
+
+```{r test-retest}
+# Dataset: agreement_testRetest
+# Raters: Rater1_T1, Rater1_T2, Rater2_T1, Rater2_T2, Rater3_T1, Rater3_T2
+
+agreement_testRetest <- read.csv(paste0(data_path, "agreement_testRetest.csv"))
+
+agreement(
+    data = agreement_testRetest,
+    conditionBVars = NULL,
+    vars = vars(Rater1_T1, Rater1_T2, Rater2_T1, Rater2_T2, Rater3_T1, Rater3_T2),
+    interIntraRater = TRUE,
+    interIntraSeparator = "_",      # Character separating rater from timepoint
+    finn = TRUE,
+    finnLevels = 3
+)
+```
+
+---
+
+## 10. Paired Agreement Comparison (Manual vs AI)
+
+Compare agreement under two conditions (e.g., manual vs AI-assisted) using a
+bootstrap test of kappa difference.
+
+```{r paired}
+# Dataset: agreement_paired_comparison
+# Condition A (vars): Manual_Rater1, Manual_Rater2
+# Condition B (conditionBVars): AI_Rater1, AI_Rater2
+
+agreement_paired <- read.csv(paste0(data_path, "agreement_paired_comparison.csv"))
+
+agreement(
+    data = agreement_paired,
+    vars = vars(Manual_Rater1, Manual_Rater2),
+    conditionBVars = vars(AI_Rater1, AI_Rater2),
+    pairedAgreementTest = TRUE,
+    pairedBootN = 200,              # Number of bootstrap replicates
+    agreementBySubgroup = TRUE,
+    subgroupVariable = tumor_type
+)
+```
+
+---
+
+## 11. Mixed-Effects Condition Comparison
+
+Compare agreement between conditions (e.g., before vs after training) using
+mixed-effects models. Requires a condition variable in the dataset.
+
+```{r mixed-effects}
+# Dataset: agreement_mixed_effects
+# Raters: Rater1, Rater2
+# Condition: condition (Pre_Training / Post_Training)
+
+agreement_mixed <- read.csv(paste0(data_path, "agreement_mixed_effects.csv"))
+
+agreement(
+    data = agreement_mixed,
+    conditionBVars = NULL,
+    vars = vars(Rater1, Rater2),
+    mixedEffectsComparison = TRUE,
+    conditionVariable = condition,
+    icc = TRUE,
+    multipleTestCorrection = "BH"   # Benjamini-Hochberg
+)
+```
+
+### Digital pathology validation
+
+```{r mixed-effects-digital}
+# Dataset: digital_pathology_validation
+# Raters: Ki67_Manual, Ki67_AI_Assisted
+# Condition: Pathologist_Experience
+
+digital_path <- read.csv(paste0(data_path, "digital_pathology_validation.csv"))
+
+agreement(
+    data = digital_path,
+    conditionBVars = NULL,
+    vars = vars(Ki67_Manual, Ki67_AI_Assisted),
+    mixedEffectsComparison = TRUE,
+    conditionVariable = Pathologist_Experience,
+    blandAltmanPlot = TRUE,
+    linCCC = TRUE,
+    agreementBySubgroup = TRUE,
+    subgroupVariable = Tumor_Type
+)
+```
+
+---
+
+## 12. AI Validation
+
+```{r ai-validation}
+# Dataset: pathology_agreement_ai
+# Raters: Ki67_AI, Ki67_Pathologist
+
+pathology_ai <- read.csv(paste0(data_path, "pathology_agreement_ai.csv"))
+
+agreement(
+    data = pathology_ai,
+    conditionBVars = NULL,
+    vars = vars(Ki67_AI, Ki67_Pathologist),
+    blandAltmanPlot = TRUE,
+    linCCC = TRUE,
+    icc = TRUE,
+    agreementBySubgroup = TRUE,
+    subgroupVariable = TumorType
+)
+```
+
+---
+
+## 13. Agreement Heatmap
+
+Dedicated visualization of cross-tabulated agreement patterns.
+
+```{r heatmap}
+# Dataset: agreement_heatmap_test
+# Raters: Scorer_A, Scorer_B, Scorer_C (HER2 scores: 0, 1+, 2+, 3+)
+
+agreement_heatmap <- read.csv(paste0(data_path, "agreement_heatmap_test.csv"))
+
+# Convert HER2 scores to ordered factors
+her2_levels <- c("0", "1+", "2+", "3+")
+agreement_heatmap$Scorer_A <- factor(agreement_heatmap$Scorer_A,
+    levels = her2_levels, ordered = TRUE)
+agreement_heatmap$Scorer_B <- factor(agreement_heatmap$Scorer_B,
+    levels = her2_levels, ordered = TRUE)
+agreement_heatmap$Scorer_C <- factor(agreement_heatmap$Scorer_C,
+    levels = her2_levels, ordered = TRUE)
+
+agreement(
+    data = agreement_heatmap,
+    conditionBVars = NULL,
+    vars = vars(Scorer_A, Scorer_B, Scorer_C),
+    wght = "equal",                     # Linear weights for ordinal HER2
+    sft = TRUE,                         # Contingency table
+    agreementHeatmap = TRUE,
+    heatmapColorScheme = "bluered",     # "bluered", "viridis", "heat", "grayscale"
+    heatmapShowPercentages = TRUE,
+    heatmapShowCounts = TRUE,
+    heatmapAnnotationSize = 3.5
+)
+```
+
+---
+
+## 14. Confusion Matrix
+
+```{r confusion-matrix-none}
+# Dataset: agreement_pathology
+
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    confusionMatrix = TRUE,
+    confusionNormalize = "none"     # "none", "row", "column"
+)
+```
+
+```{r confusion-matrix-row}
+# Row-normalized (sensitivity per category)
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    confusionMatrix = TRUE,
+    confusionNormalize = "row"
+)
+```
+
+---
+
+## 15. Bootstrap Confidence Intervals
+
+BCa (bias-corrected accelerated) bootstrap confidence intervals for all
+agreement statistics.
+
+```{r bootstrap}
+# Dataset: agreement_small (n=30)
+
+agreement_small <- read.csv(paste0(data_path, "agreement_small.csv"))
+
+agreement(
+    data = agreement_small,
+    conditionBVars = NULL,
+    vars = vars(Rater1, Rater2),
+    bootstrapCI = TRUE,
+    nBoot = 200,                    # Number of bootstrap replicates (50-5000)
+    confLevel = 0.95                # Confidence level
+)
+```
+
+---
+
+## 16. Multi-Annotator Concordance (F1)
+
+Evaluates whether a prediction (one rater column) matches the consensus of the
+other annotators.
+
+```{r concordance-f1}
+# Dataset: agreement_threeRater
+
+agreement(
+    data = agreement_threeRater,
+    conditionBVars = NULL,
+    vars = vars(Rater1, Rater2, Rater3),
+    multiAnnotatorConcordance = TRUE,
+    predictionColumn = 1            # Which rater is the "prediction" (1-indexed)
+)
+```
+
+---
+
+## 17. Specific Agreement (Positive/Negative)
+
+Category-specific agreement rates, important when overall kappa is misleading
+due to prevalence effects.
+
+```{r specific-agreement}
+# Dataset: agreement_binary
+
+agreement(
+    data = agreement_binary,
+    conditionBVars = NULL,
+    vars = vars(PathologistX, PathologistY),
+    specificAgreement = TRUE,
+    specificPositiveCategory = "Positive",  # Target category for PSA/NSA
+    specificAllCategories = TRUE,           # Show all categories
+    specificConfidenceIntervals = TRUE      # Wilson score CIs
+)
+```
+
+---
+
+## 18. Computed Variables
+
+The module can add new computed columns to the dataset.
+
+### Consensus variable
+
+```{r consensus}
+# Dataset: agreement_threeRater
+
+agreement(
+    data = agreement_threeRater,
+    conditionBVars = NULL,
+    vars = vars(Rater1, Rater2, Rater3),
+    consensusName = "consensus_rating",
+    consensusRule = "majority",     # "majority", "supermajority", "unanimous"
+    tieBreaker = "exclude"          # "exclude", "first", "lowest", "highest"
+)
+```
+
+### Level of Agreement variable
+
+```{r loa-variable}
+# Dataset: agreement_pathology
+
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    loaVariable = TRUE,
+    detailLevel = "detailed",       # "simple" or "detailed"
+    loaThresholds = "custom",       # "custom", "quartiles", "tertiles"
+    loaHighThreshold = 75,
+    loaLowThreshold = 56,
+    loaVariableName = "agreement_level",
+    showLoaTable = TRUE
+)
+```
+
+---
+
+## 19. Edge Cases
+
+### Perfect agreement
+
+```{r perfect}
+agreement_perfect <- read.csv(paste0(data_path, "agreement_perfect.csv"))
+
+agreement(
+    data = agreement_perfect,
+    conditionBVars = NULL,
+    vars = vars(RaterA, RaterB)
+)
+# Expect: kappa = 1.0, 100% agreement
+```
+
+### Poor agreement with Gwet's AC
+
+```{r poor-gwet}
+agreement(
+    data = agreement_poor,
+    conditionBVars = NULL,
+    vars = vars(PathologistA, PathologistB),
+    gwet = TRUE      # Gwet's AC is stable even when kappa is paradoxically low
+)
+```
+
+### Small sample with bootstrap
+
+```{r small-bootstrap}
+agreement(
+    data = agreement_small,
+    conditionBVars = NULL,
+    vars = vars(Rater1, Rater2),
+    bootstrapCI = TRUE,
+    nBoot = 200
+)
+```
+
+---
+
+## 20. Sample Size Calculator
+
+The sample size calculator works independently of data -- it only requires the
+analysis options to be set.
+
+```{r sample-size-kappa}
+# Kappa-based sample size
+agreement(
+    data = agreement_pathology,         # Any dataset (not used for calculation)
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    agreementSampleSize = TRUE,
+    ssMetric = "kappa",                 # "kappa", "fleiss", "icc"
+    ssKappaNull = 0.4,                  # Null hypothesis kappa
+    ssKappaAlt = 0.7,                   # Alternative hypothesis kappa
+    ssNRaters = 2,                      # Number of raters
+    ssNCategories = 4,                  # Number of categories
+    ssAlpha = 0.05,                     # Significance level
+    ssPower = 0.80                      # Desired power
+)
+```
+
+```{r sample-size-icc}
+# ICC-based sample size
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    agreementSampleSize = TRUE,
+    ssMetric = "icc",
+    ssKappaNull = 0.5,
+    ssKappaAlt = 0.8,
+    ssNRaters = 2,
+    ssAlpha = 0.05,
+    ssPower = 0.80
+)
+```
+
+---
+
+## 21. Display Options
+
+### Confidence level
+
+```{r conf-level}
+# Change from default 95% to 90%
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    confLevel = 0.90       # Applies to all CI calculations
+)
+```
+
+---
+
+## 22. Complete Example: All Categorical Options
+
+```{r kitchen-sink-categorical}
+agreement(
+    data = agreement_pathology,
+    conditionBVars = NULL,
+    vars = vars(Pathologist1, Pathologist2),
+    # Display
+    sft = TRUE,
+
+    confLevel = 0.95,
+    # Weighted kappa
+    wght = "unweighted",
+    showLevelInfo = TRUE,
+    # Additional statistics
+    kripp = TRUE,
+    krippMethod = "nominal",
+    bootstrap = TRUE,
+    gwet = TRUE,
+    gwetWeights = "unweighted",
+    pabak = TRUE,
+    # Specific agreement
+    specificAgreement = TRUE,
+    specificAllCategories = TRUE,
+    specificConfidenceIntervals = TRUE,
+    # Bias tests
+    raterBias = TRUE,
+    bhapkar = TRUE,
+    stuartMaxwell = TRUE,
+    # Confusion matrix
+    confusionMatrix = TRUE,
+    confusionNormalize = "none",
+    # Visualization
+    agreementHeatmap = TRUE,
+    # Bootstrap
+    bootstrapCI = TRUE,
+    nBoot = 200,
+    # Subgroup
+    agreementBySubgroup = TRUE,
+    subgroupVariable = specimen_type,
+    subgroupForestPlot = TRUE,
+    subgroupMinCases = 10,
+    # Computed variables
+    consensusName = "consensus",
+    consensusRule = "majority",
+    tieBreaker = "exclude",
+    loaVariable = TRUE,
+    detailLevel = "detailed",
+    loaThresholds = "custom",
+    loaHighThreshold = 75,
+    loaLowThreshold = 56,
+    loaVariableName = "agreement_level",
+    showLoaTable = TRUE,
+    # Sample size
+    agreementSampleSize = TRUE,
+    ssMetric = "kappa",
+    ssKappaNull = 0.4,
+    ssKappaAlt = 0.7,
+    ssNRaters = 2,
+    ssNCategories = 3,
+    ssAlpha = 0.05,
+    ssPower = 0.80
+)
+```
+
+---
+
+## 24. Complete Example: All Continuous Options
+
+```{r kitchen-sink-continuous}
+agreement(
+    data = agreement_continuous,
+    conditionBVars = NULL,
+    vars = vars(MeasurementA, MeasurementB),
+    confLevel = 0.95,
+    # ICC
+    icc = TRUE,
+    iccType = "icc21",
+    # Concordance
+    linCCC = TRUE,
+    # Bland-Altman
+    blandAltmanPlot = TRUE,
+    baConfidenceLevel = 0.95,
+    proportionalBias = TRUE,
+    # TDI
+    tdi = TRUE,
+    tdiCoverage = 90,
+    tdiLimit = 10,
+    # Additional statistics
+    meanPearson = TRUE,
+    maxwellRE = TRUE,
+    iota = TRUE,
+    iotaStandardize = TRUE,
+    kripp = TRUE,
+    krippMethod = "interval",
+    # Bootstrap
+    bootstrapCI = TRUE,
+    nBoot = 200,
+    # Rater profiles
+    raterProfiles = TRUE,
+    raterProfileType = "violin",
+    raterProfileShowPoints = TRUE,
+    # Subgroup
+    agreementBySubgroup = TRUE,
+    subgroupVariable = tumor_type,
+    subgroupForestPlot = TRUE,
+    # Sample size
+    agreementSampleSize = TRUE,
+    ssMetric = "icc",
+    ssKappaNull = 0.5,
+    ssKappaAlt = 0.8,
+    ssNRaters = 2,
+    ssAlpha = 0.05,
+    ssPower = 0.80
+)
+```
+
+---
+
+## Quick Reference: Choosing the Right Method
+
+| Data Type | Raters | Recommended Methods |
+|-----------|--------|---------------------|
+| Binary/Nominal | 2 | Cohen's kappa, Gwet's AC1, PABAK, specific agreement |
+| Binary/Nominal | 3+ | Fleiss' kappa, Light's kappa, Krippendorff's alpha |
+| Ordinal | 2+ | Weighted kappa (linear/quadratic), Kendall's W |
+| Continuous | 2 | ICC, Bland-Altman, Lin's CCC, TDI |
+| Continuous | 3+ | ICC, mean Pearson/Spearman, rater clustering |
+| Any with NAs | Any | Krippendorff's alpha |
+| Multi-center | Any | Hierarchical kappa, variance decomposition |
+| Before/After | Any | Paired agreement test, mixed-effects comparison |
+| Test-retest | Any | Inter/intra-rater analysis |
+
+---
+
+## References
+
+- Cohen J (1960). A coefficient of agreement for nominal scales. *Educational and Psychological Measurement*, 20(1), 37-46.
+- Fleiss JL (1971). Measuring nominal scale agreement among many raters. *Psychological Bulletin*, 76(5), 378-382.
+- Krippendorff K (2011). Computing Krippendorff's alpha-reliability. *Annenberg School for Communication Departmental Papers*, Paper 43. University of Pennsylvania.
+- Gwet KL (2008). Computing inter-rater reliability and its variance in the presence of high agreement. *British Journal of Mathematical and Statistical Psychology*, 61(1), 29-48.
+- Shrout PE, Fleiss JL (1979). Intraclass correlations: uses in assessing rater reliability. *Psychological Bulletin*, 86(2), 420-428.
+- Lin LI (1989). A concordance correlation coefficient to evaluate reproducibility. *Biometrics*, 45(1), 255-268.
+- Bland JM, Altman DG (1986). Statistical methods for assessing agreement between two methods of clinical measurement. *The Lancet*, 327(8476), 307-310.
+- Donner A, Eliasziw M (1992). A goodness-of-fit approach to inference procedures for the kappa statistic: Confidence interval construction, significance-testing and sample size estimation. *Statistics in Medicine*, 11(11), 1511-1519.

@@ -1,0 +1,201 @@
+"patient_id","disease","ordinal_score","rounded_lab","composite_score"
+"TIED-001","No Disease",5,7,6
+"TIED-002","Disease",7,10,8
+"TIED-003","No Disease",2,3,6
+"TIED-004","No Disease",4,4,4
+"TIED-005","No Disease",3,3,5
+"TIED-006","No Disease",1,7,6
+"TIED-007","Disease",6,7,9
+"TIED-008","Disease",5,6,7
+"TIED-009","Disease",7,6,3
+"TIED-010","Disease",8,11,9
+"TIED-011","No Disease",5,6,2
+"TIED-012","No Disease",5,3,5
+"TIED-013","No Disease",6,7,2
+"TIED-014","No Disease",5,6,7
+"TIED-015","Disease",8,4,3
+"TIED-016","No Disease",2,5,4
+"TIED-017","Disease",1,7,5
+"TIED-018","No Disease",6,4,2
+"TIED-019","No Disease",7,8,4
+"TIED-020","Disease",5,10,8
+"TIED-021","No Disease",1,3,5
+"TIED-022","No Disease",6,9,6
+"TIED-023","No Disease",1,7,4
+"TIED-024","No Disease",6,6,6
+"TIED-025","No Disease",5,5,5
+"TIED-026","Disease",4,6,4
+"TIED-027","Disease",9,5,8
+"TIED-028","Disease",7,8,6
+"TIED-029","No Disease",2,3,3
+"TIED-030","No Disease",2,3,6
+"TIED-031","Disease",5,6,6
+"TIED-032","No Disease",2,2,6
+"TIED-033","Disease",7,10,6
+"TIED-034","No Disease",5,5,6
+"TIED-035","No Disease",5,4,4
+"TIED-036","No Disease",3,5,2
+"TIED-037","No Disease",1,7,5
+"TIED-038","No Disease",2,6,3
+"TIED-039","No Disease",4,8,3
+"TIED-040","No Disease",1,7,5
+"TIED-041","No Disease",5,7,3
+"TIED-042","Disease",7,10,7
+"TIED-043","No Disease",5,6,4
+"TIED-044","Disease",7,10,8
+"TIED-045","No Disease",4,4,4
+"TIED-046","Disease",6,11,10
+"TIED-047","No Disease",2,8,5
+"TIED-048","No Disease",3,5,4
+"TIED-049","Disease",1,8,7
+"TIED-050","No Disease",9,6,6
+"TIED-051","No Disease",3,5,2
+"TIED-052","Disease",8,10,6
+"TIED-053","Disease",9,9,4
+"TIED-054","No Disease",8,8,5
+"TIED-055","No Disease",3,6,3
+"TIED-056","Disease",7,7,10
+"TIED-057","Disease",2,8,6
+"TIED-058","No Disease",2,7,6
+"TIED-059","No Disease",5,4,3
+"TIED-060","No Disease",5,6,2
+"TIED-061","No Disease",3,6,3
+"TIED-062","No Disease",6,6,5
+"TIED-063","No Disease",1,6,5
+"TIED-064","Disease",7,7,9
+"TIED-065","Disease",2,12,7
+"TIED-066","No Disease",6,5,4
+"TIED-067","No Disease",7,6,7
+"TIED-068","No Disease",2,5,5
+"TIED-069","No Disease",3,5,4
+"TIED-070","Disease",8,7,7
+"TIED-071","No Disease",5,5,6
+"TIED-072","No Disease",5,6,3
+"TIED-073","Disease",6,11,10
+"TIED-074","No Disease",1,6,2
+"TIED-075","Disease",1,9,9
+"TIED-076","Disease",3,7,5
+"TIED-077","No Disease",10,3,4
+"TIED-078","No Disease",2,5,2
+"TIED-079","No Disease",3,5,4
+"TIED-080","No Disease",7,5,6
+"TIED-081","Disease",10,10,8
+"TIED-082","Disease",2,10,9
+"TIED-083","No Disease",1,6,7
+"TIED-084","Disease",7,11,8
+"TIED-085","No Disease",5,5,6
+"TIED-086","No Disease",2,7,2
+"TIED-087","No Disease",1,7,3
+"TIED-088","No Disease",4,6,6
+"TIED-089","No Disease",1,5,8
+"TIED-090","Disease",3,7,7
+"TIED-091","No Disease",2,5,3
+"TIED-092","No Disease",5,1,5
+"TIED-093","No Disease",7,7,5
+"TIED-094","No Disease",2,5,6
+"TIED-095","No Disease",7,5,7
+"TIED-096","Disease",5,6,8
+"TIED-097","Disease",3,6,8
+"TIED-098","Disease",1,8,6
+"TIED-099","No Disease",2,5,3
+"TIED-100","Disease",8,9,4
+"TIED-101","No Disease",5,6,3
+"TIED-102","Disease",10,8,9
+"TIED-103","Disease",5,11,7
+"TIED-104","No Disease",5,5,4
+"TIED-105","No Disease",9,6,8
+"TIED-106","No Disease",6,3,3
+"TIED-107","No Disease",7,3,5
+"TIED-108","Disease",6,8,9
+"TIED-109","No Disease",1,5,2
+"TIED-110","No Disease",7,7,5
+"TIED-111","No Disease",6,11,3
+"TIED-112","Disease",8,8,4
+"TIED-113","No Disease",5,9,5
+"TIED-114","No Disease",4,6,2
+"TIED-115","No Disease",3,4,5
+"TIED-116","Disease",8,10,8
+"TIED-117","No Disease",5,6,3
+"TIED-118","No Disease",4,6,4
+"TIED-119","No Disease",3,7,2
+"TIED-120","No Disease",9,6,5
+"TIED-121","No Disease",3,5,4
+"TIED-122","Disease",6,10,9
+"TIED-123","Disease",10,8,9
+"TIED-124","Disease",3,8,9
+"TIED-125","No Disease",8,5,3
+"TIED-126","No Disease",6,6,6
+"TIED-127","No Disease",2,7,4
+"TIED-128","No Disease",4,5,4
+"TIED-129","No Disease",3,3,3
+"TIED-130","No Disease",7,3,6
+"TIED-131","No Disease",8,5,4
+"TIED-132","No Disease",1,4,5
+"TIED-133","Disease",8,8,8
+"TIED-134","No Disease",5,4,4
+"TIED-135","Disease",1,9,10
+"TIED-136","No Disease",5,5,7
+"TIED-137","No Disease",5,2,2
+"TIED-138","Disease",8,9,5
+"TIED-139","Disease",8,7,9
+"TIED-140","Disease",9,11,7
+"TIED-141","No Disease",7,4,2
+"TIED-142","No Disease",2,3,6
+"TIED-143","No Disease",3,9,3
+"TIED-144","No Disease",1,9,4
+"TIED-145","Disease",8,9,6
+"TIED-146","Disease",9,7,7
+"TIED-147","No Disease",5,4,4
+"TIED-148","No Disease",5,4,5
+"TIED-149","No Disease",8,2,2
+"TIED-150","No Disease",2,6,7
+"TIED-151","No Disease",3,5,6
+"TIED-152","No Disease",1,6,3
+"TIED-153","No Disease",1,3,3
+"TIED-154","No Disease",5,5,2
+"TIED-155","No Disease",2,6,4
+"TIED-156","No Disease",9,2,9
+"TIED-157","Disease",3,9,5
+"TIED-158","No Disease",1,6,2
+"TIED-159","No Disease",1,5,7
+"TIED-160","No Disease",1,5,3
+"TIED-161","No Disease",6,6,3
+"TIED-162","No Disease",4,2,3
+"TIED-163","No Disease",5,7,3
+"TIED-164","No Disease",2,5,3
+"TIED-165","No Disease",6,6,3
+"TIED-166","No Disease",5,6,3
+"TIED-167","No Disease",1,6,5
+"TIED-168","No Disease",6,5,3
+"TIED-169","No Disease",5,3,6
+"TIED-170","No Disease",6,5,5
+"TIED-171","No Disease",8,6,5
+"TIED-172","No Disease",2,4,7
+"TIED-173","No Disease",2,6,2
+"TIED-174","No Disease",1,6,4
+"TIED-175","No Disease",9,6,3
+"TIED-176","Disease",10,7,9
+"TIED-177","No Disease",8,5,6
+"TIED-178","No Disease",2,7,5
+"TIED-179","Disease",4,6,9
+"TIED-180","No Disease",3,4,6
+"TIED-181","No Disease",2,3,4
+"TIED-182","No Disease",7,6,6
+"TIED-183","No Disease",9,9,3
+"TIED-184","Disease",7,7,7
+"TIED-185","Disease",6,9,7
+"TIED-186","Disease",7,8,8
+"TIED-187","Disease",7,9,9
+"TIED-188","No Disease",5,4,5
+"TIED-189","No Disease",5,5,3
+"TIED-190","Disease",8,7,9
+"TIED-191","No Disease",1,3,6
+"TIED-192","Disease",9,5,7
+"TIED-193","Disease",10,10,5
+"TIED-194","No Disease",4,5,7
+"TIED-195","Disease",8,10,7
+"TIED-196","No Disease",2,8,7
+"TIED-197","No Disease",1,6,4
+"TIED-198","No Disease",5,8,4
+"TIED-199","No Disease",2,7,3
+"TIED-200","No Disease",1,6,6

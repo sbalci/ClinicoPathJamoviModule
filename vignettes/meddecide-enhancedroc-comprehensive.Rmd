@@ -1,0 +1,726 @@
+---
+title: "Clinical ROC Analysis (enhancedROC) - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Clinical ROC Analysis (enhancedROC) - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+
+# Load the package
+devtools::load_all("../")
+
+# Base path for data files
+data_path <- "../data-raw/non-rda/"
+data_path2 <- "../data/"
+```
+
+# Clinical ROC Analysis (enhancedROC)
+
+## Overview
+
+The **enhancedROC** module provides comprehensive Receiver Operating Characteristic
+(ROC) curve analysis for clinical diagnostic performance evaluation. It includes
+ROC curve analysis, Youden Index optimization, sensitivity/specificity analysis,
+optimal cutoff determination, comparative ROC analysis, calibration assessment,
+multi-class ROC, clinical impact metrics, and class imbalance detection.
+
+All examples below use the bundled test datasets. In jamovi, open the corresponding
+`.omv` file. From R, read the `.csv` directly.
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Outcome | Prevalence | Key Features | Primary Use |
+|---------|---|---------|------------|--------------|-------------|
+| `enhancedroc_biomarker` | 300 | Disease/Healthy | 30% | 3 biomarkers + clinical risk score | Single biomarker validation |
+| `enhancedroc_comparative` | 400 | Cancer/No Cancer | 25% | 5 markers (varying AUCs) | Compare diagnostic tests |
+| `enhancedroc_imbalanced` | 500 | Positive/Negative | 5% | Rare disease, screening/confirmatory markers | Imbalanced data handling |
+| `enhancedroc_multiclass` | 350 | 4 severity levels | Mixed | 3 biomarkers | Multi-class severity grading |
+| `enhancedroc_calibration` | 300 | Event/No Event | 35% | Predicted probs + risk score | Calibration assessment |
+| `enhancedroc_screening` | 600 | Screen Pos/Neg | 8% | High-sensitivity markers | Screening context |
+| `enhancedroc_confirmatory` | 250 | Confirmed/Not | 45% | High-specificity markers | Confirmatory testing |
+| `enhancedroc_small` | 60 | Positive/Negative | 30% | Single simple marker | Small sample testing |
+| `enhancedroc_validation` | 350 | Positive/Negative | 30% | Probability predictors, biomarker | CROC / convex hull |
+| `enhancedroc_tiedscores` | 200 | Disease/No Disease | 35% | Ordinal scores (many ties) | Tied score handling |
+
+---
+
+## 1. Single Biomarker Analysis (Default)
+
+The default analysis computes a single ROC curve with AUC, optimal cutoff via
+Youden Index, and diagnostic performance metrics.
+
+### Basic single ROC
+
+```{r single-basic}
+biomarker_data <- read.csv(paste0(data_path, "enhancedroc_biomarker.csv"))
+
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  customCutoffs = NULL
+)
+```
+
+### With cutoff table and clinical metrics
+
+```{r single-cutoff-clinical}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  cutoffTable = TRUE,
+  clinicalMetrics = TRUE,
+  prevalence = 0.30,
+  useObservedPrevalence = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Direction control and custom cutoffs
+
+```{r single-direction-custom}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  direction = "higher",
+  customCutoffs = "5.0,7.5,10.0"
+)
+```
+
+---
+
+## 2. Comparative ROC Analysis (Multiple Predictors)
+
+Compare diagnostic performance across multiple biomarkers using DeLong's test.
+
+### Five-marker comparison with DeLong
+
+```{r comparative-delong}
+comparative_data <- read.csv(paste0(data_path, "enhancedroc_comparative.csv"))
+
+enhancedROC(
+  data = comparative_data,
+  outcome = "cancer_status",
+  positiveClass = "Cancer",
+  predictors = vars(established_marker, novel_marker1, novel_marker2,
+                    imaging_score, genetic_risk_score),
+  analysisType = "comparative",
+  pairwiseComparisons = TRUE,
+  comparisonMethod = "delong",
+  customCutoffs = NULL
+)
+```
+
+### Bootstrap comparison with metrics differences
+
+```{r comparative-bootstrap}
+enhancedROC(
+  data = comparative_data,
+  outcome = "cancer_status",
+  positiveClass = "Cancer",
+  predictors = vars(established_marker, novel_marker1),
+  analysisType = "comparative",
+  comparisonMethod = "bootstrap",
+  bootstrapSamples = 200,
+  showMetricsDiff = TRUE,
+  statisticalComparison = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Comprehensive analysis with clinical interpretation
+
+```{r comparative-comprehensive}
+enhancedROC(
+  data = comparative_data,
+  outcome = "cancer_status",
+  positiveClass = "Cancer",
+  predictors = vars(established_marker, novel_marker1, novel_marker2,
+                    imaging_score, genetic_risk_score),
+  analysisType = "comprehensive",
+  comprehensive_output = TRUE,
+  clinical_interpretation = TRUE,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 3. Bootstrap & Confidence Intervals
+
+### BCa bootstrap confidence intervals
+
+```{r bootstrap-bca}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  useBootstrap = TRUE,
+  bootstrapSamples = 200,
+  bootstrapMethod = "bca",
+  customCutoffs = NULL
+)
+```
+
+### Percentile bootstrap with stratification
+
+```{r bootstrap-percentile-stratified}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  useBootstrap = TRUE,
+  bootstrapSamples = 200,
+  bootstrapMethod = "percentile",
+  stratifiedBootstrap = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### 90% CI with bootstrap CIs for cutoff and partial AUC
+
+```{r bootstrap-90ci}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  confidenceLevel = 90,
+  useBootstrap = TRUE,
+  bootstrapSamples = 200,
+  bootstrapCutoffCI = TRUE,
+  bootstrapPartialAUC = TRUE,
+  partialAuc = TRUE,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 4. ROC Curve Plot Options
+
+### Clinical theme with cutoff points and confidence bands
+
+```{r plot-clinical}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  rocCurve = TRUE,
+  showCutoffPoints = TRUE,
+  showConfidenceBands = TRUE,
+  plotTheme = "clinical",
+  customCutoffs = NULL
+)
+```
+
+### Classic theme with custom dimensions
+
+```{r plot-classic}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  rocCurve = TRUE,
+  plotTheme = "classic",
+  plotWidth = 800,
+  plotHeight = 800,
+  customCutoffs = NULL
+)
+```
+
+### Comparative ROC overlay plot
+
+```{r plot-comparative}
+enhancedROC(
+  data = comparative_data,
+  outcome = "cancer_status",
+  positiveClass = "Cancer",
+  predictors = vars(established_marker, novel_marker1),
+  analysisType = "comparative",
+  rocCurve = TRUE,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 5. Youden Index & Cutoff Analysis
+
+### Youden Index plot
+
+```{r youden-plot}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  youdenOptimization = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Cutoff analysis plot
+
+```{r cutoff-plot}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  cutoffTable = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Clinical decision plot
+
+```{r clinical-decision-plot}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  clinicalMetrics = TRUE,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 6. Advanced ROC Methods
+
+### Binormal smoothing
+
+```{r smooth-binormal}
+validation_data <- read.csv(paste0(data_path2, "enhancedroc_validation.csv"))
+
+enhancedROC(
+  data = validation_data,
+  outcome = "outcome",
+  positiveClass = "Positive",
+  predictors = "biomarker",
+  smoothMethod = "binormal",
+  customCutoffs = NULL
+)
+```
+
+### Partial AUC (high specificity region)
+
+```{r partial-auc-spec}
+enhancedROC(
+  data = validation_data,
+  outcome = "outcome",
+  positiveClass = "Positive",
+  predictors = "biomarker",
+  partialAuc = TRUE,
+  partialAucType = "specificity",
+  partialRange = "0.8,1.0",
+  customCutoffs = NULL
+)
+```
+
+### Partial AUC (high sensitivity region)
+
+```{r partial-auc-sens}
+enhancedROC(
+  data = validation_data,
+  outcome = "outcome",
+  positiveClass = "Positive",
+  predictors = "biomarker",
+  partialAuc = TRUE,
+  partialAucType = "sensitivity",
+  partialRange = "0.9,1.0",
+  customCutoffs = NULL
+)
+```
+
+### CROC analysis (Concentrated ROC)
+
+```{r croc-analysis}
+enhancedROC(
+  data = validation_data,
+  outcome = "outcome",
+  positiveClass = "Positive",
+  predictors = "biomarker",
+  crocAnalysis = TRUE,
+  crocAlpha = 7.0,
+  customCutoffs = NULL
+)
+```
+
+### Convex hull analysis
+
+```{r convex-hull}
+enhancedROC(
+  data = validation_data,
+  outcome = "outcome",
+  positiveClass = "Positive",
+  predictors = "biomarker",
+  convexHull = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Tied score handling
+
+```{r tied-scores}
+tied_data <- read.csv(paste0(data_path2, "enhancedroc_tiedscores.csv"))
+
+enhancedROC(
+  data = tied_data,
+  outcome = "disease",
+  positiveClass = "Disease",
+  predictors = vars(ordinal_score, rounded_lab, composite_score),
+  tiedScoreHandling = "average",
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 7. Sensitivity & Specificity Thresholds
+
+### Screening context: high sensitivity threshold
+
+```{r threshold-screening}
+screening_data <- read.csv(paste0(data_path, "enhancedroc_screening.csv"))
+
+enhancedROC(
+  data = screening_data,
+  outcome = "screening_indication",
+  positiveClass = "Screen Positive",
+  predictors = "sensitive_marker",
+  sensitivityThreshold = 0.95,
+  specificityThreshold = 0.5,
+  customCutoffs = NULL
+)
+```
+
+### Confirmatory context: high specificity threshold
+
+```{r threshold-confirmatory}
+confirmatory_data <- read.csv(paste0(data_path, "enhancedroc_confirmatory.csv"))
+
+enhancedROC(
+  data = confirmatory_data,
+  outcome = "confirmed_diagnosis",
+  positiveClass = "Confirmed",
+  predictors = "specific_marker",
+  sensitivityThreshold = 0.5,
+  specificityThreshold = 0.95,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 8. Class Imbalance Detection
+
+### Imbalance detection with PRC recommendation
+
+```{r imbalance-detect}
+imbalanced_data <- read.csv(paste0(data_path, "enhancedroc_imbalanced.csv"))
+
+enhancedROC(
+  data = imbalanced_data,
+  outcome = "rare_disease",
+  positiveClass = "Positive",
+  predictors = vars(screening_marker, confirmatory_marker),
+  detectImbalance = TRUE,
+  imbalanceThreshold = 3.0,
+  showImbalanceWarning = TRUE,
+  recommendPRC = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Lower imbalance threshold (more sensitive detection)
+
+```{r imbalance-sensitive}
+enhancedROC(
+  data = imbalanced_data,
+  outcome = "rare_disease",
+  positiveClass = "Positive",
+  predictors = "screening_marker",
+  detectImbalance = TRUE,
+  imbalanceThreshold = 1.5,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 9. Clinical Context & Presets
+
+### Biomarker screening preset
+
+```{r preset-screening}
+enhancedROC(
+  data = screening_data,
+  outcome = "screening_indication",
+  positiveClass = "Screen Positive",
+  predictors = "sensitive_marker",
+  clinicalContext = "screening",
+  clinicalPresets = "biomarker_screening",
+  customCutoffs = NULL
+)
+```
+
+### Confirmatory testing preset
+
+```{r preset-confirmatory}
+enhancedROC(
+  data = confirmatory_data,
+  outcome = "confirmed_diagnosis",
+  positiveClass = "Confirmed",
+  predictors = "specific_marker",
+  clinicalContext = "diagnosis",
+  clinicalPresets = "confirmatory_testing",
+  customCutoffs = NULL
+)
+```
+
+### Diagnostic validation preset (balanced)
+
+```{r preset-diagnostic}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  clinicalContext = "prognosis",
+  clinicalPresets = "diagnostic_validation",
+  customCutoffs = NULL
+)
+```
+
+### Research comprehensive preset
+
+```{r preset-research}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = vars(biomarker1, biomarker2, clinical_risk_score),
+  clinicalPresets = "research_comprehensive",
+  customCutoffs = NULL
+)
+```
+
+### Monitoring context with custom settings
+
+```{r preset-monitoring}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  clinicalContext = "monitoring",
+  clinicalPresets = "custom",
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 10. Calibration Analysis
+
+### Full calibration assessment
+
+```{r calibration-full}
+calibration_data <- read.csv(paste0(data_path, "enhancedroc_calibration.csv"))
+
+enhancedROC(
+  data = calibration_data,
+  outcome = "outcome",
+  positiveClass = "Event",
+  predictors = vars(predicted_prob, risk_score),
+  calibrationAnalysis = TRUE,
+  calibrationPlot = TRUE,
+  brierScore = TRUE,
+  calibrationMetrics = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Hosmer-Lemeshow test
+
+```{r calibration-hl}
+enhancedROC(
+  data = calibration_data,
+  outcome = "outcome",
+  positiveClass = "Event",
+  predictors = "predicted_prob",
+  hosmerLemeshow = TRUE,
+  hlGroups = 10,
+  customCutoffs = NULL
+)
+```
+
+### Hosmer-Lemeshow with fewer groups
+
+```{r calibration-hl-5}
+enhancedROC(
+  data = calibration_data,
+  outcome = "outcome",
+  positiveClass = "Event",
+  predictors = "predicted_prob",
+  hosmerLemeshow = TRUE,
+  hlGroups = 5,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 11. Multi-Class ROC
+
+### One-vs-Rest with macro averaging
+
+```{r multiclass-ovr}
+multiclass_data <- read.csv(paste0(data_path, "enhancedroc_multiclass.csv"))
+
+enhancedROC(
+  data = multiclass_data,
+  outcome = "disease_severity",
+  positiveClass = "Severe",
+  predictors = vars(biomarker_A, biomarker_B, imaging_severity_score),
+  multiClassROC = TRUE,
+  multiClassStrategy = "ovr",
+  multiClassAveraging = "macro",
+  customCutoffs = NULL
+)
+```
+
+### One-vs-One with weighted averaging
+
+```{r multiclass-ovo}
+enhancedROC(
+  data = multiclass_data,
+  outcome = "disease_severity",
+  positiveClass = "Severe",
+  predictors = "biomarker_A",
+  multiClassROC = TRUE,
+  multiClassStrategy = "ovo",
+  multiClassAveraging = "weighted",
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 12. Clinical Impact & Utility
+
+### Clinical impact with NNT calculation
+
+```{r clinical-impact}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  clinicalImpact = TRUE,
+  nntCalculation = TRUE,
+  decisionImpactTable = TRUE,
+  customCutoffs = NULL
+)
+```
+
+### Clinical utility curve
+
+```{r clinical-utility}
+enhancedROC(
+  data = biomarker_data,
+  outcome = "disease_status",
+  positiveClass = "Disease",
+  predictors = "biomarker1",
+  clinicalUtilityCurve = TRUE,
+  customCutoffs = NULL
+)
+```
+
+---
+
+## 13. Edge Cases
+
+### Small sample (n=60)
+
+```{r edge-small}
+small_data <- read.csv(paste0(data_path, "enhancedroc_small.csv"))
+
+enhancedROC(
+  data = small_data,
+  outcome = "disease",
+  positiveClass = "Positive",
+  predictors = "marker",
+  useBootstrap = TRUE,
+  bootstrapSamples = 200,
+  customCutoffs = NULL
+)
+```
+
+### Low prevalence screening data
+
+```{r edge-low-prevalence}
+enhancedROC(
+  data = screening_data,
+  outcome = "screening_indication",
+  positiveClass = "Screen Positive",
+  predictors = "sensitive_marker",
+  customCutoffs = NULL
+)
+```
+
+### Tied scores
+
+```{r edge-tied}
+enhancedROC(
+  data = tied_data,
+  outcome = "disease",
+  positiveClass = "Disease",
+  predictors = "ordinal_score",
+  customCutoffs = NULL
+)
+```
+
+---
+
+## References
+
+- DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under
+  two or more correlated receiver operating characteristic curves: a nonparametric
+  approach. *Biometrics*, 44(3), 837-845.
+- Youden WJ (1950). Index for rating diagnostic tests. *Cancer*, 3(1), 32-35.
+- Hanley JA, McNeil BJ (1982). The meaning and use of the area under a receiver
+  operating characteristic (ROC) curve. *Radiology*, 143(1), 29-36.
+- Robin X, Turck N, Hainard A, et al. (2011). pROC: an open-source package for R
+  and S+ to analyze and compare ROC curves. *BMC Bioinformatics*, 12, 77.
+- Hosmer DW, Lemeshow S (2000). *Applied Logistic Regression*. 2nd ed. Wiley.
+- Brier GW (1950). Verification of forecasts expressed in terms of probability.
+  *Monthly Weather Review*, 78(1), 1-3.

@@ -16,6 +16,29 @@ children:
             isTarget: true
 
   # ============================================================
+  # DISPLAY OPTIONS
+  # ============================================================
+
+  - type: CollapseBox
+    label: Display Options
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: sft
+          - type: CheckBox
+            name: showSummary
+          - type: CheckBox
+            name: showAbout
+          - type: TextBox
+            name: confLevel
+            format: number
+            events:
+                change: './agreement.events::onChange_confLevel'
+
+  # ============================================================
   # CATEGORICAL/NOMINAL DATA
   # ============================================================
 
@@ -48,6 +71,8 @@ children:
           - type: CheckBox
             name: bootstrap
             enable: (kripp)
+          - type: CheckBox
+            name: showKrippGuide
 
   - type: CollapseBox
     label: Light's Kappa [Categorical] (3+ Raters)
@@ -58,6 +83,8 @@ children:
         children:
           - type: CheckBox
             name: lightKappa
+          - type: CheckBox
+            name: showLightKappaGuide
 
   - type: CollapseBox
     label: Gwet's AC1/AC2 [Categorical/Ordinal]
@@ -71,6 +98,20 @@ children:
           - type: ComboBox
             name: gwetWeights
             enable: (gwet)
+          - type: CheckBox
+            name: showGwetGuide
+
+  - type: CollapseBox
+    label: PABAK & Prevalence/Bias Indices [2 Raters]
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: pabak
+          - type: CheckBox
+            name: showPABAKGuide
 
   - type: CollapseBox
     label: Finn Coefficient [Categorical] (Variance-Based)
@@ -88,6 +129,8 @@ children:
           - type: ComboBox
             name: finnModel
             enable: (finn)
+          - type: CheckBox
+            name: showFinnGuide
 
   # ============================================================
   # ORDINAL/RANKED DATA
@@ -102,6 +145,8 @@ children:
         children:
           - type: CheckBox
             name: kendallW
+          - type: CheckBox
+            name: showKendallWGuide
 
   - type: CollapseBox
     label: Robinson's A [Ordinal] (Agreement Index)
@@ -140,6 +185,8 @@ children:
         children:
           - type: CheckBox
             name: icc
+          - type: CheckBox
+            name: showICCGuide
           - type: ComboBox
             name: iccType
             enable: (icc)
@@ -200,6 +247,8 @@ children:
           - type: CheckBox
             name: iotaStandardize
             enable: (iota)
+          - type: CheckBox
+            name: showIotaGuide
 
   - type: CollapseBox
     label: Bland-Altman Analysis [Continuous] (Limits of Agreement)
@@ -214,9 +263,13 @@ children:
             name: baConfidenceLevel
             format: number
             enable: (blandAltmanPlot)
+            events:
+                change: './agreement.events::onChange_baConfidenceLevel'
           - type: CheckBox
             name: proportionalBias
             enable: (blandAltmanPlot)
+          - type: CheckBox
+            name: showBlandAltmanGuide
 
   - type: CollapseBox
     label: Agreement Heatmap [Categorical] (Confusion Matrix Visualization)
@@ -301,6 +354,8 @@ children:
           - type: CheckBox
             name: clusterRankings
             enable: (hierarchicalKappa)
+          - type: CheckBox
+            name: showHierarchicalGuide
 
   - type: CollapseBox
     label: Mixed-Effects Condition Comparison [Continuous] (AI vs Manual, Pre vs Post)
@@ -329,6 +384,8 @@ children:
           - type: ComboBox
             name: multipleTestCorrection
             enable: (mixedEffectsComparison || hierarchicalKappa)
+          - type: CheckBox
+            name: showMixedEffectsGuide
 
   - type: CollapseBox
     label: Multi-Class Confusion Matrix [Categorical] (Classification Evaluation)
@@ -342,6 +399,8 @@ children:
           - type: ComboBox
             name: confusionNormalize
             enable: (confusionMatrix)
+          - type: CheckBox
+            name: showConfusionMatrixGuide
 
   - type: CollapseBox
     label: Bootstrap Confidence Intervals [Any Data Type]
@@ -356,6 +415,8 @@ children:
             name: nBoot
             format: number
             enable: (bootstrapCI)
+          - type: CheckBox
+            name: showBootstrapCIGuide
 
   - type: CollapseBox
     label: Multi-Annotator Concordance [Categorical] (AI Validation)
@@ -370,6 +431,8 @@ children:
             name: predictionColumn
             format: number
             enable: (multiAnnotatorConcordance)
+          - type: CheckBox
+            name: showConcordanceF1Guide
 
   - type: CollapseBox
     label: Pairwise Kappa [Categorical] (vs Reference Rater)
@@ -395,6 +458,8 @@ children:
           - type: CheckBox
             name: rankRaters
             enable: (pairwiseKappa)
+          - type: CheckBox
+            name: showPairwiseKappaGuide
 
   - type: CollapseBox
     label: Rater Bias Test [Categorical] (Quality Control)
@@ -405,6 +470,8 @@ children:
         children:
           - type: CheckBox
             name: raterBias
+          - type: CheckBox
+            name: showRaterBiasGuide
 
   - type: CollapseBox
     label: Bhapkar Test [Categorical] (Marginal Homogeneity, 2 Raters)
@@ -415,6 +482,8 @@ children:
         children:
           - type: CheckBox
             name: bhapkar
+          - type: CheckBox
+            name: showBhapkarGuide
 
   - type: CollapseBox
     label: Stuart-Maxwell Test [Categorical] (Marginal Homogeneity, 2 Raters)
@@ -425,6 +494,8 @@ children:
         children:
           - type: CheckBox
             name: stuartMaxwell
+          - type: CheckBox
+            name: showStuartMaxwellGuide
 
   - type: CollapseBox
     label: Inter/Intra-Rater Reliability [Any Data Type] (Test-Retest Studies)
@@ -660,6 +731,8 @@ children:
             name: pairedBootN
             format: number
             enable: (pairedAgreementTest)
+          - type: CheckBox
+            name: showPairedAgreementGuide
 
   # ============================================================
   # SAMPLE SIZE FOR AGREEMENT STUDIES
@@ -701,21 +774,6 @@ children:
             name: ssPower
             format: number
             enable: (agreementSampleSize)
+          - type: CheckBox
+            name: showSampleSizeGuide
 
-  # ============================================================
-  # DISPLAY OPTIONS
-  # ============================================================
-
-  - type: CollapseBox
-    label: Display Options
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: sft
-          - type: CheckBox
-            name: showSummary
-          - type: CheckBox
-            name: showAbout

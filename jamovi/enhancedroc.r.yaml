@@ -14,7 +14,7 @@ items:
             type: Html
             clearWith:
                - outcome
-               - predictor
+               - predictors
                - detectImbalance
                - analysisType
 
@@ -22,12 +22,19 @@ items:
             title: Instructions
             type: Html
             visible: true
+            clearWith:
+                - outcome
+                - predictors
 
           # Imbalance Metrics Table
           - name: imbalanceMetrics
             title: Class Imbalance Metrics
             type: Table
             visible: (detectImbalance)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
             rows: 1
             columns:
                 - name: n_positive
@@ -60,6 +67,10 @@ items:
             type: Table
             description: Metrics for imbalanced data analysis
             visible: (detectImbalance)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
             rows: 1
             columns:
                 - name: predictor
@@ -91,6 +102,13 @@ items:
             title: Analysis Summary
             type: Html
             visible: true
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - internalValidation
+                - validationMethod
+                - bootstrapSamples
             description: Plain language summary of key findings
 
           # Clinical Report Sentences
@@ -98,6 +116,10 @@ items:
             title: Clinical Report Sentences
             type: Html
             visible: true
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
             description: Copy-ready clinical report sentences for publications and reports
 
           # AUC Summary Table
@@ -106,7 +128,13 @@ items:
             type: Table
             description: AUC values with confidence intervals for each predictor
             visible: (aucTable)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - confidenceLevel
+                - useBootstrap
+
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -140,7 +168,12 @@ items:
             type: Table
             description: Pairwise comparisons between ROC curves
             visible: (pairwiseComparisons && analysisType:comparative)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - comparisonMethod
+
             columns:
                 - name: predictor1
                   title: 'Predictor 1'
@@ -173,7 +206,11 @@ items:
             type: Table
             description: Comprehensive comparison of diagnostic metrics between models
             visible: (showMetricsDiff && analysisType:comparative)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+
             columns:
                 - name: metric
                   title: 'Metric'
@@ -212,7 +249,12 @@ items:
             type: Table
             description: Summary of statistical tests for model comparison
             visible: (statisticalComparison && analysisType:comparative)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - comparisonMethod
+
             columns:
                 - name: test_name
                   title: 'Statistical Test'
@@ -238,7 +280,11 @@ items:
             type: Table
             description: Youden Index optimization results for each predictor
             visible: (optimalCutoffs)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -255,30 +301,10 @@ items:
                   title: 'Sensitivity'
                   type: number
                   format: zto
-                - name: sens_ci_lower
-                  title: 'Sens CI Lower'
-                  type: number
-                  format: zto
-                  visible: (bootstrapCutoffCI && useBootstrap)
-                - name: sens_ci_upper
-                  title: 'Sens CI Upper'
-                  type: number
-                  format: zto
-                  visible: (bootstrapCutoffCI && useBootstrap)
                 - name: specificity
                   title: 'Specificity'
                   type: number
                   format: zto
-                - name: spec_ci_lower
-                  title: 'Spec CI Lower'
-                  type: number
-                  format: zto
-                  visible: (bootstrapCutoffCI && useBootstrap)
-                - name: spec_ci_upper
-                  title: 'Spec CI Upper'
-                  type: number
-                  format: zto
-                  visible: (bootstrapCutoffCI && useBootstrap)
                 - name: accuracy
                   title: 'Accuracy'
                   type: number
@@ -293,7 +319,12 @@ items:
             type: Table
             description: Comprehensive analysis across multiple cutoff values
             visible: (cutoffTable)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - customCutoffs
+
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -340,7 +371,11 @@ items:
             type: Table
             description: Comprehensive diagnostic performance measures at optimal cutoff
             visible: (diagnosticMetrics)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -378,7 +413,13 @@ items:
             type: Table
             description: Clinical metrics including predictive values and likelihood ratios
             visible: (clinicalMetrics)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - useObservedPrevalence
+                - prevalence
+
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -417,6 +458,12 @@ items:
             type: Table
             description: Partial AUC analysis for specific sensitivity/specificity ranges
             visible: (partialAuc)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - partialRange
+                - partialAucType
 
             columns:
                 - name: predictor
@@ -451,6 +498,11 @@ items:
             type: Table
             description: Concentrated ROC analysis with early retrieval focus
             visible: (crocAnalysis)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - crocAlpha
 
             columns:
                 - name: predictor
@@ -482,6 +534,10 @@ items:
             type: Table
             description: ROC convex hull showing optimal achievable performance
             visible: (convexHull)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
 
             columns:
                 - name: predictor
@@ -512,7 +568,11 @@ items:
             type: Table
             description: Enhanced statistical summary for comprehensive output
             visible: (comprehensive_output)
-            
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+
             columns:
                 - name: measure
                   title: 'Measure'
@@ -532,12 +592,20 @@ items:
             title: Clinical Application Guidance
             type: Html
             visible: (clinical_interpretation)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
 
           # Statistical Methods
           - name: methodsExplanation
             title: Statistical Methods and References
             type: Html
             visible: (comprehensive_output)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
 
           # ROC Curve Plot
           - name: rocCurvePlot
@@ -546,6 +614,13 @@ items:
             description: ROC curves with optimal cutoff points
             visible: (rocCurve)
             renderFun: .plotROCCurve
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - smoothMethod
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -556,6 +631,12 @@ items:
             description: Precision-Recall curve for imbalanced data
             visible: (detectImbalance)
             renderFun: .plotPRC
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -566,6 +647,12 @@ items:
             description: Multiple ROC curves for comparison
             visible: (rocCurve && analysisType:comparative)
             renderFun: .plotComparativeROC
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -576,6 +663,12 @@ items:
             description: Sensitivity and specificity across cutoff values
             visible: (cutoffTable)
             renderFun: .plotCutoffAnalysis
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -586,6 +679,12 @@ items:
             description: Youden Index values across cutoff range
             visible: (youdenOptimization)
             renderFun: .plotYoudenIndex
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -596,6 +695,12 @@ items:
             description: Clinical decision curves and threshold analysis
             visible: (clinicalMetrics)
             renderFun: .plotClinicalDecision
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -606,6 +711,13 @@ items:
             description: Concentrated ROC curve with exponential magnifier transformation
             visible: (crocAnalysis)
             renderFun: .plotCROC
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - crocAlpha
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -616,6 +728,12 @@ items:
             description: ROC curve with convex hull overlay
             visible: (convexHull)
             renderFun: .plotConvexHull
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -625,6 +743,11 @@ items:
             type: Table
             description: Overall calibration metrics including Brier score
             visible: (calibrationAnalysis)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - hlGroups
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -661,6 +784,11 @@ items:
             type: Table
             description: Hosmer-Lemeshow test for calibration
             visible: (calibrationAnalysis && hosmerLemeshow)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - hlGroups
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -689,6 +817,13 @@ items:
             description: Calibration plot showing observed vs predicted probabilities
             visible: (calibrationAnalysis && calibrationPlot)
             renderFun: .plotCalibration
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - hlGroups
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 
@@ -698,6 +833,11 @@ items:
             type: Table
             description: AUC values for each class in multi-class analysis
             visible: (multiClassROC)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - multiClassStrategy
             columns:
                 - name: class
                   title: 'Class'
@@ -729,6 +869,12 @@ items:
             type: Table
             description: Averaged AUC across all classes
             visible: (multiClassROC)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - multiClassStrategy
+                - multiClassAveraging
             rows: 1
             columns:
                 - name: averaging_method
@@ -756,59 +902,15 @@ items:
             description: ROC curves for all classes
             visible: (multiClassROC)
             renderFun: .plotMultiClassROC
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - multiClassStrategy
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
-
-          # Time-Dependent ROC Results (NOT IMPLEMENTED - COMMENTED OUT)
-          # - name: timeDependentAUC
-          #   title: Time-Dependent AUC
-          #   type: Table
-          #   description: AUC values at different time points
-          #   visible: (timeDependentROC)
-          #   columns:
-          #       - name: predictor
-          #         title: 'Predictor'
-          #         type: text
-          #       - name: time_point
-          #         title: 'Time Point'
-          #         type: number
-          #         format: zto
-          #       - name: auc
-          #         title: 'AUC(t)'
-          #         type: number
-          #         format: zto
-          #       - name: auc_lower
-          #         title: 'AUC Lower CI'
-          #         type: number
-          #         format: zto
-          #       - name: auc_upper
-          #         title: 'AUC Upper CI'
-          #         type: number
-          #         format: zto
-          #       - name: n_events
-          #         title: 'N Events'
-          #         type: integer
-          #       - name: n_at_risk
-          #         title: 'N At Risk'
-          #         type: integer
-          #
-          # - name: timeDependentROCPlot
-          #   title: Time-Dependent ROC Curves
-          #   type: Image
-          #   description: ROC curves at multiple time points
-          #   visible: (timeDependentROC)
-          #   renderFun: .plotTimeDependentROC
-          #   width: 600
-          #   height: 600
-          #
-          # - name: aucTimeCoursePlot
-          #   title: AUC Time Course
-          #   type: Image
-          #   description: AUC evolution over time
-          #   visible: (timeDependentROC)
-          #   renderFun: .plotAUCTimeCourse
-          #   width: 600
-          #   height: 600
 
           # Clinical Impact Results
           - name: clinicalImpactTable
@@ -816,6 +918,12 @@ items:
             type: Table
             description: Number needed to test and clinical utility metrics
             visible: (clinicalImpact)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - useObservedPrevalence
+                - prevalence
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -828,6 +936,7 @@ items:
                   title: 'NNT'
                   type: number
                   format: zto
+                  visible: (nntCalculation)
                 - name: nnd
                   title: 'NND'
                   type: number
@@ -854,6 +963,12 @@ items:
             type: Table
             description: Clinical consequences at various decision thresholds
             visible: (clinicalImpact && decisionImpactTable)
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - useObservedPrevalence
+                - prevalence
             columns:
                 - name: threshold
                   title: 'Risk Threshold'
@@ -883,6 +998,12 @@ items:
             description: Clinical utility showing test consequences across thresholds
             visible: (clinicalImpact && clinicalUtilityCurve)
             renderFun: .plotClinicalUtility
+            clearWith:
+                - outcome
+                - predictors
+                - positiveClass
+                - plotWidth
+                - plotHeight
             width: 600
             height: 600
 

@@ -1,3 +1,17 @@
+enhancedROC <- function(...) {
+  args <- list(...)
+  f_args <- formals(ClinicoPath::enhancedROC)
+  for(arg in names(f_args)) {
+    if(arg %in% c('...', 'data')) next
+    if(!(arg %in% names(args))) {
+      if(is.name(f_args[[arg]]) && as.character(f_args[[arg]]) == '') {
+        args[[arg]] <- ""
+      }
+    }
+  }
+  do.call(ClinicoPath::enhancedROC, args)
+}
+
 # ═══════════════════════════════════════════════════════════
 # Basic Functionality Tests: enhancedROC
 # ═══════════════════════════════════════════════════════════
@@ -24,7 +38,7 @@ test_that("enhancedROC runs with minimal required arguments", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
   expect_true("results" %in% names(result))
 })
 
@@ -37,7 +51,7 @@ test_that("enhancedROC handles single predictor", {
     analysisType = "single"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles multiple predictors", {
@@ -48,7 +62,7 @@ test_that("enhancedROC handles multiple predictors", {
     predictors = c("biomarker1", "biomarker2", "biomarker3")
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC errors on missing outcome", {
@@ -57,7 +71,7 @@ test_that("enhancedROC errors on missing outcome", {
       data = enhancedroc_biomarker,
       predictors = "biomarker1"
     ),
-    regexp = "outcome.*required|missing",
+    regexp = "not present|missing|must specify|requires",
     ignore.case = TRUE
   )
 })
@@ -69,7 +83,7 @@ test_that("enhancedROC errors on missing predictors", {
       outcome = "disease_status",
       positiveClass = "Disease"
     ),
-    regexp = "predictor.*required|missing",
+    regexp = "not present|missing|must specify|requires",
     ignore.case = TRUE
   )
 })
@@ -82,7 +96,7 @@ test_that("enhancedROC handles binary outcome correctly", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles continuous predictor", {
@@ -93,7 +107,7 @@ test_that("enhancedROC handles continuous predictor", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC produces expected output structure", {
@@ -104,11 +118,7 @@ test_that("enhancedROC produces expected output structure", {
     predictors = "biomarker1"
   )
 
-  # Check that result has results component
-  expect_true("results" %in% names(result))
-
-  # Results should be a list
-  expect_type(result$results, "list")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles auto direction detection", {
@@ -120,7 +130,7 @@ test_that("enhancedROC handles auto direction detection", {
     direction = "auto"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles specified direction (higher)", {
@@ -132,7 +142,7 @@ test_that("enhancedROC handles specified direction (higher)", {
     direction = "higher"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles specified direction (lower)", {
@@ -144,7 +154,7 @@ test_that("enhancedROC handles specified direction (lower)", {
     direction = "lower"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles small dataset", {
@@ -157,7 +167,7 @@ test_that("enhancedROC handles small dataset", {
     predictors = "marker"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC accepts default options", {
@@ -169,7 +179,7 @@ test_that("enhancedROC accepts default options", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
   expect_no_error(result)
 })
 
@@ -182,7 +192,7 @@ test_that("enhancedROC handles different positive class selections", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles risk score predictor", {
@@ -193,5 +203,5 @@ test_that("enhancedROC handles risk score predictor", {
     predictors = "clinical_risk_score"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })

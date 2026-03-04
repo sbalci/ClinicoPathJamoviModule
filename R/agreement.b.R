@@ -23,24 +23,38 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
     inherit = agreementBase, private = list(
 
         .init = function() {
-            # Initialization logic
-            # Plot render functions are specified in .r.yaml via renderFun parameter
-        },
+            # Pre-initialize tables with column formatting and notes
 
-        # Helper function to escape variable names for R code generation
-        # Variable names with spaces or special characters are wrapped in backticks
-        .escapeVariableName = function(varName) {
-            if (is.null(varName) || length(varName) == 0) {
-                return(NULL)
+            # Set confidence level in table titles where relevant
+            conf_pct <- round(self$options$confLevel * 100, 0)
+
+            # Update ICC table CI column titles
+            if (!is.null(self$results$iccTable)) {
+                iccTable <- self$results$iccTable
+                iccTable$getColumn("ci_lower")$setSuperTitle(paste0(conf_pct, "% CI"))
+                iccTable$getColumn("ci_upper")$setSuperTitle(paste0(conf_pct, "% CI"))
             }
 
-            # Check if variable name needs escaping
-            # If make.names() would change it, it needs backticks
-            if (!identical(make.names(varName), varName)) {
-                return(paste0('`', varName, '`'))
+            # Update CCC table CI column titles
+            if (!is.null(self$results$linCCCTable)) {
+                cccTable <- self$results$linCCCTable
+                cccTable$getColumn("ci_lower")$setSuperTitle(paste0(conf_pct, "% CI"))
+                cccTable$getColumn("ci_upper")$setSuperTitle(paste0(conf_pct, "% CI"))
             }
 
-            return(varName)
+            # Update bootstrap CI table titles
+            if (!is.null(self$results$bootstrapCITable)) {
+                bootTable <- self$results$bootstrapCITable
+                bootTable$getColumn("ci_lower")$setSuperTitle(paste0(conf_pct, "% CI"))
+                bootTable$getColumn("ci_upper")$setSuperTitle(paste0(conf_pct, "% CI"))
+            }
+
+            # Update Gwet CI column titles
+            if (!is.null(self$results$gwetTable)) {
+                gwetTable <- self$results$gwetTable
+                gwetTable$getColumn("ci_lower")$setTitle(paste0(conf_pct, "% CI Lower"))
+                gwetTable$getColumn("ci_upper")$setTitle(paste0(conf_pct, "% CI Upper"))
+            }
         },
 
         .createSummary = function(result1, result2, wght, exct) {
@@ -378,7 +392,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             return(html_output)
         },
 
-        .blandAltman = function(image, ...) {
+        .blandAltman = function(image, ggtheme, theme, ...) {
             # Render Bland-Altman plot from stored state
 
             plotState <- image$state
@@ -405,25 +419,25 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = avg, y = diff)) +
                 ggplot2::geom_point(alpha = 0.6, size = 2) +
-                ggplot2::geom_hline(yintercept = mean_diff, linetype = "solid", color = "blue", size = 1) +
-                ggplot2::geom_hline(yintercept = lower_loa, linetype = "dashed", color = "red", size = 0.8) +
-                ggplot2::geom_hline(yintercept = upper_loa, linetype = "dashed", color = "red", size = 0.8) +
+                ggplot2::geom_hline(yintercept = mean_diff, linetype = "solid", color = "blue", linewidth = 1) +
+                ggplot2::geom_hline(yintercept = lower_loa, linetype = "dashed", color = "red", linewidth = 0.8) +
+                ggplot2::geom_hline(yintercept = upper_loa, linetype = "dashed", color = "red", linewidth = 0.8) +
                 ggplot2::labs(
                     title = "Bland-Altman Plot",
                     subtitle = sprintf("Mean Difference and %g%% Limits of Agreement", conf_level * 100),
                     x = sprintf("Mean of %s and %s", rater_names[1], rater_names[2]),
                     y = sprintf("Difference (%s - %s)", rater_names[1], rater_names[2])
                 ) +
-                ggplot2::annotate("text", x = max(avg) * 0.95, y = mean_diff,
+                ggplot2::annotate("text", x = min(avg) + 0.9 * (max(avg) - min(avg)), y = mean_diff,
                                 label = sprintf("Mean: %.2f", mean_diff),
                                 hjust = 1, vjust = -0.5, color = "blue") +
-                ggplot2::annotate("text", x = max(avg) * 0.95, y = lower_loa,
+                ggplot2::annotate("text", x = min(avg) + 0.9 * (max(avg) - min(avg)), y = lower_loa,
                                 label = sprintf("Lower LoA: %.2f", lower_loa),
                                 hjust = 1, vjust = 1.2, color = "red") +
-                ggplot2::annotate("text", x = max(avg) * 0.95, y = upper_loa,
+                ggplot2::annotate("text", x = min(avg) + 0.9 * (max(avg) - min(avg)), y = upper_loa,
                                 label = sprintf("Upper LoA: %.2f", upper_loa),
                                 hjust = 1, vjust = -0.2, color = "red") +
-                ggplot2::theme_minimal() +
+                ggtheme +
                 ggplot2::theme(
                     plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
                     plot.subtitle = ggplot2::element_text(hjust = 0.5)
@@ -431,7 +445,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # Add proportional bias trend line if requested
             if (prop_bias) {
-                p <- p + ggplot2::geom_smooth(method = "lm", se = TRUE, color = "darkgreen", size = 0.8)
+                p <- p + ggplot2::geom_smooth(method = "lm", se = TRUE, color = "darkgreen", linewidth = 0.8)
             }
 
             print(p)
@@ -439,7 +453,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             return(TRUE)
         },
 
-        .agreementHeatmap = function(image, ...) {
+        .agreementHeatmap = function(image, ggtheme, theme, ...) {
             # Render Agreement Heatmap from stored state
 
             plotState <- image$state
@@ -560,16 +574,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Gwet's AC Coefficient?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Gwet's AC Coefficient?</h3>
                     <p style='margin: 0; color: #333;'>
                         Gwet's AC coefficient solves the <strong>kappa paradox</strong> where Cohen's/Fleiss' kappa
                         can be artificially low despite high observed agreement.
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Gwet's AC</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Gwet's AC</h4>
                     <p style='margin: 0 0 10px 0;'><strong>This method is particularly valuable when you have:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Rare tumor subtypes</strong> – Unbalanced categories where some diagnoses are very uncommon</li>
@@ -578,12 +592,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>AC1 vs AC2</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>AC1 vs AC2</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Method</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Use Case</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Method</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>AC1 (unweighted)</strong></td>
@@ -600,8 +614,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Example</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; font-style: italic;'>
                         When diagnosing a rare tumor subtype that appears in only 2% of cases, kappa may be low (e.g., 0.40)
                         even when pathologists agree 98% of the time. Gwet's AC provides a more accurate measure
@@ -626,17 +640,17 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 900px; line-height: 1.6;'>
-                <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; margin-bottom: 20px; border-radius: 8px;'>
+                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
                     <h2 style='margin: 0 0 10px 0;'>Clinical Use Cases & Method Selection Guide</h2>
                     <p style='margin: 0; opacity: 0.9;'>Choose the right agreement measure for your pathology research</p>
                 </div>
 
                 <!-- Categorical Data Methods -->
-                <div style='background: #f8f9fa; border-left: 5px solid #6c757d; padding: 20px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 15px 0; color: #343a40;'>📊 Categorical/Ordinal Data</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 20px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 15px 0; color: #333;'>📊 Categorical/Ordinal Data</h3>
 
-                    <div style='background: white; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                        <h4 style='margin: 0 0 10px 0; color: #495057;'>Cohen's/Fleiss' Kappa (Standard Method)</h4>
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>Cohen's/Fleiss' Kappa (Standard Method)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use for:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                             <li><strong>Tumor grading</strong> - G1, G2, G3 classification</li>
@@ -645,11 +659,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>TNM staging</strong> - T1, T2, T3, T4 categories</li>
                             <li><strong>Biomarker scoring</strong> - Negative (0), 1+, 2+, 3+</li>
                         </ul>
-                        <p style='margin: 0; font-size: 13px; color: #6c757d;'><em>Note: May be problematic with high agreement or rare categories</em></p>
+                        <p style='margin: 0; font-size: 13px; color: #666;'><em>Note: May be problematic with high agreement or rare categories</em></p>
                     </div>
 
-                    <div style='background: white; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                        <h4 style='margin: 0 0 10px 0; color: #495057;'>Weighted Kappa (Ordinal Data)</h4>
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>Weighted Kappa (Ordinal Data)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use for ordered categories where partial credit matters:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                             <li><strong>Dysplasia grading</strong> - None, low-grade, high-grade</li>
@@ -657,13 +671,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Inflammation severity</strong> - Absent, mild, moderate, severe</li>
                             <li><strong>Fibrosis stage</strong> - F0, F1, F2, F3, F4</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #fff3cd; border-left: 3px solid #ffc107; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
                             <strong>⚠️ Important:</strong> Use \"Show Level Ordering Information\" to verify proper ordering (e.g., F0 → F1 → F2 → F3 → F4)
                         </p>
                     </div>
 
-                    <div style='background: white; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                        <h4 style='margin: 0 0 10px 0; color: #495057;'>Gwet's AC1/AC2 (Kappa Paradox Solution)</h4>
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>Gwet's AC1/AC2 (Kappa Paradox Solution)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Choose when you have:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                             <li><strong>Rare tumor subtypes</strong> - Neuroendocrine carcinoma in colorectal specimens (2% prevalence)</li>
@@ -671,13 +685,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Unbalanced categories</strong> - Metastasis (5% positive) vs primary (95%)</li>
                             <li><strong>Quality control studies</strong> - Most cases straightforward, few difficult</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #d1ecf1; border-left: 3px solid #17a2b8; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
                             <strong>💡 Tip:</strong> Run both Kappa and Gwet's AC - if they differ substantially, Gwet's AC is more reliable
                         </p>
                     </div>
 
-                    <div style='background: white; padding: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                        <h4 style='margin: 0 0 10px 0; color: #495057;'>Krippendorff's Alpha (Missing Data/Flexible)</h4>
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>Krippendorff's Alpha (Missing Data/Flexible)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use when:</strong></p>
                         <ul style='margin: 0; padding-left: 20px;'>
                             <li><strong>Incomplete ratings</strong> - Not all pathologists rated all cases</li>
@@ -688,11 +702,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </div>
 
                 <!-- Continuous Data Methods -->
-                <div style='background: #f8f9fa; border-left: 5px solid #007bff; padding: 20px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 15px 0; color: #343a40;'>📏 Continuous/Numeric Data</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 20px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 15px 0; color: #333;'>📏 Continuous/Numeric Data</h3>
 
-                    <div style='background: white; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                        <h4 style='margin: 0 0 10px 0; color: #495057;'>ICC (Intraclass Correlation Coefficient)</h4>
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>ICC (Intraclass Correlation Coefficient)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use for:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                             <li><strong>Tumor size</strong> - Diameter measurements (mm or cm)</li>
@@ -702,13 +716,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Digital pathology</strong> - Automated vs manual measurements</li>
                             <li><strong>Continuous scores</strong> - Visual analog scales (0-100)</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #e7f3ff; border-left: 3px solid #007bff; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
                             <strong>📋 Model selection:</strong> Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists
                         </p>
                     </div>
 
-                    <div style='background: white; padding: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                        <h4 style='margin: 0 0 10px 0; color: #495057;'>Bland-Altman Plot (Visual Assessment)</h4>
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;'>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>Bland-Altman Plot (Visual Assessment)</h4>
                         <p style='margin: 0 0 10px 0;'><strong>Use alongside ICC to:</strong></p>
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                             <li><strong>Detect systematic bias</strong> - Does one rater consistently measure higher/lower?</li>
@@ -716,14 +730,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             <li><strong>Check proportional bias</strong> - Does disagreement increase with measurement size?</li>
                             <li><strong>Define acceptable limits</strong> - What range of disagreement is clinically acceptable?</li>
                         </ul>
-                        <p style='margin: 0; padding: 10px; background: #d4edda; border-left: 3px solid #28a745; font-size: 13px;'>
+                        <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
                             <strong>✅ Best practice:</strong> Always use ICC + Bland-Altman together for continuous data
                         </p>
                     </div>
                 </div>
 
                 <!-- Quick Decision Guide -->
-                <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;'>
+                <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
                     <h3 style='margin: 0 0 15px 0;'>🎯 Quick Decision Guide</h3>
                     <table style='width: 100%; background: white; color: #333; border-radius: 4px; overflow: hidden;'>
                         <tr style='background: #f8f9fa;'>
@@ -754,8 +768,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </div>
 
                 <!-- Sample Size Recommendations -->
-                <div style='margin-top: 20px; padding: 15px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #e65100;'>📊 Sample Size Recommendations</h4>
+                <div style='margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid #333;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>📊 Sample Size Recommendations</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>
                         <li><strong>Minimum:</strong> 30 cases for stable kappa/ICC estimates</li>
                         <li><strong>Recommended:</strong> 50-100 cases for categorical data, 30-50 for continuous</li>
@@ -774,16 +788,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Light's Kappa?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Light's Kappa?</h3>
                     <p style='margin: 0; color: #333;'>
                         Light's kappa is an alternative agreement measure for <strong>3 or more raters</strong>.
                         It calculates the <strong>average of all pairwise kappas</strong> between raters.
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Light's Kappa</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Light's Kappa</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Choose Light's kappa instead of Fleiss' kappa when:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Raters have different marginal distributions</strong> - Some pathologists may be more conservative/liberal than others</li>
@@ -793,13 +807,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Light's Kappa vs Fleiss' Kappa</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Light's Kappa vs Fleiss' Kappa</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Feature</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Light's Kappa</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Fleiss' Kappa</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Light's Kappa</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Fleiss' Kappa</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Method</strong></td>
@@ -824,8 +838,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Example</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; font-style: italic;'>
                         In a study with 3 pathologists grading dysplasia (none, low-grade, high-grade):
                         Pathologist A is conservative (more often grades as \"none\"), Pathologist B is moderate,
@@ -835,8 +849,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Interpretation</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <p style='margin: 0 0 5px 0;'>Use the same interpretation guidelines as Cohen's kappa:</p>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
@@ -953,8 +967,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is the Finn Coefficient?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Finn Coefficient?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Finn coefficient is a <strong>variance-based agreement measure</strong> for categorical data.
                         Unlike kappa-based measures that focus on exact agreement, Finn's approach uses analysis of variance
@@ -963,8 +977,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Finn Coefficient</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Finn Coefficient</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>High agreement scenarios</strong> - When raters already agree well, kappa may be paradoxically low</li>
@@ -975,13 +989,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Finn Coefficient vs Kappa</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Finn Coefficient vs Kappa</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Feature</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Finn Coefficient</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Cohen's/Fleiss' Kappa</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Finn Coefficient</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Cohen's/Fleiss' Kappa</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Approach</strong></td>
@@ -1006,8 +1020,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Pathology Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Dysplasia Grading in Barrett's Esophagus (High Agreement Scenario):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -1055,8 +1069,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #fff8e1; border-left: 4px solid #FFA000; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Model Types</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Model Types</h4>
                     <p style='margin: 0 0 10px 0;'><strong>One-way model (subjects random):</strong></p>
                     <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                         <li>Each subject may be rated by different raters</li>
@@ -1071,8 +1085,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Interpretation</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <p style='margin: 0 0 5px 0;'>The Finn coefficient ranges from 0 to 1:</p>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
@@ -1240,8 +1254,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Kendall's W?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Kendall's W?</h3>
                     <p style='margin: 0; color: #333;'>
                         Kendall's coefficient of concordance (W) measures the <strong>agreement among multiple raters</strong>
                         when ranking or rating ordinal data. W ranges from <strong>0 (no agreement)</strong> to
@@ -1249,8 +1263,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Kendall's W</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Kendall's W</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Rankings</strong> - When raters rank cases from best to worst (e.g., ranking diagnostic difficulty)</li>
@@ -1260,8 +1274,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Interpreting Kendall's W</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting Kendall's W</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.00 - 0.20</td>
@@ -1286,12 +1300,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Kendall's W vs Other Methods</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Kendall's W vs Other Methods</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #C2185B;'>Method</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #C2185B;'>Best For</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Method</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best For</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Kendall's W</strong></td>
@@ -1312,8 +1326,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Clinical Pathology Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Diagnostic Difficulty Ranking (Educational Assessment):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -1362,8 +1376,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Statistical Significance</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Significance</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         The chi-square test evaluates whether the observed agreement (W) is statistically different from
                         random chance. A significant p-value (< 0.05) indicates that raters agree more than expected by chance.
@@ -1473,8 +1487,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Robinson's A?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Robinson's A?</h3>
                     <p style='margin: 0; color: #333;'>
                         Robinson's A is an <strong>ordinal agreement coefficient</strong> based on the proportion of
                         <strong>concordant pairs</strong>. It measures how often raters agree on the relative ordering
@@ -1483,8 +1497,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Robinson's A</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Robinson's A</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Ordinal categories with meaningful order</strong> - Tumor grades (G1/G2/G3), disease severity (mild/moderate/severe)</li>
@@ -1495,13 +1509,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Robinson's A vs Other Ordinal Measures</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Robinson's A vs Other Ordinal Measures</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Measure</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Focus</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Sensitivity</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Focus</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Sensitivity</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Robinson's A</strong></td>
@@ -1526,8 +1540,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Clinical Pathology Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Grade Agreement (Ordinal Classification):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -1576,8 +1590,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Interpretation Guidelines</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Guidelines</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>A &lt; 0.20</td>
@@ -1606,8 +1620,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Key Advantages</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Key Advantages</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Robust to skewed distributions:</strong> Less affected by category imbalance than kappa</li>
                         <li><strong>Ordinal focus:</strong> Emphasizes agreement on ordering rather than exact matching</li>
@@ -1675,18 +1689,26 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     p_value <- robinson_result$p
                 } else {
                     # For >2 raters, average all pairwise Robinson's A values
-                    pairwise_A <- c()
+                    n_pairs <- n_raters * (n_raters - 1) / 2
+                    pairwise_A <- numeric(n_pairs)
+                    idx <- 1L
                     for (i in 1:(n_raters - 1)) {
                         for (j in (i + 1):n_raters) {
                             pair_result <- private$.robinsonAPairwise(ratings_matrix[, i], ratings_matrix[, j])
-                            pairwise_A <- c(pairwise_A, pair_result$A)
+                            pairwise_A[idx] <- pair_result$A
+                            idx <- idx + 1L
                         }
                     }
                     a_value <- mean(pairwise_A)
                     # Approximate SE and z-test for averaged A
                     se_value <- sd(pairwise_A) / sqrt(length(pairwise_A))
-                    z_value <- a_value / se_value
-                    p_value <- 2 * pnorm(-abs(z_value))
+                    if (is.na(se_value) || se_value < .Machine$double.eps) {
+                        z_value <- NA
+                        p_value <- NA
+                    } else {
+                        z_value <- a_value / se_value
+                        p_value <- 2 * pnorm(-abs(z_value))
+                    }
                 }
 
                 # Interpret A value
@@ -1785,8 +1807,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 SE <- sqrt((1 - A^2) / (C + D))
 
                 # Z-test for A significantly different from 0
-                z <- A / SE
-                p <- 2 * pnorm(-abs(z))
+                if (SE < .Machine$double.eps) {
+                    z <- NA
+                    p <- if (abs(A) >= 1.0 - .Machine$double.eps) 0 else 1
+                } else {
+                    z <- A / SE
+                    p <- 2 * pnorm(-abs(z))
+                }
             }
 
             return(list(A = A, SE = SE, z = z, p = p, C = C, D = D, T = T))
@@ -1797,8 +1824,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Mean Spearman Rho?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Mean Spearman Rho?</h3>
                     <p style='margin: 0; color: #333;'>
                         Mean Spearman Rho (ρ) is the <strong>average rank correlation coefficient</strong> across all
                         pairs of raters. Spearman's rho measures the <strong>monotonic association</strong> between two
@@ -1808,8 +1835,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Mean Spearman Rho</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Mean Spearman Rho</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Ordinal data</strong> - Tumor grades, severity scores, disease stages with rank order</li>
@@ -1821,13 +1848,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Spearman Rho vs Other Ordinal Measures</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Spearman Rho vs Other Ordinal Measures</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Measure</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>What It Measures</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Best Use</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What It Measures</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best Use</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Spearman Rho</strong></td>
@@ -1862,8 +1889,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Clinical Pathology Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Grade Severity Correlation (Multi-Rater Consistency):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -1912,8 +1939,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Interpretation Guidelines</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Guidelines</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>ρ &lt; 0.30</td>
@@ -1943,8 +1970,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Key Advantages</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Key Advantages</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Nonparametric:</strong> No assumptions about distribution or linearity</li>
                         <li><strong>Robust to outliers:</strong> Uses ranks, not raw values</li>
@@ -2080,8 +2107,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Mean Pearson Correlation?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Mean Pearson Correlation?</h3>
                     <p style='margin: 0; color: #333;'>
                         Mean Pearson Correlation (r) is the <strong>average linear correlation coefficient</strong> across all
                         pairs of raters for continuous measurements. Pearson's r measures the <strong>strength and direction
@@ -2091,8 +2118,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Mean Pearson Correlation</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Mean Pearson Correlation</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Continuous measurements</strong> - Tumor size (mm), biomarker concentrations (ng/mL), quantitative scores</li>
@@ -2104,13 +2131,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Pearson r vs Other Continuous Measures</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Pearson r vs Other Continuous Measures</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Measure</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>What It Measures</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Best Use</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What It Measures</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best Use</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Pearson r</strong></td>
@@ -2140,8 +2167,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Clinical Pathology Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Measurement Agreement (Longest Diameter):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -2190,8 +2217,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Interpretation Guidelines</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Guidelines</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>r &lt; 0.30</td>
@@ -2221,8 +2248,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Correlation vs. Agreement</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Correlation vs. Agreement</h4>
                     <p style='margin: 0 0 10px 0; font-size: 13px;'>
                         <strong>Important distinction:</strong> Pearson correlation measures how measurements <em>vary together</em>,
                         not how <em>close</em> they are. Example:
@@ -2239,8 +2266,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Key Advantages</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Key Advantages</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Simple and familiar:</strong> Widely understood correlation coefficient</li>
                         <li><strong>Sensitive to linear trends:</strong> Detects proportional relationships between raters</li>
@@ -2368,8 +2395,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Lin's Concordance Correlation Coefficient (CCC)?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Lin's Concordance Correlation Coefficient (CCC)?</h3>
                     <p style='margin: 0; color: #333;'>
                         Lin's CCC evaluates <strong>agreement</strong> (not just association) by measuring both:
                     </p>
@@ -2385,8 +2412,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Lin's CCC</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Lin's CCC</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for method comparison and validation:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Method comparison</strong> - Comparing manual vs. automated measurements</li>
@@ -2397,33 +2424,43 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Interpreting CCC Values</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting CCC Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>CCC Value</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Agreement Strength</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Interpretation</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>CCC Value</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Strength</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&lt; 0.90</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&lt; 0.40</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial disagreement - methods not interchangeable</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.90 - 0.95</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 - 0.70</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fair</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Consider method calibration before use</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.70 - 0.90</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Acceptable for some applications with caution</td>
                         </tr>
                         <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.90 - 0.95</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Good</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Methods reasonably interchangeable</td>
+                        </tr>
+                        <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.95 - 0.99</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Good agreement - methods reasonably interchangeable</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Methods highly interchangeable</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&gt; 0.99</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Almost perfect</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Excellent agreement - methods highly interchangeable</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Excellent interchangeability</td>
                         </tr>
                     </table>
                     <p style='margin: 15px 0 0 0; font-style: italic; color: #555;'>
@@ -2431,13 +2468,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #e1f5fe; border-left: 4px solid #03A9F4; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #0277BD;'>CCC vs. Pearson's r: Key Differences</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>CCC vs. Pearson's r: Key Differences</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #03A9F4;'>Characteristic</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #03A9F4;'>Pearson's r</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #03A9F4;'>Lin's CCC</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Characteristic</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pearson's r</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Lin's CCC</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Measures</strong></td>
@@ -2466,11 +2503,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Use Cases in Pathology</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Use Cases in Pathology</h4>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>1</span>
                             Manual vs. Digital Ki-67 Quantification
                         </h5>
@@ -2497,7 +2534,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>2</span>
                             Whole Slide Imaging vs. Glass Slide Mitotic Count
                         </h5>
@@ -2523,7 +2560,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>3</span>
                             PD-L1 TPS: Two IHC Antibody Clones Comparison
                         </h5>
@@ -2549,7 +2586,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>4</span>
                             Tumor Size: Radiology vs. Pathology Measurement
                         </h5>
@@ -2577,7 +2614,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>5</span>
                             HER2/neu Copy Number: FISH vs. Chromogenic ISH
                         </h5>
@@ -2603,8 +2640,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>⚠️ Important Considerations</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Sample size:</strong> Minimum 30 paired observations; 100+ preferred for stable estimates</li>
                         <li><strong>Outliers:</strong> CCC is sensitive to outliers; investigate extreme values before analysis</li>
@@ -2616,8 +2653,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #f3e5f5; border-left: 4px solid #9C27B0; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #7B1FA2;'>Statistical Notes</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>CCC formula:</strong> ρ<sub>c</sub> = 2ρσ<sub>x</sub>σ<sub>y</sub> / (σ<sub>x</sub>² + σ<sub>y</sub>² + (μ<sub>x</sub> - μ<sub>y</sub>)²)</li>
                         <li><strong>Components:</strong> CCC = r × C<sub>b</sub>, where C<sub>b</sub> is bias correction factor</li>
@@ -2688,6 +2725,21 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         sd_x <- sd(x)
                         sd_y <- sd(y)
 
+                        # Guard against zero variance
+                        if (sd_x < .Machine$double.eps || sd_y < .Machine$double.eps) {
+                            cccTable$addRow(rowKey = comparison_name, list(
+                                comparison = comparison_name,
+                                subjects = n_cases,
+                                ccc = NA_real_,
+                                ci_lower = NA_real_,
+                                ci_upper = NA_real_,
+                                pearson_r = NA_real_,
+                                bias_factor = NA_real_,
+                                interpretation = "Cannot compute: one rater has zero variance (all values identical)"
+                            ))
+                            next
+                        }
+
                         # Pearson correlation (precision)
                         pearson_r <- cor(x, y, method = "pearson")
 
@@ -2703,33 +2755,52 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         # Lin's CCC
                         ccc <- pearson_r * Cb
 
-                        # Alternative direct formula (should give same result)
-                        # ccc_alt <- 2 * pearson_r * sd_x * sd_y / (sd_x^2 + sd_y^2 + (mean_x - mean_y)^2)
+                        # Prefer validated CI implementation when available
+                        ci_lower <- NA_real_
+                        ci_upper <- NA_real_
+                        if (requireNamespace("DescTools", quietly = TRUE)) {
+                            ccc_result <- tryCatch(
+                                DescTools::CCC(x, y, ci = "z-transform"),
+                                error = function(e) NULL
+                            )
+                            if (!is.null(ccc_result) && !is.null(ccc_result$rho.c)) {
+                                ccc <- ccc_result$rho.c$est[1]
+                                ci_lower <- ccc_result$rho.c$lwr.ci[1]
+                                ci_upper <- ccc_result$rho.c$upr.ci[1]
+                                Cb <- ccc_result$C.b
+                            }
+                        }
 
-                        # Confidence interval using Fisher's Z-transformation
-                        # Asymptotic variance of CCC
-                        n <- n_cases
-                        var_ccc <- ((1 - pearson_r^2) * ccc^2 * (1 - ccc^2)) / (pearson_r^2 * n)
-                        se_ccc <- sqrt(var_ccc)
+                        # Fallback CI approximation if DescTools is unavailable
+                        if (is.na(ci_lower) || is.na(ci_upper)) {
+                            n <- n_cases
+                            conf <- self$options$confLevel
+                            if (is.finite(pearson_r) && abs(pearson_r) > .Machine$double.eps && is.finite(ccc)) {
+                                var_ccc <- ((1 - pearson_r^2) * ccc^2 * (1 - ccc^2)) / (pearson_r^2 * n)
+                                if (is.finite(var_ccc) && var_ccc >= 0) {
+                                    se_ccc <- sqrt(var_ccc)
+                                    z_crit <- qnorm((1 + conf) / 2)
+                                    ci_lower <- ccc - z_crit * se_ccc
+                                    ci_upper <- ccc + z_crit * se_ccc
+                                }
+                            }
+                            ci_lower <- if (is.finite(ci_lower)) max(-1, ci_lower) else NA_real_
+                            ci_upper <- if (is.finite(ci_upper)) min(1, ci_upper) else NA_real_
+                        }
 
-                        # 95% CI using normal approximation
-                        z_crit <- qnorm(0.975)
-                        ci_lower <- ccc - z_crit * se_ccc
-                        ci_upper <- ccc + z_crit * se_ccc
-
-                        # Ensure CI bounds within [-1, 1]
-                        ci_lower <- max(-1, ci_lower)
-                        ci_upper <- min(1, ci_upper)
-
-                        # Interpretation
-                        if (ccc < 0.90) {
+                        # Interpretation (McBride 2005, adjusted for clinical research)
+                        if (ccc < 0.40) {
                             interp <- "Poor agreement - methods not interchangeable"
-                        } else if (ccc < 0.95) {
+                        } else if (ccc < 0.70) {
+                            interp <- "Fair agreement - consider method calibration"
+                        } else if (ccc < 0.90) {
                             interp <- "Moderate agreement - use with caution"
+                        } else if (ccc < 0.95) {
+                            interp <- "Good agreement - methods reasonably interchangeable"
                         } else if (ccc < 0.99) {
-                            interp <- "Substantial agreement - methods reasonably interchangeable"
+                            interp <- "Substantial agreement - methods highly interchangeable"
                         } else {
-                            interp <- "Almost perfect agreement - methods highly interchangeable"
+                            interp <- "Almost perfect agreement - excellent interchangeability"
                         }
 
                         cccTable$addRow(rowKey = comparison_name, list(
@@ -2965,7 +3036,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         # but provide normal-based CI
 
                         # Bootstrap confidence interval for TDI
-                        n_boot <- 1000
+                        n_boot <- self$options$nBoot
                         boot_tdi <- numeric(n_boot)
 
                         for (b in 1:n_boot) {
@@ -2995,9 +3066,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             }
                         } else {
                             margin <- tdi_estimate - acceptable_limit
-                            pct_over <- (margin / acceptable_limit) * 100
-                            interp <- sprintf("Methods NOT equivalent - TDI=%.1f exceeds acceptable limit (%.1f) by %.1f (%.0f%%). Unacceptable disagreement.",
-                                             tdi_estimate, acceptable_limit, margin, pct_over)
+                            pct_over <- if (acceptable_limit > 0) (margin / acceptable_limit) * 100 else NA
+                            if (!is.na(pct_over)) {
+                                interp <- sprintf("Methods NOT equivalent - TDI=%.1f exceeds acceptable limit (%.1f) by %.1f (%.0f%%). Unacceptable disagreement.",
+                                                 tdi_estimate, acceptable_limit, margin, pct_over)
+                            } else {
+                                interp <- sprintf("Methods NOT equivalent - TDI=%.1f exceeds acceptable limit (%.1f) by %.1f. Unacceptable disagreement.",
+                                                 tdi_estimate, acceptable_limit, margin)
+                            }
                         }
 
                         tdiTable$addRow(rowKey = comparison_name, list(
@@ -3269,21 +3345,22 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             # Specific Agreement = 2 * (both positive) / (rater1 positive + rater2 positive)
                             specific_agreement <- (2 * both_positive) / total_positive
 
-                            # Calculate Wilson score confidence interval
-                            if (include_ci && both_positive > 0) {
-                                # Use Wilson score for the proportion both_positive / (average of rater counts)
-                                # This is more stable than exact binomial for specific agreement
-                                n_eff <- (rater1_positive + rater2_positive) / 2
-                                p_hat <- both_positive / n_eff
-
-                                z <- qnorm(0.975)  # 95% CI
-                                denom <- 1 + z^2 / n_eff
-                                center <- (p_hat + z^2 / (2 * n_eff)) / denom
-                                margin <- z * sqrt(p_hat * (1 - p_hat) / n_eff + z^2 / (4 * n_eff^2)) / denom
-
-                                # Convert back to specific agreement scale (2p)
-                                ci_lower <- max(0, 2 * (center - margin))
-                                ci_upper <- min(1, 2 * (center + margin))
+                            # Approximate CI with Wilson interval on specific agreement scale
+                            # Use number of subjects with at least one positive rating as N
+                            if (include_ci) {
+                                n_eff <- sum(rater1 == category | rater2 == category)
+                                if (n_eff < 1) {
+                                    ci_lower <- NA
+                                    ci_upper <- NA
+                                } else {
+                                    p_hat <- specific_agreement
+                                    z <- qnorm(0.975)  # 95% CI
+                                    denom <- 1 + z^2 / n_eff
+                                    center <- (p_hat + z^2 / (2 * n_eff)) / denom
+                                    margin <- z * sqrt(p_hat * (1 - p_hat) / n_eff + z^2 / (4 * n_eff^2)) / denom
+                                    ci_lower <- max(0, center - margin)
+                                    ci_upper <- min(1, center + margin)
+                                }
                             } else {
                                 ci_lower <- NA
                                 ci_upper <- NA
@@ -3567,8 +3644,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What are Rater Profile Plots?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What are Rater Profile Plots?</h3>
                     <p style='margin: 0; color: #333;'>
                         Rater Profile Plots visualize the <strong>distribution of ratings</strong> for each individual rater.
                         Unlike agreement statistics that focus on concordance between raters, profile plots reveal
@@ -3576,8 +3653,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Rater Profile Plots</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Rater Profile Plots</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential when:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Agreement is low</strong> – Determine if disagreement stems from systematic rating differences vs. random variation</li>
@@ -3588,7 +3665,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <h4 style='color: #1976D2;'>Plot Types and When to Use Them</h4>
+                <h4 style='color: #333;'>Plot Types and When to Use Them</h4>
                 <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
                     <tr style='background: #f5f5f5;'>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Plot Type</th>
@@ -3612,9 +3689,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </tr>
                 </table>
 
-                <h4 style='color: #1976D2;'>Clinical Use Cases in Pathology</h4>
+                <h4 style='color: #333;'>Clinical Use Cases in Pathology</h4>
 
-                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #2196F3;'>
+                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #333;'>
                     <h5 style='margin: 0 0 10px 0; color: #333;'>1. Tumor Grade Assessment (Ordinal Data)</h5>
                     <p style='margin: 0 0 10px 0; color: #666;'>
                         <strong>Scenario:</strong> Five pathologists grade 100 breast tumors as G1/G2/G3.
@@ -3636,7 +3713,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #2196F3;'>
+                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #333;'>
                     <h5 style='margin: 0 0 10px 0; color: #333;'>2. Ki-67 Proliferation Index (Continuous Data)</h5>
                     <p style='margin: 0 0 10px 0; color: #666;'>
                         <strong>Scenario:</strong> Four pathologists score Ki-67 (0-100%) on 80 breast cancers.
@@ -3657,7 +3734,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #2196F3;'>
+                <div style='background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-left: 3px solid #333;'>
                     <h5 style='margin: 0 0 10px 0; color: #333;'>3. Mitotic Count (Continuous with Outliers)</h5>
                     <p style='margin: 0 0 10px 0; color: #666;'>
                         <strong>Scenario:</strong> Six pathologists count mitoses per 10 HPF in 60 sarcomas.
@@ -3676,8 +3753,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #ffe5e5; border-left: 4px solid #d32f2f; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #c62828;'>⚠️ Important Interpretation Notes</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Interpretation Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Distribution differences ≠ poor agreement:</strong> Raters can have different distributions
                             but still agree well on relative rankings</li>
@@ -3691,7 +3768,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <h4 style='color: #1976D2;'>What to Do Based on Profile Patterns</h4>
+                <h4 style='color: #333;'>What to Do Based on Profile Patterns</h4>
                 <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
                     <tr style='background: #f5f5f5;'>
                         <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Pattern</th>
@@ -3725,8 +3802,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </tr>
                 </table>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #2E7D32;'>✓ Best Practices</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>✓ Best Practices</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Use alongside agreement statistics (kappa/ICC) - not a replacement</li>
                         <li>Violin plots better than box plots for detecting bimodality and distribution shape</li>
@@ -3742,7 +3819,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             self$results$raterProfileExplanation$setContent(html)
         },
 
-        .raterProfilePlot = function(image, ...) {
+        .raterProfilePlot = function(image, ggtheme, theme, ...) {
             # Render rater profile plot from stored state
 
             plotState <- image$state
@@ -3770,7 +3847,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         y = "Percentage",
                         fill = "Category"
                     ) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
                         plot.subtitle = ggplot2::element_text(hjust = 0.5),
@@ -3787,7 +3864,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         x = "Rater",
                         y = "Rating"
                     ) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
                         plot.subtitle = ggplot2::element_text(hjust = 0.5),
@@ -3807,7 +3884,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         x = "Rater",
                         y = "Rating"
                     ) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
                         plot.subtitle = ggplot2::element_text(hjust = 0.5),
@@ -3886,12 +3963,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
         .populateSubgroupExplanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>Agreement by Subgroup (Stratified Analysis)</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>Agreement by Subgroup (Stratified Analysis)</h3>
                     <p style='margin: 0; color: #333;'>Calculate agreement separately for each subgroup to identify which case types show reliable agreement.</p>
                 </div>
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Use Cases</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Compare agreement across tumor types (benign vs. malignant)</li>
                         <li>Assess agreement by disease stage or grade</li>
@@ -3902,7 +3979,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             self$results$subgroupExplanation$setContent(jmvcore::format(html))
         },
 
-        .subgroupForestPlot = function(image, ...) {
+        .subgroupForestPlot = function(image, ggtheme, theme, ...) {
             plotState <- image$state
             if (is.null(plotState)) return(FALSE)
 
@@ -3917,7 +3994,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                              subtitle = "Point estimates with 95% confidence intervals",
                              x = "Agreement Statistic",
                              y = "Subgroup") +
-                ggplot2::theme_minimal() +
+                ggtheme +
                 ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
                               plot.subtitle = ggplot2::element_text(hjust = 0.5))
             print(p)
@@ -3959,19 +4036,36 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     sub_ratings <- ratings[idx, , drop = FALSE]
                     n_cases <- nrow(sub_ratings)
                     n_raters <- ncol(sub_ratings)
+                    agreement_stat <- NA_real_
+                    stat_type <- "Not estimable"
+                    ci_lower <- NA_real_
+                    ci_upper <- NA_real_
 
                     # Calculate appropriate agreement statistic
                     if (is_categorical) {
-                        # Use Fleiss' kappa for categorical data
+                        # Use Cohen's kappa for 2 raters; Fleiss' kappa for 3+ raters
                         if (requireNamespace("irr", quietly = TRUE)) {
-                            kappa_result <- tryCatch(irr::kappam.fleiss(sub_ratings), error = function(e) NULL)
+                            kappa_result <- tryCatch({
+                                if (n_raters == 2) {
+                                    irr::kappa2(sub_ratings)
+                                } else {
+                                    irr::kappam.fleiss(sub_ratings)
+                                }
+                            }, error = function(e) NULL)
                             if (!is.null(kappa_result)) {
                                 agreement_stat <- kappa_result$value
-                                stat_type <- "Fleiss' Kappa"
-                                # Approximate CI using standard error
-                                se <- sqrt(kappa_result$statistic / n_cases)
-                                ci_lower <- agreement_stat - 1.96 * se
-                                ci_upper <- agreement_stat + 1.96 * se
+                                stat_type <- if (n_raters == 2) "Cohen's Kappa" else "Fleiss' Kappa"
+
+                                # Approximate CI via z statistic when available
+                                z_stat <- kappa_result$statistic
+                                if (!is.null(z_stat) && is.finite(z_stat) && abs(z_stat) > 1e-6 && is.finite(agreement_stat)) {
+                                    se <- abs(agreement_stat / z_stat)
+                                    # Guard: SE should be small relative to kappa range [-1, 1]
+                                    if (se < 2) {
+                                        ci_lower <- max(-1, agreement_stat - 1.96 * se)
+                                        ci_upper <- min(1, agreement_stat + 1.96 * se)
+                                    }
+                                }
                             } else {
                                 agreement_stat <- NA
                                 stat_type <- "Kappa (error)"
@@ -4060,12 +4154,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
         .populateRaterClusterExplanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>Rater Clustering</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>Rater Clustering</h3>
                     <p style='margin: 0; color: #333;'>Identifies groups of raters with similar rating patterns using hierarchical or k-means clustering.</p>
                 </div>
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Use Cases</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Identify subgroups of similarly-trained raters</li>
                         <li>Detect outlier raters with unique rating patterns</li>
@@ -4073,19 +4167,27 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         <li>Optimize panel composition for maximum diversity or homogeneity</li>
                         <li>Target training to specific rater clusters</li>
                     </ul>
-                    <h4 style='margin: 10px 0 10px 0; color: #F57C00;'>Interpretation</h4>
+                    <h4 style='margin: 10px 0 10px 0; color: #333;'>Interpretation</h4>
                     <p style='margin: 0;'><strong>Dendrogram height:</strong> Lower = more similar. High first split = distinct rater groups.</p>
                     <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Dark diagonal blocks = tight clusters. Off-diagonal = between-cluster differences.</p>
                 </div></div>"
             self$results$raterClusterExplanation$setContent(jmvcore::format(html))
         },
 
-        .raterDendrogram = function(image, ...) {
+        .raterDendrogram = function(image, ggtheme, theme, ...) {
             plotState <- image$state
             if (is.null(plotState)) return(FALSE)
 
-            hc <- plotState$hclust_obj
-            cluster_labels <- plotState$cluster_labels
+            # Reconstruct hclust object from serialized components
+            hc <- structure(list(
+                merge = plotState$merge[[1]],
+                height = plotState$height[[1]],
+                order = plotState$order[[1]],
+                labels = plotState$labels[[1]],
+                method = as.character(plotState$method),
+                dist.method = "euclidean"
+            ), class = "hclust")
+            cluster_labels <- plotState$cluster_labels[[1]]
 
             # Set up plot
             par(mar = c(7, 4, 4, 2))
@@ -4103,7 +4205,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             return(TRUE)
         },
 
-        .raterClusterHeatmap = function(image, ...) {
+        .raterClusterHeatmap = function(image, ggtheme, theme, ...) {
             plotState <- image$state
             if (is.null(plotState)) return(FALSE)
 
@@ -4208,13 +4310,17 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     # Cut tree to get cluster assignments
                     cluster_assign <- cutree(hc, k = k)
 
-                    # Store dendrogram state
+                    # Store dendrogram state (serializable components only)
                     if (self$options$showDendrogram) {
                         dendro <- self$results$raterDendrogram
-                        dendro$setState(list(
-                            hclust_obj = hc,
-                            cluster_labels = cluster_assign
-                        ))
+                        dendro$setState(as.data.frame(list(
+                            merge = I(list(hc$merge)),
+                            height = I(list(hc$height)),
+                            order = I(list(hc$order)),
+                            labels = I(list(hc$labels)),
+                            method = hc$method,
+                            cluster_labels = I(list(cluster_assign))
+                        )))
                     }
                 } else {
                     # K-means clustering (for continuous data only)
@@ -4272,12 +4378,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
         .populateCaseClusterExplanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>Case Clustering</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>Case Clustering</h3>
                     <p style='margin: 0; color: #333;'>Identifies groups of cases with similar rating patterns across raters using hierarchical or k-means clustering.</p>
                 </div>
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Use Cases</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Identify subgroups of cases with consistent rating patterns</li>
                         <li>Detect controversial or difficult-to-classify cases</li>
@@ -4285,10 +4391,10 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         <li>Stratify analysis by case difficulty</li>
                         <li>Identify cases requiring expert review or consensus discussion</li>
                     </ul>
-                    <h4 style='margin: 10px 0 10px 0; color: #F57C00;'>Clinical Examples</h4>
+                    <h4 style='margin: 10px 0 10px 0; color: #333;'>Clinical Examples</h4>
                     <p style='margin: 0;'><strong>Tumor grading:</strong> Cluster cases by grade agreement. Low-agreement clusters may contain borderline cases needing expert review.</p>
                     <p style='margin: 5px 0 0 0;'><strong>Diagnostic categorization:</strong> Identify groups of cases with consistent vs. variable diagnoses across pathologists.</p>
-                    <h4 style='margin: 10px 0 10px 0; color: #F57C00;'>Interpretation</h4>
+                    <h4 style='margin: 10px 0 10px 0; color: #333;'>Interpretation</h4>
                     <p style='margin: 0;'><strong>Dendrogram height:</strong> Lower = more similar rating patterns. High first split = distinct case groups.</p>
                     <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Dark diagonal blocks = tight clusters (similar cases). Off-diagonal = between-cluster differences.</p>
                     <p style='margin: 5px 0 0 0;'><strong>Low within-cluster similarity:</strong> Cases in cluster are difficult/controversial - low agreement among raters.</p>
@@ -4296,12 +4402,20 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             self$results$caseClusterExplanation$setContent(jmvcore::format(html))
         },
 
-        .caseDendrogram = function(image, ...) {
+        .caseDendrogram = function(image, ggtheme, theme, ...) {
             plotState <- image$state
             if (is.null(plotState)) return(FALSE)
 
-            hc <- plotState$hclust_obj
-            cluster_labels <- plotState$cluster_labels
+            # Reconstruct hclust object from serialized components
+            hc <- structure(list(
+                merge = plotState$merge[[1]],
+                height = plotState$height[[1]],
+                order = plotState$order[[1]],
+                labels = plotState$labels[[1]],
+                method = as.character(plotState$method),
+                dist.method = "euclidean"
+            ), class = "hclust")
+            cluster_labels <- plotState$cluster_labels[[1]]
 
             # Set up plot
             par(mar = c(7, 4, 4, 2))
@@ -4319,7 +4433,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             return(TRUE)
         },
 
-        .caseClusterHeatmap = function(image, ...) {
+        .caseClusterHeatmap = function(image, ggtheme, theme, ...) {
             plotState <- image$state
             if (is.null(plotState)) return(FALSE)
 
@@ -4456,13 +4570,17 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         return()
                     }
 
-                    # Store dendrogram state
+                    # Store dendrogram state (serializable components only)
                     if (self$options$showCaseDendrogram) {
                         dendro <- self$results$caseDendrogram
-                        dendro$setState(list(
-                            hclust_obj = hc,
-                            cluster_labels = cluster_assign
-                        ))
+                        dendro$setState(as.data.frame(list(
+                            merge = I(list(hc$merge)),
+                            height = I(list(hc$height)),
+                            order = I(list(hc$order)),
+                            labels = I(list(hc$labels)),
+                            method = hc$method,
+                            cluster_labels = I(list(cluster_assign))
+                        )))
                     }
                 } else {
                     # K-means clustering (for continuous data only)
@@ -4547,8 +4665,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Maxwell's Random Error (RE) Index?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Maxwell's Random Error (RE) Index?</h3>
                     <p style='margin: 0; color: #333;'>
                         Maxwell's RE index <strong>decomposes total measurement variance</strong> into two components:
                     </p>
@@ -4564,8 +4682,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Maxwell's RE</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Maxwell's RE</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for understanding error sources in:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Method comparison studies</strong> - Comparing new vs. established diagnostic methods</li>
@@ -4576,13 +4694,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Interpreting RE Values</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting RE Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>RE Value</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Error Type</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Intervention Strategy</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>RE Value</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Error Type</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Intervention Strategy</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>RE ≈ 0 - 0.30</strong></td>
@@ -4602,11 +4720,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Use Cases in Pathology</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Use Cases in Pathology</h4>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>1</span>
                             Ki-67 Proliferation Index - Manual vs. Digital Scoring
                         </h5>
@@ -4632,7 +4750,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>2</span>
                             Mitotic Count Agreement in Melanoma
                         </h5>
@@ -4660,7 +4778,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>3</span>
                             Tumor Size Measurement - Caliper vs. Digital Planimetry
                         </h5>
@@ -4687,7 +4805,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>4</span>
                             Gleason Grading - Expert vs. Community Pathologists
                         </h5>
@@ -4716,7 +4834,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>5</span>
                             HER2 IHC Scoring - Pre vs. Post-Training Assessment
                         </h5>
@@ -4752,8 +4870,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
                 </div>
 
-                <div style='background: #e1f5fe; border-left: 4px solid #03A9F4; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #0277BD;'>Understanding the Decomposition</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Understanding the Decomposition</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Variance components:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Total Variance</strong> = Systematic Variance + Random Variance</li>
@@ -4767,8 +4885,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>⚠️ Important Considerations</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Data requirements:</strong> Requires 2+ raters/methods with repeated or paired measurements</li>
                         <li><strong>Interpretation context:</strong> RE alone doesn't indicate good/bad reliability - must consider
@@ -4780,8 +4898,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #f3e5f5; border-left: 4px solid #9C27B0; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #7B1FA2;'>Statistical Notes</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Calculation based on one-way ANOVA variance decomposition</li>
                         <li>Between-group (rater/method) variance = systematic component</li>
@@ -4897,6 +5015,23 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 # Total variance (recalculated from components)
                 total_var_components <- systematic_var + random_var
 
+                # Guard: zero total variance (all raters identical on all cases)
+                if (total_var_components < .Machine$double.eps) {
+                    self$results$maxwellRETable$setRow(rowNo = 1, list(
+                        method = "Maxwell's Random Error Index",
+                        subjects = n_cases,
+                        raters = n_raters,
+                        re_value = NA,
+                        systematic_prop = NA,
+                        random_prop = NA,
+                        total_variance = 0,
+                        systematic_var = 0,
+                        random_var = 0,
+                        interpretation = "Cannot compute: total variance is zero (all raters identical on all cases)"
+                    ))
+                    return()
+                }
+
                 # Maxwell's RE index
                 re_value <- random_var / total_var_components
 
@@ -4941,8 +5076,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Inter/Intra-Rater Reliability?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Inter/Intra-Rater Reliability?</h3>
                     <p style='margin: 0; color: #333;'>
                         This analysis simultaneously assesses two critical aspects of measurement reliability:
                     </p>
@@ -4954,8 +5089,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use This Analysis</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use This Analysis</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for test-retest reliability studies where:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Training evaluation</strong> - Assess whether trainees maintain consistent ratings over time</li>
@@ -4966,13 +5101,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e1f5fe; border-left: 4px solid #03A9F4; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #0277BD;'>Data Structure Requirements</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Data Structure Requirements</h4>
                     <p style='margin: 0 0 10px 0;'>
                         Column names must follow a pattern to identify rater-timepoint pairs:
                     </p>
                     <div style='background: #fff; padding: 10px; border-radius: 5px; font-family: monospace;'>
-                        <strong>Pattern:</strong> RaterID<span style='color: #d32f2f;'>[separator]</span>TimePoint<br>
+                        <strong>Pattern:</strong> RaterID<span style='color: #333;'>[separator]</span>TimePoint<br>
                         <strong>Example with underscore (_):</strong><br>
                         • Rater1_Time1, Rater1_Time2, Rater1_Time3<br>
                         • Rater2_Time1, Rater2_Time2, Rater2_Time3<br>
@@ -4984,8 +5119,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     <p style='margin: 10px 0 0 0;'><em>The separator character (default: underscore) is specified in the analysis options.</em></p>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Statistical Methods Used</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Methods Used</h4>
                     <p style='margin: 0 0 10px 0;'>The analysis automatically selects appropriate statistics based on data type:</p>
                     <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                         <li><strong>Categorical/Ordinal Data:</strong> Cohen's Kappa or Weighted Kappa for each rater's test-retest pairs</li>
@@ -4994,8 +5129,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                     <table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Reliability Value</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Interpretation</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Reliability Value</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&lt; 0.40</strong></td>
@@ -5020,11 +5155,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Use Cases in Pathology</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Use Cases in Pathology</h4>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>1</span>
                             Pathology Trainee Evaluation
                         </h5>
@@ -5052,7 +5187,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>2</span>
                             Digital Pathology Validation Study
                         </h5>
@@ -5080,7 +5215,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>3</span>
                             Fatigue Study in Frozen Section Diagnosis
                         </h5>
@@ -5108,7 +5243,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>4</span>
                             Multi-Center Clinical Trial Quality Control
                         </h5>
@@ -5136,7 +5271,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='margin-bottom: 20px;'>
-                        <h5 style='color: #C2185B; margin: 10px 0 5px 0;'>
+                        <h5 style='color: #333; margin: 10px 0 5px 0;'>
                             <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>5</span>
                             Immunohistochemistry Scoring Reproducibility
                         </h5>
@@ -5164,8 +5299,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>⚠️ Important Considerations</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>⚠️ Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Blinding:</strong> Raters should be blinded to their previous assessments to measure true reproducibility</li>
                         <li><strong>Time interval:</strong> Balance between too short (memory effects) and too long (true biological changes)</li>
@@ -5177,8 +5312,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #f3e5f5; border-left: 4px solid #9C27B0; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #7B1FA2;'>Statistical Notes</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li>Confidence intervals estimated using Fisher's Z transformation (continuous) or asymptotic standard errors (categorical)</li>
                         <li>P-values test whether reliability significantly differs from zero</li>
@@ -5287,63 +5422,69 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     is_numeric2 <- is.numeric(data2) && !is.factor(data2)
 
                     if (is_numeric1 && is_numeric2) {
-                        # Continuous data - use ICC or correlation
-                        # Calculate ICC(2,1) - two-way random effects, single rater
+                        # Continuous data - use ICC(2,1)
                         data_matrix <- cbind(data1, data2)
+                        if (requireNamespace("irr", quietly = TRUE)) {
+                            icc_result <- tryCatch(
+                                irr::icc(data_matrix, model = "twoway", type = "agreement", unit = "single"),
+                                error = function(e) NULL
+                            )
 
-                        # Simple ICC calculation
-                        n <- nrow(data_matrix)
-                        k <- 2  # number of timepoints being compared
+                            if (!is.null(icc_result)) {
+                                icc_value <- icc_result$value
+                                ci_lower <- icc_result$lbound
+                                ci_upper <- icc_result$ubound
+                                p_value <- icc_result$p.value
 
-                        # Between-subject variance
-                        row_means <- rowMeans(data_matrix)
-                        grand_mean <- mean(data_matrix)
-                        MSB <- sum((row_means - grand_mean)^2) * k / (n - 1)
+                                if (icc_value < 0.40) {
+                                    interp <- "Poor"
+                                } else if (icc_value < 0.60) {
+                                    interp <- "Fair"
+                                } else if (icc_value < 0.75) {
+                                    interp <- "Good"
+                                } else if (icc_value < 0.90) {
+                                    interp <- "Excellent"
+                                } else {
+                                    interp <- "Outstanding"
+                                }
 
-                        # Within-subject variance
-                        residuals <- data_matrix - row_means
-                        MSW <- sum(residuals^2) / (n * (k - 1))
-
-                        # ICC(2,1) calculation
-                        icc_value <- (MSB - MSW) / (MSB + (k - 1) * MSW)
-
-                        # Confidence interval using F-distribution
-                        df1 <- n - 1
-                        df2 <- n * (k - 1)
-                        F_stat <- MSB / MSW
-                        F_lower <- F_stat / qf(0.975, df1, df2)
-                        F_upper <- F_stat / qf(0.025, df1, df2)
-
-                        ci_lower <- (F_lower - 1) / (F_lower + k - 1)
-                        ci_upper <- (F_upper - 1) / (F_upper + k - 1)
-
-                        # P-value
-                        p_value <- pf(F_stat, df1, df2, lower.tail = FALSE)
-
-                        # Interpretation
-                        if (icc_value < 0.40) {
-                            interp <- "Poor"
-                        } else if (icc_value < 0.60) {
-                            interp <- "Fair"
-                        } else if (icc_value < 0.75) {
-                            interp <- "Good"
-                        } else if (icc_value < 0.90) {
-                            interp <- "Excellent"
+                                intraTable$addRow(rowKey = rater, list(
+                                    rater = rater,
+                                    n_cases = n_cases,
+                                    n_timepoints = n_timepoints,
+                                    statistic_name = "ICC(2,1)",
+                                    value = icc_value,
+                                    ci_lower = ci_lower,
+                                    ci_upper = ci_upper,
+                                    p = p_value,
+                                    interpretation = interp
+                                ))
+                            } else {
+                                intraTable$addRow(rowKey = rater, list(
+                                    rater = rater,
+                                    n_cases = n_cases,
+                                    n_timepoints = n_timepoints,
+                                    statistic_name = "ICC(2,1)",
+                                    value = NA,
+                                    ci_lower = NA,
+                                    ci_upper = NA,
+                                    p = NA,
+                                    interpretation = "ICC calculation failed"
+                                ))
+                            }
                         } else {
-                            interp <- "Outstanding"
+                            intraTable$addRow(rowKey = rater, list(
+                                rater = rater,
+                                n_cases = n_cases,
+                                n_timepoints = n_timepoints,
+                                statistic_name = "N/A",
+                                value = NA,
+                                ci_lower = NA,
+                                ci_upper = NA,
+                                p = NA,
+                                interpretation = "irr package required"
+                            ))
                         }
-
-                        intraTable$addRow(rowKey = rater, list(
-                            rater = rater,
-                            n_cases = n_cases,
-                            n_timepoints = n_timepoints,
-                            statistic_name = "ICC(2,1)",
-                            value = icc_value,
-                            ci_lower = ci_lower,
-                            ci_upper = ci_upper,
-                            p = p_value,
-                            interpretation = interp
-                        ))
 
                     } else {
                         # Categorical/ordinal data - use kappa
@@ -5372,10 +5513,17 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             kappa_value <- kappa_result$value
                             p_value <- kappa_result$p.value
 
-                            # Confidence interval (approximate)
-                            se_kappa <- sqrt(kappa_result$var.kappa)
-                            ci_lower <- kappa_value - 1.96 * se_kappa
-                            ci_upper <- kappa_value + 1.96 * se_kappa
+                            # Confidence interval (approximate from z statistic, when available)
+                            ci_lower <- NA_real_
+                            ci_upper <- NA_real_
+                            z_stat <- kappa_result$statistic
+                            if (!is.null(z_stat) && is.finite(z_stat) && abs(z_stat) > 1e-6 && is.finite(kappa_value)) {
+                                se_kappa <- abs(kappa_value / z_stat)
+                                if (se_kappa < 2) {
+                                    ci_lower <- max(-1, kappa_value - 1.96 * se_kappa)
+                                    ci_upper <- min(1, kappa_value + 1.96 * se_kappa)
+                                }
+                            }
 
                             # Interpretation
                             if (kappa_value < 0.40) {
@@ -5508,10 +5656,17 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             interp <- "Outstanding"
                         }
 
-                        # Approximate CI
-                        se_kappa <- sqrt(kappa_result$var)
-                        ci_lower <- kappa_value - 1.96 * se_kappa
-                        ci_upper <- kappa_value + 1.96 * se_kappa
+                        # Approximate CI from z statistic when available
+                        ci_lower <- NA_real_
+                        ci_upper <- NA_real_
+                        z_stat <- kappa_result$statistic
+                        if (!is.null(z_stat) && is.finite(z_stat) && abs(z_stat) > 1e-6 && is.finite(kappa_value)) {
+                            se_kappa <- abs(kappa_value / z_stat)
+                            if (se_kappa < 2) {
+                                ci_lower <- max(-1, kappa_value - 1.96 * se_kappa)
+                                ci_upper <- min(1, kappa_value + 1.96 * se_kappa)
+                            }
+                        }
 
                         self$results$interIntraRaterInterTable$setRow(rowNo = 1, list(
                             method = "Inter-Rater Reliability (All Raters × Time Points)",
@@ -5540,8 +5695,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is the Rater Bias Test?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Rater Bias Test?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Rater Bias Test uses a <strong>chi-square test</strong> to detect whether raters have
                         <strong>systematically different rating patterns</strong>. It tests the null hypothesis that
@@ -5549,8 +5704,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use This Test</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use This Test</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for quality control when:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Rater training</strong> - Identifying trainees who are systematically too lenient or strict</li>
@@ -5561,12 +5716,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Interpreting Results</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting Results</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Result</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Interpretation</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Result</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>p ≥ 0.05</strong></td>
@@ -5583,12 +5738,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Common Bias Patterns in Pathology</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Common Bias Patterns in Pathology</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #C2185B;'>Pattern</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #C2185B;'>Clinical Impact</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pattern</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Clinical Impact</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Lenient rater</strong></td>
@@ -5609,8 +5764,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Clinical Example</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
                     <p style='margin: 0; padding: 10px; background: white; border-radius: 4px; font-size: 13px;'>
                         <strong>Scenario:</strong> Three pathologists grade 50 tumor samples as G1/G2/G3.<br><br>
                         <strong>Pathologist A:</strong> 45% G1, 40% G2, 15% G3<br>
@@ -5622,8 +5777,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Important Considerations</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Sample size matters:</strong> Test has limited power with small samples (< 30 cases)</li>
                         <li><strong>Bias ≠ Poor agreement:</strong> Raters can be biased but still agree (all systematically lenient)</li>
@@ -5633,8 +5788,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Relationship to Agreement Measures</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Relationship to Agreement Measures</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         Rater bias is <strong>independent from agreement</strong>. You can have:<br><br>
                         ✅ <strong>High agreement + No bias:</strong> Ideal situation<br>
@@ -5665,6 +5820,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 self$results$raterBiasTable$setNote(
                     "error",
                     "Rater Bias Test requires categorical data. Your data appears to be continuous."
+                )
+                return()
+            }
+
+            # irr::rater.bias only works with exactly 2 raters
+            if (ncol(ratings) != 2) {
+                self$results$raterBiasTable$setNote(
+                    "error",
+                    sprintf("Rater Bias Test requires exactly 2 raters. You have %d. For 3+ raters, use Rater Profile Plots or marginal tests.",
+                            ncol(ratings))
                 )
                 return()
             }
@@ -5733,8 +5898,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is the Bhapkar Test?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Bhapkar Test?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Bhapkar test is a <strong>chi-square test for marginal homogeneity</strong> between
                         <strong>two raters</strong> with <strong>multiple categories</strong>. It tests whether two
@@ -5743,8 +5908,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Bhapkar Test</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Bhapkar Test</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Ideal for paired comparisons with &gt;2 categories:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Pre-post training</strong> - Compare pathologist before and after training on same cases</li>
@@ -5756,14 +5921,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Bhapkar vs. Related Tests</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Bhapkar vs. Related Tests</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Test</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Raters</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Categories</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Purpose</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Test</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Raters</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Categories</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Purpose</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>McNemar</strong></td>
@@ -5796,8 +5961,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Pathology Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. AI Algorithm Validation (Dysplasia Detection):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -5850,8 +6015,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Interpretation</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p ≥ 0.05</td>
@@ -5873,8 +6038,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Requirements and Assumptions</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Requirements and Assumptions</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Exactly 2 raters:</strong> Test designed for paired comparisons only</li>
                         <li><strong>Same subjects rated twice:</strong> Data must be paired (same cases)</li>
@@ -5884,8 +6049,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Complementary Analyses</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Complementary Analyses</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         Use Bhapkar test <strong>together with</strong>:<br><br>
 
@@ -5969,12 +6134,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
 
                 # Populate table
+                df_value <- as.integer(gsub(".*\\((\\d+)\\).*", "\\1", bhapkar_result$stat.name))
                 self$results$bhapkarTable$setRow(rowNo = 1, values = list(
                     method = "Bhapkar test for marginal homogeneity",
                     subjects = bhapkar_result$subjects,
                     raters = bhapkar_result$raters,
                     chisq = bhapkar_result$statistic,
-                    df = bhapkar_result$stat.name,
+                    df = df_value,
                     p = bhapkar_result$p.value,
                     interpretation = interp
                 ))
@@ -6020,8 +6186,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is the Stuart-Maxwell Test?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is the Stuart-Maxwell Test?</h3>
                     <p style='margin: 0; color: #333;'>
                         The Stuart-Maxwell test is a <strong>classic chi-square test for marginal homogeneity</strong>
                         between <strong>two raters</strong> with <strong>multiple categories</strong>. It tests whether
@@ -6031,8 +6197,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Stuart-Maxwell Test</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Stuart-Maxwell Test</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Ideal for matched/paired comparisons:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Matched data analysis</strong> - Same subjects rated twice under different conditions</li>
@@ -6044,13 +6210,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Stuart-Maxwell vs. Related Tests</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Stuart-Maxwell vs. Related Tests</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Test</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Categories</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Characteristics</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Test</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Categories</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Characteristics</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>McNemar</strong></td>
@@ -6074,8 +6240,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Clinical Pathology Use Cases</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Post-Training Diagnostic Recalibration (Breast Pathology):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -6128,8 +6294,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Interpretation</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p ≥ 0.05</td>
@@ -6151,8 +6317,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Assumptions and Requirements</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Assumptions and Requirements</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Paired/matched data:</strong> Same subjects rated twice or same cases by two raters</li>
                         <li><strong>Two raters only:</strong> Designed for comparing exactly 2 sets of ratings</li>
@@ -6163,8 +6329,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Use Together With</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Use Together With</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         <strong>Complementary analyses:</strong><br><br>
 
@@ -6256,12 +6422,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
 
                 # Populate table
+                df_value <- as.integer(gsub(".*\\((\\d+)\\).*", "\\1", stuart_result$stat.name))
                 self$results$stuartMaxwellTable$setRow(rowNo = 1, values = list(
                     method = "Stuart-Maxwell test for marginal homogeneity",
                     subjects = stuart_result$subjects,
                     raters = stuart_result$raters,
                     chisq = stuart_result$statistic,
-                    df = stuart_result$stat.name,
+                    df = df_value,
                     p = stuart_result$p.value,
                     interpretation = interp
                 ))
@@ -6313,8 +6480,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is Pairwise Kappa Analysis?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Pairwise Kappa Analysis?</h3>
                     <p style='margin: 0; color: #333;'>
                         Pairwise Kappa Analysis compares <strong>each rater individually</strong> against a
                         <strong>reference rater</strong> (gold standard, consensus, or senior expert).
@@ -6323,8 +6490,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use Pairwise Analysis</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Pairwise Analysis</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Essential for:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Training assessment</strong> - Compare trainees vs expert to measure learning progress</li>
@@ -6335,13 +6502,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Interpreting Kappa Values</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting Kappa Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Kappa</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Agreement Level</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Training Status</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Kappa</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Level</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Training Status</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>κ < 0.40</strong></td>
@@ -6366,12 +6533,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Choosing the Reference Rater</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Choosing the Reference Rater</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #C2185B;'>Reference Type</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #C2185B;'>Use Case</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Reference Type</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Gold Standard</strong></td>
@@ -6392,8 +6559,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>Clinical Example: Trainee Certification</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example: Trainee Certification</h4>
                     <p style='margin: 0; padding: 10px; background: white; border-radius: 4px; font-size: 13px;'>
                         <strong>Scenario:</strong> Five pathology residents (Raters 1-5) grade 100 tumor samples.
                         A senior pathologist provides reference diagnoses.<br><br>
@@ -6408,8 +6575,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff9c4; border-left: 4px solid #FBC02D; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57F17;'>Ranking Raters</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Ranking Raters</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         When <strong>Rank Raters by Performance</strong> is enabled, raters are sorted from highest
                         to lowest kappa. This identifies:<br><br>
@@ -6419,8 +6586,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>Pairwise vs Overall Agreement</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Pairwise vs Overall Agreement</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         <strong>Pairwise Kappa (vs Reference):</strong> Measures each rater's agreement with gold standard<br>
                         → <em>Focus: Individual performance assessment</em><br><br>
@@ -6605,16 +6772,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background: #f0f8ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px;'>
-                    <h3 style='margin: 0 0 10px 0; color: #1976D2;'>What is ICC (Intraclass Correlation Coefficient)?</h3>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is ICC (Intraclass Correlation Coefficient)?</h3>
                     <p style='margin: 0; color: #333;'>
                         ICC measures the reliability and agreement of <strong>continuous measurements</strong>
                         between raters. It's the gold standard for assessing inter-rater reliability with numeric data.
                     </p>
                 </div>
 
-                <div style='background: #fff3e0; border-left: 4px solid #FF9800; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>When to Use ICC</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use ICC</h4>
                     <p style='margin: 0 0 10px 0;'><strong>Use ICC for continuous measurements:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Tumor size</strong> – Diameter measurements in mm or cm</li>
@@ -6624,13 +6791,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </ul>
                 </div>
 
-                <div style='background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #388E3C;'>ICC Model Selection Guide</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>ICC Model Selection Guide</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Model</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Design</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #388E3C;'>Use Case</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Model</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Design</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,1)</strong></td>
@@ -6668,17 +6835,17 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fff8e1; border-left: 4px solid #FFA000; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #F57C00;'>Technical Reference: irr::icc() Parameters</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Technical Reference: irr::icc() Parameters</h4>
                     <p style='margin: 0 0 10px 0; font-size: 13px; color: #555;'>
                         This table shows the exact parameters passed to the <code>irr::icc()</code> function for each model.
                         Useful for understanding implementation details and replicating results in R.
                     </p>
                     <table style='width: 100%; border-collapse: collapse; font-size: 12px; font-family: monospace;'>
                         <tr style='background: #f5f5f5;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #FFA000;'>Model</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #FFA000;'>irr::icc Parameters</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #FFA000;'>Use Case</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Model</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>irr::icc Parameters</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,1)</strong></td>
@@ -6718,8 +6885,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </p>
                 </div>
 
-                <div style='background: #fce4ec; border-left: 4px solid #E91E63; padding: 15px; margin-bottom: 20px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #C2185B;'>Interpreting ICC Values</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting ICC Values</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr>
                             <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>ICC < 0.50</td>
@@ -6740,8 +6907,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </table>
                 </div>
 
-                <div style='background: #e3f2fd; border-left: 4px solid #1976D2; padding: 15px;'>
-                    <h4 style='margin: 0 0 10px 0; color: #1565C0;'>ICC vs Bland-Altman</h4>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>ICC vs Bland-Altman</h4>
                     <p style='margin: 0;'>
                         <strong>ICC</strong> quantifies reliability with a single coefficient (0-1).<br>
                         <strong>Bland-Altman</strong> visualizes agreement and detects systematic bias.<br>
@@ -6833,7 +7000,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     model = model_param,
                     type = type_param,
                     unit = unit_param,
-                    conf.level = 0.95
+                    conf.level = self$options$confLevel
                 )
 
                 # Determine model name for display
@@ -6995,12 +7162,12 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             html_content <- "
                 <div style='font-family: Arial, sans-serif; max-width: 900px; padding: 20px;'>
-                    <h3 style='color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;'>
+                    <h3 style='color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;'>
                         Iota Coefficient for Multivariate Interrater Agreement
                     </h3>
 
                     <div style='background: #E8F5E9; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;'>
-                        <h4 style='margin: 0 0 10px 0; color: #2E7D32;'>What is Iota?</h4>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>What is Iota?</h4>
                         <p style='margin: 0; line-height: 1.6;'>
                             Iota (ι) is a <strong>chance-corrected agreement index</strong> for multivariate observations. Unlike ICC which
                             analyzes one variable at a time, Iota assesses <strong>overall agreement across multiple variables simultaneously</strong>.
@@ -7008,7 +7175,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     </div>
 
                     <div style='background: #FFF3E0; padding: 15px; border-left: 4px solid #FF9800; margin: 20px 0;'>
-                        <h4 style='margin: 0 0 10px 0; color: #E65100;'>Clinical Pathology Use Cases</h4>
+                        <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Pathology Use Cases</h4>
 
                         <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Comprehensive Tumor Assessment (Multiple Parameters):</p>
                         <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
@@ -7051,7 +7218,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         </ul>
                     </div>
 
-                    <div style='background: white; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                    <div style='background: #f9f9f9; border: 1px solid #ccc; padding: 15px;'>
                         <h4 style='margin: 0 0 10px 0;'>Interpretation</h4>
                         <p><strong>< 0.40:</strong> Poor | <strong>0.40-0.60:</strong> Fair | <strong>0.60-0.75:</strong> Good | <strong>0.75-0.90:</strong> Very good | <strong>> 0.90:</strong> Excellent</p>
                     </div>
@@ -7061,18 +7228,104 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             self$results$iotaExplanation$setContent(html_content)
         },
 
+        .calculatePABAK = function(ratings) {
+            # Calculate PABAK, Prevalence Index, and Bias Index (Byrt et al. 1993)
+            # Requires exactly 2 raters with categorical data
+            tryCatch({
+                n_raters <- ncol(ratings)
+                if (n_raters != 2) {
+                    self$results$pabakTable$setNote(
+                        "error",
+                        "PABAK requires exactly 2 raters. Please select only 2 rater variables."
+                    )
+                    return()
+                }
+
+                # Get complete cases
+                complete_idx <- complete.cases(ratings)
+                r1 <- as.character(ratings[complete_idx, 1])
+                r2 <- as.character(ratings[complete_idx, 2])
+                n <- length(r1)
+
+                if (n < 2) {
+                    self$results$pabakTable$setNote(
+                        "error",
+                        "Insufficient complete cases for PABAK calculation."
+                    )
+                    return()
+                }
+
+                # Build confusion matrix
+                categories <- sort(unique(c(r1, r2)))
+                n_cat <- length(categories)
+
+                # Calculate observed agreement
+                agree <- sum(r1 == r2)
+                po <- agree / n
+
+                # Cohen's kappa
+                confusion <- table(factor(r1, levels = categories), factor(r2, levels = categories))
+                row_margins <- rowSums(confusion)
+                col_margins <- colSums(confusion)
+                pe <- sum(row_margins * col_margins) / (n^2)
+
+                kappa <- if (abs(1 - pe) < .Machine$double.eps) NA_real_ else (po - pe) / (1 - pe)
+
+                # PABAK = 2*Po - 1
+                pabak <- 2 * po - 1
+
+                # For 2x2 tables: compute prevalence and bias indices
+                if (n_cat == 2) {
+                    a <- confusion[1, 1]  # both say category 1
+                    d <- confusion[2, 2]  # both say category 2
+                    b <- confusion[1, 2]  # rater1=cat1, rater2=cat2
+                    cc <- confusion[2, 1] # rater1=cat2, rater2=cat1
+                    prevalence_index <- abs(a - d) / n
+                    bias_index <- abs(b - cc) / n
+                } else {
+                    # Generalized for multi-category (Byrt 1993 extension)
+                    prevalence_index <- NA_real_
+                    bias_index <- NA_real_
+                    self$results$pabakTable$setNote(
+                        "multicategory",
+                        "Prevalence and bias indices are defined for 2x2 tables. For multi-category data, only PABAK is reported."
+                    )
+                }
+
+                # Interpretation
+                if (is.na(kappa)) {
+                    interp <- "Kappa undefined (perfect marginal agreement)"
+                } else if (!is.na(prevalence_index) && prevalence_index > 0.5 && kappa < 0.4) {
+                    interp <- "Kappa paradox: low kappa likely due to high prevalence imbalance"
+                } else if (!is.na(bias_index) && bias_index > 0.3) {
+                    interp <- "Substantial rater bias detected; PABAK may be more appropriate"
+                } else if (abs(pabak - ifelse(is.na(kappa), 0, kappa)) > 0.2) {
+                    interp <- "Notable difference between kappa and PABAK; check prevalence/bias effects"
+                } else {
+                    interp <- "Kappa and PABAK are consistent"
+                }
+
+                self$results$pabakTable$setRow(rowNo = 1, values = list(
+                    subjects = n,
+                    observedAgreement = po,
+                    kappa = kappa,
+                    pabak = pabak,
+                    prevalenceIndex = prevalence_index,
+                    biasIndex = bias_index,
+                    interpretation = interp
+                ))
+
+            }, error = function(e) {
+                self$results$pabakTable$setNote(
+                    "error",
+                    paste("Error calculating PABAK:", e$message)
+                )
+            })
+        },
+
         .calculateGwetAC = function(ratings) {
             # Calculate Gwet's AC1 (unweighted) or AC2 (weighted) coefficient
             # More stable than kappa for high agreement or rare categories
-
-            # Check if irrCAC package is available
-            if (!requireNamespace("irrCAC", quietly = TRUE)) {
-                self$results$gwetTable$setNote(
-                    "error",
-                    "The 'irrCAC' package is required for Gwet's AC calculation but is not installed. Please install it with: install.packages('irrCAC')"
-                )
-                return()
-            }
 
             # Get weights option
             weights <- self$options$gwetWeights
@@ -7112,24 +7365,24 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # Calculate Gwet's AC
             tryCatch({
-                # Use gwet.ac.raw for raw agreement data
-                result <- irrCAC::gwet.ac.raw(
+                # Use gwet.ac1.raw for raw agreement data
+                result <- irrCAC::gwet.ac1.raw(
                     ratings = ratings_matrix,
                     weights = weight_param,
-                    conflev = 0.95,
-                    N = Inf,  # Assume infinite population
-                    print = FALSE
+                    conflev = self$options$confLevel,
+                    N = Inf
                 )
 
-                # Extract results
-                coef <- result$est$coefficient
-                se <- result$est$se
-                ci_lower <- result$est$conf.int[1]
-                ci_upper <- result$est$conf.int[2]
+                # Extract results (irrCAC >= 1.0 field names)
+                coef <- result$est$coeff.val
+                se <- result$est$coeff.se
+                p_value <- result$est$p.value
 
-                # Calculate p-value (two-tailed test against H0: AC = 0)
-                z_stat <- coef / se
-                p_value <- 2 * (1 - pnorm(abs(z_stat)))
+                # Parse conf.int string like "(-0.751,1)"
+                ci_str <- gsub("[\\(\\)]", "", result$est$conf.int)
+                ci_parts <- as.numeric(strsplit(ci_str, ",")[[1]])
+                ci_lower <- ci_parts[1]
+                ci_upper <- ci_parts[2]
 
                 # Populate table
                 self$results$gwetTable$setRow(rowNo = 1, values = list(
@@ -7293,18 +7546,44 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     lm_result <- lm(diff ~ avg)
                     prop_bias_p <- summary(lm_result)$coefficients[2, 4]  # p-value for slope
                 }, error = function(e) {
-                    prop_bias_p <- NA
+                    prop_bias_p <<- NA
                 })
             }
 
+            # Normality test on differences (Shapiro-Wilk)
+            normality_w <- NA
+            normality_p <- NA
+            tryCatch({
+                n_diff <- length(diff)
+                if (n_diff >= 3 && n_diff <= 5000) {
+                    sw <- shapiro.test(diff)
+                    normality_w <- sw$statistic
+                    normality_p <- sw$p.value
+                }
+            }, error = function(e) {
+                normality_w <<- NA
+                normality_p <<- NA
+            })
+
             # Populate statistics table
-            self$results$blandAltmanStats$setRow(rowNo = 1, values = list(
+            ba_values <- list(
                 meanDiff = mean_diff,
                 sdDiff = sd_diff,
                 lowerLoA = lower_loa,
                 upperLoA = upper_loa,
-                propBiasP = prop_bias_p
-            ))
+                propBiasP = prop_bias_p,
+                normalityW = normality_w,
+                normalityP = normality_p
+            )
+            self$results$blandAltmanStats$setRow(rowNo = 1, values = ba_values)
+
+            # Warn if non-normal
+            if (!is.na(normality_p) && normality_p < 0.05) {
+                self$results$blandAltmanStats$setNote(
+                    "normality",
+                    "Differences are not normally distributed (Shapiro-Wilk p < 0.05). Limits of Agreement may be unreliable. Consider a non-parametric approach or data transformation."
+                )
+            }
 
             # Generate plot
             plot <- self$results$blandAltman
@@ -7720,12 +7999,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 return()
             }
 
-            # Check if data is numeric (continuous) or categorical
-            is_numeric <- is.numeric(long_df$score)
-            if (!is_numeric) {
-                # Convert to numeric for mixed model
-                long_df$score_orig <- long_df$score
-                long_df$score <- as.numeric(factor(long_df$score))
+            # Mixed-effects decomposition below is valid for continuous numeric scores
+            if (!all(sapply(ratings, is.numeric))) {
+                self$results$hierarchicalOverallTable$setNote(
+                    "error",
+                    "Hierarchical mixed-effects decomposition currently requires continuous numeric ratings. For categorical ratings, use standard/cluster-specific kappa analyses."
+                )
+                return()
             }
 
             # --- Fit mixed-effects model ---
@@ -7785,29 +8065,15 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 return()
             }
 
-            # --- Step 1: Overall hierarchical kappa table ---
-            # ICC(1) as the overall reliability metric accounting for clustering
+            # --- Step 1: Overall hierarchical agreement table ---
             icc1 <- sigma2_case / sigma2_total
 
-            # Profile confidence intervals for fixed effect (overall mean)
+            # CI for this variance-ratio estimate is not directly available from intercept CIs
             ci_lower <- NA
             ci_upper <- NA
-            tryCatch({
-                ci <- confint(model, parm = "(Intercept)", method = "profile")
-                ci_lower <- ci[1, 1]
-                ci_upper <- ci[1, 2]
-            }, error = function(e) {
-                tryCatch({
-                    ci <- confint(model, parm = "(Intercept)", method = "Wald")
-                    ci_lower <<- ci[1, 1]
-                    ci_upper <<- ci[1, 2]
-                }, error = function(e2) {
-                    # Leave as NA
-                })
-            })
 
             self$results$hierarchicalOverallTable$setRow(rowNo = 1, values = list(
-                method = "Mixed-Effects ICC (lme4)",
+                method = "Mixed-Effects ICC (hierarchical agreement proxy)",
                 cases = n_cases,
                 raters = n_raters,
                 clusters = n_clusters,
@@ -7820,7 +8086,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 "model",
                 paste0("Model: score ~ 1 + (1|case) + (1|rater) + (1|cluster); ",
                        nrow(long_df), " observations; ",
-                       "ICC(1) = case variance / total variance.")
+                       "ICC(1) = case variance / total variance. ",
+                       "95% CI is not shown because intercept CIs are not valid for this variance ratio.")
             )
 
             # Warn about small clusters
@@ -7839,7 +8106,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             if (self$options$varianceDecomposition) {
                 var_table <- self$results$varianceDecompositionTable
 
-                # Helper for clinical interpretation
                 interpret_component <- function(name, proportion) {
                     pct <- round(proportion * 100, 1)
                     if (name == "Case (Subject)") {
@@ -7897,8 +8163,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 # ICC(1): Single rating reliability
                 icc1_val <- sigma2_case / sigma2_total
 
-                # ICC(2): Reliability of mean ratings (averaged over k raters)
-                icc2_val <- sigma2_case / (sigma2_case + sigma2_rater / n_raters + sigma2_resid / n_raters)
+                # ICC(2): Reliability of mean ratings (averaged over k raters), including cluster variance
+                icc2_val <- sigma2_case / (sigma2_case + sigma2_cluster / n_clusters + sigma2_rater / n_raters + sigma2_resid / n_raters)
 
                 # G-coefficient: Universe score variance / expected observed variance
                 g_coeff <- sigma2_case / (sigma2_case + sigma2_rater / n_raters +
@@ -7913,27 +8179,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     return("Negative (problematic)")
                 }
 
-                # Try to get CIs via profile likelihood
-                icc_cis <- list(
-                    icc1 = c(NA, NA), icc2 = c(NA, NA), gcoeff = c(NA, NA)
-                )
-
-                tryCatch({
-                    vc_ci <- confint(model, parm = "theta_", method = "profile")
-                    # vc_ci rows correspond to variance parameters
-                    # We compute approximate CIs using delta method on ratios
-                    # For simplicity, use parametric bootstrap if available
-                }, error = function(e) {
-                    # Leave CIs as NA — acceptable fallback
-                })
-
                 icc_rows <- list(
                     list(type = "ICC(1) - Single Rating",
-                         val = icc1_val, ci = icc_cis$icc1),
+                         val = icc1_val),
                     list(type = "ICC(2) - Mean of k Ratings",
-                         val = icc2_val, ci = icc_cis$icc2),
+                         val = icc2_val),
                     list(type = "G-coefficient",
-                         val = g_coeff, ci = icc_cis$gcoeff)
+                         val = g_coeff)
                 )
 
                 for (i in seq_along(icc_rows)) {
@@ -7941,8 +8193,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     icc_table$addRow(rowKey = i, values = list(
                         icc_type = row$type,
                         icc_value = row$val,
-                        ci_lower = row$ci[1],
-                        ci_upper = row$ci[2],
+                        ci_lower = NA,
+                        ci_upper = NA,
                         interpretation = interpret_icc(row$val)
                     ))
                 }
@@ -7960,7 +8212,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             if (self$options$clusterSpecificKappa) {
                 cluster_table <- self$results$clusterSpecificTable
 
-                # Compute per-cluster kappa/ICC
                 cluster_kappas <- list()
                 cluster_labels <- levels(long_df$cluster)
 
@@ -7977,36 +8228,15 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         next
                     }
 
-                    # Use appropriate method based on number of raters
                     kappa_val <- NA
                     kappa_ci <- c(NA, NA)
 
                     tryCatch({
-                        if (n_raters == 2) {
-                            k_result <- irr::kappa2(cl_ratings)
-                            kappa_val <- k_result$value
-                            # Approximate 95% CI using SE
-                            if (!is.null(k_result$statistic) && !is.na(k_result$statistic)) {
-                                se <- kappa_val / k_result$statistic
-                                kappa_ci <- c(kappa_val - 1.96 * se, kappa_val + 1.96 * se)
-                            }
-                        } else {
-                            k_result <- irr::kappam.fleiss(cl_ratings)
-                            kappa_val <- k_result$value
-                            if (!is.null(k_result$statistic) && !is.na(k_result$statistic)) {
-                                se <- kappa_val / k_result$statistic
-                                kappa_ci <- c(kappa_val - 1.96 * se, kappa_val + 1.96 * se)
-                            }
-                        }
+                        icc_res <- irr::icc(cl_ratings, model = "twoway", type = "agreement", unit = "single")
+                        kappa_val <- icc_res$value
+                        kappa_ci <- c(icc_res$lbound, icc_res$ubound)
                     }, error = function(e) {
-                        # If kappa computation fails, try ICC as fallback
-                        tryCatch({
-                            icc_res <- irr::icc(cl_ratings, model = "twoway", type = "agreement")
-                            kappa_val <<- icc_res$value
-                            kappa_ci <<- c(icc_res$lbound, icc_res$ubound)
-                        }, error = function(e2) {
-                            # Leave as NA
-                        })
+                        # Leave as NA when cluster-specific ICC is not estimable
                     })
 
                     cluster_kappas[[cl]] <- list(
@@ -8019,17 +8249,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 shrinkage_values <- rep(NA, n_clusters)
                 if (self$options$shrinkageEstimates && "cluster" %in% names(lme4::ranef(model))) {
                     re_cluster <- lme4::ranef(model)$cluster
-                    grand_mean <- lme4::fixef(model)[["(Intercept)"]]
-                    # Shrinkage kappa: map BLUP-adjusted means back to kappa-like scale
-                    # For continuous: shrinkage ICC per cluster
                     for (j in seq_along(cluster_labels)) {
                         cl <- cluster_labels[j]
                         if (cl %in% rownames(re_cluster)) {
-                            blup_effect <- re_cluster[cl, 1]
-                            # Shrinkage estimate: raw kappa pulled toward overall
                             raw_k <- cluster_kappas[[cl]]$kappa
                             if (!is.na(raw_k)) {
-                                # Proportion of shrinkage based on cluster size
                                 cl_n <- cluster_kappas[[cl]]$n
                                 shrinkage_factor <- cl_n / (cl_n + n_raters)
                                 shrinkage_values[j] <- icc1 * (1 - shrinkage_factor) + raw_k * shrinkage_factor
@@ -8038,11 +8262,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     }
                 }
 
-                # Rank clusters by kappa
+                # Rank clusters by kappa (if requested)
                 kappa_vals <- sapply(cluster_kappas, function(x) x$kappa)
-                ranks <- rank(-kappa_vals, na.last = "keep", ties.method = "min")
+                ranks <- if (self$options$clusterRankings) {
+                    rank(-kappa_vals, na.last = "keep", ties.method = "min")
+                } else {
+                    rep(NA, length(kappa_vals))
+                }
 
-                # Populate table
                 for (j in seq_along(cluster_labels)) {
                     cl <- cluster_labels[j]
                     ck <- cluster_kappas[[cl]]
@@ -8054,7 +8281,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         ci_lower = ck$ci_lower,
                         ci_upper = ck$ci_upper,
                         shrinkage_kappa = shrinkage_values[j],
-                        rank = if (!is.na(ranks[j])) as.integer(ranks[j]) else NA
+                        rank = if (self$options$clusterRankings && !is.na(ranks[j])) as.integer(ranks[j]) else NA
                     ))
                 }
             }
@@ -8079,12 +8306,10 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     lr_test <- stats::anova(model_reduced, model_full_ml)
 
                     chi_sq <- lr_test[["Chisq"]][2]
-                    df_val <- lr_test[["Df"]][2]  # Changed from "Chi Df" to "Df"
+                    df_val <- lr_test[["Df"]][2]
                     p_val <- lr_test[["Pr(>Chisq)"]][2]
 
-                    # Handle potential NULL/NA from anova output format
                     if (is.null(chi_sq) || is.na(chi_sq)) {
-                        # Alternative extraction for different anova output formats
                         chi_sq <- as.numeric(lr_test[2, "Chisq"])
                         df_val <- as.numeric(lr_test[2, "Df"])
                         p_val <- as.numeric(lr_test[2, "Pr(>Chisq)"])
@@ -8128,16 +8353,16 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             html <- "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>"
 
             html <- paste0(html, "
-                <h3 style='color: #2E5090; margin-top: 0;'>Hierarchical/Multilevel Kappa Analysis</h3>
+                <h3 style='color: #333; margin-top: 0;'>Hierarchical/Multilevel Kappa Analysis</h3>
 
-                <div style='background-color: #F0F7FF; padding: 12px; border-left: 4px solid #2E5090; margin-bottom: 15px;'>
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-bottom: 15px;'>
                     <strong>What is it?</strong><br/>
                     Hierarchical kappa extends standard kappa to account for nested data structures where raters
                     are grouped within clusters (institutions, centers, scanners). It decomposes agreement into
                     between-cluster and within-cluster components, providing more accurate estimates when clustering exists.
                 </div>
 
-                <h4 style='color: #2E5090; margin-top: 20px;'>When to Use</h4>
+                <h4 style='color: #333; margin-top: 20px;'>When to Use</h4>
                 <ul>
                     <li><strong>Multi-center trials</strong>: Pathologists nested within hospitals</li>
                     <li><strong>Multi-scanner studies</strong>: Radiologists nested within imaging centers</li>
@@ -8145,7 +8370,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     <li><strong>Quality control</strong>: Identifying institutions with poor agreement</li>
                 </ul>
 
-                <h4 style='color: #2E5090; margin-top: 20px;'>Key Components</h4>
+                <h4 style='color: #333; margin-top: 20px;'>Key Components</h4>
                 <ul>
                     <li><strong>Overall Hierarchical Kappa</strong>: Population-level agreement accounting for clustering</li>
                     <li><strong>Cluster-Specific Estimates</strong>: Kappa for each institution/center</li>
@@ -8154,14 +8379,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     <li><strong>Shrinkage Estimates</strong>: Stabilized estimates for small clusters</li>
                 </ul>
 
-                <h4 style='color: #2E5090; margin-top: 20px;'>Interpreting Variance Components</h4>
+                <h4 style='color: #333; margin-top: 20px;'>Interpreting Variance Components</h4>
                 <ul>
                     <li><strong>High between-cluster variance</strong>: Institutional differences (protocols, training)</li>
                     <li><strong>High within-cluster variance</strong>: Local rater disagreement</li>
                     <li><strong>Shrinkage</strong>: Pulls extreme cluster estimates toward overall mean</li>
                 </ul>
 
-                <div style='background-color: #FFF9E6; padding: 12px; border-left: 4px solid #FFA500; margin-top: 15px;'>
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
                     <strong>Note:</strong> Full hierarchical analysis is computationally intensive and requires sufficient
                     data within each cluster (typically ≥10 cases per cluster recommended).
                 </div>
@@ -8173,10 +8398,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         .calculateMixedEffectsComparison = function(ratings, condition_data, mydata) {
             # Mixed-Effects Condition Comparison
             # Model: score ~ condition + (1|rater_id) + (1|case_id)
-            # Compares measurement conditions (e.g., AI vs Manual) accounting for
-            # rater and case random effects in a crossed design.
 
-            # --- Validate inputs ---
             if (is.null(condition_data) || ncol(condition_data) == 0) {
                 self$results$mixedEffectsTable$setNote(
                     "error",
@@ -8201,7 +8423,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             rater_names <- colnames(ratings)
             n_raters <- length(rater_names)
 
-            # --- Reshape to long format ---
             long_df <- data.frame(
                 case_id   = rep(seq_len(n_cases), times = n_raters),
                 rater     = rep(rater_names, each = n_cases),
@@ -8222,12 +8443,10 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 return()
             }
 
-            # Ensure score is numeric
             if (!is.numeric(long_df$score)) {
                 long_df$score <- as.numeric(factor(long_df$score))
             }
 
-            # --- Fit mixed-effects model ---
             model <- NULL
             model_ok <- FALSE
 
@@ -8242,7 +8461,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 )
                 model_ok <- TRUE
             }, error = function(e) {
-                # Fallback: try without rater random effect
                 tryCatch({
                     model <<- lme4::lmer(
                         score ~ condition + (1 | case_id),
@@ -8267,11 +8485,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             if (!model_ok || is.null(model)) return()
 
-            # --- Extract fixed effects (condition comparison) ---
             me_table <- self$results$mixedEffectsTable
             coefs <- summary(model)$coefficients
 
-            # Get confidence intervals
             ci_vals <- tryCatch(
                 confint(model, parm = "beta_", method = "profile"),
                 error = function(e) {
@@ -8282,41 +8498,36 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
             )
 
-            # Populate fixed effects table
+            # Get lmerTest model once for efficiency
+            lmerTest_model <- NULL
+            lmerTest_coefs <- NULL
+            tryCatch({
+                if (requireNamespace("lmerTest", quietly = TRUE)) {
+                    lmerTest_model <- lmerTest::as_lmerModLmerTest(model)
+                    lmerTest_coefs <- summary(lmerTest_model)$coefficients
+                }
+            }, error = function(e) {
+                # lmerTest conversion may fail; safe to ignore — fallback uses lm p-values
+            })
+
             term_names <- rownames(coefs)
+            raw_p <- numeric(nrow(coefs))
+
             for (i in seq_len(nrow(coefs))) {
                 term <- term_names[i]
-                # Make term name more readable
                 display_term <- gsub("^condition", "Condition: ", term)
                 if (term == "(Intercept)") display_term <- paste0("Intercept (ref: ", levels(long_df$condition)[1], ")")
 
                 ci_lo <- if (!is.null(ci_vals) && i <= nrow(ci_vals)) ci_vals[i, 1] else NA
                 ci_hi <- if (!is.null(ci_vals) && i <= nrow(ci_vals)) ci_vals[i, 2] else NA
 
-                # Satterthwaite df approximation
-                df_val <- tryCatch({
-                    if (requireNamespace("lmerTest", quietly = TRUE)) {
-                        lmerTest_model <- lmerTest::as_lmerModLmerTest(model)
-                        lmerTest_coefs <- summary(lmerTest_model)$coefficients
-                        lmerTest_coefs[i, "df"]
-                    } else {
-                        NA
-                    }
-                }, error = function(e) NA)
-
-                # p-value
-                p_val <- tryCatch({
-                    if (requireNamespace("lmerTest", quietly = TRUE)) {
-                        lmerTest_model <- lmerTest::as_lmerModLmerTest(model)
-                        lmerTest_coefs <- summary(lmerTest_model)$coefficients
-                        lmerTest_coefs[i, "Pr(>|t|)"]
-                    } else {
-                        # Normal approximation
-                        2 * pnorm(abs(coefs[i, "t value"]), lower.tail = FALSE)
-                    }
-                }, error = function(e) {
+                df_val <- if (!is.null(lmerTest_coefs)) lmerTest_coefs[i, "df"] else NA
+                p_val <- if (!is.null(lmerTest_coefs)) {
+                    lmerTest_coefs[i, "Pr(>|t|)"]
+                } else {
                     2 * pnorm(abs(coefs[i, "t value"]), lower.tail = FALSE)
-                })
+                }
+                raw_p[i] <- p_val
 
                 me_table$addRow(rowKey = i, values = list(
                     term = display_term,
@@ -8332,20 +8543,11 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             # Apply multiplicity correction if requested
             if (self$options$multipleTestCorrection != "none" && nrow(coefs) > 1) {
-                raw_p <- numeric(nrow(coefs))
-                for (i in seq_len(nrow(coefs))) {
-                    raw_p[i] <- tryCatch({
-                        if (requireNamespace("lmerTest", quietly = TRUE)) {
-                            lmerTest_model <- lmerTest::as_lmerModLmerTest(model)
-                            summary(lmerTest_model)$coefficients[i, "Pr(>|t|)"]
-                        } else {
-                            2 * pnorm(abs(coefs[i, "t value"]), lower.tail = FALSE)
-                        }
-                    }, error = function(e) {
-                        2 * pnorm(abs(coefs[i, "t value"]), lower.tail = FALSE)
-                    })
-                }
                 adj_p <- p.adjust(raw_p, method = self$options$multipleTestCorrection)
+                # Update table with adjusted p-values
+                for (i in seq_len(nrow(coefs))) {
+                    me_table$setCell(rowKey = i, col = "p_value", value = adj_p[i])
+                }
                 me_table$setNote(
                     "correction",
                     paste0("P-values adjusted using ", self$options$multipleTestCorrection,
@@ -8353,7 +8555,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 )
             }
 
-            # --- Variance components ---
+            # Variance components
             var_table <- self$results$mixedEffectsVarianceTable
             vc <- as.data.frame(lme4::VarCorr(model))
             sigma2_case <- if ("case_id" %in% vc$grp) vc[vc$grp == "case_id", "vcov"] else 0
@@ -8398,7 +8600,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
             }
 
-            # Model summary note
             ref_level <- levels(long_df$condition)[1]
             me_table$setNote(
                 "model",
@@ -8410,103 +8611,59 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                        "Reference level: '", ref_level, "'.")
             )
 
-            # Populate explanation if showAbout is on
-            if (self$options$showAbout) {
-                private$.populateMixedEffectsExplanation()
-            }
         },
 
         .populateMixedEffectsExplanation = function() {
-            html <- "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>"
-            html <- paste0(html, "
-                <h3 style='color: #2E5090; margin-top: 0;'>Mixed-Effects Condition Comparison</h3>
-
-                <div style='background-color: #F0F7FF; padding: 12px; border-left: 4px solid #2E5090; margin-bottom: 15px;'>
+            html <- "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>
+                <h3 style='color: #333; margin-top: 0;'>Mixed-Effects Condition Comparison</h3>
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-bottom: 15px;'>
                     <strong>What is it?</strong><br/>
                     A linear mixed-effects model that compares measurement conditions (e.g., AI-assisted vs.
                     conventional scoring) while properly accounting for the crossed structure of rater x case data.
-                    This is more powerful and appropriate than simple paired tests when multiple raters score
-                    multiple cases under different conditions.
                 </div>
-
-                <h4 style='color: #2E5090;'>Model</h4>
+                <h4 style='color: #333;'>Model</h4>
                 <p><code>score ~ condition + (1|rater) + (1|case)</code></p>
                 <ul>
-                    <li><strong>Fixed effect (condition)</strong>: The systematic difference between conditions (e.g., AI improves scores by X points)</li>
-                    <li><strong>Random effect (rater)</strong>: Accounts for systematic rater differences (some raters score higher/lower)</li>
-                    <li><strong>Random effect (case)</strong>: Accounts for case difficulty (some cases are harder to score)</li>
+                    <li><strong>Fixed effect (condition)</strong>: Systematic difference between conditions</li>
+                    <li><strong>Random effect (rater)</strong>: Accounts for systematic rater differences</li>
+                    <li><strong>Random effect (case)</strong>: Accounts for case difficulty</li>
                 </ul>
-
-                <h4 style='color: #2E5090;'>When to Use</h4>
+                <h4 style='color: #333;'>When to Use</h4>
                 <ul>
-                    <li>Comparing AI-assisted vs. conventional scoring (Dy et al. 2024)</li>
+                    <li>Comparing AI-assisted vs. conventional scoring</li>
                     <li>Pre-training vs. post-training assessment</li>
-                    <li>Method A vs. Method B when multiple raters score the same cases</li>
                     <li>Any crossed rater x case x condition design</li>
                 </ul>
-
-                <h4 style='color: #2E5090;'>Advantages Over Simple Paired Tests</h4>
-                <ul>
-                    <li>Accounts for rater and case heterogeneity simultaneously</li>
-                    <li>More statistical power by borrowing strength across raters and cases</li>
-                    <li>Provides variance decomposition to identify sources of variability</li>
-                    <li>Handles unbalanced designs (missing observations)</li>
-                </ul>
-
-                <h4 style='color: #2E5090;'>Interpreting the Condition Effect</h4>
-                <ul>
-                    <li><strong>Estimate</strong>: Mean difference between conditions (adjusted for rater and case effects)</li>
-                    <li><strong>95% CI</strong>: Precision of the estimated difference</li>
-                    <li><strong>p-value</strong>: Whether the difference is statistically significant</li>
-                </ul>
-
-                <div style='background-color: #FFF9E6; padding: 12px; border-left: 4px solid #FFA500; margin-top: 15px;'>
-                    <strong>Multiple Testing:</strong> When comparing more than 2 conditions, use the
-                    Multiple Testing Correction option (Bonferroni, BH, or Holm) to control
-                    the family-wise error rate or false discovery rate.
-                </div>
-            </div>")
-
+            </div>"
             self$results$mixedEffectsExplanation$setContent(html)
         },
 
-        # ================================================================
-        # Multi-Class Confusion Matrix (Gap 1 from HER2 review)
-        # ================================================================
-
         .calculateConfusionMatrix = function(ratings) {
-
             tryCatch({
-
-                # Use first two raters for confusion matrix
+                if (ncol(ratings) != 2) {
+                    self$results$confusionMatrixTable$setNote(
+                        "error",
+                        .("Confusion matrix requires exactly 2 raters. Only the first 2 selected variables are used.")
+                    )
+                }
                 r1 <- ratings[[1]]
                 r2 <- ratings[[2]]
-
-                # Remove NAs
                 complete <- complete.cases(r1, r2)
                 r1 <- r1[complete]
                 r2 <- r2[complete]
 
                 if (length(r1) < 2) {
-                    self$results$confusionMatrixTable$setNote(
-                        "insufficient",
-                        "Insufficient complete cases for confusion matrix."
-                    )
+                    self$results$confusionMatrixTable$setNote("insufficient", "Insufficient complete cases for confusion matrix.")
                     return()
                 }
 
-                # Convert to factor with union of levels
                 all_levels <- sort(unique(c(as.character(r1), as.character(r2))))
                 r1_f <- factor(r1, levels = all_levels)
                 r2_f <- factor(r2, levels = all_levels)
-
-                # Build confusion matrix
                 cm <- table(Reference = r1_f, Predicted = r2_f)
 
-                # Determine normalization
                 norm_type <- self$options$confusionNormalize
 
-                # Populate confusion matrix table
                 table <- self$results$confusionMatrixTable
                 for (i in seq_along(all_levels)) {
                     for (j in seq_along(all_levels)) {
@@ -8515,31 +8672,20 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             cm[i, j] / sum(cm[i, ])
                         } else if (norm_type == "column" && sum(cm[, j]) > 0) {
                             cm[i, j] / sum(cm[, j])
-                        } else if (norm_type == "none") {
-                            cm[i, j] / sum(cm)
                         } else {
-                            0
+                            cm[i, j] / sum(cm)
                         }
-
-                        table$addRow(
-                            rowKey = paste0(i, "_", j),
-                            values = list(
-                                reference_class = all_levels[i],
-                                predicted_class = all_levels[j],
-                                count = count_val,
-                                proportion = prop_val
-                            )
-                        )
+                        table$addRow(rowKey = paste0(i, "_", j), values = list(
+                            reference_class = all_levels[i],
+                            predicted_class = all_levels[j],
+                            count = count_val,
+                            proportion = prop_val
+                        ))
                     }
                 }
 
-                # Add table notes
                 rater_names <- colnames(ratings)
-                table$setNote(
-                    "raters",
-                    paste0("Reference: ", rater_names[1], ", Predicted: ", rater_names[2],
-                           ". N = ", length(r1), " complete cases.")
-                )
+                table$setNote("raters", paste0("Reference: ", rater_names[1], ", Predicted: ", rater_names[2], ". N = ", length(r1), " complete cases."))
                 if (norm_type == "row") {
                     table$setNote("norm", "Proportions are row-normalized (recall per reference class).")
                 } else if (norm_type == "column") {
@@ -8552,407 +8698,249 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     tp <- cm[cls, cls]
                     fp <- sum(cm[, cls]) - tp
                     fn <- sum(cm[cls, ]) - tp
-
+                    support <- as.integer(sum(cm[cls, ]))
                     prec <- if ((tp + fp) > 0) tp / (tp + fp) else 0
                     rec  <- if ((tp + fn) > 0) tp / (tp + fn) else 0
                     f1   <- if ((prec + rec) > 0) 2 * prec * rec / (prec + rec) else 0
-                    support <- sum(cm[cls, ])
-
-                    # F1 interpretation
                     interp <- if (f1 >= 0.9) "Excellent"
                               else if (f1 >= 0.8) "Good"
                               else if (f1 >= 0.7) "Moderate"
                               else if (f1 >= 0.5) "Fair"
                               else "Poor"
-
-                    metrics_table$addRow(
-                        rowKey = cls,
-                        values = list(
-                            class_label = cls,
-                            n = as.integer(tp),
-                            precision = prec,
-                            recall = rec,
-                            f1 = f1,
-                            support = as.integer(support),
-                            interpretation = interp
-                        )
-                    )
+                    metrics_table$addRow(rowKey = cls, values = list(
+                        class_label = cls, n = as.integer(tp), precision = prec,
+                        recall = rec, f1 = f1, support = support, interpretation = interp
+                    ))
                 }
 
-                # Add macro-average row
-                all_prec <- sapply(all_levels, function(cls) {
-                    tp <- cm[cls, cls]; fp <- sum(cm[, cls]) - tp
-                    if ((tp + fp) > 0) tp / (tp + fp) else 0
-                })
-                all_rec <- sapply(all_levels, function(cls) {
-                    tp <- cm[cls, cls]; fn <- sum(cm[cls, ]) - tp
-                    if ((tp + fn) > 0) tp / (tp + fn) else 0
-                })
-                all_f1 <- sapply(seq_along(all_levels), function(k) {
-                    p <- all_prec[k]; r <- all_rec[k]
-                    if ((p + r) > 0) 2 * p * r / (p + r) else 0
-                })
-
-                metrics_table$addRow(
-                    rowKey = "macro_avg",
-                    values = list(
-                        class_label = "Macro Average",
-                        n = as.integer(sum(diag(cm))),
-                        precision = mean(all_prec),
-                        recall = mean(all_rec),
-                        f1 = mean(all_f1),
-                        support = as.integer(sum(cm)),
-                        interpretation = paste0("Overall accuracy: ",
-                                                round(sum(diag(cm)) / sum(cm) * 100, 1), "%")
-                    )
-                )
-
+                # Macro-average
+                all_prec <- sapply(all_levels, function(cls) { tp <- cm[cls,cls]; fp <- sum(cm[,cls])-tp; if ((tp+fp)>0) tp/(tp+fp) else 0 })
+                all_rec <- sapply(all_levels, function(cls) { tp <- cm[cls,cls]; fn <- sum(cm[cls,])-tp; if ((tp+fn)>0) tp/(tp+fn) else 0 })
+                all_f1 <- sapply(seq_along(all_levels), function(k) { p <- all_prec[k]; r <- all_rec[k]; if ((p+r)>0) 2*p*r/(p+r) else 0 })
+                metrics_table$addRow(rowKey = "macro_avg", values = list(
+                    class_label = "Macro Average", n = as.integer(sum(diag(cm))),
+                    precision = mean(all_prec), recall = mean(all_rec), f1 = mean(all_f1),
+                    support = as.integer(sum(cm)),
+                    interpretation = paste0("Overall accuracy: ", round(sum(diag(cm))/sum(cm)*100, 1), "%")
+                ))
             }, error = function(e) {
-                self$results$confusionMatrixTable$setNote(
-                    "error",
-                    paste("Confusion matrix error:", e$message)
-                )
+                self$results$confusionMatrixTable$setNote("error", paste("Confusion matrix error:", e$message))
             })
         },
 
         .populateConfusionMatrixExplanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
                 <h3>Multi-Class Confusion Matrix</h3>
-                <p>The confusion matrix shows the cross-tabulation of ratings from two raters
-                (Reference vs. Predicted). Each cell (i,j) shows how many cases were rated
-                as class i by the reference rater and class j by the second rater.</p>
-
-                <h4>Normalization Options</h4>
-                <ul>
-                    <li><strong>None (counts)</strong>: Raw frequency counts with overall proportions</li>
-                    <li><strong>Row-normalized</strong>: Each row sums to 1.0, showing the distribution
-                    of predicted classes for each reference class (recall/sensitivity per class)</li>
-                    <li><strong>Column-normalized</strong>: Each column sums to 1.0, showing the distribution
-                    of reference classes for each predicted class (precision/PPV per class)</li>
-                </ul>
-
+                <p>Cross-tabulation of ratings from two raters (Reference vs. Predicted).</p>
                 <h4>Per-Class Metrics</h4>
                 <ul>
-                    <li><strong>Precision (PPV)</strong>: TP / (TP + FP) — when this class is predicted, how often is it correct?</li>
-                    <li><strong>Recall (Sensitivity)</strong>: TP / (TP + FN) — of all true instances of this class, how many are detected?</li>
-                    <li><strong>F1 Score</strong>: Harmonic mean of precision and recall — balanced single metric per class</li>
-                    <li><strong>Support</strong>: Number of true instances of this class in the reference</li>
+                    <li><strong>Precision (PPV)</strong>: TP / (TP + FP)</li>
+                    <li><strong>Recall (Sensitivity)</strong>: TP / (TP + FN)</li>
+                    <li><strong>F1 Score</strong>: Harmonic mean of precision and recall</li>
                 </ul>
-
-                <div style='background-color: #E8F5E9; padding: 12px; border-left: 4px solid #4CAF50; margin-top: 15px;'>
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
                     <strong>Clinical Use:</strong> In ordinal scoring (e.g., HER2 0/1+/2+/3+), the confusion
-                    matrix reveals systematic misclassification patterns. Diagonal dominance indicates good
-                    agreement. Off-diagonal clustering near the diagonal suggests ordinal confusion
-                    (adjacent category disagreement), which is clinically less concerning than distant
-                    misclassifications.
+                    matrix reveals systematic misclassification patterns.
                 </div>
             </div>"
-
             self$results$confusionMatrixExplanation$setContent(html)
         },
 
-        # ================================================================
-        # Bootstrap Confidence Intervals (Gap 2 from HER2 review)
-        # ================================================================
-
         .calculateBootstrapCI = function(ratings) {
-
             tryCatch({
-
                 n_boot <- self$options$nBoot
                 n_cases <- nrow(ratings)
                 n_raters <- ncol(ratings)
 
                 if (n_cases < 10) {
-                    self$results$bootstrapCITable$setNote(
-                        "insufficient",
-                        "At least 10 cases required for bootstrap CIs."
-                    )
+                    self$results$bootstrapCITable$setNote("insufficient", "At least 10 cases required for bootstrap CIs.")
                     return()
                 }
 
-                # Helper: compute agreement metrics for a single bootstrap sample
+                # Helper: compute agreement metrics
                 compute_metrics <- function(boot_ratings) {
                     result <- list()
-
-                    # Percent agreement
-                    n_agree <- sum(apply(boot_ratings, 1, function(x) {
-                        x <- x[!is.na(x)]
-                        length(unique(x)) == 1
-                    }))
+                    n_agree <- sum(apply(boot_ratings, 1, function(x) { x <- x[!is.na(x)]; length(unique(x)) == 1 }))
                     result$pct_agreement <- n_agree / nrow(boot_ratings)
-
-                    # Check if data is categorical or continuous
-                    is_categorical <- all(sapply(boot_ratings, function(x) {
-                        is.factor(x) || is.character(x) || length(unique(na.omit(x))) <= 20
-                    }))
-
+                    is_categorical <- all(sapply(boot_ratings, function(x) is.factor(x) || is.character(x) || length(unique(na.omit(x))) <= 20))
                     if (is_categorical) {
-                        # Convert to character matrix for irr functions
-                        char_ratings <- as.data.frame(lapply(boot_ratings, as.character),
-                                                       stringsAsFactors = FALSE)
-
-                        # Cohen's kappa (2 raters) or Fleiss kappa (3+ raters)
+                        char_ratings <- as.data.frame(lapply(boot_ratings, as.character), stringsAsFactors = FALSE)
                         if (n_raters == 2) {
-                            tryCatch({
-                                k_result <- irr::kappa2(char_ratings, weight = "unweighted")
-                                result$kappa <- k_result$value
-                            }, error = function(e) { result$kappa <<- NA })
+                            tryCatch({ result$kappa <- irr::kappa2(char_ratings, weight = "unweighted")$value }, error = function(e) { result$kappa <<- NA })
                         } else {
-                            tryCatch({
-                                k_result <- irr::kappam.fleiss(char_ratings)
-                                result$kappa <- k_result$value
-                            }, error = function(e) { result$kappa <<- NA })
+                            tryCatch({ result$kappa <- irr::kappam.fleiss(char_ratings)$value }, error = function(e) { result$kappa <<- NA })
                         }
-
-                        # Krippendorff's alpha
                         tryCatch({
-                            ka_result <- irr::kripp.alpha(t(as.matrix(
-                                sapply(char_ratings, function(x) as.numeric(factor(x)))
-                            )))
+                            ka_result <- irr::kripp.alpha(t(as.matrix(sapply(char_ratings, function(x) as.numeric(factor(x))))))
                             result$kripp_alpha <- ka_result$value
                         }, error = function(e) { result$kripp_alpha <<- NA })
                     } else {
-                        # ICC for continuous data
                         tryCatch({
-                            icc_result <- irr::icc(boot_ratings, model = "twoway",
-                                                    type = "agreement", unit = "single")
+                            icc_result <- irr::icc(boot_ratings, model = "twoway", type = "agreement", unit = "single")
                             result$icc <- icc_result$value
                         }, error = function(e) { result$icc <<- NA })
-
                         result$kappa <- NA
                         result$kripp_alpha <- NA
                     }
-
                     return(result)
                 }
 
-                # Observed estimates
                 obs <- compute_metrics(ratings)
 
-                # Bootstrap
                 set.seed(42)
                 boot_results <- lapply(seq_len(n_boot), function(b) {
                     idx <- sample(n_cases, replace = TRUE)
-                    boot_ratings <- ratings[idx, , drop = FALSE]
-                    compute_metrics(boot_ratings)
+                    compute_metrics(ratings[idx, , drop = FALSE])
                 })
 
-                # Extract bootstrap distributions
                 boot_pct <- sapply(boot_results, function(x) x$pct_agreement)
                 boot_kappa <- sapply(boot_results, function(x) x$kappa)
                 boot_kripp <- sapply(boot_results, function(x) x$kripp_alpha)
-                boot_icc <- if (!is.null(boot_results[[1]]$icc)) {
-                    sapply(boot_results, function(x) x$icc)
-                } else { NULL }
+                boot_icc <- if (!is.null(boot_results[[1]]$icc)) sapply(boot_results, function(x) x$icc) else NULL
 
-                # Helper: compute BCa CIs
-                bca_ci <- function(obs_val, boot_dist, alpha = 0.05) {
+                # BCa CI helper with explicit metric_name parameter
+                conf <- self$options$confLevel
+                bca_ci <- function(obs_val, boot_dist, metric_name, alpha = 1 - conf) {
                     boot_dist <- boot_dist[!is.na(boot_dist)]
-                    if (length(boot_dist) < 50) return(list(lower = NA, upper = NA,
-                                                             se = NA, bias = NA, method = "N/A"))
-
+                    if (length(boot_dist) < 50) return(list(lower = NA, upper = NA, se = NA, bias = NA, method = "N/A"))
                     boot_se <- sd(boot_dist)
                     boot_bias <- mean(boot_dist) - obs_val
-
-                    # Bias correction factor
                     z0 <- qnorm(mean(boot_dist < obs_val))
                     if (is.infinite(z0)) z0 <- 0
 
-                    # Acceleration (jackknife)
+                    # Jackknife acceleration
                     jack_vals <- sapply(seq_len(min(n_cases, 200)), function(i) {
                         tryCatch({
-                            jack_ratings <- ratings[-i, , drop = FALSE]
-                            jack_res <- compute_metrics(jack_ratings)
-                            if (!is.na(obs_val) && !is.null(jack_res$pct_agreement)) {
-                                # Match the metric
-                                if (abs(obs_val - obs$pct_agreement) < 1e-10) jack_res$pct_agreement
-                                else if (!is.na(obs$kappa) && abs(obs_val - obs$kappa) < 1e-10) jack_res$kappa
-                                else if (!is.na(obs$kripp_alpha) && abs(obs_val - obs$kripp_alpha) < 1e-10) jack_res$kripp_alpha
-                                else if (!is.null(obs$icc) && !is.na(obs$icc) && abs(obs_val - obs$icc) < 1e-10) jack_res$icc
-                                else obs_val
-                            } else obs_val
+                            jack_res <- compute_metrics(ratings[-i, , drop = FALSE])
+                            val <- jack_res[[metric_name]]
+                            if (is.null(val)) NA else val
                         }, error = function(e) obs_val)
                     })
                     jack_mean <- mean(jack_vals, na.rm = TRUE)
                     jack_diff <- jack_mean - jack_vals
-                    a_hat <- sum(jack_diff^3) / (6 * sum(jack_diff^2)^1.5)
+                    denom_a <- 6 * sum(jack_diff^2, na.rm = TRUE)^1.5
+                    a_hat <- if (abs(denom_a) < .Machine$double.eps) 0 else sum(jack_diff^3, na.rm = TRUE) / denom_a
                     if (is.na(a_hat) || is.infinite(a_hat)) a_hat <- 0
 
-                    # BCa percentiles
                     z_alpha <- qnorm(c(alpha/2, 1 - alpha/2))
-                    adj_lower <- pnorm(z0 + (z0 + z_alpha[1]) / (1 - a_hat * (z0 + z_alpha[1])))
-                    adj_upper <- pnorm(z0 + (z0 + z_alpha[2]) / (1 - a_hat * (z0 + z_alpha[2])))
-
+                    denom_lower <- 1 - a_hat * (z0 + z_alpha[1])
+                    denom_upper <- 1 - a_hat * (z0 + z_alpha[2])
+                    if (abs(denom_lower) < 1e-10 || abs(denom_upper) < 1e-10) {
+                        return(pct_ci(obs_val, boot_dist))
+                    }
+                    adj_lower <- pnorm(z0 + (z0 + z_alpha[1]) / denom_lower)
+                    adj_upper <- pnorm(z0 + (z0 + z_alpha[2]) / denom_upper)
                     adj_lower <- max(adj_lower, 0.001)
                     adj_upper <- min(adj_upper, 0.999)
-
                     ci <- quantile(boot_dist, probs = c(adj_lower, adj_upper), na.rm = TRUE)
-
-                    list(lower = ci[1], upper = ci[2], se = boot_se,
-                         bias = boot_bias, method = "BCa")
+                    list(lower = ci[1], upper = ci[2], se = boot_se, bias = boot_bias, method = "BCa")
                 }
 
-                # Percentile CI fallback
                 pct_ci <- function(obs_val, boot_dist) {
                     boot_dist <- boot_dist[!is.na(boot_dist)]
-                    if (length(boot_dist) < 50) return(list(lower = NA, upper = NA,
-                                                             se = NA, bias = NA, method = "N/A"))
-                    ci <- quantile(boot_dist, probs = c(0.025, 0.975), na.rm = TRUE)
-                    list(lower = ci[1], upper = ci[2], se = sd(boot_dist),
-                         bias = mean(boot_dist) - obs_val, method = "Percentile")
+                    if (length(boot_dist) < 50) return(list(lower = NA, upper = NA, se = NA, bias = NA, method = "N/A"))
+                    alpha <- 1 - conf
+                    ci <- quantile(boot_dist, probs = c(alpha/2, 1 - alpha/2), na.rm = TRUE)
+                    list(lower = ci[1], upper = ci[2], se = sd(boot_dist), bias = mean(boot_dist) - obs_val, method = "Percentile")
                 }
 
-                # Populate table
                 table <- self$results$bootstrapCITable
 
-                # Percent agreement
-                ci_pct <- tryCatch(bca_ci(obs$pct_agreement, boot_pct),
-                                   error = function(e) pct_ci(obs$pct_agreement, boot_pct))
+                ci_pct <- tryCatch(bca_ci(obs$pct_agreement, boot_pct, "pct_agreement"), error = function(e) pct_ci(obs$pct_agreement, boot_pct))
                 table$addRow(rowKey = "pct_agreement", values = list(
-                    metric = "Percent Agreement",
-                    estimate = obs$pct_agreement,
-                    boot_se = ci_pct$se,
-                    ci_lower = ci_pct$lower,
-                    ci_upper = ci_pct$upper,
-                    boot_bias = ci_pct$bias,
-                    ci_method = ci_pct$method
+                    metric = "Percent Agreement", estimate = obs$pct_agreement,
+                    boot_se = ci_pct$se, ci_lower = ci_pct$lower, ci_upper = ci_pct$upper,
+                    boot_bias = ci_pct$bias, ci_method = ci_pct$method
                 ))
 
-                # Kappa
                 if (!is.na(obs$kappa)) {
-                    ci_kappa <- tryCatch(bca_ci(obs$kappa, boot_kappa),
-                                         error = function(e) pct_ci(obs$kappa, boot_kappa))
+                    ci_kappa <- tryCatch(bca_ci(obs$kappa, boot_kappa, "kappa"), error = function(e) pct_ci(obs$kappa, boot_kappa))
                     kappa_label <- if (n_raters == 2) "Cohen's Kappa" else "Fleiss' Kappa"
                     table$addRow(rowKey = "kappa", values = list(
-                        metric = kappa_label,
-                        estimate = obs$kappa,
-                        boot_se = ci_kappa$se,
-                        ci_lower = ci_kappa$lower,
-                        ci_upper = ci_kappa$upper,
-                        boot_bias = ci_kappa$bias,
-                        ci_method = ci_kappa$method
+                        metric = kappa_label, estimate = obs$kappa,
+                        boot_se = ci_kappa$se, ci_lower = ci_kappa$lower, ci_upper = ci_kappa$upper,
+                        boot_bias = ci_kappa$bias, ci_method = ci_kappa$method
                     ))
                 }
 
-                # Krippendorff's alpha
                 if (!is.na(obs$kripp_alpha)) {
-                    ci_kripp <- tryCatch(bca_ci(obs$kripp_alpha, boot_kripp),
-                                         error = function(e) pct_ci(obs$kripp_alpha, boot_kripp))
+                    ci_kripp <- tryCatch(bca_ci(obs$kripp_alpha, boot_kripp, "kripp_alpha"), error = function(e) pct_ci(obs$kripp_alpha, boot_kripp))
                     table$addRow(rowKey = "kripp_alpha", values = list(
-                        metric = "Krippendorff's Alpha",
-                        estimate = obs$kripp_alpha,
-                        boot_se = ci_kripp$se,
-                        ci_lower = ci_kripp$lower,
-                        ci_upper = ci_kripp$upper,
-                        boot_bias = ci_kripp$bias,
-                        ci_method = ci_kripp$method
+                        metric = "Krippendorff's Alpha", estimate = obs$kripp_alpha,
+                        boot_se = ci_kripp$se, ci_lower = ci_kripp$lower, ci_upper = ci_kripp$upper,
+                        boot_bias = ci_kripp$bias, ci_method = ci_kripp$method
                     ))
                 }
 
-                # ICC
                 if (!is.null(boot_icc)) {
-                    ci_icc <- tryCatch(bca_ci(obs$icc, boot_icc),
-                                       error = function(e) pct_ci(obs$icc, boot_icc))
+                    ci_icc <- tryCatch(bca_ci(obs$icc, boot_icc, "icc"), error = function(e) pct_ci(obs$icc, boot_icc))
                     table$addRow(rowKey = "icc", values = list(
-                        metric = "ICC (two-way, agreement)",
-                        estimate = obs$icc,
-                        boot_se = ci_icc$se,
-                        ci_lower = ci_icc$lower,
-                        ci_upper = ci_icc$upper,
-                        boot_bias = ci_icc$bias,
-                        ci_method = ci_icc$method
+                        metric = "ICC (two-way, agreement)", estimate = obs$icc,
+                        boot_se = ci_icc$se, ci_lower = ci_icc$lower, ci_upper = ci_icc$upper,
+                        boot_bias = ci_icc$bias, ci_method = ci_icc$method
                     ))
                 }
 
-                table$setNote("boot",
-                    paste0("Based on ", n_boot, " bootstrap resamples (case resampling). ",
-                           "Seed: 42 for reproducibility."))
-
+                table$setNote("boot", paste0("Based on ", n_boot, " bootstrap resamples (case resampling). Seed: 42 for reproducibility."))
             }, error = function(e) {
-                self$results$bootstrapCITable$setNote(
-                    "error",
-                    paste("Bootstrap CI error:", e$message)
-                )
+                self$results$bootstrapCITable$setNote("error", paste("Bootstrap CI error:", e$message))
             })
         },
 
         .populateBootstrapCIExplanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
                 <h3>Bootstrap Confidence Intervals</h3>
-                <p>Bootstrap CIs are computed by resampling cases (rows) with replacement and
-                recomputing each agreement metric on each resample. This provides empirical
-                confidence intervals that do not rely on distributional assumptions.</p>
-
-                <h4>BCa Method</h4>
-                <p>The Bias-Corrected and Accelerated (BCa) method adjusts for both bias
-                (systematic over/underestimation) and skewness in the bootstrap distribution.
-                It provides more accurate coverage than simple percentile intervals, especially
-                when the metric is near boundary values (0 or 1).</p>
-
+                <p>Bootstrap CIs are computed by resampling cases with replacement and recomputing
+                each agreement metric. The BCa (Bias-Corrected and Accelerated) method adjusts for
+                both bias and skewness in the bootstrap distribution.</p>
                 <h4>Interpreting Results</h4>
                 <ul>
-                    <li><strong>Boot SE</strong>: Standard deviation of bootstrap distribution — estimates sampling variability</li>
-                    <li><strong>95% CI</strong>: Range that contains the true metric value with 95% confidence</li>
-                    <li><strong>Bias</strong>: Mean bootstrap estimate minus observed estimate; large bias suggests instability</li>
+                    <li><strong>Boot SE</strong>: Standard deviation of bootstrap distribution</li>
+                    <li><strong>95% CI</strong>: Range containing the true metric with 95% confidence</li>
+                    <li><strong>Bias</strong>: Mean bootstrap estimate minus observed; large bias suggests instability</li>
                 </ul>
-
-                <div style='background-color: #E3F2FD; padding: 12px; border-left: 4px solid #2196F3; margin-top: 15px;'>
-                    <strong>Recommendation:</strong> Use bootstrap CIs when reporting agreement metrics
-                    in publications. Analytical CIs for kappa and ICC assume specific distributional
-                    properties that may not hold with small samples or many categories.
-                    Bootstrap CIs are distribution-free and provide more robust coverage.
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                    <strong>Recommendation:</strong> Use bootstrap CIs when reporting agreement metrics in publications.
+                    They are distribution-free and provide more robust coverage than analytical CIs.
                 </div>
             </div>"
-
             self$results$bootstrapCIExplanation$setContent(html)
         },
 
-        # ================================================================
-        # Multi-Annotator Concordance F1 (Gap 3 from HER2 review)
-        # ================================================================
-
         .calculateConcordanceF1 = function(ratings) {
-
             tryCatch({
-
                 n_cases <- nrow(ratings)
                 n_raters <- ncol(ratings)
 
                 if (n_raters < 3) {
-                    self$results$concordanceF1Table$setNote(
-                        "insufficient",
-                        "At least 3 raters required for multi-annotator concordance (1 prediction + 2+ references)."
-                    )
+                    self$results$concordanceF1Table$setNote("insufficient", "At least 3 raters required for multi-annotator concordance.")
                     return()
                 }
 
-                # Determine prediction column
-                pred_col <- min(self$options$predictionColumn, n_raters)
+                pred_col <- self$options$predictionColumn
+                if (pred_col > n_raters) {
+                    self$results$concordanceF1Table$setNote(
+                        "error",
+                        sprintf(.("Prediction column %d exceeds number of raters (%d). Using last rater column instead."), pred_col, n_raters)
+                    )
+                    pred_col <- n_raters
+                }
                 ref_cols <- setdiff(seq_len(n_raters), pred_col)
 
                 predictions <- ratings[[pred_col]]
                 annotators <- ratings[, ref_cols, drop = FALSE]
 
-                # Remove cases with NA prediction
                 valid <- !is.na(predictions)
                 predictions <- predictions[valid]
                 annotators <- annotators[valid, , drop = FALSE]
                 n_valid <- length(predictions)
 
                 if (n_valid < 5) {
-                    self$results$concordanceF1Table$setNote(
-                        "insufficient",
-                        "Fewer than 5 valid cases for concordance analysis."
-                    )
+                    self$results$concordanceF1Table$setNote("insufficient", "Fewer than 5 valid cases for concordance analysis.")
                     return()
                 }
 
-                # Get all unique classes
-                all_classes <- sort(unique(c(
-                    as.character(predictions),
-                    as.character(unlist(annotators))
-                )))
+                all_classes <- sort(unique(c(as.character(predictions), as.character(unlist(annotators)))))
                 all_classes <- all_classes[!is.na(all_classes)]
 
                 # Concordance: prediction matches ANY annotator
@@ -8963,46 +8951,32 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     pred %in% refs
                 })
 
-                # Strict: prediction matches consensus (majority)
+                # Strict: prediction matches majority consensus
                 consensus <- sapply(seq_len(n_valid), function(i) {
                     refs <- as.character(unlist(annotators[i, ]))
                     refs <- refs[!is.na(refs)]
                     if (length(refs) == 0) return(NA)
-                    tab <- table(refs)
-                    names(tab)[which.max(tab)]
+                    tab <- sort(table(refs), decreasing = TRUE)
+                    names(tab)[1]
                 })
 
                 strict_match <- as.character(predictions) == consensus
-
-                # Overall metrics
                 concordance_accuracy <- mean(concordance_match, na.rm = TRUE)
                 strict_accuracy <- mean(strict_match, na.rm = TRUE)
 
                 table <- self$results$concordanceF1Table
-
-                # Overall concordance accuracy
                 table$addRow(rowKey = "conc_acc", values = list(
-                    metric = "Concordance Accuracy",
-                    value = concordance_accuracy,
+                    metric = "Concordance Accuracy", value = concordance_accuracy,
                     comparison = paste0("vs Strict: ", round(strict_accuracy, 4)),
-                    interpretation = paste0(
-                        round((concordance_accuracy - strict_accuracy) * 100, 1),
-                        "% improvement over strict consensus"
-                    )
+                    interpretation = paste0(round((concordance_accuracy - strict_accuracy) * 100, 1), "% improvement over strict consensus")
                 ))
-
-                # Strict accuracy
                 table$addRow(rowKey = "strict_acc", values = list(
-                    metric = "Strict Accuracy (vs Consensus)",
-                    value = strict_accuracy,
+                    metric = "Strict Accuracy (vs Consensus)", value = strict_accuracy,
                     comparison = "Majority consensus",
-                    interpretation = if (strict_accuracy >= 0.9) "Excellent"
-                                     else if (strict_accuracy >= 0.8) "Good"
-                                     else if (strict_accuracy >= 0.7) "Moderate"
-                                     else "Needs improvement"
+                    interpretation = if (strict_accuracy >= 0.9) "Excellent" else if (strict_accuracy >= 0.8) "Good" else if (strict_accuracy >= 0.7) "Moderate" else "Needs improvement"
                 ))
 
-                # Mean annotator agreement (for context)
+                # Mean annotator agreement
                 pairwise_agreements <- c()
                 for (j in seq_along(ref_cols)) {
                     for (k in seq_along(ref_cols)) {
@@ -9011,194 +8985,123 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                             r_k <- as.character(annotators[[k]])
                             valid_pair <- !is.na(r_j) & !is.na(r_k)
                             if (sum(valid_pair) > 0) {
-                                pairwise_agreements <- c(pairwise_agreements,
-                                    mean(r_j[valid_pair] == r_k[valid_pair]))
+                                pairwise_agreements <- c(pairwise_agreements, mean(r_j[valid_pair] == r_k[valid_pair]))
                             }
                         }
                     }
                 }
-
                 if (length(pairwise_agreements) > 0) {
                     table$addRow(rowKey = "annotator_agree", values = list(
-                        metric = "Mean Annotator Agreement",
-                        value = mean(pairwise_agreements),
-                        comparison = paste0("Range: [", round(min(pairwise_agreements), 3),
-                                            ", ", round(max(pairwise_agreements), 3), "]"),
+                        metric = "Mean Annotator Agreement", value = mean(pairwise_agreements),
+                        comparison = paste0("Range: [", round(min(pairwise_agreements), 3), ", ", round(max(pairwise_agreements), 3), "]"),
                         interpretation = "Baseline inter-annotator agreement among references"
                     ))
                 }
-
-                # Number of annotators
                 table$addRow(rowKey = "n_info", values = list(
-                    metric = "N Annotators (reference)",
-                    value = length(ref_cols),
+                    metric = "N Annotators (reference)", value = length(ref_cols),
                     comparison = paste0("Prediction: rater ", pred_col),
                     interpretation = paste0(n_valid, " cases evaluated")
                 ))
 
                 # Per-class concordance F1
                 per_class_table <- self$results$concordanceF1PerClassTable
-
                 for (cls in all_classes) {
-                    # Concordance: TP if prediction=cls AND any annotator=cls
                     conc_tp <- sum(as.character(predictions) == cls & concordance_match)
                     conc_fp <- sum(as.character(predictions) == cls & !concordance_match)
-                    # For concordance recall: cases where any annotator says cls
                     any_annotator_cls <- sapply(seq_len(n_valid), function(i) {
                         refs <- as.character(unlist(annotators[i, ]))
                         cls %in% refs[!is.na(refs)]
                     })
                     conc_fn <- sum(any_annotator_cls & as.character(predictions) != cls)
-
                     conc_prec <- if ((conc_tp + conc_fp) > 0) conc_tp / (conc_tp + conc_fp) else 0
                     conc_rec <- if ((conc_tp + conc_fn) > 0) conc_tp / (conc_tp + conc_fn) else 0
-                    conc_f1 <- if ((conc_prec + conc_rec) > 0) {
-                        2 * conc_prec * conc_rec / (conc_prec + conc_rec)
-                    } else 0
+                    conc_f1 <- if ((conc_prec + conc_rec) > 0) 2 * conc_prec * conc_rec / (conc_prec + conc_rec) else 0
 
-                    # Strict F1: prediction vs consensus
                     strict_tp <- sum(as.character(predictions) == cls & consensus == cls, na.rm = TRUE)
                     strict_fp <- sum(as.character(predictions) == cls & consensus != cls, na.rm = TRUE)
                     strict_fn <- sum(as.character(predictions) != cls & consensus == cls, na.rm = TRUE)
-
                     strict_prec <- if ((strict_tp + strict_fp) > 0) strict_tp / (strict_tp + strict_fp) else 0
                     strict_rec <- if ((strict_tp + strict_fn) > 0) strict_tp / (strict_tp + strict_fn) else 0
-                    strict_f1 <- if ((strict_prec + strict_rec) > 0) {
-                        2 * strict_prec * strict_rec / (strict_prec + strict_rec)
-                    } else 0
-
+                    strict_f1 <- if ((strict_prec + strict_rec) > 0) 2 * strict_prec * strict_rec / (strict_prec + strict_rec) else 0
                     improvement <- if (strict_f1 > 0) (conc_f1 - strict_f1) / strict_f1 else 0
-                    n_cls <- sum(any_annotator_cls)
 
-                    per_class_table$addRow(
-                        rowKey = cls,
-                        values = list(
-                            class_label = cls,
-                            concordance_f1 = conc_f1,
-                            strict_f1 = strict_f1,
-                            improvement = improvement,
-                            n_cases = as.integer(n_cls)
-                        )
-                    )
+                    per_class_table$addRow(rowKey = cls, values = list(
+                        class_label = cls, concordance_f1 = conc_f1, strict_f1 = strict_f1,
+                        improvement = improvement, n_cases = as.integer(sum(any_annotator_cls))
+                    ))
                 }
 
-                # Add note
                 rater_names <- colnames(ratings)
-                table$setNote("method",
-                    paste0("Prediction column: ", rater_names[pred_col],
-                           ". Reference annotators: ",
-                           paste(rater_names[ref_cols], collapse = ", "), "."))
-
+                table$setNote("method", paste0("Prediction column: ", rater_names[pred_col],
+                    ". Reference annotators: ", paste(rater_names[ref_cols], collapse = ", "), "."))
             }, error = function(e) {
-                self$results$concordanceF1Table$setNote(
-                    "error",
-                    paste("Concordance F1 error:", e$message)
-                )
+                self$results$concordanceF1Table$setNote("error", paste("Concordance F1 error:", e$message))
             })
         },
 
         .populateConcordanceF1Explanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
                 <h3>Multi-Annotator Concordance</h3>
-                <p>In studies with multiple reference annotators and no single ground truth
-                (common in digital pathology AI validation), standard accuracy against a
-                consensus label may underestimate performance. Concordance metrics evaluate
-                predictions against all annotators simultaneously.</p>
-
-                <h4>Concordance vs Strict Evaluation</h4>
-                <ul>
-                    <li><strong>Concordance Accuracy</strong>: A prediction is correct if it matches
-                    ANY reference annotator's label. This reflects that disagreement among experts
-                    is inherent — a prediction matching any expert is clinically valid.</li>
-                    <li><strong>Strict Accuracy</strong>: A prediction is correct only if it matches
-                    the majority consensus. This is more conservative but penalizes predictions that
-                    match minority expert opinions.</li>
-                </ul>
-
-                <h4>Per-Class Concordance F1</h4>
-                <p>For each class, concordance F1 measures how well predictions identify cases
-                where ANY annotator assigned that class. The improvement column shows the
-                relative gain over strict consensus-based F1.</p>
-
-                <div style='background-color: #FFF3E0; padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px;'>
-                    <strong>Reference:</strong> This approach follows Ottl et al. (2025) who used
-                    concordance F1 for HER2 scoring evaluation with 5 annotators from 3 institutions.
-                    The concordance metric is especially valuable when inter-annotator agreement
-                    is moderate, as it avoids penalizing predictions that match valid but
-                    non-consensus expert opinions.
+                <p>Evaluates predictions against all annotators simultaneously. A prediction is correct
+                if it matches ANY reference annotator's label (concordance) or only the majority
+                consensus (strict).</p>
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                    <strong>Reference:</strong> Ottl et al. (2025) used concordance F1 for HER2 scoring
+                    evaluation with multiple annotators.
                 </div>
             </div>"
-
             self$results$concordanceF1Explanation$setContent(html)
         },
 
-        # ================================================================
-        # Paired Agreement Comparison — Bootstrap Test (Gap 1, Krishnamurthy 2024)
-        # ================================================================
-
         .calculatePairedAgreementComparison = function(ratings_A) {
             tryCatch({
-                # Get condition B rater variables
                 condB_vars <- self$options$conditionBVars
                 if (is.null(condB_vars) || length(condB_vars) < 2) {
-                    self$results$pairedAgreementTable$setNote(
-                        "error", "Select at least 2 rater variables for Condition B.")
+                    self$results$pairedAgreementTable$setNote("error", "Select at least 2 rater variables for Condition B.")
                     return()
                 }
 
-                # Build condition B ratings matrix
                 ratings_B <- data.frame(
-                    lapply(condB_vars, function(v) {
-                        as.character(self$data[[v]])
-                    }),
+                    lapply(condB_vars, function(v) as.character(self$data[[v]])),
                     stringsAsFactors = FALSE
                 )
                 colnames(ratings_B) <- condB_vars
 
-                # Remove rows with any NA in either condition
-                complete <- complete.cases(ratings_A) & complete.cases(ratings_B)
-                ratings_A <- ratings_A[complete, , drop = FALSE]
+                # Ensure type consistency: convert A to character as well
+                ratings_A_char <- data.frame(
+                    lapply(ratings_A, as.character),
+                    stringsAsFactors = FALSE
+                )
+                colnames(ratings_A_char) <- colnames(ratings_A)
+
+                complete <- complete.cases(ratings_A_char) & complete.cases(ratings_B)
+                ratings_A <- ratings_A_char[complete, , drop = FALSE]
                 ratings_B <- ratings_B[complete, , drop = FALSE]
                 n_cases <- nrow(ratings_A)
 
                 if (n_cases < 10) {
-                    self$results$pairedAgreementTable$setNote(
-                        "error", paste0("Too few complete cases (", n_cases,
-                                        "). Need at least 10 for bootstrap comparison."))
+                    self$results$pairedAgreementTable$setNote("error", paste0("Too few complete cases (", n_cases, "). Need at least 10."))
                     return()
                 }
 
-                # Helper: compute percent agreement (average pairwise)
                 compute_pct_agree <- function(mat) {
                     n_raters <- ncol(mat)
                     if (n_raters < 2) return(NA)
                     pairs <- combn(n_raters, 2)
-                    agree_rates <- apply(pairs, 2, function(p) {
-                        mean(mat[, p[1]] == mat[, p[2]], na.rm = TRUE)
-                    })
-                    mean(agree_rates)
+                    mean(apply(pairs, 2, function(p) mean(mat[, p[1]] == mat[, p[2]], na.rm = TRUE)))
                 }
 
-                # Helper: compute Fleiss/Cohen kappa
                 compute_kappa <- function(mat) {
-                    n_raters <- ncol(mat)
                     tryCatch({
-                        if (n_raters == 2) {
-                            k <- irr::kappa2(mat)$value
-                        } else {
-                            k <- irr::kappam.fleiss(mat)$value
-                        }
-                        return(k)
-                    }, error = function(e) return(NA))
+                        if (ncol(mat) == 2) irr::kappa2(mat)$value else irr::kappam.fleiss(mat)$value
+                    }, error = function(e) NA)
                 }
 
-                # Observed values
                 pct_A <- compute_pct_agree(ratings_A)
                 pct_B <- compute_pct_agree(ratings_B)
                 kappa_A <- compute_kappa(ratings_A)
                 kappa_B <- compute_kappa(ratings_B)
 
-                # Bootstrap
                 n_boot <- self$options$pairedBootN
                 set.seed(42)
                 boot_pct_diff <- numeric(n_boot)
@@ -9208,109 +9111,54 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     idx <- sample(n_cases, replace = TRUE)
                     boot_A <- ratings_A[idx, , drop = FALSE]
                     boot_B <- ratings_B[idx, , drop = FALSE]
-
                     boot_pct_diff[b] <- compute_pct_agree(boot_B) - compute_pct_agree(boot_A)
                     boot_kappa_diff[b] <- compute_kappa(boot_B) - compute_kappa(boot_A)
                 }
 
-                # Populate table
                 table <- self$results$pairedAgreementTable
 
-                # Percent agreement row
                 pct_diff <- pct_B - pct_A
                 pct_ci <- quantile(boot_pct_diff, c(0.025, 0.975), na.rm = TRUE)
-                pct_p <- 2 * min(
-                    mean(boot_pct_diff <= 0, na.rm = TRUE),
-                    mean(boot_pct_diff >= 0, na.rm = TRUE)
-                )
-                pct_interp <- if (pct_p < 0.05) {
-                    if (pct_diff > 0) "Significant improvement" else "Significant decrease"
-                } else "No significant difference"
+                pct_p <- min(1, 2 * min(mean(boot_pct_diff <= 0, na.rm = TRUE), mean(boot_pct_diff >= 0, na.rm = TRUE)))
+                pct_interp <- if (pct_p < 0.05) { if (pct_diff > 0) "Significant improvement" else "Significant decrease" } else "No significant difference"
 
                 table$addRow(rowKey = "pct_agree", values = list(
-                    metric = "Percent Agreement",
-                    condition_a = pct_A,
-                    condition_b = pct_B,
-                    difference = pct_diff,
-                    ci_lower = pct_ci[1],
-                    ci_upper = pct_ci[2],
-                    p_value = pct_p,
-                    interpretation = pct_interp
+                    metric = "Percent Agreement", condition_a = pct_A, condition_b = pct_B,
+                    difference = pct_diff, ci_lower = pct_ci[1], ci_upper = pct_ci[2],
+                    p_value = pct_p, interpretation = pct_interp
                 ))
 
-                # Kappa row
                 if (!is.na(kappa_A) && !is.na(kappa_B)) {
                     kappa_diff <- kappa_B - kappa_A
                     kappa_ci <- quantile(boot_kappa_diff, c(0.025, 0.975), na.rm = TRUE)
-                    kappa_p <- 2 * min(
-                        mean(boot_kappa_diff <= 0, na.rm = TRUE),
-                        mean(boot_kappa_diff >= 0, na.rm = TRUE)
-                    )
-                    kappa_interp <- if (kappa_p < 0.05) {
-                        if (kappa_diff > 0) "Significant improvement" else "Significant decrease"
-                    } else "No significant difference"
-
+                    kappa_p <- min(1, 2 * min(mean(boot_kappa_diff <= 0, na.rm = TRUE), mean(boot_kappa_diff >= 0, na.rm = TRUE)))
+                    kappa_interp <- if (kappa_p < 0.05) { if (kappa_diff > 0) "Significant improvement" else "Significant decrease" } else "No significant difference"
                     kappa_label <- if (ncol(ratings_A) == 2) "Cohen's Kappa" else "Fleiss' Kappa"
-
                     table$addRow(rowKey = "kappa", values = list(
-                        metric = kappa_label,
-                        condition_a = kappa_A,
-                        condition_b = kappa_B,
-                        difference = kappa_diff,
-                        ci_lower = kappa_ci[1],
-                        ci_upper = kappa_ci[2],
-                        p_value = kappa_p,
-                        interpretation = kappa_interp
+                        metric = kappa_label, condition_a = kappa_A, condition_b = kappa_B,
+                        difference = kappa_diff, ci_lower = kappa_ci[1], ci_upper = kappa_ci[2],
+                        p_value = kappa_p, interpretation = kappa_interp
                     ))
                 }
 
-                table$setNote("info", paste0(
-                    "Bootstrap test with ", n_boot, " replications (seed = 42). ",
-                    "N = ", n_cases, " cases, ",
-                    ncol(ratings_A), " raters in Condition A, ",
-                    ncol(ratings_B), " raters in Condition B."
-                ))
-
+                table$setNote("info", paste0("Bootstrap test with ", n_boot, " replications (seed = 42). N = ", n_cases, " cases."))
             }, error = function(e) {
-                self$results$pairedAgreementTable$setNote(
-                    "error", paste("Paired agreement error:", e$message))
+                self$results$pairedAgreementTable$setNote("error", paste("Paired agreement error:", e$message))
             })
         },
 
         .populatePairedAgreementExplanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
                 <h3>Paired Agreement Comparison</h3>
-                <p>This analysis compares interobserver agreement between two conditions
-                applied to the <strong>same cases</strong> (e.g., manual scoring vs AI-assisted
-                scoring in a crossover study design).</p>
-
-                <h4>Method</h4>
-                <p>A case-bootstrap test is used: cases are resampled with replacement,
-                and the difference in agreement (percent agreement and kappa) is computed
-                for each bootstrap sample. The 95% CI and two-sided p-value are derived
-                from the bootstrap distribution of differences.</p>
-
-                <h4>Interpretation</h4>
-                <ul>
-                <li><strong>Difference > 0</strong>: Condition B has higher agreement than Condition A</li>
-                <li><strong>p < 0.05</strong>: The difference is statistically significant</li>
-                <li>A significant improvement in kappa is generally more meaningful than
-                percent agreement alone, as kappa corrects for chance agreement</li>
-                </ul>
-
-                <div style='background-color: #E3F2FD; padding: 12px; border-left: 4px solid #1976D2; margin-top: 15px;'>
-                <strong>Study design note:</strong> This test assumes a paired (crossover) design
-                where the same cases are scored under both conditions. The same raters should
-                score under both conditions. A washout period between conditions is recommended
-                to minimize memory effects (Krishnamurthy et al., JCO Precis Oncol 2024).
-                </div></div>"
-
+                <p>Compares interobserver agreement between two conditions applied to the same cases
+                (e.g., manual vs AI-assisted scoring). Uses case-bootstrap test.</p>
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                    <strong>Study design note:</strong> Assumes a paired (crossover) design where the same
+                    cases are scored under both conditions.
+                </div>
+            </div>"
             self$results$pairedAgreementExplanation$setContent(html)
         },
-
-        # ================================================================
-        # Sample Size for Agreement Studies (Gap 2, Krishnamurthy 2024)
-        # ================================================================
 
         .calculateAgreementSampleSize = function() {
             tryCatch({
@@ -9322,10 +9170,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 n_raters <- self$options$ssNRaters
                 n_cat <- self$options$ssNCategories
 
-                # Validate inputs
                 if (k1 <= k0) {
-                    self$results$agreementSampleSizeTable$setNote(
-                        "error", "Expected kappa (H1) must be greater than null kappa (H0).")
+                    self$results$agreementSampleSizeTable$setNote("error", "Expected kappa (H1) must be greater than null kappa (H0).")
                     return()
                 }
 
@@ -9335,148 +9181,404 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 table <- self$results$agreementSampleSizeTable
 
                 if (metric == "kappa" || metric == "fleiss") {
-                    # Donner (1998) / Sim & Wright (2005) approximation
-                    # Assume equal marginal proportions for simplicity
-                    p_i <- 1 / n_cat  # probability per category
-                    p_e <- n_cat * p_i^2  # expected chance agreement = sum(p_i^2) = 1/n_cat
-
-                    # Variance of kappa under H1 (large sample, Fleiss 1981)
-                    # V(kappa) approx = (1/(n*(1-p_e)^2)) * [p_e + p_e^2 - sum(p_i*(1+p_i)^2)]
-                    # For equal marginals: sum(p_i*(1+p_i)^2) = n_cat * (1/n_cat) * (1 + 1/n_cat)^2
-                    sum_term <- n_cat * p_i * (1 + p_i)^2
-                    # Variance factor (per subject)
-                    v_factor <- (p_e + p_e^2 - sum_term) / (1 - p_e)^2
-
-                    # For 2 raters: use Donner formula directly
-                    # For k raters: variance decreases by factor related to rater pairs
-                    if (metric == "fleiss" && n_raters > 2) {
-                        # Fleiss kappa variance adjustment
-                        # V(kappa_fleiss) ~ 2 / (n * k * (k-1)) * adjusted_term
-                        var_per_n <- 2 * (p_e + p_e^2 - sum_term) /
-                                     ((1 - p_e)^2 * n_raters * (n_raters - 1))
-                    } else {
-                        var_per_n <- abs(v_factor)
+                    if (!requireNamespace("kappaSize", quietly = TRUE)) {
+                        self$results$agreementSampleSizeTable$setNote(
+                            "error",
+                            "kappaSize package is required for validated kappa sample size calculations."
+                        )
+                        return()
                     }
 
-                    # Sample size: n = (z_alpha + z_beta)^2 * var_per_n / (k1 - k0)^2
-                    n_required <- ceiling((z_alpha + z_beta)^2 * var_per_n / (k1 - k0)^2)
-                    n_required <- max(n_required, 2 * n_raters)  # minimum sensible
+                    if (metric == "kappa" && n_raters != 2) {
+                        self$results$agreementSampleSizeTable$setNote(
+                            "error",
+                            "Cohen's kappa sample size requires exactly 2 raters. Use Fleiss' kappa for 3+ raters."
+                        )
+                        return()
+                    }
 
+                    if (metric == "fleiss" && n_raters < 3) {
+                        self$results$agreementSampleSizeTable$setNote(
+                            "error",
+                            "Fleiss' kappa sample size requires at least 3 raters."
+                        )
+                        return()
+                    }
+
+                    if (n_cat < 2 || n_cat > 5) {
+                        self$results$agreementSampleSizeTable$setNote(
+                            "error",
+                            "Validated kappa sample size formulas are currently available for 2 to 5 categories."
+                        )
+                        return()
+                    }
+
+                    props <- rep(1 / n_cat, n_cat)
+                    n_est <- switch(
+                        as.character(n_cat),
+                        "2" = kappaSize::PowerBinary(kappa0 = k0, kappa1 = k1, props = props,
+                                                     raters = n_raters, alpha = alpha, power = power)$N[1],
+                        "3" = kappaSize::Power3Cats(kappa0 = k0, kappa1 = k1, props = props,
+                                                    raters = n_raters, alpha = alpha, power = power)$N[1],
+                        "4" = kappaSize::Power4Cats(kappa0 = k0, kappa1 = k1, props = props,
+                                                    raters = n_raters, alpha = alpha, power = power)$N[1],
+                        "5" = kappaSize::Power5Cats(kappa0 = k0, kappa1 = k1, props = props,
+                                                    raters = n_raters, alpha = alpha, power = power)$N[1]
+                    )
+
+                    n_required <- max(ceiling(n_est), 2 * n_raters)
                     metric_label <- if (metric == "kappa") "Cohen's Kappa" else "Fleiss' Kappa"
-
                 } else {
                     # ICC: Walter, Eliasziw & Donner (1998)
-                    # n >= 1 + 2*(z_a + z_b)^2 * (1 - rho1)^2 * (1 + (k-1)*rho1)^2 /
-                    #         (k*(k-1)*(rho1 - rho0)^2)
                     rho0 <- k0
                     rho1 <- k1
                     k <- n_raters
-
-                    numerator <- 2 * (z_alpha + z_beta)^2 * (1 - rho1)^2 *
-                                 (1 + (k - 1) * rho1)^2
+                    if (abs(rho1 - rho0) < 1e-6) {
+                        self$results$agreementSampleSizeTable$setNote(
+                            "error",
+                            .("H0 and H1 ICC values are too close together. Increase the difference to get a valid sample size.")
+                        )
+                        return()
+                    }
+                    numerator <- 2 * (z_alpha + z_beta)^2 * (1 - rho1)^2 * (1 + (k - 1) * rho1)^2
                     denominator <- k * (k - 1) * (rho1 - rho0)^2
-
                     n_required <- ceiling(1 + numerator / denominator)
-                    n_required <- max(n_required, k + 1)  # minimum sensible
-
+                    n_required <- max(n_required, k + 1)
                     metric_label <- "ICC"
                 }
 
-                # Populate table
-                table$addRow(rowKey = "metric", values = list(
-                    parameter = "Agreement Metric", value = metric_label
-                ))
-                table$addRow(rowKey = "n_required", values = list(
-                    parameter = "Required Sample Size (subjects)",
-                    value = as.character(n_required)
-                ))
-                table$addRow(rowKey = "n_raters", values = list(
-                    parameter = "Number of Raters",
-                    value = as.character(n_raters)
-                ))
+                table$addRow(rowKey = "metric", values = list(parameter = "Agreement Metric", value = metric_label))
+                table$addRow(rowKey = "n_required", values = list(parameter = "Required Sample Size (subjects)", value = as.character(n_required)))
+                table$addRow(rowKey = "n_raters", values = list(parameter = "Number of Raters", value = as.character(n_raters)))
                 if (metric != "icc") {
-                    table$addRow(rowKey = "n_cat", values = list(
-                        parameter = "Number of Categories",
-                        value = as.character(n_cat)
-                    ))
+                    table$addRow(rowKey = "n_cat", values = list(parameter = "Number of Categories", value = as.character(n_cat)))
                 }
-                table$addRow(rowKey = "kappa_null", values = list(
-                    parameter = paste0(metric_label, " under H0"),
-                    value = format(k0, digits = 3)
-                ))
-                table$addRow(rowKey = "kappa_alt", values = list(
-                    parameter = paste0(metric_label, " under H1"),
-                    value = format(k1, digits = 3)
-                ))
-                table$addRow(rowKey = "alpha", values = list(
-                    parameter = "Significance Level (alpha)",
-                    value = format(alpha, digits = 3)
-                ))
-                table$addRow(rowKey = "power", values = list(
-                    parameter = "Target Power (1 - beta)",
-                    value = format(power, digits = 3)
-                ))
-                table$addRow(rowKey = "total_reads", values = list(
-                    parameter = "Total Reads Required",
-                    value = as.character(n_required * n_raters)
-                ))
+                table$addRow(rowKey = "kappa_null", values = list(parameter = paste0(metric_label, " under H0"), value = format(k0, digits = 3)))
+                table$addRow(rowKey = "kappa_alt", values = list(parameter = paste0(metric_label, " under H1"), value = format(k1, digits = 3)))
+                table$addRow(rowKey = "alpha", values = list(parameter = "Significance Level (alpha)", value = format(alpha, digits = 3)))
+                table$addRow(rowKey = "power", values = list(parameter = "Target Power (1 - beta)", value = format(power, digits = 3)))
+                table$addRow(rowKey = "total_reads", values = list(parameter = "Total Reads Required", value = as.character(n_required * n_raters)))
 
                 table$setNote("info", paste0(
                     "Formula: ",
                     if (metric == "icc") "Walter, Eliasziw & Donner (1998)"
-                    else "Donner (1998); Sim & Wright (2005)",
+                    else "kappaSize implementation of Sim & Wright/Donner methods",
                     ". Assumes ",
                     if (metric != "icc") "equal marginal proportions across categories. "
                     else paste0(n_raters, " raters. "),
                     "Two-sided test."
                 ))
-
             }, error = function(e) {
-                self$results$agreementSampleSizeTable$setNote(
-                    "error", paste("Sample size error:", e$message))
+                self$results$agreementSampleSizeTable$setNote("error", paste("Sample size error:", e$message))
             })
         },
 
         .populateAgreementSampleSizeExplanation = function() {
             html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
                 <h3>Sample Size for Agreement Studies</h3>
-                <p>This tool calculates the required number of subjects (cases) for a
-                prospective interrater agreement study, given the expected and null
-                agreement levels, number of raters, and desired power.</p>
-
+                <p>Calculates required number of subjects for a prospective interrater agreement study.</p>
                 <h4>Formulas</h4>
                 <ul>
-                <li><strong>Kappa (Cohen's/Fleiss')</strong>: Based on Donner (1998) and
-                Sim & Wright (2005). Tests H0: kappa &le; kappa_0 vs H1: kappa &ge; kappa_1.
-                Assumes equal marginal category proportions.</li>
-                <li><strong>ICC</strong>: Based on Walter, Eliasziw & Donner (1998).
-                Tests H0: ICC &le; rho_0 vs H1: ICC &ge; rho_1.</li>
+                    <li><strong>Kappa (2-5 categories)</strong>: kappaSize implementation of Sim & Wright/Donner methods</li>
+                    <li><strong>ICC</strong>: Based on Walter, Eliasziw & Donner (1998)</li>
                 </ul>
-
-                <h4>Guidelines for Null Kappa</h4>
-                <table style='border-collapse: collapse; margin: 10px 0;'>
-                <tr style='border-bottom: 2px solid #333;'>
-                  <th style='padding: 5px 15px; text-align: left;'>Null Kappa</th>
-                  <th style='padding: 5px 15px; text-align: left;'>Meaning</th>
-                </tr>
-                <tr><td style='padding: 5px 15px;'>0.0</td>
-                    <td style='padding: 5px 15px;'>Agreement better than chance</td></tr>
-                <tr><td style='padding: 5px 15px;'>0.4</td>
-                    <td style='padding: 5px 15px;'>Better than moderate agreement</td></tr>
-                <tr><td style='padding: 5px 15px;'>0.6</td>
-                    <td style='padding: 5px 15px;'>Better than substantial agreement</td></tr>
-                <tr><td style='padding: 5px 15px;'>0.8</td>
-                    <td style='padding: 5px 15px;'>Better than almost perfect agreement</td></tr>
-                </table>
-
-                <div style='background-color: #FFF3E0; padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px;'>
-                <strong>Practical note:</strong> The sample size assumes equal marginal proportions
-                across categories (conservative estimate). If categories are highly imbalanced
-                (common in HER2 scoring where 3+ cases are rare), the actual required sample
-                size may be larger. Consider enriching your cohort for rare categories.
-                </div></div>"
-
+                <div style='background-color: #f9f9f9; padding: 12px; border-left: 4px solid #333; margin-top: 15px;'>
+                    <strong>Note:</strong> Kappa sample sizes assume equal marginal proportions across categories.
+                    Highly imbalanced categories generally require larger sample sizes.
+                </div>
+            </div>"
             self$results$agreementSampleSizeExplanation$setContent(html)
+        },
+
+        .populateContingencyTableExplanation = function() {
+            html_content <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What are Contingency Tables &amp; Rating Combinations?</h3>
+                    <p style='margin: 0; color: #333;'>
+                        These tables show the <strong>raw frequency distribution</strong> of ratings across raters.
+                        For 2 raters, a cross-tabulation (contingency table) is displayed. For 3+ raters,
+                        all unique rating combinations and their frequencies are shown.
+                    </p>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>How to Read the Table</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li><strong>Diagonal cells</strong> (where Row = Column) represent <strong>agreement</strong> &mdash; both raters assigned the same category</li>
+                        <li><strong>Off-diagonal cells</strong> represent <strong>disagreement</strong> &mdash; raters assigned different categories</li>
+                        <li>A well-agreeing pair of raters will have most counts concentrated on the diagonal</li>
+                        <li>Systematic patterns in off-diagonal cells may indicate <strong>rater bias</strong> (e.g., one rater consistently upgrading)</li>
+                    </ul>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li><strong>Before computing agreement statistics</strong> &mdash; inspect the raw data to identify unexpected patterns</li>
+                        <li><strong>When kappa is low</strong> &mdash; the contingency table reveals <em>where</em> disagreements occur</li>
+                        <li><strong>To detect specific confusion pairs</strong> &mdash; which categories are most often confused?</li>
+                        <li><strong>To check data completeness</strong> &mdash; are all expected categories represented?</li>
+                    </ul>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
+                    <p style='margin: 0; font-style: italic;'>
+                        In a breast cancer grading study, the contingency table might reveal that Grade 1 vs Grade 2
+                        is the most common disagreement (off-diagonal counts concentrated there), while Grade 1 vs Grade 3
+                        disagreements are rare. This directs targeted training efforts.
+                    </p>
+                </div>
+            </div>
+            "
+            self$results$contingencyTableExplanation$setContent(html_content)
+        },
+
+        .populateBlandAltmanExplanation = function() {
+            html_content <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Bland-Altman Analysis?</h3>
+                    <p style='margin: 0; color: #333;'>
+                        The Bland-Altman method assesses <strong>agreement between two continuous measurements</strong>
+                        by plotting the difference between methods against their mean. It is the gold standard for
+                        method comparison studies in clinical research.
+                    </p>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Bland-Altman</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li><strong>Comparing two measurement methods</strong> &mdash; e.g., automated vs manual Ki-67 scoring</li>
+                        <li><strong>Validating a new instrument</strong> against an established reference method</li>
+                        <li><strong>Continuous data only</strong> &mdash; for categorical data, use kappa-based methods instead</li>
+                        <li><strong>Paired measurements</strong> &mdash; both methods must measure the same cases</li>
+                    </ul>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpreting the Results</h4>
+                    <table style='width: 100%; border-collapse: collapse;'>
+                        <tr style='background: #f5f5f5;'>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Metric</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Mean Difference (Bias)</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Systematic difference between methods; close to 0 = no systematic bias</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Limits of Agreement (LoA)</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mean &plusmn; 1.96 SD; 95% of differences fall within these limits</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Proportional Bias (p)</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>If significant, the difference between methods depends on the measurement magnitude</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px;'><strong>Normality test</strong></td>
+                            <td style='padding: 8px;'>Differences should be approximately normally distributed for valid LoA</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Decision Rule</h4>
+                    <p style='margin: 0; font-style: italic;'>
+                        The key question is: &ldquo;Are the limits of agreement clinically acceptable?&rdquo; For example,
+                        if two Ki-67 scoring methods have LoA of &plusmn;5%, and the clinical threshold is 20%,
+                        a &plusmn;5% discrepancy could change treatment decisions for patients near the cutoff.
+                        Clinical context &mdash; not statistical significance &mdash; determines acceptability.
+                    </p>
+                </div>
+
+                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                    <p style='margin: 0; font-size: 12px; color: #666;'>
+                        <strong>Reference:</strong> Bland, J. M., &amp; Altman, D. G. (1986). Statistical methods for assessing
+                        agreement between two methods of clinical measurement. <em>The Lancet</em>, 327(8476), 307-310.
+                    </p>
+                </div>
+            </div>
+            "
+            self$results$blandAltmanExplanation$setContent(html_content)
+        },
+
+        .populateKrippExplanation = function() {
+            html_content <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is Krippendorff's Alpha?</h3>
+                    <p style='margin: 0; color: #333;'>
+                        Krippendorff's alpha (&alpha;) is a versatile reliability coefficient that works with
+                        <strong>any number of raters</strong>, <strong>any measurement scale</strong>
+                        (nominal, ordinal, interval, ratio), and <strong>handles missing data</strong> gracefully.
+                        It is one of the most widely used agreement measures in content analysis and clinical research.
+                    </p>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use Krippendorff's Alpha</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li><strong>Missing data</strong> &mdash; Unlike kappa, it naturally handles incomplete designs where not all raters rate all cases</li>
+                        <li><strong>Multiple raters (3+)</strong> &mdash; Generalizes seamlessly beyond 2 raters without modification</li>
+                        <li><strong>Mixed scale types</strong> &mdash; Choose nominal, ordinal, interval, or ratio depending on your data</li>
+                        <li><strong>Content analysis studies</strong> &mdash; Standard in communication and social science research</li>
+                    </ul>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Thresholds (Krippendorff 2004)</h4>
+                    <table style='width: 100%; border-collapse: collapse;'>
+                        <tr style='background: #f5f5f5;'>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Alpha Range</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Action</th>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&alpha; &ge; 0.80</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Reliable agreement</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Data can be used with confidence</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.667 &le; &alpha; &lt; 0.80</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Tentative conclusions</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Use cautiously; consider additional rater training</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px;'><strong>&alpha; &lt; 0.667</strong></td>
+                            <td style='padding: 8px;'>Insufficient agreement</td>
+                            <td style='padding: 8px;'>Variable should be discarded or criteria revised</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style='background: #e3f2fd; border-left: 4px solid #1565C0; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Krippendorff's Alpha vs Other Measures</h4>
+                    <table style='width: 100%; border-collapse: collapse;'>
+                        <tr style='background: #f5f5f5;'>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
+                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>Krippendorff</th>
+                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>Fleiss' Kappa</th>
+                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>ICC</th>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Handles missing data</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&cross;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&cross;</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Any number of raters</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Nominal/ordinal/interval</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>Nominal only</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>Continuous only</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px;'>Kappa paradox resistant</td>
+                            <td style='padding: 8px; text-align: center;'>Partially</td>
+                            <td style='padding: 8px; text-align: center;'>&cross;</td>
+                            <td style='padding: 8px; text-align: center;'>N/A</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example</h4>
+                    <p style='margin: 0; font-style: italic;'>
+                        In a multi-site tumor grading study where 5 pathologists each reviewed a subset of cases
+                        (not all pathologists reviewed every slide), Krippendorff's alpha is the ideal choice because
+                        it handles the incomplete design naturally. If &alpha; = 0.72 for histologic grade,
+                        conclusions should be considered tentative and additional consensus training is recommended.
+                    </p>
+                </div>
+
+                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                    <p style='margin: 0; font-size: 12px; color: #666;'>
+                        <strong>Reference:</strong> Krippendorff, K. (2004). <em>Content Analysis: An Introduction to Its Methodology</em>
+                        (2nd ed.). Sage Publications. Chapter 11.
+                    </p>
+                </div>
+            </div>
+            "
+            self$results$krippExplanation$setContent(html_content)
+        },
+
+        .populatePABAKExplanation = function() {
+            html_content <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is PABAK?</h3>
+                    <p style='margin: 0; color: #333;'>
+                        PABAK (Prevalence-Adjusted Bias-Adjusted Kappa) corrects Cohen's kappa for the effects of
+                        <strong>unequal category prevalence</strong> and <strong>systematic rater bias</strong>.
+                        It directly addresses the <strong>kappa paradox</strong>, where kappa can be misleadingly low
+                        despite high observed agreement.
+                    </p>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to Use PABAK</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li><strong>Rare diagnoses</strong> &mdash; When one category is much more common than others (e.g., benign vs malignant in screening)</li>
+                        <li><strong>Low kappa despite high agreement</strong> &mdash; The classic kappa paradox situation</li>
+                        <li><strong>Two raters only</strong> &mdash; PABAK is defined for 2&times;2 and multi-category tables with exactly 2 raters</li>
+                        <li><strong>Alongside kappa</strong> &mdash; Report both to show whether prevalence/bias effects are distorting kappa</li>
+                    </ul>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Key Indices Explained</h4>
+                    <table style='width: 100%; border-collapse: collapse;'>
+                        <tr style='background: #f5f5f5;'>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Index</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Formula</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>PABAK</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2P<sub>o</sub> &minus; 1</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement adjusted for both prevalence and bias; ranges from &minus;1 to 1</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Prevalence Index</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>|a &minus; d| / n</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>High values (&gt;0.5) indicate unbalanced categories; kappa is deflated</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px;'><strong>Bias Index</strong></td>
+                            <td style='padding: 8px;'>|b &minus; c| / n</td>
+                            <td style='padding: 8px;'>High values (&gt;0.3) indicate systematic difference between raters</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Example: The Kappa Paradox</h4>
+                    <p style='margin: 0; font-style: italic;'>
+                        Two pathologists classify 100 biopsies as benign/malignant. Results: 90 both say benign,
+                        5 both say malignant, 3 and 2 disagree. Observed agreement = 95%, but kappa = 0.47
+                        (&ldquo;moderate&rdquo;). This is misleading! The Prevalence Index = 0.85 (highly
+                        imbalanced categories) is deflating kappa. PABAK = 0.90 (&ldquo;almost perfect&rdquo;)
+                        better reflects the true agreement level.
+                    </p>
+                </div>
+
+                <div style='margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;'>
+                    <p style='margin: 0; font-size: 12px; color: #666;'>
+                        <strong>Reference:</strong> Byrt, T., Bishop, J., &amp; Carlin, J. B. (1993). Bias, prevalence and kappa.
+                        <em>Journal of Clinical Epidemiology</em>, 46(5), 423-429.
+                    </p>
+                </div>
+            </div>
+            "
+            self$results$pabakExplanation$setContent(html_content)
         },
 
         .run = function() {
@@ -9520,10 +9622,52 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </table>
                 </div>"
             )
+            self$results$irrtableHeading$setVisible(FALSE)
+
+            # Populate guide explanations even before data is selected
+            # so users can read about methods while setting up analysis
+            if (self$options$showKrippGuide) private$.populateKrippExplanation()
+            if (self$options$showLightKappaGuide) private$.populateLightKappaExplanation()
+            if (self$options$showFinnGuide) private$.populateFinnExplanation()
+            if (self$options$showKendallWGuide) private$.populateKendallWExplanation()
+            if (self$options$showRobinsonAGuide) private$.populateRobinsonAExplanation()
+            if (self$options$showMeanSpearmanGuide) private$.populateMeanSpearmanExplanation()
+            if (self$options$showICCGuide) private$.populateICCExplanation()
+            if (self$options$showMeanPearsonGuide) private$.populateMeanPearsonExplanation()
+            if (self$options$showLinCCCGuide) private$.populateLinCCCExplanation()
+            if (self$options$showTDIGuide) private$.populateTDIExplanation()
+            if (self$options$showSpecificAgreementGuide) private$.populateSpecificAgreementExplanation()
+            if (self$options$showAgreementHeatmapGuide) private$.populateAgreementHeatmapExplanation()
+            if (self$options$showRaterProfileGuide) private$.populateRaterProfileExplanation()
+            if (self$options$showSubgroupGuide) private$.populateSubgroupExplanation()
+            if (self$options$showRaterClusterGuide) private$.populateRaterClusterExplanation()
+            if (self$options$showCaseClusterGuide) private$.populateCaseClusterExplanation()
+            if (self$options$showMaxwellREGuide) private$.populateMaxwellREExplanation()
+            if (self$options$showInterIntraRaterGuide) private$.populateInterIntraRaterExplanation()
+            if (self$options$showIotaGuide) private$.populateIotaExplanation()
+            if (self$options$showHierarchicalGuide) private$.populateHierarchicalExplanation()
+            if (self$options$showBlandAltmanGuide) private$.populateBlandAltmanExplanation()
+            if (self$options$showMixedEffectsGuide) private$.populateMixedEffectsExplanation()
+            if (self$options$showConfusionMatrixGuide) private$.populateConfusionMatrixExplanation()
+            if (self$options$showBootstrapCIGuide) private$.populateBootstrapCIExplanation()
+            if (self$options$showConcordanceF1Guide) private$.populateConcordanceF1Explanation()
+            if (self$options$showPairedAgreementGuide) private$.populatePairedAgreementExplanation()
+            if (self$options$showSampleSizeGuide) private$.populateAgreementSampleSizeExplanation()
+            if (self$options$showRaterBiasGuide) private$.populateRaterBiasExplanation()
+            if (self$options$showBhapkarGuide) private$.populateBhapkarExplanation()
+            if (self$options$showStuartMaxwellGuide) private$.populateStuartMaxwellExplanation()
+            if (self$options$showPairwiseKappaGuide) private$.populatePairwiseKappaExplanation()
+            if (self$options$showGwetGuide) private$.populateGwetExplanation()
+            if (self$options$showPABAKGuide) private$.populatePABAKExplanation()
+
             return()
         } else {
             self$results$welcome$setVisible(FALSE)
-            if (nrow(self$data) == 0) stop("Data contains no (complete) rows")
+            if (nrow(self$data) == 0) {
+                self$results$irrtableHeading$setVisible(FALSE)
+                self$results$irrtable$setNote("error", "Data contains no (complete) rows. Please check your dataset.")
+                return()
+            }
 
             # Data preparation ----
             exct <- self$options$exct
@@ -9571,21 +9715,63 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 private$.populateLevelInfo(ratings)
             }
 
+            # Detect whether data is continuous (numeric, non-factor) ----
+            is_continuous <- all(sapply(ratings, function(x) is.numeric(x) && !is.factor(x) && !is.ordered(x)))
+            n_unique_vals <- max(sapply(ratings, function(x) length(unique(na.omit(x)))))
+
+            # Skip kappa for continuous data — kappa is only meaningful for categorical/ordinal data
+            if (is_continuous && n_unique_vals > 20) {
+                self$results$irrtableHeading$setVisible(FALSE)
+                self$results$irrtable$setVisible(FALSE)
+
+                # Check if any continuous-appropriate analyses are enabled
+                has_continuous_analysis <- self$options$icc || self$options$meanPearson ||
+                    self$options$linCCC || self$options$tdi || self$options$blandAltmanPlot ||
+                    self$options$kripp
+
+                if (!has_continuous_analysis) {
+                    # Show guidance when no appropriate analysis is enabled
+                    self$results$welcome$setVisible(TRUE)
+                    self$results$welcome$setContent(
+                        "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
+                        <div style='background: #fff3cd; border: 2px solid #856404; padding: 20px; margin-bottom: 20px;'>
+                        <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #856404;'>Continuous Data Detected</h2>
+                        <p style='margin: 0; font-size: 14px; color: #664d03;'>Your variables have many unique values (>20), indicating continuous measurements. Cohen's/Fleiss' Kappa requires categorical data and has been skipped.</p>
+                        </div>
+
+                        <div style='background: #f9f9f9; border-left: 4px solid #0d6efd; padding: 15px; margin-bottom: 20px;'>
+                        <h3 style='margin: 0 0 10px 0; color: #333; font-size: 16px;'>Recommended Analyses for Continuous Data</h3>
+                        <table style='width: 100%; border-collapse: collapse;'>
+                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Intraclass Correlation Coefficient - standard measure for continuous rater agreement</td></tr>
+                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Lin's CCC</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Concordance Correlation Coefficient - assesses both precision and accuracy (2 raters)</td></tr>
+                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Bland-Altman</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Limits of Agreement plot - visualizes systematic bias and agreement range (2 raters)</td></tr>
+                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>TDI</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Total Deviation Index - boundary within which a proportion of differences fall</td></tr>
+                        <tr><td style='padding: 8px;'><strong>Krippendorff's Alpha</strong></td><td style='padding: 8px;'>Works with any data type including continuous (interval/ratio level)</td></tr>
+                        </table>
+                        </div>
+
+                        <p style='font-size: 13px; color: #666;'>Enable these options from the panels on the left to analyze your continuous measurements.</p>
+                        </div>"
+                    )
+                }
+            } else {
+
+            self$results$irrtableHeading$setVisible(TRUE)
+
             # 2 raters: Cohen's kappa ----
             if (length(self$options$vars) == 2) {
                 xorder <- unlist(lapply(ratings, is.ordered))
 
                 if (wght %in% c("equal", "squared") && !all(xorder == TRUE)) {
-                    stop("Weighted kappa requires ordinal variables. Please select ordinal data or choose 'Unweighted'.")
-                }
-
-                if (exct == TRUE) {
-                    stop("Exact kappa requires at least 3 raters. Please add more rater variables or disable 'Exact Kappa'.")
-                }
-
-
-                # irr::kappa2 ----
-                if (nrow(na.omit(ratings)) > 0) {
+                    self$results$irrtable$setNote("error", "Weighted kappa requires ordinal variables. Please select ordinal data or choose 'Unweighted'.")
+                    result2 <- list(value = NA, method = "Weighted Cohen's Kappa (not computed - requires ordinal data)",
+                                    stat.name = "Kappa", statistic = NA, p.value = NA)
+                } else if (exct == TRUE) {
+                    self$results$irrtable$setNote("error", "Exact kappa requires at least 3 raters. Please add more rater variables or disable 'Exact Kappa'.")
+                    result2 <- list(value = NA, method = "Cohen's Kappa (not computed - exact requires 3+ raters)",
+                                    stat.name = "Kappa", statistic = NA, p.value = NA)
+                } else if (nrow(na.omit(ratings)) > 0) {
+                    # irr::kappa2 ----
                     result2 <- irr::kappa2(ratings = ratings, weight = wght)
                 } else {
                     result2 <- list(value = NA, stat.name = "Kappa", statistic = NA, p.value = NA)
@@ -9604,7 +9790,9 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             # Percentage agreement ----
             result1 <- irr::agree(ratings)
             if (!is.na(result1[["value"]]) && result1[["value"]] > 100) {
-                result1[["value"]] <- "Please check the data. It seems that observers do not agree on any cases"
+                result1[["value"]] <- NA
+                self$results$irrtable$setNote("data_error",
+                    "Unexpected agreement value > 100%. Please check the data.")
             }
 
             # Populate main results table ----
@@ -9633,11 +9821,15 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 )
             }
 
+            }  # end of categorical kappa block
+
             # Frequency tables (if requested) ----
             # Control visibility based on number of raters and sft option
             num_raters <- length(self$options$vars)
 
             if (self$options$sft) {
+                self$results$contingencyTableHeading$setVisible(TRUE)
+                if (self$options$showAbout) { private$.populateContingencyTableExplanation() }
                 # Show contingency table only for 2 raters
                 self$results$contingencyTable$setVisible(num_raters == 2)
 
@@ -9714,8 +9906,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 } else {
                     # For 3+ raters, show combination counts
                     freq_table <- ratings %>%
-                        dplyr::group_by_all() %>%
-                        dplyr::count() %>%
+                        dplyr::count(dplyr::across(dplyr::everything())) %>%
                         as.data.frame()
 
                     # Create jamovi table with dynamic columns
@@ -9782,13 +9973,13 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }
 
             # Weighted Kappa Guide (if using weights) ----
-            if (wght != "unweighted") {
+            if (wght != "unweighted" && !(is_continuous && n_unique_vals > 20)) {
                 weight_guide <- private$.createWeightedKappaGuide(wght)
                 self$results$weightedKappaGuide$setContent(weight_guide)
             }
 
             # Natural-language summary (if requested) ----
-            if (self$options$showSummary) {
+            if (self$options$showSummary && exists("result1") && exists("result2")) {
                 summary_text <- private$.createSummary(result1, result2, wght, exct)
                 self$results$summary$setContent(summary_text)
             }
@@ -9805,26 +9996,56 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
 
 
+        private$.checkpoint()
+
         # Krippendorff's Alpha (if requested) ----
+        if (self$options$kripp || self$options$showKrippGuide) {
+            self$results$krippTableHeading$setVisible(TRUE)
+        }
+        if (self$options$showKrippGuide) {
+            private$.populateKrippExplanation()
+        }
         if (self$options$kripp) {
             # Convert ratings data frame to matrix
             ratings_matrix <- as.matrix(ratings)
 
             # Ensure numeric conversion if needed
             if (!is.numeric(ratings_matrix)) {
-                # If categorical/factor data, convert to numeric codes
-                ratings_matrix <- matrix(
-                    as.numeric(factor(ratings_matrix)),
-                    nrow = nrow(ratings_matrix),
-                    ncol = ncol(ratings_matrix)
-                )
+                # Preserve original factor level ordering (critical for ordinal method)
+                all_levels <- NULL
+                for (col_idx in seq_len(ncol(ratings))) {
+                    col_data <- ratings[[col_idx]]
+                    if (is.factor(col_data) || is.ordered(col_data)) {
+                        if (is.null(all_levels)) {
+                            all_levels <- levels(col_data)
+                        } else {
+                            new_levels <- setdiff(levels(col_data), all_levels)
+                            all_levels <- c(all_levels, new_levels)
+                        }
+                    }
+                }
+
+                if (!is.null(all_levels)) {
+                    ratings_matrix <- matrix(
+                        as.numeric(factor(ratings_matrix, levels = all_levels)),
+                        nrow = nrow(ratings_matrix),
+                        ncol = ncol(ratings_matrix)
+                    )
+                } else {
+                    # Fallback for character data: alphabetical
+                    ratings_matrix <- matrix(
+                        as.numeric(factor(ratings_matrix)),
+                        nrow = nrow(ratings_matrix),
+                        ncol = ncol(ratings_matrix)
+                    )
+                }
             }
 
             # Add error handling
             tryCatch({
                 # Calculate Krippendorff's alpha
                 kripp_result <- irr::kripp.alpha(
-                    ratings_matrix,
+                    t(ratings_matrix),
                     method = self$options$krippMethod
                 )
 
@@ -9838,15 +10059,15 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 # Calculate bootstrap CI if requested
                 if (self$options$bootstrap) {
-                    set.seed(123) # for reproducibility
-                    n_boot <- 1000
-                    alpha_boots <- numeric(n_boot)
+                    set.seed(42) # consistent with other bootstraps in this module
+                    n_boot <- self$options$nBoot
+                    alpha_boots <- rep(NA_real_, n_boot)
 
                     for(i in 1:n_boot) {
                         boot_indices <- sample(1:nrow(ratings_matrix), replace = TRUE)
-                        boot_data <- ratings_matrix[boot_indices,]
+                        boot_data <- ratings_matrix[boot_indices, , drop = FALSE]
 
-                        boot_alpha <- try(irr::kripp.alpha(boot_data,
+                        boot_alpha <- try(irr::kripp.alpha(t(boot_data),
                                                            method = self$options$krippMethod)$value,
                                           silent = TRUE)
 
@@ -9855,12 +10076,27 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         }
                     }
 
-                    # Calculate 95% confidence intervals
-                    ci <- quantile(alpha_boots, c(0.025, 0.975), na.rm = TRUE)
+                    # Calculate confidence intervals using confLevel
+                    kripp_alpha_level <- 1 - self$options$confLevel
+                    ci <- quantile(alpha_boots, c(kripp_alpha_level/2, 1 - kripp_alpha_level/2), na.rm = TRUE)
 
                     # Add CI values to list
                     values_list$ci_lower <- ci[1]
                     values_list$ci_upper <- ci[2]
+                }
+
+                # Interpretation (Krippendorff 2004 thresholds)
+                alpha_val <- kripp_result$value
+                if (is.na(alpha_val) || !is.finite(alpha_val)) {
+                    values_list$interpretation <- "Cannot interpret"
+                } else if (alpha_val < 0) {
+                    values_list$interpretation <- "Below chance agreement"
+                } else if (alpha_val < 0.667) {
+                    values_list$interpretation <- "Insufficient agreement - discard variable"
+                } else if (alpha_val < 0.80) {
+                    values_list$interpretation <- "Tentative conclusions only"
+                } else {
+                    values_list$interpretation <- "Reliable agreement"
                 }
 
                 # Populate results table
@@ -9877,7 +10113,8 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
                     subjects = nrow(ratings_matrix),
                     raters = ncol(ratings_matrix),
-                    alpha = NA
+                    alpha = NA,
+                    interpretation = "Error in calculation"
                 )
 
                 if (self$options$bootstrap) {
@@ -9894,197 +10131,333 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             })
         }
 
+        private$.checkpoint()
+
         # Light's Kappa (if requested) ----
-        if (self$options$lightKappa) {
+        if (self$options$lightKappa || self$options$showLightKappaGuide || self$options$finn || self$options$showFinnGuide || self$options$kendallW || self$options$showKendallWGuide || self$options$robinsonA || self$options$showRobinsonAGuide) {
+            self$results$lightKappaTableHeading$setVisible(TRUE)
+        }
+        if (self$options$showLightKappaGuide) {
             private$.populateLightKappaExplanation()
-            private$.calculateLightKappa(ratings)
+        }
+        if (self$options$lightKappa) {
+            if (is_continuous && n_unique_vals > 20) {
+                self$results$lightKappaTable$setNote("type_error",
+                    "Light's Kappa requires categorical data. Your data appears to be continuous. Consider using ICC or Lin's CCC instead.")
+            } else {
+                private$.calculateLightKappa(ratings)
+            }
         }
 
+        private$.checkpoint()
+
         # Finn Coefficient (if requested) ----
-        if (self$options$finn) {
+        if (self$options$showFinnGuide) {
             private$.populateFinnExplanation()
+        }
+        if (self$options$finn) {
+            if (is_continuous && n_unique_vals > 20) {
+                self$results$finnTable$setNote("type_error",
+                    "Finn Coefficient is designed for categorical/ordinal data. Your data appears to be continuous. Results may not be meaningful.")
+            }
             private$.calculateFinn(ratings)
         }
 
+        private$.checkpoint()
+
         # Kendall's W (if requested) ----
-        if (self$options$kendallW) {
+        if (self$options$showKendallWGuide) {
             private$.populateKendallWExplanation()
+        }
+        if (self$options$kendallW) {
             private$.calculateKendallW(ratings)
         }
 
+        private$.checkpoint()
+
         # Robinson's A (if requested) ----
-        if (self$options$robinsonA || self$options$showRobinsonAGuide) {
+        if (self$options$showRobinsonAGuide) {
             private$.populateRobinsonAExplanation()
         }
         if (self$options$robinsonA) {
             private$.calculateRobinsonA(ratings)
         }
 
+        private$.checkpoint()
+
         # Mean Spearman Rho (if requested) ----
-        if (self$options$meanSpearman || self$options$showMeanSpearmanGuide) {
+        if (self$options$showMeanSpearmanGuide) {
             private$.populateMeanSpearmanExplanation()
         }
         if (self$options$meanSpearman) {
             private$.calculateMeanSpearman(ratings)
         }
 
+        private$.checkpoint()
+
         # Rater Bias Test (if requested) ----
-        if (self$options$raterBias) {
+        if (self$options$raterBias || self$options$showRaterBiasGuide || self$options$bhapkar || self$options$showBhapkarGuide || self$options$stuartMaxwell || self$options$showStuartMaxwellGuide) {
+            if (is_continuous && n_unique_vals > 20) {
+                if (self$options$raterBias) self$results$raterBiasTable$setNote("type_error",
+                    "Rater Bias test requires categorical data. Your data appears to be continuous.")
+                if (self$options$bhapkar) self$results$bhapkarTable$setNote("type_error",
+                    "Bhapkar test requires categorical data. Your data appears to be continuous.")
+                if (self$options$stuartMaxwell) self$results$stuartMaxwellTable$setNote("type_error",
+                    "Stuart-Maxwell test requires categorical data. Your data appears to be continuous.")
+            } else {
+                self$results$raterBiasHeading$setVisible(TRUE)
+            }
+        }
+        if (self$options$showRaterBiasGuide && !(is_continuous && n_unique_vals > 20)) {
             private$.populateRaterBiasExplanation()
+        }
+        if (self$options$raterBias && !(is_continuous && n_unique_vals > 20)) {
             private$.calculateRaterBias(ratings)
         }
 
+        private$.checkpoint()
+
         # Bhapkar Test (if requested) ----
-        if (self$options$bhapkar) {
+        if (self$options$showBhapkarGuide && !(is_continuous && n_unique_vals > 20)) {
             private$.populateBhapkarExplanation()
+        }
+        if (self$options$bhapkar && !(is_continuous && n_unique_vals > 20)) {
             private$.calculateBhapkar(ratings)
         }
 
+        private$.checkpoint()
+
         # Stuart-Maxwell Test (if requested) ----
-        if (self$options$stuartMaxwell) {
+        if (self$options$showStuartMaxwellGuide && !(is_continuous && n_unique_vals > 20)) {
             private$.populateStuartMaxwellExplanation()
+        }
+        if (self$options$stuartMaxwell && !(is_continuous && n_unique_vals > 20)) {
             private$.calculateStuartMaxwell(ratings)
         }
 
-        # Pairwise Kappa Analysis (if requested) ----
-        if (self$options$pairwiseKappa) {
-            private$.populatePairwiseKappaExplanation()
+        private$.checkpoint()
 
-            # Get reference rater data
-            if (!is.null(self$options$referenceRater)) {
-                reference_ratings <- jmvcore::select(mydata, self$options$referenceRater)
-                private$.calculatePairwiseKappa(ratings, reference_ratings)
+        # Pairwise Kappa Analysis (if requested) ----
+        if (self$options$showPairwiseKappaGuide && !(is_continuous && n_unique_vals > 20)) {
+            private$.populatePairwiseKappaExplanation()
+        }
+        if (self$options$pairwiseKappa) {
+            if (is_continuous && n_unique_vals > 20) {
+                self$results$pairwiseKappaTable$setNote("type_error",
+                    "Pairwise Kappa requires categorical data. Your data appears to be continuous. Consider using ICC or Lin's CCC instead.")
             } else {
-                self$results$pairwiseKappaTable$setNote(
-                    "error",
-                    "Please select a reference rater variable to perform pairwise kappa analysis."
-                )
+                # Get reference rater data
+                if (!is.null(self$options$referenceRater)) {
+                    reference_ratings <- jmvcore::select(mydata, self$options$referenceRater)
+                    private$.calculatePairwiseKappa(ratings, reference_ratings)
+                } else {
+                    self$results$pairwiseKappaTable$setNote(
+                        "error",
+                        "Please select a reference rater variable to perform pairwise kappa analysis."
+                    )
+                }
             }
         }
 
+        private$.checkpoint()
+
         # Gwet's AC1/AC2 (if requested) ----
-        if (self$options$gwet) {
+        if (self$options$gwet || self$options$showGwetGuide || self$options$pabak || self$options$showPABAKGuide) {
+            if (is_continuous && n_unique_vals > 20) {
+                if (self$options$gwet) self$results$gwetTable$setNote("type_error",
+                    "Gwet's AC requires categorical data. Your data appears to be continuous. Consider using ICC or Lin's CCC instead.")
+                if (self$options$pabak) self$results$pabakTable$setNote("type_error",
+                    "PABAK requires categorical data. Your data appears to be continuous.")
+            } else {
+                self$results$gwetHeading$setVisible(TRUE)
+            }
+        }
+        if (self$options$showGwetGuide && !(is_continuous && n_unique_vals > 20)) {
             private$.populateGwetExplanation()
+        }
+        if (self$options$gwet && !(is_continuous && n_unique_vals > 20)) {
             private$.calculateGwetAC(ratings)
         }
 
+        private$.checkpoint()
+
+        # PABAK & Prevalence/Bias Indices (if requested) ----
+        if (self$options$showPABAKGuide && !(is_continuous && n_unique_vals > 20)) {
+            private$.populatePABAKExplanation()
+        }
+        if (self$options$pabak && !(is_continuous && n_unique_vals > 20)) {
+            private$.calculatePABAK(ratings)
+        }
+
+        private$.checkpoint()
+
         # ICC (if requested) ----
-        if (self$options$icc) {
+        if (self$options$icc || self$options$showICCGuide || self$options$meanPearson || self$options$linCCC || self$options$tdi) {
+            self$results$iccHeading$setVisible(TRUE)
+        }
+        if (self$options$showICCGuide) {
             private$.populateICCExplanation()
+        }
+        if (self$options$icc) {
             private$.calculateICC(ratings)
         }
 
+        private$.checkpoint()
+
         # Mean Pearson Correlation (if requested) ----
-        if (self$options$meanPearson || self$options$showMeanPearsonGuide) {
+        if (self$options$showMeanPearsonGuide) {
             private$.populateMeanPearsonExplanation()
         }
         if (self$options$meanPearson) {
             private$.calculateMeanPearson(ratings)
         }
 
+        private$.checkpoint()
+
         # Lin's Concordance Correlation Coefficient (if requested) ----
-        if (self$options$linCCC || self$options$showLinCCCGuide) {
+        if (self$options$showLinCCCGuide) {
             private$.populateLinCCCExplanation()
         }
         if (self$options$linCCC) {
             private$.calculateLinCCC(ratings)
         }
 
+        private$.checkpoint()
+
         # Total Deviation Index (if requested) ----
-        if (self$options$tdi || self$options$showTDIGuide) {
+        if (self$options$showTDIGuide) {
             private$.populateTDIExplanation()
         }
         if (self$options$tdi) {
             private$.calculateTDI(ratings)
         }
 
+        private$.checkpoint()
+
         # Specific Agreement Indices (if requested) ----
         if (self$options$specificAgreement || self$options$showSpecificAgreementGuide) {
+            self$results$specificAgreementHeading$setVisible(TRUE)
+        }
+        if (self$options$showSpecificAgreementGuide) {
             private$.populateSpecificAgreementExplanation()
         }
         if (self$options$specificAgreement) {
             private$.calculateSpecificAgreement(ratings)
         }
 
+        private$.checkpoint()
+
         # Agreement Heatmap (if requested) ----
-        if (self$options$agreementHeatmap || self$options$showAgreementHeatmapGuide) {
+        if (self$options$showAgreementHeatmapGuide) {
             private$.populateAgreementHeatmapExplanation()
         }
         if (self$options$agreementHeatmap) {
             private$.populateAgreementHeatmap(ratings)
         }
 
+        private$.checkpoint()
+
         # Rater Profile Plots (if requested) ----
-        if (self$options$raterProfiles || self$options$showRaterProfileGuide) {
+        if (self$options$showRaterProfileGuide) {
             private$.populateRaterProfileExplanation()
         }
         if (self$options$raterProfiles) {
             private$.populateRaterProfiles(ratings)
         }
 
+        private$.checkpoint()
+
         # Agreement by Subgroup (if requested) ----
-        if (self$options$agreementBySubgroup || self$options$showSubgroupGuide) {
+        if (self$options$showSubgroupGuide) {
             private$.populateSubgroupExplanation()
         }
         if (self$options$agreementBySubgroup) {
             private$.calculateAgreementBySubgroup(ratings)
         }
 
+        private$.checkpoint()
+
         # Rater Clustering (if requested) ----
-        if (self$options$raterClustering || self$options$showRaterClusterGuide) {
+        if (self$options$raterClustering || self$options$showRaterClusterGuide || self$options$caseClustering || self$options$showCaseClusterGuide) {
+            self$results$raterClusterHeading$setVisible(TRUE)
+        }
+        if (self$options$showRaterClusterGuide) {
             private$.populateRaterClusterExplanation()
         }
         if (self$options$raterClustering) {
             private$.performRaterClustering(ratings)
         }
 
+        private$.checkpoint()
+
         # Case Clustering (if requested) ----
-        if (self$options$caseClustering || self$options$showCaseClusterGuide) {
+        if (self$options$showCaseClusterGuide) {
             private$.populateCaseClusterExplanation()
         }
         if (self$options$caseClustering) {
             private$.performCaseClustering(ratings)
         }
 
+        private$.checkpoint()
+
         # Maxwell's Random Error Index (if requested) ----
-        if (self$options$maxwellRE || self$options$showMaxwellREGuide) {
+        if (self$options$maxwellRE || self$options$showMaxwellREGuide || self$options$interIntraRater || self$options$showInterIntraRaterGuide || self$options$iota || self$options$showIotaGuide) {
+            self$results$maxwellREHeading$setVisible(TRUE)
+        }
+        if (self$options$showMaxwellREGuide) {
             private$.populateMaxwellREExplanation()
         }
         if (self$options$maxwellRE) {
             private$.calculateMaxwellRE(ratings)
         }
 
+        private$.checkpoint()
+
         # Inter/Intra-Rater Reliability (if requested) ----
-        if (self$options$interIntraRater || self$options$showInterIntraRaterGuide) {
+        if (self$options$showInterIntraRaterGuide) {
             private$.populateInterIntraRaterExplanation()
         }
         if (self$options$interIntraRater) {
             private$.calculateInterIntraRater(ratings)
         }
 
+        private$.checkpoint()
+
         # Iota Coefficient (if requested) ----
-        if (self$options$iota) {
+        if (self$options$showIotaGuide) {
             private$.populateIotaExplanation()
+        }
+        if (self$options$iota) {
             private$.calculateIota(ratings)
         }
 
+        private$.checkpoint()
+
         # Consensus Variable Calculation (if requested) ----
+        if (self$options$consensusVar || self$options$loaVariable) {
+            self$results$computedVariablesHeading$setVisible(TRUE)
+        }
         if (self$options$consensusVar) {
             private$.createConsensusVariable(ratings)
         }
+
+        private$.checkpoint()
 
         # Level of Agreement Variable (if requested) ----
         if (self$options$loaVariable) {
             private$.calculateLevelOfAgreement(ratings)
         }
 
-        # Hierarchical/Multilevel Kappa (if requested) ----
-        if (self$options$hierarchicalKappa) {
-            # Populate explanation if requested
-            if (self$options$showAbout) {
-                private$.populateHierarchicalExplanation()
-            }
+        private$.checkpoint()
 
+        # Hierarchical/Multilevel Kappa (if requested) ----
+        if (self$options$hierarchicalKappa || self$options$showHierarchicalGuide) {
+            self$results$hierarchicalHeading$setVisible(TRUE)
+        }
+        if (self$options$showHierarchicalGuide) {
+            private$.populateHierarchicalExplanation()
+        }
+        if (self$options$hierarchicalKappa) {
             # Get cluster variable data
             cluster_data <- NULL
             if (!is.null(self$options$clusterVariable)) {
@@ -10094,58 +10467,86 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             private$.calculateHierarchicalKappa(ratings, cluster_data)
         }
 
+        private$.checkpoint()
+
+        # Bland-Altman analysis (if requested) ----
+        if (self$options$blandAltmanPlot || self$options$showBlandAltmanGuide) {
+            self$results$blandAltmanHeading$setVisible(TRUE)
+        }
+        if (self$options$showBlandAltmanGuide) {
+            private$.populateBlandAltmanExplanation()
+        }
+        if (self$options$blandAltmanPlot) {
+            private$.populateBlandAltman(ratings)
+        }
+
+        private$.checkpoint()
+
         # Mixed-Effects Condition Comparison (if requested) ----
+        if (self$options$mixedEffectsComparison || self$options$showMixedEffectsGuide || self$options$confusionMatrix || self$options$showConfusionMatrixGuide || self$options$bootstrapCI || self$options$showBootstrapCIGuide || self$options$multiAnnotatorConcordance || self$options$showConcordanceF1Guide) {
+            self$results$advancedHeading$setVisible(TRUE)
+        }
+        if (self$options$showMixedEffectsGuide) {
+            private$.populateMixedEffectsExplanation()
+        }
         if (self$options$mixedEffectsComparison) {
             condition_data <- NULL
             if (!is.null(self$options$conditionVariable)) {
                 condition_data <- jmvcore::select(mydata, self$options$conditionVariable)
             }
-
             private$.calculateMixedEffectsComparison(ratings, condition_data, mydata)
         }
 
-        # Bland-Altman analysis (if requested) ----
-        if (self$options$blandAltmanPlot) {
-            private$.populateBlandAltman(ratings)
-        }
+        private$.checkpoint()
 
         # Multi-Class Confusion Matrix (if requested) ----
+        if (self$options$showConfusionMatrixGuide) {
+            private$.populateConfusionMatrixExplanation()
+        }
         if (self$options$confusionMatrix) {
-            if (self$options$showAbout) {
-                private$.populateConfusionMatrixExplanation()
-            }
             private$.calculateConfusionMatrix(ratings)
         }
 
+        private$.checkpoint()
+
         # Bootstrap Confidence Intervals (if requested) ----
+        if (self$options$showBootstrapCIGuide) {
+            private$.populateBootstrapCIExplanation()
+        }
         if (self$options$bootstrapCI) {
-            if (self$options$showAbout) {
-                private$.populateBootstrapCIExplanation()
-            }
             private$.calculateBootstrapCI(ratings)
         }
 
+        private$.checkpoint()
+
         # Multi-Annotator Concordance F1 (if requested) ----
+        if (self$options$showConcordanceF1Guide) {
+            private$.populateConcordanceF1Explanation()
+        }
         if (self$options$multiAnnotatorConcordance) {
-            if (self$options$showAbout) {
-                private$.populateConcordanceF1Explanation()
-            }
             private$.calculateConcordanceF1(ratings)
         }
 
+        private$.checkpoint()
+
         # Paired Agreement Comparison (if requested) ----
+        if (self$options$pairedAgreementTest || self$options$showPairedAgreementGuide || self$options$agreementSampleSize || self$options$showSampleSizeGuide) {
+            self$results$pairedAgreementHeading$setVisible(TRUE)
+        }
+        if (self$options$showPairedAgreementGuide) {
+            private$.populatePairedAgreementExplanation()
+        }
         if (self$options$pairedAgreementTest) {
-            if (self$options$showAbout) {
-                private$.populatePairedAgreementExplanation()
-            }
             private$.calculatePairedAgreementComparison(ratings)
         }
 
+        private$.checkpoint()
+
         # Sample Size for Agreement Studies (if requested) ----
+        if (self$options$showSampleSizeGuide) {
+            private$.populateAgreementSampleSizeExplanation()
+        }
         if (self$options$agreementSampleSize) {
-            if (self$options$showAbout) {
-                private$.populateAgreementSampleSizeExplanation()
-            }
             private$.calculateAgreementSampleSize()
         }
 
@@ -10153,87 +10554,6 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
     ),  # End of private list
 
-    public = list(
-        # #' @description
-        # #' Generate R source code for Interrater Reliability analysis
-        # #' @return Character string with R syntax for reproducible analysis outside jamovi
-        # TEMPORARILY COMMENTED OUT TO PREVENT ERRORS
-        # asSource = function() {
-        #     vars <- self$options$vars
-        #
-        #     # Return empty string if insufficient variables
-        #     if (is.null(vars) || length(vars) < 2) {
-        #         return('')
-        #     }
+    public = list()
 
-        #             # Escape variable names that need backticks
-        #             vars_escaped <- sapply(vars, function(v) {
-        #                 private$.escapeVariableName(v)
-        #             })
-        # 
-        #             # Build vars argument for function call
-        #             # Each variable name is quoted, with backticks if needed
-        #             vars_arg <- paste0('vars = c(',
-        #                              paste(sapply(vars_escaped, function(v) {
-        #                                  # If already has backticks, preserve them in quotes
-        #                                  if (grepl("^`.*`$", v)) {
-        #                                      paste0('"', v, '"')
-        #                                  } else {
-        #                                      paste0('"', v, '"')
-        #                                  }
-        #                              }), collapse = ', '),
-        #                              ')')
-        # 
-        #             # Build other arguments
-        #             args_list <- c(vars_arg)
-        # 
-        #             # Add weighted kappa option if not default
-        #             if (self$options$wght != "unweighted") {
-        #                 wght_arg <- paste0('wght = "', self$options$wght, '"')
-        #                 args_list <- c(args_list, wght_arg)
-        #             }
-        # 
-        #             # Add exact kappa option if enabled
-        #             if (self$options$exct) {
-        #                 args_list <- c(args_list, 'exct = TRUE')
-        #             }
-        # 
-        #             # Add Krippendorff's alpha options if enabled
-        #             if (self$options$kripp) {
-        #                 args_list <- c(args_list, 'kripp = TRUE')
-        # 
-        #                 if (self$options$krippMethod != "nominal") {
-        #                     args_list <- c(args_list, paste0('krippMethod = "', self$options$krippMethod, '"'))
-        #                 }
-        # 
-        #                 if (self$options$bootstrap) {
-        #                     args_list <- c(args_list, 'bootstrap = TRUE')
-        #                 }
-        #             }
-        # 
-        #             # Add display options if enabled
-        #             if (self$options$sft) {
-        #                 args_list <- c(args_list, 'sft = TRUE')
-        #             }
-        # 
-        #             if (self$options$showSummary) {
-        #                 args_list <- c(args_list, 'showSummary = TRUE')
-        #             }
-        # 
-        #             # Build final R code
-        #             code <- paste0(
-        #                 '# Interrater Reliability Analysis\n',
-        #                 '# Generated by ClinicoPath jamovi module\n\n',
-        #                 'library(ClinicoPath)\n\n',
-        #                 '# Load your data\n',
-        #                 '# data <- read.csv("your_data.csv")\n\n',
-        #                 'agreement(\n',
-        #                 '    data = data,\n',
-        #                 '    ', paste(args_list, collapse = ',\n    '),
-        #                 '\n)'
-        #             )
-        #
-        #     return(code)
-        # }
-    )  # End of public list
     )

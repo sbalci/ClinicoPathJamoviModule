@@ -26,7 +26,16 @@ items:
     - name: simpleResultsTable
       title: ROC Analysis Summary
       type: Table
+      rows: 0
       visible: true
+      clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - direction
+          - method
+          - metric
       columns:
         - name: variable
           title: Variable
@@ -34,7 +43,7 @@ items:
         - name: auc
           title: AUC
           type: number
-          format: zto,pvalue
+          format: zto
         - name: ci_lower
           title: 95% CI Lower
           type: number
@@ -51,7 +60,15 @@ items:
     - name: clinicalInterpretationTable
       title: Clinical Interpretation
       type: Table
+      rows: 0
       visible: (clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)
+      clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - direction
+          - clinicalMode
       columns:
         - name: variable
           title: Test
@@ -146,6 +163,7 @@ items:
     - name: thresholdTable
       title: Detailed Threshold Performance
       type: Table
+      rows: 0
       visible: (showThresholdTable)
       clearWith:
         - dependentVars
@@ -197,6 +215,7 @@ items:
     - name: fixedSensSpecTable
       title: Fixed Sensitivity/Specificity Results
       type: Table
+      rows: 0
       visible: (fixedSensSpecAnalysis)
       clearWith:
         - dependentVars
@@ -260,7 +279,16 @@ items:
     - name: aucSummaryTable
       title: Area Under the ROC Curve
       type: Table
+      rows: 0
       visible: true
+      clearWith:
+          - dependentVars
+          - classVar
+          - positiveClass
+          - subGroup
+          - direction
+          - ciMethod
+          - confidenceLevel
       columns:
         - name: variable
           title: Variable
@@ -285,6 +313,7 @@ items:
     - name: delongComparisonTable
       title: DeLong Test Pairwise Comparisons
       type: Table
+      rows: 0
       visible: (delongTest)
       clearWith:
         - dependentVars
@@ -470,6 +499,7 @@ items:
     - name: idiTable
       title: Integrated Discrimination Improvement (IDI)
       type: Table
+      rows: 0
       visible: (calculateIDI)
       clearWith:
         - dependentVars
@@ -507,6 +537,7 @@ items:
     - name: nriTable
       title: Net Reclassification Index (NRI)
       type: Table
+      rows: 0
       visible: (calculateNRI)
       clearWith:
         - dependentVars
@@ -557,6 +588,7 @@ items:
     - name: effectSizeTable
       title: Effect Size Analysis
       type: Table
+      rows: 0
       visible: (effectSizeAnalysis)
       clearWith:
         - dependentVars
@@ -591,13 +623,15 @@ items:
     - name: powerAnalysisTable
       title: Power Analysis Results
       type: Table
+      rows: 0
       visible: (powerAnalysis)
       clearWith:
         - dependentVars
         - classVar
         - positiveClass
         - targetPower
-        - targetEffectSize
+        - expectedAUCDifference
+        - significanceLevel
       columns:
         - name: variable
           title: Variable
@@ -624,33 +658,34 @@ items:
         - Faul2007
 
     - name: bayesianROCTable
-      title: Bayesian ROC Analysis
+      title: Bootstrap ROC Analysis with Prior Weighting
       type: Table
+      rows: 0
       visible: (bayesianAnalysis)
       clearWith:
         - dependentVars
         - classVar
         - positiveClass
-        - bayesianPrior
-        - mcmcSamples
+        - priorAUC
+        - priorPrecision
       columns:
         - name: variable
           title: Variable
           type: text
         - name: posterior_auc_mean
-          title: Posterior AUC Mean
+          title: Weighted Bootstrap AUC
           type: number
           format: zto
         - name: credible_lower
-          title: 95% Credible Lower
+          title: 95% Bootstrap CI Lower
           type: number
           format: zto
         - name: credible_upper
-          title: 95% Credible Upper
+          title: 95% Bootstrap CI Upper
           type: number
           format: zto
         - name: bayes_factor
-          title: Bayes Factor
+          title: Bootstrap Evidence Ratio
           type: number
           format: zto
         - name: evidence_strength
@@ -666,13 +701,15 @@ items:
     - name: clinicalUtilityTable
       title: Clinical Utility Analysis
       type: Table
+      rows: 0
       visible: (clinicalUtilityAnalysis)
       clearWith:
         - dependentVars
         - classVar
         - positiveClass
-        - treatmentBenefit
-        - treatmentHarm
+        - treatmentThreshold
+        - harmBenefitRatio
+        - interventionCost
       columns:
         - name: variable
           title: Variable
@@ -717,6 +754,7 @@ items:
     - name: metaAnalysisTable
       title: Meta-Analysis Results
       type: Table
+      rows: 0
       visible: (metaAnalysis)
       clearWith:
         - dependentVars
@@ -758,43 +796,18 @@ items:
         - Higgins2003
         - DerSimonian1986
 
-    - name: sensitivityAnalysisTable
-      title: Sensitivity Analysis
-      type: Table
-      visible: false
-      clearWith:
-        - dependentVars
-        - classVar
-        - positiveClass
-      columns:
-        - name: scenario
-          title: Scenario
-          type: text
-        - name: auc_change
-          title: AUC Change
-          type: number
-          format: zto
-        - name: percent_change
-          title: Percent Change
-          type: number
-          format: pc
-        - name: robustness
-          title: Robustness
-          type: text
-        - name: clinical_impact
-          title: Clinical Impact
-          type: text
-
     - name: decisionCurveTable
       title: Decision Curve Analysis
       type: Table
+      rows: 0
       visible: (clinicalUtilityAnalysis)
       clearWith:
         - dependentVars
         - classVar
         - positiveClass
-        - treatmentBenefit
-        - treatmentHarm
+        - treatmentThreshold
+        - harmBenefitRatio
+        - interventionCost
       columns:
         - name: variable
           title: Variable
@@ -823,6 +836,7 @@ items:
     - name: partialAUCTable
       title: Partial AUC Results
       type: Table
+      rows: 0
       visible: (partialAUC)
       clearWith:
         - dependentVars
@@ -859,6 +873,7 @@ items:
     - name: bootstrapCITable
       title: Bootstrap Confidence Intervals
       type: Table
+      rows: 0
       visible: (bootstrapCI)
       clearWith:
         - dependentVars
@@ -888,6 +903,7 @@ items:
     - name: rocComparisonTable
       title: Classifier Performance Comparison
       type: Table
+      rows: 0
       visible: (compareClassifiers)
       clearWith:
         - dependentVars
@@ -953,10 +969,11 @@ items:
           - classVar
           - positiveClass
           - targetPower
-          - targetEffectSize
+          - expectedAUCDifference
+          - significanceLevel
 
     - name: bayesianTracePlot
-      title: Bayesian MCMC Traces
+      title: Bootstrap AUC Traces
       type: Array
       visible: (bayesianAnalysis)
       template:
@@ -968,7 +985,8 @@ items:
           - dependentVars
           - classVar
           - positiveClass
-          - mcmcSamples
+          - priorAUC
+          - priorPrecision
 
     - name: decisionCurvePlot
       title: Decision Curve Analysis
@@ -983,8 +1001,9 @@ items:
           - dependentVars
           - classVar
           - positiveClass
-          - treatmentBenefit
-          - treatmentHarm
+          - treatmentThreshold
+          - harmBenefitRatio
+          - interventionCost
 
     - name: metaAnalysisForestPlot
       title: Meta-Analysis Forest Plot
@@ -995,20 +1014,6 @@ items:
         width: 800
         height: 600
         renderFun: .plotMetaAnalysisForest
-        clearWith:
-          - dependentVars
-          - classVar
-          - positiveClass
-
-    - name: sensitivityAnalysisPlot
-      title: Sensitivity Analysis Plot
-      type: Array
-      visible: false
-      template:
-        type: Image
-        width: 650
-        height: 450
-        renderFun: .plotSensitivityAnalysis
         clearWith:
           - dependentVars
           - classVar

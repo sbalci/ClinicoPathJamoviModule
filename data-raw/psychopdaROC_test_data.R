@@ -181,6 +181,69 @@ psychopdaROC_large <- tibble(
   risk_category = sample(c("Low", "Intermediate", "High"), n_large, replace = TRUE)
 )
 
+# ═══ 18. ADVANCED FEATURES DATA (Meta-analysis, IDI/NRI, Bayesian, Clinical Utility) ═══
+n_advanced <- 250
+psychopdaROC_advanced <- tibble(
+  patient_id = paste0("PT", sprintf("%03d", 1:n_advanced)),
+  diagnosis = factor(sample(c("Positive", "Negative"), n_advanced, replace = TRUE, prob = c(0.35, 0.65)),
+                     levels = c("Negative", "Positive")),
+  # 5 markers with varying AUC for meta-analysis (requires 3+)
+  marker_excellent = rnorm(n_advanced, ifelse(diagnosis == "Positive", 90, 45), 12),
+  marker_good = rnorm(n_advanced, ifelse(diagnosis == "Positive", 80, 50), 15),
+  marker_moderate = rnorm(n_advanced, ifelse(diagnosis == "Positive", 70, 55), 18),
+  marker_fair = rnorm(n_advanced, ifelse(diagnosis == "Positive", 65, 55), 20),
+  marker_poor = rnorm(n_advanced, ifelse(diagnosis == "Positive", 58, 55), 22),
+  # Subgroup for stratified analysis
+  site = factor(sample(c("Center_A", "Center_B", "Center_C"), n_advanced, replace = TRUE)),
+  risk_group = factor(sample(c("Low", "High"), n_advanced, replace = TRUE))
+)
+
+# ═══ Convert all class variables to factors for jamovi compatibility ═══
+psychopdaROC_test$disease_status <- factor(psychopdaROC_test$disease_status,
+                                            levels = c("Healthy", "Disease"))
+psychopdaROC_test$sex <- factor(psychopdaROC_test$sex)
+psychopdaROC_screening$cancer <- factor(psychopdaROC_screening$cancer,
+                                         levels = c("No_Cancer", "Cancer"))
+psychopdaROC_screening$risk_factors <- factor(psychopdaROC_screening$risk_factors)
+psychopdaROC_cardiac$mi_status <- factor(psychopdaROC_cardiac$mi_status,
+                                          levels = c("No_MI", "MI"))
+psychopdaROC_multibiomarker$diagnosis <- factor(psychopdaROC_multibiomarker$diagnosis,
+                                                  levels = c("Negative", "Positive"))
+psychopdaROC_subgroup$disease <- factor(psychopdaROC_subgroup$disease,
+                                         levels = c("Healthy", "Disease"))
+psychopdaROC_subgroup$age_group <- factor(psychopdaROC_subgroup$age_group)
+psychopdaROC_subgroup$sex <- factor(psychopdaROC_subgroup$sex)
+psychopdaROC_perfect$condition <- factor(psychopdaROC_perfect$condition,
+                                          levels = c("Negative", "Positive"))
+psychopdaROC_poor$status <- factor(psychopdaROC_poor$status,
+                                    levels = c("Control", "Case"))
+psychopdaROC_overlap$diagnosis <- factor(psychopdaROC_overlap$diagnosis,
+                                          levels = c("Non_Diseased", "Diseased"))
+psychopdaROC_rare$rare_disease <- factor(psychopdaROC_rare$rare_disease,
+                                          levels = c("No_Disease", "Disease"))
+psychopdaROC_costbenefit$outcome <- factor(psychopdaROC_costbenefit$outcome,
+                                            levels = c("No_Event", "Event"))
+psychopdaROC_spectrum$binary_status <- factor(psychopdaROC_spectrum$binary_status,
+                                               levels = c("Negative", "Positive"))
+psychopdaROC_spectrum$severity <- factor(psychopdaROC_spectrum$severity,
+                                          levels = c("Mild", "Moderate", "Severe"))
+psychopdaROC_timedep$outcome <- factor(psychopdaROC_timedep$outcome,
+                                        levels = c("No_Event", "Event"))
+psychopdaROC_small$class <- factor(psychopdaROC_small$class,
+                                    levels = c("Negative", "Positive"))
+psychopdaROC_imbalanced$rare_outcome <- factor(psychopdaROC_imbalanced$rare_outcome,
+                                                levels = c("No_Event", "Event"))
+psychopdaROC_missing$diagnosis <- factor(psychopdaROC_missing$diagnosis,
+                                          levels = c("Healthy", "Disease"))
+psychopdaROC_missing$covariate <- factor(psychopdaROC_missing$covariate)
+psychopdaROC_constant$outcome <- factor(psychopdaROC_constant$outcome,
+                                         levels = c("Negative", "Positive"))
+psychopdaROC_large$disease_status <- factor(psychopdaROC_large$disease_status,
+                                             levels = c("No_Disease", "Disease"))
+psychopdaROC_large$sex <- factor(psychopdaROC_large$sex)
+psychopdaROC_large$site <- factor(psychopdaROC_large$site)
+psychopdaROC_large$risk_category <- factor(psychopdaROC_large$risk_category)
+
 # ═══ SAVE ALL DATASETS ═══
 datasets <- list(
   psychopdaROC_test = psychopdaROC_test,
@@ -199,7 +262,8 @@ datasets <- list(
   psychopdaROC_imbalanced = psychopdaROC_imbalanced,
   psychopdaROC_missing = psychopdaROC_missing,
   psychopdaROC_constant = psychopdaROC_constant,
-  psychopdaROC_large = psychopdaROC_large
+  psychopdaROC_large = psychopdaROC_large,
+  psychopdaROC_advanced = psychopdaROC_advanced
 )
 
 for (dataset_name in names(datasets)) {
@@ -212,4 +276,4 @@ for (dataset_name in names(datasets)) {
   jmvReadWrite::write_omv(dtaFrm = data, fleOut = here::here("data", paste0(dataset_name, ".omv")), frcWrt = TRUE)
 }
 
-cat("✅ PsychoPDA ROC test data: 17 datasets × 4 formats = 68 files\n")
+cat("✅ PsychoPDA ROC test data: 18 datasets × 4 formats = 72 files\n")

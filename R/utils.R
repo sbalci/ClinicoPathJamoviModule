@@ -184,62 +184,69 @@ raw_to_prob <- function(values, actual, direction = ">=") {
     if (length(values) != length(actual)) {
         stop("Values and actual must have the same length")
     }
-    
+
     if (!direction %in% c(">=", "<=")) {
         stop("Direction must be '>=' or '<='")
     }
-    
+
     # Remove missing values
     complete_cases <- !is.na(values) & !is.na(actual)
     values_clean <- values[complete_cases]
     actual_clean <- actual[complete_cases]
-    
+
     if (length(values_clean) == 0) {
         warning("No complete cases found")
         return(rep(NA, length(values)))
     }
-    
-    # Get unique sorted values for thresholds
-    sorted_values <- sort(unique(values_clean))
-    
+
     # Initialize probabilities vector
     probs <- rep(NA, length(values))
-    
-    # Calculate sensitivity for each unique value as proxy for probability
-    for (i in seq_along(sorted_values)) {
-        threshold <- sorted_values[i]
-        
-        # Get predictions based on direction
-        if (direction == ">=") {
-            predicted_pos <- values_clean >= threshold
-        } else {
-            predicted_pos <- values_clean <= threshold
+
+    # Use logistic regression to convert raw values to predicted probabilities
+    # This is the statistically correct approach for IDI/NRI calculations
+    predictor <- if (direction == "<=") -values_clean else values_clean
+
+    glm_result <- tryCatch({
+        model <- glm(actual_clean ~ predictor, family = binomial(link = "logit"))
+        # Get fitted probabilities for the complete cases
+        fitted_probs <- model$fitted.values
+        # Predict for ALL original values (including those with NA in actual)
+        new_predictor <- if (direction == "<=") -values else values
+        predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
+    }, warning = function(w) {
+        # glm may warn about convergence or fitted probabilities near 0/1
+        # Suppress and continue
+        suppressWarnings({
+            model <- glm(actual_clean ~ predictor, family = binomial(link = "logit"))
+            new_predictor <- if (direction == "<=") -values else values
+            predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
+        })
+    }, error = function(e) {
+        # Fallback: use empirical CDF-based rank probabilities
+        # This handles perfect separation and other glm failures
+        warning("Logistic regression failed; using rank-based probability estimates")
+        rank_probs <- rep(NA, length(values))
+        ranks <- rank(values_clean, ties.method = "average")
+        normalized_ranks <- ranks / (length(ranks) + 1)
+        # Map clean ranks to original positions
+        for (i in seq_along(values)) {
+            if (!is.na(values[i])) {
+                match_idx <- which(values_clean == values[i])
+                if (length(match_idx) > 0) {
+                    rank_probs[i] <- mean(normalized_ranks[match_idx])
+                }
+            }
         }
-        
-        # Calculate sensitivity at this threshold
-        tp <- sum(predicted_pos & actual_clean == 1)
-        fn <- sum(!predicted_pos & actual_clean == 1)
-        
-        # Calculate sensitivity (avoid division by zero)
-        if ((tp + fn) > 0) {
-            sensitivity <- tp / (tp + fn)
-        } else {
-            sensitivity <- 0
-        }
-        
-        # Assign probability based on sensitivity
-        value_indices <- which(values == threshold)
-        if (direction == ">=") {
-            probs[value_indices] <- sensitivity
-        } else {
-            probs[value_indices] <- 1 - sensitivity
-        }
-    }
-    
+        if (direction == "<=") rank_probs <- 1 - rank_probs
+        rank_probs
+    })
+
+    probs <- as.numeric(glm_result)
+
     # Ensure probabilities are in [0,1] range
-    probs[probs < 0] <- 0
-    probs[probs > 1] <- 1
-    
+    probs[!is.na(probs) & probs < 0] <- 0
+    probs[!is.na(probs) & probs > 1] <- 1
+
     return(probs)
 }
 

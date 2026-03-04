@@ -3,7 +3,7 @@ name:  agreement
 title: Interrater Reliability
 menuGroup: meddecideT
 menuSubgroup: Agreement
-version: '0.0.33'
+version: '0.0.35'
 jas: '1.2'
 
 description:
@@ -42,6 +42,17 @@ options:
             Confidence level for Bland-Altman limits of agreement (LoA).
             Typically 0.95 for 95% confidence intervals.
 
+    - name: confLevel
+      title: 'Confidence Level for CIs'
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals in ICC, CCC, bootstrap CIs,
+            and other agreement statistics. Default is 0.95 (95% CI).
+
     - name: proportionalBias
       title: 'Test for Proportional Bias'
       type: Bool
@@ -51,6 +62,14 @@ options:
             Test whether the difference between raters changes systematically
             with the magnitude of measurement (proportional bias).
             Uses linear regression of difference vs. mean.
+
+    - name: showBlandAltmanGuide
+      title: "When to use Bland-Altman Analysis"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining Bland-Altman limits of agreement for method comparison studies.
 
     - name: blandAltmanPlot
       title: 'Bland-Altman Plot'
@@ -219,6 +238,14 @@ options:
           R: >
             Calculate bootstrap confidence intervals for Krippendorff's alpha.
 
+    - name: showKrippGuide
+      title: "When to use Krippendorff's Alpha"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining when to use Krippendorff's Alpha including handling missing data and data type selection.
+
     - name: gwet
       title: "Calculate Gwet's AC1/AC2"
       type: Bool
@@ -244,6 +271,33 @@ options:
           R: >
             Unweighted (AC1) for nominal categories. Linear or Quadratic weights (AC2) for ordinal data.
 
+    - name: showGwetGuide
+      title: "When to use Gwet's AC"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining when Gwet's AC is preferred over Cohen's kappa, especially for high agreement rates.
+
+    - name: pabak
+      title: "Calculate PABAK & Prevalence/Bias Indices"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Prevalence-Adjusted Bias-Adjusted Kappa (PABAK) corrects Cohen's kappa for the effects
+            of prevalence and bias. Also reports the prevalence index (PI) and bias index (BI).
+            Useful when kappa is paradoxically low despite high agreement (Byrt et al. 1993).
+            Requires exactly 2 raters with categorical data.
+
+    - name: showPABAKGuide
+      title: "When to use PABAK"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining PABAK, the kappa paradox, and when prevalence/bias adjustment is needed.
+
     - name: icc
       title: "Calculate ICC (Continuous Data)"
       type: Bool
@@ -253,6 +307,15 @@ options:
             Intraclass Correlation Coefficient for continuous measurements (e.g., tumor size in mm,
             biomarker concentrations). Standard measure for assessing agreement with numeric data.
             Complements Bland-Altman analysis.
+
+    - name: showICCGuide
+      title: "When to use ICC"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining when and how to use the Intraclass Correlation
+            Coefficient, including ICC model selection, interpretation thresholds, and clinical examples.
 
     - name: iccType
       title: "ICC Model"
@@ -391,6 +454,14 @@ options:
             different scales (e.g., tumor size in mm vs. Ki-67 percentage). Ensures each variable contributes
             equally to the overall agreement measure.
 
+    - name: showIotaGuide
+      title: "When to use Iota Coefficient"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining the Iota coefficient for multivariate agreement assessment.
+
     - name: finn
       title: "Calculate Finn Coefficient (Variance-Based Agreement)"
       type: Bool
@@ -427,6 +498,14 @@ options:
             may be rated by different raters). Two-way: both subjects and raters are random (subjects and raters
             randomly chosen from larger populations).
 
+    - name: showFinnGuide
+      title: "When to use Finn Coefficient"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining the Finn coefficient and variance-based agreement measurement.
+
     - name: lightKappa
       title: "Calculate Light's Kappa (3+ Raters)"
       type: Bool
@@ -436,6 +515,14 @@ options:
             Alternative agreement measure for 3 or more raters. Calculates the average of all pairwise
             kappas between raters. More robust than Fleiss' kappa when raters have different marginal
             distributions or when assumptions of Fleiss' kappa are questionable.
+
+    - name: showLightKappaGuide
+      title: "When to use Light's Kappa"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining when Light's Kappa is preferred for 3+ rater studies.
 
     - name: kendallW
       title: "Calculate Kendall's W (Concordance for Rankings)"
@@ -447,6 +534,14 @@ options:
             ranking ordinal data. W ranges from 0 (no agreement) to 1 (perfect agreement). Particularly
             useful for ranked data, severity scores, and ordinal grading systems where you want to know
             if raters rank cases in similar order.
+
+    - name: showKendallWGuide
+      title: "When to use Kendall's W"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide explaining Kendall's W for ordinal concordance and ranking agreement.
 
     - name: robinsonA
       title: "Calculate Robinson's A (Ordinal Agreement Index)"
@@ -503,6 +598,14 @@ options:
             significantly across raters. Essential quality control tool to identify raters who consistently
             over-diagnose or under-diagnose compared to their peers.
 
+    - name: showRaterBiasGuide
+      title: "When to use Rater Bias Test"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for detecting systematic rater bias in quality control.
+
     - name: bhapkar
       title: "Bhapkar Test (Marginal Homogeneity for 2 Raters)"
       type: Bool
@@ -514,6 +617,14 @@ options:
             use rating categories with equal frequency. Essential for paired comparisons (e.g., pre-post training,
             novice vs. expert, pathologist vs. AI algorithm) to detect systematic differences in category usage.
 
+    - name: showBhapkarGuide
+      title: "When to use Bhapkar Test"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for the Bhapkar test of marginal homogeneity.
+
     - name: stuartMaxwell
       title: "Stuart-Maxwell Test (Marginal Homogeneity for 2 Raters)"
       type: Bool
@@ -524,6 +635,14 @@ options:
             for matched data analysis. Like McNemar's test but for >2 categories. Tests if two raters use rating
             categories with equal frequency. Note: Bhapkar test is more powerful for large samples, but Stuart-Maxwell
             is the traditional choice. Use for paired/matched comparisons to detect systematic category usage differences.
+
+    - name: showStuartMaxwellGuide
+      title: "When to use Stuart-Maxwell Test"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for the Stuart-Maxwell test of marginal homogeneity.
 
     - name: maxwellRE
       title: "Maxwell's RE (Random Error Index)"
@@ -610,6 +729,14 @@ options:
             performing raters for quality control and training needs. Useful for identifying raters
             who need additional training or those ready for certification.
 
+    - name: showPairwiseKappaGuide
+      title: "When to use Pairwise Kappa"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for pairwise kappa analysis against a reference rater.
+
     # Hierarchical/Multilevel Agreement Analysis
     - name: hierarchicalKappa
       title: "Hierarchical/Multilevel Kappa"
@@ -693,6 +820,14 @@ options:
             Identifies best and worst performing sites. Use cautiously to avoid
             unfair comparisons when cluster sizes differ substantially.
 
+    - name: showHierarchicalGuide
+      title: "When to use Hierarchical Kappa"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for hierarchical/multilevel kappa in multi-center studies.
+
     # Mixed-Effects Condition Comparison
     - name: conditionVariable
       title: "Condition/Method Variable"
@@ -739,6 +874,14 @@ options:
             p-values in the hierarchical analysis and to per-condition
             comparisons when multiple conditions are present.
 
+    - name: showMixedEffectsGuide
+      title: "When to use Mixed-Effects Comparison"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for mixed-effects condition comparison in AI validation studies.
+
     # Multi-Class Confusion Matrix
     - name: confusionMatrix
       title: "Confusion Matrix Table"
@@ -770,6 +913,14 @@ options:
             shows proportions within each predicted category (equivalent to
             precision/PPV per class).
 
+    - name: showConfusionMatrixGuide
+      title: "When to use Confusion Matrix"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for multi-class confusion matrix interpretation and per-class metrics.
+
     # Bootstrap Confidence Intervals
     - name: bootstrapCI
       title: "Bootstrap Confidence Intervals"
@@ -794,6 +945,14 @@ options:
             Number of bootstrap resamples for confidence interval estimation.
             1000 is adequate for 95% CIs. Use 5000-10000 for publication-quality
             99% CIs or when metrics are near boundary values (0 or 1).
+
+    - name: showBootstrapCIGuide
+      title: "When to use Bootstrap CIs"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for bootstrap confidence intervals and when they are preferred over analytical CIs.
 
     # Multi-Annotator Concordance F1
     - name: multiAnnotatorConcordance
@@ -821,6 +980,14 @@ options:
             column 1 (first rater). Remaining columns are treated as reference
             annotators. For AI validation, set this to the column containing AI
             predictions.
+
+    - name: showConcordanceF1Guide
+      title: "When to use Multi-Annotator Concordance"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for concordance metrics in AI validation with multiple reference annotators.
 
     - name: specificAgreement
       title: "Specific Agreement Indices (Category-Focused)"
@@ -1137,7 +1304,7 @@ options:
 
     - name: subgroupMinCases
       title: "Minimum Cases per Subgroup"
-      type: Number
+      type: Integer
       default: 10
       min: 5
       max: 100
@@ -1232,7 +1399,7 @@ options:
 
     - name: nClusters
       title: "Number of Clusters (K-means)"
-      type: Number
+      type: Integer
       default: 3
       min: 2
       max: 10
@@ -1334,7 +1501,7 @@ options:
 
     - name: nCaseClusters
       title: "Number of Clusters (K-means)"
-      type: Number
+      type: Integer
       default: 3
       min: 2
       max: 20
@@ -1397,6 +1564,14 @@ options:
       default: 2000
       description:
           R: Number of bootstrap replications for paired comparison test.
+
+    - name: showPairedAgreementGuide
+      title: "When to use Paired Agreement Comparison"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for comparing agreement between two conditions.
 
     # ============================================================
     # SAMPLE SIZE FOR AGREEMENT STUDIES (Gap from Krishnamurthy 2024)
@@ -1482,6 +1657,14 @@ options:
       default: 0.80
       description:
           R: Target power (1 - Type II error rate).
+
+    - name: showSampleSizeGuide
+      title: "When to use Sample Size Calculator"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show educational guide for planning agreement study sample size.
 
 
 

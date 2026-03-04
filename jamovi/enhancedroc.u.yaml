@@ -34,39 +34,31 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: LayoutBox
-            cell:
-              column: 0
-              row: 0
+          - type: Label
+            label: Analysis Settings
             children:
-              - type: Label
-                label: Analysis Settings
-                children:
-                  - type: ComboBox
-                    name: analysisType
-                  - type: ComboBox
-                    name: direction
-                  - type: CheckBox
-                    name: youdenOptimization
-          - type: LayoutBox
-            cell:
-              column: 0
-              row: 1
+              - type: ComboBox
+                name: analysisType
+              - type: ComboBox
+                name: direction
+              - type: CheckBox
+                name: youdenOptimization
+              - type: ComboBox
+                name: clinicalContext
+              - type: ComboBox
+                name: clinicalPresets
+          - type: Label
+            label: Thresholds & Cutoffs
             children:
-              - type: Label
-                label: Clinical Presets & Thresholds
-                children:
-                  - type: ComboBox
-                    name: clinicalPresets
-                  - type: TextBox
-                    name: sensitivityThreshold
-                    format: number
-                  - type: TextBox
-                    name: specificityThreshold
-                    format: number
-                  - type: TextBox
-                    name: customCutoffs
-                    format: string
+              - type: TextBox
+                name: sensitivityThreshold
+                format: number
+              - type: TextBox
+                name: specificityThreshold
+                format: number
+              - type: TextBox
+                name: customCutoffs
+                format: string
   - type: CollapseBox
     label: Output Options
     collapsed: false
@@ -117,7 +109,7 @@ children:
                   - type: CheckBox
                     name: statisticalComparison
   - type: CollapseBox
-    label: Statistical Options
+    label: Clinical Context & Prevalence
     collapsed: true
     stretchFactor: 1
     children:
@@ -130,46 +122,102 @@ children:
               row: 0
             children:
               - type: Label
-                label: Confidence Intervals
+                label: Disease Prevalence
                 children:
                   - type: TextBox
-                    name: confidenceLevel
-                    suffix: '%'
+                    name: prevalence
                     format: number
                   - type: CheckBox
-                    name: useBootstrap
-                  - type: TextBox
-                    name: bootstrapSamples
-                    format: number
-                    enable: (useBootstrap)
-                  - type: ComboBox
-                    name: bootstrapMethod
-                    enable: (useBootstrap)
-                  - type: CheckBox
-                    name: stratifiedBootstrap
-                    enable: (useBootstrap)
-                  - type: CheckBox
-                    name: bootstrapCutoffCI
-                    enable: (useBootstrap)
-                  - type: CheckBox
-                    name: bootstrapPartialAUC
-                    enable: (useBootstrap && partialAuc)
+                    name: useObservedPrevalence
           - type: LayoutBox
             cell:
               column: 1
               row: 0
             children:
               - type: Label
-                label: Comparisons
+                label: Reporting Options
                 children:
                   - type: CheckBox
-                    name: pairwiseComparisons
-                  - type: ComboBox
-                    name: comparisonMethod
-                    enable: (pairwiseComparisons)
+                    name: comprehensive_output
+                  - type: CheckBox
+                    name: clinical_interpretation
+  - type: CollapseBox
+    label: Statistical Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Confidence Intervals
+            children:
+              - type: TextBox
+                name: confidenceLevel
+                suffix: '%'
+                format: number
+              - type: CheckBox
+                name: useBootstrap
+              - type: TextBox
+                name: bootstrapSamples
+                format: number
+                enable: (useBootstrap)
+              - type: ComboBox
+                name: bootstrapMethod
+                enable: (useBootstrap)
+              - type: CheckBox
+                name: stratifiedBootstrap
+                enable: (useBootstrap)
+              - type: CheckBox
+                name: bootstrapCutoffCI
+              - type: CheckBox
+                name: bootstrapPartialAUC
+          - type: Label
+            label: ROC Curve Comparisons
+            children:
+              - type: CheckBox
+                name: pairwiseComparisons
+              - type: ComboBox
+                name: comparisonMethod
+                enable: (pairwiseComparisons)
+  - type: CollapseBox
+    label: Advanced ROC Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Smoothing & Partial AUC
+            children:
+              - type: ComboBox
+                name: smoothMethod
+              - type: CheckBox
+                name: partialAuc
+              - type: ComboBox
+                name: partialAucType
+                enable: (partialAuc)
+              - type: TextBox
+                name: partialRange
+                format: string
+                enable: (partialAuc)
+          - type: Label
+            label: Curve Analysis
+            children:
+              - type: CheckBox
+                name: convexHull
+              - type: ComboBox
+                name: tiedScoreHandling
+              - type: CheckBox
+                name: crocAnalysis
+              - type: TextBox
+                name: crocAlpha
+                format: number
+                enable: (crocAnalysis)
   - type: CollapseBox
     label: Class Imbalance Detection
-    collapsed: false
+    collapsed: true
     stretchFactor: 1
     children:
       - type: LayoutBox
@@ -187,77 +235,6 @@ children:
           - type: CheckBox
             name: recommendPRC
             enable: (detectImbalance)
-  - type: CollapseBox
-    label: Clinical Context
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: LayoutBox
-            cell:
-              column: 0
-              row: 0
-            children:
-              - type: Label
-                label: Clinical Application
-                children:
-                  - type: ComboBox
-                    name: clinicalContext
-                  - type: TextBox
-                    name: prevalence
-                    format: number
-              - type: LayoutBox
-                margin: large
-                children:
-                  - type: CheckBox
-                    name: useObservedPrevalence
-          - type: LayoutBox
-            cell:
-              column: 1
-              row: 0
-            children:
-              - type: Label
-                label: Advanced Options
-                children:
-                  - type: ComboBox
-                    name: smoothMethod
-                  - type: CheckBox
-                    name: partialAuc
-                  - type: ComboBox
-                    name: partialAucType
-                    enable: (partialAuc)
-                  - type: TextBox
-                    name: partialRange
-                    format: string
-                    enable: (partialAuc)
-                  - type: CheckBox
-                    name: crocAnalysis
-                  - type: TextBox
-                    name: crocAlpha
-                    format: number
-                    enable: (crocAnalysis)
-                  - type: CheckBox
-                    name: convexHull
-                  - type: ComboBox
-                    name: tiedScoreHandling
-                  - type: TextBox
-                    name: splineKnots
-                    format: number
-                    enable: (smoothMethod)
-  - type: CollapseBox
-    label: Advanced Output
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: comprehensive_output
-          - type: CheckBox
-            name: clinical_interpretation
   - type: CollapseBox
     label: Calibration Analysis
     collapsed: true
@@ -290,21 +267,10 @@ children:
                 children:
                   - type: CheckBox
                     name: splineCalibration
-                  - type: CheckBox
-                    name: eoRatio
-                    enable: (calibrationAnalysis)
-                  - type: CheckBox
-                    name: namDagostino
-                    enable: (calibrationAnalysis)
-                  - type: CheckBox
-                    name: greenwoodNam
-                    enable: (calibrationAnalysis)
-                  - type: CheckBox
-                    name: calibrationBelt
-                    enable: (calibrationAnalysis)
-                  - type: CheckBox
-                    name: calibrationDensity
-                    enable: (calibrationAnalysis)
+                  - type: TextBox
+                    name: splineKnots
+                    format: number
+                    enable: (splineCalibration)
           - type: LayoutBox
             cell:
               column: 1
@@ -320,6 +286,21 @@ children:
                     name: hlGroups
                     format: number
                     enable: (calibrationAnalysis && hosmerLemeshow)
+                  - type: CheckBox
+                    name: eoRatio
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: namDagostino
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: greenwoodNam
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: calibrationBelt
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: calibrationDensity
+                    enable: (calibrationAnalysis)
   - type: CollapseBox
     label: Multi-Class ROC
     collapsed: true
@@ -336,23 +317,6 @@ children:
           - type: ComboBox
             name: multiClassAveraging
             enable: (multiClassROC)
-  # - type: CollapseBox
-  #   label: Time-Dependent ROC
-  #   collapsed: true
-  #   stretchFactor: 1
-  #   children:
-  #     - type: LayoutBox
-  #       margin: large
-  #       children:
-  #         - type: CheckBox
-  #           name: timeDependentROC
-  #         - type: TextBox
-  #           name: timePoints
-  #           format: string
-  #           enable: (timeDependentROC)
-  #         - type: ComboBox
-  #           name: tdRocMethod
-  #           enable: (timeDependentROC)
   - type: CollapseBox
     label: Clinical Impact
     collapsed: true
@@ -364,16 +328,13 @@ children:
           - type: CheckBox
             name: clinicalImpact
           - type: CheckBox
-            name: nntCalculation
-            enable: (clinicalImpact)
-          - type: CheckBox
             name: clinicalUtilityCurve
             enable: (clinicalImpact)
           - type: CheckBox
+            name: nntCalculation
+          - type: CheckBox
             name: decisionImpactTable
             enable: (clinicalImpact)
-          # - type: CheckBox
-          #   name: survivalROC
           - type: CheckBox
             name: harrellCIndex
           - type: CheckBox
@@ -412,24 +373,20 @@ children:
               row: 0
             children:
               - type: Label
-                label: Validation Settings
+                label: Internal Validation
                 children:
+                  - type: CheckBox
+                    name: internalValidation
                   - type: ComboBox
                     name: validationMethod
+                    enable: (internalValidation)
+              - type: LayoutBox
+                margin: large
+                children:
                   - type: CheckBox
                     name: optimismCorrection
                   - type: CheckBox
                     name: externalValidation
-                  - type: CheckBox
-                    name: internalValidation
-          - type: LayoutBox
-            cell:
-              column: 1
-              row: 0
-            children:
-              - type: Label
-                label: Advanced Performance Analysis
-                children:
                   - type: CheckBox
                     name: decisionImpactCurves
                   - type: CheckBox

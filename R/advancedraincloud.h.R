@@ -574,7 +574,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "advancedraincloud",
-                version = c(0,0,33),
+                version = c(0,0,34),
                 options = options,
                 results = advancedraincloudResults$new(options=options),
                 data = data,

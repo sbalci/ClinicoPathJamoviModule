@@ -1,0 +1,1299 @@
+---
+title: "Advanced ROC Analysis (psychopdaROC) - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Advanced ROC Analysis (psychopdaROC) - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+
+# Load the package
+devtools::load_all("../")
+
+# Base path for data files
+data_path <- "../data-raw/non-rda/"
+data_path2 <- "../data/"
+```
+
+# Advanced ROC Analysis (psychopdaROC)
+
+## Overview
+
+The **psychopdaROC** module provides advanced Receiver Operating Characteristic
+(ROC) curve analysis with optimal cutpoint determination using the `cutpointr`
+framework. It supports 12 cutpoint optimization methods, 16 optimization metrics,
+subgroup analysis, DeLong's test for comparing ROC curves, IDI/NRI reclassification
+indices, effect size and power analysis, bootstrap ROC with prior weighting,
+clinical utility analysis, meta-analysis of AUC values, and fixed
+sensitivity/specificity analysis.
+
+All examples below use the bundled test datasets. In jamovi, open the corresponding
+`.omv` file. From R, read the `.csv` directly.
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Class Levels | Prevalence | Key Features | Primary Use |
+|---------|---|-------------|------------|--------------|-------------|
+| `psychopdaROC_test` | 200 | Healthy/Disease | ~50% | 1 biomarker, age, sex | Basic single-marker testing |
+| `psychopdaROC_screening` | 250 | No Cancer/Cancer | ~25% | PSA, CA125 | Cancer screening |
+| `psychopdaROC_cardiac` | 180 | No MI/MI | ~30% | Troponin, creatinine, BNP | Cardiac biomarkers |
+| `psychopdaROC_multibiomarker` | 220 | Negative/Positive | ~30% | 3 markers + combined score | Multi-marker comparison |
+| `psychopdaROC_subgroup` | 200 | No Disease/Disease | ~30% | test_score, age_group, sex | Subgroup analysis |
+| `psychopdaROC_perfect` | 100 | Negative/Positive | 50% | Perfect separation | AUC=1.0 edge case |
+| `psychopdaROC_poor` | 150 | Negative/Positive | ~50% | No discrimination | AUC~0.5 edge case |
+| `psychopdaROC_overlap` | 190 | Negative/Positive | ~50% | Moderate overlap | AUC~0.70 |
+| `psychopdaROC_rare` | 300 | No Disease/Disease | 5% | Single biomarker | Rare disease |
+| `psychopdaROC_costbenefit` | 160 | No Event/Event | ~30% | Risk score, cost columns | Cost-benefit optimization |
+| `psychopdaROC_spectrum` | 170 | 3 severity + binary | varies | Continuous marker | Disease spectrum |
+| `psychopdaROC_timedep` | 140 | No Event/Event | ~30% | Baseline + follow-up | Longitudinal comparison |
+| `psychopdaROC_small` | 30 | Negative/Positive | ~50% | Single marker | Small sample edge case |
+| `psychopdaROC_imbalanced` | 200 | No Event/Event | 2% | Single predictor | Extreme imbalance |
+| `psychopdaROC_missing` | 150 | Negative/Positive | ~30% | 2 tests + covariate, NAs | Missing data handling |
+| `psychopdaROC_constant` | 80 | No Event/Event | ~50% | Constant marker (all=50) | Zero variance edge case |
+| `psychopdaROC_large` | 500 | No Disease/Disease | ~30% | 2 biomarkers, site | Large sample / subgroups |
+| `psychopdaROC_advanced` | 250 | Negative/Positive | ~30% | 5 markers, site | Meta-analysis / advanced |
+
+---
+
+## 1. Basic ROC Analysis (Default Cutpoint)
+
+The default analysis uses Youden Index optimization (`maximize_metric` with `youden`)
+to find the optimal cutpoint.
+
+### Default single-marker ROC
+
+```{r basic-default}
+test_data <- read.csv(paste0(data_path, "psychopdaROC_test.csv"))
+
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  refVar = NULL
+)
+```
+
+### With confusion matrix and threshold table
+
+```{r basic-tables}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  sensSpecTable = TRUE,
+  showThresholdTable = TRUE,
+  maxThresholds = 20,
+  refVar = NULL
+)
+```
+
+### Lower values indicate positive class
+
+```{r basic-direction}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  direction = "<=",
+  refVar = NULL
+)
+```
+
+---
+
+## 2. Cutpoint Optimization Methods
+
+### Key optimization metrics
+
+```{r cut-youden}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "maximize_metric",
+  metric = "youden",
+  refVar = NULL
+)
+```
+
+```{r cut-accuracy}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "maximize_metric",
+  metric = "accuracy",
+  refVar = NULL
+)
+```
+
+```{r cut-f1}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "maximize_metric",
+  metric = "F1_score",
+  refVar = NULL
+)
+```
+
+```{r cut-kappa}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "maximize_metric",
+  metric = "cohens_kappa",
+  refVar = NULL
+)
+```
+
+### Minimize misclassification cost
+
+```{r cut-misclass}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "minimize_metric",
+  metric = "misclassification_cost",
+  refVar = NULL
+)
+```
+
+### LOESS-smoothed Youden
+
+```{r cut-loess}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "maximize_loess_metric",
+  metric = "youden",
+  refVar = NULL
+)
+```
+
+### Bootstrap-optimized cutpoint
+
+```{r cut-boot}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "maximize_boot_metric",
+  boot_runs = 200,
+  seed = 123,
+  refVar = NULL
+)
+```
+
+### Kernel-smoothed Youden
+
+```{r cut-kernel}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "oc_youden_kernel",
+  refVar = NULL
+)
+```
+
+### Parametric normal Youden
+
+```{r cut-normal}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "oc_youden_normal",
+  refVar = NULL
+)
+```
+
+### Manual cutpoint
+
+```{r cut-manual}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "oc_manual",
+  specifyCutScore = "7.5",
+  refVar = NULL
+)
+```
+
+### Cost-benefit optimized cutpoint
+
+```{r cut-cost}
+costbenefit_data <- read.csv(paste0(data_path, "psychopdaROC_costbenefit.csv"))
+
+psychopdaROC(
+  data = costbenefit_data,
+  classVar = "outcome",
+  positiveClass = "Event",
+  dependentVars = "risk_score",
+  method = "oc_cost_ratio",
+  costratioFP = 0.1,
+  refVar = NULL
+)
+```
+
+### Equal sensitivity and specificity
+
+```{r cut-equal}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "oc_equal_sens_spec",
+  refVar = NULL
+)
+```
+
+### Closest to perfect classifier (0,1)
+
+```{r cut-closest01}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  method = "oc_closest_01",
+  refVar = NULL
+)
+```
+
+---
+
+## 3. Cutpoint Fine-Tuning
+
+### Metric tolerance
+
+```{r finetune-tol}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  tol_metric = 0.01,
+  refVar = NULL
+)
+```
+
+### Tie-breaking methods
+
+```{r finetune-ties-mean}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  break_ties = "mean",
+  refVar = NULL
+)
+```
+
+```{r finetune-ties-median}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  break_ties = "median",
+  refVar = NULL
+)
+```
+
+### All observed cutpoints
+
+```{r finetune-all-observed}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  allObserved = TRUE,
+  refVar = NULL
+)
+```
+
+---
+
+## 4. Multiple Test Variables (Comparative)
+
+### Multi-marker ROC overlay
+
+```{r multi-overlay}
+multi_data <- read.csv(paste0(data_path, "psychopdaROC_multibiomarker.csv"))
+
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3, combined_score),
+  plotROC = TRUE,
+  combinePlots = TRUE,
+  refVar = NULL
+)
+```
+
+### DeLong test for AUC comparison
+
+```{r multi-delong}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3),
+  delongTest = TRUE,
+  refVar = NULL
+)
+```
+
+### Cardiac biomarker comparison
+
+```{r multi-cardiac}
+cardiac_data <- read.csv(paste0(data_path, "psychopdaROC_cardiac.csv"))
+
+psychopdaROC(
+  data = cardiac_data,
+  classVar = "mi_status",
+  positiveClass = "MI",
+  dependentVars = vars(troponin, creatinine, bnp),
+  combinePlots = TRUE,
+  delongTest = TRUE,
+  refVar = NULL
+)
+```
+
+---
+
+## 5. ROC Visualization Options
+
+### Optimal point and confidence bands
+
+```{r viz-bands}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  plotROC = TRUE,
+  showOptimalPoint = TRUE,
+  showConfidenceBands = TRUE,
+  refVar = NULL
+)
+```
+
+### Smoothed ROC with standard error
+
+```{r viz-smooth}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  smoothing = TRUE,
+  displaySE = TRUE,
+  refVar = NULL
+)
+```
+
+### Publication-ready clean plot
+
+```{r viz-clean}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  cleanPlot = TRUE,
+  refVar = NULL
+)
+```
+
+### Legend positions
+
+```{r viz-legend}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3),
+  combinePlots = TRUE,
+  legendPosition = "bottom",
+  refVar = NULL
+)
+```
+
+### Direct curve labels
+
+```{r viz-direct-label}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3),
+  combinePlots = TRUE,
+  directLabel = TRUE,
+  refVar = NULL
+)
+```
+
+---
+
+## 6. Diagnostic Plots
+
+### Sensitivity/Specificity vs Threshold
+
+```{r diag-criterion}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  showCriterionPlot = TRUE,
+  refVar = NULL
+)
+```
+
+### Predictive values vs Prevalence
+
+```{r diag-prevalence}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  showPrevalencePlot = TRUE,
+  refVar = NULL
+)
+```
+
+### Test value distribution by class
+
+```{r diag-dot}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  showDotPlot = TRUE,
+  refVar = NULL
+)
+```
+
+### Precision-Recall curve
+
+```{r diag-prc}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  precisionRecallCurve = TRUE,
+  refVar = NULL
+)
+```
+
+---
+
+## 7. Prevalence & Prior Settings
+
+### Prior prevalence adjustment for rare disease
+
+```{r prev-prior}
+rare_data <- read.csv(paste0(data_path, "psychopdaROC_rare.csv"))
+
+psychopdaROC(
+  data = rare_data,
+  classVar = "rare_disease",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  usePriorPrev = TRUE,
+  priorPrev = 0.05,
+  refVar = NULL
+)
+```
+
+### Sample prevalence (default)
+
+```{r prev-sample}
+psychopdaROC(
+  data = rare_data,
+  classVar = "rare_disease",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  usePriorPrev = FALSE,
+  refVar = NULL
+)
+```
+
+---
+
+## 8. Subgroup Analysis
+
+### By age group
+
+```{r subgroup-age}
+subgroup_data <- read.csv(paste0(data_path, "psychopdaROC_subgroup.csv"))
+
+psychopdaROC(
+  data = subgroup_data,
+  classVar = "disease",
+  positiveClass = "Disease",
+  dependentVars = "test_score",
+  subGroup = "age_group",
+  refVar = NULL
+)
+```
+
+### By sex
+
+```{r subgroup-sex}
+psychopdaROC(
+  data = subgroup_data,
+  classVar = "disease",
+  positiveClass = "Disease",
+  dependentVars = "test_score",
+  subGroup = "sex",
+  refVar = NULL
+)
+```
+
+### Large dataset with site subgroups
+
+```{r subgroup-site}
+large_data <- read.csv(paste0(data_path, "psychopdaROC_large.csv"))
+
+psychopdaROC(
+  data = large_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = vars(biomarker1, biomarker2),
+  subGroup = "site",
+  refVar = NULL
+)
+```
+
+---
+
+## 9. Advanced ROC Analysis
+
+### Partial AUC (high specificity region)
+
+```{r adv-partial-auc}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  partialAUC = TRUE,
+  partialAUCfrom = 0.8,
+  partialAUCto = 1.0,
+  refVar = NULL
+)
+```
+
+### Partial AUC (very high specificity)
+
+```{r adv-partial-auc-high}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  partialAUC = TRUE,
+  partialAUCfrom = 0.9,
+  partialAUCto = 1.0,
+  refVar = NULL
+)
+```
+
+### Binormal smoothing
+
+```{r adv-smooth-binormal}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  rocSmoothingMethod = "binormal",
+  refVar = NULL
+)
+```
+
+### Bootstrap confidence intervals
+
+```{r adv-bootstrap-ci}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  bootstrapCI = TRUE,
+  bootstrapReps = 200,
+  refVar = NULL
+)
+```
+
+### Quantile-based CIs
+
+```{r adv-quantile-ci}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  quantileCIs = TRUE,
+  quantiles = "0.1,0.25,0.5,0.75,0.9",
+  refVar = NULL
+)
+```
+
+---
+
+## 10. Fixed Sensitivity / Specificity Analysis
+
+### Fixed sensitivity for screening (95%)
+
+```{r fixed-sens}
+screening_data <- read.csv(paste0(data_path, "psychopdaROC_screening.csv"))
+
+psychopdaROC(
+  data = screening_data,
+  classVar = "cancer",
+  positiveClass = "Cancer",
+  dependentVars = "psa_level",
+  fixedSensSpecAnalysis = TRUE,
+  fixedAnalysisType = "sensitivity",
+  fixedSensitivityValue = 0.95,
+  refVar = NULL
+)
+```
+
+### Fixed specificity for confirmation (90%)
+
+```{r fixed-spec}
+psychopdaROC(
+  data = screening_data,
+  classVar = "cancer",
+  positiveClass = "Cancer",
+  dependentVars = "psa_level",
+  fixedSensSpecAnalysis = TRUE,
+  fixedAnalysisType = "specificity",
+  fixedSpecificityValue = 0.90,
+  refVar = NULL
+)
+```
+
+### Interpolation methods
+
+```{r fixed-interp-linear}
+psychopdaROC(
+  data = screening_data,
+  classVar = "cancer",
+  positiveClass = "Cancer",
+  dependentVars = "psa_level",
+  fixedSensSpecAnalysis = TRUE,
+  fixedAnalysisType = "sensitivity",
+  fixedSensitivityValue = 0.95,
+  fixedInterpolation = "linear",
+  refVar = NULL
+)
+```
+
+### Fixed ROC plot with explanation
+
+```{r fixed-roc-plot}
+psychopdaROC(
+  data = screening_data,
+  classVar = "cancer",
+  positiveClass = "Cancer",
+  dependentVars = "psa_level",
+  fixedSensSpecAnalysis = TRUE,
+  fixedAnalysisType = "sensitivity",
+  fixedSensitivityValue = 0.95,
+  showFixedROC = TRUE,
+  showFixedExplanation = TRUE,
+  refVar = NULL
+)
+```
+
+---
+
+## 11. Model Comparison (IDI / NRI)
+
+### Integrated Discrimination Improvement (IDI)
+
+```{r idi}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3),
+  calculateIDI = TRUE,
+  refVar = NULL,
+  idiNriBootRuns = 200
+)
+```
+
+### Category-based Net Reclassification Index (NRI)
+
+```{r nri-category}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3),
+  calculateNRI = TRUE,
+  refVar = NULL,
+  nriThresholds = "0.3,0.7"
+)
+```
+
+### Continuous NRI (no thresholds)
+
+```{r nri-continuous}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3),
+  calculateNRI = TRUE,
+  refVar = NULL,
+  nriThresholds = ""
+)
+```
+
+### Comprehensive classifier comparison
+
+```{r compare-classifiers}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3),
+  compareClassifiers = TRUE,
+  refVar = NULL
+)
+```
+
+---
+
+## 12. Effect Size & Power Analysis
+
+### Effect size analysis
+
+```{r effect-size}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  effectSizeAnalysis = TRUE,
+  refVar = NULL
+)
+```
+
+### Post-hoc power analysis
+
+```{r power-posthoc}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  powerAnalysis = TRUE,
+  powerAnalysisType = "post_hoc",
+  significanceLevel = 0.05,
+  targetPower = 0.80,
+  refVar = NULL
+)
+```
+
+### Prospective power analysis
+
+```{r power-prospective}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  powerAnalysis = TRUE,
+  powerAnalysisType = "prospective",
+  expectedAUCDifference = 0.10,
+  refVar = NULL
+)
+```
+
+### Sample size estimation
+
+```{r power-sample-size}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  powerAnalysis = TRUE,
+  powerAnalysisType = "sample_size",
+  correlationROCs = 0.5,
+  refVar = NULL
+)
+```
+
+---
+
+## 13. Bootstrap ROC with Prior Weighting
+
+### Default prior (AUC=0.7, precision=10)
+
+```{r bayesian-default}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  bayesianAnalysis = TRUE,
+  priorAUC = 0.7,
+  priorPrecision = 10,
+  refVar = NULL
+)
+```
+
+### Strong prior belief (AUC=0.9, high precision)
+
+```{r bayesian-strong}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  bayesianAnalysis = TRUE,
+  priorAUC = 0.9,
+  priorPrecision = 50,
+  refVar = NULL
+)
+```
+
+---
+
+## 14. Clinical Utility Analysis
+
+### Decision curve analysis
+
+```{r clinical-utility}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  clinicalUtilityAnalysis = TRUE,
+  treatmentThreshold = "0.05,0.5,0.05",
+  harmBenefitRatio = 0.25,
+  refVar = NULL
+)
+```
+
+### With intervention cost analysis
+
+```{r clinical-utility-cost}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  clinicalUtilityAnalysis = TRUE,
+  interventionCost = TRUE,
+  harmBenefitRatio = 1.0,
+  refVar = NULL
+)
+```
+
+---
+
+## 15. Meta-Analysis (3+ Variables Required)
+
+### Fixed and random effects meta-analysis
+
+```{r meta-both}
+advanced_data <- read.csv(paste0(data_path2, "psychopdaROC_advanced.csv"))
+
+psychopdaROC(
+  data = advanced_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker_excellent, marker_good, marker_moderate,
+                       marker_fair, marker_poor),
+  metaAnalysis = TRUE,
+  metaAnalysisMethod = "both",
+  heterogeneityTest = TRUE,
+  overrideMetaAnalysisWarning = TRUE,
+  refVar = NULL
+)
+```
+
+### Forest plot
+
+```{r meta-forest}
+psychopdaROC(
+  data = advanced_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker_excellent, marker_good, marker_moderate,
+                       marker_fair, marker_poor),
+  metaAnalysis = TRUE,
+  metaAnalysisMethod = "both",
+  forestPlot = TRUE,
+  overrideMetaAnalysisWarning = TRUE,
+  refVar = NULL
+)
+```
+
+### Fixed effects only (3 markers)
+
+```{r meta-fixed}
+psychopdaROC(
+  data = advanced_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker_excellent, marker_good, marker_moderate),
+  metaAnalysis = TRUE,
+  metaAnalysisMethod = "fixed",
+  overrideMetaAnalysisWarning = TRUE,
+  refVar = NULL
+)
+```
+
+---
+
+## 16. Clinical Mode Presets
+
+### Basic mode (minimal clinical output)
+
+```{r mode-basic}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  clinicalMode = "basic",
+  refVar = NULL
+)
+```
+
+### Advanced mode
+
+```{r mode-advanced}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  clinicalMode = "advanced",
+  refVar = NULL
+)
+```
+
+### Comprehensive mode (full research-grade output)
+
+```{r mode-comprehensive}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  clinicalMode = "comprehensive",
+  refVar = NULL
+)
+```
+
+### Screening preset
+
+```{r preset-screening}
+psychopdaROC(
+  data = screening_data,
+  classVar = "cancer",
+  positiveClass = "Cancer",
+  dependentVars = "psa_level",
+  clinicalPreset = "screening",
+  refVar = NULL
+)
+```
+
+### Confirmation preset
+
+```{r preset-confirmation}
+psychopdaROC(
+  data = cardiac_data,
+  classVar = "mi_status",
+  positiveClass = "MI",
+  dependentVars = "troponin",
+  clinicalPreset = "confirmation",
+  refVar = NULL
+)
+```
+
+### Balanced and research presets
+
+```{r preset-balanced}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  clinicalPreset = "balanced",
+  refVar = NULL
+)
+```
+
+```{r preset-research}
+psychopdaROC(
+  data = test_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  clinicalPreset = "research",
+  refVar = NULL
+)
+```
+
+---
+
+## 17. Edge Cases
+
+### Perfect separation (AUC=1.0)
+
+```{r edge-perfect}
+perfect_data <- read.csv(paste0(data_path, "psychopdaROC_perfect.csv"))
+
+psychopdaROC(
+  data = perfect_data,
+  classVar = "condition",
+  positiveClass = "Positive",
+  dependentVars = "perfect_test",
+  refVar = NULL
+)
+```
+
+### No discrimination (AUC~0.5)
+
+```{r edge-poor}
+poor_data <- read.csv(paste0(data_path, "psychopdaROC_poor.csv"))
+
+psychopdaROC(
+  data = poor_data,
+  classVar = "status",
+  positiveClass = "Case",
+  dependentVars = "poor_marker",
+  refVar = NULL
+)
+```
+
+### Moderate overlap (AUC~0.70)
+
+```{r edge-overlap}
+overlap_data <- read.csv(paste0(data_path, "psychopdaROC_overlap.csv"))
+
+psychopdaROC(
+  data = overlap_data,
+  classVar = "diagnosis",
+  positiveClass = "Diseased",
+  dependentVars = "test_value",
+  refVar = NULL
+)
+```
+
+### Small sample (n=30)
+
+```{r edge-small}
+small_data <- read.csv(paste0(data_path, "psychopdaROC_small.csv"))
+
+psychopdaROC(
+  data = small_data,
+  classVar = "class",
+  positiveClass = "Positive",
+  dependentVars = "marker",
+  refVar = NULL
+)
+```
+
+### Extreme imbalance (2% event rate)
+
+```{r edge-imbalanced}
+imbalanced_data <- read.csv(paste0(data_path, "psychopdaROC_imbalanced.csv"))
+
+psychopdaROC(
+  data = imbalanced_data,
+  classVar = "rare_outcome",
+  positiveClass = "Event",
+  dependentVars = "predictor",
+  refVar = NULL
+)
+```
+
+### Constant predictor (zero variance)
+
+```{r edge-constant}
+constant_data <- read.csv(paste0(data_path, "psychopdaROC_constant.csv"))
+
+psychopdaROC(
+  data = constant_data,
+  classVar = "outcome",
+  positiveClass = "Positive",
+  dependentVars = "constant_marker",
+  refVar = NULL
+)
+```
+
+### Missing data
+
+```{r edge-missing}
+missing_data <- read.csv(paste0(data_path, "psychopdaROC_missing.csv"))
+
+psychopdaROC(
+  data = missing_data,
+  classVar = "diagnosis",
+  positiveClass = "Disease",
+  dependentVars = vars(test_a, test_b),
+  refVar = NULL
+)
+```
+
+### Rare disease (5% prevalence)
+
+```{r edge-rare}
+psychopdaROC(
+  data = rare_data,
+  classVar = "rare_disease",
+  positiveClass = "Disease",
+  dependentVars = "biomarker",
+  refVar = NULL
+)
+```
+
+### Large dataset (n=500)
+
+```{r edge-large}
+psychopdaROC(
+  data = large_data,
+  classVar = "disease_status",
+  positiveClass = "Disease",
+  dependentVars = vars(biomarker1, biomarker2),
+  refVar = NULL
+)
+```
+
+---
+
+## 18. Time-Dependent & Spectrum Analysis
+
+### Compare baseline vs follow-up markers
+
+```{r timedep}
+timedep_data <- read.csv(paste0(data_path, "psychopdaROC_timedep.csv"))
+
+psychopdaROC(
+  data = timedep_data,
+  classVar = "outcome",
+  positiveClass = "Event",
+  dependentVars = vars(baseline_marker, followup_marker),
+  delongTest = TRUE,
+  combinePlots = TRUE,
+  refVar = NULL
+)
+```
+
+### Disease spectrum data
+
+```{r spectrum}
+spectrum_data <- read.csv(paste0(data_path, "psychopdaROC_spectrum.csv"))
+
+psychopdaROC(
+  data = spectrum_data,
+  classVar = "binary_status",
+  positiveClass = "Positive",
+  dependentVars = "continuous_marker",
+  refVar = NULL
+)
+```
+
+---
+
+## 19. Comprehensive Publication-Ready Scenario
+
+Full research-grade analysis combining multiple features.
+
+```{r comprehensive-pub}
+psychopdaROC(
+  data = multi_data,
+  classVar = "diagnosis",
+  positiveClass = "Positive",
+  dependentVars = vars(marker1, marker2, marker3, combined_score),
+  clinicalMode = "comprehensive",
+  method = "maximize_metric",
+  metric = "youden",
+  delongTest = TRUE,
+  calculateIDI = TRUE,
+  calculateNRI = TRUE,
+  refVar = NULL,
+  bootstrapCI = TRUE,
+  bootstrapReps = 200,
+  clinicalUtilityAnalysis = TRUE,
+  plotROC = TRUE,
+  combinePlots = TRUE,
+  cleanPlot = TRUE,
+  sensSpecTable = TRUE
+)
+```
+
+---
+
+## References
+
+- Youden WJ (1950). Index for rating diagnostic tests. *Cancer*, 3(1), 32-35.
+- DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under
+  two or more correlated receiver operating characteristic curves: a nonparametric
+  approach. *Biometrics*, 44(3), 837-845.
+- Pencina MJ, D'Agostino RB, D'Agostino RB Jr, Vasan RS (2008). Evaluating the
+  added predictive ability of a new marker: from area under the ROC curve to
+  reclassification and beyond. *Statistics in Medicine*, 27(2), 157-172.
+- Thiele C, Hirschfeld G (2021). cutpointr: Improved estimation and validation of
+  optimal cutpoints in R. *Journal of Statistical Software*, 98(11), 1-27.
+- Robin X, Turck N, Hainard A, et al. (2011). pROC: an open-source package for R
+  and S+ to analyze and compare ROC curves. *BMC Bioinformatics*, 12, 77.
+- Vickers AJ, Elkin EB (2006). Decision curve analysis: a novel method for evaluating
+  prediction models. *Medical Decision Making*, 26(6), 565-574.

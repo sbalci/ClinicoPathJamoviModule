@@ -117,9 +117,43 @@ Rscript _updateModules.R
 
 
 
+---
+
+prepare an agent team to work on function psychopdaROC:
+- all agents are experts in R-package and jamovi development.
+- a sonograph function will record the team's process in a log file.
+- lead agent is an expert in biostatistics working with pathologists and clinicians. it will orchestrate the team, update the sonograph log file. Will make sure no functionality is removed and favor functionality. it will check if jmvtools::prepare();devtools::document() is error free. 
+- one agent will check if the function is mathematically and statistically accurate?
+- one agent will check if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
+- one agent will check if it is ready to be used by clinicians and pathologists?
+- one agent will check if it is ready for release? 
+- one agent will suggest improvements.
+- one agent will update .u.yaml to make it user friendly. make all relevant features to be together.
+- one agent will remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders.
+- one agent will check if .a.yaml follows vignettes/jamovi_a_yaml_guide.md
+- one agent will check if .b.R follows vignettes/jamovi_b_R_guide.md
+- one agent will check if .r.yaml follows vignettes/jamovi_r_yaml_guide.md
+- one agent will check if .u.yaml follows vignettes/jamovi_u_yaml_guide.md
+- one agent will check if .js follows vignettes/jamovi_js_guide.md
+- one agent will check if .a.yaml follows vignettes/jamovi_actions_guide.md
+- one agent will check if .a.yaml follows vignettes/jamovi_formula_guide.md
+- one agent will check if .a.yaml follows vignettes/jamovi_i18n_guide.md
+- one agent will check if .a.yaml follows vignettes/jamovi_module_patterns_guide.md
+- one agent will check if .a.yaml follows vignettes/jamovi_plots_guide.md
+- one agent will check if .a.yaml follows vignettes/jamovi_tables_guide.md
+- one agent will run /check-function with the function name and make relevant fixes
+- one agent will run /check-function-base with the function name and make relevant fixes
+- one agent will run /check-function-full with the function name and make relevant fixes
+- one agent will run /review-function with the function name and make relevant fixes
+- one agent will run /fix-function with the function name and make relevant fixes
+
+---
+
+
+
 
 Always use available 'skills' when possible. Keep the output organized. 
-Use these skills to update text and analysis in the project: 
+Use these skills to update qmd files, codes,text, analysis, and interpretations in the project: 
   pubmed-database
   biopython
   biorxiv-database

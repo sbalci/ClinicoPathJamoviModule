@@ -1,3 +1,17 @@
+psychopdaROC <- function(...) {
+  args <- list(...)
+  f_args <- formals(ClinicoPath::psychopdaROC)
+  for(arg in names(f_args)) {
+    if(arg %in% c('...', 'data')) next
+    if(!(arg %in% names(args))) {
+      if(is.name(f_args[[arg]]) && as.character(f_args[[arg]]) == '') {
+        args[[arg]] <- ""
+      }
+    }
+  }
+  do.call(ClinicoPath::psychopdaROC, args)
+}
+
 # ═══════════════════════════════════════════════════════════
 # Argument Tests: psychopdaROC
 # ═══════════════════════════════════════════════════════════
@@ -17,7 +31,7 @@ test_that("psychopdaROC respects different cutpoint methods", {
       classVar = "disease_status",
       method = method
     )
-    expect_s3_class(result, "psychopdaROCClass")
+    expect_s3_class(result, "psychopdaROCResults")
   }
 })
 
@@ -29,7 +43,7 @@ test_that("psychopdaROC respects subgroup analysis", {
     positiveClass = "Disease",
     subGroup = "age_group"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC respects manual cutpoint", {
@@ -40,7 +54,7 @@ test_that("psychopdaROC respects manual cutpoint", {
     method = "oc_manual",
     specifyCutScore = "60"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC respects tie-breaking methods", {
@@ -53,7 +67,7 @@ test_that("psychopdaROC respects tie-breaking methods", {
       classVar = "disease_status",
       break_ties = tie_method
     )
-    expect_s3_class(result, "psychopdaROCClass")
+    expect_s3_class(result, "psychopdaROCResults")
   }
 })
 
@@ -64,7 +78,7 @@ test_that("psychopdaROC respects metric tolerance", {
     classVar = "disease_status",
     tol_metric = 0.1
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles bootstrapped methods", {
@@ -74,7 +88,7 @@ test_that("psychopdaROC handles bootstrapped methods", {
     classVar = "disease_status",
     method = "maximize_boot_metric"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles LOESS smoothed methods", {
@@ -84,7 +98,7 @@ test_that("psychopdaROC handles LOESS smoothed methods", {
     classVar = "disease_status",
     method = "maximize_loess_metric"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles cost-benefit optimization", {
@@ -95,7 +109,7 @@ test_that("psychopdaROC handles cost-benefit optimization", {
     positiveClass = "Event",
     method = "oc_cost_ratio"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })
 
 test_that("psychopdaROC handles different metrics with minimize method", {
@@ -106,5 +120,5 @@ test_that("psychopdaROC handles different metrics with minimize method", {
     method = "minimize_metric",
     metric = "abs_d_sens_spec"
   )
-  expect_s3_class(result, "psychopdaROCClass")
+  expect_s3_class(result, "psychopdaROCResults")
 })

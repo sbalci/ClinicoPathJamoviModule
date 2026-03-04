@@ -1,3 +1,17 @@
+enhancedROC <- function(...) {
+  args <- list(...)
+  f_args <- formals(ClinicoPath::enhancedROC)
+  for(arg in names(f_args)) {
+    if(arg %in% c('...', 'data')) next
+    if(!(arg %in% names(args))) {
+      if(is.name(f_args[[arg]]) && as.character(f_args[[arg]]) == '') {
+        args[[arg]] <- ""
+      }
+    }
+  }
+  do.call(ClinicoPath::enhancedROC, args)
+}
+
 # ═══════════════════════════════════════════════════════════
 # Argument Combination Tests: enhancedROC
 # ═══════════════════════════════════════════════════════════
@@ -21,7 +35,7 @@ test_that("enhancedROC performs Youden Index optimization", {
     youdenOptimization = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC evaluates custom cutoffs", {
@@ -33,7 +47,7 @@ test_that("enhancedROC evaluates custom cutoffs", {
     customCutoffs = "10, 15, 20, 25"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC applies sensitivity threshold", {
@@ -45,7 +59,7 @@ test_that("enhancedROC applies sensitivity threshold", {
     sensitivityThreshold = 0.9
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC applies specificity threshold", {
@@ -57,7 +71,7 @@ test_that("enhancedROC applies specificity threshold", {
     specificityThreshold = 0.9
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC uses different confidence levels", {
@@ -69,7 +83,7 @@ test_that("enhancedROC uses different confidence levels", {
     predictors = "biomarker1",
     confidenceLevel = 90
   )
-  expect_s3_class(result1, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
 
   # Test with 99% CI
   result2 <- enhancedROC(
@@ -79,7 +93,7 @@ test_that("enhancedROC uses different confidence levels", {
     predictors = "biomarker1",
     confidenceLevel = 99
   )
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC uses bootstrap confidence intervals", {
@@ -92,7 +106,7 @@ test_that("enhancedROC uses bootstrap confidence intervals", {
     bootstrapSamples = 500  # Reduced for testing speed
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles different bootstrap methods", {
@@ -106,7 +120,7 @@ test_that("enhancedROC handles different bootstrap methods", {
     bootstrapSamples = 200,
     bootstrapMethod = "percentile"
   )
-  expect_s3_class(result1, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
 
   # Test BCa method
   result2 <- enhancedROC(
@@ -118,7 +132,7 @@ test_that("enhancedROC handles different bootstrap methods", {
     bootstrapSamples = 200,
     bootstrapMethod = "bca"
   )
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC performs comparative ROC analysis", {
@@ -130,7 +144,7 @@ test_that("enhancedROC performs comparative ROC analysis", {
     analysisType = "comparative"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC performs pairwise comparisons", {
@@ -142,7 +156,7 @@ test_that("enhancedROC performs pairwise comparisons", {
     pairwiseComparisons = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles different comparison methods", {
@@ -155,7 +169,7 @@ test_that("enhancedROC handles different comparison methods", {
     pairwiseComparisons = TRUE,
     comparisonMethod = "delong"
   )
-  expect_s3_class(result1, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
 
   # Bootstrap method
   result2 <- enhancedROC(
@@ -166,7 +180,7 @@ test_that("enhancedROC handles different comparison methods", {
     pairwiseComparisons = TRUE,
     comparisonMethod = "bootstrap"
   )
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC generates ROC curve plot", {
@@ -178,7 +192,7 @@ test_that("enhancedROC generates ROC curve plot", {
     rocCurve = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC displays AUC table", {
@@ -190,7 +204,7 @@ test_that("enhancedROC displays AUC table", {
     aucTable = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC displays cutoff analysis table", {
@@ -202,7 +216,7 @@ test_that("enhancedROC displays cutoff analysis table", {
     cutoffTable = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC displays optimal cutoffs", {
@@ -215,7 +229,7 @@ test_that("enhancedROC displays optimal cutoffs", {
     youdenOptimization = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC displays diagnostic metrics", {
@@ -227,7 +241,7 @@ test_that("enhancedROC displays diagnostic metrics", {
     diagnosticMetrics = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC displays clinical metrics (PPV, NPV, LR)", {
@@ -240,7 +254,7 @@ test_that("enhancedROC displays clinical metrics (PPV, NPV, LR)", {
     prevalence = 0.15
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC uses observed prevalence", {
@@ -253,7 +267,7 @@ test_that("enhancedROC uses observed prevalence", {
     useObservedPrevalence = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC performs partial AUC analysis", {
@@ -267,7 +281,7 @@ test_that("enhancedROC performs partial AUC analysis", {
     partialRange = "0.8,1.0"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles different smoothing methods", {
@@ -279,7 +293,7 @@ test_that("enhancedROC handles different smoothing methods", {
     predictors = "biomarker1",
     smoothMethod = "none"
   )
-  expect_s3_class(result1, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
 
   # Binormal smoothing
   result2 <- enhancedROC(
@@ -289,7 +303,7 @@ test_that("enhancedROC handles different smoothing methods", {
     predictors = "biomarker1",
     smoothMethod = "binormal"
   )
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC applies clinical context", {
@@ -301,7 +315,7 @@ test_that("enhancedROC applies clinical context", {
     predictors = "biomarker1",
     clinicalContext = "screening"
   )
-  expect_s3_class(result1, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
 
   # Diagnosis context
   result2 <- enhancedROC(
@@ -311,7 +325,7 @@ test_that("enhancedROC applies clinical context", {
     predictors = "biomarker1",
     clinicalContext = "diagnosis"
   )
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC applies clinical presets", {
@@ -323,7 +337,7 @@ test_that("enhancedROC applies clinical presets", {
     predictors = "biomarker1",
     clinicalPresets = "biomarker_screening"
   )
-  expect_s3_class(result1, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
 
   # Confirmatory testing preset
   result2 <- enhancedROC(
@@ -333,7 +347,7 @@ test_that("enhancedROC applies clinical presets", {
     predictors = "biomarker1",
     clinicalPresets = "confirmatory_testing"
   )
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles different plot themes", {
@@ -346,7 +360,7 @@ test_that("enhancedROC handles different plot themes", {
     rocCurve = TRUE,
     plotTheme = "clinical"
   )
-  expect_s3_class(result1, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
 
   # Modern theme
   result2 <- enhancedROC(
@@ -357,7 +371,7 @@ test_that("enhancedROC handles different plot themes", {
     rocCurve = TRUE,
     plotTheme = "modern"
   )
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC shows cutoff points on plot", {
@@ -371,7 +385,7 @@ test_that("enhancedROC shows cutoff points on plot", {
     youdenOptimization = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC shows confidence bands", {
@@ -386,7 +400,7 @@ test_that("enhancedROC shows confidence bands", {
     bootstrapSamples = 200
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC detects class imbalance", {
@@ -401,7 +415,7 @@ test_that("enhancedROC detects class imbalance", {
     showImbalanceWarning = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC combines multiple features", {
@@ -423,5 +437,5 @@ test_that("enhancedROC combines multiple features", {
     pairwiseComparisons = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })

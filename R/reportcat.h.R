@@ -103,7 +103,7 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "reportcat",
-                version = c(0,0,33),
+                version = c(0,0,35),
                 options = options,
                 results = reportcatResults$new(options=options),
                 data = data,

@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.34
-Date: 2026-02-15
+Version: 0.0.35.03
+Date: 2026-03-03
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -52,6 +52,7 @@ Imports:
     gt,
     gtsummary,
     irr,
+    irrCAC,
     janitor,
     jmvcore,
     kableExtra,
@@ -550,8 +551,6 @@ Collate:
     'effectsize.h.R'
     'emfrailty.b.R'
     'emfrailty.h.R'
-    'enhancedROC.b.R'
-    'enhancedROC.h.R'
     'enhanced_wrapper_example.R'
     'enhancedcorrelation.b.R'
     'enhancedcorrelation.h.R'
@@ -561,6 +560,8 @@ Collate:
     'enhancedfactorvariable.h.R'
     'enhancedfrequency.b.R'
     'enhancedfrequency.h.R'
+    'enhancedroc.b.R'
+    'enhancedroc.h.R'
     'enhancedtables.b.R'
     'enhancedtables.h.R'
     'enhancedtwowayfrequency.b.R'
@@ -904,9 +905,9 @@ Collate:
     'progressionsurvival.h.R'
     'pseudosurvival.b.R'
     'pseudosurvival.h.R'
-    'psychopdaROC.b.R'
-    'psychopdaROC.h.R'
     'psychopdaROC_utilities.R'
+    'psychopdaroc.b.R'
+    'psychopdaroc.h.R'
     'qtwist.b.R'
     'qtwist.h.R'
     'qualitycontrol.b.R'

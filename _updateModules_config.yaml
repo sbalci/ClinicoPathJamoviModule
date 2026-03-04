@@ -15,11 +15,11 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.34"
-new_date: "2026-02-15"
+new_version: "0.0.35.03"
+new_date: "2026-03-03"
 quick: false
-TEST: false
-meddecide: true
+TEST: true
+meddecide: false
 jjstatsplot: false
 jsurvival: false
 ClinicoPathDescriptives: false
@@ -70,6 +70,8 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     r_files:
       - "utils.R"
+      - "error_handling.R"
+      - "diagnostichelpers.R"
       - "decisiongraph_utils.R"
       - "psychopdaROC_utilities.R"
       - "nomogrammer.R"
@@ -77,6 +79,8 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     r_files:
       - "utils.R"
+      - "diagnostichelpers.R"
+      - "survivalPower_distributions.R"
   ClinicoPathDescriptives:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     r_files:
@@ -104,6 +108,9 @@ modules:
       - "histopathology.rda"
     r_files:
       - "utils.R"
+      - "error_handling.R"
+      - "diagnostichelpers.R"
+      - "survivalPower_distributions.R"
       - "decisiongraph_utils.R"
       - "ihc_utilities.R"
       - "psychopdaROC_utilities.R"

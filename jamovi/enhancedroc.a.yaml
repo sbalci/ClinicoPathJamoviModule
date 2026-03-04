@@ -1,10 +1,10 @@
 ---
 name: enhancedROC
 title: Clinical ROC Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
-version: '0.0.34'
+version: '0.0.35'
 jas: '1.2'
 
 description:
@@ -78,12 +78,13 @@ options:
     - name: youdenOptimization
       title: 'Youden Index Optimization'
       type: Bool
-      default: false
+      default: true
       description: 'Find optimal cutoff using Youden Index (Sensitivity + Specificity - 1)'
 
     - name: customCutoffs
       title: 'Custom Cutoffs'
       type: String
+      default: ''
       description: 'Comma-separated list of custom cutoffs to evaluate (e.g., 0.1, 0.5, 0.9)'
 
     - name: sensitivityThreshold
@@ -180,13 +181,13 @@ options:
     - name: rocCurve
       title: 'ROC Curve Plot'
       type: Bool
-      default: false
+      default: true
       description: 'Display ROC curve plot'
 
     - name: aucTable
       title: 'AUC Summary Table'
       type: Bool
-      default: false
+      default: true
       description: 'Display AUC summary table'
 
     - name: cutoffTable
@@ -198,13 +199,13 @@ options:
     - name: optimalCutoffs
       title: 'Optimal Cutoffs Summary'
       type: Bool
-      default: false
+      default: true
       description: 'Display optimal cutoff summary'
 
     - name: diagnosticMetrics
       title: 'Diagnostic Metrics'
       type: Bool
-      default: false
+      default: true
       description: 'Display comprehensive diagnostic metrics'
 
     - name: clinicalMetrics

@@ -1,3 +1,17 @@
+enhancedROC <- function(...) {
+  args <- list(...)
+  f_args <- formals(ClinicoPath::enhancedROC)
+  for(arg in names(f_args)) {
+    if(arg %in% c('...', 'data')) next
+    if(!(arg %in% names(args))) {
+      if(is.name(f_args[[arg]]) && as.character(f_args[[arg]]) == '') {
+        args[[arg]] <- ""
+      }
+    }
+  }
+  do.call(ClinicoPath::enhancedROC, args)
+}
+
 # ═══════════════════════════════════════════════════════════
 # Integration Tests: enhancedROC
 # ═══════════════════════════════════════════════════════════
@@ -29,8 +43,8 @@ test_that("enhancedROC produces consistent results across runs", {
   )
 
   # Results should be identical (deterministic)
-  expect_s3_class(result1, "enhancedROCClass")
-  expect_s3_class(result2, "enhancedROCClass")
+  expect_s3_class(result1, "enhancedROCResults")
+  expect_s3_class(result2, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: basic → plots → metrics", {
@@ -41,7 +55,7 @@ test_that("enhancedROC workflow: basic → plots → metrics", {
     positiveClass = "Disease",
     predictors = "biomarker1"
   )
-  expect_s3_class(basic, "enhancedROCClass")
+  expect_s3_class(basic, "enhancedROCResults")
 
   # Step 2: Add visualizations
   with_plots <- enhancedROC(
@@ -52,7 +66,7 @@ test_that("enhancedROC workflow: basic → plots → metrics", {
     rocCurve = TRUE,
     showCutoffPoints = TRUE
   )
-  expect_s3_class(with_plots, "enhancedROCClass")
+  expect_s3_class(with_plots, "enhancedROCResults")
 
   # Step 3: Add comprehensive metrics
   with_metrics <- enhancedROC(
@@ -65,7 +79,7 @@ test_that("enhancedROC workflow: basic → plots → metrics", {
     clinicalMetrics = TRUE,
     youdenOptimization = TRUE
   )
-  expect_s3_class(with_metrics, "enhancedROCClass")
+  expect_s3_class(with_metrics, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: single → comparative → pairwise", {
@@ -77,7 +91,7 @@ test_that("enhancedROC workflow: single → comparative → pairwise", {
     predictors = "established_marker",
     analysisType = "single"
   )
-  expect_s3_class(single, "enhancedROCClass")
+  expect_s3_class(single, "enhancedROCResults")
 
   # Step 2: Add comparative analysis
   comparative <- enhancedROC(
@@ -87,7 +101,7 @@ test_that("enhancedROC workflow: single → comparative → pairwise", {
     predictors = c("established_marker", "novel_marker1"),
     analysisType = "comparative"
   )
-  expect_s3_class(comparative, "enhancedROCClass")
+  expect_s3_class(comparative, "enhancedROCResults")
 
   # Step 3: Add pairwise statistical comparison
   with_comparison <- enhancedROC(
@@ -99,7 +113,7 @@ test_that("enhancedROC workflow: single → comparative → pairwise", {
     pairwiseComparisons = TRUE,
     comparisonMethod = "delong"
   )
-  expect_s3_class(with_comparison, "enhancedROCClass")
+  expect_s3_class(with_comparison, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: screening application", {
@@ -121,7 +135,7 @@ test_that("enhancedROC workflow: screening application", {
     useObservedPrevalence = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: confirmatory testing", {
@@ -142,7 +156,7 @@ test_that("enhancedROC workflow: confirmatory testing", {
     clinicalMetrics = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: biomarker validation study", {
@@ -167,7 +181,7 @@ test_that("enhancedROC workflow: biomarker validation study", {
     bootstrapSamples = 500
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: calibration assessment", {
@@ -186,7 +200,7 @@ test_that("enhancedROC workflow: calibration assessment", {
     brierScore = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: class imbalance handling", {
@@ -209,7 +223,7 @@ test_that("enhancedROC workflow: class imbalance handling", {
     useObservedPrevalence = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: multi-class ROC analysis", {
@@ -225,7 +239,7 @@ test_that("enhancedROC workflow: multi-class ROC analysis", {
     multiClassAveraging = "macro"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC handles data from CSV import", {
@@ -243,7 +257,7 @@ test_that("enhancedROC handles data from CSV import", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 
   # Clean up
   unlink(temp_csv)
@@ -264,7 +278,7 @@ test_that("enhancedROC handles data from Excel import", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 
   # Clean up
   unlink(temp_xlsx)
@@ -282,7 +296,7 @@ test_that("enhancedROC handles different data structures consistently", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result_tibble, "enhancedROCClass")
+  expect_s3_class(result_tibble, "enhancedROCResults")
 
   # Test with data.frame
   df_data <- as.data.frame(enhancedroc_biomarker)
@@ -294,7 +308,7 @@ test_that("enhancedROC handles different data structures consistently", {
     predictors = "biomarker1"
   )
 
-  expect_s3_class(result_df, "enhancedROCClass")
+  expect_s3_class(result_df, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: complete publication-ready analysis", {
@@ -329,7 +343,7 @@ test_that("enhancedROC workflow: complete publication-ready analysis", {
     clinical_interpretation = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: iterative cutoff optimization", {
@@ -342,7 +356,7 @@ test_that("enhancedROC workflow: iterative cutoff optimization", {
     youdenOptimization = TRUE,
     optimalCutoffs = TRUE
   )
-  expect_s3_class(youden_result, "enhancedROCClass")
+  expect_s3_class(youden_result, "enhancedROCResults")
 
   # Step 2: Evaluate custom cutoffs around optimal
   custom_result <- enhancedROC(
@@ -353,7 +367,7 @@ test_that("enhancedROC workflow: iterative cutoff optimization", {
     customCutoffs = "15, 18, 20, 22, 25",
     cutoffTable = TRUE
   )
-  expect_s3_class(custom_result, "enhancedROCClass")
+  expect_s3_class(custom_result, "enhancedROCResults")
 
   # Step 3: Apply sensitivity/specificity constraints
   constrained_result <- enhancedROC(
@@ -365,7 +379,7 @@ test_that("enhancedROC workflow: iterative cutoff optimization", {
     specificityThreshold = 0.75,
     cutoffTable = TRUE
   )
-  expect_s3_class(constrained_result, "enhancedROCClass")
+  expect_s3_class(constrained_result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: partial AUC for specific ranges", {
@@ -380,7 +394,7 @@ test_that("enhancedROC workflow: partial AUC for specific ranges", {
     partialRange = "0.9,1.0",
     rocCurve = TRUE
   )
-  expect_s3_class(high_spec_result, "enhancedROCClass")
+  expect_s3_class(high_spec_result, "enhancedROCResults")
 
   # High-sensitivity partial AUC (e.g., for screening)
   high_sens_result <- enhancedROC(
@@ -393,7 +407,7 @@ test_that("enhancedROC workflow: partial AUC for specific ranges", {
     partialRange = "0.9,1.0",
     rocCurve = TRUE
   )
-  expect_s3_class(high_sens_result, "enhancedROCClass")
+  expect_s3_class(high_sens_result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: comparing old vs new biomarker", {
@@ -415,7 +429,7 @@ test_that("enhancedROC workflow: comparing old vs new biomarker", {
     bootstrapSamples = 500
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: subgroup analysis", {
@@ -427,7 +441,7 @@ test_that("enhancedROC workflow: subgroup analysis", {
     positiveClass = "Disease",
     predictors = "biomarker1"
   )
-  expect_s3_class(result_male, "enhancedROCClass")
+  expect_s3_class(result_male, "enhancedROCResults")
 
   female_subset <- enhancedroc_biomarker[enhancedroc_biomarker$sex == "Female", ]
   result_female <- enhancedROC(
@@ -436,7 +450,7 @@ test_that("enhancedROC workflow: subgroup analysis", {
     positiveClass = "Disease",
     predictors = "biomarker1"
   )
-  expect_s3_class(result_female, "enhancedROCClass")
+  expect_s3_class(result_female, "enhancedROCResults")
 })
 
 test_that("enhancedROC workflow: sensitivity analysis with different prevalences", {
@@ -452,7 +466,7 @@ test_that("enhancedROC workflow: sensitivity analysis with different prevalences
       clinicalMetrics = TRUE,
       prevalence = prev
     )
-    expect_s3_class(result, "enhancedROCClass")
+    expect_s3_class(result, "enhancedROCResults")
   }
 })
 
@@ -468,5 +482,5 @@ test_that("enhancedROC integrates with small dataset workflow", {
     rocCurve = TRUE
   )
 
-  expect_s3_class(result, "enhancedROCClass")
+  expect_s3_class(result, "enhancedROCResults")
 })
