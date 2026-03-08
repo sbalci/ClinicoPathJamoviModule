@@ -1,0 +1,509 @@
+---
+title: "SCAD/MCP Cox Regression for Variable Selection in Survival Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SCAD/MCP Cox Regression for Variable Selection in Survival Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** The `ncvregcox()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference. To run interactively,
+> use `devtools::load_all()` and call the R6 class directly:
+> `ncvregcoxClass$new(options = ncvregcoxOptions$new(...), data = mydata)`.
+
+# SCAD/MCP Cox Regression
+
+## Overview
+
+The **SCAD Cox Regression** module (`ncvregcox`) performs variable selection using
+non-convex penalties — **SCAD** (Smoothly Clipped Absolute Deviation) and **MCP**
+(Minimax Concave Penalty) — for Cox proportional hazards models. These penalties
+solve a fundamental problem with LASSO: **over-penalization of large coefficients**.
+
+Key features:
+
+- **Three penalty types**: SCAD, MCP, and LASSO (for comparison)
+- **Oracle properties**: Consistent selection + unbiased estimation for large effects
+- **Cross-validated lambda selection** (min or 1-SE rule)
+- **Regularization path** visualization
+- **Variable importance** analysis
+
+---
+
+## Why Non-Convex Penalties?
+
+LASSO applies a constant penalty rate regardless of coefficient size, which means:
+- Small (noise) coefficients: shrunk to zero (good)
+- Large (true) coefficients: also over-shrunk (bad — introduces bias)
+
+**SCAD** and **MCP** use penalties that flatten out for large coefficients:
+
+### Penalty Comparison
+
+| Penalty | Behavior | Bias for Large Effects | Selection |
+|---------|----------|----------------------|-----------|
+| **LASSO** | Constant penalty rate | High bias | Consistent under conditions |
+| **SCAD** | Penalty flattens at $\gamma\lambda$ | Nearly unbiased | Oracle property |
+| **MCP** | Penalty flattens sooner | Nearly unbiased | Oracle property |
+| **Ridge** | Quadratic penalty | Moderate bias | No selection |
+
+### Mathematical Formulation
+
+**LASSO penalty**: $P(\beta) = \lambda |\beta|$
+
+**SCAD penalty** (Fan & Li, 2001):
+$$P(\beta) = \begin{cases}
+\lambda |\beta| & \text{if } |\beta| \leq \lambda \\
+\frac{-(\beta^2 - 2\gamma\lambda|\beta| + \lambda^2)}{2(\gamma-1)} & \text{if } \lambda < |\beta| \leq \gamma\lambda \\
+\frac{(\gamma+1)\lambda^2}{2} & \text{if } |\beta| > \gamma\lambda
+\end{cases}$$
+
+**MCP** (Zhang, 2010):
+$$P(\beta) = \begin{cases}
+\lambda |\beta| - \frac{\beta^2}{2\gamma} & \text{if } |\beta| \leq \gamma\lambda \\
+\frac{\gamma\lambda^2}{2} & \text{if } |\beta| > \gamma\lambda
+\end{cases}$$
+
+The default $\gamma = 3.7$ for SCAD was recommended by Fan & Li (2001) based on
+Bayesian arguments and minimization of a Bayesian risk.
+
+---
+
+## When to Use SCAD/MCP
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Suspect strong true effects that LASSO would bias | **SCAD or MCP** |
+| Building a model for publication (unbiased coefficients) | **SCAD recommended** |
+| Very high dimensional (p >> n) | LASSO may be more stable |
+| Want oracle property without two-stage procedure | **SCAD or MCP** |
+| Moderate number of predictors | **MCP** (more aggressive selection) |
+| Need guaranteed convexity for optimization | Use LASSO |
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Events | Covariates | Description |
+|---------|---|--------|------------|-------------|
+| Synthetic "clinical" | 200 | ~110 | 15 mixed | Clinical study with known effects |
+| Synthetic "sparse" | 100 | ~50 | 30 | Many noise variables, few true signals |
+
+---
+
+## 1. SCAD Penalty (Default)
+
+SCAD is the recommended starting point — it provides nearly unbiased estimates
+for truly important variables while setting noise variables to zero.
+
+```{r clinical-data}
+# Simulate clinical survival data
+set.seed(42)
+n <- 200
+
+# Predictors with true effects
+age <- rnorm(n, 62, 11)
+bmi <- rnorm(n, 27, 5)
+tumor_diameter <- rlnorm(n, log(3.5), 0.5)
+ldh <- rlnorm(n, log(200), 0.4)
+cea <- rlnorm(n, log(5), 0.8)
+t_stage_num <- sample(1:4, n, replace = TRUE, prob = c(0.15, 0.3, 0.35, 0.2))
+t_stage <- factor(paste0("T", t_stage_num))
+
+# Noise predictors
+crp <- rlnorm(n, log(3), 0.7)
+albumin <- rnorm(n, 4.0, 0.5)
+wbc <- rnorm(n, 8, 2.5)
+neutrophil_ratio <- rbeta(n, 5, 3)
+platelet <- rnorm(n, 250, 60)
+gender <- factor(sample(c("M", "F"), n, replace = TRUE))
+n_stage <- factor(sample(c("N0", "N1", "N2"), n, replace = TRUE,
+                         prob = c(0.45, 0.35, 0.2)))
+histology <- factor(sample(c("Adenocarcinoma", "Squamous", "Other"), n,
+                           replace = TRUE, prob = c(0.5, 0.35, 0.15)))
+
+# True survival model
+lp <- 0.03 * (age - 62) +
+      0.15 * tumor_diameter +
+      0.003 * (ldh - 200) +
+      0.05 * cea +
+      0.3 * (t_stage_num - 1)
+
+surv_time <- rweibull(n, shape = 1.2, scale = 36 * exp(-lp * 0.15))
+censor_time <- runif(n, 8, 48)
+time <- pmax(pmin(surv_time, censor_time), 0.1)
+# ncvregcox expects factor for event
+event <- factor(ifelse(surv_time <= censor_time, "1", "0"))
+
+data_clinical <- data.frame(
+  time = time, event = event,
+  age = age, bmi = bmi, tumor_diameter = tumor_diameter,
+  ldh = ldh, cea = cea, t_stage = t_stage,
+  crp = crp, albumin = albumin, wbc = wbc,
+  neutrophil_ratio = neutrophil_ratio, platelet = platelet,
+  gender = gender, n_stage = n_stage, histology = histology
+)
+
+cat("N:", n, "Events:", sum(event == "1"),
+    "Event rate:", round(mean(event == "1"), 2), "\n")
+```
+
+```{r scad-run}
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin", "wbc",
+                 "neutrophil_ratio", "platelet", "gender",
+                 "n_stage", "histology"),
+  penalty = "SCAD",
+  gamma = 3.7,
+  alpha = 1.0,
+  cv_folds = 10,
+  lambda_type = "min",
+  standardize = TRUE,
+  plot_path = TRUE,
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+Expected: SCAD should select age, tumor_diameter, ldh, cea, and t_stage.
+Noise variables should be eliminated with nearly unbiased coefficient estimates.
+
+---
+
+## 2. MCP Penalty
+
+MCP is more aggressive than SCAD — it transitions to zero penalty more quickly,
+leading to sparser models.
+
+```{r mcp}
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin", "wbc",
+                 "neutrophil_ratio", "platelet", "gender",
+                 "n_stage", "histology"),
+  penalty = "MCP",
+  gamma = 3.0,
+  alpha = 1.0,
+  cv_folds = 10,
+  lambda_type = "min",
+  standardize = TRUE,
+  plot_path = TRUE,
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+---
+
+## 3. LASSO Penalty (Comparison)
+
+Include LASSO for comparison — it typically selects more variables but with
+higher coefficient bias.
+
+```{r lasso-comparison}
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin", "wbc",
+                 "neutrophil_ratio", "platelet", "gender",
+                 "n_stage", "histology"),
+  penalty = "lasso",
+  alpha = 1.0,
+  cv_folds = 10,
+  lambda_type = "min",
+  standardize = TRUE,
+  plot_path = TRUE,
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+**Compare**: SCAD and MCP should have less biased coefficients for age, tumor_diameter,
+ldh, cea, and t_stage than LASSO, while still setting noise variables to zero.
+
+---
+
+## 4. Gamma Parameter
+
+The gamma parameter controls how quickly the penalty flattens:
+- **SCAD**: gamma must be > 2. Default 3.7 (Fan & Li recommendation)
+- **MCP**: gamma must be > 1. Default 3.0. Lower gamma = more aggressive selection
+
+```{r gamma-scad-low}
+# SCAD with lower gamma (more aggressive)
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin"),
+  penalty = "SCAD",
+  gamma = 2.5,
+  cv_folds = 10,
+  lambda_type = "min",
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+```{r gamma-scad-high}
+# SCAD with higher gamma (closer to LASSO behavior)
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin"),
+  penalty = "SCAD",
+  gamma = 6.0,
+  cv_folds = 10,
+  lambda_type = "min",
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+---
+
+## 5. Lambda Selection: min vs 1se
+
+```{r lambda-min}
+# Minimum CV error — selects more variables
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin"),
+  penalty = "SCAD",
+  lambda_type = "min",
+  cv_folds = 10,
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+```{r lambda-1se}
+# One SE rule — more parsimonious
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin"),
+  penalty = "SCAD",
+  lambda_type = "1se",
+  cv_folds = 10,
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+---
+
+## 6. Sparse Scenario (Many Noise Variables)
+
+```{r sparse-data}
+# 100 patients, 30 variables, only 4 truly important
+set.seed(123)
+n3 <- 100
+p3 <- 30
+
+X <- matrix(rnorm(n3 * p3), nrow = n3)
+colnames(X) <- paste0("X", 1:p3)
+
+# Only 4 variables have true effects
+beta_true <- rep(0, p3)
+beta_true[c(1, 8, 15, 23)] <- c(1.0, -0.8, 0.6, -0.7)
+
+lp3 <- X %*% beta_true
+surv3 <- rweibull(n3, 1.2, 24 * exp(-as.numeric(lp3) * 0.2))
+cens3 <- runif(n3, 6, 36)
+time3 <- pmax(pmin(surv3, cens3), 0.1)
+event3 <- factor(ifelse(surv3 <= cens3, "1", "0"))
+
+data_sparse <- data.frame(time = time3, event = event3, as.data.frame(X))
+
+cat("N:", n3, "Events:", sum(event3 == "1"),
+    "True signals: X1, X8, X15, X23\n")
+```
+
+```{r sparse-scad}
+# SCAD should recover the 4 true variables
+ncvregcox(
+  data = data_sparse,
+  time = "time",
+  event = "event",
+  covariates = paste0("X", 1:30),
+  penalty = "SCAD",
+  gamma = 3.7,
+  cv_folds = 10,
+  lambda_type = "min",
+  plot_path = TRUE,
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+```{r sparse-mcp}
+# MCP comparison
+ncvregcox(
+  data = data_sparse,
+  time = "time",
+  event = "event",
+  covariates = paste0("X", 1:30),
+  penalty = "MCP",
+  gamma = 3.0,
+  cv_folds = 10,
+  lambda_type = "min",
+  plot_path = TRUE,
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+---
+
+## 7. Elastic Net Mixing
+
+Combine SCAD/MCP with L2 penalty (alpha < 1) for correlated predictors.
+
+```{r elastic}
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "bmi", "tumor_diameter", "ldh", "cea",
+                 "t_stage", "crp", "albumin"),
+  penalty = "SCAD",
+  alpha = 0.7,  # Mix with L2 penalty
+  cv_folds = 10,
+  lambda_type = "min",
+  plot_cv = TRUE,
+  variable_importance = TRUE
+)
+```
+
+---
+
+## 8. Standardization
+
+```{r no-standardize}
+# Without standardization (not recommended for mixed-scale variables)
+ncvregcox(
+  data = data_clinical,
+  time = "time",
+  event = "event",
+  covariates = c("age", "tumor_diameter", "ldh", "cea"),
+  penalty = "SCAD",
+  standardize = FALSE,
+  cv_folds = 10,
+  lambda_type = "min",
+  variable_importance = TRUE
+)
+```
+
+---
+
+## Interpreting Results
+
+### Selected Variables Table
+
+| Column | Meaning |
+|--------|---------|
+| Variable | Predictor name |
+| Coefficient | Log hazard ratio (nearly unbiased with SCAD/MCP) |
+| Hazard Ratio | exp(coefficient) |
+| Selected | Non-zero coefficient indicator |
+
+### Key Advantage Over LASSO
+
+For a true coefficient of 0.8:
+- LASSO might estimate 0.5 (biased downward)
+- SCAD/MCP might estimate 0.78 (nearly unbiased)
+
+This matters for hazard ratio interpretation in clinical settings.
+
+### Variable Importance
+
+Variables ranked by absolute coefficient value. With SCAD/MCP, the ranking
+is more reliable than LASSO because coefficients are less biased.
+
+---
+
+## SCAD vs MCP: Which to Choose?
+
+| Criterion | SCAD | MCP |
+|-----------|------|-----|
+| Bias for large effects | Very low | Very low |
+| Selection aggressiveness | Moderate | More aggressive |
+| Stability | Good | Slightly less stable |
+| Recommended gamma | 3.7 (default) | 3.0 (default) |
+| Publication standard | More established | Gaining adoption |
+
+**Practical recommendation**: Start with SCAD (gamma=3.7). Switch to MCP if
+you want sparser selection. Use LASSO as comparison baseline.
+
+---
+
+## Common Pitfalls
+
+1. **Setting gamma too low for SCAD**: gamma < 2.5 makes optimization unstable.
+   Stick with the default 3.7 unless you have a specific reason to change it.
+
+2. **Comparing SCAD/MCP coefficients directly to LASSO**: SCAD/MCP coefficients
+   are less biased. A SCAD coefficient of 0.8 is not "bigger" than a LASSO
+   coefficient of 0.5 for the same variable — the LASSO version is just more shrunk.
+
+3. **Not reporting the penalty type**: Always specify whether you used SCAD, MCP,
+   or LASSO, along with the gamma value and lambda selection method.
+
+4. **Using SCAD/MCP for very high dimensional data (p >> 10n)**: In extremely
+   high-dimensional settings, LASSO or Elastic Net may be more stable.
+   SCAD/MCP work best when p is moderately large relative to n.
+
+---
+
+## Related ClinicoPath Functions
+
+| Function | Use When |
+|----------|----------|
+| **LASSO Cox** | Standard LASSO with suitability assessment |
+| **Adaptive LASSO** | Two-stage adaptive weights approach |
+| **High-Dimensional Cox** | Multiple regularization methods unified |
+| **PLS Cox** | Dimensionality reduction for very high p |
+| **Multivariable Survival** | Standard Cox, no regularization needed |
+
+---
+
+## References
+
+- Fan J, Li R. Variable selection via nonconcave penalized likelihood and its oracle properties. *J Am Stat Assoc*. 2001;96(456):1348-1360.
+- Zhang CH. Nearly unbiased variable selection under minimax concave penalty. *Ann Stat*. 2010;38(2):894-942.
+- Breheny P, Huang J. Coordinate descent algorithms for nonconvex penalized regression, with applications to biological feature selection. *Ann Appl Stat*. 2011;5(1):232-253.
+- Fan J, Li R. Variable selection for Cox's proportional hazards model and frailty model. *Ann Stat*. 2002;30(1):74-99.

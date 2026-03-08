@@ -1,9 +1,10 @@
 ---
 name: plscox
 title: Partial Least Squares Cox Models
-menuGroup: SurvivalD
-menuSubgroup: High-Dimensional Methods
-menuSubtitle: 'PLS-based Cox Regression for High-Dimensional Survival Data'
+menuGroup: SurvivalT
+menuSubgroup: Dimension Reduction Cox
+menuTitle: PLS Cox
+menuSubtitle: Creates survival-directed composite scores for massive (p > n) datasets.
 version: '0.0.3'
 jas: '1.2'
 
@@ -14,6 +15,11 @@ description:
         for analysis of genomic, proteomic, and other high-dimensional datasets.
 
 options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
     - name: time
       title: 'Time Variable'
       type: Variable
@@ -209,3 +215,13 @@ options:
       type: Bool
       default: true
       description: 'Assess model prediction accuracy using C-index and other metrics'
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Run a comprehensive data suitability assessment before analysis.
+            Checks sample size, events-per-variable ratio, multicollinearity, 
+            and whether regularization is needed.

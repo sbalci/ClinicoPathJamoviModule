@@ -35,6 +35,17 @@ children:
             name: strata
             maxItemCount: 1
             isTarget: true
+
+  - type: CollapseBox
+    label: Data Suitability
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: suitabilityCheck
+
   - type: LayoutBox
     margin: large
     children:

@@ -1,0 +1,543 @@
+---
+title: "Adaptive LASSO Cox Regression for Variable Selection in Survival Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Adaptive LASSO Cox Regression for Variable Selection in Survival Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** The `adaptivelasso()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference. To run interactively,
+> use `devtools::load_all()` and call the R6 class directly:
+> `adaptivelassoClass$new(options = adaptivelassoOptions$new(...), data = mydata)`.
+
+# Adaptive LASSO Cox Regression
+
+## Overview
+
+The **Adaptive LASSO Cox Regression** module (`adaptivelasso`) performs variable selection
+in survival analysis using adaptively weighted L1-penalized Cox proportional hazards
+regression. Unlike standard LASSO, adaptive LASSO uses data-driven penalty weights
+to achieve the **oracle property** — consistent variable selection and asymptotically
+unbiased coefficient estimates for truly non-zero variables.
+
+Key features:
+
+- **Multiple weight methods** (Ridge, Univariate Cox, Full Cox, Correlation, Equal)
+- **Cross-validated lambda selection** with multiple performance measures
+- **Stability selection** for robust variable identification
+- **Model diagnostics** (proportional hazards test, goodness of fit)
+- **Risk group stratification** with Kaplan-Meier curves
+- **Comprehensive visualizations** (regularization path, CV curve, stability plot)
+
+---
+
+## What is Adaptive LASSO?
+
+Standard LASSO applies the same penalty to all coefficients, which can lead to:
+- **Inconsistent selection**: Some noise variables may be selected
+- **Biased estimates**: True non-zero coefficients are over-shrunk
+
+Adaptive LASSO fixes this by using **variable-specific weights**:
+
+$$\text{Maximize:} \quad \ell(\beta) - \lambda \sum_{j=1}^{p} w_j |\beta_j|$$
+
+where $w_j = 1/|\hat{\beta}_j^{(0)}|^\gamma$ are weights based on initial estimates
+$\hat{\beta}_j^{(0)}$.
+
+**Effect**: Variables with large initial coefficients get small penalties (kept in model),
+while variables with small initial estimates get large penalties (shrunk to zero).
+
+### Weight Methods Comparison
+
+| Method | Initial Estimate | Best For |
+|--------|-----------------|----------|
+| **Ridge** (default) | Ridge regression coefficients | Stable weights, handles collinearity |
+| **Univariate** | Individual Cox regressions | Fast, works with p > n |
+| **Full Cox** | Standard Cox model | Accurate when p < n |
+| **Correlation** | Marginal survival correlations | Very fast screening |
+| **Equal** | All weights = 1 (standard LASSO) | Comparison baseline |
+
+### LASSO vs Adaptive LASSO
+
+| Property | Standard LASSO | Adaptive LASSO |
+|----------|---------------|----------------|
+| Oracle property | No | Yes |
+| Coefficient bias | Higher | Lower for true signals |
+| Selection consistency | Not guaranteed | Consistent under mild conditions |
+| Computation | One-stage | Two-stage (initial + penalized) |
+| Best for | Quick screening | Publishable models |
+
+---
+
+## When to Use Adaptive LASSO
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Building a prognostic model for publication | **Adaptive LASSO recommended** |
+| Many predictors (p >= n/3) | **Use Ridge weights** |
+| Correlated predictors | **Use Ridge weights + alpha < 1** |
+| Quick variable screening | Standard LASSO may suffice |
+| Very few predictors (p < 5) | Standard Cox regression |
+| Need robust selection | Enable **stability selection** |
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Events | Predictors | Description |
+|---------|---|--------|------------|-------------|
+| Synthetic "standard" | 180 | ~100 | 12 mixed | Clinical study with known effects |
+| Synthetic "small" | 60 | ~25 | 8 | Small sample edge case |
+| Synthetic "collinear" | 120 | ~55 | 6 (2 correlated pairs) | Collinearity testing |
+
+---
+
+## 1. Basic Analysis with Ridge Weights
+
+The default configuration uses Ridge regression weights for adaptive penalties.
+
+```{r basic-ridge}
+# Create synthetic clinical data
+set.seed(42)
+n <- 180
+
+# Clinical variables
+age <- rnorm(n, 60, 12)
+tumor_size <- rlnorm(n, log(3), 0.6)
+ki67 <- pmin(pmax(rnorm(n, 25, 15), 1), 95)
+stage_num <- sample(1:4, n, replace = TRUE, prob = c(0.2, 0.35, 0.3, 0.15))
+stage <- factor(c("I", "II", "III", "IV")[stage_num])
+grade <- factor(sample(c("Low", "Moderate", "High"), n, replace = TRUE,
+                       prob = c(0.25, 0.45, 0.30)))
+gender <- factor(sample(c("Male", "Female"), n, replace = TRUE))
+treatment <- factor(sample(c("Surgery", "ChemoRT", "Combined"), n, replace = TRUE,
+                          prob = c(0.4, 0.3, 0.3)))
+
+# True survival model: age, stage, ki67, treatment affect survival
+linear_pred <- 0.03 * (age - 60) +
+               0.4 * (stage_num - 1) +
+               0.02 * (ki67 - 25) +
+               ifelse(treatment == "Combined", -0.5, 0)
+
+# Generate survival times (Weibull)
+baseline_time <- 36
+time_raw <- rweibull(n, shape = 1.2, scale = baseline_time * exp(-linear_pred * 0.3))
+censor_time <- runif(n, 12, 60)
+time <- pmin(time_raw, censor_time)
+time <- pmax(time, 0.1)
+event <- factor(ifelse(time_raw <= censor_time, "Event", "Censored"),
+                levels = c("Censored", "Event"))
+
+# Noise variables
+hemoglobin <- rnorm(n, 13, 2)
+crp <- rlnorm(n, log(5), 0.8)
+albumin <- rnorm(n, 4.0, 0.5)
+center <- factor(sample(c("CenterA", "CenterB", "CenterC"), n, replace = TRUE))
+
+data_clinical <- data.frame(
+  follow_up = time, event = event,
+  age = age, tumor_size = tumor_size, ki67 = ki67,
+  stage = stage, grade = grade, gender = gender,
+  treatment = treatment, hemoglobin = hemoglobin,
+  crp = crp, albumin = albumin, center = center
+)
+
+cat("Event rate:", mean(event == "Event"), "\n")
+cat("N:", n, "Events:", sum(event == "Event"), "\n")
+```
+
+```{r run-basic}
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade",
+                 "gender", "treatment", "hemoglobin", "crp", "albumin"),
+  weight_method = "ridge",
+  alpha = 1.0,
+  gamma = 1.0,
+  cv_folds = 10,
+  cv_measure = "deviance",
+  show_coefficients = TRUE,
+  show_selection_path = TRUE,
+  show_cv_results = TRUE,
+  plot_selection_path = TRUE,
+  plot_cv_curve = TRUE,
+  plot_survival_curves = TRUE
+)
+```
+
+Expected: Adaptive LASSO should select age, stage, ki67, and treatment as important
+predictors. Noise variables (hemoglobin, albumin) should be eliminated.
+
+---
+
+## 2. Comparing Weight Methods
+
+Different weight calculation methods suit different data scenarios.
+
+```{r weight-univariate}
+# Univariate Cox weights — good for p > n scenarios
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade",
+                 "gender", "treatment", "hemoglobin", "crp", "albumin"),
+  weight_method = "univariate",
+  alpha = 1.0,
+  gamma = 1.0,
+  cv_folds = 10,
+  show_coefficients = TRUE,
+  show_cv_results = TRUE,
+  plot_selection_path = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+```{r weight-equal}
+# Equal weights = standard LASSO (for comparison)
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade",
+                 "gender", "treatment", "hemoglobin", "crp", "albumin"),
+  weight_method = "equal",
+  alpha = 1.0,
+  cv_folds = 10,
+  show_coefficients = TRUE,
+  show_cv_results = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+**Interpretation**: Compare the selected variables between Ridge-weighted, Univariate-weighted,
+and Equal-weighted (standard LASSO) models. Ridge typically provides the most stable selection.
+
+---
+
+## 3. Stability Selection
+
+Stability selection identifies variables that are robustly selected across many
+bootstrap subsamples — more reliable than single-model selection.
+
+```{r stability}
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade",
+                 "gender", "treatment", "hemoglobin", "crp", "albumin"),
+  weight_method = "ridge",
+  alpha = 1.0,
+  cv_folds = 10,
+  stability_selection = TRUE,
+  stability_threshold = 0.6,
+  bootstrap_samples = 100,
+  subsampling_ratio = 0.8,
+  show_coefficients = TRUE,
+  plot_stability = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+Variables selected in >60% of bootstrap samples are considered stable.
+This is the recommended approach for publishable prognostic models.
+
+---
+
+## 4. Elastic Net Mixing (Correlated Predictors)
+
+When predictors are correlated, pure LASSO (alpha=1) arbitrarily selects one
+from a correlated group. Setting alpha < 1 adds an L2 penalty to encourage
+group selection.
+
+```{r elastic-net}
+# Create data with correlated predictors
+set.seed(42)
+n2 <- 120
+base1 <- rnorm(n2)
+base2 <- rnorm(n2)
+
+data_corr <- data.frame(
+  time = pmax(rweibull(n2, 1.2, 24) * exp(-0.3 * base1), 0.1),
+  event = factor(sample(c("Event", "Censored"), n2, replace = TRUE,
+                        prob = c(0.55, 0.45)),
+                 levels = c("Censored", "Event")),
+  var1 = base1,
+  var2 = base1 + rnorm(n2, 0, 0.2),  # r ~ 0.98 with var1
+  var3 = base2,
+  var4 = base2 + rnorm(n2, 0, 0.3),  # r ~ 0.95 with var3
+  var5 = rnorm(n2),
+  var6 = rnorm(n2)
+)
+
+# Pure LASSO (alpha = 1) — may drop one from each correlated pair
+adaptivelasso(
+  strata = NULL,
+  data = data_corr,
+  time = "time",
+  event = "event",
+  predictors = c("var1", "var2", "var3", "var4", "var5", "var6"),
+  weight_method = "ridge",
+  alpha = 1.0,
+  cv_folds = 5,
+  show_coefficients = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+```{r elastic-net-05}
+# Elastic Net (alpha = 0.5) — tends to keep correlated groups together
+adaptivelasso(
+  strata = NULL,
+  data = data_corr,
+  time = "time",
+  event = "event",
+  predictors = c("var1", "var2", "var3", "var4", "var5", "var6"),
+  weight_method = "ridge",
+  alpha = 0.5,
+  cv_folds = 5,
+  show_coefficients = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+---
+
+## 5. Gamma Parameter Effect
+
+The gamma parameter controls the strength of adaptive penalization. Higher gamma
+values create larger differences between penalty weights.
+
+```{r gamma-comparison}
+# gamma = 0.5 (mild adaptation)
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade",
+                 "gender", "treatment", "hemoglobin"),
+  weight_method = "ridge",
+  gamma = 0.5,
+  cv_folds = 10,
+  show_coefficients = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+```{r gamma-high}
+# gamma = 2.0 (strong adaptation — more aggressive selection)
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade",
+                 "gender", "treatment", "hemoglobin"),
+  weight_method = "ridge",
+  gamma = 2.0,
+  cv_folds = 10,
+  show_coefficients = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+**Guidelines**: gamma = 1 is the standard choice. Use gamma = 2 for more aggressive
+selection when you suspect many noise variables. Use gamma = 0.5 when you want to
+retain more variables for further investigation.
+
+---
+
+## 6. Model Diagnostics
+
+Test proportional hazards assumption and assess model goodness of fit.
+
+```{r diagnostics}
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade",
+                 "treatment"),
+  weight_method = "ridge",
+  cv_folds = 10,
+  proportional_hazards = TRUE,
+  goodness_of_fit = TRUE,
+  influence_diagnostics = TRUE,
+  show_coefficients = TRUE,
+  show_diagnostics = TRUE,
+  plot_diagnostics = TRUE
+)
+```
+
+---
+
+## 7. Risk Group Stratification
+
+Classify patients into risk groups based on the adaptive LASSO linear predictor.
+
+```{r risk-groups}
+# 3 risk groups (default)
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade", "treatment"),
+  weight_method = "ridge",
+  cv_folds = 10,
+  risk_groups = 3,
+  time_points = "12, 24, 60",
+  baseline_survival = TRUE,
+  show_coefficients = TRUE,
+  plot_survival_curves = TRUE,
+  plot_baseline_hazard = TRUE
+)
+```
+
+---
+
+## 8. Stratified Analysis
+
+Use stratification when the proportional hazards assumption is violated for
+a variable (e.g., center effects).
+
+```{r stratified}
+adaptivelasso(
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage", "grade", "treatment"),
+  strata = "center",
+  weight_method = "ridge",
+  cv_folds = 10,
+  show_coefficients = TRUE,
+  plot_cv_curve = TRUE
+)
+```
+
+---
+
+## 9. Advanced Options
+
+### Tie handling method
+
+```{r ties}
+# Efron method (more accurate with many ties)
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage"),
+  weight_method = "ridge",
+  tie_method = "efron",
+  cv_folds = 10,
+  show_coefficients = TRUE
+)
+```
+
+### Convergence and iterations
+
+```{r convergence}
+adaptivelasso(
+  strata = NULL,
+  data = data_clinical,
+  time = "follow_up",
+  event = "event",
+  predictors = c("age", "tumor_size", "ki67", "stage"),
+  weight_method = "ridge",
+  convergence_threshold = 1e-8,
+  max_iterations = 50000,
+  random_seed = 456,
+  cv_folds = 10,
+  show_coefficients = TRUE
+)
+```
+
+---
+
+## Interpreting Results
+
+### Coefficient Table
+
+| Column | Meaning |
+|--------|---------|
+| Variable | Predictor name |
+| Coefficient | Log hazard ratio (positive = risk, negative = protective) |
+| Hazard Ratio | exp(coefficient) — multiplicative effect on hazard |
+| Adaptive Weight | Penalty weight used (lower = less penalized) |
+| Selected | Whether variable survived regularization |
+
+### Stability Selection Results
+
+| Metric | Meaning |
+|--------|---------|
+| Selection Frequency | Proportion of bootstrap samples selecting the variable |
+| Stable | Whether frequency exceeds the stability threshold |
+| Rank | Variables ranked by selection frequency |
+
+---
+
+## Common Pitfalls
+
+1. **Using Full Cox weights when p > n**: Full Cox model fails when predictors exceed
+   observations. Use Ridge or Univariate weights instead.
+
+2. **Ignoring weight method choice**: Ridge is the safest default. Univariate is faster
+   but ignores variable interactions in the initial estimates.
+
+3. **Setting gamma too high**: gamma > 3 can over-penalize moderate effects, leading to
+   missed true signals.
+
+4. **Not using stability selection for publication**: Single-run variable selection is
+   unstable. Stability selection provides more robust and reproducible results.
+
+5. **Ignoring proportional hazards**: The adaptive LASSO Cox model assumes proportional
+   hazards. Check this assumption with the built-in diagnostics.
+
+---
+
+## Related ClinicoPath Functions
+
+| Function | Use When |
+|----------|----------|
+| **LASSO Cox** | Standard LASSO without adaptive weights (simpler, faster) |
+| **SCAD Cox** | Non-convex penalties (SCAD/MCP) for unbiased estimation |
+| **High-Dimensional Cox** | Multiple regularization methods in one interface |
+| **PLS Cox** | Dimensionality reduction approach (PCA/PLS before Cox) |
+| **Multivariable Survival** | Standard Cox with no regularization needed |
+
+---
+
+## References
+
+- Zou H. The adaptive lasso and its oracle properties. *J Am Stat Assoc*. 2006;101(476):1418-1429.
+- Zhang HH, Lu W. Adaptive lasso for Cox's proportional hazards model. *Biometrika*. 2007;94(3):691-703.
+- Meinshausen N, Buhlmann P. Stability selection. *J R Stat Soc Ser B*. 2010;72(4):417-473.
+- Tibshirani R. The lasso method for variable selection in the Cox model. *Stat Med*. 1997;16(4):385-395.

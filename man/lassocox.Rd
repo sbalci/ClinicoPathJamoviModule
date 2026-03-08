@@ -13,6 +13,7 @@ lassocox(
   lambda = "lambda.1se",
   nfolds = 10,
   standardize = TRUE,
+  suitabilityCheck = TRUE,
   cv_plot = TRUE,
   coef_plot = TRUE,
   survival_plot = TRUE,
@@ -45,6 +46,10 @@ cross-validation.}
 \item{standardize}{Whether to standardize predictor variables before
 fitting.}
 
+\item{suitabilityCheck}{Run a comprehensive data suitability assessment
+before LASSO analysis. Checks sample size, events-per-variable ratio,
+multicollinearity, and whether regularization is needed.}
+
 \item{cv_plot}{Whether to show the cross-validation plot.}
 
 \item{coef_plot}{Whether to show the coefficient path plot.}
@@ -73,6 +78,7 @@ selection.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 \code{results$performance} \tab \tab \tab \tab \tab a table \cr

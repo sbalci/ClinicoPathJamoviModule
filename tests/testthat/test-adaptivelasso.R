@@ -1,79 +1,103 @@
 library(testthat)
-test_that('adaptivelasso analysis works', {
-  skip_if_not_installed('jmvReadWrite')
 
-  # Synthetic data generation
+test_that("adaptivelasso runs with explicit event level and custom lambda range", {
+  skip_if_not_installed("jmvcore")
+  if (!exists("adaptivelasso", mode = "function")) {
+    skip("adaptivelasso() not available in this test session")
+  }
+
   set.seed(123)
-  n <- 200
+  n <- 180
   data <- data.frame(
-    time = runif(n, 1, 100),
-    event = sample(c('A', 'B'), n, replace = TRUE),
-    predictors1 = sample(c('A', 'B'), n, replace = TRUE),
-    predictors2 = sample(c('A', 'B'), n, replace = TRUE),
-    predictors3 = sample(c('A', 'B'), n, replace = TRUE),
-    strata = sample(c('A', 'B'), n, replace = TRUE)
+    time = rexp(n, rate = 0.05) + 0.1,
+    event = factor(sample(c("censored", "event"), n, replace = TRUE, prob = c(0.4, 0.6))),
+    age = rnorm(n, mean = 62, sd = 10),
+    stage = factor(sample(c("I", "II", "III"), n, replace = TRUE)),
+    biomarker = rnorm(n),
+    strata = factor(sample(c("A", "B"), n, replace = TRUE))
   )
 
-  # Run analysis
+  model <- NULL
   expect_no_error({
     model <- adaptivelasso(
       data = data,
-    time = 'time',
-    event = 'event',
-    predictors = c('predictors1', 'predictors2', 'predictors3'),
-    strata = 'strata',
-    weight_method = 'ridge',
-    alpha = 1,
-    gamma = 1,
-    cv_folds = 10,
-    cv_measure = 'deviance',
-    lambda_sequence = 'auto',
-    lambda_min_ratio = 1e-6,
-    n_lambda = 10,
-    stability_selection = FALSE,
-    stability_threshold = 0.6,
-    bootstrap_samples = 50,
-    subsampling_ratio = 0.8,
-    proportional_hazards = TRUE,
-    influence_diagnostics = FALSE,
-    goodness_of_fit = TRUE,
-    risk_groups = 3,
-    baseline_survival = TRUE,
-    show_coefficients = TRUE,
-    show_selection_path = TRUE,
-    show_cv_results = TRUE,
-    show_diagnostics = TRUE,
-    plot_selection_path = TRUE,
-    plot_cv_curve = TRUE,
-    plot_stability = FALSE,
-    plot_survival_curves = FALSE,
-    plot_baseline_hazard = FALSE,
-    plot_diagnostics = FALSE,
-    tie_method = 'breslow',
-    standardize = TRUE,
-    intercept = FALSE,
-    parallel_computing = FALSE,
-    n_cores = 1,
-    convergence_threshold = 1e-7,
-    max_iterations = 1000,
-    random_seed = 123
+      time = "time",
+      event = "event",
+      event_level = "event",
+      predictors = c("age", "stage", "biomarker"),
+      strata = "strata",
+      cv_folds = 5,
+      lambda_sequence = "custom",
+      lambda_custom_max = 1,
+      lambda_custom_min = 0.01,
+      n_lambda = 25,
+      stability_selection = TRUE,
+      bootstrap_samples = 50,
+      subsampling_ratio = 0.7,
+      baseline_survival = TRUE,
+      parallel_computing = FALSE,
+      plot_selection_path = FALSE,
+      plot_cv_curve = FALSE,
+      plot_stability = FALSE,
+      plot_survival_curves = FALSE,
+      plot_baseline_hazard = FALSE,
+      plot_diagnostics = FALSE,
+      random_seed = 123
     )
   })
 
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
+  expect_true(inherits(model, "adaptivelassoResults"))
 
-  # Define output path
-  omv_path <- file.path('omv_output', 'adaptivelasso.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
+  cv_df <- as.data.frame(model$cvResults)
+  expect_true(nrow(cv_df) >= 1)
+  expect_true(all(c("lambda_min", "lambda_1se") %in% names(cv_df)))
 
-  # Attempt to write OMV
-  expect_no_error({
-    # jmvReadWrite::write_omv(model, omv_path)
-    warning("Skipping write_omv for adaptivelasso due to dimension error in jmvReadWrite")
-  })
-
-  expect_true(file.exists(omv_path))
+  stab_df <- as.data.frame(model$stabilityResults)
+  if (nrow(stab_df) > 0) {
+    expect_false(any(grepl("^s\\d+$", stab_df$variable)))
+  }
 })
 
+test_that("adaptivelasso works when strata is omitted and single lambda mode is selected", {
+  skip_if_not_installed("jmvcore")
+  if (!exists("adaptivelasso", mode = "function")) {
+    skip("adaptivelasso() not available in this test session")
+  }
+
+  set.seed(321)
+  n <- 140
+  data <- data.frame(
+    time = rexp(n, rate = 0.07) + 0.1,
+    event = factor(sample(c("no", "yes"), n, replace = TRUE, prob = c(0.45, 0.55))),
+    x1 = rnorm(n),
+    x2 = rnorm(n),
+    x3 = factor(sample(c("low", "high"), n, replace = TRUE))
+  )
+
+  model <- NULL
+  expect_no_error({
+    model <- adaptivelasso(
+      data = data,
+      time = "time",
+      event = "event",
+      event_level = "yes",
+      predictors = c("x1", "x2", "x3"),
+      lambda_sequence = "single",
+      lambda_single = 0.05,
+      cv_folds = 5,
+      n_lambda = 20,
+      stability_selection = FALSE,
+      plot_selection_path = FALSE,
+      plot_cv_curve = FALSE,
+      plot_stability = FALSE,
+      plot_survival_curves = FALSE,
+      plot_baseline_hazard = FALSE,
+      plot_diagnostics = FALSE,
+      random_seed = 321
+    )
+  })
+
+  expect_true(inherits(model, "adaptivelassoResults"))
+  coef_df <- as.data.frame(model$coefficients)
+  expect_true(nrow(coef_df) >= 1)
+})

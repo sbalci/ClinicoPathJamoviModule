@@ -8,14 +8,18 @@ adaptivelasso(
   data,
   time,
   event,
+  event_level = NULL,
   predictors,
-  strata,
+  strata = NULL,
   weight_method = "ridge",
   alpha = 1,
   gamma = 1,
   cv_folds = 10,
   cv_measure = "deviance",
   lambda_sequence = "auto",
+  lambda_custom_max = 1,
+  lambda_custom_min = 0.001,
+  lambda_single = 0.01,
   lambda_min_ratio = 0.001,
   n_lambda = 100,
   stability_selection = FALSE,
@@ -55,14 +59,18 @@ adaptivelasso(
 is the  time from study entry to event or censoring.}
 
 \item{event}{Event indicator variable. For survival analysis: 0 = censored,
-1 = event. For competing risks: 0 = censored, 1+ = different event types.}
+1 = event. For multi-level variables, choose the event level of interest.}
+
+\item{event_level}{Level of the event variable to be treated as the event
+of interest. For binary factors this can be left empty and the second level
+is used.}
 
 \item{predictors}{Variables to include in the adaptive LASSO Cox model. Can
 include continuous, ordinal, and nominal variables. Automatic
 standardization is applied for optimal penalty performance.}
 
-\item{strata}{Optional stratification variable for stratified Cox
-regression. Creates separate baseline hazards for each stratum.}
+\item{strata}{Optional stratification variable. When provided, stratified
+Cox structures are used for penalized fitting and refitted Cox summaries.}
 
 \item{weight_method}{Method for calculating adaptive weights. Ridge
 provides stable weights with shrinkage, univariate uses individual Cox
@@ -81,13 +89,22 @@ variable selection but potentially increasing instability.}
 penalty parameter. More folds provide better estimates but increase
 computation time.}
 
-\item{cv_measure}{Performance measure for cross-validation. Deviance is
-computationally efficient, C-index focuses on discrimination, Brier score
-accounts for calibration, AUC provides time-specific performance.}
+\item{cv_measure}{Performance measure for cross-validation. Deviance
+(partial likelihood) is computationally efficient and is the default.
+C-index (Harrell's concordance) focuses on discrimination ability.}
 
 \item{lambda_sequence}{How to specify the penalty parameter sequence.
-Automatic uses data-driven range, custom allows user specification, single
-tests only one value.}
+Automatic uses a data-driven range, custom uses user-defined max/min, and
+single fits only one lambda value.}
+
+\item{lambda_custom_max}{Maximum lambda value for custom lambda sequence
+mode. Must be greater than Custom Lambda Minimum.}
+
+\item{lambda_custom_min}{Minimum lambda value for custom lambda sequence
+mode. Must be smaller than Custom Lambda Maximum.}
+
+\item{lambda_single}{Lambda value used when Lambda Sequence is set to
+Single Value.}
 
 \item{lambda_min_ratio}{Ratio of smallest to largest lambda value in
 automatic sequence. Smaller values explore stronger penalties but may lead
@@ -125,7 +142,7 @@ deviance, concordance statistics, and calibration measures.}
 predictor. Used for Kaplan-Meier curves and risk group analysis.}
 
 \item{time_points}{Comma-separated list of time points for survival
-probability predictions. Empty string uses data-driven quantiles.}
+probability predictions. Leave empty to suppress the predictions table.}
 
 \item{baseline_survival}{Estimate and plot baseline survival function for
 the adaptive LASSO Cox model using Breslow estimator.}
@@ -166,11 +183,11 @@ better approximation but is computationally more intensive.}
 \item{standardize}{Standardize predictors before fitting. Recommended for
 optimal penalty performance with mixed-scale variables.}
 
-\item{intercept}{Include intercept term in Cox model. Generally not needed
-for survival analysis but may be useful in special cases.}
+\item{intercept}{Retained for compatibility. Cox proportional hazards models
+do not estimate an intercept term, so this option has no effect.}
 
 \item{parallel_computing}{Use parallel computing for cross-validation and
-bootstrap procedures to reduce computation time.}
+stability-selection resampling to reduce computation time.}
 
 \item{n_cores}{Number of CPU cores for parallel computation when enabled.
 More cores speed up CV and bootstrap but use more memory.}
@@ -223,8 +240,8 @@ stability selection for robust variable identification, and comprehensive
 model diagnostics. Particularly effective for high-dimensional survival
 data where traditional methods fail, genomic studies with many biomarkers,
 and clinical prediction models requiring sparse, interpretable solutions.
-The method automatically handles tied survival times, stratified analysis,
-and provides uncertainty quantification through bootstrap procedures.
+The method supports tie handling in refitted Cox models, optional
+stratification for Cox modeling, and bootstrap-based stability selection.
 }
 \examples{
 \donttest{

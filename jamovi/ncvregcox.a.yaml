@@ -1,10 +1,10 @@
 ---
 name: ncvregcox
 title: Smoothly Clipped Absolute Deviation Cox Regression
-menuGroup: SurvivalD
-menuSubgroup: High-Dimensional Methods
-menuTitle: SCAD Cox Regression
-menuSubtitle: Variable selection with smoothly clipped absolute deviation penalty
+menuGroup: SurvivalT
+menuSubgroup: Penalized Cox Regression
+menuTitle: SCAD/MCP Cox
+menuSubtitle: Unbiased hazard ratio estimates without LASSO "shrinkage bias".
 version: '0.0.31'
 jas: '1.2'
 
@@ -75,8 +75,6 @@ options:
             title: "SCAD (Smoothly Clipped Absolute Deviation)"
           - name: "MCP" 
             title: "MCP (Minimax Concave Penalty)"
-          - name: "lasso"
-            title: "Lasso (L1 penalty)"
       default: "SCAD"
       description:
           R: Type of penalty function for variable selection
@@ -147,3 +145,13 @@ options:
       default: true
       description:
           R: Calculate and display variable importance metrics
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Run a comprehensive data suitability assessment before analysis.
+            Checks sample size, events-per-variable ratio, multicollinearity, 
+            and whether regularization is needed.

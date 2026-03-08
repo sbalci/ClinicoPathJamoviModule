@@ -28,91 +28,110 @@ children:
           - type: VariablesListBox
             name: predictors
             isTarget: true
-  - type: LayoutBox
-    margin: large
+
+  - type: CollapseBox
+    label: Data Suitability
+    collapsed: false
     children:
-      - type: TextBox
-        name: pls_components
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: suitabilityCheck
+
+  - type: CollapseBox
+    label: PLS Model Settings
+    collapsed: false
     children:
-      - type: ComboBox
-        name: cross_validation
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: component_selection
+          - type: TextBox
+            name: pls_components
+            format: number
+            enable: (component_selection:manual)
+          - type: ComboBox
+            name: cross_validation
+          - type: ComboBox
+            name: pls_algorithm
+          - type: ComboBox
+            name: scaling_method
+
+  - type: CollapseBox
+    label: Advanced Algorithm Settings
+    collapsed: true
     children:
-      - type: ComboBox
-        name: component_selection
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: max_iterations
+            format: number
+          - type: TextBox
+            name: tolerance
+            format: number
+
+  - type: CollapseBox
+    label: Validation
+    collapsed: true
     children:
-      - type: ComboBox
-        name: scaling_method
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap_validation
+          - type: TextBox
+            name: n_bootstrap
+            format: number
+            enable: (bootstrap_validation)
+          - type: CheckBox
+            name: permutation_test
+          - type: TextBox
+            name: n_permutations
+            format: number
+            enable: (permutation_test)
+
+  - type: CollapseBox
+    label: Risk Stratification
+    collapsed: true
     children:
-      - type: ComboBox
-        name: pls_algorithm
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: risk_groups
+            format: number
+
+  - type: CollapseBox
+    label: Output Options
+    collapsed: true
     children:
-      - type: TextBox
-        name: max_iterations
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: confidence_intervals
+          - type: CheckBox
+            name: feature_importance
+          - type: CheckBox
+            name: prediction_accuracy
+
+  - type: CollapseBox
+    label: Plots
+    collapsed: true
     children:
-      - type: TextBox
-        name: tolerance
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: bootstrap_validation
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: n_bootstrap
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: permutation_test
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: n_permutations
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: plot_components
-      - type: CheckBox
-        name: plot_loadings
-      - type: CheckBox
-        name: plot_scores
-      - type: CheckBox
-        name: plot_validation
-      - type: CheckBox
-        name: plot_survival
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: risk_groups
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: confidence_intervals
-      - type: CheckBox
-        name: feature_importance
-      - type: CheckBox
-        name: prediction_accuracy
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: plot_components
+          - type: CheckBox
+            name: plot_loadings
+          - type: CheckBox
+            name: plot_scores
+          - type: CheckBox
+            name: plot_validation
+          - type: CheckBox
+            name: plot_survival

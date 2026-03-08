@@ -102,59 +102,87 @@ children:
       - type: TextBox
         name: cv_repeats
         format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ebic_gamma
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: weight_type
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: weight_power
-        format: number
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Data Suitability
+    collapsed: false
     children:
       - type: CheckBox
-        name: standardize_vars
-      - type: CheckBox
-        name: center_vars
-      - type: CheckBox
-        name: orthogonalize_groups
-  - type: LayoutBox
-    margin: large
+        name: suitabilityCheck
+
+  - type: CollapseBox
+    label: Advanced Optimization
+    collapsed: true
     children:
-      - type: TextBox
-        name: max_iterations
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: convergence_threshold
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: standardize_vars
+          - type: CheckBox
+            name: center_vars
+          - type: CheckBox
+            name: orthogonalize_groups
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: max_iterations
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: convergence_threshold
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: warm_start
+          - type: CheckBox
+            name: parallel_cv
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: seed_value
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: ebic_gamma
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: weight_type
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: weight_power
+            format: number
+
+  - type: CollapseBox
+    label: Plots
+    collapsed: true
     children:
       - type: CheckBox
-        name: warm_start
+        name: plot_cv_error
       - type: CheckBox
-        name: parallel_cv
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: seed_value
-        format: number
-  - type: LayoutBox
-    margin: large
+        name: plot_coefficients
+      - type: CheckBox
+        name: plot_groups
+      - type: CheckBox
+        name: plot_sparsity
+      - type: CheckBox
+        name: plot_stability
+
+  - type: CollapseBox
+    label: Results Display 
+    collapsed: true
     children:
       - type: CheckBox
         name: show_summary
@@ -168,16 +196,6 @@ children:
         name: show_performance
       - type: CheckBox
         name: show_validation
-      - type: CheckBox
-        name: plot_cv_error
-      - type: CheckBox
-        name: plot_coefficients
-      - type: CheckBox
-        name: plot_groups
-      - type: CheckBox
-        name: plot_sparsity
-      - type: CheckBox
-        name: plot_stability
   - type: LayoutBox
     margin: large
     children:

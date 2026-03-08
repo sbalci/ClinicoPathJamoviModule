@@ -1,9 +1,10 @@
 ---
 name: lassocox
 title: Lasso-Cox Regression
-menuGroup: SurvivalD
-menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Variable Selection with Lasso Regularization'
+menuGroup: SurvivalT
+menuSubgroup: Penalized Cox Regression
+menuTitle: LASSO Cox
+menuSubtitle: Baseline feature screening. Automatically drops irrelevant predictors.
 version: '0.0.3'
 jas: '1.2'
 
@@ -12,7 +13,8 @@ description:
     R:
         dontrun: true
         usage: |
-            # example will be added
+            lassocox(data = data, elapsedtime = "Time", outcome = "Status",
+                outcomeLevel = "1", explanatory = vars(age, stage, grade))
 
 options:
     - name: data
@@ -32,11 +34,12 @@ options:
     - name: outcome
       title: 'Outcome'
       type: Variable
-      suggested: [ ordinal, nominal, continuous ]
+      suggested: [ ordinal, nominal ]
       permitted: [ factor, numeric ]
       description:
         R: >
-          The outcome variable. Typically indicates event status (e.g., death, recurrence).
+          Binary event indicator variable (event vs censored). Can be factor or
+          numeric with exactly two observed values.
 
     - name: outcomeLevel
       title: Event Level
@@ -44,7 +47,9 @@ options:
       variable: (outcome)
       description:
         R: >
-          The level of `outcome` considered as the event.
+          Level of `outcome` considered as the event. For binary factor outcomes,
+          if left empty the second observed level is used; for numeric binary
+          outcomes, the larger observed value is used (or 1 for 0/1 coding).
 
     - name: explanatory
       title: Explanatory Variables
@@ -54,6 +59,7 @@ options:
       description:
         R: >
           Variables to be considered for selection in the Lasso-Cox regression.
+          Constant variables are removed automatically before fitting.
       
     - name: lambda
       title: Lambda Selection Method
@@ -75,7 +81,18 @@ options:
       min: 3
       description:
         R: >
-          Number of folds for cross-validation.
+          Number of folds for cross-validation. Fold count is reduced
+          automatically when sample size is limited.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123456
+      min: 1
+      max: 999999
+      description:
+        R: >
+          Random seed for reproducible cross-validation fold assignment.
       
     - name: standardize
       title: Standardize Variables
@@ -83,7 +100,18 @@ options:
       default: true
       description:
         R: >
-          Whether to standardize predictor variables before fitting.
+          Whether to standardize predictor variables before fitting. If enabled,
+          reported coefficients are on the standardized predictor scale.
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+        R: >
+          Run a comprehensive data suitability assessment before LASSO analysis.
+          Checks sample size, events-per-variable ratio, multicollinearity,
+          and whether regularization is needed.
 
     - name: cv_plot
       title: Cross-validation Plot
@@ -107,14 +135,16 @@ options:
       default: true
       description:
         R: >
-          Whether to show survival curves by risk groups.
+          Whether to show survival curves by risk groups. Uses `survminer`
+          if available, with a base-R fallback otherwise.
 
     - name: riskScore
       title: Add Risk Score to Data
       type: Output
       description:
         R: >
-          If true, adds calculated risk scores to the dataset.
+          Adds calculated risk scores to the dataset (complete cases only;
+          excluded rows receive missing values).
 
     # Explanatory Output Options
     - name: showExplanations

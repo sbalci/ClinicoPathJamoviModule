@@ -1,0 +1,20 @@
+title: Penalized Cox Regression Guide
+name: lassointro
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: Label
+    label: This guide helps you choose the right penalized Cox regression method for your survival data. No data required.
+    margin: large
+    children:
+      - type: CheckBox
+        name: showOverview
+      - type: CheckBox
+        name: showDecisionGuide
+      - type: CheckBox
+        name: showClinicalScenarios
+      - type: CheckBox
+        name: showAssumptions
+      - type: CheckBox
+        name: showGlossary

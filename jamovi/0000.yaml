@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.37
+version: 0.0.37.01
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-03-04'
+date: '2026-03-07'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1325,10 +1325,10 @@ analyses:
   - title: Lasso-Cox Regression
     name: lassocox
     ns: ClinicoPath
-    menuGroup: SurvivalD
-    menuSubgroup: ClinicoPath Survival
-    menuTitle: Lasso-Cox Regression
-    menuSubtitle: Variable Selection with Lasso Regularization
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: LASSO Cox
+    menuSubtitle: Baseline feature screening. Automatically drops irrelevant predictors.
     description: >-
       Performs Lasso-penalized Cox regression for variable selection in survival
       analysis.
@@ -2894,21 +2894,6 @@ analyses:
       Perform survival analysis on complex survey data using the survey
       package. Supports weighted estimates, complex sampling designs, and
       weighted Cox proportional hazards models.
-  - title: Penalized Cox Regression
-    name: penalizedcox
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: ClinicoPath Survival
-    menuTitle: Penalized Cox Regression
-    menuSubtitle: LASSO, Ridge, Elastic Net for high-dimensional survival data
-    description: >-
-      Performs penalized Cox proportional hazards regression using
-      regularization methods (LASSO, Ridge, Elastic Net) for high-dimensional
-      survival data. This method is particularly useful when the number of
-      variables is large relative to the number of observations, or when
-      multicollinearity is present. The regularization helps with variable
-      selection and prevents overfitting.
   - title: Mixed-Effects Cox Regression
     name: mixedcox
     ns: ClinicoPath
@@ -3046,10 +3031,10 @@ analyses:
     name: highdimcox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: ClinicoPath Survival
-    menuTitle: High-Dimensional Cox Regression
-    menuSubtitle: Advanced regularization for high-dimensional survival data
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: Elastic Net Cox
+    menuSubtitle: Handles moderate/heavy collinearity among multiple predictors.
     description: >-
       Performs high-dimensional Cox proportional hazards regression using
       advanced regularization methods (LASSO, Ridge, Elastic Net, Adaptive
@@ -3570,10 +3555,10 @@ analyses:
     name: adaptivelasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: Machine Learning
-    menuTitle: Adaptive LASSO for Cox Models
-    menuSubtitle: Advanced penalized regression with adaptive variable selection
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: Adaptive LASSO Cox
+    menuSubtitle: Oracle properties for mathematically consistent variable selection.
     description: >
       Adaptive LASSO for Cox proportional hazards models with data-driven
       penalty selection and improved variable selection properties. Unlike
@@ -3585,9 +3570,9 @@ analyses:
       comprehensive model diagnostics. Particularly effective for
       high-dimensional survival data where traditional methods fail, genomic
       studies with many biomarkers, and clinical prediction models requiring
-      sparse, interpretable solutions. The method automatically handles tied
-      survival times, stratified analysis, and provides uncertainty
-      quantification through bootstrap procedures.
+      sparse, interpretable solutions. The method supports tie handling in
+      refitted Cox models, optional stratification for Cox modeling, and
+      bootstrap-based stability selection.
   - title: Bayesian Model Averaging
     name: bayesianma
     ns: ClinicoPath
@@ -3599,10 +3584,10 @@ analyses:
     name: grouplasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: Machine Learning
-    menuTitle: Group LASSO for Survival Analysis
-    menuSubtitle: Penalized regression with group-wise variable selection
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: Group LASSO Cox
+    menuSubtitle: Selects or removes pre-defined biological/categorical groups together.
     description: >
       Group LASSO for Cox proportional hazards models enabling simultaneous
       selection of pre-defined variable groups while maintaining within-group
@@ -3686,9 +3671,11 @@ analyses:
     name: sparsegrouplasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
-    menuTitle: Sparse Group LASSO
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: Sparse Group LASSO Cox
     description: Sparse Group LASSO regularization for survival analysis
+    menuSubtitle: Group selection with the flexibility to drop individual features.
   - title: Bayesian Additive Regression Trees (BART) for Survival
     name: survivalbart
     ns: ClinicoPath
@@ -3747,10 +3734,10 @@ analyses:
     name: pcacox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: High-Dimensional Methods
-    menuTitle: Principal Component Cox Models
-    menuSubtitle: PCA-based Cox Regression for High-Dimensional Data
+    menuGroup: SurvivalT
+    menuSubgroup: Dimension Reduction Cox
+    menuTitle: PCA Cox
+    menuSubtitle: Shrinks extreme collinearity into uncorrelated principal components.
     description: >
       Principal Component Analysis for Cox regression with high-dimensional
       predictors.
@@ -3761,10 +3748,10 @@ analyses:
     name: plscox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: High-Dimensional Methods
-    menuTitle: Partial Least Squares Cox Models
-    menuSubtitle: PLS-based Cox Regression for High-Dimensional Survival Data
+    menuGroup: SurvivalT
+    menuSubgroup: Dimension Reduction Cox
+    menuTitle: PLS Cox
+    menuSubtitle: Creates survival-directed composite scores for massive (p > n) datasets.
     description: >
       Partial Least Squares Cox regression for high-dimensional survival data.
 
@@ -4209,10 +4196,10 @@ analyses:
     name: principalcox
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
-    menuSubgroup: Survival Analysis
+    menuGroup: SurvivalT
+    menuSubgroup: Dimension Reduction Cox (Drafts)
     menuTitle: Principal Component Cox
-    menuSubtitle: Principal component analysis for Cox regression with high-dimensional data
+    menuSubtitle: Supervised PCA for Cox regression with high-dimensional data
     description: >
       Principal Component Cox models address the challenges of high-dimensional
       survival data by using principal component analysis (PCA) to reduce
@@ -4350,10 +4337,10 @@ analyses:
     name: ncvregcox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
-    menuSubgroup: High-Dimensional Methods
-    menuTitle: SCAD Cox Regression
-    menuSubtitle: Variable selection with smoothly clipped absolute deviation penalty
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: SCAD/MCP Cox
+    menuSubtitle: Unbiased hazard ratio estimates without LASSO "shrinkage bias".
     description: >
       Smoothly Clipped Absolute Deviation (SCAD) Cox regression for
       high-dimensional survival data. 
@@ -4505,26 +4492,6 @@ analyses:
       synthesis across multiple studies. This approach accounts for both 
       within-study and between-study variability using informative prior 
       distributions and MCMC sampling methods.
-  - title: Penalized Cox Regression
-    name: penalizedcoxregression
-    ns: ClinicoPath
-    category: analyses
-    menuGroup: ClinicoPathD
-    menuSubgroup: ClinicoPath Survival
-    menuTitle: Penalized Cox Regression
-    menuSubtitle: L1/L2 penalized survival models for high-dimensional data
-    description: >-
-      Performs penalized Cox proportional hazards regression for
-      high-dimensional 
-
-      survival data using L1 (LASSO), L2 (Ridge), and Elastic Net
-      regularization.
-
-      This method is particularly useful when the number of covariates
-      approaches
-
-      or exceeds the number of observations, or when variable selection is
-      needed.
   - title: Robust Correlation Methods
     name: robustcorrelation
     ns: ClinicoPath
@@ -5789,6 +5756,19 @@ analyses:
       risk stratification. Automatically performs cross-validation and tree
       pruning. Creates new variable with risk group assignments. Useful for
       developing prognostic staging systems by integrating multiple predictors.
+  - title: Penalized Cox Regression Guide
+    name: lassointro
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: Method Guide
+    menuSubtitle: Which penalized survival method should I use?
+    description: >
+      An interactive guide to penalized Cox regression methods available in
+      ClinicoPath. Helps clinicians, pathologists, radiologists, and oncologists
+      choose the right analysis for their data and research question. No data or
+      variables required.
 usesNative: true
 minApp: 1.8.0
 

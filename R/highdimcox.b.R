@@ -17,14 +17,7 @@
 #' 
 #' \strong{High-Dimensional Specific Features:}
 #' - Stability selection for robust variable identification
-#' - Bootstrap-based variable importance assessment
-#' - Screening methods for ultra-high dimensional data
-#' - Cross-validation optimized for high-dimensional settings
-#' - Regularization path analysis and visualization
-#' 
-#' \strong{Model Assessment & Validation:}
-#' - Time-dependent prediction accuracy
-#' - High-dimensional model diagnostics
+#' - Comprehensive model validation and diagnostics
 #' - Variable importance rankings
 #' - Stability-based confidence measures
 #' 
@@ -57,10 +50,9 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       # Constants for high-dimensional analysis
       DEFAULT_CV_FOLDS = 10,
       DEFAULT_ALPHA = 0.5,
-      DEFAULT_BOOTSTRAP_ITERATIONS = 500,
+      DEFAULT_SUBSAMPLING_ITERATIONS = 500,
       DEFAULT_STABILITY_THRESHOLD = 0.8,
       MIN_OBSERVATIONS = 30,
-      MAX_VARIABLES_WITHOUT_SCREENING = 1000,
       
       # Core initialization method
       .init = function() {
@@ -140,23 +132,25 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             return()
           }
           
-          # Perform variable screening if needed
-          screening_results <- private$.performVariableScreening(data_prep)
-          screening_results$data_prep <- data_prep  # Add data_prep to screening_results
-          
+          # Assess data suitability if requested
+          if (self$options$suitabilityCheck) {
+            private$.assessSuitability(data_prep)
+          }
+
           # Execute high-dimensional Cox regression
-          model_results <- private$.performHighDimCoxRegression(screening_results)
+          model_results <- private$.performHighDimCoxRegression(data_prep)
           
           # Perform stability selection if requested
+          stability_results <- NULL
           if (self$options$stability_selection) {
-            stability_results <- private$.performStabilitySelection(screening_results)
+            stability_results <- private$.performStabilitySelection(data_prep)
           }
-          
+
           # Generate comprehensive results
-          private$.populateResults(model_results, screening_results, stability_results)
+          private$.populateResults(model_results, data_prep, stability_results)
           
           # Create visualizations
-          private$.createPlots(model_results, screening_results, stability_results)
+          private$.createPlots(model_results, data_prep, stability_results)
           
           # Generate summaries if requested
           if (self$options$showSummaries) {
@@ -173,7 +167,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             paste0(
               "<h3>Analysis Error</h3>",
               "<p>An error occurred during high-dimensional Cox regression analysis:</p>",
-              "<pre>", htmlspecialchars(e$message), "</pre>",
+              "<pre>", gsub("&", "&amp;", gsub(">", "&gt;", gsub("<", "&lt;", e$message))), "</pre>",
               "<p>Please check your data and analysis options.</p>"
             )
           )
@@ -234,15 +228,15 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         
         # Get predictor matrix
         pred_data <- self$data[pred_vars]
-        
-        # Convert factors to numeric if needed
-        for (i in seq_along(pred_data)) {
-          if (is.factor(pred_data[[i]])) {
-            pred_data[[i]] <- as.numeric(pred_data[[i]])
-          }
+
+        # Check if any predictors are factors requiring dummy encoding
+        has_factors <- any(vapply(pred_data, is.factor, logical(1)))
+        if (has_factors) {
+          # Use model.matrix to create proper dummy variables (no intercept)
+          pred_matrix <- model.matrix(~ . - 1, data = pred_data)
+        } else {
+          pred_matrix <- as.matrix(pred_data)
         }
-        
-        pred_matrix <- as.matrix(pred_data)
         
         # Remove rows with missing values
         complete_rows <- complete.cases(time_data, event_numeric, pred_matrix)
@@ -273,108 +267,93 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         )
       },
       
-      # Variable screening for ultra-high dimensional data
-      .performVariableScreening = function(data_prep) {
-        n_vars <- data_prep$n_vars
-        n_obs <- data_prep$n_obs
-        
-        # Skip screening if number of variables is manageable
-        if (n_vars <= private$MAX_VARIABLES_WITHOUT_SCREENING) {
-          return(list(
-            screened_vars = seq_len(n_vars),
-            screening_performed = FALSE,
-            screening_method = "none",
-            n_screened = n_vars
-          ))
-        }
-        
-        # Perform marginal screening using Cox univariate models
-        screening_pvals <- numeric(n_vars)
-        screening_coeffs <- numeric(n_vars)
-        
-        for (i in seq_len(n_vars)) {
-          tryCatch({
-            cox_fit <- survival::coxph(data_prep$survival ~ data_prep$predictors[, i])
-            screening_pvals[i] <- summary(cox_fit)$coefficients[, "Pr(>|z|)"]
-            screening_coeffs[i] <- coef(cox_fit)
-          }, error = function(e) {
-            screening_pvals[i] <- 1.0
-            screening_coeffs[i] <- 0.0
-          })
-        }
-        
-        # Select top variables based on significance
-        top_k <- min(floor(n_obs / 2), n_vars, 500)  # Conservative screening
-        selected_indices <- order(screening_pvals)[seq_len(top_k)]
-        
-        list(
-          screened_vars = selected_indices,
-          screening_performed = TRUE,
-          screening_method = "marginal_cox",
-          n_screened = top_k,
-          screening_pvals = screening_pvals,
-          screening_coeffs = screening_coeffs
-        )
-      },
-      
       # High-dimensional Cox regression with advanced regularization
-      .performHighDimCoxRegression = function(screening_results) {
-        data_prep <- screening_results$data_prep
-        screened_vars <- screening_results$screened_vars
+      .performHighDimCoxRegression = function(data_prep) {
         
-        # Use screened variables
-        X <- data_prep$predictors[, screened_vars, drop = FALSE]
+        # Use full predictor set
+        X <- data_prep$predictors
         y <- data_prep$survival
         
         # Set regularization parameters
         alpha <- self$options$alpha_value
         regularization_method <- self$options$regularization_method
-        
+        penalty_weights <- rep(1, ncol(X))
+
         # Adjust alpha based on regularization method
         if (regularization_method == "lasso") {
           alpha <- 1.0
         } else if (regularization_method == "ridge") {
           alpha <- 0.0
+        } else if (regularization_method == "adaptive_lasso") {
+          alpha <- 1.0
+          # Compute adaptive penalty weights from Ridge initial estimates
+          penalty_weights <- tryCatch({
+            ridge_fit <- glmnet::glmnet(
+              x = X, y = y, family = "cox",
+              alpha = 0, standardize = TRUE
+            )
+            lambda_ridge <- ridge_fit$lambda[max(1, length(ridge_fit$lambda) %/% 4)]
+            initial_coefs <- as.vector(coef(ridge_fit, s = lambda_ridge))
+            gamma <- 1  # standard adaptive LASSO exponent
+            w <- 1 / (abs(initial_coefs) + 1e-6)^gamma
+            w / mean(w)  # normalize so mean penalty weight = 1
+          }, error = function(e) {
+            self$results$todo$setContent(
+              "<div class='alert alert-warning'><strong>Warning:</strong> Ridge regression failed during Adaptive LASSO weights calculation. Falling back to standard LASSO.</div>"
+            )
+            rep(1, ncol(X))
+          })
         }
-        
+        # else: elastic_net uses user-provided alpha_value
+
         # Perform cross-validation
         cv_folds <- self$options$cv_folds
-        
+
         cv_fit <- glmnet::cv.glmnet(
           x = X,
           y = y,
           family = "cox",
           alpha = alpha,
+          penalty.factor = penalty_weights,
           nfolds = cv_folds,
           standardize = TRUE,
           parallel = FALSE
         )
-        
+
         # Select lambda based on method
         lambda_selection <- self$options$cv_method
         if (lambda_selection == "cv_min") {
           selected_lambda <- cv_fit$lambda.min
         } else {
-          selected_lambda <- cv_fit$lambda.1se
+          selected_lambda <- cv_fit$lambda.1se  # cv_1se
         }
-        
+
         # Fit final model
         final_fit <- glmnet::glmnet(
           x = X,
           y = y,
           family = "cox",
           alpha = alpha,
+          penalty.factor = penalty_weights,
           standardize = TRUE
         )
         
         # Extract coefficients at selected lambda
         coefficients <- as.vector(coef(final_fit, s = selected_lambda))
         selected_vars_idx <- which(coefficients != 0)
-        
+
         # Calculate variable importance
         var_importance <- abs(coefficients)
-        names(var_importance) <- data_prep$var_names[screened_vars]
-        
+        names(var_importance) <- data_prep$var_names
+
+        # Calculate concordance index (C-index)
+        # Note: higher risk score = worse prognosis, so reverse = TRUE
+        concordance_val <- tryCatch({
+          risk_scores <- as.vector(X %*% coefficients)
+          cindex_result <- survival::concordance(y ~ risk_scores, reverse = TRUE)
+          cindex_result$concordance
+        }, error = function(e) NA_real_)
+
         list(
           cv_fit = cv_fit,
           final_fit = final_fit,
@@ -382,32 +361,30 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           coefficients = coefficients,
           selected_variables = selected_vars_idx,
           variable_importance = var_importance,
-          screened_indices = screened_vars,
           alpha = alpha,
-          n_selected = length(selected_vars_idx)
+          n_selected = length(selected_vars_idx),
+          concordance = concordance_val
         )
       },
       
       # Stability selection for robust variable identification
-      .performStabilitySelection = function(screening_results) {
-        data_prep <- screening_results$data_prep
-        screened_vars <- screening_results$screened_vars
+      .performStabilitySelection = function(data_prep) {
         
-        n_bootstrap <- self$options$bootstrap_iterations
+        n_bootstrap <- self$options$subsampling_iterations
         stability_threshold <- self$options$stability_threshold
         
-        X <- data_prep$predictors[, screened_vars, drop = FALSE]
+        X <- data_prep$predictors
         y <- data_prep$survival
         n_obs <- nrow(X)
         n_vars <- ncol(X)
         
-        # Storage for bootstrap results
+        # Storage for subsampling results
         selection_matrix <- matrix(0, nrow = n_bootstrap, ncol = n_vars)
         
-        # Bootstrap sampling and variable selection
+        # Subsampling and variable selection
         for (b in seq_len(n_bootstrap)) {
-          # Bootstrap sample
-          boot_indices <- sample(n_obs, size = floor(n_obs * 0.8), replace = FALSE)
+          # Subsample
+          boot_indices <- sample(n_obs, size = floor(n_obs * 0.5), replace = FALSE)
           X_boot <- X[boot_indices, , drop = FALSE]
           y_boot <- y[boot_indices]
           
@@ -448,39 +425,30 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       
       # Initialize result tables
       .initializeResultTables = function() {
-        # Initialize tables with empty structure
-        if (self$options$show_coefficients_table) {
-          self$results$selectedVariables$setKeys(character(0))
-        }
-        
-        self$results$regularizationMetrics$setKeys(c("lambda", "deviance", "variables", "alpha"))
-        self$results$dimensionalityReduction$setKeys(c("original", "screened", "selected"))
+        # Tables are initialized via addRow calls in populate methods
       },
       
       # Populate all result tables and summaries
-      .populateResults = function(model_results, screening_results, stability_results = NULL) {
+      .populateResults = function(model_results, data_prep, stability_results = NULL) {
         # Populate model summary
-        private$.populateModelSummary(model_results, screening_results)
+        private$.populateModelSummary(model_results, data_prep)
         
         # Populate selected variables table
         if (self$options$show_coefficients_table) {
-          private$.populateVariablesTable(model_results, screening_results)
+          private$.populateVariablesTable(model_results, data_prep)
         }
         
         # Populate regularization metrics
         private$.populateRegularizationMetrics(model_results)
         
-        # Populate dimensionality reduction summary
-        private$.populateDimensionalityReduction(model_results, screening_results)
-        
         # Populate stability results if available
         if (!is.null(stability_results) && self$options$stability_selection) {
-          private$.populateStabilityResults(stability_results, screening_results)
+          private$.populateStabilityResults(stability_results, data_prep)
         }
       },
       
       # Populate model summary
-      .populateModelSummary = function(model_results, screening_results) {
+      .populateModelSummary = function(model_results, data_prep) {
         summary_content <- paste0(
           "<h4>High-Dimensional Cox Regression Results</h4>",
           "<p><strong>Regularization:</strong> ", self$options$regularization_method, 
@@ -488,29 +456,30 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           "<p><strong>Selected Lambda:</strong> ", 
           format(model_results$selected_lambda, scientific = TRUE, digits = 3), "</p>",
           "<p><strong>Variables:</strong> ", 
-          length(self$options$predictors), " original → ",
-          screening_results$n_screened, " screened → ",
+          length(self$options$predictors), " candidate variables → ",
           model_results$n_selected, " selected</p>",
-          "<p><strong>Cross-Validation:</strong> ", self$options$cv_folds, "-fold CV</p>"
+          "<p><strong>Cross-Validation:</strong> ", self$options$cv_folds, "-fold CV</p>",
+          if (!is.na(model_results$concordance)) {
+            paste0("<p><strong>Concordance (C-index):</strong> ",
+                   round(model_results$concordance, 3), "</p>")
+          } else ""
         )
         
         self$results$modelSummary$setContent(summary_content)
       },
       
       # Populate selected variables table
-      .populateVariablesTable = function(model_results, screening_results) {
+      .populateVariablesTable = function(model_results, data_prep) {
         if (model_results$n_selected == 0) {
           return()
         }
         
         selected_idx <- model_results$selected_variables
-        screened_vars <- model_results$screened_indices
-        
-        # Get variable names and coefficients
-        var_names <- names(model_results$variable_importance)[screened_vars][selected_idx]
+
+        var_names <- data_prep$var_names[selected_idx]
         coefficients <- model_results$coefficients[selected_idx]
         hazard_ratios <- exp(coefficients)
-        importance_scores <- model_results$variable_importance[screened_vars][selected_idx]
+        importance_scores <- as.numeric(model_results$variable_importance[selected_idx])
         
         # Create table data
         for (i in seq_along(selected_idx)) {
@@ -527,12 +496,17 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .populateRegularizationMetrics = function(model_results) {
         cv_fit <- model_results$cv_fit
         
+        conc_val <- if (!is.na(model_results$concordance)) {
+          round(model_results$concordance, 4)
+        } else "N/A"
+
         metrics <- data.frame(
           metric = c(
             "Selected Lambda",
             "Lambda Min",
             "Lambda 1SE",
             "CV Deviance at Selected Lambda",
+            "Concordance (C-index)",
             "Number of Selected Variables",
             "Regularization Method"
           ),
@@ -540,7 +514,8 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             format(model_results$selected_lambda, scientific = TRUE, digits = 3),
             format(cv_fit$lambda.min, scientific = TRUE, digits = 3),
             format(cv_fit$lambda.1se, scientific = TRUE, digits = 3),
-            round(cv_fit$cvm[cv_fit$lambda == model_results$selected_lambda], 3),
+            round(cv_fit$cvm[which.min(abs(cv_fit$lambda - model_results$selected_lambda))], 3),
+            as.character(conc_val),
             model_results$n_selected,
             paste0(self$options$regularization_method, " (α=", round(model_results$alpha, 2), ")")
           ),
@@ -549,6 +524,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             "Lambda minimizing CV error",
             "Lambda within 1-SE of minimum",
             "Cross-validated model deviance",
+            "Discrimination ability (0.5 = random, 1.0 = perfect)",
             "Variables with non-zero coefficients",
             "Applied regularization strategy"
           )
@@ -563,42 +539,12 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         }
       },
       
-      # Populate dimensionality reduction summary
-      .populateDimensionalityReduction = function(model_results, screening_results) {
-        n_original <- length(self$options$predictors)
-        n_screened <- screening_results$n_screened
-        n_selected <- model_results$n_selected
-        
-        stages <- data.frame(
-          stage = c("Original Dataset", "After Screening", "Final Selection"),
-          variables_input = c(n_original, n_screened, n_selected),
-          variables_selected = c(n_screened, n_selected, n_selected),
-          reduction_ratio = c(
-            round(n_screened / n_original, 3),
-            round(n_selected / n_screened, 3),
-            1.0
-          )
-        )
-        
-        for (i in seq_len(nrow(stages))) {
-          self$results$dimensionalityReduction$addRow(rowKey = i, values = list(
-            stage = stages$stage[i],
-            variables_input = stages$variables_input[i],
-            variables_selected = stages$variables_selected[i],
-            reduction_ratio = stages$reduction_ratio[i]
-          ))
-        }
-      },
-      
       # Populate stability selection results
-      .populateStabilityResults = function(stability_results, screening_results) {
+      .populateStabilityResults = function(stability_results, data_prep) {
         selection_probs <- stability_results$selection_probabilities
         stable_vars <- stability_results$stable_variables
-        screened_vars <- screening_results$screened_vars
         
-        # Get variable names for screened variables
-        data_prep <- screening_results$data_prep
-        var_names <- data_prep$var_names[screened_vars]
+        var_names <- data_prep$var_names
         
         # Create results for variables above threshold
         stable_data <- data.frame(
@@ -638,7 +584,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       },
       
       # Create visualization plots
-      .createPlots = function(model_results, screening_results, stability_results = NULL) {
+      .createPlots = function(model_results, data_prep, stability_results = NULL) {
         if (self$options$show_regularization_path) {
           private$.createRegularizationPath(model_results)
         }
@@ -648,15 +594,15 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         }
         
         if (self$options$show_variable_importance) {
-          private$.createVariableImportancePlot(model_results, screening_results)
+          private$.createVariableImportancePlot(model_results, data_prep)
         }
         
         if (self$options$show_model_diagnostics) {
-          private$.createModelDiagnostics(model_results, screening_results)
+          private$.createModelDiagnostics(model_results, data_prep)
         }
         
         if (!is.null(stability_results) && self$options$stability_selection) {
-          private$.createStabilityPlot(stability_results)
+          private$.createStabilityPlot(stability_results, data_prep)
         }
       },
       
@@ -664,83 +610,88 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .createRegularizationPath = function(model_results) {
         tryCatch({
           image <- self$results$regularizationPath
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            model_results = model_results
-          ))
-          
+          # Extract only plain numeric data for protobuf-safe serialization
+          cv_fit <- model_results$cv_fit
+          plot_data <- list(
+            lambda = as.numeric(cv_fit$lambda),
+            cvm = as.numeric(cv_fit$cvm),
+            cvsd = as.numeric(cv_fit$cvsd),
+            lambda_min = as.numeric(cv_fit$lambda.min),
+            lambda_1se = as.numeric(cv_fit$lambda.1se)
+          )
+          image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
       # Create cross-validation plot
       .createCVPlot = function(model_results) {
         tryCatch({
           image <- self$results$cvPlot
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            cv_fit = model_results$cv_fit,
-            selected_lambda = model_results$selected_lambda
-          ))
-          
+          cv_fit <- model_results$cv_fit
+          plot_data <- list(
+            lambda = as.numeric(cv_fit$lambda),
+            cvm = as.numeric(cv_fit$cvm),
+            cvsd = as.numeric(cv_fit$cvsd),
+            cvup = as.numeric(cv_fit$cvup),
+            cvlo = as.numeric(cv_fit$cvlo),
+            lambda_min = as.numeric(cv_fit$lambda.min),
+            lambda_1se = as.numeric(cv_fit$lambda.1se),
+            selected_lambda = as.numeric(model_results$selected_lambda)
+          )
+          image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
       # Create variable importance plot
-      .createVariableImportancePlot = function(model_results, screening_results) {
+      .createVariableImportancePlot = function(model_results, data_prep) {
         if (model_results$n_selected == 0) return()
-        
+
         tryCatch({
           image <- self$results$variableImportance
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            importance_data = model_results$variable_importance,
-            selected_vars = model_results$selected_variables,
-            screened_indices = model_results$screened_indices
-          ))
-          
+          # Store selected variable names (not indices) for color matching in render
+          selected_var_names <- names(model_results$variable_importance)[model_results$selected_variables]
+          plot_data <- list(
+            var_names = as.character(names(model_results$variable_importance)),
+            importance = as.numeric(model_results$variable_importance),
+            selected_vars = as.character(selected_var_names)
+          )
+          image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
       # Create model diagnostics plot
-      .createModelDiagnostics = function(model_results, screening_results) {
+      .createModelDiagnostics = function(model_results, data_prep) {
         tryCatch({
           image <- self$results$modelDiagnostics
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            model_results = model_results,
-            screening_results = screening_results
-          ))
-          
+          selected_var_names <- names(model_results$variable_importance)[model_results$selected_variables]
+          plot_data <- list(
+            n_selected = as.integer(model_results$n_selected),
+            selected_vars = as.character(selected_var_names),
+            concordance = as.numeric(model_results$concordance)
+          )
+          image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
       # Create stability selection plot
-      .createStabilityPlot = function(stability_results) {
+      .createStabilityPlot = function(stability_results, data_prep) {
         tryCatch({
           image <- self$results$stabilityPlot
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            stability_results = stability_results
-          ))
-          
+          var_names <- data_prep$var_names
+          plot_data <- list(
+            selection_frequencies = as.numeric(stability_results$selection_probabilities),
+            var_names = as.character(var_names),
+            threshold = as.numeric(stability_results$stability_threshold)
+          )
+          image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
         })
@@ -807,11 +758,6 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           "to identify variables that are consistently selected. This provides a measure of selection confidence ",
           "and helps identify the most robust predictive features.</p>",
           
-          "<h5>Variable Screening</h5>",
-          "<p>For ultra-high dimensional data (p >> n), marginal screening using univariate Cox models ",
-          "pre-selects the most promising variables before applying regularized regression, improving ",
-          "computational efficiency and statistical properties.</p>",
-          
           "<h5>Clinical Interpretation</h5>",
           "<p>Selected variables and their coefficients can be used to:</p>",
           "<ul>",
@@ -823,7 +769,331 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         )
         
         self$results$methodExplanation$setContent(explanations)
+      },
+
+      # Data suitability assessment
+      .assessSuitability = function(data_prep) {
+        checks <- list()
+        n <- data_prep$n_obs
+        n_events <- sum(data_prep$event)
+        p <- data_prep$n_vars
+        event_rate <- n_events / n
+
+        # -- Check 1: Events-Per-Variable (EPV) --
+        epv <- n_events / p
+        if (epv >= 10) { # Adjusted for high dim
+          checks$epv <- list(
+            color = "green", label = "Events-Per-Variable (Overall)",
+            value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+            detail = "High EPV. Regularization will perform robustly."
+          )
+        } else if (epv >= 1) {
+          checks$epv <- list(
+            color = "yellow", label = "Events-Per-Variable (Overall)",
+            value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+            detail = "Adequate for regularized regression, which handles low EPV better than standard Cox."
+          )
+        } else {
+          checks$epv <- list(
+            color = "yellow", label = "Events-Per-Variable (Overall)",
+            value = sprintf("%.3f (n_events=%d, p=%d)", epv, n_events, p),
+            detail = "Ultra-low EPV (p > n_events). Standard Cox would fail. Penalized regression is strictly required."
+          )
+        }
+
+        # -- Check 2: Regularization Need --
+        if (p >= n / 3) {
+          checks$regularization <- list(
+            color = "green", label = "Regularization Need",
+            value = sprintf("p=%d, n=%d (ratio=%.2f)", p, n, p / n),
+            detail = "High-dimensional setting. Penalized regularization is strongly indicated."
+          )
+        } else {
+          checks$regularization <- list(
+            color = "yellow", label = "Regularization Need",
+            value = sprintf("p=%d, EPV=%.0f", p, epv),
+            detail = "Moderate/low dimensionality. Standard Cox may also suffice."
+          )
+        }
+
+        # -- Check 3: Sample Size --
+        if (n >= 100) {
+          checks$sample_size <- list(
+            color = "green", label = "Sample Size",
+            value = sprintf("n=%d", n),
+            detail = "Adequate sample size for penalized regression."
+          )
+        } else if (n >= 30) {
+          checks$sample_size <- list(
+            color = "yellow", label = "Sample Size",
+            value = sprintf("n=%d", n),
+            detail = "Small sample. CV folds may be somewhat unstable."
+          )
+        } else {
+          checks$sample_size <- list(
+            color = "red", label = "Sample Size",
+            value = sprintf("n=%d", n),
+            detail = "Very small sample. Results will be highly variable."
+          )
+        }
+
+        # -- Check 4: Event Rate --
+        if (event_rate >= 0.20 && event_rate <= 0.80) {
+          checks$event_rate <- list(
+            color = "green", label = "Event Rate",
+            value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
+            detail = "Balanced event rate. Good for model estimation."
+          )
+        } else {
+          checks$event_rate <- list(
+            color = "yellow", label = "Event Rate",
+            value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
+            detail = "Imbalanced event rate. Model calibration may be affected."
+          )
+        }
+
+        # -- Check 5: Multicollinearity --
+        tryCatch({
+          # Due to potentially high dimensionality, we only check collinearity on a subset or skip heavy logic
+          if (p <= 2000) {
+              if (p >= 2) {
+                  cor_matrix <- cor(data_prep$predictors, use = "pairwise.complete.obs")
+                  diag(cor_matrix) <- 0
+                  max_cor <- max(abs(cor_matrix), na.rm = TRUE)
+                  
+                  if (max_cor < 0.7) {
+                      checks$collinearity <- list(
+                          color = "green", label = "Multicollinearity",
+                          value = sprintf("Max |r| = %.2f", max_cor),
+                          detail = "No concerning collinearity detected."
+                      )
+                  } else if (max_cor < 0.9) {
+                      checks$collinearity <- list(
+                          color = "yellow", label = "Multicollinearity",
+                          value = sprintf("Max |r| = %.2f", max_cor),
+                          detail = "Moderate collinearity. Elastic Net or Ridge handles this well."
+                      )
+                  } else {
+                      checks$collinearity <- list(
+                          color = "yellow", label = "Multicollinearity",
+                          value = sprintf("Max |r| = %.2f", max_cor),
+                          detail = "High collinearity. Elastic Net or Ridge is strongly recommended to retain correlated predictors."
+                      )
+                  }
+              }
+          } else {
+              checks$collinearity <- list(
+                  color = "green", label = "Multicollinearity",
+                  value = paste0("p=", p, " (skipped)"),
+                  detail = "Skipped exhaustive collinearity check due to ultra-high dimensionality."
+              )
+          }
+        }, error = function(e) {
+          NULL
+        })
+
+        # -- Check 6: Data Quality --
+        original_data <- self$data
+        pred_vars <- self$options$predictors
+        n_total <- nrow(original_data)
+        n_missing <- n_total - n
+        pct_missing <- 100 * n_missing / n_total
+
+        # Check for constant predictors
+        constant_cols <- apply(data_prep$predictors, 2, function(col) var(col, na.rm = TRUE) == 0)
+        n_constant <- sum(constant_cols)
+
+        if (n_missing == 0 && n_constant == 0) {
+            checks$data_quality <- list(
+                color = "green", label = "Data Quality",
+                value = "No issues",
+                detail = "Complete data with no constant predictors."
+            )
+        } else {
+            issues <- character(0)
+            if (pct_missing > 0) issues <- c(issues, sprintf("%.1f%% missing data (%d rows excluded).", pct_missing, n_missing))
+            if (n_constant > 0) issues <- c(issues, sprintf("%d constant predictor column(s) detected.", n_constant))
+            checks$data_quality <- list(
+                color = if (pct_missing > 20 || n_constant > 0) "red" else "yellow",
+                label = "Data Quality",
+                value = sprintf("%.1f%% missing, %d constant", pct_missing, n_constant),
+                detail = paste(issues, collapse = " ")
+            )
+        }
+
+        # -- Overall Verdict --
+        colors <- sapply(checks, function(x) x$color)
+        if (any(colors == "red")) {
+            overall <- "red"
+            overall_text <- "Some issues require attention before relying on these results."
+        } else if (any(colors == "yellow")) {
+            overall <- "yellow"
+            overall_text <- "Data is usable but review the flagged items."
+        } else {
+            overall <- "green"
+            overall_text <- "Data is well-suited for High-Dimensional Cox regression."
+        }
+
+        private$.generateSuitabilityHtml(checks, overall, overall_text)
+      },
+
+      .generateSuitabilityHtml = function(checks, overall, overall_text) {
+          # Color mapping
+          bg_colors <- list(
+              green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
+              yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
+              red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+          )
+          dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
+
+          # Overall banner
+          html <- paste0(
+              "<div style='", bg_colors[[overall]], " padding: 12px; border-radius: 6px; margin-bottom: 12px;'>",
+              "<strong>Overall: ", overall_text, "</strong></div>"
+          )
+
+          # Check table
+          html <- paste0(html,
+              "<table style='width: 100%; border-collapse: collapse; font-size: 13px;'>",
+              "<thead><tr style='border-bottom: 2px solid #dee2e6;'>",
+              "<th style='padding: 6px; text-align: left;'>Status</th>",
+              "<th style='padding: 6px; text-align: left;'>Check</th>",
+              "<th style='padding: 6px; text-align: left;'>Value</th>",
+              "<th style='padding: 6px; text-align: left;'>Detail</th>",
+              "</tr></thead><tbody>"
+          )
+
+          for (chk in checks) {
+              if (is.null(chk)) next
+              dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>&#9679;</span>")
+              html <- paste0(html,
+                  "<tr style='border-bottom: 1px solid #dee2e6;'>",
+                  "<td style='padding: 6px;'>", dot, "</td>",
+                  "<td style='padding: 6px;'><strong>", chk$label, "</strong></td>",
+                  "<td style='padding: 6px;'>", chk$value, "</td>",
+                  "<td style='padding: 6px;'>", chk$detail, "</td>",
+                  "</tr>"
+              )
+          }
+
+          html <- paste0(html, "</tbody></table>")
+
+          self$results$suitabilityReport$setContent(html)
+      },
+
+      # Render function for regularization path plot
+      .plot_regularization_path = function(image, ggtheme, theme, ...) {
+        plot_data <- image$state
+        if (is.null(plot_data)) return(FALSE)
+
+        tryCatch({
+          log_lambda <- log(plot_data$lambda)
+          plot(log_lambda, plot_data$cvm, type = "l", col = "blue", lwd = 2,
+               xlab = expression(log(lambda)), ylab = "Partial Likelihood Deviance",
+               main = "Regularization Path")
+          abline(v = log(plot_data$lambda_min), lty = 2, col = "red")
+          if (!is.null(plot_data$lambda_1se))
+            abline(v = log(plot_data$lambda_1se), lty = 2, col = "darkgreen")
+          legend("topright", legend = c("Lambda Min", "Lambda 1SE"),
+                 lty = 2, col = c("red", "darkgreen"), cex = 0.8)
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
+      # Render function for cross-validation plot
+      .plot_cv = function(image, ggtheme, theme, ...) {
+        plot_data <- image$state
+        if (is.null(plot_data)) return(FALSE)
+
+        tryCatch({
+          log_lambda <- log(plot_data$lambda)
+          plot(log_lambda, plot_data$cvm, type = "n",
+               ylim = range(c(plot_data$cvlo, plot_data$cvup), na.rm = TRUE),
+               xlab = expression(log(lambda)), ylab = "Partial Likelihood Deviance",
+               main = "Cross-Validation Results")
+          polygon(c(log_lambda, rev(log_lambda)),
+                  c(plot_data$cvup, rev(plot_data$cvlo)),
+                  col = rgb(0.8, 0.8, 1, 0.3), border = NA)
+          lines(log_lambda, plot_data$cvm, col = "blue", lwd = 2)
+          abline(v = log(plot_data$lambda_min), lty = 2, col = "red")
+          if (!is.null(plot_data$lambda_1se))
+            abline(v = log(plot_data$lambda_1se), lty = 2, col = "darkgreen")
+          legend("topright", legend = c("CV Mean", "Lambda Min", "Lambda 1SE"),
+                 lty = c(1, 2, 2), col = c("blue", "red", "darkgreen"),
+                 lwd = c(2, 1, 1), cex = 0.8)
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
+      # Render function for variable importance plot
+      .plot_variable_importance = function(image, ggtheme, theme, ...) {
+        plot_data <- image$state
+        if (is.null(plot_data)) return(FALSE)
+
+        tryCatch({
+          imp <- plot_data$importance
+          names(imp) <- plot_data$var_names
+          imp <- sort(imp, decreasing = FALSE)
+          n <- length(imp)
+          if (n == 0) return(FALSE)
+          cols <- ifelse(names(imp) %in% plot_data$selected_vars, "steelblue", "gray70")
+          par(mar = c(5, max(8, max(nchar(names(imp))) * 0.6), 4, 2))
+          barplot(imp, horiz = TRUE, las = 1, col = cols,
+                  xlab = "Importance Score", main = "Variable Importance")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
+      # Render function for model diagnostics plot
+      .plot_model_diagnostics = function(image, ggtheme, theme, ...) {
+        plot_data <- image$state
+        if (is.null(plot_data)) return(FALSE)
+
+        tryCatch({
+          conc_text <- if (!is.null(plot_data$concordance) && !is.na(plot_data$concordance)) {
+            paste("Concordance (C-index):", round(plot_data$concordance, 3))
+          } else {
+            "Concordance: N/A"
+          }
+          info <- c(
+            paste("Selected Variables:", plot_data$n_selected),
+            conc_text
+          )
+          plot.new()
+          plot.window(xlim = c(0, 1), ylim = c(0, 1))
+          title(main = "Model Diagnostics Summary")
+          text(0.5, 0.7, info[1], cex = 1.2)
+          text(0.5, 0.5, info[2], cex = 1.2)
+          if (!is.null(plot_data$selected_vars) && length(plot_data$selected_vars) > 0) {
+            vars_text <- paste("Variables:", paste(plot_data$selected_vars, collapse = ", "))
+            text(0.5, 0.3, vars_text, cex = 0.9)
+          }
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
+      # Render function for stability selection plot
+      .plot_stability = function(image, ggtheme, theme, ...) {
+        plot_data <- image$state
+        if (is.null(plot_data)) return(FALSE)
+
+        tryCatch({
+          freqs <- plot_data$selection_frequencies
+          names(freqs) <- plot_data$var_names
+          freqs <- sort(freqs, decreasing = FALSE)
+          n <- length(freqs)
+          if (n == 0) return(FALSE)
+          cols <- ifelse(freqs >= plot_data$threshold, "steelblue", "gray70")
+          par(mar = c(5, max(8, max(nchar(names(freqs))) * 0.6), 4, 2))
+          barplot(freqs, horiz = TRUE, las = 1, col = cols,
+                  xlab = "Selection Frequency", main = "Stability Selection",
+                  xlim = c(0, 1))
+          abline(v = plot_data$threshold, lty = 2, col = "red")
+          legend("bottomright", legend = paste("Threshold:", plot_data$threshold),
+                 lty = 2, col = "red", cex = 0.8)
+          TRUE
+        }, error = function(e) FALSE)
       }
-      
+
     )
   ) # End R6Class

@@ -12,7 +12,9 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             explanatory = NULL,
             lambda = "lambda.1se",
             nfolds = 10,
+            random_seed = 123456,
             standardize = TRUE,
+            suitabilityCheck = TRUE,
             cv_plot = TRUE,
             coef_plot = TRUE,
             survival_plot = TRUE,
@@ -40,8 +42,7 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 outcome,
                 suggested=list(
                     "ordinal",
-                    "nominal",
-                    "continuous"),
+                    "nominal"),
                 permitted=list(
                     "factor",
                     "numeric"))
@@ -71,9 +72,19 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 nfolds,
                 default=10,
                 min=3)
+            private$..random_seed <- jmvcore::OptionInteger$new(
+                "random_seed",
+                random_seed,
+                default=123456,
+                min=1,
+                max=999999)
             private$..standardize <- jmvcore::OptionBool$new(
                 "standardize",
                 standardize,
+                default=TRUE)
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
                 default=TRUE)
             private$..cv_plot <- jmvcore::OptionBool$new(
                 "cv_plot",
@@ -116,7 +127,9 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..explanatory)
             self$.addOption(private$..lambda)
             self$.addOption(private$..nfolds)
+            self$.addOption(private$..random_seed)
             self$.addOption(private$..standardize)
+            self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..cv_plot)
             self$.addOption(private$..coef_plot)
             self$.addOption(private$..survival_plot)
@@ -134,7 +147,9 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         explanatory = function() private$..explanatory$value,
         lambda = function() private$..lambda$value,
         nfolds = function() private$..nfolds$value,
+        random_seed = function() private$..random_seed$value,
         standardize = function() private$..standardize$value,
+        suitabilityCheck = function() private$..suitabilityCheck$value,
         cv_plot = function() private$..cv_plot$value,
         coef_plot = function() private$..coef_plot$value,
         survival_plot = function() private$..survival_plot$value,
@@ -151,7 +166,9 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..explanatory = NA,
         ..lambda = NA,
         ..nfolds = NA,
+        ..random_seed = NA,
         ..standardize = NA,
+        ..suitabilityCheck = NA,
         ..cv_plot = NA,
         ..coef_plot = NA,
         ..survival_plot = NA,
@@ -168,6 +185,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficients = function() private$.items[["coefficients"]],
         performance = function() private$.items[["performance"]],
@@ -206,6 +224,17 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcomeLevel",
                     "elapsedtime",
                     "explanatory")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "suitabilityCheck")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",
@@ -219,7 +248,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="number")),
+                        `type`="text")),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -394,19 +423,22 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto"),
                     list(
                         `name`="selection_frequency", 
-                        `title`="Selection Frequency", 
+                        `title`="Path Inclusion Proportion", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="stability_rank", 
-                        `title`="Stability Rank", 
+                        `title`="Importance Rank", 
                         `type`="integer")),
                 clearWith=list(
                     "showVariableImportance",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
-                    "explanatory")))
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
@@ -442,7 +474,10 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
-                    "explanatory")))
+                    "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="regularizationPathExplanation",
@@ -496,24 +531,37 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @examples
 #' \donttest{
-#' # example will be added
+#' lassocox(data = data, elapsedtime = "Time", outcome = "Status",
+#'     outcomeLevel = "1", explanatory = vars(age, stage, grade))
 #'}
 #' @param data The data as a data frame.
 #' @param elapsedtime The numeric variable representing follow-up time until
 #'   the event or last observation.
-#' @param outcome The outcome variable. Typically indicates event status
-#'   (e.g., death, recurrence).
-#' @param outcomeLevel The level of \code{outcome} considered as the event.
+#' @param outcome Binary event indicator variable (event vs censored). Can be
+#'   factor or numeric with exactly two observed values.
+#' @param outcomeLevel Level of \code{outcome} considered as the event. For
+#'   binary factor outcomes, if left empty the second observed level is used;
+#'   for numeric binary outcomes, the larger observed value is used (or 1 for
+#'   0/1 coding).
 #' @param explanatory Variables to be considered for selection in the
-#'   Lasso-Cox regression.
+#'   Lasso-Cox regression. Constant variables are removed automatically before
+#'   fitting.
 #' @param lambda Method for selecting the optimal lambda parameter from
 #'   cross-validation.
-#' @param nfolds Number of folds for cross-validation.
+#' @param nfolds Number of folds for cross-validation. Fold count is reduced
+#'   automatically when sample size is limited.
+#' @param random_seed Random seed for reproducible cross-validation fold
+#'   assignment.
 #' @param standardize Whether to standardize predictor variables before
-#'   fitting.
+#'   fitting. If enabled, reported coefficients are on the standardized
+#'   predictor scale.
+#' @param suitabilityCheck Run a comprehensive data suitability assessment
+#'   before LASSO analysis. Checks sample size, events-per-variable ratio,
+#'   multicollinearity, and whether regularization is needed.
 #' @param cv_plot Whether to show the cross-validation plot.
 #' @param coef_plot Whether to show the coefficient path plot.
-#' @param survival_plot Whether to show survival curves by risk groups.
+#' @param survival_plot Whether to show survival curves by risk groups. Uses
+#'   \code{survminer} if available, with a base-R fallback otherwise.
 #' @param showExplanations Display detailed explanations of LASSO Cox
 #'   regression methodology, including regularization concepts and
 #'   interpretation guidance.
@@ -530,6 +578,7 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$performance} \tab \tab \tab \tab \tab a table \cr
@@ -562,7 +611,9 @@ lassocox <- function(
     explanatory,
     lambda = "lambda.1se",
     nfolds = 10,
+    random_seed = 123456,
     standardize = TRUE,
+    suitabilityCheck = TRUE,
     cv_plot = TRUE,
     coef_plot = TRUE,
     survival_plot = TRUE,
@@ -593,7 +644,9 @@ lassocox <- function(
         explanatory = explanatory,
         lambda = lambda,
         nfolds = nfolds,
+        random_seed = random_seed,
         standardize = standardize,
+        suitabilityCheck = suitabilityCheck,
         cv_plot = cv_plot,
         coef_plot = coef_plot,
         survival_plot = survival_plot,

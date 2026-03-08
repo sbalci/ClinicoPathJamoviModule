@@ -9,11 +9,32 @@ items:
       type: Html
       visible: true
 
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - time
+          - event
+          - covariates
+          - suitabilityCheck
+
     - name: model_summary
       title: 'Model Summary'
       type: Table
       rows: 1
       visible: true
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
+          - suitabilityCheck
       columns:
           - name: penalty
             title: 'Penalty Function'
@@ -28,14 +49,26 @@ items:
             title: 'Variables Selected'
             type: integer
           - name: deviance_explained
-            title: 'Deviance Explained (%)'
+            title: 'C-index'
             type: number
+            format: zto
 
     - name: selected_variables
       title: 'Selected Variables'
       type: Table
       rows: 0
       visible: true
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
+          - suitabilityCheck
       columns:
           - name: variable
             title: 'Variable'
@@ -46,21 +79,23 @@ items:
           - name: hazard_ratio
             title: 'Hazard Ratio'
             type: number
-          - name: standard_error
-            title: 'Standard Error'
-            type: number
-          - name: z_value
-            title: 'Z-value'
-            type: number
-          - name: p_value
-            title: 'P-value'
-            type: number
 
     - name: variable_importance
       title: 'Variable Importance'
       type: Table
       rows: 0
       visible: (variable_importance)
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
+          - variable_importance
       columns:
           - name: variable
             title: 'Variable'
@@ -80,6 +115,16 @@ items:
       type: Table
       rows: 0
       visible: true
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
       columns:
           - name: lambda
             title: 'Lambda'
@@ -99,6 +144,16 @@ items:
       type: Table
       rows: 0
       visible: true
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
       columns:
           - name: model
             title: 'Model'
@@ -124,6 +179,16 @@ items:
       type: Table
       rows: 1
       visible: true
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
       columns:
           - name: converged
             title: 'Converged'
@@ -145,6 +210,16 @@ items:
       height: 450
       visible: (plot_path)
       renderFun: .plot_regularization_path
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
 
     - name: cv_error_plot
       title: Cross-Validation Error
@@ -153,6 +228,16 @@ items:
       height: 450
       visible: (plot_cv)
       renderFun: .plot_cv_error
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
 
     - name: variable_selection_plot
       title: Variable Selection Stability
@@ -161,19 +246,32 @@ items:
       height: 450
       visible: (variable_importance)
       renderFun: .plot_variable_selection
-
-    - name: coefficient_comparison
-      title: Coefficient Comparison
-      type: Image
-      width: 600
-      height: 450
-      visible: true
-      renderFun: .plot_coefficient_comparison
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
+          - variable_importance
 
     - name: model_interpretation
       title: Model Interpretation and Clinical Insights
       type: Html
       visible: true
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - cv_folds
+          - lambda_type
+          - alpha
+          - gamma
+          - standardize
 
 refs:
     - ClinicoPathJamoviModule

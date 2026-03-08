@@ -355,7 +355,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjpiestats",
-                version = c(0,0,36),
+                version = c(0,0,37),
                 options = options,
                 results = jjpiestatsResults$new(options=options),
                 data = data,

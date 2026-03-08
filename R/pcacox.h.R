@@ -9,11 +9,14 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             time = NULL,
             status = NULL,
             predictors = NULL,
+            suitabilityCheck = TRUE,
             clinical_vars = NULL,
             pca_method = "supervised",
             n_components = 5,
             component_selection = "cv",
             cv_folds = 10,
+            sparse_parameter = 0.1,
+            confidence_level = 0.95,
             variance_threshold = 0.8,
             scaling = TRUE,
             centering = TRUE,
@@ -27,6 +30,7 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plot_biplot = TRUE,
             plot_survival = TRUE,
             risk_score = TRUE,
+            show_model_comparison = FALSE,
             pathway_analysis = FALSE,
             feature_importance = TRUE, ...) {
 
@@ -59,6 +63,10 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
+                default=TRUE)
             private$..clinical_vars <- jmvcore::OptionVariables$new(
                 "clinical_vars",
                 clinical_vars,
@@ -99,6 +107,18 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=10,
                 min=3,
                 max=20)
+            private$..sparse_parameter <- jmvcore::OptionNumber$new(
+                "sparse_parameter",
+                sparse_parameter,
+                default=0.1,
+                min=0.001,
+                max=1)
+            private$..confidence_level <- jmvcore::OptionNumber$new(
+                "confidence_level",
+                confidence_level,
+                default=0.95,
+                min=0.5,
+                max=0.99)
             private$..variance_threshold <- jmvcore::OptionNumber$new(
                 "variance_threshold",
                 variance_threshold,
@@ -157,6 +177,10 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "risk_score",
                 risk_score,
                 default=TRUE)
+            private$..show_model_comparison <- jmvcore::OptionBool$new(
+                "show_model_comparison",
+                show_model_comparison,
+                default=FALSE)
             private$..pathway_analysis <- jmvcore::OptionBool$new(
                 "pathway_analysis",
                 pathway_analysis,
@@ -169,11 +193,14 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..time)
             self$.addOption(private$..status)
             self$.addOption(private$..predictors)
+            self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..clinical_vars)
             self$.addOption(private$..pca_method)
             self$.addOption(private$..n_components)
             self$.addOption(private$..component_selection)
             self$.addOption(private$..cv_folds)
+            self$.addOption(private$..sparse_parameter)
+            self$.addOption(private$..confidence_level)
             self$.addOption(private$..variance_threshold)
             self$.addOption(private$..scaling)
             self$.addOption(private$..centering)
@@ -187,6 +214,7 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plot_biplot)
             self$.addOption(private$..plot_survival)
             self$.addOption(private$..risk_score)
+            self$.addOption(private$..show_model_comparison)
             self$.addOption(private$..pathway_analysis)
             self$.addOption(private$..feature_importance)
         }),
@@ -194,11 +222,14 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         time = function() private$..time$value,
         status = function() private$..status$value,
         predictors = function() private$..predictors$value,
+        suitabilityCheck = function() private$..suitabilityCheck$value,
         clinical_vars = function() private$..clinical_vars$value,
         pca_method = function() private$..pca_method$value,
         n_components = function() private$..n_components$value,
         component_selection = function() private$..component_selection$value,
         cv_folds = function() private$..cv_folds$value,
+        sparse_parameter = function() private$..sparse_parameter$value,
+        confidence_level = function() private$..confidence_level$value,
         variance_threshold = function() private$..variance_threshold$value,
         scaling = function() private$..scaling$value,
         centering = function() private$..centering$value,
@@ -212,17 +243,21 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot_biplot = function() private$..plot_biplot$value,
         plot_survival = function() private$..plot_survival$value,
         risk_score = function() private$..risk_score$value,
+        show_model_comparison = function() private$..show_model_comparison$value,
         pathway_analysis = function() private$..pathway_analysis$value,
         feature_importance = function() private$..feature_importance$value),
     private = list(
         ..time = NA,
         ..status = NA,
         ..predictors = NA,
+        ..suitabilityCheck = NA,
         ..clinical_vars = NA,
         ..pca_method = NA,
         ..n_components = NA,
         ..component_selection = NA,
         ..cv_folds = NA,
+        ..sparse_parameter = NA,
+        ..confidence_level = NA,
         ..variance_threshold = NA,
         ..scaling = NA,
         ..centering = NA,
@@ -236,6 +271,7 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plot_biplot = NA,
         ..plot_survival = NA,
         ..risk_score = NA,
+        ..show_model_comparison = NA,
         ..pathway_analysis = NA,
         ..feature_importance = NA)
 )
@@ -245,6 +281,7 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         summary = function() private$.items[["summary"]],
         pcaSummary = function() private$.items[["pcaSummary"]],
         coxResults = function() private$.items[["coxResults"]],
@@ -252,6 +289,7 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         modelPerformance = function() private$.items[["modelPerformance"]],
         featureImportance = function() private$.items[["featureImportance"]],
         riskScore = function() private$.items[["riskScore"]],
+        modelComparison = function() private$.items[["modelComparison"]],
         screePlot = function() private$.items[["screePlot"]],
         loadingsPlot = function() private$.items[["loadingsPlot"]],
         biplot = function() private$.items[["biplot"]],
@@ -282,6 +320,11 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "time",
                     "status",
                     "predictors")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -463,6 +506,36 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelComparison",
+                title="Model Comparison (Variable Components)",
+                visible="(show_model_comparison)",
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="n_components", 
+                        `title`="N Components", 
+                        `type`="integer"),
+                    list(
+                        `name`="c_index", 
+                        `title`="C-Index", 
+                        `type`="number"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number"),
+                    list(
+                        `name`="bic", 
+                        `title`="BIC", 
+                        `type`="number"),
+                    list(
+                        `name`="log_likelihood", 
+                        `title`="Log-Likelihood", 
+                        `type`="number"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="screePlot",
@@ -587,11 +660,15 @@ pcacoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param time Survival time variable
 #' @param status Event status variable
 #' @param predictors Variables for principal component analysis
+#' @param suitabilityCheck assess if data is suitable for the selected PCA Cox
+#'   model
 #' @param clinical_vars Clinical predictors to retain in model
 #' @param pca_method PCA methodology for dimensionality reduction
 #' @param n_components Number of PCs to include in Cox model
 #' @param component_selection Selection criteria for PCs
 #' @param cv_folds K-fold CV parameter
+#' @param sparse_parameter Sparsity alpha/beta parameter
+#' @param confidence_level Confidence interval width
 #' @param variance_threshold Proportion of variance threshold
 #' @param scaling Center and scale variables
 #' @param centering Center variables to zero mean
@@ -605,11 +682,14 @@ pcacoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plot_biplot Generate biplot visualization
 #' @param plot_survival Generate survival stratification plots
 #' @param risk_score Calculate combined risk score
+#' @param show_model_comparison Calculate and compare sequential component
+#'   additions
 #' @param pathway_analysis Analyze biological pathways
 #' @param feature_importance Rank features by contribution
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pcaSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coxResults} \tab \tab \tab \tab \tab a table \cr
@@ -617,6 +697,7 @@ pcacoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$modelPerformance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$featureImportance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$riskScore} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$screePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$loadingsPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$biplot} \tab \tab \tab \tab \tab an image \cr
@@ -641,11 +722,14 @@ pcacox <- function(
     time,
     status,
     predictors,
+    suitabilityCheck = TRUE,
     clinical_vars,
     pca_method = "supervised",
     n_components = 5,
     component_selection = "cv",
     cv_folds = 10,
+    sparse_parameter = 0.1,
+    confidence_level = 0.95,
     variance_threshold = 0.8,
     scaling = TRUE,
     centering = TRUE,
@@ -659,6 +743,7 @@ pcacox <- function(
     plot_biplot = TRUE,
     plot_survival = TRUE,
     risk_score = TRUE,
+    show_model_comparison = FALSE,
     pathway_analysis = FALSE,
     feature_importance = TRUE) {
 
@@ -682,11 +767,14 @@ pcacox <- function(
         time = time,
         status = status,
         predictors = predictors,
+        suitabilityCheck = suitabilityCheck,
         clinical_vars = clinical_vars,
         pca_method = pca_method,
         n_components = n_components,
         component_selection = component_selection,
         cv_folds = cv_folds,
+        sparse_parameter = sparse_parameter,
+        confidence_level = confidence_level,
         variance_threshold = variance_threshold,
         scaling = scaling,
         centering = centering,
@@ -700,6 +788,7 @@ pcacox <- function(
         plot_biplot = plot_biplot,
         plot_survival = plot_survival,
         risk_score = risk_score,
+        show_model_comparison = show_model_comparison,
         pathway_analysis = pathway_analysis,
         feature_importance = feature_importance)
 

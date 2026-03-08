@@ -34,76 +34,116 @@ children:
           - type: VariablesListBox
             name: clinical_vars
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: pca_method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: n_components
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: component_selection
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: cv_folds
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: variance_threshold
-        format: number
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Data Suitability
+    collapsed: false
     children:
       - type: CheckBox
-        name: scaling
-      - type: CheckBox
-        name: centering
-      - type: CheckBox
-        name: survival_weighting
-      - type: CheckBox
-        name: permutation_test
-  - type: LayoutBox
-    margin: large
+        name: suitabilityCheck
+
+  - type: CollapseBox
+    label: Advanced PC Settings
+    collapsed: true
     children:
-      - type: TextBox
-        name: n_permutations
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: pca_method
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: n_components
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: component_selection
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: cv_folds
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: variance_threshold
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: sparse_parameter
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: scaling
+          - type: CheckBox
+            name: centering
+          - type: CheckBox
+            name: survival_weighting
+
+  - type: CollapseBox
+    label: Permutation & Validation
+    collapsed: true
     children:
-      - type: CheckBox
-        name: bootstrap_validation
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: confidence_level
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: permutation_test
+          - type: TextBox
+            name: n_permutations
+            format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: bootstrap_validation
+          - type: TextBox
+            name: n_bootstrap
+            format: number
+
+  - type: CollapseBox
+    label: Plots
+    collapsed: true
     children:
-      - type: TextBox
-        name: n_bootstrap
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: plot_scree
+          - type: CheckBox
+            name: plot_loadings
+          - type: CheckBox
+            name: plot_biplot
+          - type: CheckBox
+            name: plot_survival
+
+  - type: CollapseBox
+    label: Additional Analyses
+    collapsed: true
     children:
-      - type: CheckBox
-        name: plot_scree
-      - type: CheckBox
-        name: plot_loadings
-      - type: CheckBox
-        name: plot_biplot
-      - type: CheckBox
-        name: plot_survival
-      - type: CheckBox
-        name: risk_score
-      - type: CheckBox
-        name: pathway_analysis
-      - type: CheckBox
-        name: feature_importance
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: risk_score
+          - type: CheckBox
+            name: show_model_comparison
+          - type: CheckBox
+            name: pathway_analysis
+          - type: CheckBox
+            name: feature_importance

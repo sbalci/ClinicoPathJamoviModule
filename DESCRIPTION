@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.37
-Date: 2026-03-04
+Version: 0.0.37.01
+Date: 2026-03-07
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -787,6 +787,8 @@ Collate:
     'landmarkanalysis.h.R'
     'lassocox.b.R'
     'lassocox.h.R'
+    'lassointro.b.R'
+    'lassointro.h.R'
     'likelihoodratio.b.R'
     'likelihoodratio.h.R'
     'linechart.b.R'
@@ -899,10 +901,6 @@ Collate:
     'pcaloadingtest.b.R'
     'pcaloadingtest.h.R'
     'pcaloadingtest_data-data.R'
-    'penalizedcox.b.R'
-    'penalizedcox.h.R'
-    'penalizedcoxregression.b.R'
-    'penalizedcoxregression.h.R'
     'permutationsurvival.b.R'
     'permutationsurvival.h.R'
     'pheval.b.R'

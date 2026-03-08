@@ -14,9 +14,8 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             alpha_value = 0.5,
             cv_method = "cv_1se",
             cv_folds = 10,
-            variable_selection = "none",
             stability_selection = FALSE,
-            bootstrap_iterations = 500,
+            subsampling_iterations = 500,
             stability_threshold = 0.8,
             show_regularization_path = TRUE,
             show_cv_plot = TRUE,
@@ -24,7 +23,8 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             show_coefficients_table = TRUE,
             show_model_diagnostics = TRUE,
             showSummaries = FALSE,
-            showExplanations = FALSE, ...) {
+            showExplanations = FALSE,
+            suitabilityCheck = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -81,7 +81,6 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "cv_method",
                 cv_method,
                 options=list(
-                    "cv_glmnet",
                     "cv_1se",
                     "cv_min"),
                 default="cv_1se")
@@ -91,22 +90,13 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=3,
                 max=20,
                 default=10)
-            private$..variable_selection <- jmvcore::OptionList$new(
-                "variable_selection",
-                variable_selection,
-                options=list(
-                    "none",
-                    "stepwise",
-                    "best_subset",
-                    "forward_selection"),
-                default="none")
             private$..stability_selection <- jmvcore::OptionBool$new(
                 "stability_selection",
                 stability_selection,
                 default=FALSE)
-            private$..bootstrap_iterations <- jmvcore::OptionInteger$new(
-                "bootstrap_iterations",
-                bootstrap_iterations,
+            private$..subsampling_iterations <- jmvcore::OptionInteger$new(
+                "subsampling_iterations",
+                subsampling_iterations,
                 min=100,
                 max=1000,
                 default=500)
@@ -144,6 +134,10 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showExplanations",
                 showExplanations,
                 default=FALSE)
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
+                default=TRUE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..outcome)
@@ -153,9 +147,8 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..alpha_value)
             self$.addOption(private$..cv_method)
             self$.addOption(private$..cv_folds)
-            self$.addOption(private$..variable_selection)
             self$.addOption(private$..stability_selection)
-            self$.addOption(private$..bootstrap_iterations)
+            self$.addOption(private$..subsampling_iterations)
             self$.addOption(private$..stability_threshold)
             self$.addOption(private$..show_regularization_path)
             self$.addOption(private$..show_cv_plot)
@@ -164,6 +157,7 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..show_model_diagnostics)
             self$.addOption(private$..showSummaries)
             self$.addOption(private$..showExplanations)
+            self$.addOption(private$..suitabilityCheck)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -174,9 +168,8 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         alpha_value = function() private$..alpha_value$value,
         cv_method = function() private$..cv_method$value,
         cv_folds = function() private$..cv_folds$value,
-        variable_selection = function() private$..variable_selection$value,
         stability_selection = function() private$..stability_selection$value,
-        bootstrap_iterations = function() private$..bootstrap_iterations$value,
+        subsampling_iterations = function() private$..subsampling_iterations$value,
         stability_threshold = function() private$..stability_threshold$value,
         show_regularization_path = function() private$..show_regularization_path$value,
         show_cv_plot = function() private$..show_cv_plot$value,
@@ -184,7 +177,8 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         show_coefficients_table = function() private$..show_coefficients_table$value,
         show_model_diagnostics = function() private$..show_model_diagnostics$value,
         showSummaries = function() private$..showSummaries$value,
-        showExplanations = function() private$..showExplanations$value),
+        showExplanations = function() private$..showExplanations$value,
+        suitabilityCheck = function() private$..suitabilityCheck$value),
     private = list(
         ..elapsedtime = NA,
         ..outcome = NA,
@@ -194,9 +188,8 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..alpha_value = NA,
         ..cv_method = NA,
         ..cv_folds = NA,
-        ..variable_selection = NA,
         ..stability_selection = NA,
-        ..bootstrap_iterations = NA,
+        ..subsampling_iterations = NA,
         ..stability_threshold = NA,
         ..show_regularization_path = NA,
         ..show_cv_plot = NA,
@@ -204,7 +197,8 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..show_coefficients_table = NA,
         ..show_model_diagnostics = NA,
         ..showSummaries = NA,
-        ..showExplanations = NA)
+        ..showExplanations = NA,
+        ..suitabilityCheck = NA)
 )
 
 highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -212,11 +206,11 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         modelSummary = function() private$.items[["modelSummary"]],
         selectedVariables = function() private$.items[["selectedVariables"]],
         regularizationMetrics = function() private$.items[["regularizationMetrics"]],
         stabilityResults = function() private$.items[["stabilityResults"]],
-        dimensionalityReduction = function() private$.items[["dimensionalityReduction"]],
         regularizationPath = function() private$.items[["regularizationPath"]],
         cvPlot = function() private$.items[["cvPlot"]],
         variableImportance = function() private$.items[["variableImportance"]],
@@ -239,7 +233,22 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Analysis",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "predictors",
+                    "suitabilityCheck")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "predictors",
+                    "suitabilityCheck")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelSummary",
@@ -307,53 +316,70 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="importance_rank", 
                         `title`="Importance Rank", 
                         `type`="integer"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="dimensionalityReduction",
-                title="Dimensionality Summary",
-                visible=TRUE,
-                columns=list(
-                    list(
-                        `name`="stage", 
-                        `title`="Analysis Stage", 
-                        `type`="text"),
-                    list(
-                        `name`="variables_input", 
-                        `title`="Input Variables", 
-                        `type`="integer"),
-                    list(
-                        `name`="variables_selected", 
-                        `title`="Selected Variables", 
-                        `type`="integer"),
-                    list(
-                        `name`="reduction_ratio", 
-                        `title`="Reduction Ratio", 
-                        `type`="number"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="regularizationPath",
                 title="Regularization Path",
-                visible="(show_regularization_path)"))
+                visible="(show_regularization_path)",
+                width=600,
+                height=500,
+                renderFun=".plot_regularization_path",
+                requiresData=TRUE,
+                clearWith=list(
+                    "predictors",
+                    "alpha_value",
+                    "regularization_method")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cvPlot",
                 title="Cross-Validation Plot",
-                visible="(show_cv_plot)"))
+                visible="(show_cv_plot)",
+                width=500,
+                height=400,
+                renderFun=".plot_cv",
+                requiresData=TRUE,
+                clearWith=list(
+                    "cv_folds",
+                    "cv_method",
+                    "predictors")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="variableImportance",
                 title="Variable Importance Plot",
-                visible="(show_variable_importance)"))
+                visible="(show_variable_importance)",
+                width=500,
+                height=400,
+                renderFun=".plot_variable_importance",
+                requiresData=TRUE,
+                clearWith=list(
+                    "predictors",
+                    "alpha_value",
+                    "regularization_method")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="modelDiagnostics",
                 title="Model Diagnostics",
-                visible="(show_model_diagnostics)"))
+                visible="(show_model_diagnostics)",
+                width=600,
+                height=500,
+                renderFun=".plot_model_diagnostics",
+                requiresData=TRUE,
+                clearWith=list(
+                    "predictors",
+                    "elapsedtime",
+                    "outcome")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="stabilityPlot",
                 title="Stability Selection Plot",
-                visible="(stability_selection)"))
+                visible="(stability_selection)",
+                width=500,
+                height=400,
+                renderFun=".plot_stability",
+                requiresData=TRUE,
+                clearWith=list(
+                    "stability_selection",
+                    "stability_threshold")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -421,7 +447,7 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     regularization_method = "elastic_net",
 #'     alpha_value = 0.5,
 #'     stability_selection = TRUE,
-#'     bootstrap_iterations = 500
+#'     subsampling_iterations = 500
 #' )
 #'}
 #' @param data the data as a data frame
@@ -434,12 +460,10 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alpha_value Alpha parameter for elastic net (0=ridge, 1=lasso)
 #' @param cv_method Cross-validation method for lambda selection
 #' @param cv_folds Number of cross-validation folds
-#' @param variable_selection Additional variable selection method after
-#'   regularization
 #' @param stability_selection Perform stability selection for variable
 #'   importance
-#' @param bootstrap_iterations Number of bootstrap iterations for stability
-#'   selection
+#' @param subsampling_iterations Number of subsampling iterations for
+#'   stability selection
 #' @param stability_threshold Threshold for stability selection
 #' @param show_regularization_path Display regularization path plot
 #' @param show_cv_plot Display cross-validation error plot
@@ -448,14 +472,17 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param show_model_diagnostics Display model diagnostic plots
 #' @param showSummaries Generate natural language summaries
 #' @param showExplanations Show methodology explanations
+#' @param suitabilityCheck Run a comprehensive data suitability assessment
+#'   before analysis. Checks sample size, events-per-variable ratio,
+#'   multicollinearity,  and whether regularization is needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$selectedVariables} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$regularizationMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stabilityResults} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$dimensionalityReduction} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$regularizationPath} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$cvPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$variableImportance} \tab \tab \tab \tab \tab an image \cr
@@ -482,9 +509,8 @@ highdimcox <- function(
     alpha_value = 0.5,
     cv_method = "cv_1se",
     cv_folds = 10,
-    variable_selection = "none",
     stability_selection = FALSE,
-    bootstrap_iterations = 500,
+    subsampling_iterations = 500,
     stability_threshold = 0.8,
     show_regularization_path = TRUE,
     show_cv_plot = TRUE,
@@ -492,7 +518,8 @@ highdimcox <- function(
     show_coefficients_table = TRUE,
     show_model_diagnostics = TRUE,
     showSummaries = FALSE,
-    showExplanations = FALSE) {
+    showExplanations = FALSE,
+    suitabilityCheck = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("highdimcox requires jmvcore to be installed (restart may be required)")
@@ -517,9 +544,8 @@ highdimcox <- function(
         alpha_value = alpha_value,
         cv_method = cv_method,
         cv_folds = cv_folds,
-        variable_selection = variable_selection,
         stability_selection = stability_selection,
-        bootstrap_iterations = bootstrap_iterations,
+        subsampling_iterations = subsampling_iterations,
         stability_threshold = stability_threshold,
         show_regularization_path = show_regularization_path,
         show_cv_plot = show_cv_plot,
@@ -527,7 +553,8 @@ highdimcox <- function(
         show_coefficients_table = show_coefficients_table,
         show_model_diagnostics = show_model_diagnostics,
         showSummaries = showSummaries,
-        showExplanations = showExplanations)
+        showExplanations = showExplanations,
+        suitabilityCheck = suitabilityCheck)
 
     analysis <- highdimcoxClass$new(
         options = options,

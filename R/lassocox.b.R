@@ -55,7 +55,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "lassocoxClass",
     inherit = lassocoxBase,
     private = list(
-        
+
+        # Sanitize variable names for safe column access and formula building
+        .escapeVar = function(x) {
+            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
         # Initialize results and validate dependencies
         .init = function() {
             # Check for required packages
@@ -65,9 +70,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             if (!requireNamespace("survival", quietly = TRUE)) {
                 missing_packages <- c(missing_packages, "survival")
-            }
-            if (!requireNamespace("survminer", quietly = TRUE)) {
-                missing_packages <- c(missing_packages, "survminer")
             }
             
             if (length(missing_packages) > 0) {
@@ -90,7 +92,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Initialize with welcome message if no variables selected
             if (is.null(self$options$elapsedtime) ||
                 is.null(self$options$outcome) ||
-                is.null(self$options$explanatory)) {
+                is.null(self$options$explanatory) ||
+                length(self$options$explanatory) == 0) {
 
                 welcome_msg <- "
                 <div class='alert alert-info'>
@@ -134,6 +137,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$coef_plot$setVisible(FALSE)
                 self$results$survival_plot$setVisible(FALSE)
             }
+
+            # Informational note: survminer is optional because a base-R fallback is provided
+            if (!requireNamespace("survminer", quietly = TRUE) && isTRUE(self$options$survival_plot)) {
+                self$results$todo$setContent(paste0(
+                    "<div class='alert alert-warning'>",
+                    "<h4>Optional Package Not Installed</h4>",
+                    "<p><code>survminer</code> is not installed. Survival curves will use a base-R fallback.</p>",
+                    "</div>"
+                ))
+                self$results$todo$setVisible(TRUE)
+            }
             
             # Initialize explanatory content
             private$.initializeExplanations()
@@ -147,7 +161,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (is.null(self$options$elapsedtime) ||
                 is.null(self$options$outcome) ||
-                is.null(self$options$explanatory)) {
+                is.null(self$options$explanatory) ||
+                length(self$options$explanatory) == 0) {
                 return()
             }
 
@@ -162,7 +177,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Prepare and validate data
                 data <- private$.cleanData()
                 if (is.null(data)) return()
-                
+
+                # Run suitability assessment (advisory only, always proceeds)
+                if (self$options$suitabilityCheck) {
+                    private$.assessSuitability(data)
+                }
+
                 # Fit Lasso-Cox model
                 results <- private$.fitModel(data)
                 if (is.null(results)) return()
@@ -191,144 +211,208 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Comprehensive data cleaning and validation
         .cleanData = function() {
             data <- self$data
-            
-            # Validate and clean time variable
             time_var <- self$options$elapsedtime
-            time <- jmvcore::toNumeric(data[[time_var]])
-            
-            if (any(is.na(time))) {
-                stop("Time variable contains missing values. Please remove or impute missing observations.")
-            }
-            if (any(time < 0, na.rm = TRUE)) {
-                stop("Time variable contains negative values. Survival times must be non-negative.")
-            }
-            if (any(time == 0, na.rm = TRUE)) {
-                warning("Time variable contains zero values. Consider adding a small constant or reviewing data.")
-            }
-            
-            # Validate and clean outcome variable
-            outcome <- data[[self$options$outcome]]
-            unique_levels <- unique(na.omit(outcome))
-            
-            if (length(unique_levels) != 2) {
-                stop(paste0("Outcome variable must be binary (exactly 2 levels). Found ", 
-                           length(unique_levels), " levels: ", 
-                           paste(unique_levels, collapse = ", ")))
-            }
-            
-            if (is.null(self$options$outcomeLevel) || !(self$options$outcomeLevel %in% unique_levels)) {
-                stop("Please specify a valid outcome level that represents the event of interest.")
-            }
-            
-            # Create binary status variable (1 = event, 0 = censored)
-            status <- as.numeric(outcome == self$options$outcomeLevel)
-            
-            # Validate predictors
+            outcome_var <- self$options$outcome
             explanatory_vars <- self$options$explanatory
+
+            # Validate predictors
             if (length(explanatory_vars) < 2) {
                 stop("At least 2 explanatory variables are required for Lasso regression.")
             }
-            
+
+            # Extract core variables
+            time <- jmvcore::toNumeric(data[[time_var]])
+            outcome_raw <- data[[outcome_var]]
             predictors <- data[explanatory_vars]
-            
-            # Check for constant variables
+
+            # Determine event coding robustly for factor/character/numeric outcomes
+            event_level_used <- NULL
+            if (is.factor(outcome_raw) || is.character(outcome_raw)) {
+                outcome_chr <- as.character(outcome_raw)
+                observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
+                if (length(observed_levels) != 2) {
+                    stop(paste0(
+                        "Outcome variable must be binary among observed values. Found ",
+                        length(observed_levels), " levels: ",
+                        paste(observed_levels, collapse = ", ")
+                    ))
+                }
+
+                outcome_level_opt <- self$options$outcomeLevel
+                if (is.null(outcome_level_opt) || !nzchar(as.character(outcome_level_opt))) {
+                    event_level_used <- observed_levels[2]
+                } else {
+                    event_level_used <- as.character(outcome_level_opt)
+                    if (!(event_level_used %in% observed_levels)) {
+                        stop(paste0(
+                            "Selected event level ('", event_level_used,
+                            "') is not present in observed outcome data."
+                        ))
+                    }
+                }
+
+                status <- as.numeric(outcome_chr == event_level_used)
+            } else {
+                outcome_num <- jmvcore::toNumeric(outcome_raw)
+                observed_levels <- sort(unique(outcome_num[!is.na(outcome_num)]))
+                if (length(observed_levels) != 2) {
+                    stop(paste0(
+                        "Numeric outcome must have exactly 2 observed values. Found: ",
+                        paste(observed_levels, collapse = ", ")
+                    ))
+                }
+
+                outcome_level_opt <- self$options$outcomeLevel
+                if (!is.null(outcome_level_opt) && nzchar(as.character(outcome_level_opt))) {
+                    event_level_num <- suppressWarnings(as.numeric(outcome_level_opt))
+                    if (is.na(event_level_num) || !(event_level_num %in% observed_levels)) {
+                        stop("For numeric outcomes, Event Level must be one of the observed outcome values.")
+                    }
+                } else if (all(observed_levels %in% c(0, 1))) {
+                    event_level_num <- 1
+                } else {
+                    event_level_num <- max(observed_levels)
+                }
+
+                event_level_used <- as.character(event_level_num)
+                status <- as.numeric(outcome_num == event_level_num)
+            }
+
+            # Remove constant explanatory variables instead of failing hard
             constant_vars <- sapply(predictors, function(x) {
                 if (is.numeric(x)) {
-                    var(x, na.rm = TRUE) == 0
+                    v <- var(x, na.rm = TRUE)
+                    is.na(v) || v == 0
                 } else {
                     length(unique(na.omit(x))) <= 1
                 }
             })
-            
             if (any(constant_vars)) {
                 constant_var_names <- names(predictors)[constant_vars]
-                stop(paste0("The following variables are constant and will be removed: ",
-                           paste(constant_var_names, collapse = ", ")))
+                predictors <- predictors[, !constant_vars, drop = FALSE]
+                explanatory_vars <- names(predictors)
+                warning(paste0(
+                    "Removed constant explanatory variables: ",
+                    paste(constant_var_names, collapse = ", ")
+                ))
             }
-            
-            # Check for complete cases
+            if (ncol(predictors) == 0) {
+                stop("No valid explanatory variables remain after removing constant predictors.")
+            }
+            if (ncol(predictors) == 1) {
+                warning("Only one non-constant explanatory variable remains; LASSO selection is limited.")
+            }
+
+            # Complete-case filtering across all analysis inputs
             complete <- complete.cases(time, status, predictors)
             n_complete <- sum(complete)
-            n_events <- sum(status[complete])
-            
+            n_excluded <- length(complete) - n_complete
+
             if (n_complete < 10) {
-                stop(paste0("Too few complete cases for analysis (", n_complete, 
-                           "). Need at least 10 complete observations."))
+                stop(paste0(
+                    "Too few complete cases for analysis (", n_complete,
+                    "). Need at least 10 complete observations."
+                ))
             }
-            
+            if (n_excluded > 0) {
+                warning(paste0(
+                    "Excluded ", n_excluded,
+                    " row(s) with missing values in time/outcome/predictors (complete-case analysis)."
+                ))
+            }
+
+            time_cc <- time[complete]
+            status_cc <- status[complete]
+
+            if (any(!is.finite(time_cc))) {
+                stop("Time variable contains non-finite values after filtering. Please correct the input.")
+            }
+            if (any(time_cc < 0, na.rm = TRUE)) {
+                stop("Time variable contains negative values. Survival times must be non-negative.")
+            }
+            if (any(time_cc == 0, na.rm = TRUE)) {
+                warning("Time variable contains zero values. Consider adding a small constant if convergence issues occur.")
+            }
+
+            # Outcome must remain binary after complete-case filtering
+            if (!(length(unique(status_cc)) == 2 && all(unique(status_cc) %in% c(0, 1)))) {
+                stop("Outcome is not binary after complete-case filtering. Check event level and missing-data pattern.")
+            }
+
+            n_events <- sum(status_cc == 1)
             if (n_events < 5) {
-                stop(paste0("Too few events for analysis (", n_events, 
-                           "). Need at least 5 events for reliable estimation."))
+                stop(paste0(
+                    "Too few events for analysis (", n_events,
+                    "). Need at least 5 events for reliable estimation."
+                ))
             }
-            
-            # Validate events per variable ratio
+
+            # Validate events-per-predictor ratio
             n_predictors <- ncol(predictors)
             if (n_events < n_predictors && n_events < 10) {
-                warning(paste0("Low events per variable ratio (", n_events, " events, ", 
-                              n_predictors, " variables). Consider reducing variables or using stronger regularization."))
+                warning(paste0(
+                    "Low events-per-predictor ratio (", n_events, " events, ",
+                    n_predictors, " predictors). Consider stronger regularization or fewer predictors."
+                ))
             }
-            
-            # Create design matrix with proper handling of factors
+
+            # Create design matrix with robust factor handling
             tryCatch({
-                # Handle factor variables properly
-                factor_vars <- sapply(predictors[complete,], is.factor)
+                factor_vars <- sapply(predictors[complete, , drop = FALSE], is.factor)
                 if (any(factor_vars)) {
-                    # Ensure factors have sufficient levels in complete cases
                     for (var_name in names(factor_vars)[factor_vars]) {
                         factor_levels <- length(unique(predictors[complete, var_name]))
                         if (factor_levels < 2) {
-                            stop(paste0("Factor variable '", var_name, 
-                                       "' has insufficient variation in complete cases."))
+                            stop(paste0(
+                                "Factor variable '", var_name,
+                                "' has insufficient variation in complete cases."
+                            ))
                         }
                     }
                 }
-                
-                # Create model matrix
-                X <- model.matrix(~ ., data = predictors[complete,])[, -1]
-                
-                # Check for rank deficiency
+
+                X <- model.matrix(~ ., data = predictors[complete, , drop = FALSE])[, -1, drop = FALSE]
                 if (ncol(X) == 0) {
-                    stop("No valid predictors remaining after processing. Check variable coding.")
+                    stop("No valid predictors remaining after model-matrix encoding.")
                 }
-                
-                # Remove any columns with all zeros or NAs
+
                 valid_cols <- apply(X, 2, function(col) {
-                    !all(is.na(col)) && var(col, na.rm = TRUE) > 0
+                    !all(is.na(col)) && is.finite(var(col, na.rm = TRUE)) && var(col, na.rm = TRUE) > 0
                 })
-                
                 if (!any(valid_cols)) {
-                    stop("No valid predictors after removing constant/invalid columns.")
+                    stop("No valid predictors after removing degenerate design-matrix columns.")
                 }
-                
                 X <- X[, valid_cols, drop = FALSE]
-                
             }, error = function(e) {
-                stop(paste0("Error creating design matrix: ", e$message, 
-                           ". Check factor variable coding and missing values."))
+                stop(paste0(
+                    "Error creating design matrix: ", e$message,
+                    ". Check factor coding and missing values."
+                ))
             })
-            
+
             # Standardize variables if requested
             if (self$options$standardize) {
-                # Store scaling parameters for later use
                 X_scaled <- scale(X)
+                scale_vals <- attr(X_scaled, "scaled:scale")
+                scale_vals[is.na(scale_vals) | scale_vals == 0] <- 1
+                attr(X_scaled, "scaled:scale") <- scale_vals
+                X <- as.matrix(X_scaled)
+                X[is.na(X)] <- 0
                 scaling_info <- list(
                     center = attr(X_scaled, "scaled:center"),
-                    scale = attr(X_scaled, "scaled:scale")
+                    scale = scale_vals
                 )
-                X <- as.matrix(X_scaled)
             } else {
                 scaling_info <- NULL
             }
-            
-            # Final validation
+
             if (any(is.infinite(X))) {
                 stop("Design matrix contains infinite values. Check for extreme outliers.")
             }
-            
-            # Return cleaned and validated data
+
             return(list(
-                time = time[complete],
-                status = status[complete],
+                time = time_cc,
+                status = status_cc,
                 X = X,
                 n = n_complete,
                 n_events = n_events,
@@ -336,8 +420,57 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 variable_names = colnames(X),
                 original_variable_names = explanatory_vars,
                 scaling_info = scaling_info,
-                complete_cases = which(complete)
+                complete_cases = which(complete),
+                event_level_used = event_level_used,
+                excluded_rows = n_excluded
             ))
+        },
+
+        .makeStratifiedFoldId = function(status, nfolds, seed_value = NULL) {
+            if (length(status) < nfolds) {
+                return(NULL)
+            }
+
+            event_idx <- which(status == 1)
+            cens_idx <- which(status == 0)
+            if (length(event_idx) < nfolds || length(cens_idx) < nfolds) {
+                return(NULL)
+            }
+
+            if (!is.null(seed_value) && !is.na(seed_value)) {
+                set.seed(seed_value)
+            }
+
+            foldid <- integer(length(status))
+            foldid[event_idx] <- sample(rep(seq_len(nfolds), length.out = length(event_idx)))
+            foldid[cens_idx] <- sample(rep(seq_len(nfolds), length.out = length(cens_idx)))
+
+            if (length(unique(foldid)) < nfolds) {
+                return(NULL)
+            }
+            foldid
+        },
+
+        .makeBinaryRiskGroups = function(risk_scores) {
+            q <- as.numeric(stats::quantile(risk_scores, probs = c(0, 0.5, 1), na.rm = TRUE, type = 8))
+            q <- unique(q)
+
+            if (length(q) >= 3) {
+                return(cut(
+                    risk_scores,
+                    breaks = q,
+                    labels = c("Low Risk", "High Risk"),
+                    include.lowest = TRUE
+                ))
+            }
+
+            med <- stats::median(risk_scores, na.rm = TRUE)
+            groups <- ifelse(risk_scores <= med, "Low Risk", "High Risk")
+            groups <- factor(groups, levels = c("Low Risk", "High Risk"))
+            if (length(unique(groups)) < 2) {
+                return(NULL)
+            }
+            groups
         },
 
         # Enhanced model fitting with comprehensive error handling
@@ -355,26 +488,45 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (any(is.na(y))) {
                 stop("Invalid survival object. Check time and status variables.")
             }
-            
+
             # Set up cross-validation parameters
-            nfolds <- max(3, min(self$options$nfolds, data$n %/% 3))
-            if (nfolds != self$options$nfolds) {
-                warning(paste0("Reduced number of CV folds to ", nfolds, 
-                              " due to small sample size."))
+            nfolds_requested <- as.integer(self$options$nfolds)
+            nfolds <- max(3, min(nfolds_requested, data$n - 1))
+            if (nfolds != nfolds_requested) {
+                warning(paste0(
+                    "Reduced number of CV folds to ", nfolds,
+                    " due to sample size constraints."
+                ))
             }
-            
+
+            seed_value <- tryCatch(as.integer(self$options$random_seed), error = function(e) NA_integer_)
+            if (is.na(seed_value)) {
+                seed_value <- 123456
+            }
+
+            foldid <- private$.makeStratifiedFoldId(data$status, nfolds, seed_value)
+            if (is.null(foldid)) {
+                warning("Could not create stratified CV folds; using default fold assignment.")
+            }
+
             # Fit cross-validated Lasso-Cox model
             tryCatch({
-                set.seed(123456)  # For reproducibility
-                cv_fit <- glmnet::cv.glmnet(
+                set.seed(seed_value)
+                cv_args <- list(
                     x = data$X,
                     y = y,
                     family = "cox",
                     alpha = 1,  # Lasso (L1) penalty
-                    nfolds = nfolds,
                     standardize = FALSE,  # Already standardized if requested
                     parallel = FALSE  # Avoid parallel processing issues
                 )
+                if (is.null(foldid)) {
+                    cv_args$nfolds <- nfolds
+                } else {
+                    cv_args$foldid <- foldid
+                    cv_args$nfolds <- nfolds
+                }
+                cv_fit <- do.call(glmnet::cv.glmnet, cv_args)
                 
                 # Check if cross-validation succeeded
                 if (is.null(cv_fit$lambda.min) || is.na(cv_fit$lambda.min)) {
@@ -409,7 +561,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Extract coefficients and selected variables
             coef_matrix <- as.matrix(coef(final_model, s = lambda_optimal))
-            selected_vars <- which(coef_matrix != 0)
+            selected_vars <- which(abs(coef_matrix) > 1e-8)
             
             if (length(selected_vars) == 0) {
                 warning("No variables selected by Lasso. Consider using lambda.min or less regularization.")
@@ -420,7 +572,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     alpha = 1, lambda = lambda_optimal, standardize = FALSE
                 )
                 coef_matrix <- as.matrix(coef(final_model, s = lambda_optimal))
-                selected_vars <- which(coef_matrix != 0)
+                selected_vars <- which(abs(coef_matrix) > 1e-8)
             }
             
             # Calculate risk scores
@@ -456,13 +608,15 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             metrics <- list()
             
             # C-index (concordance index)
+            # Note: higher risk_scores = worse prognosis, so we need reverse=TRUE
+            # because survival::concordance() by default treats higher values as better
             tryCatch({
-                cindex_result <- survival::concordance(y ~ risk_scores)
+                cindex_result <- survival::concordance(y ~ risk_scores, reverse = TRUE)
                 metrics$cindex <- cindex_result$concordance
-                metrics$cindex_se <- sqrt(cindex_result$var)
+                metrics$cindex_se <- sqrt(max(0, cindex_result$var))
             }, error = function(e) {
-                metrics$cindex <- NA
-                metrics$cindex_se <- NA
+                metrics$cindex <<- NA
+                metrics$cindex_se <<- NA
             })
             
             # AUC at different time points (if applicable)
@@ -481,10 +635,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Risk group analysis
             tryCatch({
-                risk_groups <- cut(risk_scores, 
-                                 breaks = quantile(risk_scores, c(0, 0.5, 1)),
-                                 labels = c("Low Risk", "High Risk"),
-                                 include.lowest = TRUE)
+                risk_groups <- private$.makeBinaryRiskGroups(risk_scores)
+                if (is.null(risk_groups)) {
+                    stop("Unable to form two risk groups from risk scores.")
+                }
                 
                 # Log-rank test
                 fit <- survival::survdiff(y ~ risk_groups)
@@ -492,15 +646,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Hazard ratio between risk groups
                 cox_fit <- survival::coxph(y ~ risk_groups)
-                metrics$hazard_ratio <- exp(coef(cox_fit))
-                metrics$hr_ci_lower <- exp(confint(cox_fit)[1])
-                metrics$hr_ci_upper <- exp(confint(cox_fit)[2])
+                hr <- exp(as.numeric(coef(cox_fit)[1]))
+                ci <- exp(stats::confint(cox_fit))
+                metrics$hazard_ratio <- hr
+                metrics$hr_ci_lower <- as.numeric(ci[1, 1])
+                metrics$hr_ci_upper <- as.numeric(ci[1, 2])
                 
             }, error = function(e) {
-                metrics$logrank_p <- NA
-                metrics$hazard_ratio <- NA
-                metrics$hr_ci_lower <- NA
-                metrics$hr_ci_upper <- NA
+                metrics$logrank_p <<- NA
+                metrics$hazard_ratio <<- NA
+                metrics$hr_ci_lower <<- NA
+                metrics$hr_ci_upper <<- NA
             })
             
             return(metrics)
@@ -548,6 +704,18 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 statistic = "Censoring Rate",
                 value = paste0(round(100 * results$data$n_censored / results$data$n, 1), "%")
             ))
+
+            table$addRow(rowKey = 8, values = list(
+                statistic = "Event Level Used",
+                value = results$data$event_level_used
+            ))
+
+            if (!is.null(results$data$excluded_rows) && results$data$excluded_rows > 0) {
+                table$addRow(rowKey = 9, values = list(
+                    statistic = "Rows Excluded (Missing Data)",
+                    value = results$data$excluded_rows
+                ))
+            }
         },
 
         .populateCoefficients = function(results) {
@@ -559,9 +727,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(results$selected_vars) == 0) {
                 table$addRow(rowKey = 1, values = list(
                     variable = "No variables selected",
-                    coefficient = "",
-                    hazardRatio = "",
-                    importance = ""
+                    coefficient = NA,
+                    hazardRatio = NA,
+                    importance = NA
                 ))
                 return()
             }
@@ -580,6 +748,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     hazardRatio = round(hr_val, 4),
                     importance = round(importance, 4)
                 ))
+            }
+
+            # Note about coefficient scale when standardization was used
+            if (!is.null(results$data$scaling_info)) {
+                table$setNote("scale",
+                    "Coefficients are on the standardized scale (per 1-SD change in the predictor).")
             }
         },
 
@@ -603,20 +777,23 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     value = cindex_text,
                     interpretation = private$.interpretCindex(metrics$cindex)
                 ))
+                table$setNote("cindex",
+                    "C-index is the apparent (training) value and may be optimistic. External validation is recommended.")
             }
-            
+
             # Log-rank test p-value
-            if (!is.na(metrics$logrank_p)) {
+            if (!is.null(metrics$logrank_p) && !is.na(metrics$logrank_p)) {
                 table$addRow(rowKey = 2, values = list(
                     metric = "Log-rank p-value",
                     value = if (metrics$logrank_p < 0.001) "< 0.001" else round(metrics$logrank_p, 3),
                     interpretation = if (metrics$logrank_p < 0.05) "Significant risk stratification" else "Non-significant stratification"
                 ))
             }
-            
+
             # Hazard ratio between risk groups
-            if (!is.na(metrics$hazard_ratio)) {
-                hr_text <- if (!is.na(metrics$hr_ci_lower) && !is.na(metrics$hr_ci_upper)) {
+            if (!is.null(metrics$hazard_ratio) && !is.na(metrics$hazard_ratio)) {
+                hr_text <- if (!is.null(metrics$hr_ci_lower) && !is.na(metrics$hr_ci_lower) &&
+                               !is.null(metrics$hr_ci_upper) && !is.na(metrics$hr_ci_upper)) {
                     paste0(round(metrics$hazard_ratio, 2), " (95% CI: ", 
                           round(metrics$hr_ci_lower, 2), "-", round(metrics$hr_ci_upper, 2), ")")
                 } else {
@@ -650,30 +827,26 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Enhanced plotting functions
         .cvPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$cv_plot) return()
-            
-            results <- image$state
-            if (is.null(results)) return()
-            
-            # Create ggplot version of CV plot
+
+            state <- image$state
+            if (is.null(state)) return()
+
+            # Build data frame from plain numeric state
             cv_data <- data.frame(
-                lambda = results$cv_fit$lambda,
-                cvm = results$cv_fit$cvm,
-                cvsd = results$cv_fit$cvsd,
-                cvup = results$cv_fit$cvup,
-                cvlo = results$cv_fit$cvlo
+                lambda = state$lambda,
+                cvm    = state$cvm,
+                cvsd   = state$cvsd,
+                cvup   = state$cvup,
+                cvlo   = state$cvlo
             )
-            
-            # Add optimal lambda points
-            lambda_min_idx <- which.min(abs(cv_data$lambda - results$cv_fit$lambda.min))
-            lambda_1se_idx <- which.min(abs(cv_data$lambda - results$cv_fit$lambda.1se))
-            
+
             p <- ggplot2::ggplot(cv_data, ggplot2::aes(x = log(lambda), y = cvm)) +
                 ggplot2::geom_point(color = "red", size = 0.8) +
-                ggplot2::geom_errorbar(ggplot2::aes(ymin = cvlo, ymax = cvup), 
+                ggplot2::geom_errorbar(ggplot2::aes(ymin = cvlo, ymax = cvup),
                                       color = "darkgrey", width = 0.02) +
-                ggplot2::geom_vline(xintercept = log(results$cv_fit$lambda.min), 
+                ggplot2::geom_vline(xintercept = log(state$lambda_min),
                                    linetype = "dashed", color = "blue") +
-                ggplot2::geom_vline(xintercept = log(results$cv_fit$lambda.1se), 
+                ggplot2::geom_vline(xintercept = log(state$lambda_1se),
                                    linetype = "dashed", color = "green") +
                 ggplot2::labs(
                     title = "Cross-Validation Plot",
@@ -682,25 +855,24 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     y = "Partial Likelihood Deviance"
                 ) +
                 ggtheme
-            
+
             print(p)
             TRUE
         },
 
         .coefPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$coef_plot) return()
-            
-            results <- image$state
-            if (is.null(results) || length(results$selected_vars) == 0) return()
-            
-            # Create coefficient plot
+
+            state <- image$state
+            if (is.null(state) || length(state$var_names) == 0) return()
+
+            # Build data frame from plain state
             coef_data <- data.frame(
-                variable = factor(names(results$var_importance), 
-                                levels = names(results$var_importance)),
-                coefficient = as.numeric(results$coef_matrix[results$selected_vars, 1]),
-                importance = results$var_importance
+                variable   = factor(state$var_names, levels = state$var_names),
+                coefficient = state$coef_values,
+                importance  = state$var_importance
             )
-            
+
             p <- ggplot2::ggplot(coef_data, ggplot2::aes(x = variable, y = coefficient)) +
                 ggplot2::geom_col(ggplot2::aes(fill = coefficient > 0), alpha = 0.7) +
                 ggplot2::scale_fill_manual(values = c("TRUE" = "red", "FALSE" = "blue"),
@@ -709,23 +881,24 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ggplot2::coord_flip() +
                 ggplot2::labs(
                     title = "Selected Variables and Coefficients",
+                    subtitle = if (!is.null(self$options$standardize) && self$options$standardize) "Coefficients reflect standardized effect sizes." else NULL,
                     x = "Variables",
                     y = "Coefficient"
                 ) +
                 ggtheme
-            
+
             print(p)
             TRUE
         },
 
         .survivalPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$survival_plot) return()
-            
-            results <- image$state
-            if (is.null(results)) return()
-            
+
+            state <- image$state
+            if (is.null(state)) return()
+
             # Check if risk scores are available and valid
-            if (is.null(results$risk_scores) || length(results$risk_scores) == 0) {
+            if (is.null(state$risk_scores) || length(state$risk_scores) == 0) {
                 text_warning <- "No risk scores available.\nLASSO selected no variables.\n\nConsider using:\n• lambda.min instead of lambda.1se\n• Less regularization (lower lambda)\n• More explanatory variables"
                 
                 # Create a new page with proper formatting
@@ -757,7 +930,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Check if all risk scores are the same (no discrimination)
-            if (length(unique(results$risk_scores)) <= 1) {
+            if (length(unique(state$risk_scores)) <= 1) {
                 text_warning <- "Risk scores are uniform.\nNo discrimination possible.\n\nThis can happen when:\n• All selected variables have very small coefficients\n• The model overfits to noise\n• Lambda value is inappropriate"
                 
                 grid::grid.newpage()
@@ -775,12 +948,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create risk groups based on median risk score
             tryCatch({
-                risk_groups <- cut(results$risk_scores,
-                                 breaks = c(-Inf, median(results$risk_scores), Inf),
-                                 labels = c("Low Risk", "High Risk"))
-                
+                risk_groups <- private$.makeBinaryRiskGroups(state$risk_scores)
+                if (is.null(risk_groups)) {
+                    stop("Unable to create two risk groups from risk scores.")
+                }
+
                 # Check if we have valid data
-                if (is.null(results$data$time) || is.null(results$data$status)) {
+                if (is.null(state$time) || is.null(state$status)) {
                     text_warning <- "Survival data not available.\n\nPlease check that:\n• Time and outcome variables are properly selected\n• Data contains valid survival information"
                     
                     grid::grid.newpage()
@@ -798,8 +972,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Create complete data frame for survminer
                 plot_data <- data.frame(
-                    time = results$data$time,
-                    status = results$data$status,
+                    time = state$time,
+                    status = state$status,
                     risk_groups = risk_groups
                 )
                 
@@ -822,11 +996,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return(TRUE)
                 }
                 
-                # Create survival object
-                surv_obj <- survival::Surv(plot_data$time, plot_data$status)
-                
-                # Fit survival curves
-                fit <- survival::survfit(surv_obj ~ risk_groups, data = plot_data)
+                # Fit survival curves using column names in formula
+                fit <- survival::survfit(survival::Surv(time, status) ~ risk_groups, data = plot_data)
                 
                 # Create enhanced survival plot
                 if (requireNamespace("survminer", quietly = TRUE)) {
@@ -834,6 +1005,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         fit,
                         data = plot_data,
                         risk.table = TRUE,
+                        risk.table.y.text = TRUE,
                         pval = TRUE,
                         conf.int = TRUE,
                         ggtheme = ggtheme,
@@ -841,7 +1013,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         xlab = "Time",
                         ylab = "Survival Probability",
                         legend.title = "Risk Group",
-                        palette = c("blue", "red")
+                        legend.labs = c("Low Risk", "High Risk"),
+                        palette = c("#2166AC", "#B2182B")
                     )
                     print(p)
                 } else {
@@ -873,25 +1046,47 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .savePlotData = function(results) {
-            # Save data for plot rendering
+            # Save PLAIN data for plot rendering (no glmnet/cv.glmnet objects)
+            # to avoid protobuf serialization errors with function references
             if (self$options$cv_plot) {
-                self$results$cv_plot$setState(results)
+                cv_plot_data <- list(
+                    lambda = as.numeric(results$cv_fit$lambda),
+                    cvm = as.numeric(results$cv_fit$cvm),
+                    cvsd = as.numeric(results$cv_fit$cvsd),
+                    cvup = as.numeric(results$cv_fit$cvup),
+                    cvlo = as.numeric(results$cv_fit$cvlo),
+                    lambda_min = as.numeric(results$cv_fit$lambda.min),
+                    lambda_1se = as.numeric(results$cv_fit$lambda.1se)
+                )
+                self$results$cv_plot$setState(cv_plot_data)
                 # Add CV plot explanation
                 if (self$options$showExplanations) {
                     private$.populateCrossValidationExplanation()
                 }
             }
-            
+
             if (self$options$coef_plot && length(results$selected_vars) > 0) {
-                self$results$coef_plot$setState(results)
+                coef_plot_data <- list(
+                    var_names = names(results$var_importance),
+                    var_importance = as.numeric(results$var_importance),
+                    coef_values = as.numeric(results$coef_matrix[results$selected_vars, 1])
+                )
+                self$results$coef_plot$setState(coef_plot_data)
                 # Add regularization path explanation
                 if (self$options$showExplanations) {
                     private$.populateRegularizationPathExplanation()
                 }
+            } else if (self$options$coef_plot) {
+                self$results$coef_plot$setState(NULL)
             }
-            
+
             if (self$options$survival_plot) {
-                self$results$survival_plot$setState(results)
+                survival_plot_data <- as.data.frame(list(
+                    time = as.numeric(results$data$time),
+                    status = as.integer(results$data$status),
+                    risk_scores = as.numeric(results$risk_scores)
+                ))
+                self$results$survival_plot$setState(survival_plot_data)
                 # Add risk score explanation
                 if (self$options$showExplanations) {
                     private$.populateRiskScoreExplanation()
@@ -1065,9 +1260,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <h5> Implementation Notes</h5>
                 <ul>
                     <li>Uses coordinate descent algorithm for optimization</li>
-                    <li>Handles ties in survival times using Efron approximation</li>
-                    <li>Standardization applied to predictors but not survival times</li>
-                    <li>Results are unstandardized for interpretability</li>
+                    <li>Handles ties in survival times using Breslow approximation (glmnet default)</li>
+                    <li>Standardization (if enabled) is applied to predictors but not survival times</li>
+                    <li>When standardization is enabled, coefficients are on the standardized scale</li>
                 </ul>
             </div>
             "
@@ -1266,46 +1461,409 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
             
-            # Calculate importance metrics
+            # Pre-compute selection frequencies from the regularization path
+            all_coefs <- tryCatch(
+                as.matrix(coef(results$cv_fit$glmnet.fit)),
+                error = function(e) NULL
+            )
+            n_lambdas <- if (!is.null(all_coefs)) ncol(all_coefs) else 0
+
+            # Compute importance-based ranks
+            abs_coefs <- abs(results$coef_matrix[results$selected_vars, 1])
+            importance_order <- order(abs_coefs, decreasing = TRUE)
+            importance_ranks <- integer(length(results$selected_vars))
+            importance_ranks[importance_order] <- seq_along(importance_order)
+
             for (i in seq_along(results$selected_vars)) {
                 var_idx <- results$selected_vars[i]
                 var_name <- results$data$variable_names[var_idx]
                 coef_val <- abs(results$coef_matrix[var_idx, 1])
-                
-                # Simple importance based on absolute coefficient
+
                 importance <- coef_val
-                # Placeholder for selection frequency (would need bootstrap analysis)
-                freq <- 1.0
-                
+
+                # Selection frequency: fraction of lambda path where variable is non-zero
+                freq <- if (!is.null(all_coefs) && n_lambdas > 0) {
+                    sum(all_coefs[var_idx, ] != 0) / n_lambdas
+                } else {
+                    NA
+                }
+
                 table$addRow(rowKey = i, values = list(
                     variable = var_name,
                     importance_score = importance,
                     selection_frequency = freq,
-                    stability_rank = i
+                    stability_rank = importance_ranks[i]
                 ))
             }
+        },
+
+        # ── Data Suitability Assessment ─────────────────────────────
+        .assessSuitability = function(data) {
+            checks <- list()
+            n <- data$n
+            n_events <- data$n_events
+            p <- ncol(data$X)
+            event_rate <- n_events / n
+
+            # -- Check 1: Events-Per-Variable (EPV) --
+            epv <- n_events / p
+            if (epv >= 20) {
+                checks$epv <- list(
+                    color = "green", label = "Events-Per-Variable",
+                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "Excellent EPV ratio. Reliable coefficient estimates expected."
+                )
+            } else if (epv >= 2) {
+                checks$epv <- list(
+                    color = "yellow", label = "Events-Per-Variable",
+                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "Adequate for LASSO (which handles low EPV better than standard Cox), but interpret with caution."
+                )
+            } else {
+                checks$epv <- list(
+                    color = "red", label = "Events-Per-Variable",
+                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "Very low EPV. Results may be unreliable even with LASSO regularization. Consider reducing variables or collecting more data."
+                )
+            }
+
+            # -- Check 2: Regularization Need --
+            if (p >= n / 3) {
+                checks$regularization <- list(
+                    color = "green", label = "Regularization Need",
+                    value = sprintf("p=%d, n=%d (ratio=%.2f)", p, n, p / n),
+                    detail = "High-dimensional setting. LASSO regularization is strongly indicated."
+                )
+            } else if (p <= 5 && epv >= 30) {
+                checks$regularization <- list(
+                    color = "green", label = "Regularization Need",
+                    value = sprintf("p=%d, EPV=%.0f", p, epv),
+                    detail = "Low-dimensional with ample events. LASSO is valid but standard Cox regression may suffice."
+                )
+            } else if (p <= 10 && epv >= 20) {
+                checks$regularization <- list(
+                    color = "yellow", label = "Regularization Need",
+                    value = sprintf("p=%d, EPV=%.0f", p, epv),
+                    detail = "Moderate dimensionality. Consider standard Cox regression (Multivariable Survival in ClinicoPath) as an alternative."
+                )
+            } else {
+                checks$regularization <- list(
+                    color = "green", label = "Regularization Need",
+                    value = sprintf("p=%d, n=%d", p, n),
+                    detail = "LASSO regularization is appropriate for this data dimension."
+                )
+            }
+
+            # -- Check 3: Sample Size --
+            if (n >= 100) {
+                checks$sample_size <- list(
+                    color = "green", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Adequate sample size for penalized regression."
+                )
+            } else if (n >= 20) {
+                checks$sample_size <- list(
+                    color = "yellow", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Small sample. Cross-validation folds may be unstable. Consider reducing the number of CV folds."
+                )
+            } else {
+                checks$sample_size <- list(
+                    color = "red", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Very small sample. Penalized regression results will be highly variable. Consider simpler analyses."
+                )
+            }
+
+            # -- Check 4: Event Rate --
+            if (event_rate >= 0.20 && event_rate <= 0.80) {
+                checks$event_rate <- list(
+                    color = "green", label = "Event Rate",
+                    value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
+                    detail = "Balanced event rate. Good for model estimation."
+                )
+            } else if ((event_rate >= 0.10 && event_rate < 0.20) ||
+                       (event_rate > 0.80 && event_rate <= 0.90)) {
+                checks$event_rate <- list(
+                    color = "yellow", label = "Event Rate",
+                    value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
+                    detail = "Imbalanced event rate. Model calibration may be affected."
+                )
+            } else {
+                checks$event_rate <- list(
+                    color = "red", label = "Event Rate",
+                    value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
+                    detail = "Extreme event rate. Consider whether survival analysis is appropriate or collect longer follow-up."
+                )
+            }
+
+            # -- Check 5: Multicollinearity --
+            tryCatch({
+                # Identify which design-matrix columns came from the same original variable.
+                # Sort by decreasing name length so that longer variable names (e.g. "age_group")
+                # are matched before shorter prefixes (e.g. "age"), preventing mis-assignment.
+                orig_vars <- data$original_variable_names
+                col_names <- colnames(data$X)
+                col_origin <- rep(NA_character_, length(col_names))
+                sorted_vars <- orig_vars[order(nchar(orig_vars), decreasing = TRUE)]
+                for (v in sorted_vars) {
+                    v_safe <- make.names(v)
+                    unassigned <- is.na(col_origin)
+                    col_origin[unassigned & (startsWith(col_names, v) | startsWith(col_names, v_safe))] <- v
+                }
+                # Fallback for unmatched columns
+                col_origin[is.na(col_origin)] <- col_names[is.na(col_origin)]
+
+                if (ncol(data$X) >= 2) {
+                    cor_matrix <- cor(data$X, use = "pairwise.complete.obs")
+                    diag(cor_matrix) <- 0
+                    # Zero out within-factor dummy correlations
+                    for (i in seq_len(ncol(cor_matrix))) {
+                        for (j in seq_len(ncol(cor_matrix))) {
+                            if (!is.na(col_origin[i]) && !is.na(col_origin[j]) &&
+                                col_origin[i] == col_origin[j]) {
+                                cor_matrix[i, j] <- 0
+                            }
+                        }
+                    }
+                    max_cor <- max(abs(cor_matrix), na.rm = TRUE)
+
+                    # Find top correlated pairs
+                    top_pairs <- character(0)
+                    if (max_cor > 0.5) {
+                        cor_vals <- sort(abs(cor_matrix[upper.tri(cor_matrix)]), decreasing = TRUE)
+                        idx <- which(abs(cor_matrix) >= cor_vals[min(3, length(cor_vals))] & upper.tri(cor_matrix), arr.ind = TRUE)
+                        for (k in seq_len(min(3, nrow(idx)))) {
+                            top_pairs <- c(top_pairs,
+                                sprintf("%s & %s (r=%.2f)", col_names[idx[k, 1]], col_names[idx[k, 2]],
+                                        cor_matrix[idx[k, 1], idx[k, 2]]))
+                        }
+                    }
+                    pair_text <- if (length(top_pairs) > 0) paste0(" Top pairs: ", paste(top_pairs, collapse = "; "), ".") else ""
+
+                    if (max_cor < 0.7) {
+                        checks$collinearity <- list(
+                            color = "green", label = "Multicollinearity",
+                            value = sprintf("Max |r| = %.2f", max_cor),
+                            detail = paste0("No concerning collinearity detected.", pair_text)
+                        )
+                    } else if (max_cor < 0.9) {
+                        checks$collinearity <- list(
+                            color = "yellow", label = "Multicollinearity",
+                            value = sprintf("Max |r| = %.2f", max_cor),
+                            detail = paste0("Moderate collinearity. LASSO handles this by selecting one from correlated groups. Consider Elastic Net (Penalized Cox in ClinicoPath) if you want to retain correlated predictors.", pair_text)
+                        )
+                    } else if (max_cor < 0.99) {
+                        checks$collinearity <- list(
+                            color = "yellow", label = "Multicollinearity",
+                            value = sprintf("Max |r| = %.2f", max_cor),
+                            detail = paste0("High collinearity. Strongly recommend Elastic Net or Ridge regression.", pair_text)
+                        )
+                    } else {
+                        checks$collinearity <- list(
+                            color = "red", label = "Multicollinearity",
+                            value = sprintf("Max |r| = %.2f", max_cor),
+                            detail = paste0("Near-perfect collinearity detected. Remove redundant variables before analysis.", pair_text)
+                        )
+                    }
+                } else {
+                    checks$collinearity <- list(
+                        color = "green", label = "Multicollinearity",
+                        value = "N/A (single column)",
+                        detail = "Only one predictor column; collinearity not applicable."
+                    )
+                }
+            }, error = function(e) {
+                checks$collinearity <<- list(
+                    color = "green", label = "Multicollinearity",
+                    value = "Could not compute",
+                    detail = "Correlation matrix could not be computed (e.g., all categorical predictors). Proceeding without this check."
+                )
+            })
+
+            # -- Check 6: Data Quality --
+            original_data <- self$data
+            expl_vars <- self$options$explanatory
+            n_total <- nrow(original_data)
+            n_missing <- n_total - n
+            pct_missing <- 100 * n_missing / n_total
+
+            # Check for constant predictors (already caught in cleanData, but summarize)
+            constant_cols <- apply(data$X, 2, function(col) var(col, na.rm = TRUE) == 0)
+            n_constant <- sum(constant_cols)
+
+            if (n_missing == 0 && n_constant == 0) {
+                checks$data_quality <- list(
+                    color = "green", label = "Data Quality",
+                    value = "No issues",
+                    detail = "Complete data with no constant predictors."
+                )
+            } else if (pct_missing <= 5 && n_constant == 0) {
+                checks$data_quality <- list(
+                    color = "yellow", label = "Data Quality",
+                    value = sprintf("%.1f%% missing (%d rows excluded)", pct_missing, n_missing),
+                    detail = "Minor missingness. Complete-case analysis used. Results should be reliable if data is missing at random."
+                )
+            } else {
+                issues <- character(0)
+                if (pct_missing > 5) issues <- c(issues, sprintf("%.1f%% missing data (%d rows excluded). Consider multiple imputation.", pct_missing, n_missing))
+                if (n_constant > 0) issues <- c(issues, sprintf("%d constant predictor column(s) detected.", n_constant))
+                checks$data_quality <- list(
+                    color = if (pct_missing > 20) "red" else "yellow",
+                    label = "Data Quality",
+                    value = sprintf("%.1f%% missing, %d constant", pct_missing, n_constant),
+                    detail = paste(issues, collapse = " ")
+                )
+            }
+
+            # -- Overall Verdict --
+            colors <- sapply(checks, function(x) x$color)
+            if (any(colors == "red")) {
+                overall <- "red"
+                overall_text <- "Some issues require attention before relying on these results."
+            } else if (any(colors == "yellow")) {
+                # Special case: if only yellow is regularization-not-needed and rest green
+                yellow_checks <- names(checks)[colors == "yellow"]
+                if (length(yellow_checks) == 1 && yellow_checks == "regularization") {
+                    overall <- "green"
+                    overall_text <- "Data is suitable for LASSO Cox regression (though standard Cox may also be appropriate)."
+                } else {
+                    overall <- "yellow"
+                    overall_text <- "Data is usable but review the flagged items."
+                }
+            } else {
+                overall <- "green"
+                overall_text <- "Data is well-suited for LASSO Cox regression."
+            }
+
+            private$.generateSuitabilityHtml(checks, overall, overall_text)
+        },
+
+        .generateSuitabilityHtml = function(checks, overall, overall_text) {
+            # Color mapping
+            bg_colors <- list(
+                green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
+                yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
+                red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+            )
+            dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
+
+            # Overall banner
+            html <- paste0(
+                "<div style='", bg_colors[[overall]], " padding: 12px; border-radius: 6px; margin-bottom: 12px;'>",
+                "<strong>Overall: ", overall_text, "</strong></div>"
+            )
+
+            # Check table
+            html <- paste0(html,
+                "<table style='width: 100%; border-collapse: collapse; font-size: 13px;'>",
+                "<thead><tr style='border-bottom: 2px solid #dee2e6;'>",
+                "<th style='padding: 6px; text-align: left;'>Status</th>",
+                "<th style='padding: 6px; text-align: left;'>Check</th>",
+                "<th style='padding: 6px; text-align: left;'>Value</th>",
+                "<th style='padding: 6px; text-align: left;'>Detail</th>",
+                "</tr></thead><tbody>"
+            )
+
+            for (chk in checks) {
+                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>&#9679;</span>")
+                html <- paste0(html,
+                    "<tr style='border-bottom: 1px solid #dee2e6;'>",
+                    "<td style='padding: 6px;'>", dot, "</td>",
+                    "<td style='padding: 6px;'><strong>", chk$label, "</strong></td>",
+                    "<td style='padding: 6px;'>", chk$value, "</td>",
+                    "<td style='padding: 6px;'>", chk$detail, "</td>",
+                    "</tr>"
+                )
+            }
+
+            html <- paste0(html, "</tbody></table>")
+
+            # Recommendations (if any yellow/red)
+            colors <- sapply(checks, function(x) x$color)
+            if (any(colors %in% c("yellow", "red"))) {
+                html <- paste0(html,
+                    "<div style='margin-top: 12px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;'>",
+                    "<strong>Recommendations:</strong><ul style='margin: 6px 0;'>"
+                )
+                if (!is.null(checks$epv) && checks$epv$color == "red") {
+                    html <- paste0(html, "<li>Consider Kaplan-Meier curves with log-rank test for very low EPV scenarios.</li>")
+                }
+                if (!is.null(checks$regularization) && checks$regularization$color == "yellow") {
+                    html <- paste0(html, "<li>Use <strong>Multivariable Survival</strong> in ClinicoPath for standard Cox regression with fewer predictors.</li>")
+                }
+                if (!is.null(checks$collinearity) && checks$collinearity$color %in% c("yellow", "red")) {
+                    html <- paste0(html, "<li>Use <strong>Penalized Cox Regression</strong> in ClinicoPath with Elastic Net (alpha=0.5) to retain correlated predictors.</li>")
+                }
+                if (!is.null(checks$sample_size) && checks$sample_size$color == "red") {
+                    html <- paste0(html, "<li>With very small samples, consider univariable analyses or use <strong>Survival Analysis</strong> in ClinicoPath.</li>")
+                }
+                if (!is.null(checks$data_quality) && checks$data_quality$color %in% c("yellow", "red")) {
+                    html <- paste0(html, "<li>Consider multiple imputation before LASSO analysis for substantial missing data.</li>")
+                }
+                html <- paste0(html, "</ul></div>")
+            }
+
+            # Interpretation guidance (always shown)
+            html <- paste0(html,
+                "<div style='margin-top: 10px; font-size: 12px; color: #6c757d;'>",
+                "<em>This assessment is advisory. The analysis proceeds regardless of the verdict. ",
+                "Green = no concerns, Yellow = proceed with caution, Red = results may be unreliable.</em></div>"
+            )
+
+            self$results$suitabilityReport$setContent(html)
         },
 
         .populateModelComparison = function(results) {
             table <- self$results$modelComparison
             table$deleteRows()
-            
-            # LASSO model performance
+
+            # LASSO model metrics
+            lasso_aic <- NA
+            lasso_loglik <- NA
+            tryCatch({
+                # Refit Cox model with only selected variables for AIC/loglik
+                if (length(results$selected_vars) > 0) {
+                    selected_X <- as.data.frame(results$data$X[, results$selected_vars, drop = FALSE])
+                    y <- survival::Surv(results$data$time, results$data$status)
+                    lasso_cox <- survival::coxph(y ~ ., data = selected_X)
+                    lasso_aic <- AIC(lasso_cox)
+                    lasso_loglik <- as.numeric(logLik(lasso_cox))
+                }
+            }, error = function(e) {
+                # silently use NA
+            })
+
             table$addRow(rowKey = 1, values = list(
-                model_type = "LASSO Cox",
+                model_type = "Post-LASSO Standard Cox (Selected Variables)",
                 n_variables = length(results$selected_vars),
                 cindex = results$performance_metrics$cindex,
-                aic = NA,  # Would need to calculate
-                log_likelihood = NA  # Would need to calculate
+                aic = lasso_aic,
+                log_likelihood = lasso_loglik
             ))
-            
-            # Standard Cox comparison (placeholder)
+
+            # Standard Cox with all variables
+            std_cindex <- NA
+            std_aic <- NA
+            std_loglik <- NA
+            tryCatch({
+                y <- survival::Surv(results$data$time, results$data$status)
+                selected_data <- as.data.frame(results$data$X)
+                std_cox <- survival::coxph(y ~ ., data = selected_data)
+                std_cindex_result <- survival::concordance(std_cox, reverse = TRUE)
+                std_cindex <- std_cindex_result$concordance
+                std_aic <- AIC(std_cox)
+                std_loglik <- as.numeric(logLik(std_cox))
+            }, error = function(e) {
+                # Standard Cox may fail with too many variables (p > n)
+            })
+
             table$addRow(rowKey = 2, values = list(
                 model_type = "Standard Cox (all variables)",
                 n_variables = ncol(results$data$X),
-                cindex = NA,  # Would need to fit standard Cox
-                aic = NA,
-                log_likelihood = NA
+                cindex = std_cindex,
+                aic = std_aic,
+                log_likelihood = std_loglik
             ))
         }
     )

@@ -877,10 +877,10 @@ refs:
 
     glmnet:
         type: 'software'
-        author: ""
-        year: ""
-        title: "glmnet: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=glmnet'
+        author: Jerome Friedman, Trevor Hastie, Rob Tibshirani, Balasubramanian Narasimhan, Kenneth Tay, Noah Simon
+        year: 2025
+        title: "glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models"
+        publisher: '[R package version 4.1-8]. Retrieved from https://CRAN.R-project.org/package=glmnet'
         url: https://CRAN.R-project.org/package=glmnet
 
     pwr:
@@ -2006,11 +2006,11 @@ refs:
 
     survcomp:
         type: 'software'
-        author: ""
-        year: ""
-        title: "survcomp: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survcomp'
-        url: https://CRAN.R-project.org/package=survcomp
+        author: Benjamin Haibe-Kains, Markus Schroeder, Catharina Olsen, Christos Sotiriou, Gianluca Bontempi, John Quackenbush
+        year: 2024
+        title: "survcomp: Performance Assessment and Comparison for Survival Analysis"
+        publisher: '[R/Bioconductor package]. Retrieved from https://bioconductor.org/packages/release/bioc/html/survcomp.html'
+        url: https://bioconductor.org/packages/release/bioc/html/survcomp.html
 
     reReg:
         type: 'software'

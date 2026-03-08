@@ -13,6 +13,11 @@ items:
       type: Html
       visible: false
 
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+
     - name: coefficients
       title: Selected Variables and Coefficients
       type: Table
@@ -60,6 +65,9 @@ items:
       clearWith:
         - predictors
         - lambda_sequence
+        - lambda_custom_max
+        - lambda_custom_min
+        - lambda_single
         - n_lambda
       columns:
         - name: step
@@ -73,11 +81,11 @@ items:
           title: Variables Selected
           type: integer
         - name: deviance
-          title: Deviance
+          title: CV Metric
           type: number
           format: zto
         - name: cv_error
-          title: CV Error
+          title: CV SE
           type: number
           format: zto
 
@@ -89,6 +97,9 @@ items:
         - cv_folds
         - cv_measure
         - lambda_sequence
+        - lambda_custom_max
+        - lambda_custom_min
+        - lambda_single
       columns:
         - name: criterion
           title: Criterion
@@ -195,7 +206,7 @@ items:
     - name: riskGroups
       title: Risk Group Analysis
       type: Table
-      visible: (risk_groups > 2)
+      visible: true
       clearWith:
         - risk_groups
         - time
@@ -225,7 +236,7 @@ items:
     - name: predictions
       title: Survival Predictions
       type: Table
-      visible: (time_points != "")
+      visible: (baseline_survival && time_points != "")
       clearWith:
         - time_points
         - baseline_survival
@@ -248,15 +259,19 @@ items:
           format: zto
 
     - name: pathPlot
-      title: Regularization Path
+      title: Coefficient Paths
       type: Image
       width: 600
       height: 500
       visible: (plot_selection_path)
+      renderFun: .renderPathPlot
       requiresData: true
       clearWith:
         - predictors
         - lambda_sequence
+        - lambda_custom_max
+        - lambda_custom_min
+        - lambda_single
 
     - name: cvPlot
       title: Cross-Validation Curve
@@ -264,10 +279,15 @@ items:
       width: 500
       height: 400
       visible: (plot_cv_curve)
+      renderFun: .renderCVPlot
       requiresData: true
       clearWith:
         - cv_folds
         - cv_measure
+        - lambda_sequence
+        - lambda_custom_max
+        - lambda_custom_min
+        - lambda_single
 
     - name: stabilityPlot
       title: Stability Selection
@@ -275,6 +295,7 @@ items:
       width: 500
       height: 400
       visible: (plot_stability)
+      renderFun: .renderStabilityPlot
       requiresData: true
       clearWith:
         - stability_selection
@@ -286,6 +307,7 @@ items:
       width: 500
       height: 400
       visible: (plot_survival_curves)
+      renderFun: .renderSurvivalPlot
       requiresData: true
       clearWith:
         - risk_groups
@@ -298,6 +320,7 @@ items:
       width: 500
       height: 400
       visible: (plot_baseline_hazard)
+      renderFun: .renderBaselineHazardPlot
       requiresData: true
       clearWith:
         - baseline_survival
@@ -310,6 +333,7 @@ items:
       width: 600
       height: 500
       visible: (plot_diagnostics)
+      renderFun: .renderDiagnosticsPlot
       requiresData: true
       clearWith:
         - proportional_hazards

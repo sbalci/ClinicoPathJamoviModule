@@ -1,9 +1,10 @@
 ---
 name:  highdimcox
 title: High-Dimensional Cox Regression
-menuGroup: SurvivalD
-menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Advanced regularization for high-dimensional survival data'
+menuGroup: SurvivalT
+menuSubgroup: Penalized Cox Regression
+menuTitle: Elastic Net Cox
+menuSubtitle: Handles moderate/heavy collinearity among multiple predictors.
 version: '0.0.1'
 jas: '1.2'
 
@@ -42,7 +43,7 @@ description:
                 regularization_method = "elastic_net",
                 alpha_value = 0.5,
                 stability_selection = TRUE,
-                bootstrap_iterations = 500
+                subsampling_iterations = 500
             )
 
 options:
@@ -128,8 +129,6 @@ options:
     title: Cross-Validation Method
     type: List
     options:
-        - name: cv_glmnet
-          title: "Standard K-Fold CV"
         - name: cv_1se
           title: "1-SE Rule CV"
         - name: cv_min
@@ -149,23 +148,6 @@ options:
         R: >
           Number of cross-validation folds
 
-  - name: variable_selection
-    title: Variable Selection Method
-    type: List
-    options:
-        - name: none
-          title: "No Additional Selection"
-        - name: stepwise
-          title: "Stepwise Selection"
-        - name: best_subset
-          title: "Best Subset Selection"
-        - name: forward_selection
-          title: "Forward Selection"
-    default: none
-    description:
-        R: >
-          Additional variable selection method after regularization
-
   - name: stability_selection
     title: Stability Selection
     type: Bool
@@ -174,15 +156,15 @@ options:
         R: >
           Perform stability selection for variable importance
 
-  - name: bootstrap_iterations
-    title: Bootstrap Iterations
+  - name: subsampling_iterations
+    title: Subsampling Iterations
     type: Integer
     min: 100
     max: 1000
     default: 500
     description:
         R: >
-          Number of bootstrap iterations for stability selection
+          Number of subsampling iterations for stability selection
 
   - name: stability_threshold
     title: Stability Threshold
@@ -249,3 +231,13 @@ options:
     description:
         R: >
           Show methodology explanations
+
+  - name: suitabilityCheck
+    title: Data Suitability Assessment
+    type: Bool
+    default: true
+    description:
+        R: >
+          Run a comprehensive data suitability assessment before analysis.
+          Checks sample size, events-per-variable ratio, multicollinearity, 
+          and whether regularization is needed.

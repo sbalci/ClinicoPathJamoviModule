@@ -14,7 +14,6 @@ highdimcox(
   alpha_value = 0.5,
   cv_method = "cv_1se",
   cv_folds = 10,
-  variable_selection = "none",
   stability_selection = FALSE,
   bootstrap_iterations = 500,
   stability_threshold = 0.8,
@@ -46,9 +45,6 @@ regression}
 \item{cv_method}{Cross-validation method for lambda selection}
 
 \item{cv_folds}{Number of cross-validation folds}
-
-\item{variable_selection}{Additional variable selection method after
-regularization}
 
 \item{stability_selection}{Perform stability selection for variable
 importance}

@@ -1,0 +1,456 @@
+---
+title: "High-Dimensional Cox Regression for Survival Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{High-Dimensional Cox Regression for Survival Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** The `highdimcox()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference. To run interactively,
+> use `devtools::load_all()` and call the R6 class directly:
+> `highdimcoxClass$new(options = highdimcoxOptions$new(...), data = mydata)`.
+
+# High-Dimensional Cox Regression
+
+## Overview
+
+The **High-Dimensional Cox Regression** module (`highdimcox`) provides a unified
+interface for regularized Cox regression when the number of predictors is large
+relative to sample size. It supports **LASSO**, **Ridge**, **Elastic Net**, and
+**Adaptive LASSO** regularization, with optional stability selection for robust
+variable identification.
+
+This module is designed for:
+
+- **Genomic survival studies** (gene expression panels, mutation data)
+- **Proteomic/metabolomic data** (high-dimensional biomarker panels)
+- **Radiomics studies** (texture and morphology features from imaging)
+- **Any p >> n survival scenario**
+
+Key features:
+
+- **Multiple regularization methods** in one interface
+- **Cross-validation** with configurable lambda selection (min, 1se)
+- **Stability selection** via bootstrap for robust variable identification
+- **Variable importance** and coefficient visualization
+- **Model diagnostics** and performance metrics
+
+---
+
+## Regularization Methods Explained
+
+When you have more predictors than observations (or close to it), standard Cox
+regression fails. Regularization adds a penalty to prevent overfitting.
+
+| Method | Penalty | Alpha | Selects Variables? | Best For |
+|--------|---------|-------|-------------------|----------|
+| **LASSO** | $\lambda \sum \|\beta_j\|$ | 1.0 | Yes (sets to zero) | Sparse models |
+| **Ridge** | $\lambda \sum \beta_j^2$ | 0.0 | No (shrinks all) | Prediction, collinearity |
+| **Elastic Net** | Mixed L1+L2 | 0.5 | Yes (grouped) | Correlated groups |
+| **Adaptive LASSO** | Weighted L1 | 1.0 | Yes (oracle) | Publication models |
+
+The **Elastic Net** (default, alpha=0.5) is the recommended starting point —
+it combines the variable selection of LASSO with the stability of Ridge.
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Events | Predictors | Description |
+|---------|---|--------|------------|-------------|
+| Synthetic "genomic" | 150 | ~75 | 100 genes + 5 clinical | Gene expression survival study |
+| Synthetic "proteomic" | 80 | ~50 | 50 proteins + 3 clinical | Smaller proteomic study |
+
+---
+
+## 1. LASSO Regularization
+
+Pure LASSO selects the sparsest model — ideal when you expect few true predictors.
+
+```{r create-genomic-data}
+# Simulate a genomic survival study (150 patients, 100 genes)
+set.seed(42)
+n <- 150
+p_genes <- 100
+
+# Gene expression matrix
+gene_matrix <- matrix(rnorm(n * p_genes), nrow = n)
+colnames(gene_matrix) <- paste0("GENE_", sprintf("%03d", 1:p_genes))
+
+# True effects: 6 genes affect survival
+true_effects <- rep(0, p_genes)
+true_effects[c(5, 12, 27, 43, 68, 91)] <- c(0.8, -0.6, 0.5, -0.4, 0.7, -0.5)
+
+# Clinical variables
+age <- rnorm(n, 62, 10)
+gender <- factor(sample(c("Male", "Female"), n, replace = TRUE))
+stage <- factor(sample(c("I", "II", "III"), n, replace = TRUE,
+                       prob = c(0.3, 0.4, 0.3)))
+
+# Survival times
+lp <- gene_matrix %*% true_effects + 0.02 * (age - 62) + 0.3 * (as.numeric(stage) - 1)
+surv_time <- rweibull(n, shape = 1.3, scale = 30 * exp(-as.numeric(lp) * 0.2))
+censor_time <- runif(n, 6, 48)
+time <- pmax(pmin(surv_time, censor_time), 0.1)
+event <- factor(ifelse(surv_time <= censor_time, "Dead", "Alive"),
+                levels = c("Alive", "Dead"))
+
+data_genomic <- data.frame(
+  survival_months = time,
+  vital_status = event,
+  age = age, gender = gender, stage = stage,
+  as.data.frame(gene_matrix)
+)
+
+cat("N:", n, "Events:", sum(event == "Dead"),
+    "Event rate:", round(mean(event == "Dead"), 2), "\n")
+cat("Predictors:", ncol(data_genomic) - 2, "\n")
+```
+
+```{r lasso-run}
+# All gene + clinical predictors
+pred_vars <- c("age", "gender", "stage",
+               paste0("GENE_", sprintf("%03d", 1:p_genes)))
+
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "lasso",
+  cv_method = "cv_1se",
+  cv_folds = 10,
+  show_regularization_path = TRUE,
+  show_cv_plot = TRUE,
+  show_variable_importance = TRUE,
+  show_coefficients_table = TRUE,
+  show_model_diagnostics = TRUE
+)
+```
+
+---
+
+## 2. Ridge Regularization
+
+Ridge keeps all variables but shrinks coefficients — better for prediction
+when you believe many variables contribute small effects.
+
+```{r ridge}
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "ridge",
+  cv_method = "cv_min",
+  cv_folds = 10,
+  show_cv_plot = TRUE,
+  show_coefficients_table = TRUE,
+  show_model_diagnostics = TRUE
+)
+```
+
+---
+
+## 3. Elastic Net (Default)
+
+The recommended starting point — combines LASSO selection with Ridge stability.
+
+```{r elastic-net}
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "elastic_net",
+  alpha_value = 0.5,
+  cv_method = "cv_1se",
+  cv_folds = 10,
+  show_regularization_path = TRUE,
+  show_cv_plot = TRUE,
+  show_variable_importance = TRUE,
+  show_coefficients_table = TRUE
+)
+```
+
+### Alpha Tuning
+
+```{r alpha-tuning}
+# More LASSO-like (alpha = 0.8)
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "elastic_net",
+  alpha_value = 0.8,
+  cv_folds = 10,
+  show_coefficients_table = TRUE,
+  show_cv_plot = TRUE
+)
+```
+
+---
+
+## 4. Adaptive LASSO
+
+Two-stage approach with oracle properties — best for publishable models.
+
+```{r adaptive}
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "adaptive_lasso",
+  cv_method = "cv_1se",
+  cv_folds = 10,
+  show_regularization_path = TRUE,
+  show_cv_plot = TRUE,
+  show_variable_importance = TRUE,
+  show_coefficients_table = TRUE
+)
+```
+
+---
+
+## 5. Stability Selection
+
+Bootstrap-based stability selection identifies variables that are consistently
+selected across many random subsamples.
+
+```{r stability}
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "elastic_net",
+  alpha_value = 0.5,
+  cv_folds = 10,
+  stability_selection = TRUE,
+  bootstrap_iterations = 100,
+  stability_threshold = 0.8,
+  show_variable_importance = TRUE,
+  show_coefficients_table = TRUE
+)
+```
+
+Variables selected in >80% of bootstrap iterations are considered robustly important.
+
+---
+
+## 6. CV Method Comparison
+
+The choice of CV lambda selection affects model complexity.
+
+```{r cv-min}
+# Minimum CV error — more variables, better fit but risk of overfitting
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "lasso",
+  cv_method = "cv_min",
+  cv_folds = 10,
+  show_coefficients_table = TRUE,
+  show_cv_plot = TRUE
+)
+```
+
+```{r cv-1se}
+# 1-SE rule — more parsimonious, better generalization
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars,
+  regularization_method = "lasso",
+  cv_method = "cv_1se",
+  cv_folds = 10,
+  show_coefficients_table = TRUE,
+  show_cv_plot = TRUE
+)
+```
+
+---
+
+## 7. Smaller Dataset (Proteomic)
+
+```{r proteomic-data}
+# 80 patients, 50 protein markers
+set.seed(123)
+n2 <- 80
+p_prot <- 50
+
+prot_matrix <- matrix(rnorm(n2 * p_prot, mean = 10, sd = 3), nrow = n2)
+colnames(prot_matrix) <- paste0("PROT_", sprintf("%02d", 1:p_prot))
+
+# 4 proteins with true effects
+true_prot <- rep(0, p_prot)
+true_prot[c(3, 17, 28, 42)] <- c(0.15, -0.12, 0.18, -0.10)
+
+lp2 <- prot_matrix %*% true_prot
+surv_time2 <- rweibull(n2, shape = 1.1, scale = 24 * exp(-as.numeric(lp2) * 0.5))
+censor_time2 <- runif(n2, 6, 36)
+time2 <- pmax(pmin(surv_time2, censor_time2), 0.1)
+event2 <- factor(ifelse(surv_time2 <= censor_time2, "Dead", "Alive"),
+                 levels = c("Alive", "Dead"))
+
+data_proteomic <- data.frame(
+  time = time2, status = event2,
+  age = rnorm(n2, 55, 12),
+  gender = factor(sample(c("M", "F"), n2, replace = TRUE)),
+  as.data.frame(prot_matrix)
+)
+
+cat("N:", n2, "Events:", sum(event2 == "Dead"),
+    "Event rate:", round(mean(event2 == "Dead"), 2), "\n")
+```
+
+```{r proteomic-run}
+prot_vars <- c("age", "gender", paste0("PROT_", sprintf("%02d", 1:p_prot)))
+
+highdimcox(
+  data = data_proteomic,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "Dead",
+  predictors = prot_vars,
+  regularization_method = "elastic_net",
+  alpha_value = 0.5,
+  cv_method = "cv_1se",
+  cv_folds = 5,
+  show_regularization_path = TRUE,
+  show_cv_plot = TRUE,
+  show_variable_importance = TRUE,
+  show_coefficients_table = TRUE,
+  showExplanations = TRUE
+)
+```
+
+---
+
+## 8. Explanatory Output
+
+```{r explanatory}
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  predictors = pred_vars[1:20],  # Subset for readability
+  regularization_method = "elastic_net",
+  cv_folds = 10,
+  show_coefficients_table = TRUE,
+  showSummaries = TRUE,
+  showExplanations = TRUE
+)
+```
+
+---
+
+## Interpreting Results
+
+### Coefficient Table
+
+| Column | Meaning |
+|--------|---------|
+| Variable | Predictor name |
+| Coefficient | Regularized log hazard ratio |
+| Hazard Ratio | exp(coefficient) |
+| Importance | Absolute coefficient value |
+
+### Variable Importance Plot
+
+Variables are ranked by the absolute value of their regularized coefficients.
+The plot shows which predictors have the strongest association with survival
+after accounting for regularization.
+
+### Regularization Path
+
+The coefficient path plot shows how each variable's coefficient changes as the
+penalty strength (lambda) increases. Variables that persist at higher lambda values
+are more robust predictors.
+
+---
+
+## Method Selection Guide
+
+| Your Data | Recommended Method | Alpha |
+|-----------|--------------------|-------|
+| p >> n, expect few true predictors | LASSO | 1.0 |
+| p >> n, many small effects | Ridge | 0.0 |
+| p >> n, correlated groups | Elastic Net | 0.3-0.7 |
+| p > n, want publishable model | Adaptive LASSO | 1.0 |
+| Moderate p, clinical study | Elastic Net | 0.5 |
+| Prediction is primary goal | Ridge or Elastic Net | 0.0-0.5 |
+| Interpretation is primary goal | LASSO or Adaptive LASSO | 0.8-1.0 |
+
+---
+
+## Common Pitfalls
+
+1. **Using Ridge when you need variable selection**: Ridge never sets coefficients
+   to exactly zero. For interpretable models, use LASSO or Elastic Net.
+
+2. **Not adjusting CV folds for small samples**: With n < 100, use cv_folds = 5
+   instead of 10 to ensure adequate events per fold.
+
+3. **Ignoring stability selection**: A single regularized model may give unstable
+   variable selections. Use stability selection (bootstrap_iterations >= 200)
+   for robust results.
+
+4. **Comparing models with different alpha values**: Models with different alpha
+   values optimize different objectives. Compare using the same alpha or use
+   nested cross-validation.
+
+5. **Not reporting the regularization method**: Always report which method
+   (LASSO/Ridge/Elastic Net), alpha value, CV method, and number of selected variables.
+
+---
+
+## Related ClinicoPath Functions
+
+| Function | Use When |
+|----------|----------|
+| **LASSO Cox** | Pure LASSO with suitability assessment and clinical guidance |
+| **Adaptive LASSO** | Oracle property weights for improved selection |
+| **SCAD Cox** | Non-convex penalties avoiding LASSO bias |
+| **PLS Cox** | Dimensionality reduction approach for very high p |
+| **Multivariable Survival** | Standard Cox when p is small |
+
+---
+
+## References
+
+- Zou H, Hastie T. Regularization and variable selection via the elastic net. *J R Stat Soc Ser B*. 2005;67(2):301-320.
+- Simon N, et al. Regularization paths for Cox's proportional hazards model via coordinate descent. *J Stat Softw*. 2011;39(5):1-13.
+- Meinshausen N, Buhlmann P. Stability selection. *J R Stat Soc Ser B*. 2010;72(4):417-473.
+- Tibshirani R. Regression shrinkage and selection via the lasso. *J R Stat Soc Ser B*. 1996;58(1):267-288.

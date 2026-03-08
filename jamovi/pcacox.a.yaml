@@ -1,9 +1,10 @@
 ---
 name: pcacox
 title: Principal Component Cox Models
-menuGroup: SurvivalD
-menuSubgroup: High-Dimensional Methods
-menuSubtitle: 'PCA-based Cox Regression for High-Dimensional Data'
+menuGroup: SurvivalT
+menuSubgroup: Dimension Reduction Cox
+menuTitle: PCA Cox
+menuSubtitle: Shrinks extreme collinearity into uncorrelated principal components.
 version: '0.0.3'
 jas: '1.2'
 
@@ -61,6 +62,13 @@ options:
             High-dimensional predictor variables (e.g., gene expression)
           R: >
             Variables for principal component analysis
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+          R: assess if data is suitable for the selected PCA Cox model
 
     - name: clinical_vars
       title: 'Clinical Variables'
@@ -134,6 +142,30 @@ options:
             Number of folds for cross-validation
           R: >
             K-fold CV parameter
+
+    - name: sparse_parameter
+      title: 'Sparsity Parameter'
+      type: Number
+      default: 0.1
+      min: 0.001
+      max: 1.0
+      description:
+          ui: >
+            Parameter controlling sparsity (lower = fewer features)
+          R: >
+            Sparsity alpha/beta parameter
+
+    - name: confidence_level
+      title: 'Confidence Level'
+      type: Number
+      default: 0.95
+      min: 0.50
+      max: 0.99
+      description:
+          ui: >
+            Confidence level for intervals
+          R: >
+            Confidence interval width
 
     - name: variance_threshold
       title: 'Variance Threshold'
@@ -270,6 +302,16 @@ options:
             Generate prognostic risk score
           R: >
             Calculate combined risk score
+
+    - name: show_model_comparison
+      title: 'Show Model Comparison'
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Compare base vs standard component sets
+          R: >
+            Calculate and compare sequential component additions
 
     - name: pathway_analysis
       title: 'Pathway Analysis'

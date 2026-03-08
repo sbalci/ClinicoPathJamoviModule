@@ -1,0 +1,554 @@
+---
+title: "LASSO Cox Regression for Variable Selection in Survival Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LASSO Cox Regression for Variable Selection in Survival Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** The `lassocox()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference. To run interactively,
+> use `devtools::load_all()` and call the R6 class directly:
+> `lassocoxClass$new(options = lassocoxOptions$new(...), data = mydata)`.
+
+# LASSO Cox Regression
+
+## Overview
+
+The **Lasso-Cox Regression** module (`lassocox`) performs automatic variable selection
+in survival analysis using L1-penalized Cox proportional hazards regression.
+It identifies the most important predictors while preventing overfitting —
+ideal for clinicopathological research with many candidate variables.
+
+Key features:
+
+- **Data suitability assessment** (traffic-light system)
+- **Cross-validated lambda selection** (lambda.min vs lambda.1se)
+- **Variable selection** with coefficient shrinkage
+- **Risk score calculation** and patient stratification
+- **Comprehensive visualizations** (CV plot, coefficient plot, survival curves)
+- **Clinical interpretation guidance**
+
+---
+
+## What is LASSO Cox Regression?
+
+LASSO (Least Absolute Shrinkage and Selection Operator) Cox regression combines the
+Cox proportional hazards model with L1 regularization for automatic variable selection.
+
+**Standard Cox model:**
+
+$$h(t) = h_0(t) \exp(\beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_p x_p)$$
+
+**LASSO Cox adds a penalty:**
+
+$$\text{Maximize:} \quad \ell(\beta) - \lambda \sum_{j=1}^{p} |\beta_j|$$
+
+where $\ell(\beta)$ is the partial log-likelihood and $\lambda$ controls penalty strength.
+
+The effect: small coefficients shrink toward zero, irrelevant variables become
+exactly zero, and only important predictors remain in the model.
+
+### LASSO vs Ridge vs Elastic Net
+
+| Method | Penalty | Variable Selection | Best For |
+|--------|---------|-------------------|----------|
+| **Ridge** | $\lambda \sum \beta_j^2$ (L2) | No — shrinks but keeps all | Correlated predictors, all must stay |
+| **LASSO** | $\lambda \sum |\beta_j|$ (L1) | Yes — sets some to zero | Sparse models, feature selection |
+| **Elastic Net** | $\alpha \lambda \sum |\beta_j| + (1-\alpha) \lambda \sum \beta_j^2$ | Yes — grouped selection | Correlated groups should stay/go together |
+
+In ClinicoPath: `lassocox` uses alpha=1 (pure LASSO). For Elastic Net or Ridge,
+use the **Penalized Cox Regression** module.
+
+---
+
+## When to Use LASSO Cox Regression
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Many predictors relative to sample (p >= n/3) | **LASSO strongly indicated** |
+| Radiomics / genomics feature selection | **LASSO ideal** |
+| Building a prognostic risk score | **LASSO recommended** |
+| Few predictors (p < 5) with ample events | Standard Cox may suffice |
+| Correlated predictors that should all be retained | Consider Elastic Net |
+| Inference / p-values are the primary goal | Use standard Cox regression |
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Events | Predictors | Description |
+|---------|---|--------|------------|-------------|
+| Synthetic "standard" | 200 | 80 | 3 numeric | Clean scenario (all green suitability) |
+| Synthetic "small" | 60 | 25 | 5 numeric | Yellow suitability scenario |
+| Synthetic "collinear" | 100 | 45 | 4 (2 correlated) | Multicollinearity detection |
+| Synthetic "categorical" | 100 | 40 | 3 factors | All categorical predictors |
+| `histopathology` | 250 | ~100 | 8 mixed | Real clinical pathology data |
+
+---
+
+## 1. Basic Analysis (Green Suitability)
+
+A standard scenario with adequate sample size, events, and predictors.
+
+```{r basic-green}
+# Create synthetic data: 200 patients, 80 events, 3 numeric predictors
+set.seed(42)
+n <- 200
+data_green <- data.frame(
+  time = abs(rnorm(n, 20, 10)) + 0.1,
+  status = factor(c(rep("event", 80), rep("censored", 120)),
+                  levels = c("censored", "event")),
+  var1 = rnorm(n),
+  var2 = rnorm(n),
+  var3 = rnorm(n)
+)
+
+lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
+```
+
+The suitability report should show all green indicators:
+
+- **EPV**: 80/3 = 26.7 (excellent)
+- **Sample size**: n=200 (adequate)
+- **Event rate**: 40% (balanced)
+- **Multicollinearity**: uncorrelated predictors
+
+---
+
+## 2. Small Sample (Yellow Suitability)
+
+When sample size is limited, the suitability assessment flags potential issues.
+
+```{r small-sample}
+set.seed(42)
+data_small <- data.frame(
+  time = abs(rnorm(60, 15, 8)) + 0.1,
+  status = factor(c(rep("event", 25), rep("censored", 35)),
+                  levels = c("censored", "event")),
+  var1 = rnorm(60), var2 = rnorm(60), var3 = rnorm(60),
+  var4 = rnorm(60), var5 = rnorm(60)
+)
+
+lassocox(
+  data = data_small,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3", "var4", "var5"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
+```
+
+Expected suitability flags:
+
+- **EPV**: 25/5 = 5.0 (yellow — adequate for LASSO but interpret with caution)
+- **Sample size**: n=60 (yellow — small sample)
+- **Regularization**: yellow — standard Cox may be an alternative
+
+---
+
+## 3. Multicollinearity Detection
+
+When predictors are highly correlated, the suitability check identifies the pairs.
+
+```{r collinearity}
+set.seed(42)
+base_var <- rnorm(100)
+data_collinear <- data.frame(
+  time = abs(rnorm(100, 20, 10)) + 0.1,
+  status = factor(c(rep("event", 45), rep("censored", 55)),
+                  levels = c("censored", "event")),
+  var1 = base_var,
+  var2 = base_var + rnorm(100, 0, 0.1),  # r > 0.95 with var1
+  var3 = rnorm(100),
+  var4 = rnorm(100)
+)
+
+lassocox(
+  data = data_collinear,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3", "var4"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
+```
+
+The suitability report should flag:
+
+- **Multicollinearity**: yellow/red with max |r| > 0.95
+- **Top correlated pair**: var1 & var2
+- **Recommendation**: Consider Elastic Net (Penalized Cox in ClinicoPath)
+
+---
+
+## 4. Categorical Predictors
+
+LASSO handles factor variables via dummy coding. The collinearity check
+correctly excludes within-factor dummy correlations.
+
+```{r categorical}
+set.seed(42)
+data_cat <- data.frame(
+  time = abs(rnorm(100, 20, 10)) + 0.1,
+  status = factor(c(rep("event", 40), rep("censored", 60)),
+                  levels = c("censored", "event")),
+  grade = factor(sample(c("Low", "Med", "High"), 100, replace = TRUE)),
+  stage = factor(sample(c("I", "II", "III"), 100, replace = TRUE)),
+  treatment = factor(sample(c("A", "B"), 100, replace = TRUE))
+)
+
+lassocox(
+  data = data_cat,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("grade", "stage", "treatment"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
+```
+
+---
+
+## 5. Lambda Selection: lambda.min vs lambda.1se
+
+The choice of lambda controls the trade-off between model complexity and parsimony.
+
+```{r lambda-min}
+# lambda.min: minimum CV error — more variables, better in-sample fit
+lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.min",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
+```
+
+```{r lambda-1se}
+# lambda.1se: most regularized within 1 SE — fewer variables, better generalization
+lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
+```
+
+**Interpretation:**
+
+- **lambda.min**: Selects more variables. Better in-sample performance but higher overfitting risk.
+- **lambda.1se** (default): More parsimonious. Recommended for clinical models that need to generalize.
+
+---
+
+## 6. Suitability Check Toggle
+
+The suitability assessment is advisory — it never blocks the analysis.
+
+```{r toggle-off}
+# Disable suitability assessment
+lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,  # No suitability report shown
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE
+)
+```
+
+---
+
+## 7. Explanatory Output Options
+
+### Method explanations
+
+```{r explanations}
+lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE,
+  showExplanations = TRUE,         # LASSO methodology + plot explanations
+  showMethodologyNotes = TRUE,     # Technical details
+  includeClinicalGuidance = TRUE   # Clinical interpretation guide
+)
+```
+
+### Variable importance and model comparison
+
+```{r importance-comparison}
+lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.min",  # More likely to select variables
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = FALSE,
+  coef_plot = FALSE,
+  survival_plot = FALSE,
+  showVariableImportance = TRUE,   # Importance scores + stability ranks
+  showModelComparison = TRUE       # LASSO vs Standard Cox comparison
+)
+```
+
+---
+
+## 8. Risk Score Output
+
+The computed risk score can be saved as a new variable in the dataset.
+
+```{r risk-score}
+result <- lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.min",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = FALSE,
+  coef_plot = FALSE,
+  survival_plot = FALSE
+)
+```
+
+The risk score is computed as:
+
+$$\text{Risk Score} = \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_k X_k$$
+
+where only LASSO-selected variables have non-zero coefficients.
+
+---
+
+## Interpreting Results
+
+### Model Summary Table
+
+| Statistic | Meaning |
+|-----------|---------|
+| Total Variables | Number of candidate predictors (after dummy coding) |
+| Selected Variables | Variables with non-zero coefficients |
+| Selection Proportion | Percentage of variables retained |
+| Optimal Lambda | The regularization strength used |
+| Sample Size | Complete cases used |
+| Number of Events | Events observed |
+| Censoring Rate | Percentage of censored observations |
+
+### Selected Variables Table
+
+| Column | Meaning |
+|--------|---------|
+| Variable | Predictor name |
+| Coefficient | Log hazard ratio (positive = risk, negative = protective) |
+| Hazard Ratio | exp(coefficient) — multiplicative effect on hazard |
+| Importance | Absolute coefficient value |
+
+### Performance Table
+
+| Metric | Meaning |
+|--------|---------|
+| C-index | Discrimination (0.5 = random, 1.0 = perfect) |
+| Log-rank p-value | Statistical significance of risk group separation |
+| Hazard Ratio | Risk of high vs low group (with 95% CI) |
+
+### C-index Interpretation
+
+| C-index | Discrimination | Clinical Utility |
+|---------|---------------|-----------------|
+| 0.50–0.60 | Poor | Limited |
+| 0.60–0.70 | Fair | May inform decisions |
+| 0.70–0.80 | Good | Useful for stratification |
+| 0.80–0.90 | Excellent | Strong utility |
+| > 0.90 | Outstanding | May indicate overfitting |
+
+---
+
+## Common Pitfalls and Best Practices
+
+### Pitfalls to Avoid
+
+1. **Using LASSO with too few events**: EPV < 2 produces unreliable results. Even with regularization, LASSO needs sufficient events — a common problem in small radiomics cohorts (e.g., 80 patients with 300 features).
+
+2. **Not standardizing variables**: LASSO is sensitive to scale. A variable measured in 0–20,000 (e.g., tumor area) will dominate one measured in 0–100 (e.g., age) unless standardized. Use `standardize = TRUE` (the default).
+
+3. **Interpreting coefficients as p-values**: LASSO performs *selection*, not *testing*. Incorrect: "LASSO identified Ki67 as statistically significant." Correct: "LASSO selected Ki67 as an important predictor."
+
+4. **Feature selection on full data (data leakage)**: A very common mistake. If you perform LASSO feature selection on all patients, then build and test the model on the same data, information leaks from the test set into the selection step. Feature selection must be done *within the training set only*.
+
+5. **No external validation**: Internal cross-validation produces optimistically biased estimates. Journals increasingly require external validation cohorts. The validation hierarchy:
+   - Internal cross-validation (minimum)
+   - Internal train/test split
+   - External independent dataset (preferred)
+
+6. **Ignoring feature stability**: Radiomic or WSI features may change with scanner, staining protocol, segmentation method, or resolution. Before LASSO, features should be tested for robustness using intraclass correlation coefficient (ICC) or test–retest analysis.
+
+7. **Reporting only selected variables**: Good reporting requires: selected features, lambda value used, cross-validation method, coefficient values, and performance metrics. Follow the TRIPOD statement for transparent reporting.
+
+8. **Ignoring clinical variables**: Some radiomics papers include only image features. Combined models (clinical + pathological + radiomic + molecular) usually perform better.
+
+9. **Not assessing model performance properly**: Survival models should report C-index *and* calibration curves. High discrimination (C-index) alone is insufficient — the model must also be well-calibrated. Consider decision curve analysis for clinical utility.
+
+10. **No calibration analysis**: A model with high AUC/C-index but poor calibration makes systematically wrong predictions. Always check calibration plots and consider the Hosmer–Lemeshow test or calibration slope.
+
+### Best Practices
+
+1. **Check suitability first**: Use the built-in assessment before interpreting results
+2. **Prefer lambda.1se**: More parsimonious and generalizable than lambda.min
+3. **Report transparently**: Lambda, CV method, all selected variables, coefficients
+4. **Validate externally**: Test in independent cohorts when possible
+5. **Combine with clinical variables**: Don't use only image/genomic features
+6. **Follow TRIPOD guidelines**: For prognostic model reporting
+7. **Test feature stability**: Use ICC before entering features into LASSO
+8. **Perform selection within training set**: Never select features on the full dataset
+
+---
+
+## Radiomics and Digital Pathology Pipeline
+
+LASSO Cox regression is central to many radiomics and digital pathology prognostic studies.
+A robust analysis pipeline follows these steps:
+
+```
+WSI / Imaging Data
+       ↓
+Feature Extraction (e.g., texture, morphology, deep features)
+       ↓
+Feature Stability Testing (ICC, test–retest)
+       ↓
+Feature Reduction (remove unstable/redundant features)
+       ↓
+LASSO Cox Selection (cross-validated, training set only)
+       ↓
+Model Construction (risk score from selected features)
+       ↓
+Internal Validation (bootstrap or cross-validation)
+       ↓
+External Validation (independent cohort)
+       ↓
+Calibration + Decision Curve Analysis
+```
+
+### Application Areas
+
+| Domain | Example Use |
+|--------|------------|
+| **WSI radiomics** | Texture and morphology features from whole-slide images |
+| **Deep feature selection** | CNN-extracted features reduced via LASSO for interpretability |
+| **Tumor microenvironment signatures** | Spatial features (immune cell density, stroma ratio) |
+| **Gene expression survival models** | Selecting prognostic genes from expression panels |
+
+### Typical Wording in Papers
+
+When reporting LASSO Cox results, consider these example phrasings:
+
+> "Feature selection was performed using LASSO penalized Cox regression with
+> 10-fold cross-validation. The selected features were used to construct a
+> radiomic risk score."
+
+> "Variables were selected using LASSO regression with 10-fold cross-validation,
+> and selected predictors were entered into the multivariable Cox model."
+
+---
+
+## Related ClinicoPath Functions
+
+| Function | Use When |
+|----------|----------|
+| **Survival Analysis** | Standard Kaplan-Meier with log-rank test (few predictors) |
+| **Multivariable Survival** | Standard Cox with multiple predictors (no regularization needed) |
+| **Penalized Cox Regression** | Elastic Net or Ridge (retain correlated predictors) |
+| **Adaptive LASSO** | Two-stage LASSO with oracle properties |
+| **Group LASSO** | Select/exclude grouped variables together |
+
+---
+
+## References
+
+- Tibshirani R. The lasso method for variable selection in the Cox model. *Stat Med*. 1997;16(4):385-395.
+- Simon N, et al. Regularization paths for Cox's proportional hazards model via coordinate descent. *J Stat Softw*. 2011;39(5):1-13.
+- Collins GS, et al. Transparent reporting of a multivariable prediction model for individual prognosis or diagnosis (TRIPOD). *BMJ*. 2015;350:g7594.

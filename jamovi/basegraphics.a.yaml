@@ -4,7 +4,7 @@ title: "Base Graphics Visualization"
 menuGroup: JJStatsPlotT
 menuSubgroup: All-In-One
 menuSubtitle: "Fast & Customizable Base R Plots"
-version: '0.0.36'
+version: '0.0.37'
 jas: '1.2'
 
 description:

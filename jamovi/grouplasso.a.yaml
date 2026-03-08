@@ -1,9 +1,10 @@
 ---
 name: grouplasso
 title: Group LASSO for Survival Analysis
-menuGroup: SurvivalD
-menuSubgroup: Machine Learning
-menuSubtitle: Penalized regression with group-wise variable selection
+menuGroup: SurvivalT
+menuSubgroup: Penalized Cox Regression
+menuTitle: Group LASSO Cox
+menuSubtitle: Selects or removes pre-defined biological/categorical groups together.
 version: '0.0.31'
 jas: '1.2'
 
@@ -39,6 +40,16 @@ options:
       type: Data
       description:
           R: The data as a data frame.
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+          R: >
+            Run a comprehensive data suitability assessment before analysis.
+            Checks sample size, events-per-variable ratio, multicollinearity, 
+            and whether regularization is needed.
 
     - name: time
       title: Time Variable

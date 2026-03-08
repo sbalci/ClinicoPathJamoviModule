@@ -9,26 +9,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         
         .init = function() {
-            # Check for required packages
-            if (!requireNamespace('survival', quietly = TRUE)) {
-                self$results$errors$setContent(
-                    "The survival package is required but not installed."
-                )
-            }
-            
-            if (!requireNamespace('superpc', quietly = TRUE)) {
-                self$results$warnings$setContent(
-                    "The superpc package is recommended for supervised PCA. 
-                    Install using: install.packages('superpc')"
-                )
-            }
-            
-            if (!requireNamespace('prcomp', quietly = TRUE)) {
-                self$results$warnings$setContent(
-                    "Enhanced PCA functionality requires additional packages. 
-                    Consider installing: sparsepca, kernlab"
-                )
-            }
+            # Package checks are handled via tryCatch in the methods that use them.
+            # The required 'survival' package is listed in DESCRIPTION Imports.
         },
         
         .run = function() {
@@ -99,48 +81,78 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$predictors <- predictors
             private$clinical_vars <- clinical_vars
             
+            # Assess data suitability if requested
+            if (self$options$suitabilityCheck) {
+                private$.assessSuitability()
+            }
+            
             # Perform PCA analysis
             private$.performPCA()
             
-            # Fit Cox model on principal components
-            private$.fitPCCoxModel()
-            
-            # Generate summary
-            private$.generateSummary()
-            
-            # Calculate additional analyses if requested
-            if (self$options$feature_importance) {
-                private$.calculateFeatureImportance()
+            # Additional analyses if model is available
+            if (!is.null(private$cox_model)) {
+                
+                # Generate summary
+                private$.generateSummary()
+                
+                # Calculate additional analyses if requested
+                if (self$options$feature_importance) {
+                    private$.calculateFeatureImportance()
+                }
+                
+                if (self$options$risk_score) {
+                    private$.calculateRiskScore()
+                }
+                
+                # Prepare plots
+                if (self$options$plot_scree) {
+                    private$.prepareScreePlot()
+                }
+                
+                if (self$options$plot_loadings) {
+                    private$.prepareLoadingsPlot()
+                }
+                
+                if (self$options$plot_biplot) {
+                    private$.prepareBiplot()
+                }
+                
+                if (self$options$plot_survival) {
+                    # Survival plot requires risk scores; compute them if not already done
+                    if (is.null(private$risk_scores)) {
+                        private$.calculateRiskScore()
+                    }
+                    private$.prepareSurvivalPlot()
+                }
+
+                # Validation analyses
+                if (self$options$bootstrap_validation) {
+                    private$.performBootstrapValidation()
+                }
+
+                if (self$options$permutation_test) {
+                    private$.performPermutationTest()
+                }
+                
+                if (self$options$show_model_comparison) {
+                    private$.populateModelComparison()
+                }
             }
-            
-            if (self$options$risk_score) {
-                private$.calculateRiskScore()
-            }
-            
-            # Prepare plots
-            if (self$options$plot_scree) {
-                private$.prepareScreePlot()
-            }
-            
-            if (self$options$plot_loadings) {
-                private$.prepareLoadingsPlot()
-            }
-            
-            if (self$options$plot_biplot) {
-                private$.prepareBiplot()
-            }
-            
-            if (self$options$plot_survival) {
-                private$.prepareSurvivalPlot()
-            }
-            
-            # Validation analyses
-            if (self$options$bootstrap_validation) {
-                private$.performBootstrapValidation()
-            }
-            
-            if (self$options$permutation_test) {
-                private$.performPermutationTest()
+
+            # Pathway analysis (not yet implemented)
+            if (isTRUE(self$options$pathway_analysis)) {
+                self$results$pathwayAnalysis$setContent(
+                    "<h4>Pathway Enrichment Analysis</h4>
+                    <p><b>Status:</b> This feature is not yet implemented in the current version.</p>
+                    <p>Pathway analysis requires external gene set databases (e.g., MSigDB, KEGG, Reactome)
+                    and is planned for a future release. In the meantime, you can export the feature importance
+                    rankings from this analysis and use dedicated pathway analysis tools such as:</p>
+                    <ul>
+                    <li><b>GSEA</b> (Gene Set Enrichment Analysis)</li>
+                    <li><b>clusterProfiler</b> R package</li>
+                    <li><b>Enrichr</b> web tool</li>
+                    </ul>"
+                )
             }
         },
         
@@ -148,13 +160,15 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             tryCatch({
                 
-                # Extract predictor matrix
-                X <- as.matrix(private$clean_data[, private$predictors])
+                # Extract predictor matrix using model.matrix to handle factors
+                formula_str <- paste("~ -1 +", paste(private$predictors, collapse = " + "))
+                X <- model.matrix(as.formula(formula_str), data = private$clean_data)
                 
                 # Handle missing values
                 if (any(is.na(X))) {
-                    X <- X[complete.cases(X), ]
-                    private$clean_data <- private$clean_data[complete.cases(X), ]
+                    complete_idx <- complete.cases(X)
+                    X <- X[complete_idx, , drop = FALSE]
+                    private$clean_data <- private$clean_data[complete_idx, , drop = FALSE]
                 }
                 
                 # Scale and center if requested
@@ -186,11 +200,87 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Populate PCA summary table
                 private$.populatePCASummary()
                 
+                # Fit Cox model on principal components
+                private$.fitPCCoxModel()
+                
             }, error = function(e) {
-                self$results$errors$setContent(
-                    paste("PCA analysis failed:", e$message)
+                self$results$todo$setContent(
+                    paste0("<html><body><div style='color: red;'>",
+                           "<b>PCA analysis failed:</b> ", htmltools::htmlEscape(e$message), 
+                           "</div></body></html>")
                 )
             })
+        },
+        
+        .assessSuitability = function() {
+            data <- self$data
+            time_var <- self$options$time
+            status_var <- self$options$status
+            predictors <- self$options$predictors
+
+            html <- self$results$suitabilityReport
+            
+            if (is.null(html)) return()
+            
+            # 1. Sample Size & Events
+            total_n <- nrow(data)
+            events <- 0
+            if (!is.null(status_var) && status_var %in% names(data)) {
+                # Ensure it's treated as numeric 0/1 properly
+                events <- sum(as.numeric(as.character(data[[status_var]])), na.rm = TRUE)
+            }
+            n_vars <- length(predictors)
+            epv <- ifelse(n_vars > 0, events / n_vars, 0)
+
+            # Define warning colors
+            epv_color <- ifelse(epv < 5, "red", ifelse(epv < 10, "orange", "green"))
+            
+            # 2. Missing Data
+            missing_text <- ""
+            complete_cases <- sum(complete.cases(data[, c(time_var, status_var, predictors), drop=FALSE]))
+            missing_pct <- 100 * (1 - complete_cases/total_n)
+            
+            if (missing_pct > 10) {
+                missing_text <- paste0("<div style='color: orange; margin-top: 5px;'>",
+                                     "⚠️ <b>Note:</b> ", round(missing_pct, 1), "% of cases have missing data and will be excluded.",
+                                     "</div>")
+            }
+
+            # Construct HTML
+            content <- paste0(
+                "<html>
+                <style>
+                    .suit-box { border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+                    .suit-title { font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 5px; }
+                    .metric { display: flex; justify-content: space-between; margin: 3px 0; }
+                </style>
+                <div class='suit-box'>
+                    <div class='suit-title'>Dataset Assessment for PCA Cox</div>
+                    
+                    <div class='metric'>
+                        <span><b>Sample Size:</b> ", total_n, "</span>
+                        <span><b>Number of Events:</b> ", events, "</span>
+                    </div>
+                    
+                    <div class='metric'>
+                        <span><b>Predictors (P):</b> ", n_vars, "</span>
+                        <span><b style='color:", epv_color, "'>Events Per Variable (EPV): ", round(epv, 2), "</b></span>
+                    </div>
+                    
+                    <div style='margin-top: 10px;'>
+                        <b>Assessment:</b><br>",
+                        ifelse(epv < 5, 
+                               "<span style='color: red;'>⚠️ <b>High Dimensionality:</b> EPV is very low. Regularization via dimensionality reduction (PCA) is strictly necessary, but results may still be highly unstable.</span>", 
+                               ifelse(epv < 10, 
+                                      "<span style='color: orange;'>⚠️ <b>Moderate Dimensionality:</b> PCA will effectively perform dimension reduction and manage multicollinearity.</span>",
+                                      "<span style='color: green;'>✓ <b>Adequate Events:</b> Sample size is sufficient for this number of predictors. PCA will focus on identifying feature patterns.</span>"
+                               )),
+                    "</div>",
+                    missing_text,
+                "</div></html>"
+            )
+            
+            html$setContent(content)
         },
         
         .performStandardPCA = function() {
@@ -272,7 +362,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     # Run Sparse PCA
                     # Note: sparsepca expects centered data usually, X_matrix is already scaled/centered if requested
-                    spca_res <- sparsepca::spca(private$X_matrix, k = n_components, alpha = 1e-4, beta = 1e-4)
+                    sparse_param <- self$options$sparse_parameter %||% 0.1
+                    spca_res <- sparsepca::spca(private$X_matrix, k = n_components, alpha = sparse_param, beta = sparse_param)
                     
                     private$pca_result <- spca_res
                     
@@ -448,12 +539,19 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         test_pcs <- private$pc_scores[test_idx, 1:k, drop = FALSE]
                         test_pred <- predict(cox_model, newdata = as.data.frame(test_pcs))
                         
-                        # Calculate C-index (simplified)
-                        test_time <- private$clean_data[test_idx, private$time_var]
-                        test_status <- private$clean_data[test_idx, private$status_var]
-                        
-                        c_index <- survival::concordance(test_pred ~ test_time + test_status)$concordance
-                        fold_scores[fold] <- c_index
+                        # Calculate C-index using correct Surv ~ predictor formula and handling potential zero-variance predicting scores in small folds.
+                        test_time <- private$clean_data[[private$time_var]][test_idx]
+                        test_status <- private$clean_data[[private$status_var]][test_idx]
+
+                        tryCatch({
+                            c_obj <- survival::concordance(
+                                survival::Surv(test_time, test_status) ~ test_pred, 
+                                reverse = TRUE
+                            )
+                            fold_scores[fold] <- c_obj$concordance
+                        }, error = function(e) {
+                            fold_scores[fold] <- 0.500
+                        })
                     }
                     
                     cv_scores[k] <- mean(fold_scores, na.rm = TRUE)
@@ -545,7 +643,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             table <- self$results$coxResults
             coef_summary <- summary(private$cox_model)$coefficients
-            confint_result <- confint(private$cox_model)
+            conf_level <- self$options$confidence_level %||% 0.95
+            confint_result <- confint(private$cox_model, level = conf_level)
             
             for (i in 1:nrow(coef_summary)) {
                 
@@ -593,9 +692,13 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # AIC
                 aic_val <- AIC(private$cox_model)
                 
+                # Confidence Multiplier
+                conf_level <- self$options$confidence_level %||% 0.95
+                z_mult <- qnorm(1 - (1 - conf_level)/2)
+                
                 # Add metrics to table
                 metrics <- list(
-                    list("C-Index", c_stat, c_se, c_stat - 1.96*c_se, c_stat + 1.96*c_se),
+                    list("Training Concordance Index*", c_stat, c_se, c_stat - z_mult*c_se, c_stat + z_mult*c_se),
                     list("R-squared", r_squared, NA, NA, NA),
                     list("AIC", aic_val, NA, NA, NA),
                     list("Log-likelihood", loglik[2], NA, NA, NA)
@@ -610,6 +713,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ci_upper = ifelse(is.na(metrics[[i]][[5]]), "", round(metrics[[i]][[5]], 4))
                     ))
                 }
+                
+                table$setNote("cindex", "* Note: The Training Concordance Index overestimates true out-of-sample performance, as it is evaluated on the data used for variable selection. See Bootstrap Validation for pessimism-corrected estimates.")
                 
             }, error = function(e) {
                 message("Performance calculation failed: ", e$message)
@@ -678,44 +783,72 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 risk_scores <- predict(private$cox_model, type = "lp")
                 
                 # Divide into risk groups (tertiles)
-                tertiles <- quantile(risk_scores, c(1/3, 2/3))
-                risk_groups <- cut(risk_scores, 
-                                 breaks = c(-Inf, tertiles, Inf),
-                                 labels = c("Low", "Medium", "High"))
+                tertiles <- quantile(risk_scores, c(1/3, 2/3), na.rm = TRUE)
+                # Ensure cut breaks are strictly unique
+                if (tertiles[1] == tertiles[2] || min(risk_scores, na.rm=T) == tertiles[1] || max(risk_scores, na.rm=T) == tertiles[2]) {
+                    # Fallback if there are flat distributions preventing pure tertiles
+                    unique_vals <- unique(risk_scores)
+                    if(length(unique_vals) <= 3) {
+                         risk_groups <- factor(risk_scores, labels = paste("Level", seq_along(unique_vals)))
+                    } else {
+                        tertiles <- attr(suppressWarnings(Hmisc::wtd.quantile(risk_scores, probs=c(1/3, 2/3), type="quantile", na.rm=TRUE)), "names")
+                        tertiles <- quantile(jitter(risk_scores), c(1/3, 2/3), na.rm = TRUE)
+                        risk_groups <- cut(risk_scores, 
+                                         breaks = c(-Inf, tertiles, Inf),
+                                         labels = c("Low", "Medium", "High"))
+                    }
+                } else {
+                    risk_groups <- cut(risk_scores, 
+                                     breaks = c(-Inf, tertiles, Inf),
+                                     labels = c("Low", "Medium", "High"))
+                }
                 
                 # Calculate group statistics
                 table <- self$results$riskScore
                 
                 for (group in c("Low", "Medium", "High")) {
-                    
+
                     group_idx <- which(risk_groups == group)
                     n_patients <- length(group_idx)
-                    
-                    group_time <- private$clean_data[group_idx, private$time_var]
-                    group_status <- private$clean_data[group_idx, private$status_var]
-                    
+
+                    group_time <- private$clean_data[[private$time_var]][group_idx]
+                    group_status <- private$clean_data[[private$status_var]][group_idx]
+
                     n_events <- sum(group_status)
                     median_survival <- median(group_time[group_status == 1], na.rm = TRUE)
-                    
+
                     # Calculate HR vs low risk group
                     if (group == "Low") {
                         hr_vs_low <- 1.0
                         p_value <- NA
                     } else {
-                        # Simplified HR calculation
-                        group_factor <- factor(risk_groups %in% c("Low", group), labels = c("Low", group))
-                        cox_temp <- survival::coxph(Surv(private$clean_data[[private$time_var]], 
-                                                       private$clean_data[[private$status_var]]) ~ group_factor)
-                        hr_vs_low <- exp(coef(cox_temp))
-                        p_value <- summary(cox_temp)$coefficients[1, "Pr(>|z|)"]
+                        tryCatch({
+                            # Subset to Low + current group for pairwise HR
+                            compare_idx <- which(risk_groups %in% c("Low", group))
+                            compare_factor <- factor(
+                                as.character(risk_groups[compare_idx]),
+                                levels = c("Low", group)
+                            )
+                            cox_temp <- survival::coxph(
+                                survival::Surv(
+                                    private$clean_data[[private$time_var]][compare_idx],
+                                    private$clean_data[[private$status_var]][compare_idx]
+                                ) ~ compare_factor
+                            )
+                            hr_vs_low <- exp(coef(cox_temp)[1])
+                            p_value <- summary(cox_temp)$coefficients[1, "Pr(>|z|)"]
+                        }, error = function(e) {
+                            hr_vs_low <<- NA
+                            p_value <<- NA
+                        })
                     }
-                    
+
                     table$addRow(rowKey = group, values = list(
                         risk_group = group,
                         n_patients = n_patients,
-                        n_events = n_events,
+                        n_events = as.integer(n_events),
                         median_survival = ifelse(is.na(median_survival), "", round(median_survival, 2)),
-                        hr_vs_low = round(hr_vs_low, 3),
+                        hr_vs_low = ifelse(is.na(hr_vs_low), "", round(hr_vs_low, 3)),
                         p_value = ifelse(is.na(p_value), "", round(p_value, 4))
                     ))
                 }
@@ -781,85 +914,230 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .prepareScreePlot = function() {
             image <- self$results$screePlot
+            # Extract only plain numeric data for protobuf-safe serialization
             image$setState(list(
-                eigenvalues = private$eigenvalues,
-                selected = private$selected_components
+                eigenvalues = as.numeric(private$eigenvalues),
+                selected = as.integer(private$selected_components)
             ))
         },
-        
+
         .prepareLoadingsPlot = function() {
             image <- self$results$loadingsPlot
             image$setState(list(
-                loadings = private$loadings,
-                selected = private$selected_components
+                loadings = as.data.frame(private$loadings),
+                selected = as.integer(private$selected_components)
             ))
         },
-        
+
         .prepareBiplot = function() {
             image <- self$results$biplot
             image$setState(list(
-                pc_scores = private$pc_scores,
-                loadings = private$loadings
+                pc_scores = as.data.frame(private$pc_scores),
+                loadings = as.data.frame(private$loadings)
             ))
         },
-        
+
         .prepareSurvivalPlot = function() {
+            if (is.null(private$risk_groups) || is.null(private$clean_data)) return()
+
             image <- self$results$survivalPlot
-            image$setState(list(
-                risk_scores = private$risk_scores,
-                risk_groups = private$risk_groups,
-                time_var = private$time_var,
-                status_var = private$status_var,
-                data = private$clean_data
-            ))
+            # Store actual data columns (not variable name strings) for protobuf-safe serialization
+            image$setState(as.data.frame(list(
+                risk_scores = as.numeric(private$risk_scores),
+                risk_groups = as.character(private$risk_groups),
+                time = as.numeric(private$clean_data[[private$time_var]]),
+                status = as.integer(private$clean_data[[private$status_var]])
+            )))
         },
         
         .performBootstrapValidation = function() {
-            
+
             tryCatch({
-                
+
+                if (is.null(private$cox_model) || is.null(private$cox_data)) {
+                    self$results$bootstrapValidation$setContent(
+                        "<h4>Bootstrap Validation</h4><p>No fitted model available for validation.</p>"
+                    )
+                    return()
+                }
+
                 n_bootstrap <- self$options$n_bootstrap %||% 100
-                
+                n <- nrow(private$cox_data)
+
+                # Harrell's optimism-corrected bootstrap
+                # Apparent C-index from the original model
+                apparent_c <- survival::concordance(private$cox_model)$concordance
+
+                optimism_vals <- numeric(n_bootstrap)
+                cal_slopes <- numeric(n_bootstrap)
+
+                for (b in seq_len(n_bootstrap)) {
+                    tryCatch({
+                        # Draw bootstrap sample
+                        boot_idx <- sample(n, n, replace = TRUE)
+                        boot_data <- private$cox_data[boot_idx, ]
+
+                        # Fit model on bootstrap sample
+                        boot_model <- survival::coxph(
+                            formula(private$cox_model),
+                            data = boot_data
+                        )
+
+                        # C-index on bootstrap sample (training performance)
+                        c_boot <- survival::concordance(boot_model)$concordance
+
+                        # Predict on original data using bootstrap model
+                        lp_orig <- predict(boot_model, newdata = private$cox_data, type = "lp")
+                        c_orig <- survival::concordance(
+                            survival::Surv(private$cox_data$time, private$cox_data$status) ~ lp_orig
+                        )$concordance
+
+                        # Optimism = boot performance - original data performance
+                        optimism_vals[b] <- c_boot - c_orig
+
+                        # Calibration slope: regress original outcome on bootstrap LP
+                        cal_model <- survival::coxph(
+                            survival::Surv(time, status) ~ lp_orig,
+                            data = private$cox_data
+                        )
+                        cal_slopes[b] <- coef(cal_model)
+
+                    }, error = function(e) {
+                        optimism_vals[b] <<- NA
+                        cal_slopes[b] <<- NA
+                    })
+                }
+
+                # Compute summaries
+                mean_optimism <- mean(optimism_vals, na.rm = TRUE)
+                corrected_c <- apparent_c - mean_optimism
+                mean_cal_slope <- mean(cal_slopes, na.rm = TRUE)
+                n_successful <- sum(!is.na(optimism_vals))
+
                 bootstrap_html <- paste0(
                     "<h4>Bootstrap Validation Results</h4>",
-                    "<p>Bootstrap validation with ", n_bootstrap, " samples:</p>",
+                    "<p>Harrell's optimism-corrected bootstrap validation (", n_successful,
+                    " of ", n_bootstrap, " samples completed):</p>",
+                    "<table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse;'>",
+                    "<tr><th>Metric</th><th>Value</th></tr>",
+                    "<tr><td>Apparent C-index</td><td>", round(apparent_c, 4), "</td></tr>",
+                    "<tr><td>Mean optimism</td><td>", round(mean_optimism, 4), "</td></tr>",
+                    "<tr><td><b>Optimism-corrected C-index</b></td><td><b>", round(corrected_c, 4), "</b></td></tr>",
+                    "<tr><td>Mean calibration slope</td><td>", round(mean_cal_slope, 4), "</td></tr>",
+                    "</table>",
+                    "<p><b>Interpretation:</b></p>",
                     "<ul>",
-                    "<li><b>Optimism-corrected C-index:</b> Available</li>",
-                    "<li><b>Component Stability:</b> Principal components stable across bootstrap samples</li>",
-                    "<li><b>Feature Selection Stability:</b> Top features consistently selected</li>",
-                    "</ul>",
-                    "<p><i>Note:</i> Bootstrap validation computationally intensive for high-dimensional data.</p>"
+                    "<li>Optimism-corrected C-index removes overfitting bias. Values above 0.6 suggest useful discrimination.</li>",
+                    "<li>Calibration slope near 1.0 indicates good calibration; values less than 1.0 suggest overfitting.</li>",
+                    "</ul>"
                 )
-                
+
                 self$results$bootstrapValidation$setContent(bootstrap_html)
-                
+
             }, error = function(e) {
-                message("Bootstrap validation failed: ", e$message)
+                self$results$bootstrapValidation$setContent(
+                    paste0("<h4>Bootstrap Validation</h4>",
+                           "<p>Bootstrap validation could not be completed: ", htmltools::htmlEscape(e$message), "</p>")
+                )
             })
         },
         
         .performPermutationTest = function() {
-            
+
             tryCatch({
-                
+
+                if (is.null(private$cox_model) || is.null(private$cox_data)) {
+                    self$results$permutationTest$setContent(
+                        "<h4>Permutation Test</h4><p>No fitted model available for permutation testing.</p>"
+                    )
+                    return()
+                }
+
                 n_permutations <- self$options$n_permutations %||% 100
-                
+
+                # Observed model log-likelihood ratio statistic
+                observed_llr <- 2 * diff(private$cox_model$loglik)
+
+                # Per-component observed z-statistics
+                cox_summary <- summary(private$cox_model)$coefficients
+                pc_rows <- grep("^PC", rownames(cox_summary))
+                observed_z <- abs(cox_summary[pc_rows, "z"])
+                pc_names <- rownames(cox_summary)[pc_rows]
+
+                # Permutation distribution: shuffle survival outcomes
+                perm_llr <- numeric(n_permutations)
+                perm_z_matrix <- matrix(NA, nrow = n_permutations, ncol = length(pc_rows))
+
+                for (b in seq_len(n_permutations)) {
+                    tryCatch({
+                        perm_data <- private$cox_data
+                        perm_idx <- sample(nrow(perm_data))
+                        perm_data$time <- private$cox_data$time[perm_idx]
+                        perm_data$status <- private$cox_data$status[perm_idx]
+
+                        perm_model <- survival::coxph(
+                            formula(private$cox_model),
+                            data = perm_data
+                        )
+
+                        perm_llr[b] <- 2 * diff(perm_model$loglik)
+
+                        perm_coef <- summary(perm_model)$coefficients
+                        perm_pc_rows <- grep("^PC", rownames(perm_coef))
+                        if (length(perm_pc_rows) == length(pc_rows)) {
+                            perm_z_matrix[b, ] <- abs(perm_coef[perm_pc_rows, "z"])
+                        }
+                    }, error = function(e) {
+                        perm_llr[b] <<- NA
+                    })
+                }
+
+                # Calculate p-values
+                n_valid <- sum(!is.na(perm_llr))
+                overall_p <- mean(perm_llr >= observed_llr, na.rm = TRUE)
+
+                # Per-component p-values
+                pc_p_values <- sapply(seq_along(pc_rows), function(j) {
+                    perm_z_col <- perm_z_matrix[, j]
+                    mean(perm_z_col >= observed_z[j], na.rm = TRUE)
+                })
+
+                # Build results table
+                pc_table_rows <- paste0(
+                    sapply(seq_along(pc_names), function(j) {
+                        paste0("<tr><td>", pc_names[j], "</td>",
+                               "<td>", round(observed_z[j], 3), "</td>",
+                               "<td>", round(pc_p_values[j], 4), "</td>",
+                               "<td>", ifelse(pc_p_values[j] < 0.05, "Significant", "Not significant"), "</td></tr>")
+                    }),
+                    collapse = ""
+                )
+
                 permutation_html <- paste0(
                     "<h4>Permutation Test Results</h4>",
-                    "<p>Significance testing with ", n_permutations, " permutations:</p>",
-                    "<ul>",
-                    "<li><b>Component Significance:</b> Components show significant survival association</li>",
-                    "<li><b>Model P-value:</b> Overall model significantly better than random</li>",
-                    "<li><b>Individual PC P-values:</b> Most selected PCs individually significant</li>",
-                    "</ul>",
-                    "<p><i>Interpretation:</i> Permutation tests validate that the PCA-derived components ",
-                    "contain genuine survival-relevant information rather than noise.</p>"
+                    "<p>Significance testing with ", n_valid, " of ", n_permutations,
+                    " permutations completed:</p>",
+                    "<p><b>Overall model p-value (permutation):</b> ", round(overall_p, 4),
+                    ifelse(overall_p < 0.05,
+                           " (significant: model captures genuine survival signal)",
+                           " (not significant: model may reflect noise)"),
+                    "</p>",
+                    "<table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse;'>",
+                    "<tr><th>Component</th><th>Observed |z|</th><th>Perm. p-value</th><th>Conclusion</th></tr>",
+                    pc_table_rows,
+                    "</table>",
+                    "<p><b>Interpretation:</b> Permutation tests validate that the PCA-derived components ",
+                    "contain genuine survival-relevant information. Components with p &lt; 0.05 show ",
+                    "associations unlikely to arise by chance.</p>"
                 )
-                
+
                 self$results$permutationTest$setContent(permutation_html)
-                
+
             }, error = function(e) {
-                message("Permutation test failed: ", e$message)
+                self$results$permutationTest$setContent(
+                    paste0("<h4>Permutation Test</h4>",
+                           "<p>Permutation test could not be completed: ", htmltools::htmlEscape(e$message), "</p>")
+                )
             })
         },
         

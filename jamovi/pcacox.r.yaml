@@ -12,6 +12,11 @@ items:
           - status
           - predictors
 
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+
     - name: summary
       title: Analysis Summary
       type: Html
@@ -159,6 +164,30 @@ items:
             title: 'p-value'
             type: number
             format: zto,pvalue
+
+    - name: modelComparison
+      title: Model Comparison (Variable Components)
+      type: Table
+      visible: (show_model_comparison)
+      columns:
+          - name: model
+            title: 'Model'
+            type: text
+          - name: n_components
+            title: 'N Components'
+            type: integer
+          - name: c_index
+            title: 'C-Index'
+            type: number
+          - name: aic
+            title: 'AIC'
+            type: number
+          - name: bic
+            title: 'BIC'
+            type: number
+          - name: log_likelihood
+            title: 'Log-Likelihood'
+            type: number
 
     - name: screePlot
       title: Scree Plot - Explained Variance

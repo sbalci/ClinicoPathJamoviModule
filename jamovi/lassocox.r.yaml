@@ -13,6 +13,17 @@ items:
           - elapsedtime
           - explanatory
 
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - suitabilityCheck
+
     - name: modelSummary
       title: Model Summary
       type: Table
@@ -23,7 +34,7 @@ items:
           type: text
         - name: value
           title: "Value"
-          type: number
+          type: text
       clearWith:
           - outcome
           - outcomeLevel
@@ -189,11 +200,11 @@ items:
           type: number
           format: zto
         - name: selection_frequency
-          title: "Selection Frequency"
+          title: "Path Inclusion Proportion"
           type: number
           format: pc
         - name: stability_rank
-          title: "Stability Rank"
+          title: "Importance Rank"
           type: integer
       clearWith:
           - showVariableImportance
@@ -201,6 +212,9 @@ items:
           - outcomeLevel
           - elapsedtime
           - explanatory
+          - lambda
+          - nfolds
+          - standardize
 
     - name: modelComparison
       title: LASSO vs Standard Cox Regression
@@ -232,6 +246,9 @@ items:
           - outcomeLevel
           - elapsedtime
           - explanatory
+          - lambda
+          - nfolds
+          - standardize
 
     - name: regularizationPathExplanation
       title: Understanding Regularization Path

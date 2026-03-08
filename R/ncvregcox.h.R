@@ -17,7 +17,8 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             standardize = TRUE,
             plot_path = TRUE,
             plot_cv = TRUE,
-            variable_importance = TRUE, ...) {
+            variable_importance = TRUE,
+            suitabilityCheck = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -53,8 +54,7 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 penalty,
                 options=list(
                     "SCAD",
-                    "MCP",
-                    "lasso"),
+                    "MCP"),
                 default="SCAD")
             private$..cv_folds <- jmvcore::OptionNumber$new(
                 "cv_folds",
@@ -97,6 +97,10 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "variable_importance",
                 variable_importance,
                 default=TRUE)
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
+                default=TRUE)
 
             self$.addOption(private$..time)
             self$.addOption(private$..event)
@@ -110,6 +114,7 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plot_path)
             self$.addOption(private$..plot_cv)
             self$.addOption(private$..variable_importance)
+            self$.addOption(private$..suitabilityCheck)
         }),
     active = list(
         time = function() private$..time$value,
@@ -123,7 +128,8 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         standardize = function() private$..standardize$value,
         plot_path = function() private$..plot_path$value,
         plot_cv = function() private$..plot_cv$value,
-        variable_importance = function() private$..variable_importance$value),
+        variable_importance = function() private$..variable_importance$value,
+        suitabilityCheck = function() private$..suitabilityCheck$value),
     private = list(
         ..time = NA,
         ..event = NA,
@@ -136,7 +142,8 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..standardize = NA,
         ..plot_path = NA,
         ..plot_cv = NA,
-        ..variable_importance = NA)
+        ..variable_importance = NA,
+        ..suitabilityCheck = NA)
 )
 
 ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -144,6 +151,7 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         model_summary = function() private$.items[["model_summary"]],
         selected_variables = function() private$.items[["selected_variables"]],
         variable_importance = function() private$.items[["variable_importance"]],
@@ -153,7 +161,6 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         regularization_path = function() private$.items[["regularization_path"]],
         cv_error_plot = function() private$.items[["cv_error_plot"]],
         variable_selection_plot = function() private$.items[["variable_selection_plot"]],
-        coefficient_comparison = function() private$.items[["coefficient_comparison"]],
         model_interpretation = function() private$.items[["model_interpretation"]]),
     private = list(),
     public=list(
@@ -171,12 +178,33 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="instructions",
                 title="Instructions",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "suitabilityCheck")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="model_summary",
                 title="Model Summary",
                 rows=1,
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize",
+                    "suitabilityCheck"),
                 columns=list(
                     list(
                         `name`="penalty", 
@@ -196,14 +224,26 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="deviance_explained", 
-                        `title`="Deviance Explained (%)", 
-                        `type`="number"))))
+                        `title`="C-index", 
+                        `type`="number", 
+                        `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="selected_variables",
                 title="Selected Variables",
                 rows=0,
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize",
+                    "suitabilityCheck"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -216,18 +256,6 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="hazard_ratio", 
                         `title`="Hazard Ratio", 
-                        `type`="number"),
-                    list(
-                        `name`="standard_error", 
-                        `title`="Standard Error", 
-                        `type`="number"),
-                    list(
-                        `name`="z_value", 
-                        `title`="Z-value", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="P-value", 
                         `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -235,6 +263,17 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Variable Importance",
                 rows=0,
                 visible="(variable_importance)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize",
+                    "variable_importance"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -258,6 +297,16 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Cross-Validation Results",
                 rows=0,
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize"),
                 columns=list(
                     list(
                         `name`="lambda", 
@@ -281,6 +330,16 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Model Comparison",
                 rows=0,
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize"),
                 columns=list(
                     list(
                         `name`="model", 
@@ -312,6 +371,16 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Convergence Information",
                 rows=1,
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize"),
                 columns=list(
                     list(
                         `name`="converged", 
@@ -336,7 +405,17 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 visible="(plot_path)",
-                renderFun=".plot_regularization_path"))
+                renderFun=".plot_regularization_path",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cv_error_plot",
@@ -344,7 +423,17 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 visible="(plot_cv)",
-                renderFun=".plot_cv_error"))
+                renderFun=".plot_cv_error",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="variable_selection_plot",
@@ -352,20 +441,33 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 visible="(variable_importance)",
-                renderFun=".plot_variable_selection"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="coefficient_comparison",
-                title="Coefficient Comparison",
-                width=600,
-                height=450,
-                visible=TRUE,
-                renderFun=".plot_coefficient_comparison"))
+                renderFun=".plot_variable_selection",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize",
+                    "variable_importance")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="model_interpretation",
                 title="Model Interpretation and Clinical Insights",
-                visible=TRUE))}))
+                visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "cv_folds",
+                    "lambda_type",
+                    "alpha",
+                    "gamma",
+                    "standardize")))}))
 
 ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ncvregcoxBase",
@@ -426,9 +528,13 @@ ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plot_cv Display cross-validation error plot
 #' @param variable_importance Calculate and display variable importance
 #'   metrics
+#' @param suitabilityCheck Run a comprehensive data suitability assessment
+#'   before analysis. Checks sample size, events-per-variable ratio,
+#'   multicollinearity,  and whether regularization is needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$model_summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$selected_variables} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$variable_importance} \tab \tab \tab \tab \tab a table \cr
@@ -438,7 +544,6 @@ ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$regularization_path} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$cv_error_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$variable_selection_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$coefficient_comparison} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$model_interpretation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -462,7 +567,8 @@ ncvregcox <- function(
     standardize = TRUE,
     plot_path = TRUE,
     plot_cv = TRUE,
-    variable_importance = TRUE) {
+    variable_importance = TRUE,
+    suitabilityCheck = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ncvregcox requires jmvcore to be installed (restart may be required)")
@@ -491,7 +597,8 @@ ncvregcox <- function(
         standardize = standardize,
         plot_path = plot_path,
         plot_cv = plot_cv,
-        variable_importance = variable_importance)
+        variable_importance = variable_importance,
+        suitabilityCheck = suitabilityCheck)
 
     analysis <- ncvregcoxClass$new(
         options = options,

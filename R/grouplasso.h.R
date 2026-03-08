@@ -6,6 +6,7 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            suitabilityCheck = TRUE,
             time = NULL,
             event = NULL,
             predictors = NULL,
@@ -55,6 +56,10 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
+                default=TRUE)
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
@@ -298,6 +303,7 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=1,
                 max=999999)
 
+            self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..time)
             self$.addOption(private$..event)
             self$.addOption(private$..predictors)
@@ -342,6 +348,7 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..random_seed)
         }),
     active = list(
+        suitabilityCheck = function() private$..suitabilityCheck$value,
         time = function() private$..time$value,
         event = function() private$..event$value,
         predictors = function() private$..predictors$value,
@@ -385,6 +392,7 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         parallel_computing = function() private$..parallel_computing$value,
         random_seed = function() private$..random_seed$value),
     private = list(
+        ..suitabilityCheck = NA,
         ..time = NA,
         ..event = NA,
         ..predictors = NA,
@@ -435,11 +443,13 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         instructions = function() private$.items[["instructions"]],
         todo = function() private$.items[["todo"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         groupSummary = function() private$.items[["groupSummary"]],
         coefficients = function() private$.items[["coefficients"]],
         pathSummary = function() private$.items[["pathSummary"]],
         cvResults = function() private$.items[["cvResults"]],
         stabilityResults = function() private$.items[["stabilityResults"]],
+        modelPerformanceNote = function() private$.items[["modelPerformanceNote"]],
         modelPerformance = function() private$.items[["modelPerformance"]],
         nestedCVResults = function() private$.items[["nestedCVResults"]],
         permutationResults = function() private$.items[["permutationResults"]],
@@ -458,7 +468,7 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "survival",
-                    "grplasso"))
+                    "glmnet"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -469,6 +479,16 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="todo",
                 title="Analysis Todo",
                 visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "predictors",
+                    "suitabilityCheck")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="groupSummary",
@@ -667,6 +687,11 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="First Selected (Lambda)", 
                         `type`="number", 
                         `format`="zto"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="modelPerformanceNote",
+                title="",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelPerformance",
@@ -867,6 +892,9 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' )
 #'}
 #' @param data The data as a data frame.
+#' @param suitabilityCheck Run a comprehensive data suitability assessment
+#'   before analysis. Checks sample size, events-per-variable ratio,
+#'   multicollinearity,  and whether regularization is needed.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.
 #' @param event Event indicator variable. For survival analysis: 0 = censored,
@@ -970,11 +998,13 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$groupSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pathSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cvResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stabilityResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelPerformanceNote} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelPerformance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nestedCVResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$permutationResults} \tab \tab \tab \tab \tab a table \cr
@@ -994,6 +1024,7 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 grouplasso <- function(
     data,
+    suitabilityCheck = TRUE,
     time,
     event,
     predictors,
@@ -1055,6 +1086,7 @@ grouplasso <- function(
     for (v in strata) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- grouplassoOptions$new(
+        suitabilityCheck = suitabilityCheck,
         time = time,
         event = event,
         predictors = predictors,

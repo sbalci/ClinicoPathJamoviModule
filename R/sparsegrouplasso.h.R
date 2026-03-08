@@ -9,6 +9,7 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             time_var = NULL,
             event_var = NULL,
             pred_vars = NULL,
+            suitabilityCheck = TRUE,
             group_definition = "factor_based",
             custom_groups = "",
             pathway_info = NULL,
@@ -81,6 +82,10 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 permitted=list(
                     "numeric",
                     "factor"))
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
+                default=TRUE)
             private$..group_definition <- jmvcore::OptionList$new(
                 "group_definition",
                 group_definition,
@@ -299,6 +304,7 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..time_var)
             self$.addOption(private$..event_var)
             self$.addOption(private$..pred_vars)
+            self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..group_definition)
             self$.addOption(private$..custom_groups)
             self$.addOption(private$..pathway_info)
@@ -345,6 +351,7 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         time_var = function() private$..time_var$value,
         event_var = function() private$..event_var$value,
         pred_vars = function() private$..pred_vars$value,
+        suitabilityCheck = function() private$..suitabilityCheck$value,
         group_definition = function() private$..group_definition$value,
         custom_groups = function() private$..custom_groups$value,
         pathway_info = function() private$..pathway_info$value,
@@ -390,6 +397,7 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..time_var = NA,
         ..event_var = NA,
         ..pred_vars = NA,
+        ..suitabilityCheck = NA,
         ..group_definition = NA,
         ..custom_groups = NA,
         ..pathway_info = NA,
@@ -439,6 +447,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     active = list(
         instructions = function() private$.items[["instructions"]],
         todo = function() private$.items[["todo"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         summary = function() private$.items[["summary"]],
         coefficients = function() private$.items[["coefficients"]],
         groupStructure = function() private$.items[["groupStructure"]],
@@ -474,6 +483,11 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="todo",
                 title="Analysis Todo",
                 visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -799,6 +813,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="cvErrorPlot",
                 title="Cross-Validation Error",
+                renderFun=".renderCVErrorPlot",
                 width=600,
                 height=400,
                 visible="(plot_cv_error)",
@@ -811,6 +826,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="coefficientPlot",
                 title="Coefficient Path",
+                renderFun=".renderCoefficientPlot",
                 width=700,
                 height=500,
                 visible="(plot_coefficients)",
@@ -823,6 +839,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="groupSelectionPlot",
                 title="Group Selection Pattern",
+                renderFun=".renderGroupSelectionPlot",
                 width=600,
                 height=400,
                 visible="(plot_groups)",
@@ -835,6 +852,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="sparsityPlot",
                 title="Sparsity Pattern",
+                renderFun=".renderSparsityPlot",
                 width=600,
                 height=400,
                 visible="(plot_sparsity)",
@@ -847,6 +865,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="stabilityPlot",
                 title="Stability Selection",
+                renderFun=".renderStabilityPlot",
                 width=600,
                 height=400,
                 visible="(plot_stability)",
@@ -902,6 +921,8 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param time_var the time-to-event variable
 #' @param event_var the event indicator variable (0/1 or FALSE/TRUE)
 #' @param pred_vars the predictor variables for the model
+#' @param suitabilityCheck assess if data is suitable for the selected
+#'   regularized Cox model
 #' @param group_definition method for defining variable groups
 #' @param custom_groups custom group specification as comma-separated lists.
 #'   Example: "1,2;3,4,5;6" for three groups
@@ -956,6 +977,7 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$groupStructure} \tab \tab \tab \tab \tab a table \cr
@@ -985,6 +1007,7 @@ sparsegrouplasso <- function(
     time_var,
     event_var,
     pred_vars,
+    suitabilityCheck = TRUE,
     group_definition = "factor_based",
     custom_groups = "",
     pathway_info,
@@ -1048,6 +1071,7 @@ sparsegrouplasso <- function(
         time_var = time_var,
         event_var = event_var,
         pred_vars = pred_vars,
+        suitabilityCheck = suitabilityCheck,
         group_definition = group_definition,
         custom_groups = custom_groups,
         pathway_info = pathway_info,

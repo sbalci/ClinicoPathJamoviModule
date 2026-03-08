@@ -13,6 +13,16 @@ items:
       type: Html
       visible: false
 
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - time
+          - event
+          - predictors
+          - suitabilityCheck
+
     - name: groupSummary
       title: Group Structure Summary
       type: Table
@@ -178,6 +188,11 @@ items:
           type: number
           format: zto
 
+    - name: modelPerformanceNote
+      title: ''
+      type: Html
+      visible: true
+
     - name: modelPerformance
       title: Model Performance
       type: Table
@@ -318,5 +333,5 @@ refs:
     - ClinicoPathJamoviModule
 
     - survival
-    - grplasso
+    - glmnet
 ...

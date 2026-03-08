@@ -90,7 +90,22 @@ grouplassoClass <- R6::R6Class(
             if (is.null(group_data)) return()
 
             # Check if required packages are available
-            required_packages <- c("grplasso", "survival", "glmnet")
+            required_packages <- c("survival", "glmnet")
+
+            # Assess data suitability if requested
+            if (self$options$suitabilityCheck) {
+                # Just use predictor data as a matrix
+                pred_mat <- as.matrix(group_data$data[, self$options$predictors, drop=FALSE])
+                # Convert factors to numeric to allow rough correlation checks
+                if(ncol(pred_mat) > 0) {
+                   numeric_pred_mat <- matrix(NA, nrow=nrow(pred_mat), ncol=ncol(pred_mat))
+                   for(i in 1:ncol(pred_mat)) {
+                       numeric_pred_mat[,i] <- as.numeric(as.factor(pred_mat[,i]))
+                   }
+                   private$.assessSuitability(numeric_pred_mat, group_data$time, group_data$event)
+                }
+            }
+
             missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
             
             if (length(missing_packages) > 0) {
@@ -427,124 +442,264 @@ grouplassoClass <- R6::R6Class(
         },
 
         .fitStandardGroupLasso = function(group_data) {
-            requireNamespace("grplasso", quietly = TRUE)
+            requireNamespace("glmnet", quietly = TRUE)
+            requireNamespace("survival", quietly = TRUE)
 
-            # Set up lambda sequence
-            if (self$options$lambda_sequence == "auto") {
-                lambda_seq <- NULL
-            } else {
-                # Custom lambda sequence implementation would go here
-                lambda_seq <- NULL
+            # Build penalty.factor from group structure to achieve group-level
+            # penalization via glmnet. All variables in the same group receive
+            # the same penalty weight (derived from group weights), so they are
+            # selected/excluded together by the L1 penalty.
+            group_vector <- group_data$groups
+            group_info   <- group_data$group_info
+            group_weights_vec <- private$.calculateGroupWeights(group_vector, group_info)
+
+            # Map group-level weights to per-variable penalty factors
+            penalty_factor <- numeric(length(group_vector))
+            for (i in seq_len(nrow(group_info))) {
+                gid <- group_info$group_id[i]
+                penalty_factor[group_vector == gid] <- group_weights_vec[i]
             }
 
-            # Fit group LASSO with cross-validation
+            # Fit group LASSO Cox with cross-validation via glmnet
             set.seed(self$options$random_seed)
-            
-            # Use grplasso package for group LASSO
-            cv_fit <- grplasso::grplasso(
+
+            cv_result <- glmnet::cv.glmnet(
                 x = group_data$x,
                 y = group_data$y,
-                index = group_data$groups,
+                family = "cox",
+                alpha = 1,
+                penalty.factor = penalty_factor,
+                nfolds = self$options$cv_folds,
                 standardize = FALSE,  # Already standardized if requested
-                model = LinReg(),  # For Cox, would need CoxReg()
-                lambda = lambda_seq,
-                control = grplasso::grpl.control(
-                    inner.iter = self$options$max_iterations,
-                    beta.start = NULL,
-                    step.ratio = 0.5
-                )
+                maxit = self$options$max_iterations
             )
 
-            # Cross-validation for lambda selection
-            cv_result <- grplasso::cv.grplasso(
+            # Fit full regularization path
+            full_fit <- glmnet::glmnet(
                 x = group_data$x,
                 y = group_data$y,
-                index = group_data$groups,
-                model = LinReg(),
-                nfolds = self$options$cv_folds,
-                lambda = cv_fit$lambda
+                family = "cox",
+                alpha = 1,
+                penalty.factor = penalty_factor,
+                lambda = cv_result$lambda,
+                standardize = FALSE,
+                maxit = self$options$max_iterations
             )
 
             # Extract optimal results
             lambda_min <- cv_result$lambda.min
             lambda_1se <- cv_result$lambda.1se
-            
+
             # Get coefficients at optimal lambda
-            coef_min <- predict(cv_fit, lambda = lambda_min, type = "coefficients")
-            coef_1se <- predict(cv_fit, lambda = lambda_1se, type = "coefficients")
+            coef_min <- as.vector(coef(cv_result, s = "lambda.min"))
+            coef_1se <- as.vector(coef(cv_result, s = "lambda.1se"))
 
             return(list(
-                cv_fit = cv_fit,
+                cv_fit = full_fit,
                 cv_result = cv_result,
                 lambda_min = lambda_min,
                 lambda_1se = lambda_1se,
                 coef_min = coef_min,
                 coef_1se = coef_1se,
-                group_vector = group_data$groups
+                group_vector = group_data$groups,
+                penalty_factor = penalty_factor
             ))
         },
 
         .fitSparseGroupLasso = function(group_data) {
-            # Sparse group LASSO implementation
-            # This would combine group and individual penalties
-            # For now, fallback to standard group LASSO
-            return(private$.fitStandardGroupLasso(group_data))
+            # Sparse group LASSO: combines group-level (L1/L2) and individual (L1)
+            # penalties via the glmnet alpha parameter. alpha < 1 mixes L1 and L2
+            # norms, achieving within-group sparsity when combined with penalty.factor.
+            requireNamespace("glmnet", quietly = TRUE)
+            requireNamespace("survival", quietly = TRUE)
+
+            group_vector <- group_data$groups
+            group_info   <- group_data$group_info
+            group_weights_vec <- private$.calculateGroupWeights(group_vector, group_info)
+
+            penalty_factor <- numeric(length(group_vector))
+            for (i in seq_len(nrow(group_info))) {
+                gid <- group_info$group_id[i]
+                penalty_factor[group_vector == gid] <- group_weights_vec[i]
+            }
+
+            # Use the user-specified alpha (sparsity parameter) to blend
+            # group-level and individual-level penalties
+            alpha_val <- self$options$alpha
+
+            set.seed(self$options$random_seed)
+
+            cv_result <- glmnet::cv.glmnet(
+                x = group_data$x,
+                y = group_data$y,
+                family = "cox",
+                alpha = alpha_val,
+                penalty.factor = penalty_factor,
+                nfolds = self$options$cv_folds,
+                standardize = FALSE,
+                maxit = self$options$max_iterations
+            )
+
+            full_fit <- glmnet::glmnet(
+                x = group_data$x,
+                y = group_data$y,
+                family = "cox",
+                alpha = alpha_val,
+                penalty.factor = penalty_factor,
+                lambda = cv_result$lambda,
+                standardize = FALSE,
+                maxit = self$options$max_iterations
+            )
+
+            lambda_min <- cv_result$lambda.min
+            lambda_1se <- cv_result$lambda.1se
+            coef_min <- as.vector(coef(cv_result, s = "lambda.min"))
+            coef_1se <- as.vector(coef(cv_result, s = "lambda.1se"))
+
+            return(list(
+                cv_fit = full_fit,
+                cv_result = cv_result,
+                lambda_min = lambda_min,
+                lambda_1se = lambda_1se,
+                coef_min = coef_min,
+                coef_1se = coef_1se,
+                group_vector = group_data$groups,
+                penalty_factor = penalty_factor
+            ))
         },
 
         .fitAdaptiveGroupLasso = function(group_data) {
-            # Adaptive group LASSO with data-driven weights
-            # Calculate initial weights and then fit
-            return(private$.fitStandardGroupLasso(group_data))
+            # Adaptive group LASSO: use ridge-based initial estimates to compute
+            # data-driven penalty weights per group, then fit L1-penalized Cox.
+            requireNamespace("glmnet", quietly = TRUE)
+            requireNamespace("survival", quietly = TRUE)
+
+            group_vector <- group_data$groups
+            group_info   <- group_data$group_info
+
+            # Step 1: Obtain initial coefficient estimates via ridge Cox
+            ridge_fit <- glmnet::glmnet(
+                x = group_data$x,
+                y = group_data$y,
+                family = "cox",
+                alpha = 0,
+                standardize = FALSE
+            )
+            # Pick a moderate lambda along the path
+            lambda_ridge <- ridge_fit$lambda[max(1, length(ridge_fit$lambda) %/% 4)]
+            initial_coefs <- as.vector(coef(ridge_fit, s = lambda_ridge))
+
+            # Step 2: Compute adaptive group weights from initial estimates
+            # Weight = 1 / (group L2 norm of initial coefficients) ^ gamma
+            gamma_val <- 1  # Standard adaptive weight exponent
+            adaptive_penalty <- numeric(length(group_vector))
+            for (i in seq_len(nrow(group_info))) {
+                gid <- group_info$group_id[i]
+                g_idx <- which(group_vector == gid)
+                group_norm <- sqrt(sum(initial_coefs[g_idx]^2))
+                # Avoid division by zero; large weight = strong penalization
+                w <- if (group_norm > 1e-10) (1 / group_norm)^gamma_val else 1e4
+                adaptive_penalty[g_idx] <- w
+            }
+
+            # Step 3: Fit adaptive group LASSO Cox
+            set.seed(self$options$random_seed)
+
+            cv_result <- glmnet::cv.glmnet(
+                x = group_data$x,
+                y = group_data$y,
+                family = "cox",
+                alpha = 1,
+                penalty.factor = adaptive_penalty,
+                nfolds = self$options$cv_folds,
+                standardize = FALSE,
+                maxit = self$options$max_iterations
+            )
+
+            full_fit <- glmnet::glmnet(
+                x = group_data$x,
+                y = group_data$y,
+                family = "cox",
+                alpha = 1,
+                penalty.factor = adaptive_penalty,
+                lambda = cv_result$lambda,
+                standardize = FALSE,
+                maxit = self$options$max_iterations
+            )
+
+            lambda_min <- cv_result$lambda.min
+            lambda_1se <- cv_result$lambda.1se
+            coef_min <- as.vector(coef(cv_result, s = "lambda.min"))
+            coef_1se <- as.vector(coef(cv_result, s = "lambda.1se"))
+
+            return(list(
+                cv_fit = full_fit,
+                cv_result = cv_result,
+                lambda_min = lambda_min,
+                lambda_1se = lambda_1se,
+                coef_min = coef_min,
+                coef_1se = coef_1se,
+                group_vector = group_data$groups,
+                penalty_factor = adaptive_penalty
+            ))
         },
 
         .stabilitySelection = function(group_data) {
+            requireNamespace("glmnet", quietly = TRUE)
+
             n_boot <- self$options$bootstrap_samples
-            subsample_ratio <- 0.8  # Fixed subsample ratio
+            subsample_ratio <- 0.8
             n_groups <- max(group_data$groups)
-            
+            group_vector <- group_data$groups
+            group_info <- group_data$group_info
+
+            # Build penalty factor (same logic as in .fitStandardGroupLasso)
+            group_weights_vec <- private$.calculateGroupWeights(group_vector, group_info)
+            penalty_factor <- numeric(length(group_vector))
+            for (i in seq_len(nrow(group_info))) {
+                gid <- group_info$group_id[i]
+                penalty_factor[group_vector == gid] <- group_weights_vec[i]
+            }
+
             selection_matrix <- matrix(0, nrow = n_boot, ncol = n_groups)
-            
+
             set.seed(self$options$random_seed)
-            
+
             for (b in 1:n_boot) {
-                # Bootstrap sample
                 n_sub <- floor(nrow(group_data$x) * subsample_ratio)
                 boot_idx <- sample(nrow(group_data$x), n_sub, replace = FALSE)
-                
+
                 boot_x <- group_data$x[boot_idx, , drop = FALSE]
-                boot_y <- group_data$y[boot_idx, ]
-                boot_groups <- group_data$groups
-                
+                boot_y <- group_data$y[boot_idx]
+
                 tryCatch({
-                    # Fit group LASSO on bootstrap sample
-                    boot_fit <- grplasso::grplasso(
+                    boot_cv <- glmnet::cv.glmnet(
                         x = boot_x,
                         y = boot_y,
-                        index = boot_groups,
-                        standardize = FALSE,
-                        model = LinReg()
+                        family = "cox",
+                        alpha = 1,
+                        penalty.factor = penalty_factor,
+                        nfolds = min(5, self$options$cv_folds),
+                        standardize = FALSE
                     )
-                    
-                    # Check which groups are selected at some lambda
-                    # This is a simplified implementation
+
+                    boot_coef <- as.vector(coef(boot_cv, s = "lambda.min"))
+
                     for (g in 1:n_groups) {
-                        group_vars <- which(boot_groups == g)
+                        group_vars <- which(group_vector == g)
                         if (length(group_vars) > 0) {
-                            # Check if any variable in group has non-zero coefficient
-                            group_selected <- any(abs(boot_fit$coefficients[group_vars, ncol(boot_fit$coefficients)]) > 1e-8)
+                            group_selected <- any(abs(boot_coef[group_vars]) > 1e-8)
                             selection_matrix[b, g] <- as.numeric(group_selected)
                         }
                     }
-                    
                 }, error = function(e) {
-                    # Skip this bootstrap sample
+                    # Skip this bootstrap sample on error
                 })
             }
-            
-            # Calculate selection frequencies
+
             selection_freq <- colMeans(selection_matrix)
             stable_groups <- which(selection_freq >= self$options$stability_threshold)
-            
+
             return(list(
                 selection_frequencies = selection_freq,
                 stable_groups = stable_groups,
@@ -553,15 +708,73 @@ grouplassoClass <- R6::R6Class(
         },
 
         .nestedCrossValidation = function(group_data) {
-            # Nested cross-validation implementation
+            requireNamespace("glmnet", quietly = TRUE)
+            requireNamespace("survival", quietly = TRUE)
+
             outer_folds <- self$options$cv_folds
             inner_folds <- self$options$inner_cv_folds
-            
-            # This would be a more complex implementation
-            # For now, return placeholder results
+            n <- nrow(group_data$x)
+            group_vector <- group_data$groups
+            group_info <- group_data$group_info
+
+            # Build penalty factor
+            group_weights_vec <- private$.calculateGroupWeights(group_vector, group_info)
+            penalty_factor <- numeric(length(group_vector))
+            for (i in seq_len(nrow(group_info))) {
+                gid <- group_info$group_id[i]
+                penalty_factor[group_vector == gid] <- group_weights_vec[i]
+            }
+
+            set.seed(self$options$random_seed)
+            fold_ids <- sample(rep(1:outer_folds, length.out = n))
+
+            outer_performance <- numeric(outer_folds)
+            optimal_lambdas   <- numeric(outer_folds)
+
+            for (k in 1:outer_folds) {
+                test_idx  <- which(fold_ids == k)
+                train_idx <- which(fold_ids != k)
+
+                train_x <- group_data$x[train_idx, , drop = FALSE]
+                train_y <- group_data$y[train_idx]
+                test_x  <- group_data$x[test_idx, , drop = FALSE]
+                test_y  <- group_data$y[test_idx]
+
+                tryCatch({
+                    # Inner CV for lambda selection
+                    inner_cv <- glmnet::cv.glmnet(
+                        x = train_x,
+                        y = train_y,
+                        family = "cox",
+                        alpha = 1,
+                        penalty.factor = penalty_factor,
+                        nfolds = inner_folds,
+                        standardize = FALSE,
+                        maxit = self$options$max_iterations
+                    )
+
+                    optimal_lambdas[k] <- inner_cv$lambda.min
+
+                    # Evaluate on held-out fold using concordance (C-index)
+                    test_coef <- as.vector(coef(inner_cv, s = "lambda.min"))
+                    lp_test <- as.vector(test_x %*% test_coef)
+
+                    # Compute C-index via survival::concordance
+                    conc <- survival::concordance(
+                        test_y ~ lp_test,
+                        reverse = TRUE
+                    )
+                    outer_performance[k] <- conc$concordance
+
+                }, error = function(e) {
+                    outer_performance[k] <<- NA
+                    optimal_lambdas[k]   <<- NA
+                })
+            }
+
             return(list(
-                outer_performance = rep(0.7, outer_folds),
-                optimal_lambdas = rep(0.1, outer_folds)
+                outer_performance = outer_performance,
+                optimal_lambdas = optimal_lambdas
             ))
         },
 
@@ -589,6 +802,11 @@ grouplassoClass <- R6::R6Class(
             # Stability results
             if (self$options$stability_selection && !is.null(group_results$stability)) {
                 private$.populateStabilityResults(group_results, group_data)
+            }
+
+            # Nested CV results
+            if (self$options$nested_cv && !is.null(group_results$nested_cv)) {
+                private$.populateNestedCVResults(group_results, group_data)
             }
 
             # Performance metrics
@@ -626,6 +844,17 @@ grouplassoClass <- R6::R6Class(
                 }
             }
 
+            # Compute actual group weights used in penalty
+            group_weights_vec <- private$.calculateGroupWeights(group_vector, group_info)
+
+            # Compute group L2 norms of coefficients for entry order
+            group_norms <- sapply(group_info$group_id, function(g) {
+                g_idx <- which(group_vector == g)
+                sqrt(sum(coef_vec[g_idx]^2))
+            })
+            # Rank by descending norm (larger norm = entered earlier)
+            entry_order <- rank(-group_norms, ties.method = "min")
+
             group_summary <- data.frame(
                 group_id = group_info$group_id,
                 group_name = group_info$group_name,
@@ -634,9 +863,9 @@ grouplassoClass <- R6::R6Class(
                     paste(group_data$var_names[var_indices], collapse = ", ")
                 }),
                 group_size = group_info$group_size,
-                group_weight = rep(1, nrow(group_info)),  # Placeholder
+                group_weight = group_weights_vec,
                 selected = selected_groups,
-                selection_order = 1:nrow(group_info)  # Placeholder
+                selection_order = entry_order
             )
 
             self$results$groupSummary$setData(group_summary)
@@ -646,15 +875,28 @@ grouplassoClass <- R6::R6Class(
             coef_vec <- as.vector(group_results$coef_min)
             group_vector <- group_data$groups
             var_names <- group_data$var_names
-            
+            group_info <- group_data$group_info
+
+            # Compute per-variable group norm (L2 norm of coefficients in same group)
+            group_norms <- numeric(length(coef_vec))
+            for (i in seq_len(nrow(group_info))) {
+                gid <- group_info$group_id[i]
+                g_idx <- which(group_vector == gid)
+                gnorm <- sqrt(sum(coef_vec[g_idx]^2))
+                group_norms[g_idx] <- gnorm
+            }
+
+            max_abs <- max(abs(coef_vec), na.rm = TRUE)
+            rel_importance <- if (max_abs > 0) abs(coef_vec) / max_abs else rep(0, length(coef_vec))
+
             # Create coefficient table
             coef_data <- data.frame(
                 group_id = group_vector,
                 variable = var_names,
                 coefficient = coef_vec,
                 exp_coefficient = exp(coef_vec),
-                group_norm = rep(NA, length(coef_vec)),  # Would calculate group norms
-                relative_importance = abs(coef_vec) / max(abs(coef_vec), na.rm = TRUE),
+                group_norm = group_norms,
+                relative_importance = rel_importance,
                 selected = ifelse(abs(coef_vec) > self$options$selection_threshold, "Yes", "No")
             )
 
@@ -669,18 +911,41 @@ grouplassoClass <- R6::R6Class(
         },
 
         .populatePathSummary = function(group_results) {
-            if (!is.null(group_results$cv_fit)) {
-                lambda_seq <- group_results$cv_fit$lambda
+            full_fit <- group_results$cv_fit
+            if (!is.null(full_fit)) {
+                lambda_seq <- full_fit$lambda
+                beta_matrix <- as.matrix(full_fit$beta)
                 n_steps <- min(20, length(lambda_seq))
                 step_indices <- round(seq(1, length(lambda_seq), length.out = n_steps))
-                
+                group_vector <- group_results$group_vector
+
+                n_groups_sel <- numeric(n_steps)
+                n_vars_sel   <- numeric(n_steps)
+                dev_values   <- numeric(n_steps)
+                df_values    <- numeric(n_steps)
+
+                for (j in seq_along(step_indices)) {
+                    idx <- step_indices[j]
+                    coefs_at_lambda <- beta_matrix[, idx]
+                    selected <- abs(coefs_at_lambda) > 1e-10
+                    n_vars_sel[j] <- sum(selected)
+                    # Count unique groups with at least one selected variable
+                    if (any(selected)) {
+                        n_groups_sel[j] <- length(unique(group_vector[selected]))
+                    } else {
+                        n_groups_sel[j] <- 0
+                    }
+                    dev_values[j] <- full_fit$dev.ratio[idx]
+                    df_values[j]  <- full_fit$df[idx]
+                }
+
                 path_data <- data.frame(
                     step = 1:n_steps,
                     lambda = lambda_seq[step_indices],
-                    n_groups_selected = rep(NA, n_steps),  # Would calculate
-                    n_variables_selected = rep(NA, n_steps),  # Would calculate
-                    deviance = rep(NA, n_steps),  # Would calculate
-                    df = rep(NA, n_steps)  # Would calculate
+                    n_groups_selected = as.integer(n_groups_sel),
+                    n_variables_selected = as.integer(n_vars_sel),
+                    deviance = dev_values,
+                    df = df_values
                 )
 
                 self$results$pathSummary$setData(path_data)
@@ -688,15 +953,34 @@ grouplassoClass <- R6::R6Class(
         },
 
         .populateCVResults = function(group_results) {
-            if (!is.null(group_results$cv_result)) {
+            cv_res <- group_results$cv_result
+            if (!is.null(cv_res)) {
+                # CV error at lambda.min
+                idx_min <- which(cv_res$lambda == cv_res$lambda.min)
+                cv_error_min <- if (length(idx_min) > 0) cv_res$cvm[idx_min[1]] else min(cv_res$cvm, na.rm = TRUE)
+
+                # CV error at lambda.1se
+                idx_1se <- which(cv_res$lambda == cv_res$lambda.1se)
+                cv_error_1se <- if (length(idx_1se) > 0) cv_res$cvm[idx_1se[1]] else NA
+
+                # Count selected groups at each lambda
+                group_vector <- group_results$group_vector
+                coef_min_vec <- group_results$coef_min
+                coef_1se_vec <- group_results$coef_1se
+
+                count_groups <- function(cv) {
+                    sel <- abs(cv) > 1e-10
+                    if (any(sel)) length(unique(group_vector[sel])) else 0L
+                }
+
                 cv_data <- data.frame(
-                    criterion = "Cross-Validation",
+                    criterion = "Cross-Validation (Partial Likelihood Deviance)",
                     lambda_min = group_results$lambda_min,
                     lambda_1se = group_results$lambda_1se,
-                    cv_error_min = min(group_results$cv_result$cvm, na.rm = TRUE),
-                    cv_error_1se = group_results$cv_result$cvm[which(group_results$cv_result$lambda == group_results$lambda_1se)],
-                    groups_min = NA,  # Would calculate
-                    groups_1se = NA   # Would calculate
+                    cv_error_min = cv_error_min,
+                    cv_error_1se = cv_error_1se,
+                    groups_min = count_groups(coef_min_vec),
+                    groups_1se = count_groups(coef_1se_vec)
                 )
 
                 self$results$cvResults$setData(cv_data)
@@ -720,39 +1004,128 @@ grouplassoClass <- R6::R6Class(
             self$results$stabilityResults$setData(stability_data)
         },
 
+        .populateNestedCVResults = function(group_results, group_data) {
+            nested <- group_results$nested_cv
+            outer_folds <- length(nested$outer_performance)
+
+            nested_data <- data.frame(
+                outer_fold = 1:outer_folds,
+                optimal_lambda = nested$optimal_lambdas,
+                n_groups_selected = rep(NA_integer_, outer_folds),
+                performance = nested$outer_performance,
+                training_error = rep(NA_real_, outer_folds)
+            )
+
+            self$results$nestedCVResults$setData(nested_data)
+        },
+
         .populatePerformance = function(group_results, group_data) {
-            # Calculate performance metrics
+            coef_vec <- group_results$coef_min
+            group_vector <- group_data$groups
+            selected <- abs(coef_vec) > self$options$selection_threshold
+            n_vars_selected <- sum(selected)
+            n_groups_selected <- if (any(selected)) length(unique(group_vector[selected])) else 0
+
+            cv_res <- group_results$cv_result
+            cv_error <- if (!is.null(cv_res)) {
+                idx <- which(cv_res$lambda == cv_res$lambda.min)
+                if (length(idx) > 0) cv_res$cvm[idx[1]] else min(cv_res$cvm, na.rm = TRUE)
+            } else { NA }
+
+            # Compute C-index on training data
+            c_index <- NA
+            if (n_vars_selected > 0) {
+                tryCatch({
+                    lp <- as.vector(group_data$x %*% coef_vec)
+                    conc <- survival::concordance(group_data$y ~ lp, reverse = TRUE)
+                    c_index <- conc$concordance
+                }, error = function(e) {})
+            } else {
+                c_index <- 0.500
+            }
+
+            metrics <- c("Number of Groups Selected", "Number of Variables Selected",
+                         "CV Partial Likelihood Deviance", "Training Concordance Index")
+            values <- c(n_groups_selected, n_vars_selected, cv_error, c_index)
+            ci_texts <- c("", "", "", "")
+            descriptions <- c(
+                "Groups with at least one non-zero coefficient",
+                "Individual variables with non-zero coefficients",
+                "Cross-validation error at optimal lambda",
+                "Concordance index on training data (optimistic)"
+            )
+
             perf_data <- data.frame(
-                metric = c("Number of Groups Selected", "Number of Variables Selected", "CV Error"),
-                value = c(
-                    length(unique(group_data$groups)),  # Placeholder
-                    sum(abs(group_results$coef_min) > self$options$selection_threshold),
-                    min(group_results$cv_result$cvm, na.rm = TRUE)
-                ),
-                confidence_interval = c("", "", ""),
-                description = c(
-                    "Groups selected by group LASSO",
-                    "Individual variables selected",
-                    "Cross-validation error at optimal lambda"
-                )
+                metric = metrics,
+                value = values,
+                confidence_interval = ci_texts,
+                description = descriptions
             )
 
             self$results$modelPerformance$setData(perf_data)
+            
+            note <- "<p><i>Note: The Training Concordance Index overestimates true out-of-sample performance, especially for high-dimensional models. Use Cross-Validation or Nested CV for a realistic assessment.</i></p>"
+            self$results$modelPerformanceNote$setContent(note)
         },
 
         .plotRegularizationPath = function(group_results, group_data) {
             image <- self$results$pathPlot
-            image$setState(list(results = group_results, data = group_data))
+            # Extract coefficient path from the glmnet fit object
+            full_fit <- group_results$cv_fit
+            # full_fit$beta is a sparse matrix: variables x lambda
+            beta_matrix <- as.matrix(full_fit$beta)
+            plot_data <- list(
+                lambda = as.numeric(full_fit$lambda),
+                beta = as.data.frame(t(beta_matrix)),
+                var_names = as.character(rownames(beta_matrix)),
+                lambda_min = as.numeric(group_results$lambda_min),
+                lambda_1se = as.numeric(group_results$lambda_1se),
+                group_vector = as.integer(group_data$groups),
+                group_names = as.character(group_data$group_info$group_name)
+            )
+            image$setState(plot_data)
         },
 
         .plotCVCurve = function(group_results) {
             image <- self$results$cvPlot
-            image$setState(group_results)
+            cv_res <- group_results$cv_result
+            plot_data <- list(
+                lambda = as.numeric(cv_res$lambda),
+                cvm = as.numeric(cv_res$cvm),
+                cvsd = as.numeric(cv_res$cvsd),
+                cvup = as.numeric(cv_res$cvup),
+                cvlo = as.numeric(cv_res$cvlo),
+                lambda_min = as.numeric(cv_res$lambda.min),
+                lambda_1se = as.numeric(cv_res$lambda.1se)
+            )
+            image$setState(plot_data)
         },
 
         .plotGroupImportance = function(group_results, group_data) {
             image <- self$results$importancePlot
-            image$setState(list(results = group_results, data = group_data))
+            # Use coef_min (the coefficient vector at lambda.min)
+            coef_vec <- as.numeric(group_results$coef_min)
+            var_names <- group_data$var_names
+            group_vector <- group_data$groups
+
+            # Compute group-level importance (L2 norm of group coefficients)
+            group_info <- group_data$group_info
+            group_importance <- numeric(nrow(group_info))
+            for (i in seq_len(nrow(group_info))) {
+                gid <- group_info$group_id[i]
+                g_idx <- which(group_vector == gid)
+                group_importance[i] <- sqrt(sum(coef_vec[g_idx]^2))
+            }
+
+            plot_data <- list(
+                var_names = as.character(var_names),
+                var_importance = as.numeric(abs(coef_vec)),
+                coef_values = coef_vec,
+                group_vector = as.integer(group_vector),
+                group_names = as.character(group_info$group_name),
+                group_importance = as.numeric(group_importance)
+            )
+            image$setState(plot_data)
         },
 
         .initResults = function() {
@@ -764,6 +1137,182 @@ grouplassoClass <- R6::R6Class(
             self$results$stabilityResults$setVisible(self$options$stability_selection)
             self$results$nestedCVResults$setVisible(self$options$nested_cv)
             self$results$permutationResults$setVisible(self$options$permutation_test)
+        },
+
+        # Data suitability assessment
+        .assessSuitability = function(pred_matrix, time_var, status_var) {
+            checks <- list()
+            
+            n <- nrow(pred_matrix)
+            n_events <- sum(status_var == 1)
+            p <- ncol(pred_matrix)
+            event_rate <- n_events / n
+
+            # -- Check 1: Events-Per-Variable (EPV) --
+            epv <- n_events / p
+            if (epv >= 10) {
+                checks$epv <- list(
+                    color = "green", label = "Events-Per-Variable (Overall)",
+                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "High EPV. Model estimation will be robust."
+                )
+            } else if (epv >= 1) {
+                checks$epv <- list(
+                    color = "yellow", label = "Events-Per-Variable (Overall)",
+                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "Low EPV. Standard Cox would struggle, but Group LASSO handles this well."
+                )
+            } else {
+                checks$epv <- list(
+                    color = "red", label = "Events-Per-Variable (Overall)",
+                    value = sprintf("%.3f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "Ultra-low EPV (< 1). Group LASSO regularization is absolutely necessary."
+                )
+            }
+
+            # -- Check 2: Regularization/Reduction Need --
+            if (p >= n / 3) {
+                checks$regularization <- list(
+                    color = "green", label = "Reduction Need",
+                    value = sprintf("p=%d, n=%d (ratio=%.2f)", p, n, p / n),
+                    detail = "High-dimensional setting. Group LASSO is strongly indicated."
+                )
+            } else {
+                checks$regularization <- list(
+                    color = "yellow", label = "Reduction Need",
+                    value = sprintf("p=%d, EPV=%.0f", p, epv),
+                    detail = "Moderate/low dimensionality. Group LASSO is still valid for group selection."
+                )
+            }
+
+            # -- Check 3: Sample Size --
+            if (n >= 100) {
+                checks$sample_size <- list(
+                    color = "green", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Adequate sample size for cross-validation."
+                )
+            } else if (n >= 30) {
+                checks$sample_size <- list(
+                    color = "yellow", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Small sample. Consider reducing the number of CV folds (e.g., 5-fold instead of 10)."
+                )
+            } else {
+                checks$sample_size <- list(
+                    color = "red", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Very small sample. Results will be highly variable and CV may not converge."
+                )
+            }
+
+            # -- Check 4: Multicollinearity --
+            tryCatch({
+                if (p <= 2000 && p >= 2) {
+                    cor_matrix <- cor(pred_matrix, use = "pairwise.complete.obs")
+                    diag(cor_matrix) <- 0
+                    max_cor <- max(abs(cor_matrix), na.rm = TRUE)
+                    
+                    if (max_cor < 0.7) {
+                        checks$collinearity <- list(
+                            color = "green", label = "Multicollinearity",
+                            value = sprintf("Max |r| = %.2f", max_cor),
+                            detail = "No concerning collinearity detected."
+                        )
+                    } else if (max_cor < 0.9) {
+                        checks$collinearity <- list(
+                            color = "yellow", label = "Multicollinearity",
+                            value = sprintf("Max |r| = %.2f", max_cor),
+                            detail = "Moderate collinearity. Group LASSO handles structure better than standard LASSO."
+                        )
+                    } else {
+                        checks$collinearity <- list(
+                            color = "yellow", label = "Multicollinearity",
+                            value = sprintf("Max |r| = %.2f", max_cor),
+                            detail = "High collinearity. Combining highly correlated variables into the same group is recommended."
+                        )
+                    }
+                }
+            }, error = function(e) {
+                NULL
+            })
+
+            # -- Check 5: Data Quality --
+            original_data <- self$data
+            n_total <- nrow(original_data)
+            n_missing <- n_total - n
+            pct_missing <- 100 * n_missing / n_total
+
+            if (n_missing == 0) {
+                checks$data_quality <- list(
+                    color = "green", label = "Data Quality",
+                    value = "No missing data",
+                    detail = "Complete dataset."
+                )
+            } else {
+                checks$data_quality <- list(
+                    color = if (pct_missing > 20) "red" else "yellow",
+                    label = "Data Quality",
+                    value = sprintf("%.1f%% missing", pct_missing),
+                    detail = sprintf("%.1f%% missing data (%d rows excluded).", pct_missing, n_missing)
+                )
+            }
+
+            # -- Overall Verdict --
+            colors <- sapply(checks, function(x) x$color)
+            if (any(colors == "red")) {
+                overall <- "red"
+                overall_text <- "Some issues require attention before relying on these results."
+            } else if (any(colors == "yellow")) {
+                overall <- "yellow"
+                overall_text <- "Data is usable but review the flagged items."
+            } else {
+                overall <- "green"
+                overall_text <- "Data is well-suited for Group LASSO modeling."
+            }
+
+            private$.generateSuitabilityHtml(checks, overall, overall_text)
+        },
+
+        .generateSuitabilityHtml = function(checks, overall, overall_text) {
+            bg_colors <- list(
+                green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
+                yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
+                red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+            )
+            dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
+
+            html <- paste0(
+                "<div style='", bg_colors[[overall]], " padding: 12px; border-radius: 6px; margin-bottom: 12px;'>",
+                "<strong>Overall: ", overall_text, "</strong></div>"
+            )
+
+            html <- paste0(html,
+                "<table style='width: 100%; border-collapse: collapse; font-size: 13px;'>",
+                "<thead><tr style='border-bottom: 2px solid #dee2e6;'>",
+                "<th style='padding: 6px; text-align: left;'>Status</th>",
+                "<th style='padding: 6px; text-align: left;'>Check</th>",
+                "<th style='padding: 6px; text-align: left;'>Value</th>",
+                "<th style='padding: 6px; text-align: left;'>Detail</th>",
+                "</tr></thead><tbody>"
+            )
+
+            for (chk in checks) {
+                if (is.null(chk)) next
+                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>&#9679;</span>")
+                html <- paste0(html,
+                    "<tr style='border-bottom: 1px solid #dee2e6;'>",
+                    "<td style='padding: 6px;'>", dot, "</td>",
+                    "<td style='padding: 6px;'><strong>", chk$label, "</strong></td>",
+                    "<td style='padding: 6px;'>", chk$value, "</td>",
+                    "<td style='padding: 6px;'>", chk$detail, "</td>",
+                    "</tr>"
+                )
+            }
+
+            html <- paste0(html, "</tbody></table>")
+
+            self$results$suitabilityReport$setContent(html)
         }
     )
 )

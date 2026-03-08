@@ -32,6 +32,13 @@ children:
             name: explanatory
             isTarget: true
   - type: CollapseBox
+    label: Data Suitability
+    collapsed: false
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: suitabilityCheck
+  - type: CollapseBox
     label: Model Options
     collapsed: true
     stretchFactor: 1
@@ -60,6 +67,12 @@ children:
         name: coef_plot
       - type: CheckBox
         name: survival_plot
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: random_seed
+        format: number
   - type: CollapseBox
     label: Output Options
     collapsed: true
@@ -70,8 +83,10 @@ children:
         children:
           - type: Output
             name: riskScore
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Explanatory Output
+    collapsed: true
+    stretchFactor: 1
     children:
       - type: CheckBox
         name: showExplanations

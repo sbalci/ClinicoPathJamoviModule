@@ -2,6 +2,14 @@ ncvregcoxClass <- R6::R6Class(
     "ncvregcoxClass",
     inherit = ncvregcoxBase,
     private = list(
+        .analysis_data = NULL,
+        .covariates = NULL,
+        .cv_fit = NULL,
+        .final_fit = NULL,
+        .lambda_opt = NULL,
+        .X = NULL,
+        .Y = NULL,
+
         .init = function() {
             private$.update_instructions()
         },
@@ -13,6 +21,12 @@ ncvregcoxClass <- R6::R6Class(
             }
             
             private$.prepare_data()
+
+            # Assess data suitability if requested
+            if (self$options$suitabilityCheck) {
+                private$.assessSuitability()
+            }
+
             private$.fit_ncvreg_cox()
             private$.populate_results()
             private$.create_plots()
@@ -81,9 +95,14 @@ ncvregcoxClass <- R6::R6Class(
             }
             
             # Create analysis dataset
+            event_col <- data[[event_var]]
+            # Convert factor event to numeric (0/1) if needed
+            if (is.factor(event_col)) {
+                event_col <- as.numeric(event_col) - 1
+            }
             analysis_data <- data.frame(
-                time = data[[time_var]],
-                event = data[[event_var]]
+                time = as.numeric(data[[time_var]]),
+                event = as.numeric(event_col)
             )
             
             # Add covariates
@@ -115,8 +134,15 @@ ncvregcoxClass <- R6::R6Class(
                 data <- private$.analysis_data
                 covariates <- private$.covariates
                 
-                # Create design matrix
-                X <- as.matrix(data[, covariates, drop = FALSE])
+                # Create design matrix (handle factors via model.matrix)
+                cov_data <- data[, covariates, drop = FALSE]
+                has_factors <- any(sapply(cov_data, is.factor))
+                if (has_factors) {
+                    mm_formula <- as.formula(paste("~", paste(covariates, collapse = " + ")))
+                    X <- model.matrix(mm_formula, data = cov_data)[, -1, drop = FALSE]
+                } else {
+                    X <- as.matrix(cov_data)
+                }
                 
                 # Create survival object
                 Y <- survival::Surv(data$time, data$event)
@@ -143,25 +169,17 @@ ncvregcoxClass <- R6::R6Class(
                     returnY = FALSE
                 )
                 
-                # Get optimal lambda
+                # Get optimal lambda (fall back to lambda.min if 1se not available)
                 lambda_type <- self$options$lambda_type
-                if (lambda_type == "1se") {
+                if (lambda_type == "1se" && !is.null(cv_fit$lambda.1se) && length(cv_fit$lambda.1se) == 1) {
                     lambda_opt <- cv_fit$lambda.1se
                 } else {
                     lambda_opt <- cv_fit$lambda.min
                 }
                 
-                # Fit final model with optimal lambda
-                final_fit <- ncvreg::ncvsurv(
-                    X = X,
-                    y = Y,
-                    penalty = penalty_type,
-                    gamma = self$options$gamma,
-                    alpha = self$options$alpha,
-                    lambda = lambda_opt,
-                    standardize = self$options$standardize
-                )
-                
+                # Use the fit from cv.ncvsurv (already has the full path)
+                final_fit <- cv_fit$fit
+
                 private$.cv_fit <- cv_fit
                 private$.final_fit <- final_fit
                 private$.lambda_opt <- lambda_opt
@@ -195,25 +213,32 @@ ncvregcoxClass <- R6::R6Class(
             cv_fit <- private$.cv_fit
             final_fit <- private$.final_fit
             lambda_opt <- private$.lambda_opt
-            
+
             # Calculate metrics
             penalty_name <- private$.format_penalty(self$options$penalty)
             cv_error <- min(cv_fit$cve, na.rm = TRUE)
-            
+
             # Get selected variables
             coeffs <- coef(final_fit, lambda = lambda_opt)
-            n_selected <- sum(coeffs != 0)
-            
-            # Calculate deviance explained (approximate)
-            deviance_explained <- (1 - cv_error / var(private$.Y[,1], na.rm = TRUE)) * 100
-            deviance_explained <- max(0, min(100, deviance_explained))
-            
-            table$setRow(rowNo = 1, values = list(
+            n_selected <- as.integer(sum(coeffs != 0))
+
+            # Computer proper C-index from linear predictor
+            cindex <- NA_real_
+            if (n_selected > 0) {
+                cindex <- tryCatch({
+                    lp <- as.numeric(private$.X %*% coeffs)
+                    # Higher LP = higher hazard = worse prognosis, so reverse=TRUE
+                    ci <- survival::concordance(private$.Y ~ lp, reverse = TRUE)
+                    as.numeric(ci$concordance)
+                }, error = function(e) NA_real_)
+            }
+
+            table$addRow(rowKey = 1, values = list(
                 penalty = penalty_name,
-                lambda_selected = lambda_opt,
-                cv_error = cv_error,
+                lambda_selected = as.numeric(lambda_opt),
+                cv_error = as.numeric(cv_error),
                 n_selected = n_selected,
-                deviance_explained = deviance_explained
+                deviance_explained = as.numeric(if (!is.na(cindex)) cindex else NA_real_)
             ))
         },
         
@@ -221,35 +246,28 @@ ncvregcoxClass <- R6::R6Class(
             table <- self$results$selected_variables
             final_fit <- private$.final_fit
             lambda_opt <- private$.lambda_opt
-            covariates <- private$.covariates
-            
-            # Get coefficients
+
+            # Get penalized coefficients
             coeffs <- coef(final_fit, lambda = lambda_opt)
+            var_names <- colnames(private$.X)
+            if (is.null(var_names)) var_names <- paste0("V", seq_along(coeffs))
             selected_vars <- which(coeffs != 0)
-            
+
             if (length(selected_vars) == 0) {
                 return()
             }
-            
-            # Calculate standard errors (approximate)
+
             for (i in seq_along(selected_vars)) {
                 var_idx <- selected_vars[i]
-                var_name <- covariates[var_idx]
-                coeff <- coeffs[var_idx]
+                var_name <- var_names[var_idx]
+                # Use penalized coefficient (from SCAD/MCP)
+                coeff <- as.numeric(coeffs[var_idx])
                 hr <- exp(coeff)
-                
-                # Approximate standard error (this is a simplified approach)
-                se <- abs(coeff) * 0.1  # Placeholder - proper SE calculation is complex
-                z_val <- coeff / se
-                p_val <- 2 * (1 - pnorm(abs(z_val)))
-                
+
                 table$addRow(rowKey = i, values = list(
                     variable = var_name,
                     coefficient = coeff,
-                    hazard_ratio = hr,
-                    standard_error = se,
-                    z_value = z_val,
-                    p_value = p_val
+                    hazard_ratio = hr
                 ))
             }
         },
@@ -284,38 +302,61 @@ ncvregcoxClass <- R6::R6Class(
         .populate_model_comparison = function() {
             table <- self$results$model_comparison
             cv_fit <- private$.cv_fit
-            
+
             # Compare different lambda selections
             lambda_min <- cv_fit$lambda.min
             lambda_1se <- cv_fit$lambda.1se
-            
-            # Get errors for comparison
-            min_idx <- which.min(abs(cv_fit$lambda - lambda_min))
-            se_idx <- which.min(abs(cv_fit$lambda - lambda_1se))
-            
-            models <- list(
-                list(name = "Lambda Min", lambda = lambda_min, idx = min_idx),
-                list(name = "Lambda 1SE", lambda = lambda_1se, idx = se_idx)
-            )
-            
+
+            # Build model list (only include valid lambdas)
+            models <- list()
+            if (!is.null(lambda_min) && length(lambda_min) == 1) {
+                min_idx <- which.min(abs(cv_fit$lambda - lambda_min))
+                models[[length(models) + 1]] <- list(name = "Lambda Min", lambda = lambda_min, idx = min_idx)
+            }
+            if (!is.null(lambda_1se) && length(lambda_1se) == 1) {
+                se_idx <- which.min(abs(cv_fit$lambda - lambda_1se))
+                models[[length(models) + 1]] <- list(name = "Lambda 1SE", lambda = lambda_1se, idx = se_idx)
+            }
+
+            if (length(models) == 0) return()
+
             for (i in seq_along(models)) {
                 model <- models[[i]]
                 idx <- model$idx
-                
-                cv_error <- cv_fit$cve[idx]
-                n_vars <- sum(cv_fit$fit$beta[, idx] != 0)
-                
-                # Approximate C-index and AIC (simplified)
-                c_index <- max(0.5, 1 - cv_error / var(private$.Y[,1], na.rm = TRUE))
-                aic <- 2 * n_vars + 2 * cv_error * nrow(private$.X)
-                
+
+                cv_error <- as.numeric(cv_fit$cve[idx])
+                beta_at_lambda <- cv_fit$fit$beta[, idx]
+                n_vars <- as.integer(sum(beta_at_lambda != 0))
+
+                # Compute proper C-index from the linear predictor
+                c_index <- NA_real_
+                if (n_vars > 0) {
+                    c_index <- tryCatch({
+                        lp <- as.numeric(private$.X %*% beta_at_lambda)
+                        ci <- survival::concordance(private$.Y ~ lp, reverse = TRUE)
+                        as.numeric(ci$concordance)
+                    }, error = function(e) NA_real_)
+                }
+
+                # Compute proper AIC by refitting Cox with selected variables
+                aic <- tryCatch({
+                    sel <- which(beta_at_lambda != 0)
+                    if (length(sel) > 0) {
+                        sel_X <- private$.X[, sel, drop = FALSE]
+                        refit <- survival::coxph(private$.Y ~ sel_X)
+                        AIC(refit)
+                    } else {
+                        NA_real_
+                    }
+                }, error = function(e) NA_real_)
+
                 table$addRow(rowKey = i, values = list(
                     model = model$name,
-                    lambda = model$lambda,
+                    lambda = as.numeric(model$lambda),
                     cv_error = cv_error,
                     n_vars = n_vars,
-                    c_index = c_index,
-                    aic = aic
+                    c_index = as.numeric(c_index),
+                    aic = as.numeric(aic)
                 ))
             }
         },
@@ -323,12 +364,33 @@ ncvregcoxClass <- R6::R6Class(
         .populate_convergence_info = function() {
             table <- self$results$convergence_info
             final_fit <- private$.final_fit
-            
-            # Basic convergence info
-            table$setRow(rowNo = 1, values = list(
-                converged = "Yes",
-                iterations = 100,  # ncvreg doesn't expose iteration count easily
-                tolerance = 1e-6,
+
+            # Extract real convergence info from the ncvreg fit object
+            n_iter <- tryCatch(
+                as.integer(final_fit$iter),
+                error = function(e) NA_integer_
+            )
+            # ncvreg uses eps for convergence tolerance (default 1e-4)
+            tol <- tryCatch(
+                as.numeric(final_fit$eps),
+                error = function(e) NA_real_
+            )
+            # ncvreg does not expose a "converged" flag directly;
+            # if iter < max.iter the algorithm converged
+            max_iter <- tryCatch(
+                as.integer(final_fit$max.iter),
+                error = function(e) NA_integer_
+            )
+            converged_flag <- if (!is.na(n_iter) && !is.na(max_iter)) {
+                if (n_iter < max_iter) "Yes" else "No (max iterations reached)"
+            } else {
+                "Unknown"
+            }
+
+            table$addRow(rowKey = 1, values = list(
+                converged = converged_flag,
+                iterations = if (!is.na(n_iter)) n_iter else NA_integer_,
+                tolerance = if (!is.na(tol)) tol else NA_real_,
                 algorithm = paste("Coordinate Descent with", self$options$penalty, "penalty")
             ))
         },
@@ -337,23 +399,25 @@ ncvregcoxClass <- R6::R6Class(
             table <- self$results$variable_importance
             final_fit <- private$.final_fit
             lambda_opt <- private$.lambda_opt
-            covariates <- private$.covariates
-            
+
             # Calculate importance based on absolute coefficients
             coeffs <- coef(final_fit, lambda = lambda_opt)
-            importance <- abs(coeffs)
-            
+            var_names <- colnames(private$.X)
+            if (is.null(var_names)) var_names <- paste0("V", seq_along(coeffs))
+            importance <- abs(as.numeric(coeffs))
+
             # Rank variables
             ranks <- rank(-importance, ties.method = "first")
-            relative_importance <- (importance / max(importance, na.rm = TRUE)) * 100
-            
+            max_imp <- max(importance, na.rm = TRUE)
+            relative_importance <- if (max_imp > 0) (importance / max_imp) * 100 else rep(0, length(importance))
+
             # Add variables with non-zero importance
             for (i in seq_along(coeffs)) {
                 if (importance[i] > 0) {
                     table$addRow(rowKey = i, values = list(
-                        variable = covariates[i],
+                        variable = var_names[i],
                         importance = importance[i],
-                        rank = ranks[i],
+                        rank = as.integer(ranks[i]),
                         relative_importance = relative_importance[i]
                     ))
                 }
@@ -361,8 +425,45 @@ ncvregcoxClass <- R6::R6Class(
         },
         
         .create_plots = function() {
-            # Plots will be implemented in render functions
-            # This is a placeholder for plot creation logic
+            # Store plot data in image states for render functions
+            if (!is.null(private$.cv_fit)) {
+                self$results$regularization_path$setState(list(ready = TRUE))
+                self$results$cv_error_plot$setState(list(ready = TRUE))
+            }
+            if (!is.null(private$.final_fit) && self$options$variable_importance) {
+                self$results$variable_selection_plot$setState(list(ready = TRUE))
+            }
+        },
+
+        .plot_regularization_path = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.final_fit)) return(FALSE)
+            plot(private$.final_fit)
+            title("Regularization Path", line = 2.5)
+            return(TRUE)
+        },
+
+        .plot_cv_error = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.cv_fit)) return(FALSE)
+            plot(private$.cv_fit)
+            title("Cross-Validation Error", line = 2.5)
+            return(TRUE)
+        },
+
+        .plot_variable_selection = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.final_fit)) return(FALSE)
+            coeffs <- coef(private$.final_fit, lambda = private$.lambda_opt)
+            importance <- abs(coeffs)
+            importance <- importance[importance > 0]
+            if (length(importance) == 0) {
+                plot.new()
+                text(0.5, 0.5, "No variables selected", cex = 1.2)
+                return(TRUE)
+            }
+            importance <- sort(importance, decreasing = TRUE)
+            barplot(importance, las = 2, main = "Variable Importance",
+                    ylab = "Absolute Coefficient", col = "steelblue",
+                    cex.names = 0.8)
+            return(TRUE)
         },
         
         .create_model_interpretation = function() {
@@ -392,16 +493,214 @@ ncvregcoxClass <- R6::R6Class(
                 "<li>Oracle properties ensure consistent variable selection</li>",
                 "<li>Cross-validation provides unbiased performance estimates</li>",
                 "<li>Hazard ratios represent multiplicative effects on hazard</li>",
+                "<li>Standard errors and p-values are not reported for penalized regression. Traditional inference is invalid after variable selection (post-selection inference).</li>",
                 "</ul>"
             )
             
             self$results$model_interpretation$setContent(html)
+        },
+
+        # Data suitability assessment
+        .assessSuitability = function() {
+            checks <- list()
+            data <- private$.analysis_data
+            
+            n <- nrow(data)
+            n_events <- sum(data$event == 1)
+            p <- length(private$.covariates)
+            event_rate <- n_events / n
+
+            # -- Check 1: Events-Per-Variable (EPV) --
+            epv <- n_events / p
+            if (epv >= 10) {
+                checks$epv <- list(
+                    color = "green", label = "Events-Per-Variable (Overall)",
+                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "High EPV. Regularization will perform robustly."
+                )
+            } else if (epv >= 1) {
+                checks$epv <- list(
+                    color = "yellow", label = "Events-Per-Variable (Overall)",
+                    value = sprintf("%.1f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "Adequate for SCAD/MCP penalized regression, which handles low EPV better than standard Cox."
+                )
+            } else {
+                checks$epv <- list(
+                    color = "yellow", label = "Events-Per-Variable (Overall)",
+                    value = sprintf("%.3f (n_events=%d, p=%d)", epv, n_events, p),
+                    detail = "Ultra-low EPV. Standard Cox would fail. Penalized regression is strictly required."
+                )
+            }
+
+            # -- Check 2: Regularization Need --
+            if (p >= n / 3) {
+                checks$regularization <- list(
+                    color = "green", label = "Regularization Need",
+                    value = sprintf("p=%d, n=%d (ratio=%.2f)", p, n, p / n),
+                    detail = "High-dimensional setting. Penalized regularization is strongly indicated."
+                )
+            } else {
+                checks$regularization <- list(
+                    color = "yellow", label = "Regularization Need",
+                    value = sprintf("p=%d, EPV=%.0f", p, epv),
+                    detail = "Moderate/low dimensionality. Standard Cox may also suffice."
+                )
+            }
+
+            # -- Check 3: Sample Size --
+            if (n >= 100) {
+                checks$sample_size <- list(
+                    color = "green", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Adequate sample size for penalized regression."
+                )
+            } else if (n >= 30) {
+                checks$sample_size <- list(
+                    color = "yellow", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Small sample. CV folds may be somewhat unstable."
+                )
+            } else {
+                checks$sample_size <- list(
+                    color = "red", label = "Sample Size",
+                    value = sprintf("n=%d", n),
+                    detail = "Very small sample. Results will be highly variable."
+                )
+            }
+
+            # -- Check 4: Event Rate --
+            if (event_rate >= 0.20 && event_rate <= 0.80) {
+                checks$event_rate <- list(
+                    color = "green", label = "Event Rate",
+                    value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
+                    detail = "Balanced event rate. Good for model estimation."
+                )
+            } else {
+                checks$event_rate <- list(
+                    color = "yellow", label = "Event Rate",
+                    value = sprintf("%.1f%% (%d/%d)", event_rate * 100, n_events, n),
+                    detail = "Imbalanced event rate. Model calibration may be affected."
+                )
+            }
+
+            # -- Check 5: Multicollinearity --
+            tryCatch({
+                if (p <= 2000 && p >= 2) {
+                    cov_data <- data[, private$.covariates, drop = FALSE]
+                    # Only calculate correlation on numeric columns to avoid failures
+                    num_data <- cov_data[, sapply(cov_data, is.numeric), drop = FALSE]
+                    if (ncol(num_data) >= 2) {
+                        cor_matrix <- cor(num_data, use = "pairwise.complete.obs")
+                        diag(cor_matrix) <- 0
+                        max_cor <- max(abs(cor_matrix), na.rm = TRUE)
+                        
+                        if (max_cor < 0.7) {
+                            checks$collinearity <- list(
+                                color = "green", label = "Multicollinearity",
+                                value = sprintf("Max |r| = %.2f", max_cor),
+                                detail = "No concerning collinearity detected."
+                            )
+                        } else if (max_cor < 0.9) {
+                            checks$collinearity <- list(
+                                color = "yellow", label = "Multicollinearity",
+                                value = sprintf("Max |r| = %.2f", max_cor),
+                                detail = "Moderate collinearity. SCAD/MCP works well under moderate collinearity."
+                            )
+                        } else {
+                            checks$collinearity <- list(
+                                color = "red", label = "Multicollinearity",
+                                value = sprintf("Max |r| = %.2f", max_cor),
+                                detail = "High collinearity. SCAD/MCP can be highly unstable under extreme collinearity. Consider using Elastic Net (via Penalized Cox option) instead."
+                            )
+                        }
+                    }
+                }
+            }, error = function(e) {
+                NULL
+            })
+
+            # -- Check 6: Data Quality --
+            original_data <- self$data
+            n_total <- nrow(original_data)
+            n_missing <- n_total - n
+            pct_missing <- 100 * n_missing / n_total
+
+            if (n_missing == 0) {
+                checks$data_quality <- list(
+                    color = "green", label = "Data Quality",
+                    value = "No missing data",
+                    detail = "Complete dataset."
+                )
+            } else {
+                checks$data_quality <- list(
+                    color = if (pct_missing > 20) "red" else "yellow",
+                    label = "Data Quality",
+                    value = sprintf("%.1f%% missing", pct_missing),
+                    detail = sprintf("%.1f%% missing data (%d rows excluded).", pct_missing, n_missing)
+                )
+            }
+
+            # -- Overall Verdict --
+            colors <- sapply(checks, function(x) x$color)
+            if (any(colors == "red")) {
+                overall <- "red"
+                overall_text <- "Some issues require attention before relying on these results."
+            } else if (any(colors == "yellow")) {
+                overall <- "yellow"
+                overall_text <- "Data is usable but review the flagged items."
+            } else {
+                overall <- "green"
+                overall_text <- "Data is well-suited for SCAD/MCP Cox regression."
+            }
+
+            private$.generateSuitabilityHtml(checks, overall, overall_text)
+        },
+
+        .generateSuitabilityHtml = function(checks, overall, overall_text) {
+            bg_colors <- list(
+                green  = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;",
+                yellow = "background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;",
+                red    = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
+            )
+            dot_colors <- list(green = "#28a745", yellow = "#ffc107", red = "#dc3545")
+
+            html <- paste0(
+                "<div style='", bg_colors[[overall]], " padding: 12px; border-radius: 6px; margin-bottom: 12px;'>",
+                "<strong>Overall: ", overall_text, "</strong></div>"
+            )
+
+            html <- paste0(html,
+                "<table style='width: 100%; border-collapse: collapse; font-size: 13px;'>",
+                "<thead><tr style='border-bottom: 2px solid #dee2e6;'>",
+                "<th style='padding: 6px; text-align: left;'>Status</th>",
+                "<th style='padding: 6px; text-align: left;'>Check</th>",
+                "<th style='padding: 6px; text-align: left;'>Value</th>",
+                "<th style='padding: 6px; text-align: left;'>Detail</th>",
+                "</tr></thead><tbody>"
+            )
+
+            for (chk in checks) {
+                if (is.null(chk)) next
+                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>&#9679;</span>")
+                html <- paste0(html,
+                    "<tr style='border-bottom: 1px solid #dee2e6;'>",
+                    "<td style='padding: 6px;'>", dot, "</td>",
+                    "<td style='padding: 6px;'><strong>", chk$label, "</strong></td>",
+                    "<td style='padding: 6px;'>", chk$value, "</td>",
+                    "<td style='padding: 6px;'>", chk$detail, "</td>",
+                    "</tr>"
+                )
+            }
+
+            html <- paste0(html, "</tbody></table>")
+
+            self$results$suitabilityReport$setContent(html)
         }
     ),
     
     public = list(
-        initialize = function() {
-            super$initialize()
+        initialize = function(...) {
+            super$initialize(...)
         }
     )
 )

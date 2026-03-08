@@ -446,7 +446,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "timedependentdca",
-                version = c(0,0,36),
+                version = c(0,0,37),
                 options = options,
                 results = timedependentdcaResults$new(options=options),
                 data = data,

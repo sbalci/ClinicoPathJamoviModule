@@ -8,6 +8,21 @@ items:
       title: Analysis
       type: Html
       visible: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - predictors
+        - suitabilityCheck
+
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - elapsedtime
+          - outcome
+          - predictors
+          - suitabilityCheck
 
     - name: modelSummary
       title: Model Summary
@@ -65,48 +80,71 @@ items:
             title: Importance Rank
             type: integer
 
-    - name: dimensionalityReduction
-      title: Dimensionality Summary
-      type: Table
-      visible: true
-      columns:
-          - name: stage
-            title: Analysis Stage
-            type: text
-          - name: variables_input
-            title: Input Variables
-            type: integer
-          - name: variables_selected
-            title: Selected Variables
-            type: integer
-          - name: reduction_ratio
-            title: Reduction Ratio
-            type: number
+
 
     - name: regularizationPath
       title: Regularization Path
       type: Image
       visible: (show_regularization_path)
+      width: 600
+      height: 500
+      renderFun: .plot_regularization_path
+      requiresData: true
+      clearWith:
+        - predictors
+        - alpha_value
+        - regularization_method
 
     - name: cvPlot
       title: Cross-Validation Plot
       type: Image
       visible: (show_cv_plot)
+      width: 500
+      height: 400
+      renderFun: .plot_cv
+      requiresData: true
+      clearWith:
+        - cv_folds
+        - cv_method
+        - predictors
 
     - name: variableImportance
       title: Variable Importance Plot
       type: Image
       visible: (show_variable_importance)
+      width: 500
+      height: 400
+      renderFun: .plot_variable_importance
+      requiresData: true
+      clearWith:
+        - predictors
+        - alpha_value
+        - regularization_method
 
     - name: modelDiagnostics
       title: Model Diagnostics
       type: Image
       visible: (show_model_diagnostics)
+      width: 600
+      height: 500
+      renderFun: .plot_model_diagnostics
+      requiresData: true
+      clearWith:
+        - predictors
+        - elapsedtime
+        - outcome
 
     - name: stabilityPlot
       title: Stability Selection Plot
       type: Image
       visible: (stability_selection)
+      width: 500
+      height: 400
+      renderFun: .plot_stability
+      requiresData: true
+      clearWith:
+        - stability_selection
+        - stability_threshold
 
     - name: analysisSummary
       title: Analysis Summary

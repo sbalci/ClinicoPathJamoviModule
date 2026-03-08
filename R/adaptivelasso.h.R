@@ -8,14 +8,19 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         initialize = function(
             time = NULL,
             event = NULL,
+            event_level = NULL,
             predictors = NULL,
             strata = NULL,
+            suitabilityCheck = TRUE,
             weight_method = "ridge",
             alpha = 1,
             gamma = 1,
             cv_folds = 10,
             cv_measure = "deviance",
             lambda_sequence = "auto",
+            lambda_custom_max = 1,
+            lambda_custom_min = 0.001,
+            lambda_single = 0.01,
             lambda_min_ratio = 0.001,
             n_lambda = 100,
             stability_selection = FALSE,
@@ -69,6 +74,10 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 permitted=list(
                     "factor",
                     "numeric"))
+            private$..event_level <- jmvcore::OptionLevel$new(
+                "event_level",
+                event_level,
+                variable="(event)")
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
                 predictors,
@@ -84,9 +93,11 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 strata,
                 suggested=list(
                     "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor"))
+                    "ordinal"))
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
+                default=TRUE)
             private$..weight_method <- jmvcore::OptionList$new(
                 "weight_method",
                 weight_method,
@@ -120,9 +131,7 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 cv_measure,
                 options=list(
                     "deviance",
-                    "C",
-                    "brier",
-                    "auc"),
+                    "C"),
                 default="deviance")
             private$..lambda_sequence <- jmvcore::OptionList$new(
                 "lambda_sequence",
@@ -132,6 +141,24 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "custom",
                     "single"),
                 default="auto")
+            private$..lambda_custom_max <- jmvcore::OptionNumber$new(
+                "lambda_custom_max",
+                lambda_custom_max,
+                default=1,
+                min=0.000001,
+                max=1000)
+            private$..lambda_custom_min <- jmvcore::OptionNumber$new(
+                "lambda_custom_min",
+                lambda_custom_min,
+                default=0.001,
+                min=1e-8,
+                max=100)
+            private$..lambda_single <- jmvcore::OptionNumber$new(
+                "lambda_single",
+                lambda_single,
+                default=0.01,
+                min=1e-8,
+                max=1000)
             private$..lambda_min_ratio <- jmvcore::OptionNumber$new(
                 "lambda_min_ratio",
                 lambda_min_ratio,
@@ -278,14 +305,19 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             self$.addOption(private$..time)
             self$.addOption(private$..event)
+            self$.addOption(private$..event_level)
             self$.addOption(private$..predictors)
             self$.addOption(private$..strata)
+            self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..weight_method)
             self$.addOption(private$..alpha)
             self$.addOption(private$..gamma)
             self$.addOption(private$..cv_folds)
             self$.addOption(private$..cv_measure)
             self$.addOption(private$..lambda_sequence)
+            self$.addOption(private$..lambda_custom_max)
+            self$.addOption(private$..lambda_custom_min)
+            self$.addOption(private$..lambda_single)
             self$.addOption(private$..lambda_min_ratio)
             self$.addOption(private$..n_lambda)
             self$.addOption(private$..stability_selection)
@@ -320,14 +352,19 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         time = function() private$..time$value,
         event = function() private$..event$value,
+        event_level = function() private$..event_level$value,
         predictors = function() private$..predictors$value,
         strata = function() private$..strata$value,
+        suitabilityCheck = function() private$..suitabilityCheck$value,
         weight_method = function() private$..weight_method$value,
         alpha = function() private$..alpha$value,
         gamma = function() private$..gamma$value,
         cv_folds = function() private$..cv_folds$value,
         cv_measure = function() private$..cv_measure$value,
         lambda_sequence = function() private$..lambda_sequence$value,
+        lambda_custom_max = function() private$..lambda_custom_max$value,
+        lambda_custom_min = function() private$..lambda_custom_min$value,
+        lambda_single = function() private$..lambda_single$value,
         lambda_min_ratio = function() private$..lambda_min_ratio$value,
         n_lambda = function() private$..n_lambda$value,
         stability_selection = function() private$..stability_selection$value,
@@ -361,14 +398,19 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     private = list(
         ..time = NA,
         ..event = NA,
+        ..event_level = NA,
         ..predictors = NA,
         ..strata = NA,
+        ..suitabilityCheck = NA,
         ..weight_method = NA,
         ..alpha = NA,
         ..gamma = NA,
         ..cv_folds = NA,
         ..cv_measure = NA,
         ..lambda_sequence = NA,
+        ..lambda_custom_max = NA,
+        ..lambda_custom_min = NA,
+        ..lambda_single = NA,
         ..lambda_min_ratio = NA,
         ..n_lambda = NA,
         ..stability_selection = NA,
@@ -407,6 +449,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         instructions = function() private$.items[["instructions"]],
         todo = function() private$.items[["todo"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         coefficients = function() private$.items[["coefficients"]],
         selectionPath = function() private$.items[["selectionPath"]],
         cvResults = function() private$.items[["cvResults"]],
@@ -442,6 +485,11 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="todo",
                 title="Analysis Todo",
                 visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coefficients",
@@ -497,6 +545,9 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "predictors",
                     "lambda_sequence",
+                    "lambda_custom_max",
+                    "lambda_custom_min",
+                    "lambda_single",
                     "n_lambda"),
                 columns=list(
                     list(
@@ -514,12 +565,12 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer"),
                     list(
                         `name`="deviance", 
-                        `title`="Deviance", 
+                        `title`="CV Metric", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="cv_error", 
-                        `title`="CV Error", 
+                        `title`="CV SE", 
                         `type`="number", 
                         `format`="zto"))))
             self$add(jmvcore::Table$new(
@@ -530,7 +581,10 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "cv_folds",
                     "cv_measure",
-                    "lambda_sequence"),
+                    "lambda_sequence",
+                    "lambda_custom_max",
+                    "lambda_custom_min",
+                    "lambda_single"),
                 columns=list(
                     list(
                         `name`="criterion", 
@@ -657,7 +711,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="riskGroups",
                 title="Risk Group Analysis",
-                visible="(risk_groups > 2)",
+                visible=TRUE,
                 clearWith=list(
                     "risk_groups",
                     "time",
@@ -693,7 +747,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="predictions",
                 title="Survival Predictions",
-                visible="(time_points != \"\")",
+                visible="(baseline_survival && time_points != \"\")",
                 clearWith=list(
                     "time_points",
                     "baseline_survival"),
@@ -721,14 +775,18 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Image$new(
                 options=options,
                 name="pathPlot",
-                title="Regularization Path",
+                title="Coefficient Paths",
                 width=600,
                 height=500,
                 visible="(plot_selection_path)",
+                renderFun=".renderPathPlot",
                 requiresData=TRUE,
                 clearWith=list(
                     "predictors",
-                    "lambda_sequence")))
+                    "lambda_sequence",
+                    "lambda_custom_max",
+                    "lambda_custom_min",
+                    "lambda_single")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cvPlot",
@@ -736,10 +794,15 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=500,
                 height=400,
                 visible="(plot_cv_curve)",
+                renderFun=".renderCVPlot",
                 requiresData=TRUE,
                 clearWith=list(
                     "cv_folds",
-                    "cv_measure")))
+                    "cv_measure",
+                    "lambda_sequence",
+                    "lambda_custom_max",
+                    "lambda_custom_min",
+                    "lambda_single")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="stabilityPlot",
@@ -747,6 +810,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=500,
                 height=400,
                 visible="(plot_stability)",
+                renderFun=".renderStabilityPlot",
                 requiresData=TRUE,
                 clearWith=list(
                     "stability_selection",
@@ -758,6 +822,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=500,
                 height=400,
                 visible="(plot_survival_curves)",
+                renderFun=".renderSurvivalPlot",
                 requiresData=TRUE,
                 clearWith=list(
                     "risk_groups",
@@ -770,6 +835,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=500,
                 height=400,
                 visible="(plot_baseline_hazard)",
+                renderFun=".renderBaselineHazardPlot",
                 requiresData=TRUE,
                 clearWith=list(
                     "baseline_survival",
@@ -782,6 +848,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=600,
                 height=500,
                 visible="(plot_diagnostics)",
+                renderFun=".renderDiagnosticsPlot",
                 requiresData=TRUE,
                 clearWith=list(
                     "proportional_hazards",
@@ -820,8 +887,8 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' model diagnostics. Particularly effective for high-dimensional survival 
 #' data where traditional methods fail, genomic studies with many biomarkers, 
 #' and clinical prediction models requiring sparse, interpretable solutions. 
-#' The method automatically handles tied survival times, stratified analysis, 
-#' and provides uncertainty quantification through bootstrap procedures.
+#' The method supports tie handling in refitted Cox models, optional 
+#' stratification for Cox modeling, and bootstrap-based stability selection.
 #' 
 #'
 #' @examples
@@ -840,13 +907,19 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.
-#' @param event Event indicator variable. For survival analysis: 0 = censored,
-#'   1 = event. For competing risks: 0 = censored, 1+ = different event types.
+#' @param event Event indicator variable. For binary outcomes use 0 =
+#'   censored, 1 = event. For multi-level variables, choose the event level of
+#'   interest.
+#' @param event_level Level of the event variable to be treated as the event
+#'   of interest. For binary factors this can be left empty and the second level
+#'   is used.
 #' @param predictors Variables to include in the adaptive LASSO Cox model. Can
 #'   include continuous, ordinal, and nominal variables. Automatic
 #'   standardization is applied for optimal penalty performance.
-#' @param strata Optional stratification variable for stratified Cox
-#'   regression. Creates separate baseline hazards for each stratum.
+#' @param strata Optional stratification variable. When provided, stratified
+#'   Cox structures are used for penalized fitting and refitted Cox summaries.
+#' @param suitabilityCheck assess if data is suitable for the selected
+#'   Adaptive LASSO model
 #' @param weight_method Method for calculating adaptive weights. Ridge
 #'   provides stable weights with shrinkage, univariate uses individual Cox
 #'   regressions, full Cox uses complete model (may be unstable), correlation
@@ -860,12 +933,18 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cv_folds Number of folds for cross-validation to select optimal
 #'   penalty parameter. More folds provide better estimates but increase
 #'   computation time.
-#' @param cv_measure Performance measure for cross-validation. Deviance is
-#'   computationally efficient, C-index focuses on discrimination, Brier score
-#'   accounts for calibration, AUC provides time-specific performance.
+#' @param cv_measure Performance measure for cross-validation. Deviance
+#'   (partial likelihood) is computationally efficient and is the default.
+#'   C-index (Harrell's concordance) focuses on discrimination ability.
 #' @param lambda_sequence How to specify the penalty parameter sequence.
-#'   Automatic uses data-driven range, custom allows user specification, single
-#'   tests only one value.
+#'   Automatic uses a data-driven range, custom uses user-defined max/min, and
+#'   single fits only one lambda value.
+#' @param lambda_custom_max Maximum lambda value for custom lambda sequence
+#'   mode. Must be greater than Custom Lambda Minimum.
+#' @param lambda_custom_min Minimum lambda value for custom lambda sequence
+#'   mode. Must be smaller than Custom Lambda Maximum.
+#' @param lambda_single Lambda value used when Lambda Sequence is set to
+#'   Single Value.
 #' @param lambda_min_ratio Ratio of smallest to largest lambda value in
 #'   automatic sequence. Smaller values explore stronger penalties but may lead
 #'   to computational difficulties.
@@ -892,7 +971,7 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param risk_groups Number of risk groups for stratification based on linear
 #'   predictor. Used for Kaplan-Meier curves and risk group analysis.
 #' @param time_points Comma-separated list of time points for survival
-#'   probability predictions. Empty string uses data-driven quantiles.
+#'   probability predictions. Leave empty to suppress the predictions table.
 #' @param baseline_survival Estimate and plot baseline survival function for
 #'   the adaptive LASSO Cox model using Breslow estimator.
 #' @param show_coefficients Display coefficient estimates for selected
@@ -919,10 +998,10 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   better approximation but is computationally more intensive.
 #' @param standardize Standardize predictors before fitting. Recommended for
 #'   optimal penalty performance with mixed-scale variables.
-#' @param intercept Include intercept term in Cox model. Generally not needed
-#'   for survival analysis but may be useful in special cases.
+#' @param intercept Retained for compatibility. Cox proportional hazards
+#'   models do not estimate an intercept term, so this option has no effect.
 #' @param parallel_computing Use parallel computing for cross-validation and
-#'   bootstrap procedures to reduce computation time.
+#'   stability-selection resampling to reduce computation time.
 #' @param n_cores Number of CPU cores for parallel computation when enabled.
 #'   More cores speed up CV and bootstrap but use more memory.
 #' @param convergence_threshold Convergence threshold for coordinate descent
@@ -936,6 +1015,7 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$selectionPath} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cvResults} \tab \tab \tab \tab \tab a table \cr
@@ -963,14 +1043,19 @@ adaptivelasso <- function(
     data,
     time,
     event,
+    event_level,
     predictors,
     strata,
+    suitabilityCheck = TRUE,
     weight_method = "ridge",
     alpha = 1,
     gamma = 1,
     cv_folds = 10,
     cv_measure = "deviance",
     lambda_sequence = "auto",
+    lambda_custom_max = 1,
+    lambda_custom_min = 0.001,
+    lambda_single = 0.01,
     lambda_min_ratio = 0.001,
     n_lambda = 100,
     stability_selection = FALSE,
@@ -1017,19 +1102,23 @@ adaptivelasso <- function(
             `if`( ! missing(predictors), predictors, NULL),
             `if`( ! missing(strata), strata, NULL))
 
-    for (v in strata) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- adaptivelassoOptions$new(
         time = time,
         event = event,
+        event_level = event_level,
         predictors = predictors,
         strata = strata,
+        suitabilityCheck = suitabilityCheck,
         weight_method = weight_method,
         alpha = alpha,
         gamma = gamma,
         cv_folds = cv_folds,
         cv_measure = cv_measure,
         lambda_sequence = lambda_sequence,
+        lambda_custom_max = lambda_custom_max,
+        lambda_custom_min = lambda_custom_min,
+        lambda_single = lambda_single,
         lambda_min_ratio = lambda_min_ratio,
         n_lambda = n_lambda,
         stability_selection = stability_selection,

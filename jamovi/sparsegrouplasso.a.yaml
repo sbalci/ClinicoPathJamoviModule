@@ -1,7 +1,10 @@
 ---
 name: sparsegrouplasso
 title: Sparse Group LASSO
-menuGroup: ClinicoPathD
+menuGroup: SurvivalT
+menuSubgroup: Penalized Cox Regression
+menuTitle: Sparse Group LASSO Cox
+menuSubtitle: Group selection with the flexibility to drop individual features.
 version: '1.0.0'
 jas: '1.2'
 
@@ -58,6 +61,13 @@ options:
         - factor
       description:
           R: the predictor variables for the model
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+          R: assess if data is suitable for the selected regularized Cox model
 
     - name: group_definition
       title: Group Definition Method

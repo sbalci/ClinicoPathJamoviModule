@@ -1,0 +1,278 @@
+---
+name: lassocox
+title: Lasso-Cox Regression
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - suitabilityCheck
+
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      rows: 0
+      columns:
+        - name: statistic
+          title: ""
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+
+    - name: coefficients
+      title: Selected Variables
+      type: Table
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+        - name: hazardRatio
+          title: "Hazard Ratio"
+          type: number
+        - name: importance
+          title: "Importance"
+          type: number
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+
+    - name: performance
+      title: Model Performance
+      type: Table
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+          
+    - name: cv_plot
+      title: Cross-validation Plot
+      type: Image
+      renderFun: .cvPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (cv_plot)
+      refs: glmnet
+      clearWith:
+          - cv_plot
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+      
+    - name: coef_plot
+      title: Coefficient Plot
+      type: Image
+      renderFun: .coefPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (coef_plot)
+      refs: glmnet
+      clearWith:
+          - coef_plot
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+      
+    - name: survival_plot
+      title: Risk Group Survival Plot
+      type: Image
+      renderFun: .survivalPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (survival_plot)
+      refs: survminer
+      clearWith:
+          - survival_plot
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+
+    - name: riskScore
+      title: Add Risk Score to Data
+      type: Output
+      varTitle: 'Calculated Risk Score from Lasso-Cox Regression'
+      varDescription: Risk Score Based on Lasso-Cox Model
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+
+    # Explanatory Output Items
+    - name: lassoExplanation
+      title: Understanding LASSO Cox Regression
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - showExplanations
+
+    - name: methodologyNotes
+      title: LASSO Cox Methodology Notes
+      type: Html
+      visible: (showMethodologyNotes)
+      clearWith:
+          - showMethodologyNotes
+
+    - name: clinicalGuidance
+      title: Clinical Interpretation Guidance
+      type: Html
+      visible: (includeClinicalGuidance)
+      clearWith:
+          - includeClinicalGuidance
+
+    - name: variableImportance
+      title: Variable Importance Analysis
+      type: Table
+      visible: (showVariableImportance)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: importance_score
+          title: "Importance Score"
+          type: number
+          format: zto
+        - name: selection_frequency
+          title: "Selection Frequency"
+          type: number
+          format: pc
+        - name: stability_rank
+          title: "Stability Rank"
+          type: integer
+      clearWith:
+          - showVariableImportance
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+
+    - name: modelComparison
+      title: LASSO vs Standard Cox Regression
+      type: Table
+      visible: (showModelComparison)
+      rows: 0
+      columns:
+        - name: model_type
+          title: "Model Type"
+          type: text
+        - name: n_variables
+          title: "N Variables"
+          type: integer
+        - name: cindex
+          title: "C-index"
+          type: number
+          format: zto
+        - name: aic
+          title: "AIC"
+          type: number
+          format: zto
+        - name: log_likelihood
+          title: "Log-Likelihood"
+          type: number
+          format: zto
+      clearWith:
+          - showModelComparison
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+
+    - name: regularizationPathExplanation
+      title: Understanding Regularization Path
+      type: Html
+      visible: (showExplanations && coef_plot)
+      clearWith:
+          - showExplanations
+          - coef_plot
+
+    - name: crossValidationExplanation
+      title: Understanding Cross-Validation Plot
+      type: Html
+      visible: (showExplanations && cv_plot)
+      clearWith:
+          - showExplanations
+          - cv_plot
+
+    - name: riskScoreExplanation
+      title: Understanding Risk Scores and Survival Curves
+      type: Html
+      visible: (showExplanations && survival_plot)
+      clearWith:
+          - showExplanations
+          - survival_plot
+
+refs:
+    - ClinicoPathJamoviModule
+    - glmnet
+    - survival
+    - survminer
+    - survcomp
+    - grid
+...

@@ -28,12 +28,13 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             risk_groups = 3,
             confidence_intervals = TRUE,
             feature_importance = TRUE,
-            prediction_accuracy = TRUE, ...) {
+            prediction_accuracy = TRUE,
+            suitabilityCheck = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
                 name="plscox",
-                requiresData=FALSE,
+                requiresData=TRUE,
                 ...)
 
             private$..time <- jmvcore::OptionVariable$new(
@@ -173,6 +174,10 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "prediction_accuracy",
                 prediction_accuracy,
                 default=TRUE)
+            private$..suitabilityCheck <- jmvcore::OptionBool$new(
+                "suitabilityCheck",
+                suitabilityCheck,
+                default=TRUE)
 
             self$.addOption(private$..time)
             self$.addOption(private$..status)
@@ -197,6 +202,7 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..confidence_intervals)
             self$.addOption(private$..feature_importance)
             self$.addOption(private$..prediction_accuracy)
+            self$.addOption(private$..suitabilityCheck)
         }),
     active = list(
         time = function() private$..time$value,
@@ -221,7 +227,8 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         risk_groups = function() private$..risk_groups$value,
         confidence_intervals = function() private$..confidence_intervals$value,
         feature_importance = function() private$..feature_importance$value,
-        prediction_accuracy = function() private$..prediction_accuracy$value),
+        prediction_accuracy = function() private$..prediction_accuracy$value,
+        suitabilityCheck = function() private$..suitabilityCheck$value),
     private = list(
         ..time = NA,
         ..status = NA,
@@ -245,7 +252,8 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..risk_groups = NA,
         ..confidence_intervals = NA,
         ..feature_importance = NA,
-        ..prediction_accuracy = NA)
+        ..prediction_accuracy = NA,
+        ..suitabilityCheck = NA)
 )
 
 plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -253,6 +261,7 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        suitabilityReport = function() private$.items[["suitabilityReport"]],
         modelSummary = function() private$.items[["modelSummary"]],
         componentSelection = function() private$.items[["componentSelection"]],
         modelCoefficients = function() private$.items[["modelCoefficients"]],
@@ -280,26 +289,55 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "glue",
                     "plsRcox",
                     "survival",
+                    "ggplot2",
                     "ggrepel",
                     "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="Instructions",
+                visible=TRUE,
                 clearWith=list(
                     "time",
                     "status",
                     "predictors")))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="suitabilityReport",
+                title="Data Suitability Assessment",
+                visible="(suitabilityCheck)",
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "suitabilityCheck")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="modelSummary",
                 title="Model Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "pls_components",
+                    "cross_validation",
+                    "component_selection",
+                    "scaling_method",
+                    "pls_algorithm")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="componentSelection",
                 title="Component Selection Results",
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "pls_components",
+                    "cross_validation",
+                    "component_selection",
+                    "scaling_method"),
                 columns=list(
                     list(
                         `name`="n_components", 
@@ -326,6 +364,14 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="modelCoefficients",
                 title="PLS Cox Model Coefficients",
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "pls_components",
+                    "cross_validation",
+                    "component_selection",
+                    "scaling_method"),
                 columns=list(
                     list(
                         `name`="component", 
@@ -365,6 +411,12 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="variableLoadings",
                 title="Variable Loadings on PLS Components",
                 visible="(feature_importance)",
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "pls_components",
+                    "scaling_method"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -391,6 +443,14 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="modelPerformance",
                 title="Model Performance Metrics",
                 visible="(prediction_accuracy)",
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "pls_components",
+                    "cross_validation",
+                    "component_selection",
+                    "scaling_method"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -417,6 +477,13 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="riskStratification",
                 title="Risk Group Stratification",
                 visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "pls_components",
+                    "risk_groups",
+                    "scaling_method"),
                 columns=list(
                     list(
                         `name`="risk_group", 
@@ -547,7 +614,7 @@ plscoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'na')
+                weightsSupport = 'auto')
         }))
 
 #' Partial Least Squares Cox Models
@@ -557,6 +624,7 @@ plscoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' modeling
 #' for analysis of genomic, proteomic, and other high-dimensional datasets.
 #' 
+#' @param data The data as a data frame.
 #' @param time .
 #' @param status .
 #' @param predictors .
@@ -585,9 +653,13 @@ plscoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param feature_importance Calculate and display variable importance scores
 #' @param prediction_accuracy Assess model prediction accuracy using C-index
 #'   and other metrics
+#' @param suitabilityCheck Run a comprehensive data suitability assessment
+#'   before analysis. Checks sample size, events-per-variable ratio,
+#'   multicollinearity,  and whether regularization is needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$componentSelection} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelCoefficients} \tab \tab \tab \tab \tab a table \cr
@@ -613,6 +685,7 @@ plscoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 plscox <- function(
+    data,
     time,
     status,
     predictors,
@@ -635,7 +708,8 @@ plscox <- function(
     risk_groups = 3,
     confidence_intervals = TRUE,
     feature_importance = TRUE,
-    prediction_accuracy = TRUE) {
+    prediction_accuracy = TRUE,
+    suitabilityCheck = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("plscox requires jmvcore to be installed (restart may be required)")
@@ -643,6 +717,13 @@ plscox <- function(
     if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
     if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame(),
+            `if`( ! missing(time), time, NULL),
+            `if`( ! missing(status), status, NULL),
+            `if`( ! missing(predictors), predictors, NULL))
+
 
     options <- plscoxOptions$new(
         time = time,
@@ -667,7 +748,8 @@ plscox <- function(
         risk_groups = risk_groups,
         confidence_intervals = confidence_intervals,
         feature_importance = feature_importance,
-        prediction_accuracy = prediction_accuracy)
+        prediction_accuracy = prediction_accuracy,
+        suitabilityCheck = suitabilityCheck)
 
     analysis <- plscoxClass$new(
         options = options,

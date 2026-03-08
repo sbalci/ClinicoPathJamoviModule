@@ -5,6 +5,7 @@
 \title{Partial Least Squares Cox Models}
 \usage{
 plscox(
+  data,
   time,
   status,
   predictors,
@@ -31,6 +32,8 @@ plscox(
 )
 }
 \arguments{
+\item{data}{The data as a data frame.}
+
 \item{time}{.}
 
 \item{status}{.}

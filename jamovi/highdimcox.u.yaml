@@ -42,12 +42,21 @@ children:
             name: outcomeLevel
             format: string
             label: Event Level
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Data Suitability
+    collapsed: false
     children:
-      - type: Label
-        label: Regularization Settings
-        style: list-inline
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: suitabilityCheck
+  - type: CollapseBox
+    label: Regularization Settings
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
         children:
           - type: ComboBox
             name: regularization_method
@@ -55,46 +64,41 @@ children:
           - type: TextBox
             name: alpha_value
             format: number
-            label: Elastic Net Alpha
+            label: Elastic Net Alpha (0=Ridge, 1=LASSO)
+            enable: (regularization_method:elastic_net)
           - type: ComboBox
             name: cv_method
             label: Cross-Validation Method
-  - type: LayoutBox
-    margin: large
+          - type: TextBox
+            name: cv_folds
+            format: number
+            label: Number of CV Folds
+  - type: CollapseBox
+    label: Stability Selection
+    collapsed: true
     children:
-      - type: Label
-        label: Variable Selection
-        style: list-inline
-        children:
-          - type: ComboBox
-            name: variable_selection
-            label: Variable Selection Method
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: cv_folds
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Label
-        label: Stability Selection
-        style: list-inline
+      - type: LayoutBox
+        margin: large
         children:
           - type: CheckBox
             name: stability_selection
             label: Perform Stability Selection
           - type: TextBox
+            name: subsampling_iterations
+            format: number
+            label: Subsampling Iterations
+            enable: (stability_selection)
+          - type: TextBox
             name: stability_threshold
             format: number
             label: Stability Threshold
-  - type: LayoutBox
-    margin: large
+            enable: (stability_selection)
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
     children:
-      - type: Label
-        label: Display Options
-        style: list-inline
+      - type: LayoutBox
+        margin: large
         children:
           - type: CheckBox
             name: show_regularization_path
@@ -117,9 +121,3 @@ children:
           - type: CheckBox
             name: showExplanations
             label: Method Explanations
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: bootstrap_iterations
-        format: number

@@ -5,20 +5,48 @@ items:
     - name: todo
       title: Instructions
       type: Html
+      visible: true
       clearWith:
           - time
           - status
           - predictors
 
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - suitabilityCheck
+
     - name: modelSummary
       title: Model Summary
       type: Html
       visible: true
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+          - cross_validation
+          - component_selection
+          - scaling_method
+          - pls_algorithm
 
     - name: componentSelection
       title: Component Selection Results
       type: Table
       visible: true
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+          - cross_validation
+          - component_selection
+          - scaling_method
       columns:
           - name: n_components
             title: Components
@@ -40,6 +68,14 @@ items:
       title: PLS Cox Model Coefficients
       type: Table
       visible: true
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+          - cross_validation
+          - component_selection
+          - scaling_method
       columns:
           - name: component
             title: PLS Component
@@ -71,6 +107,12 @@ items:
       title: Variable Loadings on PLS Components
       type: Table
       visible: (feature_importance)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+          - scaling_method
       columns:
           - name: variable
             title: Variable
@@ -92,6 +134,14 @@ items:
       title: Model Performance Metrics
       type: Table
       visible: (prediction_accuracy)
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+          - cross_validation
+          - component_selection
+          - scaling_method
       columns:
           - name: metric
             title: Metric
@@ -113,6 +163,13 @@ items:
       title: Risk Group Stratification
       type: Table
       visible: true
+      clearWith:
+          - time
+          - status
+          - predictors
+          - pls_components
+          - risk_groups
+          - scaling_method
       columns:
           - name: risk_group
             title: Risk Group
@@ -224,6 +281,7 @@ refs:
     - glue
     - plsRcox
     - survival
+    - ggplot2
     - ggrepel
     - survminer
 ...

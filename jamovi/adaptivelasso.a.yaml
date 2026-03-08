@@ -1,9 +1,10 @@
 ---
 name: adaptivelasso
 title: Adaptive LASSO for Cox Models
-menuGroup: SurvivalD
-menuSubgroup: Machine Learning
-menuSubtitle: Advanced penalized regression with adaptive variable selection
+menuGroup: SurvivalT
+menuSubgroup: Penalized Cox Regression
+menuTitle: Adaptive LASSO Cox
+menuSubtitle: Oracle properties for mathematically consistent variable selection.
 version: '0.0.31'
 jas: '1.2'
 
@@ -19,8 +20,8 @@ description:
         model diagnostics. Particularly effective for high-dimensional survival
         data where traditional methods fail, genomic studies with many biomarkers,
         and clinical prediction models requiring sparse, interpretable solutions.
-        The method automatically handles tied survival times, stratified analysis,
-        and provides uncertainty quantification through bootstrap procedures.
+        The method supports tie handling in refitted Cox models, optional
+        stratification for Cox modeling, and bootstrap-based stability selection.
     R:
         dontrun: true
         usage: >
@@ -58,8 +59,17 @@ options:
       permitted: [factor, numeric]
       description:
           R: >
-            Event indicator variable. For survival analysis: 0 = censored, 1 = event.
-            For competing risks: 0 = censored, 1+ = different event types.
+            Event indicator variable. For binary outcomes use 0 = censored, 1 = event.
+            For multi-level variables, choose the event level of interest.
+
+    - name: event_level
+      title: Event Level
+      type: Level
+      variable: (event)
+      description:
+          R: >
+            Level of the event variable to be treated as the event of interest.
+            For binary factors this can be left empty and the second level is used.
 
     - name: predictors
       title: Predictor Variables
@@ -76,11 +86,17 @@ options:
       title: Stratification Variable
       type: Variable
       suggested: [nominal, ordinal]
-      permitted: [factor]
       description:
           R: >
-            Optional stratification variable for stratified Cox regression.
-            Creates separate baseline hazards for each stratum.
+            Optional stratification variable. When provided, stratified Cox
+            structures are used for penalized fitting and refitted Cox summaries.
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+          R: assess if data is suitable for the selected Adaptive LASSO model
 
     # Model specification
     - name: weight_method
@@ -146,18 +162,14 @@ options:
       options:
         - title: Partial Likelihood Deviance
           name: deviance
-        - title: C-index
+        - title: "Harrell's C-index"
           name: C
-        - title: Integrated Brier Score
-          name: brier
-        - title: Time-dependent AUC
-          name: auc
       default: deviance
       description:
           R: >
-            Performance measure for cross-validation. Deviance is computationally
-            efficient, C-index focuses on discrimination, Brier score accounts
-            for calibration, AUC provides time-specific performance.
+            Performance measure for cross-validation. Deviance (partial likelihood)
+            is computationally efficient and is the default. C-index (Harrell's
+            concordance) focuses on discrimination ability.
 
     - name: lambda_sequence
       title: Lambda Sequence
@@ -173,8 +185,40 @@ options:
       description:
           R: >
             How to specify the penalty parameter sequence. Automatic uses
-            data-driven range, custom allows user specification, single
-            tests only one value.
+            a data-driven range, custom uses user-defined max/min, and
+            single fits only one lambda value.
+
+    - name: lambda_custom_max
+      title: Custom Lambda Maximum
+      type: Number
+      default: 1.0
+      min: 1e-6
+      max: 1000
+      description:
+          R: >
+            Maximum lambda value for custom lambda sequence mode.
+            Must be greater than Custom Lambda Minimum.
+
+    - name: lambda_custom_min
+      title: Custom Lambda Minimum
+      type: Number
+      default: 0.001
+      min: 1e-8
+      max: 100
+      description:
+          R: >
+            Minimum lambda value for custom lambda sequence mode.
+            Must be smaller than Custom Lambda Maximum.
+
+    - name: lambda_single
+      title: Single Lambda Value
+      type: Number
+      default: 0.01
+      min: 1e-8
+      max: 1000
+      description:
+          R: >
+            Lambda value used when Lambda Sequence is set to Single Value.
 
     - name: lambda_min_ratio
       title: Lambda Min Ratio
@@ -291,7 +335,7 @@ options:
       description:
           R: >
             Comma-separated list of time points for survival probability
-            predictions. Empty string uses data-driven quantiles.
+            predictions. Leave empty to suppress the predictions table.
 
     - name: baseline_survival
       title: Estimate Baseline Survival
@@ -424,8 +468,8 @@ options:
       default: false
       description:
           R: >
-            Include intercept term in Cox model. Generally not needed
-            for survival analysis but may be useful in special cases.
+            Retained for compatibility. Cox proportional hazards models
+            do not estimate an intercept term, so this option has no effect.
 
     - name: parallel_computing
       title: Parallel Computing
@@ -433,8 +477,8 @@ options:
       default: false
       description:
           R: >
-            Use parallel computing for cross-validation and bootstrap
-            procedures to reduce computation time.
+            Use parallel computing for cross-validation and stability-selection
+            resampling to reduce computation time.
 
     - name: n_cores
       title: Number of Cores

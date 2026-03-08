@@ -30,6 +30,16 @@ children:
             isTarget: true
 
   - type: CollapseBox
+    label: Data Suitability
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: suitabilityCheck
+
+  - type: CollapseBox
     label: Model Options
     collapsed: false
     children:

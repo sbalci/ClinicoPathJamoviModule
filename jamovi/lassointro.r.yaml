@@ -1,0 +1,37 @@
+---
+name: lassointro
+title: Penalized Cox Regression Guide
+jrs: '1.1'
+
+items:
+    - name: overview
+      title: ''
+      type: Html
+      visible: (showOverview)
+
+    - name: decisionGuide
+      title: ''
+      type: Html
+      visible: (showDecisionGuide)
+
+    - name: clinicalScenarios
+      title: ''
+      type: Html
+      visible: (showClinicalScenarios)
+
+    - name: assumptions
+      title: ''
+      type: Html
+      visible: (showAssumptions)
+
+    - name: glossary
+      title: ''
+      type: Html
+      visible: (showGlossary)
+
+refs:
+    - ClinicoPathJamoviModule
+    - glmnet
+    - survival
+    - ncvreg
+...

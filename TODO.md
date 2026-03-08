@@ -60,7 +60,7 @@ use gemini to make Readiness for Clinicians and Pathologists assessment and Use 
 
 You are an expert R-package and jamovi developer.
 You are an expert in biostatistics working with pathologists and clinicians.
-Critically evaluate the next function.
+Critically evaluate lassocox function.
 Is it mathematically and statistically accurate?
 Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 Is it ready to be used by clinicians and pathologists?
@@ -118,11 +118,12 @@ Rscript _updateModules.R
 
 
 ---
+<!-- prepare an agent team to work on functions: lassointro, lassocox, adaptivelasso, highdimcox, ncvregcox, plscox, grouplasso, sparsegrouplasso, pcacox: -->
 
-prepare an agent team to work on function psychopdaROC:
-- all agents are experts in R-package and jamovi development.
+prepare an agent team to work on function: lassocox:
+- all agents are experts in R-package and jamovi development and biostatistics working with pathologists and clinicians.
+- lead agent will orchestrate the team, observe agent process, delegate next work, update the sonograph log file. Will make sure no functionality is removed and favor functionality. finally, it will check if jmvtools::prepare();devtools::document() is error free. 
 - a sonograph function will record the team's process in a log file.
-- lead agent is an expert in biostatistics working with pathologists and clinicians. it will orchestrate the team, update the sonograph log file. Will make sure no functionality is removed and favor functionality. it will check if jmvtools::prepare();devtools::document() is error free. 
 - one agent will check if the function is mathematically and statistically accurate?
 - one agent will check if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 - one agent will check if it is ready to be used by clinicians and pathologists?
@@ -146,6 +147,12 @@ prepare an agent team to work on function psychopdaROC:
 - one agent will run /check-function-full with the function name and make relevant fixes
 - one agent will run /review-function with the function name and make relevant fixes
 - one agent will run /fix-function with the function name and make relevant fixes
+- one agent will run /document-function with the function name and prepare documentation
+- one agent will run /generate-test-data with the function name and generate test data
+- one agent will run /prepare-translation with the function name and generate translation
+- one agent will run /social-media-promo with the function name and generate social media promotion text
+- one agent will run /update-refs with the function name and update references
+
 
 ---
 

@@ -13,6 +13,11 @@ items:
       type: Html
       visible: false
 
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+
     - name: summary
       title: Sparse Group LASSO Summary
       type: Table
@@ -285,6 +290,7 @@ items:
     - name: cvErrorPlot
       title: Cross-Validation Error
       type: Image
+      renderFun: .renderCVErrorPlot
       width: 600
       height: 400
       visible: (plot_cv_error)
@@ -297,6 +303,7 @@ items:
     - name: coefficientPlot
       title: Coefficient Path
       type: Image
+      renderFun: .renderCoefficientPlot
       width: 700
       height: 500
       visible: (plot_coefficients)
@@ -309,6 +316,7 @@ items:
     - name: groupSelectionPlot
       title: Group Selection Pattern
       type: Image
+      renderFun: .renderGroupSelectionPlot
       width: 600
       height: 400
       visible: (plot_groups)
@@ -321,6 +329,7 @@ items:
     - name: sparsityPlot
       title: Sparsity Pattern
       type: Image
+      renderFun: .renderSparsityPlot
       width: 600
       height: 400
       visible: (plot_sparsity)
@@ -333,6 +342,7 @@ items:
     - name: stabilityPlot
       title: Stability Selection
       type: Image
+      renderFun: .renderStabilityPlot
       width: 600
       height: 400
       visible: (plot_stability)

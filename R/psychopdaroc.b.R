@@ -1799,7 +1799,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   <head>
                   </head>
                   <body>
-                  This function was originally developed by Lucas Friesen in pschoPDA module. <a href='https://github.com/ClinicoPath/jamoviPsychoPDA'>The original module</a> is no longer maintained. The testroc function with additional features are added to the meddecide module.
+                  This function was originally developed by Lucas Friesen in psychoPDA module. <a href='https://github.com/ClinicoPath/jamoviPsychoPDA'>The original module</a> is no longer maintained. The testroc function with additional features are added to the meddecide module.
                   <div class='instructions'>
                   <p><b>ROC Analysis for Medical Decision Making</b></p>
                   <p>This analysis creates Receiver Operating Characteristic (ROC) curves and calculates optimal cutpoints for diagnostic tests.</p>
