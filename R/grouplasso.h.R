@@ -40,6 +40,8 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plot_group_importance = TRUE,
             plot_stability = FALSE,
             plot_group_structure = FALSE,
+            showSummary = FALSE,
+            showExplanations = FALSE,
             standardize = TRUE,
             adaptive_weights_method = "ridge",
             random_seed = 123, ...) {
@@ -234,6 +236,14 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plot_group_structure",
                 plot_group_structure,
                 default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
             private$..standardize <- jmvcore::OptionBool$new(
                 "standardize",
                 standardize,
@@ -286,6 +296,8 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plot_group_importance)
             self$.addOption(private$..plot_stability)
             self$.addOption(private$..plot_group_structure)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showExplanations)
             self$.addOption(private$..standardize)
             self$.addOption(private$..adaptive_weights_method)
             self$.addOption(private$..random_seed)
@@ -325,6 +337,8 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot_group_importance = function() private$..plot_group_importance$value,
         plot_stability = function() private$..plot_stability$value,
         plot_group_structure = function() private$..plot_group_structure$value,
+        showSummary = function() private$..showSummary$value,
+        showExplanations = function() private$..showExplanations$value,
         standardize = function() private$..standardize$value,
         adaptive_weights_method = function() private$..adaptive_weights_method$value,
         random_seed = function() private$..random_seed$value),
@@ -363,6 +377,8 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plot_group_importance = NA,
         ..plot_stability = NA,
         ..plot_group_structure = NA,
+        ..showSummary = NA,
+        ..showExplanations = NA,
         ..standardize = NA,
         ..adaptive_weights_method = NA,
         ..random_seed = NA)
@@ -388,7 +404,9 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cvPlot = function() private$.items[["cvPlot"]],
         importancePlot = function() private$.items[["importancePlot"]],
         stabilityPlot = function() private$.items[["stabilityPlot"]],
-        groupStructurePlot = function() private$.items[["groupStructurePlot"]]),
+        groupStructurePlot = function() private$.items[["groupStructurePlot"]],
+        summary = function() private$.items[["summary"]],
+        explanations = function() private$.items[["explanations"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -782,7 +800,25 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "group_definition",
                     "group_structure",
-                    "factor_grouping")))}))
+                    "factor_grouping")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Results Summary",
+                visible="(showSummary)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "penalty_type",
+                    "cv_folds")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="About This Analysis",
+                visible="(showExplanations)"))}))
 
 grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "grouplassoBase",
@@ -918,6 +954,10 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   selection frequencies across subsamples.
 #' @param plot_group_structure Visualize group structure and variable
 #'   assignments.
+#' @param showSummary Display a plain-language summary paragraph of the
+#'   analysis results, suitable for pasting into reports or tumor board notes.
+#' @param showExplanations Display an educational panel explaining what Group
+#'   LASSO does, when to use it, assumptions, and how to interpret the outputs.
 #' @param standardize Standardize variables before fitting. Recommended for
 #'   optimal penalty performance across different variable scales.
 #' @param adaptive_weights_method Method for calculating adaptive weights for
@@ -945,6 +985,8 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$importancePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$stabilityPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$groupStructurePlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -990,6 +1032,8 @@ grouplasso <- function(
     plot_group_importance = TRUE,
     plot_stability = FALSE,
     plot_group_structure = FALSE,
+    showSummary = FALSE,
+    showExplanations = FALSE,
     standardize = TRUE,
     adaptive_weights_method = "ridge",
     random_seed = 123) {
@@ -1043,6 +1087,8 @@ grouplasso <- function(
         plot_group_importance = plot_group_importance,
         plot_stability = plot_stability,
         plot_group_structure = plot_group_structure,
+        showSummary = showSummary,
+        showExplanations = showExplanations,
         standardize = standardize,
         adaptive_weights_method = adaptive_weights_method,
         random_seed = random_seed)

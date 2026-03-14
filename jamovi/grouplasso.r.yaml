@@ -339,6 +339,24 @@ items:
         - group_structure
         - factor_grouping
 
+    - name: summary
+      title: Results Summary
+      type: Html
+      visible: (showSummary)
+      clearWith:
+        - time
+        - event
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - penalty_type
+        - cv_folds
+
+    - name: explanations
+      title: About This Analysis
+      type: Html
+      visible: (showExplanations)
+
 
 refs:
     - ClinicoPathJamoviModule

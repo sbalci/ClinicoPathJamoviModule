@@ -12,22 +12,17 @@ grouplasso(
   outcomeLevel,
   censorLevel,
   predictors,
-  strata,
   group_definition = "automatic",
   group_structure = "",
   factor_grouping = TRUE,
   penalty_type = "group_lasso",
-  alpha = 0.5,
   group_weights = "sqrt_size",
   custom_weights = "",
   cv_folds = 10,
-  cv_measure = "deviance",
-  lambda_sequence = "auto",
-  n_lambda = 50,
-  lambda_min_ratio = 0.01,
-  algorithm = "coordinate",
-  max_iterations = 1000,
-  tolerance = 1e-06,
+  n_lambda = 100,
+  lambda_min_ratio = 0.001,
+  max_iterations = 10000,
+  tolerance = 0.001,
   selection_threshold = 1e-08,
   stability_selection = FALSE,
   bootstrap_samples = 100,
@@ -46,10 +41,7 @@ grouplasso(
   plot_stability = FALSE,
   plot_group_structure = FALSE,
   standardize = TRUE,
-  center_groups = FALSE,
   adaptive_weights_method = "ridge",
-  warm_start = TRUE,
-  parallel_computing = FALSE,
   random_seed = 123
 )
 }
@@ -58,10 +50,10 @@ grouplasso(
 
 \item{suitabilityCheck}{Run a comprehensive data suitability assessment
 before analysis. Checks sample size, events-per-variable ratio,
-multicollinearity,  and whether regularization is needed.}
+multicollinearity, and whether regularization is needed.}
 
 \item{time}{Time to event variable (numeric). For right-censored data, this
-is the  time from study entry to event or censoring.}
+is the time from study entry to event or censoring.}
 
 \item{event}{Event indicator variable. For survival analysis: 0 = censored,
 1 = event. For competing risks: 0 = censored, 1+ = different event types.}
@@ -76,37 +68,31 @@ encoding: rows whose event value matches neither level are treated as
 missing and excluded.}
 
 \item{predictors}{Variables to include in the group LASSO Cox model.
-Variables can be grouped based on biological, clinical, or statistical
-criteria. Factor variables are automatically converted to dummy variables.}
-
-\item{strata}{Optional stratification variable for stratified Cox
-regression. Creates separate baseline hazards for each stratum.}
+Variables can be grouped based on clinical or statistical criteria. Factor
+variables are automatically converted to dummy variables.}
 
 \item{group_definition}{Method for defining variable groups. Automatic
-groups by data type, custom allows manual specification, factor-based
-groups dummy variables from same factor, biological supports pathway-based
-groupings.}
+groups each original variable (with its dummy columns) as a separate group.
+Custom allows manual specification. Factor-based groups dummy variables
+from the same factor together.}
 
 \item{group_structure}{Custom group assignment as comma-separated list.
 Format: 'var1:group1, var2:group1, var3:group2'. Only used when
-group_definition is 'custom'. Groups can overlap.}
+group_definition is 'custom'.}
 
-\item{factor_grouping}{Automatically group dummy variables from the same
-factor variable. Ensures that factor variables are selected/excluded as
-complete units.}
+\item{factor_grouping}{When using automatic grouping, automatically group
+dummy variables from the same factor variable into a single group. Ensures
+that factor variables are selected or excluded as complete units.}
 
-\item{penalty_type}{Type of group penalty. Group LASSO selects entire
-groups, sparse group combines group and individual penalties, adaptive uses
-data-driven weights, overlapping handles variables belonging to multiple
-groups.}
+\item{penalty_type}{Type of group penalty via grpreg. Group LASSO (L1/L2
+mixed norm) selects entire groups simultaneously. Group MCP and Group SCAD
+provide non-convex alternatives with less bias for large coefficients.
+Adaptive Group LASSO uses data-driven penalty weights for improved oracle
+properties.}
 
-\item{alpha}{Mixing parameter for sparse group LASSO. 0 = pure group LASSO,
-1 = pure individual LASSO, intermediate values combine both penalties. Only
-used for sparse group LASSO.}
-
-\item{group_weights}{Method for calculating group-specific penalty weights.
-Square root of group size is standard, adaptive uses initial estimates,
-custom allows user-specified weights.}
+\item{group_weights}{Method for calculating group-specific penalty
+multipliers passed to grpreg. Square root of group size is the standard
+choice. Custom allows user-specified weights.}
 
 \item{custom_weights}{Custom weights for each group as comma-separated
 values. Order should match group numbering. Only used with custom weights.}
@@ -115,25 +101,14 @@ values. Order should match group numbering. Only used with custom weights.}
 penalty parameter. More folds provide better estimates but increase
 computation time.}
 
-\item{cv_measure}{Performance measure for cross-validation. Deviance is
-standard for Cox models, C-index focuses on discrimination, Brier score
-provides calibration-aware selection.}
-
-\item{lambda_sequence}{Specification of penalty parameter sequence.
-Automatic uses data-driven range, custom allows user-defined range.}
-
 \item{n_lambda}{Number of lambda values in the regularization path. More
 values provide finer resolution but increase computation time.}
 
 \item{lambda_min_ratio}{Ratio of smallest to largest lambda in automatic
 sequence. Smaller values explore stronger penalties.}
 
-\item{algorithm}{Optimization algorithm for group LASSO. Coordinate descent
-is standard and efficient, proximal gradient handles complex penalties,
-ADMM works well for overlapping groups.}
-
-\item{max_iterations}{Maximum iterations for optimization algorithm.
-Increase if convergence warnings occur.}
+\item{max_iterations}{Maximum iterations for the coordinate descent
+algorithm. Increase if convergence warnings occur.}
 
 \item{tolerance}{Convergence tolerance for optimization. Smaller values
 provide more precise solutions but increase computation time.}
@@ -142,12 +117,11 @@ provide more precise solutions but increase computation time.}
 Groups with maximum coefficient magnitude below this value are considered
 unselected.}
 
-\item{stability_selection}{Perform stability selection across bootstrap
-samples to identify robust group selection patterns and reduce selection
-variability.}
+\item{stability_selection}{Perform stability selection across subsamples to
+identify robust group selection patterns and reduce selection variability.}
 
-\item{bootstrap_samples}{Number of bootstrap samples for stability
-selection. More samples provide more stable group selection.}
+\item{bootstrap_samples}{Number of subsamples for stability selection. More
+samples provide more stable group selection.}
 
 \item{stability_threshold}{Minimum selection frequency for groups in
 stability selection. Higher thresholds provide more conservative selection.}
@@ -187,25 +161,18 @@ penalty selection and confidence bands.}
 groups based on coefficient norms and selection frequency.}
 
 \item{plot_stability}{Plot stability selection results showing group
-selection frequencies across bootstrap samples.}
+selection frequencies across subsamples.}
 
 \item{plot_group_structure}{Visualize group structure and variable
-assignments with overlap indicators for complex grouping schemes.}
+assignments.}
 
 \item{standardize}{Standardize variables before fitting. Recommended for
 optimal penalty performance across different variable scales.}
 
-\item{center_groups}{Center variables within their respective groups before
-applying penalties. Can improve performance for heterogeneous groups.}
-
 \item{adaptive_weights_method}{Method for calculating adaptive weights for
-groups. Ridge provides stable estimates, univariate uses marginal effects.}
-
-\item{warm_start}{Use warm start initialization for faster convergence
-along the regularization path.}
-
-\item{parallel_computing}{Use parallel computing for cross-validation and
-bootstrap procedures to reduce computation time.}
+groups. Only used when penalty_type is adaptive_group. Ridge provides
+stable estimates via ridge Cox regression. Univariate uses marginal Cox
+regression for each group separately.}
 
 \item{random_seed}{Random seed for cross-validation folds and bootstrap
 sampling. Ensures reproducible results across analyses.}
@@ -241,11 +208,11 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Group LASSO for Cox proportional hazards models enabling simultaneous
 selection of pre-defined variable groups while maintaining within-group
-structure. This method extends traditional LASSO by applying penalties at
-the group level, making it ideal for categorical variables with multiple
-dummy codes, grouped biomarkers, or structured predictors like gene
-pathways. The implementation supports overlapping groups, adaptive group
-weights, sparse group LASSO combining group and individual penalties, and
+structure. This method applies the group LASSO penalty (L1/L2 mixed norm)
+at the group level using the grpreg package, ensuring entire groups of
+variables are selected or excluded together. Ideal for categorical
+variables with multiple dummy codes, grouped biomarkers, or structured
+predictors like gene pathways. Supports adaptive group weights and
 comprehensive cross-validation for optimal penalty selection. Particularly
 valuable for genomic survival analysis, clinical prediction models with
 natural variable groupings, and scenarios requiring interpretable

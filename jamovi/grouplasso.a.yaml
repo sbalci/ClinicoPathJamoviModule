@@ -410,6 +410,25 @@ options:
           R: >
             Visualize group structure and variable assignments.
 
+    # Clinical output options
+    - name: showSummary
+      title: Show Summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display a plain-language summary paragraph of the analysis results,
+            suitable for pasting into reports or tumor board notes.
+
+    - name: showExplanations
+      title: Show Explanations
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display an educational panel explaining what Group LASSO does,
+            when to use it, assumptions, and how to interpret the outputs.
+
     # Advanced options
     - name: standardize
       title: Standardize Variables

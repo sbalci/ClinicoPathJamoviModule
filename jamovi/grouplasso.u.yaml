@@ -162,6 +162,16 @@ children:
         margin: large
         children:
           - type: Label
+            label: Clinical Output
+            children:
+              - type: CheckBox
+                name: showSummary
+              - type: CheckBox
+                name: showExplanations
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
             label: Tables
             children:
               - type: CheckBox

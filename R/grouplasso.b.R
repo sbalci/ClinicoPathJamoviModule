@@ -73,11 +73,12 @@ grouplassoClass <- R6::R6Class(
                 return()
             }
 
-            # Check if grpreg is available
+            # Check if required packages are available
             if (!requireNamespace("grpreg", quietly = TRUE)) {
                 private$.insertNotice(
                     'missingGrpreg', jmvcore::NoticeType$ERROR,
-                    "Package 'grpreg' is required for Group LASSO Cox regression. Install with: install.packages('grpreg')"
+                    "Package 'grpreg' is required for Group LASSO Cox regression. Install with: install.packages('grpreg')",
+                    position = 1
                 )
                 return()
             }
@@ -85,7 +86,8 @@ grouplassoClass <- R6::R6Class(
             if (!requireNamespace("survival", quietly = TRUE)) {
                 private$.insertNotice(
                     'missingSurvival', jmvcore::NoticeType$ERROR,
-                    "Package 'survival' is required. Install with: install.packages('survival')"
+                    "Package 'survival' is required. Install with: install.packages('survival')",
+                    position = 1
                 )
                 return()
             }
@@ -270,6 +272,15 @@ grouplassoClass <- R6::R6Class(
                 return(NULL)
             }
 
+            if (sum(event_values == 1) == 0) {
+                private$.insertNotice(
+                    'noEvents', jmvcore::NoticeType$ERROR,
+                    "No events detected in the data. All observations are censored. Group LASSO requires at least some events to fit.",
+                    position = 1
+                )
+                return(NULL)
+            }
+
             # Prepare predictor matrix and groups
             pred_data <- analysis_data[, pred_vars, drop = FALSE]
             design_result <- private$.createDesignMatrix(pred_data, pred_vars)
@@ -298,24 +309,33 @@ grouplassoClass <- R6::R6Class(
             # Convert factors to dummy variables and create design matrix
             x_matrix <- model.matrix(~ . - 1, data = pred_data)
 
-            # Standardize if requested (grpreg does internal standardization,
-            # but explicit pre-scaling ensures consistent behavior)
-            if (self$options$standardize) {
-                x_scaled <- scale(x_matrix)
-                # Replace NaN columns (zero-variance) with zeros
-                x_scaled[is.nan(x_scaled)] <- 0
-                x_matrix <- x_scaled
-            }
-
-            # Track which columns came from which original variable
-            # using model.matrix's assign attribute
+            # Preserve the assign attribute before any transformation
             assign_vec <- attr(x_matrix, "assign")
+
+            # Standardize if requested: scale columns before passing to grpreg.
+            # grpreg also standardizes internally, but pre-scaling ensures the
+            # group multiplier weights are computed on a common scale.
+            if (self$options$standardize) {
+                col_sds <- apply(x_matrix, 2, sd, na.rm = TRUE)
+                # Only scale columns with non-zero variance
+                scale_cols <- which(col_sds > 1e-10)
+                if (length(scale_cols) > 0) {
+                    x_matrix[, scale_cols] <- scale(x_matrix[, scale_cols])
+                }
+            }
             if (is.null(assign_vec)) {
                 # Fallback: map columns to original variables by name matching
+                # Sort pred_vars by descending length to avoid prefix collisions
+                # (e.g., "age_group" matched before "age")
                 assign_vec <- rep(0L, ncol(x_matrix))
-                for (i in seq_along(pred_vars)) {
+                sorted_idx <- order(nchar(pred_vars), decreasing = TRUE)
+                col_names <- colnames(x_matrix)
+                for (i in sorted_idx) {
                     var <- pred_vars[i]
-                    col_indices <- which(startsWith(colnames(x_matrix), var))
+                    # Exact match or match with level suffix (factor dummies)
+                    col_indices <- which(col_names == var | startsWith(col_names, paste0(var, ".")))
+                    # Only assign to columns not yet mapped
+                    col_indices <- col_indices[assign_vec[col_indices] == 0L]
                     assign_vec[col_indices] <- i
                 }
             }
@@ -597,15 +617,9 @@ grouplassoClass <- R6::R6Class(
             lambda_1se <- private$.computeLambda1se(cv_result)
 
             # Get coefficients at optimal lambdas
+            # Cox models have no intercept; coef() returns p coefficients directly
             coef_min <- as.numeric(coef(full_fit, lambda = lambda_min))
             coef_1se <- as.numeric(coef(full_fit, lambda = lambda_1se))
-
-            # grpreg Cox coef() may include intercept as first element (= 0)
-            # Remove it if present
-            if (length(coef_min) == ncol(group_data$x) + 1) {
-                coef_min <- coef_min[-1]
-                coef_1se <- coef_1se[-1]
-            }
 
             return(list(
                 cv_fit = full_fit,
@@ -693,18 +707,19 @@ grouplassoClass <- R6::R6Class(
                 return(coefs)
             }
 
-            # Fallback: ridge via grpreg
+            # Fallback: use least-penalized coefficients from grpreg path
+            # (smallest lambda = least shrinkage, approximating ridge)
             tryCatch({
-                ridge_fit <- grpreg::grpsurv(
+                fallback_fit <- grpreg::grpsurv(
                     X = group_data$x,
                     y = group_data$y,
                     group = group_data$groups,
                     penalty = "grLasso",
-                    nlambda = 20
+                    nlambda = 50
                 )
-                # Use coefficients at a moderate lambda
-                mid_idx <- max(1, ncol(ridge_fit$beta) %/% 4)
-                coefs <- as.numeric(ridge_fit$beta[, mid_idx])
+                # Pick the last lambda (smallest penalty = least shrinkage)
+                last_idx <- ncol(fallback_fit$beta)
+                coefs <- as.numeric(fallback_fit$beta[, last_idx])
                 return(coefs)
             }, error = function(e) {
                 return(rep(0.01, n_vars))
@@ -736,9 +751,17 @@ grouplassoClass <- R6::R6Class(
         .stabilitySelection = function(group_data) {
             n_boot <- self$options$bootstrap_samples
             subsample_ratio <- 0.8
+            if (length(group_data$groups) == 0) return(NULL)
             n_groups <- max(group_data$groups)
             group_vector <- group_data$groups
             group_multiplier <- private$.buildGroupMultiplier(group_data)
+
+            # Use the same penalty type as the main model
+            penalty <- switch(self$options$penalty_type,
+                group_lasso = "grLasso", group_mcp = "grMCP",
+                group_scad = "grSCAD", adaptive_group = "grLasso",
+                "grLasso"
+            )
 
             selection_matrix <- matrix(0, nrow = n_boot, ncol = n_groups)
 
@@ -756,16 +779,13 @@ grouplassoClass <- R6::R6Class(
                         X = boot_x,
                         y = boot_y,
                         group = group_vector,
-                        penalty = "grLasso",
+                        penalty = penalty,
                         group.multiplier = group_multiplier,
                         nfolds = min(5, self$options$cv_folds),
                         seed = self$options$random_seed + b
                     )
 
                     boot_coef <- as.numeric(coef(boot_cv$fit, lambda = boot_cv$lambda.min))
-                    if (length(boot_coef) == ncol(group_data$x) + 1) {
-                        boot_coef <- boot_coef[-1]
-                    }
 
                     for (g in seq_len(n_groups)) {
                         group_vars <- which(group_vector == g)
@@ -799,11 +819,19 @@ grouplassoClass <- R6::R6Class(
             group_vector <- group_data$groups
             group_multiplier <- private$.buildGroupMultiplier(group_data)
 
+            penalty <- switch(self$options$penalty_type,
+                group_lasso = "grLasso", group_mcp = "grMCP",
+                group_scad = "grSCAD", adaptive_group = "grLasso",
+                "grLasso"
+            )
+
             set.seed(self$options$random_seed)
             fold_ids <- sample(rep(seq_len(outer_folds), length.out = n))
 
             outer_performance <- numeric(outer_folds)
             optimal_lambdas <- numeric(outer_folds)
+            n_groups_sel <- integer(outer_folds)
+            training_errors <- numeric(outer_folds)
 
             for (k in seq_len(outer_folds)) {
                 test_idx <- which(fold_ids == k)
@@ -819,7 +847,7 @@ grouplassoClass <- R6::R6Class(
                         X = train_x,
                         y = train_y,
                         group = group_vector,
-                        penalty = "grLasso",
+                        penalty = penalty,
                         group.multiplier = group_multiplier,
                         nfolds = inner_folds,
                         seed = self$options$random_seed + k
@@ -827,24 +855,32 @@ grouplassoClass <- R6::R6Class(
 
                     optimal_lambdas[k] <- inner_cv$lambda.min
 
-                    # Evaluate on held-out fold using concordance (C-index)
+                    # Get coefficients and count selected groups
                     test_coef <- as.numeric(coef(inner_cv$fit, lambda = inner_cv$lambda.min))
-                    if (length(test_coef) == ncol(group_data$x) + 1) {
-                        test_coef <- test_coef[-1]
-                    }
-                    lp_test <- as.numeric(test_x %*% test_coef)
+                    sel <- abs(test_coef) > 1e-10
+                    n_groups_sel[k] <- if (any(sel)) length(unique(group_vector[sel])) else 0L
 
+                    # Training error (CV error at optimal lambda)
+                    idx_min <- which(inner_cv$lambda == inner_cv$lambda.min)
+                    training_errors[k] <- if (length(idx_min) > 0) inner_cv$cve[idx_min[1]] else min(inner_cv$cve, na.rm = TRUE)
+
+                    # Evaluate on held-out fold using concordance (C-index)
+                    lp_test <- as.numeric(test_x %*% test_coef)
                     conc <- survival::concordance(test_y ~ lp_test, reverse = TRUE)
                     outer_performance[k] <- conc$concordance
                 }, error = function(e) {
                     outer_performance[k] <<- NA
                     optimal_lambdas[k] <<- NA
+                    n_groups_sel[k] <<- NA_integer_
+                    training_errors[k] <<- NA
                 })
             }
 
             return(list(
                 outer_performance = outer_performance,
-                optimal_lambdas = optimal_lambdas
+                optimal_lambdas = optimal_lambdas,
+                n_groups_selected = n_groups_sel,
+                training_errors = training_errors
             ))
         },
 
@@ -856,13 +892,19 @@ grouplassoClass <- R6::R6Class(
             group_vector <- group_data$groups
             group_multiplier <- private$.buildGroupMultiplier(group_data)
 
+            penalty <- switch(self$options$penalty_type,
+                group_lasso = "grLasso", group_mcp = "grMCP",
+                group_scad = "grSCAD", adaptive_group = "grLasso",
+                "grLasso"
+            )
+
             # Observed model
             set.seed(self$options$random_seed)
             obs_cv <- tryCatch({
                 grpreg::cv.grpsurv(
                     X = group_data$x, y = group_data$y,
                     group = group_vector,
-                    penalty = "grLasso",
+                    penalty = penalty,
                     group.multiplier = group_multiplier,
                     nfolds = min(5, self$options$cv_folds),
                     seed = self$options$random_seed
@@ -872,7 +914,6 @@ grouplassoClass <- R6::R6Class(
             if (is.null(obs_cv)) return(NULL)
 
             obs_coef <- as.numeric(coef(obs_cv$fit, lambda = obs_cv$lambda.min))
-            if (length(obs_coef) == ncol(group_data$x) + 1) obs_coef <- obs_coef[-1]
             obs_n_groups <- length(unique(group_vector[abs(obs_coef) > 1e-8]))
             obs_deviance <- min(obs_cv$cve, na.rm = TRUE)
 
@@ -895,13 +936,12 @@ grouplassoClass <- R6::R6Class(
                     perm_cv <- grpreg::cv.grpsurv(
                         X = group_data$x, y = perm_y,
                         group = group_vector,
-                        penalty = "grLasso",
+                        penalty = penalty,
                         group.multiplier = group_multiplier,
                         nfolds = min(5, self$options$cv_folds),
                         seed = self$options$random_seed + b
                     )
                     perm_coef <- as.numeric(coef(perm_cv$fit, lambda = perm_cv$lambda.min))
-                    if (length(perm_coef) == ncol(group_data$x) + 1) perm_coef <- perm_coef[-1]
                     perm_n_groups[b] <- length(unique(group_vector[abs(perm_coef) > 1e-8]))
                     perm_deviance[b] <- min(perm_cv$cve, na.rm = TRUE)
 
@@ -962,6 +1002,14 @@ grouplassoClass <- R6::R6Class(
 
             # Performance metrics
             private$.populatePerformance(group_results, group_data)
+
+            # Clinical output panels
+            if (isTRUE(self$options$showSummary)) {
+                private$.populateSummary(group_results, group_data)
+            }
+            if (isTRUE(self$options$showExplanations)) {
+                private$.populateExplanations()
+            }
 
             # Plots
             if (self$options$plot_regularization_path) {
@@ -1079,8 +1127,8 @@ grouplassoClass <- R6::R6Class(
                 n_vars_sel <- sum(selected)
                 n_groups_sel <- if (any(selected)) length(unique(group_vector[selected])) else 0L
 
-                # grpreg uses $loss for deviance and may not have $df
-                dev_val <- if (!is.null(full_fit$loss)) full_fit$loss[idx] else NA
+                # grpreg stores negative partial log-likelihood in $deviance
+                dev_val <- if (!is.null(full_fit$deviance) && idx <= length(full_fit$deviance)) full_fit$deviance[idx] else NA
                 df_val <- n_vars_sel  # approximate df as number of selected variables
 
                 table$addRow(rowKey = j, values = list(
@@ -1132,6 +1180,35 @@ grouplassoClass <- R6::R6Class(
         .populateStabilityResults = function(group_results, group_data) {
             stability <- group_results$stability
             group_info <- group_data$group_info
+            group_vector <- group_data$groups
+
+            # Compute first_selected: lambda at which each group first enters the model
+            first_selected_lambda <- rep(NA_real_, nrow(group_info))
+            full_fit <- group_results$cv_fit
+            if (!is.null(full_fit)) {
+                beta_matrix <- full_fit$beta
+                lambda_seq <- full_fit$lambda
+                for (i in seq_len(nrow(group_info))) {
+                    gid <- group_info$group_id[i]
+                    g_idx <- which(group_vector == gid)
+                    if (length(g_idx) > 0) {
+                        # Scan from largest lambda (most penalized) to smallest
+                        for (j in seq_len(ncol(beta_matrix))) {
+                            if (any(abs(beta_matrix[g_idx, j]) > 1e-10)) {
+                                first_selected_lambda[i] <- lambda_seq[j]
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+
+            # Stability score: weighted combination of selection frequency and entry order
+            # Groups that are selected frequently AND enter early get higher scores
+            max_lambda <- if (!is.null(full_fit)) max(full_fit$lambda) else 1
+            entry_scores <- ifelse(is.na(first_selected_lambda), 0,
+                                   first_selected_lambda / max_lambda)
+            stability_scores <- (stability$selection_frequencies + entry_scores) / 2
 
             table <- self$results$stabilityResults
             for (i in seq_len(nrow(group_info))) {
@@ -1139,9 +1216,9 @@ grouplassoClass <- R6::R6Class(
                     group_id = group_info$group_id[i],
                     group_name = group_info$group_name[i],
                     selection_frequency = stability$selection_frequencies[i],
-                    stability_score = stability$selection_frequencies[i],
+                    stability_score = stability_scores[i],
                     stable_selection = if (stability$selection_frequencies[i] >= self$options$stability_threshold) "Stable" else "Unstable",
-                    first_selected = NA
+                    first_selected = first_selected_lambda[i]
                 ))
             }
         },
@@ -1155,9 +1232,9 @@ grouplassoClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = list(
                     outer_fold = as.integer(i),
                     optimal_lambda = nested$optimal_lambdas[i],
-                    n_groups_selected = NA_integer_,
+                    n_groups_selected = nested$n_groups_selected[i],
                     performance = nested$outer_performance[i],
-                    training_error = NA_real_
+                    training_error = nested$training_errors[i]
                 ))
             }
         },
@@ -1256,6 +1333,160 @@ grouplassoClass <- R6::R6Class(
 
             note <- "<p><i>Note: The Training Concordance Index overestimates true out-of-sample performance, especially for high-dimensional models. Use Cross-Validation or Nested CV for a realistic assessment.</i></p>"
             self$results$modelPerformanceNote$setContent(note)
+        },
+
+        # ══════════════════════════════════════════════════════════════
+        # Clinical Output Panels
+        # ══════════════════════════════════════════════════════════════
+        .populateSummary = function(group_results, group_data) {
+            coef_vec <- group_results$coef_min
+            group_vector <- group_data$groups
+            selected <- abs(coef_vec) > self$options$selection_threshold
+            n_vars_selected <- sum(selected)
+            n_groups_selected <- if (any(selected)) length(unique(group_vector[selected])) else 0
+            n_groups_total <- max(group_vector)
+            n_obs <- group_data$n_obs
+            n_events <- group_data$n_events
+
+            penalty_label <- switch(self$options$penalty_type,
+                group_lasso = "Group LASSO (grLasso)",
+                group_mcp = "Group MCP (grMCP)",
+                group_scad = "Group SCAD (grSCAD)",
+                adaptive_group = "Adaptive Group LASSO",
+                "Group LASSO"
+            )
+
+            # C-index
+            c_index <- NA
+            if (n_vars_selected > 0) {
+                tryCatch({
+                    lp <- as.numeric(group_data$x %*% coef_vec)
+                    conc <- survival::concordance(group_data$y ~ lp, reverse = TRUE)
+                    c_index <- conc$concordance
+                }, error = function(e) {})
+            } else {
+                c_index <- 0.5
+            }
+
+            # Build summary paragraph
+            selected_group_names <- character(0)
+            group_info <- group_data$group_info
+            for (i in seq_len(nrow(group_info))) {
+                g_idx <- which(group_vector == group_info$group_id[i])
+                gnorm <- sqrt(sum(coef_vec[g_idx]^2))
+                if (gnorm > self$options$selection_threshold) {
+                    selected_group_names <- c(selected_group_names, group_info$group_name[i])
+                }
+            }
+
+            selected_text <- if (length(selected_group_names) > 0) {
+                paste(selected_group_names, collapse = ", ")
+            } else {
+                "none"
+            }
+
+            c_text <- if (!is.na(c_index)) sprintf("%.3f", c_index) else "N/A"
+
+            # HR interpretation for top variables
+            hr_lines <- ""
+            if (n_vars_selected > 0) {
+                sel_idx <- which(selected)
+                # Sort by absolute coefficient
+                sel_order <- sel_idx[order(abs(coef_vec[sel_idx]), decreasing = TRUE)]
+                top_n <- min(5, length(sel_order))
+                hr_parts <- character(top_n)
+                for (k in seq_len(top_n)) {
+                    idx <- sel_order[k]
+                    hr <- exp(coef_vec[idx])
+                    direction <- if (hr > 1) "increased" else "decreased"
+                    hr_parts[k] <- sprintf("<li><strong>%s</strong>: HR = %.3f (%s risk per unit increase)</li>",
+                                           group_data$var_names[idx], hr, direction)
+                }
+                hr_lines <- paste0("<ul>", paste(hr_parts, collapse = ""), "</ul>")
+            }
+
+            html <- paste0(
+                "<div style='font-family: Arial, sans-serif; padding: 10px;'>",
+                "<h3>Results Summary</h3>",
+                "<p>A ", penalty_label, " penalized Cox regression was fitted to ",
+                n_obs, " observations (", n_events, " events) with ",
+                ncol(group_data$x), " predictor variables organized into ",
+                n_groups_total, " groups. ",
+                "Using ", self$options$cv_folds, "-fold cross-validation, ",
+                "the optimal penalty (lambda = ", sprintf("%.4f", group_results$lambda_min),
+                ") selected <strong>", n_groups_selected, "/", n_groups_total,
+                " groups</strong> (", n_vars_selected, " individual variables). ",
+                "The training concordance index was <strong>", c_text,
+                "</strong> (note: this is an optimistic estimate).</p>",
+                if (n_vars_selected > 0) paste0(
+                    "<p><strong>Selected groups:</strong> ", selected_text, "</p>",
+                    "<p><strong>Top hazard ratios:</strong></p>", hr_lines
+                ) else "<p>No variables were selected by the model at the optimal penalty level. Consider relaxing the penalty or reviewing the data.</p>",
+                "</div>"
+            )
+
+            self$results$summary$setContent(html)
+        },
+
+        .populateExplanations = function() {
+            html <- paste0(
+                "<div style='font-family: Arial, sans-serif; padding: 10px;'>",
+
+                "<h3>About Group LASSO for Survival Analysis</h3>",
+
+                "<p><strong>What does this analysis do?</strong><br>",
+                "Group LASSO applies a penalized Cox proportional hazards model that selects or removes ",
+                "pre-defined <em>groups</em> of variables simultaneously. Unlike standard LASSO (which selects ",
+                "individual variables), Group LASSO uses an L1/L2 mixed penalty norm that enforces group-level ",
+                "sparsity: either all variables in a group are included, or the entire group is excluded. ",
+                "This is implemented via the <code>grpreg</code> R package.</p>",
+
+                "<p><strong>When should I use it?</strong></p>",
+                "<ul>",
+                "<li>You have grouped predictors (e.g., dummy variables from a single factor, genes in a pathway, biomarker panels)</li>",
+                "<li>You want to identify which groups of variables predict survival while preserving within-group structure</li>",
+                "<li>You have more predictors than events (high-dimensional setting) and need regularization</li>",
+                "<li>You want interpretable group-wise feature selection rather than individual variable selection</li>",
+                "</ul>",
+
+                "<p><strong>Penalty types explained:</strong></p>",
+                "<ul>",
+                "<li><strong>Group LASSO (grLasso):</strong> The standard choice. Convex penalty, continuous shrinkage. All-or-nothing group selection.</li>",
+                "<li><strong>Group MCP:</strong> Non-convex minimax concave penalty. Less bias for large coefficients. May select fewer groups more confidently.</li>",
+                "<li><strong>Group SCAD:</strong> Non-convex smoothly clipped penalty. Similar benefits to MCP with different shrinkage profile.</li>",
+                "<li><strong>Adaptive Group LASSO:</strong> Uses data-driven weights from an initial model (ridge or univariate Cox). Provides better oracle properties: stronger penalty on unimportant groups, lighter on important ones.</li>",
+                "</ul>",
+
+                "<p><strong>Key assumptions:</strong></p>",
+                "<ul>",
+                "<li>Cox proportional hazards: the effect of each variable is constant over time</li>",
+                "<li>Right-censored survival data with well-defined time and event variables</li>",
+                "<li>Group structure is meaningful: variables within a group should be related</li>",
+                "<li>No strong violations of the PH assumption (consider time-dependent models if violated)</li>",
+                "</ul>",
+
+                "<p><strong>How to interpret outputs:</strong></p>",
+                "<ul>",
+                "<li><strong>Hazard Ratio (HR):</strong> HR &gt; 1 means higher risk (worse prognosis); HR &lt; 1 means lower risk (better prognosis)</li>",
+                "<li><strong>Group norm:</strong> The L2 norm of coefficients within a group; larger norm = more important group</li>",
+                "<li><strong>C-index:</strong> Concordance index, where 0.5 = no discrimination and 1.0 = perfect discrimination. Training C-index is optimistic; use nested CV for realistic estimates</li>",
+                "<li><strong>Lambda:</strong> The penalty parameter. Larger lambda = more regularization = fewer groups selected</li>",
+                "<li><strong>Lambda.min:</strong> The lambda that minimizes CV error. <strong>Lambda.1se:</strong> The largest lambda within 1 SE of the minimum (more parsimonious model)</li>",
+                "</ul>",
+
+                "<p><strong>Tips for clinicians:</strong></p>",
+                "<ul>",
+                "<li>Check the Data Suitability panel first: if EPV &lt; 2, results may be unreliable</li>",
+                "<li>Use stability selection to confirm which groups are robustly selected across subsamples</li>",
+                "<li>Use nested CV to get an honest estimate of predictive performance</li>",
+                "<li>The training C-index overestimates performance; always cross-validate</li>",
+                "<li>Group LASSO is best when you have a natural grouping (clinical domains, pathways, biomarker panels)</li>",
+                "</ul>",
+
+                "</div>"
+            )
+
+            self$results$explanations$setContent(html)
         },
 
         .initResults = function() {

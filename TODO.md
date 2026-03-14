@@ -122,10 +122,6 @@ Rscript _updateModules.R
 
 
 
-/check-function-full grouplasso
-/review-function grouplasso
-/fix-function grouplasso
-/generate-test-data grouplasso
 /update-refs grouplasso
 /document-function grouplasso
 
