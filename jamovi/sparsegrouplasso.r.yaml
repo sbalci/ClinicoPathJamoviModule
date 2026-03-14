@@ -25,6 +25,8 @@ items:
       clearWith:
         - time_var
         - event_var
+        - outcomeLevel
+        - censorLevel
         - pred_vars
         - alpha_sgl
         - selection_criterion

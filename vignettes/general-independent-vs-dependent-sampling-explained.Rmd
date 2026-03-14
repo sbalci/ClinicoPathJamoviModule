@@ -584,7 +584,7 @@ If VI is scattered throughout tumor (not contiguous), approaches independence:
 
 ```{r example_usage, eval=FALSE}
 # Load the example dataset
-library(ClinicoPath)
+devtools::load_all(".")
 data(duan2023_vi_blocks)
 
 # In jamovi:

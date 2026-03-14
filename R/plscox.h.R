@@ -8,14 +8,19 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             time = NULL,
             status = NULL,
+            outcomeLevel = NULL,
+            censorLevel = NULL,
             predictors = NULL,
             pls_components = 5,
             cross_validation = "k10",
             component_selection = "cv_loglik",
             scaling_method = "standardize",
-            pls_algorithm = "nipals",
-            max_iterations = 100,
             tolerance = 0.000001,
+            tie_method = "efron",
+            sparse_pls = FALSE,
+            limQ2set = 0.0975,
+            pvals_expli = FALSE,
+            alpha_pvals_expli = 0.05,
             bootstrap_validation = FALSE,
             n_bootstrap = 200,
             permutation_test = FALSE,
@@ -53,6 +58,14 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor",
                     "numeric"))
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(status)")
+            private$..censorLevel <- jmvcore::OptionLevel$new(
+                "censorLevel",
+                censorLevel,
+                variable="(status)")
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
                 predictors,
@@ -96,26 +109,39 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "minmax",
                     "none"),
                 default="standardize")
-            private$..pls_algorithm <- jmvcore::OptionList$new(
-                "pls_algorithm",
-                pls_algorithm,
-                options=list(
-                    "nipals",
-                    "kernel",
-                    "widekernelpls"),
-                default="nipals")
-            private$..max_iterations <- jmvcore::OptionInteger$new(
-                "max_iterations",
-                max_iterations,
-                default=100,
-                min=50,
-                max=1000)
             private$..tolerance <- jmvcore::OptionNumber$new(
                 "tolerance",
                 tolerance,
                 default=0.000001,
                 min=1e-10,
                 max=0.001)
+            private$..tie_method <- jmvcore::OptionList$new(
+                "tie_method",
+                tie_method,
+                options=list(
+                    "efron",
+                    "breslow"),
+                default="efron")
+            private$..sparse_pls <- jmvcore::OptionBool$new(
+                "sparse_pls",
+                sparse_pls,
+                default=FALSE)
+            private$..limQ2set <- jmvcore::OptionNumber$new(
+                "limQ2set",
+                limQ2set,
+                default=0.0975,
+                min=0,
+                max=1)
+            private$..pvals_expli <- jmvcore::OptionBool$new(
+                "pvals_expli",
+                pvals_expli,
+                default=FALSE)
+            private$..alpha_pvals_expli <- jmvcore::OptionNumber$new(
+                "alpha_pvals_expli",
+                alpha_pvals_expli,
+                default=0.05,
+                min=0.001,
+                max=0.5)
             private$..bootstrap_validation <- jmvcore::OptionBool$new(
                 "bootstrap_validation",
                 bootstrap_validation,
@@ -181,14 +207,19 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..time)
             self$.addOption(private$..status)
+            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..censorLevel)
             self$.addOption(private$..predictors)
             self$.addOption(private$..pls_components)
             self$.addOption(private$..cross_validation)
             self$.addOption(private$..component_selection)
             self$.addOption(private$..scaling_method)
-            self$.addOption(private$..pls_algorithm)
-            self$.addOption(private$..max_iterations)
             self$.addOption(private$..tolerance)
+            self$.addOption(private$..tie_method)
+            self$.addOption(private$..sparse_pls)
+            self$.addOption(private$..limQ2set)
+            self$.addOption(private$..pvals_expli)
+            self$.addOption(private$..alpha_pvals_expli)
             self$.addOption(private$..bootstrap_validation)
             self$.addOption(private$..n_bootstrap)
             self$.addOption(private$..permutation_test)
@@ -207,14 +238,19 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         time = function() private$..time$value,
         status = function() private$..status$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
+        censorLevel = function() private$..censorLevel$value,
         predictors = function() private$..predictors$value,
         pls_components = function() private$..pls_components$value,
         cross_validation = function() private$..cross_validation$value,
         component_selection = function() private$..component_selection$value,
         scaling_method = function() private$..scaling_method$value,
-        pls_algorithm = function() private$..pls_algorithm$value,
-        max_iterations = function() private$..max_iterations$value,
         tolerance = function() private$..tolerance$value,
+        tie_method = function() private$..tie_method$value,
+        sparse_pls = function() private$..sparse_pls$value,
+        limQ2set = function() private$..limQ2set$value,
+        pvals_expli = function() private$..pvals_expli$value,
+        alpha_pvals_expli = function() private$..alpha_pvals_expli$value,
         bootstrap_validation = function() private$..bootstrap_validation$value,
         n_bootstrap = function() private$..n_bootstrap$value,
         permutation_test = function() private$..permutation_test$value,
@@ -232,14 +268,19 @@ plscoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..time = NA,
         ..status = NA,
+        ..outcomeLevel = NA,
+        ..censorLevel = NA,
         ..predictors = NA,
         ..pls_components = NA,
         ..cross_validation = NA,
         ..component_selection = NA,
         ..scaling_method = NA,
-        ..pls_algorithm = NA,
-        ..max_iterations = NA,
         ..tolerance = NA,
+        ..tie_method = NA,
+        ..sparse_pls = NA,
+        ..limQ2set = NA,
+        ..pvals_expli = NA,
+        ..alpha_pvals_expli = NA,
         ..bootstrap_validation = NA,
         ..n_bootstrap = NA,
         ..permutation_test = NA,
@@ -286,10 +327,8 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Partial Least Squares Cox Models",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "glue",
                     "plsRcox",
                     "survival",
-                    "ggplot2",
                     "ggrepel",
                     "survminer"))
             self$add(jmvcore::Html$new(
@@ -300,6 +339,8 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -309,6 +350,8 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "suitabilityCheck")))
             self$add(jmvcore::Html$new(
@@ -319,12 +362,19 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "pls_components",
                     "cross_validation",
                     "component_selection",
                     "scaling_method",
-                    "pls_algorithm")))
+                    "tolerance",
+                    "tie_method",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="componentSelection",
@@ -333,11 +383,19 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "pls_components",
                     "cross_validation",
                     "component_selection",
-                    "scaling_method"),
+                    "scaling_method",
+                    "tolerance",
+                    "tie_method",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli"),
                 columns=list(
                     list(
                         `name`="n_components", 
@@ -367,11 +425,19 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "pls_components",
                     "cross_validation",
                     "component_selection",
-                    "scaling_method"),
+                    "scaling_method",
+                    "tolerance",
+                    "tie_method",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli"),
                 columns=list(
                     list(
                         `name`="component", 
@@ -414,9 +480,16 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "pls_components",
-                    "scaling_method"),
+                    "scaling_method",
+                    "tolerance",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -436,7 +509,7 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="importance_score", 
-                        `title`="Importance", 
+                        `title`="Cox-Weighted Importance", 
                         `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -446,11 +519,19 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "pls_components",
                     "cross_validation",
                     "component_selection",
-                    "scaling_method"),
+                    "scaling_method",
+                    "tolerance",
+                    "tie_method",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -480,10 +561,18 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "pls_components",
                     "risk_groups",
-                    "scaling_method"),
+                    "scaling_method",
+                    "tolerance",
+                    "tie_method",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli"),
                 columns=list(
                     list(
                         `name`="risk_group", 
@@ -525,8 +614,16 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
-                    "pls_components")))
+                    "pls_components",
+                    "scaling_method",
+                    "tolerance",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="loadingsPlot",
@@ -538,8 +635,16 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
-                    "pls_components")))
+                    "pls_components",
+                    "scaling_method",
+                    "tolerance",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="scoresPlot",
@@ -551,7 +656,16 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
-                    "predictors")))
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pls_components",
+                    "scaling_method",
+                    "tolerance",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="validationPlot",
@@ -561,8 +675,20 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".plotValidation",
                 visible="(plot_validation)",
                 clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pls_components",
                     "cross_validation",
-                    "component_selection")))
+                    "component_selection",
+                    "scaling_method",
+                    "tolerance",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
@@ -574,17 +700,59 @@ plscoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
-                    "risk_groups")))
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pls_components",
+                    "risk_groups",
+                    "scaling_method",
+                    "tolerance",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="bootstrapResults",
                 title="Bootstrap Validation Results",
-                visible="(bootstrap_validation)"))
+                visible="(bootstrap_validation)",
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pls_components",
+                    "scaling_method",
+                    "tolerance",
+                    "tie_method",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli",
+                    "bootstrap_validation",
+                    "n_bootstrap")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="permutationResults",
                 title="Permutation Test Results",
-                visible="(permutation_test)"))
+                visible="(permutation_test)",
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pls_components",
+                    "scaling_method",
+                    "tolerance",
+                    "tie_method",
+                    "sparse_pls",
+                    "limQ2set",
+                    "pvals_expli",
+                    "alpha_pvals_expli",
+                    "permutation_test",
+                    "n_permutations")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGuidance",
@@ -627,15 +795,32 @@ plscoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param time .
 #' @param status .
+#' @param outcomeLevel Level of \code{status} considered as the event. For
+#'   binary factor outcomes, if left empty the second observed level is used;
+#'   for numeric binary outcomes, the larger observed value is used (or 1 for
+#'   0/1 coding).
+#' @param censorLevel Level of \code{status} considered as censored (no
+#'   event). Together with \code{outcomeLevel}, this defines a strict two-level
+#'   encoding: rows whose status matches neither level are treated as missing
+#'   and excluded.
 #' @param predictors .
 #' @param pls_components Number of PLS components to extract
 #' @param cross_validation Cross-validation method for component selection
 #' @param component_selection Method for selecting optimal number of
 #'   components
 #' @param scaling_method Method for scaling predictor variables
-#' @param pls_algorithm Algorithm for PLS computation
-#' @param max_iterations Maximum iterations for PLS algorithm convergence
-#' @param tolerance Tolerance for algorithm convergence
+#' @param tolerance Tolerance for algorithm convergence (jamovi default:
+#'   1e-06, plsRcox default: 1e-12)
+#' @param tie_method Method for handling tied event times in Cox model
+#'   (plsRcox default: efron)
+#' @param sparse_pls Enable sparse PLS for automatic variable selection
+#'   (plsRcox default: false)
+#' @param limQ2set Q-squared threshold for PLS component stopping criterion
+#'   (plsRcox default: 0.0975)
+#' @param pvals_expli Use p-value based predictor selection during PLS fitting
+#'   (plsRcox default: false)
+#' @param alpha_pvals_expli Significance level for p-value based variable
+#'   selection (plsRcox default: 0.05)
 #' @param bootstrap_validation Perform bootstrap validation of model
 #'   performance
 #' @param n_bootstrap Number of bootstrap replications
@@ -688,14 +873,19 @@ plscox <- function(
     data,
     time,
     status,
+    outcomeLevel,
+    censorLevel,
     predictors,
     pls_components = 5,
     cross_validation = "k10",
     component_selection = "cv_loglik",
     scaling_method = "standardize",
-    pls_algorithm = "nipals",
-    max_iterations = 100,
     tolerance = 0.000001,
+    tie_method = "efron",
+    sparse_pls = FALSE,
+    limQ2set = 0.0975,
+    pvals_expli = FALSE,
+    alpha_pvals_expli = 0.05,
     bootstrap_validation = FALSE,
     n_bootstrap = 200,
     permutation_test = FALSE,
@@ -728,14 +918,19 @@ plscox <- function(
     options <- plscoxOptions$new(
         time = time,
         status = status,
+        outcomeLevel = outcomeLevel,
+        censorLevel = censorLevel,
         predictors = predictors,
         pls_components = pls_components,
         cross_validation = cross_validation,
         component_selection = component_selection,
         scaling_method = scaling_method,
-        pls_algorithm = pls_algorithm,
-        max_iterations = max_iterations,
         tolerance = tolerance,
+        tie_method = tie_method,
+        sparse_pls = sparse_pls,
+        limQ2set = limQ2set,
+        pvals_expli = pvals_expli,
+        alpha_pvals_expli = alpha_pvals_expli,
         bootstrap_validation = bootstrap_validation,
         n_bootstrap = n_bootstrap,
         permutation_test = permutation_test,

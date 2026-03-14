@@ -65,15 +65,38 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             analysis_vars <- c(time_var, status_var, predictors, clinical_vars)
             analysis_vars <- analysis_vars[!is.null(analysis_vars)]
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
-            
+
+            # Two-level outcome encoding: event level -> 1, censored level -> 0, else -> NA (excluded)
+            event_data <- clean_data[[status_var]]
+            event_level <- as.character(self$options$outcomeLevel)
+            censor_level <- as.character(self$options$censorLevel)
+
+            event_numeric <- rep(NA_real_, length(event_data))
+            event_chr <- if (is.factor(event_data)) as.character(event_data) else as.character(event_data)
+            event_numeric[event_chr == event_level] <- 1
+            event_numeric[event_chr == censor_level] <- 0
+
+            n_excluded_outcome <- sum(is.na(event_numeric) & !is.na(event_data))
+            if (n_excluded_outcome > 0) {
+                self$results$todo$setContent(paste0(
+                    "<div class='alert alert-warning'><strong>Note:</strong> ",
+                    n_excluded_outcome, " row(s) excluded because outcome value matched neither ",
+                    "the event level ('", event_level, "') nor the censored level ('", censor_level, "').</div>"
+                ))
+            }
+
+            # Replace the status column with numeric 0/1 and drop unmatched rows
+            clean_data[[status_var]] <- event_numeric
+            clean_data <- clean_data[!is.na(clean_data[[status_var]]), ]
+
             if (nrow(clean_data) < 20) {
                 stop("Insufficient data for PCA-Cox analysis (minimum 20 complete cases required)")
             }
-            
+
             if (length(predictors) > nrow(clean_data)) {
                 message("High-dimensional setting detected: p (", length(predictors), ") > n (", nrow(clean_data), ")")
             }
-            
+
             # Store for use in other methods
             private$clean_data <- clean_data
             private$time_var <- time_var
@@ -226,8 +249,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             total_n <- nrow(data)
             events <- 0
             if (!is.null(status_var) && status_var %in% names(data)) {
-                # Ensure it's treated as numeric 0/1 properly
-                events <- sum(as.numeric(as.character(data[[status_var]])), na.rm = TRUE)
+                # Use two-level encoding consistent with .run()
+                event_level <- as.character(self$options$outcomeLevel)
+                raw_status <- if (is.factor(data[[status_var]])) as.character(data[[status_var]]) else as.character(data[[status_var]])
+                events <- sum(raw_status == event_level, na.rm = TRUE)
             }
             n_vars <- length(predictors)
             epv <- ifelse(n_vars > 0, events / n_vars, 0)

@@ -14,7 +14,7 @@ The module's features can be broadly categorized as follows:
 * **Performance Metrics:** C-index, log-rank test, hazard ratio between risk groups.
 * **Visualization:** Cross-validation plot, coefficient plot, risk group survival curves.
 * **Risk Stratification:** Risk score calculation and patient classification.
-* **Educational Output:** Optional explanations, methodology notes, and clinical guidance.
+* **Educational Output:** Optional explanations, methodology notes, clinical guidance, and natural-language results summary for manuscripts.
 
 ## Feature Details
 
@@ -51,6 +51,7 @@ The following table provides a detailed mapping of the module's features, from t
 | Methodology notes | `showMethodologyNotes` | Detailed Methodology Notes | `methodologyNotes` | `.populateMethodologyNotes` |
 | Clinical guidance | `includeClinicalGuidance` | Clinical Interpretation Guidance | `clinicalGuidance` | `.populateClinicalGuidance` |
 | Variable importance | `showVariableImportance` | Variable Importance Analysis | `variableImportance` | `.populateVariableImportance` |
+| Results summary | `showSummary` | Show Results Summary | `summaryText` | `.populateSummary` |
 | Model comparison | `showModelComparison` | Model Comparison Analysis | `modelComparison` | `.populateModelComparison` |
 | CV plot explanation | `showExplanations && cv_plot` | Understanding Cross-Validation Plot | `crossValidationExplanation` | `.populateCrossValidationExplanation` |
 | Reg. path explanation | `showExplanations && coef_plot` | Understanding Regularization Path | `regularizationPathExplanation` | `.populateRegularizationPathExplanation` |
@@ -58,7 +59,7 @@ The following table provides a detailed mapping of the module's features, from t
 
 ## Suitability Assessment Checks
 
-The data suitability assessment (`.assessSuitability`) evaluates 6 dimensions:
+The data suitability assessment (`.assessSuitability`) evaluates 7 dimensions:
 
 | Check | Green | Yellow | Red |
 |-------|-------|--------|-----|
@@ -68,6 +69,7 @@ The data suitability assessment (`.assessSuitability`) evaluates 6 dimensions:
 | Event Rate | 20%–80% | 10%–20% or 80%–90% | <10% or >90% |
 | Multicollinearity | max \|r\| < 0.7 | 0.7 <= max \|r\| < 0.99 | max \|r\| >= 0.99 |
 | Data Quality | No issues | <5% missing | >5% missing or constant predictors |
+| Proportional Hazards | Global p >= 0.05 | 0.01 <= p < 0.05 | p < 0.01 |
 
 The overall verdict is determined by the most severe individual check, with a special case: if only the regularization check is yellow (standard Cox may suffice) and everything else is green, the overall verdict remains green.
 
@@ -79,9 +81,10 @@ The overall verdict is determined by the most severe individual check, with a sp
 .init()              → Package checks, welcome message
 .run()               → Main pipeline:
   .cleanData()       → Validate time/outcome/predictors, create design matrix
-  .assessSuitability() → 6-check traffic-light assessment (advisory)
+  .assessSuitability() → 7-check traffic-light assessment (advisory)
   .fitModel()        → cv.glmnet → glmnet → coefficients → risk scores
   .populateModelSummary()   → Fill summary table
+  .populateSummary()        → Natural-language results paragraph
   .populateCoefficients()   → Fill selected variables table
   .populatePerformance()    → Fill C-index, log-rank, HR table
   .savePlotData()    → Extract plain numerics → setState() (protobuf-safe)

@@ -8,6 +8,8 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             time = NULL,
             event = NULL,
+            outcomeLevel = NULL,
+            censorLevel = NULL,
             covariates = NULL,
             penalty = "SCAD",
             cv_folds = 10,
@@ -40,6 +42,14 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(event)")
+            private$..censorLevel <- jmvcore::OptionLevel$new(
+                "censorLevel",
+                censorLevel,
+                variable="(event)")
             private$..covariates <- jmvcore::OptionVariables$new(
                 "covariates",
                 covariates,
@@ -73,7 +83,7 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "alpha",
                 alpha,
                 default=1,
-                min=0,
+                min=0.01,
                 max=1)
             private$..gamma <- jmvcore::OptionNumber$new(
                 "gamma",
@@ -104,6 +114,8 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..time)
             self$.addOption(private$..event)
+            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..censorLevel)
             self$.addOption(private$..covariates)
             self$.addOption(private$..penalty)
             self$.addOption(private$..cv_folds)
@@ -119,6 +131,8 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         time = function() private$..time$value,
         event = function() private$..event$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
+        censorLevel = function() private$..censorLevel$value,
         covariates = function() private$..covariates$value,
         penalty = function() private$..penalty$value,
         cv_folds = function() private$..cv_folds$value,
@@ -133,6 +147,8 @@ ncvregcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..time = NA,
         ..event = NA,
+        ..outcomeLevel = NA,
+        ..censorLevel = NA,
         ..covariates = NA,
         ..penalty = NA,
         ..cv_folds = NA,
@@ -186,6 +202,8 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "suitabilityCheck")))
             self$add(jmvcore::Table$new(
@@ -197,14 +215,15 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
                     "lambda_type",
                     "alpha",
                     "gamma",
-                    "standardize",
-                    "suitabilityCheck"),
+                    "standardize"),
                 columns=list(
                     list(
                         `name`="penalty", 
@@ -223,7 +242,7 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Variables Selected", 
                         `type`="integer"),
                     list(
-                        `name`="deviance_explained", 
+                        `name`="c_index", 
                         `title`="C-index", 
                         `type`="number", 
                         `format`="zto"))))
@@ -236,14 +255,15 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
                     "lambda_type",
                     "alpha",
                     "gamma",
-                    "standardize",
-                    "suitabilityCheck"),
+                    "standardize"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -266,6 +286,8 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -294,12 +316,14 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cross_validation_results",
-                title="Cross-Validation Results",
+                title="Cross-Validation Summary",
                 rows=0,
                 visible=TRUE,
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -333,6 +357,8 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -374,6 +400,8 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -405,10 +433,13 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 visible="(plot_path)",
+                requiresData=TRUE,
                 renderFun=".plot_regularization_path",
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -423,10 +454,13 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 visible="(plot_cv)",
+                requiresData=TRUE,
                 renderFun=".plot_cv_error",
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -441,10 +475,13 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 visible="(variable_importance)",
+                requiresData=TRUE,
                 renderFun=".plot_variable_selection",
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -461,6 +498,8 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "covariates",
                     "penalty",
                     "cv_folds",
@@ -517,12 +556,25 @@ ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data the data as a data frame
 #' @param time survival time variable
 #' @param event event indicator (1=event, 0=censored)
+#' @param outcomeLevel Level of \code{event} considered as the event (e.g.,
+#'   death, recurrence). For binary factor outcomes, if left empty the second
+#'   observed level is used; for numeric binary outcomes, the larger observed
+#'   value is used (or 1 for 0/1 coding).
+#' @param censorLevel Level of \code{event} considered as censored (no event).
+#'   Together with \code{outcomeLevel}, this defines a strict two-level
+#'   encoding: rows whose event value matches neither level are treated as
+#'   missing and excluded.
 #' @param covariates predictor variables for high-dimensional analysis
 #' @param penalty Type of penalty function for variable selection
 #' @param cv_folds Number of folds for cross-validation
 #' @param lambda_type Lambda selection criterion
-#' @param alpha Mixing parameter for elastic net (1=lasso, 0=ridge)
-#' @param gamma SCAD gamma parameter or MCP gamma parameter
+#' @param alpha Mixing parameter for elastic net (1=pure penalty, values near
+#'   0=ridge-like). ncvreg requires alpha > 0; pure ridge (alpha=0) is not
+#'   supported.
+#' @param gamma Tuning parameter controlling concavity of the penalty. SCAD
+#'   recommended default is 3.7 (Fan & Li 2001). MCP recommended default is 3.0
+#'   (Zhang 2010). When MCP is selected and gamma is left at 3.7, the
+#'   MCP-recommended default of 3.0 is used automatically.
 #' @param standardize Standardize covariates before fitting
 #' @param plot_path Display coefficient paths plot
 #' @param plot_cv Display cross-validation error plot
@@ -558,6 +610,8 @@ ncvregcox <- function(
     data,
     time,
     event,
+    outcomeLevel,
+    censorLevel,
     covariates,
     penalty = "SCAD",
     cv_folds = 10,
@@ -588,6 +642,8 @@ ncvregcox <- function(
     options <- ncvregcoxOptions$new(
         time = time,
         event = event,
+        outcomeLevel = outcomeLevel,
+        censorLevel = censorLevel,
         covariates = covariates,
         penalty = penalty,
         cv_folds = cv_folds,

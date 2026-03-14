@@ -10,6 +10,7 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
 
@@ -20,6 +21,7 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - suitabilityCheck
@@ -30,7 +32,7 @@ items:
       rows: 0
       columns:
         - name: statistic
-          title: ""
+          title: "Statistic"
           type: text
         - name: value
           title: "Value"
@@ -38,11 +40,13 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
+          - random_seed
 
     - name: coefficients
       title: Selected Variables
@@ -55,20 +59,39 @@ items:
         - name: coefficient
           title: "Coefficient"
           type: number
+          format: zto
         - name: hazardRatio
           title: "Hazard Ratio"
           type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: ci_upper
+          title: "Upper"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: p_value
+          title: "p"
+          type: number
+          format: zto,pvalue
         - name: importance
           title: "Importance"
           type: number
+          format: zto
       clearWith:
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
+          - random_seed
 
     - name: performance
       title: Model Performance
@@ -87,12 +110,14 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
-          
+          - random_seed
+
     - name: cv_plot
       title: Cross-validation Plot
       type: Image
@@ -103,15 +128,16 @@ items:
       visible: (cv_plot)
       refs: glmnet
       clearWith:
-          - cv_plot
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
-      
+          - random_seed
+
     - name: coef_plot
       title: Coefficient Plot
       type: Image
@@ -122,15 +148,16 @@ items:
       visible: (coef_plot)
       refs: glmnet
       clearWith:
-          - coef_plot
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
-      
+          - random_seed
+
     - name: survival_plot
       title: Risk Group Survival Plot
       type: Image
@@ -141,28 +168,49 @@ items:
       visible: (survival_plot)
       refs: survminer
       clearWith:
-          - survival_plot
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
+          - random_seed
 
     - name: riskScore
       title: Add Risk Score to Data
       type: Output
+      measureType: continuous
       varTitle: 'Calculated Risk Score from Lasso-Cox Regression'
       varDescription: Risk Score Based on Lasso-Cox Model
       clearWith:
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
+          - random_seed
+
+    # Natural-language Summary
+    - name: summaryText
+      title: Results Summary
+      type: Html
+      visible: (showSummary)
+      clearWith:
+          - showSummary
+          - outcome
+          - outcomeLevel
+          - censorLevel
+          - elapsedtime
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+          - random_seed
 
     # Explanatory Output Items
     - name: lassoExplanation
@@ -210,11 +258,13 @@ items:
           - showVariableImportance
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
+          - random_seed
 
     - name: modelComparison
       title: LASSO vs Standard Cox Regression
@@ -244,11 +294,13 @@ items:
           - showModelComparison
           - outcome
           - outcomeLevel
+          - censorLevel
           - elapsedtime
           - explanatory
           - lambda
           - nfolds
           - standardize
+          - random_seed
 
     - name: regularizationPathExplanation
       title: Understanding Regularization Path
@@ -279,6 +331,4 @@ refs:
     - glmnet
     - survival
     - survminer
-    - survcomp
-    - grid
 ...

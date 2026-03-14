@@ -52,6 +52,22 @@ options:
           R: >
             Event status variable
 
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (status)
+      description:
+          R: >
+            Level of status variable indicating event occurred
+
+    - name: censorLevel
+      title: Censored Level
+      type: Level
+      variable: (status)
+      description:
+          R: >
+            Level of status variable indicating censored (no event)
+
     - name: predictors
       title: 'High-Dimensional Predictors'
       type: Variables

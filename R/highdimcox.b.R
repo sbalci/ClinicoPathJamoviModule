@@ -47,6 +47,9 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .variable_importance = NULL,
       .screening_results = NULL,
       
+      # Variable name display mapping (model.matrix names → original names)
+      .var_display_names = NULL,
+
       # Constants for high-dimensional analysis
       DEFAULT_CV_FOLDS = 10,
       DEFAULT_ALPHA = 0.5,
@@ -94,109 +97,195 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       
       # Main analysis execution
       .run = function() {
-        # Early validation
+        # Early validation — display via todo HTML (no Notice objects)
         validation <- private$.validateInputs()
         if (!validation$valid) {
+          self$results$todo$setContent(paste0(
+            "<div class='alert alert-danger'>",
+            "<h4>Validation Error</h4>",
+            "<p>", validation$message, "</p></div>"))
           return()
         }
-        
-        # Clear todo message
-        self$results$todo$setContent("")
-        
+
         # Check package availability
         required_packages <- c("glmnet", "survival")
         missing_packages <- c()
-        
         for (pkg in required_packages) {
           if (!requireNamespace(pkg, quietly = TRUE)) {
             missing_packages <- c(missing_packages, pkg)
           }
         }
-        
         if (length(missing_packages) > 0) {
-          self$results$todo$setContent(
-            paste0(
-              "<h3>Required Packages Missing</h3>",
-              "<p>The following packages are required for high-dimensional Cox regression:</p>",
-              "<ul>", paste0("<li>", missing_packages, "</li>", collapse = ""), "</ul>",
-              "<p>Please install these packages to proceed with the analysis.</p>"
-            )
-          )
+          self$results$todo$setContent(paste0(
+            "<div class='alert alert-danger'>",
+            "<h4>Missing Packages</h4>",
+            "<p>Required packages missing: ",
+            paste(missing_packages, collapse = ", "),
+            ". Please install them to proceed.</p></div>"))
           return()
         }
-        
-        tryCatch({
-          # Prepare data for analysis
-          data_prep <- private$.prepareData()
-          if (is.null(data_prep)) {
-            return()
-          }
-          
-          # Assess data suitability if requested
-          if (self$options$suitabilityCheck) {
-            private$.assessSuitability(data_prep)
-          }
 
-          # Execute high-dimensional Cox regression
-          model_results <- private$.performHighDimCoxRegression(data_prep)
-          
-          # Perform stability selection if requested
-          stability_results <- NULL
-          if (self$options$stability_selection) {
-            stability_results <- private$.performStabilitySelection(data_prep)
-          }
+        # Clear todo and begin analysis
+        self$results$todo$setContent("")
+        self$results$todo$setVisible(FALSE)
 
-          # Generate comprehensive results
-          private$.populateResults(model_results, data_prep, stability_results)
-          
-          # Create visualizations
-          private$.createPlots(model_results, data_prep, stability_results)
-          
-          # Generate summaries if requested
-          if (self$options$showSummaries) {
-            private$.generateSummaries(model_results, stability_results)
+        # Collect warnings during the pipeline (avoids Notice serialization)
+        collected_warnings <- character(0)
+
+        withCallingHandlers(
+          tryCatch({
+            # Prepare data for analysis
+            data_prep <- private$.prepareData()
+            if (is.null(data_prep)) return()
+
+            # Data quality warnings
+            if (data_prep$n_excluded_outcome > 0) {
+              warning(sprintf(
+                '%d row(s) excluded: outcome matched neither event level nor censored level.',
+                data_prep$n_excluded_outcome))
+            }
+            if (data_prep$n_constant_removed > 0) {
+              warning(sprintf(
+                '%d constant predictor(s) removed (zero variance).',
+                data_prep$n_constant_removed))
+            }
+
+            # Assess data suitability if requested
+            if (self$options$suitabilityCheck) {
+              private$.assessSuitability(data_prep)
+            }
+
+            # Warn on low events
+            n_events <- sum(data_prep$event)
+            if (n_events < 10) {
+              warning(sprintf(
+                'Only %d events detected. Results may be highly unstable; consider increasing sample size or reducing predictors.',
+                n_events))
+            } else if (n_events < 20) {
+              warning(sprintf(
+                '%d events detected. Regularized models handle low events better than standard Cox, but interpret results cautiously.',
+                n_events))
+            }
+
+            # Execute high-dimensional Cox regression
+            model_results <- private$.performHighDimCoxRegression(data_prep)
+
+            # Perform stability selection if requested
+            stability_results <- NULL
+            if (self$options$stability_selection) {
+              stability_results <- private$.performStabilitySelection(data_prep)
+              if (stability_results$n_successful < stability_results$n_bootstrap * 0.5) {
+                warning(sprintf(
+                  'Only %d/%d stability iterations succeeded. Stability probabilities are unreliable; consider increasing sample size or reducing predictors.',
+                  stability_results$n_successful, stability_results$n_bootstrap))
+              }
+            }
+
+            # Generate comprehensive results
+            private$.populateResults(model_results, data_prep, stability_results)
+
+            # Create visualizations
+            private$.createPlots(model_results, data_prep, stability_results)
+
+            # Generate summaries if requested
+            if (self$options$showSummaries) {
+              private$.generateSummaries(model_results, stability_results)
+            }
+
+            # Generate explanations if requested
+            if (self$options$showExplanations) {
+              private$.generateExplanations()
+            }
+
+            # Display collected warnings + success message in todo HTML
+            success_msg <- sprintf(
+              'Analysis completed: %d observations, %d events, %d predictors, %d selected via %s (C-index=%.3f).',
+              data_prep$n_obs, n_events, data_prep$n_vars,
+              model_results$n_selected, self$options$regularization_method,
+              ifelse(is.na(model_results$concordance), 0, model_results$concordance))
+
+            if (length(collected_warnings) > 0) {
+              warn_items <- paste0("<li>", collected_warnings, "</li>", collapse = "")
+              todo_html <- paste0(
+                "<div class='alert alert-warning'>",
+                "<h4>Analysis Notes</h4>",
+                "<ul>", warn_items, "</ul></div>",
+                "<div class='alert alert-success'><p>", success_msg, "</p></div>")
+            } else {
+              todo_html <- paste0(
+                "<div class='alert alert-success'><p>", success_msg, "</p></div>")
+            }
+            self$results$todo$setContent(todo_html)
+            self$results$todo$setVisible(TRUE)
+
+          }, error = function(e) {
+            error_msg <- paste0(
+              "<div class='alert alert-danger'>",
+              "<h4>Analysis Error</h4>",
+              "<p><strong>Error:</strong> ", e$message, "</p>",
+              "<p>Please check your data and variable selections.</p></div>")
+            private$.clearAnalysisOutputs()
+            self$results$todo$setContent(error_msg)
+            self$results$todo$setVisible(TRUE)
+          }),
+          warning = function(w) {
+            collected_warnings <<- c(collected_warnings, conditionMessage(w))
+            invokeRestart("muffleWarning")
           }
-          
-          # Generate explanations if requested
-          if (self$options$showExplanations) {
-            private$.generateExplanations()
-          }
-          
-        }, error = function(e) {
-          self$results$todo$setContent(
-            paste0(
-              "<h3>Analysis Error</h3>",
-              "<p>An error occurred during high-dimensional Cox regression analysis:</p>",
-              "<pre>", gsub("&", "&amp;", gsub(">", "&gt;", gsub("<", "&lt;", e$message))), "</pre>",
-              "<p>Please check your data and analysis options.</p>"
-            )
-          )
-        })
+        )
       },
       
       # Input validation
       .validateInputs = function() {
         # Check for required variables
         if (is.null(self$options$elapsedtime) || self$options$elapsedtime == "") {
-          return(list(valid = FALSE, message = "Time variable is required"))
+          return(list(valid = FALSE, message = "Time variable is required."))
         }
-        
+
         if (is.null(self$options$outcome) || self$options$outcome == "") {
-          return(list(valid = FALSE, message = "Event variable is required"))
+          return(list(valid = FALSE, message = "Event variable is required."))
         }
-        
+
         if (is.null(self$options$predictors) || length(self$options$predictors) == 0) {
-          return(list(valid = FALSE, message = "At least one predictor variable is required"))
+          return(list(valid = FALSE, message = "At least one predictor variable is required."))
         }
-        
+
         # Check minimum observations
         if (nrow(self$data) < private$MIN_OBSERVATIONS) {
           return(list(
-            valid = FALSE, 
-            message = paste("At least", private$MIN_OBSERVATIONS, "observations required for high-dimensional analysis")
+            valid = FALSE,
+            message = sprintf("At least %d observations required for high-dimensional analysis (found %d).",
+                              private$MIN_OBSERVATIONS, nrow(self$data))
           ))
         }
-        
+
+        # Validate outcome levels are selected and distinct
+        event_level <- self$options$outcomeLevel
+        censor_level <- self$options$censorLevel
+        if (is.null(event_level) || is.null(censor_level) ||
+            event_level == "" || censor_level == "") {
+          return(list(valid = FALSE, message = "Both event level and censored level must be selected."))
+        }
+        if (as.character(event_level) == as.character(censor_level)) {
+          return(list(valid = FALSE,
+                      message = sprintf("Event level and censored level must be different (both set to '%s').",
+                                        as.character(event_level))))
+        }
+
+        # Validate that at least some rows match the declared levels
+        event_data <- self$data[[self$options$outcome]]
+        event_chr <- as.character(event_data)
+        n_event <- sum(event_chr == as.character(event_level), na.rm = TRUE)
+        n_censor <- sum(event_chr == as.character(censor_level), na.rm = TRUE)
+        if (n_event == 0) {
+          return(list(valid = FALSE,
+                      message = sprintf("No rows match event level '%s' in the outcome variable.", event_level)))
+        }
+        if (n_censor == 0) {
+          return(list(valid = FALSE,
+                      message = sprintf("No rows match censored level '%s' in the outcome variable.", censor_level)))
+        }
+
         return(list(valid = TRUE, message = ""))
       },
       
@@ -216,31 +305,36 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           return(NULL)
         }
         
-        # Handle outcome variable
+        # Handle outcome variable — two-level encoding
+        # Rows matching event_level → 1, censor_level → 0, anything else → NA (excluded)
         event_data <- self$data[[event_var]]
-        outcome_level <- as.character(self$options$outcomeLevel)
-        
+        event_level <- as.character(self$options$outcomeLevel)
+        censor_level <- as.character(self$options$censorLevel)
+
+        event_numeric <- rep(NA_real_, length(event_data))
+
         if (is.factor(event_data)) {
-          event_numeric <- as.numeric(event_data == outcome_level)
+          event_chr <- as.character(event_data)
+          event_numeric[event_chr == event_level] <- 1
+          event_numeric[event_chr == censor_level] <- 0
         } else {
-          event_numeric <- as.numeric(event_data == as.numeric(outcome_level))
+          event_level_num <- suppressWarnings(as.numeric(event_level))
+          censor_level_num <- suppressWarnings(as.numeric(censor_level))
+          if (!is.na(event_level_num)) event_numeric[event_data == event_level_num] <- 1
+          if (!is.na(censor_level_num)) event_numeric[event_data == censor_level_num] <- 0
         }
+
+        n_excluded_outcome <- sum(is.na(event_numeric) & !is.na(event_data))
+        n_na_outcome <- sum(is.na(event_data))
+        # Warnings will be emitted as Notices in .run(); store counts in returned list
         
-        # Get predictor matrix
+        # Get predictor data
         pred_data <- self$data[pred_vars]
 
-        # Check if any predictors are factors requiring dummy encoding
-        has_factors <- any(vapply(pred_data, is.factor, logical(1)))
-        if (has_factors) {
-          # Use model.matrix to create proper dummy variables (no intercept)
-          pred_matrix <- model.matrix(~ . - 1, data = pred_data)
-        } else {
-          pred_matrix <- as.matrix(pred_data)
-        }
-        
-        # Remove rows with missing values
-        complete_rows <- complete.cases(time_data, event_numeric, pred_matrix)
-        
+        # Complete-case filter BEFORE model.matrix (model.matrix drops NA
+        # rows silently for factor columns, causing length mismatches)
+        complete_rows <- complete.cases(time_data, event_numeric, pred_data)
+
         if (sum(complete_rows) < private$MIN_OBSERVATIONS) {
           self$results$todo$setContent(
             paste0(
@@ -251,19 +345,66 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
           return(NULL)
         }
+
+        time_data <- time_data[complete_rows]
+        event_numeric <- event_numeric[complete_rows]
+        pred_data <- pred_data[complete_rows, , drop = FALSE]
+
+        # Check if any predictors are factors requiring dummy encoding
+        has_factors <- any(vapply(pred_data, is.factor, logical(1)))
+        if (has_factors) {
+          # Use model.matrix to create proper dummy variables (no intercept)
+          pred_matrix <- model.matrix(~ . - 1, data = pred_data)
+        } else {
+          pred_matrix <- as.matrix(pred_data)
+        }
+
+        # Remove constant predictors (zero variance) — glmnet cannot handle them
+        col_vars <- apply(pred_matrix, 2, function(col) var(col, na.rm = TRUE))
+        constant_cols <- which(col_vars == 0 | is.na(col_vars))
+        if (length(constant_cols) > 0) {
+          pred_matrix <- pred_matrix[, -constant_cols, drop = FALSE]
+          if (ncol(pred_matrix) == 0) {
+            self$results$todo$setContent(
+              "<h3>Data Error</h3><p>All predictors are constant (zero variance). Cannot fit a model.</p>"
+            )
+            return(NULL)
+          }
+        }
+
+        # Create survival object (data already filtered to complete cases)
+        surv_obj <- survival::Surv(time_data, event_numeric)
         
-        # Create survival object
-        surv_obj <- survival::Surv(time_data[complete_rows], event_numeric[complete_rows])
-        
+        # Build display name mapping: model.matrix names → user-friendly names
+        mm_names <- colnames(pred_matrix)
+        display_names <- mm_names
+        for (pv in pred_vars) {
+          # Match columns that start with make.names(pv) or pv itself
+          safe_pv <- make.names(pv)
+          for (j in seq_along(mm_names)) {
+            if (mm_names[j] == safe_pv || mm_names[j] == pv) {
+              display_names[j] <- pv
+            } else if (startsWith(mm_names[j], safe_pv)) {
+              # Factor dummy: e.g. "GradeLow" → "Grade: Low"
+              level_part <- substring(mm_names[j], nchar(safe_pv) + 1)
+              display_names[j] <- paste0(pv, ": ", level_part)
+            }
+          }
+        }
+        private$.var_display_names <- display_names
+
         list(
           survival = surv_obj,
-          predictors = pred_matrix[complete_rows, , drop = FALSE],
-          time = time_data[complete_rows],
-          event = event_numeric[complete_rows],
-          n_obs = sum(complete_rows),
+          predictors = pred_matrix,
+          time = time_data,
+          event = event_numeric,
+          n_obs = length(time_data),
           n_vars = ncol(pred_matrix),
           complete_rows = complete_rows,
-          var_names = colnames(pred_matrix)
+          var_names = display_names,
+          n_excluded_outcome = n_excluded_outcome,
+          n_na_outcome = n_na_outcome,
+          n_constant_removed = length(constant_cols)
         )
       },
       
@@ -278,6 +419,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         alpha <- self$options$alpha_value
         regularization_method <- self$options$regularization_method
         penalty_weights <- rep(1, ncol(X))
+        cv_folds <- self$options$cv_folds
 
         # Adjust alpha based on regularization method
         if (regularization_method == "lasso") {
@@ -286,29 +428,24 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           alpha <- 0.0
         } else if (regularization_method == "adaptive_lasso") {
           alpha <- 1.0
-          # Compute adaptive penalty weights from Ridge initial estimates
+          # Compute adaptive penalty weights from CV-selected Ridge initial estimates
           penalty_weights <- tryCatch({
-            ridge_fit <- glmnet::glmnet(
+            cv_ridge <- glmnet::cv.glmnet(
               x = X, y = y, family = "cox",
-              alpha = 0, standardize = TRUE
+              alpha = 0, standardize = TRUE,
+              nfolds = min(cv_folds, nrow(X))
             )
-            lambda_ridge <- ridge_fit$lambda[max(1, length(ridge_fit$lambda) %/% 4)]
-            initial_coefs <- as.vector(coef(ridge_fit, s = lambda_ridge))
+            initial_coefs <- as.vector(coef(cv_ridge, s = cv_ridge$lambda.min))
             gamma <- 1  # standard adaptive LASSO exponent
             w <- 1 / (abs(initial_coefs) + 1e-6)^gamma
             w / mean(w)  # normalize so mean penalty weight = 1
           }, error = function(e) {
-            self$results$todo$setContent(
-              "<div class='alert alert-warning'><strong>Warning:</strong> Ridge regression failed during Adaptive LASSO weights calculation. Falling back to standard LASSO.</div>"
-            )
             rep(1, ncol(X))
           })
         }
         # else: elastic_net uses user-provided alpha_value
 
         # Perform cross-validation
-        cv_folds <- self$options$cv_folds
-
         cv_fit <- glmnet::cv.glmnet(
           x = X,
           y = y,
@@ -342,12 +479,13 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         coefficients <- as.vector(coef(final_fit, s = selected_lambda))
         selected_vars_idx <- which(coefficients != 0)
 
-        # Calculate variable importance
+        # Calculate variable importance (use display names)
         var_importance <- abs(coefficients)
         names(var_importance) <- data_prep$var_names
 
-        # Calculate concordance index (C-index)
+        # Calculate concordance index (C-index) — training set (optimistic)
         # Note: higher risk score = worse prognosis, so reverse = TRUE
+        # This is a re-substitution estimate; external validation is needed
         concordance_val <- tryCatch({
           risk_scores <- as.vector(X %*% coefficients)
           cindex_result <- survival::concordance(y ~ risk_scores, reverse = TRUE)
@@ -369,60 +507,108 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       
       # Stability selection for robust variable identification
       .performStabilitySelection = function(data_prep) {
-        
+
         n_bootstrap <- self$options$subsampling_iterations
         stability_threshold <- self$options$stability_threshold
-        
+
         X <- data_prep$predictors
         y <- data_prep$survival
         n_obs <- nrow(X)
         n_vars <- ncol(X)
-        
+
+        # Determine alpha from user's regularization method
+        # Stability selection requires sparsity, so ridge (alpha=0) gets bumped to elastic net
+        reg_method <- self$options$regularization_method
+        stab_alpha <- switch(reg_method,
+          lasso = 1.0,
+          ridge = 0.5,  # ridge has no selection; use elastic net instead
+          elastic_net = self$options$alpha_value,
+          adaptive_lasso = 1.0,
+          1.0  # fallback
+        )
+
+        # Per Meinshausen & Buhlmann (2010): use a FIXED lambda across all subsamples
+        # to maintain theoretical FDR/FWER control. Compute lambda from full-data CV.
+        fixed_lambda <- tryCatch({
+          cv_full <- glmnet::cv.glmnet(
+            x = X, y = y, family = "cox",
+            alpha = stab_alpha,
+            nfolds = min(self$options$cv_folds, n_obs),
+            standardize = TRUE
+          )
+          cv_full$lambda.1se
+        }, error = function(e) NULL)
+
+        if (is.null(fixed_lambda)) {
+          return(list(
+            selection_probabilities = rep(0, n_vars),
+            stable_variables = integer(0),
+            stability_threshold = stability_threshold,
+            n_bootstrap = n_bootstrap,
+            n_successful = 0L,
+            n_stable = 0L,
+            alpha_used = stab_alpha
+          ))
+        }
+
         # Storage for subsampling results
         selection_matrix <- matrix(0, nrow = n_bootstrap, ncol = n_vars)
-        
+        iter_succeeded <- logical(n_bootstrap)
+
         # Subsampling and variable selection
+        subsample_ratio <- self$options$subsampling_ratio
+        subsample_size <- floor(n_obs * subsample_ratio)
+
         for (b in seq_len(n_bootstrap)) {
-          # Subsample
-          boot_indices <- sample(n_obs, size = floor(n_obs * 0.5), replace = FALSE)
+          boot_indices <- sample(n_obs, size = subsample_size, replace = FALSE)
           X_boot <- X[boot_indices, , drop = FALSE]
           y_boot <- y[boot_indices]
-          
+
           tryCatch({
-            # Fit LASSO model (alpha = 1 for selection)
-            cv_boot <- glmnet::cv.glmnet(
-              x = X_boot,
-              y = y_boot,
-              family = "cox",
-              alpha = 1.0,
-              nfolds = 5,
-              standardize = TRUE
+            # Fit glmnet path (NOT cv.glmnet) — much faster per iteration
+            fit_boot <- glmnet::glmnet(
+              x = X_boot, y = y_boot, family = "cox",
+              alpha = stab_alpha, standardize = TRUE
             )
-            
-            # Get selected variables
-            coeffs <- as.vector(coef(cv_boot, s = "lambda.1se"))
+
+            # Extract coefficients at the fixed lambda
+            coeffs <- as.vector(coef(fit_boot, s = fixed_lambda))
             selected <- which(coeffs != 0)
             selection_matrix[b, selected] <- 1
-            
+            iter_succeeded[b] <- TRUE
+
           }, error = function(e) {
             # Skip this bootstrap iteration on error
           })
         }
-        
-        # Calculate selection probabilities
-        selection_probs <- colMeans(selection_matrix)
+
+        # Calculate selection probabilities using only successful iterations
+        n_successful <- sum(iter_succeeded)
+        if (n_successful > 0) {
+          selection_probs <- colMeans(selection_matrix[iter_succeeded, , drop = FALSE])
+        } else {
+          selection_probs <- rep(0, n_vars)
+        }
         stable_vars <- which(selection_probs >= stability_threshold)
-        
+
         list(
-          selection_matrix = selection_matrix,
           selection_probabilities = selection_probs,
           stable_variables = stable_vars,
           stability_threshold = stability_threshold,
           n_bootstrap = n_bootstrap,
-          n_stable = length(stable_vars)
+          n_successful = n_successful,
+          n_stable = length(stable_vars),
+          alpha_used = stab_alpha
         )
       },
       
+      # Clear analysis outputs on error to prevent stale results
+      .clearAnalysisOutputs = function() {
+        self$results$selectedVariables$deleteRows()
+        self$results$regularizationMetrics$deleteRows()
+        self$results$stabilityResults$deleteRows()
+      },
+
       # Initialize result tables
       .initializeResultTables = function() {
         # Tables are initialized via addRow calls in populate methods
@@ -460,7 +646,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           model_results$n_selected, " selected</p>",
           "<p><strong>Cross-Validation:</strong> ", self$options$cv_folds, "-fold CV</p>",
           if (!is.na(model_results$concordance)) {
-            paste0("<p><strong>Concordance (C-index):</strong> ",
+            paste0("<p><strong>Training C-index (optimistic):</strong> ",
                    round(model_results$concordance, 3), "</p>")
           } else ""
         )
@@ -471,7 +657,19 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       # Populate selected variables table
       .populateVariablesTable = function(model_results, data_prep) {
         if (model_results$n_selected == 0) {
+          self$results$selectedVariables$setNote(
+            "empty",
+            "No variables were selected at the chosen regularization level. Consider using a less restrictive lambda (minimum CV) or a different regularization method."
+          )
           return()
+        }
+        # Ridge retains all variables — add clarifying note
+        if (self$options$regularization_method == "ridge" &&
+            model_results$n_selected == data_prep$n_vars) {
+          self$results$selectedVariables$setNote(
+            "ridge",
+            "Ridge regression shrinks coefficients but does not set them to zero. All variables are retained. Use LASSO or Elastic Net for variable selection."
+          )
         }
         
         selected_idx <- model_results$selected_variables
@@ -506,7 +704,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             "Lambda Min",
             "Lambda 1SE",
             "CV Deviance at Selected Lambda",
-            "Concordance (C-index)",
+            "Training C-index (optimistic)",
             "Number of Selected Variables",
             "Regularization Method"
           ),
@@ -524,7 +722,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             "Lambda minimizing CV error",
             "Lambda within 1-SE of minimum",
             "Cross-validated model deviance",
-            "Discrimination ability (0.5 = random, 1.0 = perfect)",
+            "Training-set estimate; likely overestimates true discrimination. Validate externally.",
             "Variables with non-zero coefficients",
             "Applied regularization strategy"
           )
@@ -610,15 +808,38 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .createRegularizationPath = function(model_results) {
         tryCatch({
           image <- self$results$regularizationPath
-          # Extract only plain numeric data for protobuf-safe serialization
-          cv_fit <- model_results$cv_fit
-          plot_data <- list(
-            lambda = as.numeric(cv_fit$lambda),
-            cvm = as.numeric(cv_fit$cvm),
-            cvsd = as.numeric(cv_fit$cvsd),
-            lambda_min = as.numeric(cv_fit$lambda.min),
-            lambda_1se = as.numeric(cv_fit$lambda.1se)
-          )
+          final_fit <- model_results$final_fit
+
+          # Extract coefficient matrix across lambda path (actual coefficient trajectories)
+          coef_matrix <- as.matrix(coef(final_fit))  # p x n_lambda
+          lambdas <- final_fit$lambda
+
+          # Build long-format data.frame for ggplot2
+          rows <- list()
+          var_names <- rownames(coef_matrix)
+          for (j in seq_len(ncol(coef_matrix))) {
+            nonzero <- which(coef_matrix[, j] != 0)
+            if (length(nonzero) > 0) {
+              rows[[length(rows) + 1]] <- data.frame(
+                log_lambda = rep(log(lambdas[j]), length(nonzero)),
+                coefficient = coef_matrix[nonzero, j],
+                variable = var_names[nonzero],
+                stringsAsFactors = FALSE
+              )
+            }
+          }
+
+          if (length(rows) > 0) {
+            plot_data <- do.call(rbind, rows)
+          } else {
+            plot_data <- data.frame(
+              log_lambda = numeric(0), coefficient = numeric(0),
+              variable = character(0), stringsAsFactors = FALSE
+            )
+          }
+          attr(plot_data, "lambda_min") <- as.numeric(model_results$cv_fit$lambda.min)
+          attr(plot_data, "lambda_1se") <- as.numeric(model_results$cv_fit$lambda.1se)
+          attr(plot_data, "selected_lambda") <- as.numeric(model_results$selected_lambda)
           image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
@@ -630,16 +851,16 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         tryCatch({
           image <- self$results$cvPlot
           cv_fit <- model_results$cv_fit
-          plot_data <- list(
+          plot_data <- as.data.frame(list(
             lambda = as.numeric(cv_fit$lambda),
             cvm = as.numeric(cv_fit$cvm),
             cvsd = as.numeric(cv_fit$cvsd),
             cvup = as.numeric(cv_fit$cvup),
-            cvlo = as.numeric(cv_fit$cvlo),
-            lambda_min = as.numeric(cv_fit$lambda.min),
-            lambda_1se = as.numeric(cv_fit$lambda.1se),
-            selected_lambda = as.numeric(model_results$selected_lambda)
-          )
+            cvlo = as.numeric(cv_fit$cvlo)
+          ))
+          attr(plot_data, "lambda_min") <- as.numeric(cv_fit$lambda.min)
+          attr(plot_data, "lambda_1se") <- as.numeric(cv_fit$lambda.1se)
+          attr(plot_data, "selected_lambda") <- as.numeric(model_results$selected_lambda)
           image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
@@ -652,13 +873,13 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
 
         tryCatch({
           image <- self$results$variableImportance
-          # Store selected variable names (not indices) for color matching in render
           selected_var_names <- names(model_results$variable_importance)[model_results$selected_variables]
-          plot_data <- list(
+          plot_data <- data.frame(
             var_names = as.character(names(model_results$variable_importance)),
             importance = as.numeric(model_results$variable_importance),
-            selected_vars = as.character(selected_var_names)
+            stringsAsFactors = FALSE
           )
+          attr(plot_data, "selected_vars") <- as.character(selected_var_names)
           image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
@@ -669,12 +890,19 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .createModelDiagnostics = function(model_results, data_prep) {
         tryCatch({
           image <- self$results$modelDiagnostics
-          selected_var_names <- names(model_results$variable_importance)[model_results$selected_variables]
-          plot_data <- list(
+          selected_idx <- model_results$selected_variables
+          selected_var_names <- names(model_results$variable_importance)[selected_idx]
+          selected_coefs <- model_results$coefficients[selected_idx]
+          selected_hr <- exp(selected_coefs)
+
+          plot_data <- data.frame(
             n_selected = as.integer(model_results$n_selected),
-            selected_vars = as.character(selected_var_names),
-            concordance = as.numeric(model_results$concordance)
+            concordance = as.numeric(model_results$concordance),
+            stringsAsFactors = FALSE
           )
+          attr(plot_data, "selected_vars") <- as.character(selected_var_names)
+          attr(plot_data, "coefficients") <- as.numeric(selected_coefs)
+          attr(plot_data, "hazard_ratios") <- as.numeric(selected_hr)
           image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
@@ -685,12 +913,12 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .createStabilityPlot = function(stability_results, data_prep) {
         tryCatch({
           image <- self$results$stabilityPlot
-          var_names <- data_prep$var_names
-          plot_data <- list(
+          plot_data <- data.frame(
+            var_names = as.character(data_prep$var_names),
             selection_frequencies = as.numeric(stability_results$selection_probabilities),
-            var_names = as.character(var_names),
-            threshold = as.numeric(stability_results$stability_threshold)
+            stringsAsFactors = FALSE
           )
+          attr(plot_data, "threshold") <- as.numeric(stability_results$stability_threshold)
           image$setState(plot_data)
         }, error = function(e) {
           # Skip plot creation on error
@@ -707,16 +935,22 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           
           "<p><strong>Model Selection:</strong> ",
           "Cross-validation with ", self$options$cv_folds, " folds identified ",
-          "an optimal regularization parameter (λ = ", 
+          "an optimal regularization parameter (&lambda; = ",
           format(model_results$selected_lambda, scientific = TRUE, digits = 3), ") ",
           "that selected ", model_results$n_selected, " variables from the candidate set.</p>",
-          
+          if (!is.na(model_results$concordance)) {
+            paste0("<p><strong>Training C-index (optimistic):</strong> ",
+                   round(model_results$concordance, 3), "</p>")
+          } else "",
+
           if (!is.null(stability_results)) {
             paste0(
               "<p><strong>Stability Selection:</strong> ",
-              "Bootstrap stability analysis with ", stability_results$n_bootstrap, " iterations ",
-              "identified ", stability_results$n_stable, " variables with selection probability ≥ ",
-              stability_results$stability_threshold, ", indicating robust variable selection.</p>"
+              "Bootstrap stability analysis with ", stability_results$n_successful, "/",
+              stability_results$n_bootstrap, " successful iterations ",
+              "(&alpha; = ", round(stability_results$alpha_used, 2), ") ",
+              "identified ", stability_results$n_stable, " variables with selection probability &ge; ",
+              stability_results$stability_threshold, ".</p>"
             )
           } else "",
           
@@ -795,9 +1029,9 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
         } else {
           checks$epv <- list(
-            color = "yellow", label = "Events-Per-Variable (Overall)",
+            color = "red", label = "Events-Per-Variable (Overall)",
             value = sprintf("%.3f (n_events=%d, p=%d)", epv, n_events, p),
-            detail = "Ultra-low EPV (p > n_events). Standard Cox would fail. Penalized regression is strictly required."
+            detail = "Ultra-low EPV (p > n_events). Results are exploratory only. Validate externally before clinical use."
           )
         }
 
@@ -899,9 +1133,8 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         n_missing <- n_total - n
         pct_missing <- 100 * n_missing / n_total
 
-        # Check for constant predictors
-        constant_cols <- apply(data_prep$predictors, 2, function(col) var(col, na.rm = TRUE) == 0)
-        n_constant <- sum(constant_cols)
+        # Use pre-removal count (constant predictors already removed by .prepareData)
+        n_constant <- data_prep$n_constant_removed
 
         if (n_missing == 0 && n_constant == 0) {
             checks$data_quality <- list(
@@ -981,116 +1214,209 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           self$results$suitabilityReport$setContent(html)
       },
 
-      # Render function for regularization path plot
+      # Render function for regularization path plot (ggplot2)
       .plot_regularization_path = function(image, ggtheme, theme, ...) {
         plot_data <- image$state
-        if (is.null(plot_data)) return(FALSE)
+        if (is.null(plot_data) || nrow(plot_data) == 0) return(FALSE)
 
         tryCatch({
-          log_lambda <- log(plot_data$lambda)
-          plot(log_lambda, plot_data$cvm, type = "l", col = "blue", lwd = 2,
-               xlab = expression(log(lambda)), ylab = "Partial Likelihood Deviance",
-               main = "Regularization Path")
-          abline(v = log(plot_data$lambda_min), lty = 2, col = "red")
-          if (!is.null(plot_data$lambda_1se))
-            abline(v = log(plot_data$lambda_1se), lty = 2, col = "darkgreen")
-          legend("topright", legend = c("Lambda Min", "Lambda 1SE"),
-                 lty = 2, col = c("red", "darkgreen"), cex = 0.8)
+          if (!requireNamespace("ggplot2", quietly = TRUE)) return(FALSE)
+
+          lambda_min <- attr(plot_data, "lambda_min")
+          lambda_1se <- attr(plot_data, "lambda_1se")
+          sel_lambda <- attr(plot_data, "selected_lambda")
+
+          p <- ggplot2::ggplot(plot_data,
+                               ggplot2::aes(x = log_lambda, y = coefficient,
+                                            color = variable, group = variable)) +
+            ggplot2::geom_line(alpha = 0.7, linewidth = 0.6) +
+            ggplot2::geom_hline(yintercept = 0, linetype = "solid", color = "grey50", linewidth = 0.3) +
+            ggplot2::geom_vline(xintercept = log(lambda_min), linetype = "dashed", color = "red") +
+            ggplot2::geom_vline(xintercept = log(lambda_1se), linetype = "dashed", color = "darkgreen") +
+            ggplot2::annotate("text", x = log(lambda_min), y = max(plot_data$coefficient, na.rm = TRUE),
+                              label = "min", color = "red", hjust = -0.2, size = 3) +
+            ggplot2::annotate("text", x = log(lambda_1se), y = max(plot_data$coefficient, na.rm = TRUE),
+                              label = "1se", color = "darkgreen", hjust = -0.2, size = 3) +
+            ggplot2::labs(
+              x = expression(log(lambda)),
+              y = "Coefficient",
+              title = "Coefficient Path") +
+            ggtheme +
+            ggplot2::theme(legend.position = "none")
+
+          print(p)
           TRUE
         }, error = function(e) FALSE)
       },
 
-      # Render function for cross-validation plot
+      # Render function for cross-validation plot (ggplot2)
       .plot_cv = function(image, ggtheme, theme, ...) {
         plot_data <- image$state
         if (is.null(plot_data)) return(FALSE)
 
         tryCatch({
-          log_lambda <- log(plot_data$lambda)
-          plot(log_lambda, plot_data$cvm, type = "n",
-               ylim = range(c(plot_data$cvlo, plot_data$cvup), na.rm = TRUE),
-               xlab = expression(log(lambda)), ylab = "Partial Likelihood Deviance",
-               main = "Cross-Validation Results")
-          polygon(c(log_lambda, rev(log_lambda)),
-                  c(plot_data$cvup, rev(plot_data$cvlo)),
-                  col = rgb(0.8, 0.8, 1, 0.3), border = NA)
-          lines(log_lambda, plot_data$cvm, col = "blue", lwd = 2)
-          abline(v = log(plot_data$lambda_min), lty = 2, col = "red")
-          if (!is.null(plot_data$lambda_1se))
-            abline(v = log(plot_data$lambda_1se), lty = 2, col = "darkgreen")
-          legend("topright", legend = c("CV Mean", "Lambda Min", "Lambda 1SE"),
-                 lty = c(1, 2, 2), col = c("blue", "red", "darkgreen"),
-                 lwd = c(2, 1, 1), cex = 0.8)
+          if (!requireNamespace("ggplot2", quietly = TRUE)) return(FALSE)
+
+          df <- data.frame(
+            log_lambda = log(plot_data$lambda),
+            cvm = plot_data$cvm,
+            cvup = plot_data$cvup,
+            cvlo = plot_data$cvlo
+          )
+          lambda_min <- attr(plot_data, "lambda_min")
+          lambda_1se <- attr(plot_data, "lambda_1se")
+          selected_lambda <- attr(plot_data, "selected_lambda")
+
+          p <- ggplot2::ggplot(df, ggplot2::aes(x = log_lambda, y = cvm)) +
+            ggplot2::geom_ribbon(
+              ggplot2::aes(ymin = cvlo, ymax = cvup),
+              alpha = 0.2, fill = "steelblue") +
+            ggplot2::geom_line(color = "steelblue", linewidth = 1) +
+            ggplot2::geom_point(color = "steelblue", size = 1) +
+            ggplot2::geom_vline(xintercept = log(lambda_min), linetype = "dashed", color = "red") +
+            ggplot2::geom_vline(xintercept = log(lambda_1se), linetype = "dashed", color = "darkgreen") +
+            ggplot2::annotate("text", x = log(lambda_min), y = max(df$cvup, na.rm = TRUE),
+                              label = "min", color = "red", hjust = -0.2, size = 3) +
+            ggplot2::annotate("text", x = log(lambda_1se), y = max(df$cvup, na.rm = TRUE),
+                              label = "1se", color = "darkgreen", hjust = -0.2, size = 3) +
+            ggplot2::labs(
+              x = expression(log(lambda)),
+              y = "Partial Likelihood Deviance",
+              title = "Cross-Validation Results") +
+            ggtheme
+
+          print(p)
           TRUE
         }, error = function(e) FALSE)
       },
 
-      # Render function for variable importance plot
+      # Render function for variable importance plot (ggplot2, top 25 max)
       .plot_variable_importance = function(image, ggtheme, theme, ...) {
         plot_data <- image$state
         if (is.null(plot_data)) return(FALSE)
 
         tryCatch({
-          imp <- plot_data$importance
-          names(imp) <- plot_data$var_names
-          imp <- sort(imp, decreasing = FALSE)
-          n <- length(imp)
-          if (n == 0) return(FALSE)
-          cols <- ifelse(names(imp) %in% plot_data$selected_vars, "steelblue", "gray70")
-          par(mar = c(5, max(8, max(nchar(names(imp))) * 0.6), 4, 2))
-          barplot(imp, horiz = TRUE, las = 1, col = cols,
-                  xlab = "Importance Score", main = "Variable Importance")
+          if (!requireNamespace("ggplot2", quietly = TRUE)) return(FALSE)
+
+          df <- data.frame(
+            variable = plot_data$var_names,
+            importance = plot_data$importance,
+            stringsAsFactors = FALSE
+          )
+          selected_vars <- attr(plot_data, "selected_vars")
+          df$selected <- ifelse(df$variable %in% selected_vars, "Selected", "Not selected")
+
+          # Keep only top 25 by importance for readability
+          df <- df[order(-df$importance), ]
+          if (nrow(df) > 25) df <- df[1:25, ]
+
+          # Order factor for horizontal bar chart
+          df$variable <- factor(df$variable, levels = rev(df$variable))
+
+          p <- ggplot2::ggplot(df, ggplot2::aes(x = importance, y = variable, fill = selected)) +
+            ggplot2::geom_col() +
+            ggplot2::scale_fill_manual(
+              values = c("Selected" = "steelblue", "Not selected" = "grey70"),
+              name = NULL) +
+            ggplot2::labs(
+              x = "Importance Score (|coefficient|)",
+              y = NULL,
+              title = "Variable Importance (Top 25)") +
+            ggtheme +
+            ggplot2::theme(legend.position = "bottom")
+
+          print(p)
           TRUE
         }, error = function(e) FALSE)
       },
 
-      # Render function for model diagnostics plot
+      # Render function for model diagnostics — coefficient forest plot (ggplot2)
       .plot_model_diagnostics = function(image, ggtheme, theme, ...) {
         plot_data <- image$state
         if (is.null(plot_data)) return(FALSE)
 
         tryCatch({
-          conc_text <- if (!is.null(plot_data$concordance) && !is.na(plot_data$concordance)) {
-            paste("Concordance (C-index):", round(plot_data$concordance, 3))
+          if (!requireNamespace("ggplot2", quietly = TRUE)) return(FALSE)
+
+          selected_vars <- attr(plot_data, "selected_vars")
+          coefs <- attr(plot_data, "coefficients")
+          hr_vals <- attr(plot_data, "hazard_ratios")
+
+          # If we have coefficient data, draw a forest-style plot
+          if (!is.null(coefs) && !is.null(selected_vars) && length(coefs) > 0) {
+            df <- data.frame(
+              variable = selected_vars,
+              hr = hr_vals,
+              coef = coefs,
+              stringsAsFactors = FALSE
+            )
+            df <- df[order(df$hr), ]
+            df$variable <- factor(df$variable, levels = df$variable)
+
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = hr, y = variable)) +
+              ggplot2::geom_vline(xintercept = 1, linetype = "dashed", color = "grey50") +
+              ggplot2::geom_point(color = "steelblue", size = 3) +
+              ggplot2::geom_segment(ggplot2::aes(x = 1, xend = hr, y = variable, yend = variable),
+                                    color = "steelblue", linewidth = 0.5) +
+              ggplot2::labs(
+                x = "Hazard Ratio",
+                y = NULL,
+                title = sprintf("Selected Variables (C-index = %.3f)",
+                                ifelse(is.na(plot_data$concordance[1]), 0, plot_data$concordance[1]))) +
+              ggtheme
+
+            print(p)
           } else {
-            "Concordance: N/A"
-          }
-          info <- c(
-            paste("Selected Variables:", plot_data$n_selected),
-            conc_text
-          )
-          plot.new()
-          plot.window(xlim = c(0, 1), ylim = c(0, 1))
-          title(main = "Model Diagnostics Summary")
-          text(0.5, 0.7, info[1], cex = 1.2)
-          text(0.5, 0.5, info[2], cex = 1.2)
-          if (!is.null(plot_data$selected_vars) && length(plot_data$selected_vars) > 0) {
-            vars_text <- paste("Variables:", paste(plot_data$selected_vars, collapse = ", "))
-            text(0.5, 0.3, vars_text, cex = 0.9)
+            # Fallback: text summary
+            plot.new()
+            plot.window(xlim = c(0, 1), ylim = c(0, 1))
+            title(main = "Model Diagnostics Summary")
+            conc_val <- plot_data$concordance[1]
+            text(0.5, 0.6, paste("Selected Variables:", plot_data$n_selected[1]), cex = 1.2)
+            text(0.5, 0.4,
+                 paste("C-index:", ifelse(is.na(conc_val), "N/A", round(conc_val, 3))),
+                 cex = 1.2)
           }
           TRUE
         }, error = function(e) FALSE)
       },
 
-      # Render function for stability selection plot
+      # Render function for stability selection plot (ggplot2, top 25 max)
       .plot_stability = function(image, ggtheme, theme, ...) {
         plot_data <- image$state
         if (is.null(plot_data)) return(FALSE)
 
         tryCatch({
-          freqs <- plot_data$selection_frequencies
-          names(freqs) <- plot_data$var_names
-          freqs <- sort(freqs, decreasing = FALSE)
-          n <- length(freqs)
-          if (n == 0) return(FALSE)
-          cols <- ifelse(freqs >= plot_data$threshold, "steelblue", "gray70")
-          par(mar = c(5, max(8, max(nchar(names(freqs))) * 0.6), 4, 2))
-          barplot(freqs, horiz = TRUE, las = 1, col = cols,
-                  xlab = "Selection Frequency", main = "Stability Selection",
-                  xlim = c(0, 1))
-          abline(v = plot_data$threshold, lty = 2, col = "red")
-          legend("bottomright", legend = paste("Threshold:", plot_data$threshold),
-                 lty = 2, col = "red", cex = 0.8)
+          if (!requireNamespace("ggplot2", quietly = TRUE)) return(FALSE)
+
+          df <- data.frame(
+            variable = plot_data$var_names,
+            frequency = plot_data$selection_frequencies,
+            stringsAsFactors = FALSE
+          )
+          threshold <- attr(plot_data, "threshold")
+          df$stable <- ifelse(df$frequency >= threshold, "Stable", "Below threshold")
+
+          # Keep only top 25 by frequency for readability
+          df <- df[order(-df$frequency), ]
+          if (nrow(df) > 25) df <- df[1:25, ]
+          df$variable <- factor(df$variable, levels = rev(df$variable))
+
+          p <- ggplot2::ggplot(df, ggplot2::aes(x = frequency, y = variable, fill = stable)) +
+            ggplot2::geom_col() +
+            ggplot2::geom_vline(xintercept = threshold, linetype = "dashed", color = "red") +
+            ggplot2::scale_fill_manual(
+              values = c("Stable" = "steelblue", "Below threshold" = "grey70"),
+              name = NULL) +
+            ggplot2::scale_x_continuous(limits = c(0, 1)) +
+            ggplot2::labs(
+              x = "Selection Frequency",
+              y = NULL,
+              title = sprintf("Stability Selection (threshold = %.2f)", threshold)) +
+            ggtheme +
+            ggplot2::theme(legend.position = "bottom")
+
+          print(p)
           TRUE
         }, error = function(e) FALSE)
       }

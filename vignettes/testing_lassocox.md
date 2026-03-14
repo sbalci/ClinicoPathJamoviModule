@@ -1,6 +1,6 @@
 # Testing Lasso-Cox Regression Function
 
-All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can be generated via `data-raw/create_lassocox_test_data.R`. Real data: `inst/extdata/histopathology.rds`.
+All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can be generated via `data-raw/create_lassocox_test_data.R`. Real data: `inst/extdata/histopathology.rds`. Additional datasets: `lassocox_genomic` (n=80, 50 gene features), `lassocox_multicollinear` (n=180, 12 correlated predictors).
 
 ---
 
@@ -20,6 +20,7 @@ All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can 
 | # | Data | Variables | Options to Test |
 |---|------|-----------|-----------------|
 | 3 | `lassocox_breast_cancer` (n=120) | elapsedtime: `survival_months`, outcome: `death`, outcomeLevel: `Dead`, explanatory: age, stage, grade, er_status, her2_status, GENE_001–GENE_200 | 200+ predictors. `suitabilityCheck`: verify regularization strongly indicated (green). `lambda`: lambda.1se (should select sparse set). `nfolds`: 5 (small n). |
+| 3b | `lassocox_genomic` (n=80) | elapsedtime: survival time variable, outcome: event variable, outcomeLevel: appropriate level, explanatory: all 50 gene features | 50 gene features, p >> n. `suitabilityCheck`: verify EPV and regularization checks. `nfolds`: 3 or 5. |
 
 **Options covered:** High-dimensional scenario, automatic variable selection, sparse signal recovery
 
@@ -41,6 +42,7 @@ All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can 
 | # | Data | Variables | Options to Test |
 |---|------|-----------|-----------------|
 | 6 | `lassocox_cardiovascular` (n=150) | elapsedtime: `time_to_event_months`, outcome: `cv_event`, outcomeLevel: `Event`, explanatory: all clinical + lab + medication variables | Correlated predictors (systolic/diastolic BP, total/HDL/LDL cholesterol). `suitabilityCheck`: verify collinearity detection and top correlated pairs listed. |
+| 6b | `lassocox_multicollinear` (n=180) | elapsedtime: time variable, outcome: event variable, explanatory: all 12 correlated predictors | Correlated predictors. `suitabilityCheck`: verify collinearity detection with specific pair names. |
 | 7 | Synthetic (n=100, r>0.95 pair) | Create: var1 = rnorm, var2 = var1 + noise(0.1), var3, var4 | `suitabilityCheck`: verify yellow/red collinearity with specific pair names. Recommendation to use Elastic Net. |
 
 **Options covered:** Multicollinearity detection, within-factor correlation exclusion, Elastic Net recommendation
@@ -97,6 +99,8 @@ All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can 
 | 19 | Any dataset | `includeClinicalGuidance = TRUE`: verify clinical interpretation guide with C-index table, HR interpretation, and reporting recommendations. |
 | 20 | Any dataset with selected vars | `showVariableImportance = TRUE`: verify variable importance table with importance scores, selection frequency, stability rank. |
 | 21 | Any dataset with selected vars | `showModelComparison = TRUE`: verify LASSO vs Standard Cox comparison table. |
+| 21b | Any dataset with selected vars | `showSummary = TRUE`: verify natural-language summary paragraph appears with sample size, events, selected variables, C-index, and HR text. |
+| 21c | `histopathology` | `random_seed = 42` vs `random_seed = 99999`: verify different seeds produce different variable selections. Same seed produces identical results. |
 
 ---
 
@@ -139,4 +143,6 @@ All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can 
 - [x] `showMethodologyNotes` — #18
 - [x] `includeClinicalGuidance` — #19
 - [x] `showVariableImportance` — #20
+- [x] `showSummary` — #21b
 - [x] `showModelComparison` — #21
+- [x] `random_seed` — #21c

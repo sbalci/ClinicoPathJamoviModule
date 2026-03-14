@@ -234,6 +234,108 @@ create_plscox_small <- function() {
 
 
 # ==============================================================================
+# Dataset 3: Genomic p >> n Dataset (n=60, p=200)
+# ==============================================================================
+#
+# True p >> n scenario typical of gene expression studies.
+# Tests the core PLS use case: more variables than observations.
+# Also includes some edge-case features:
+#   - Near-zero-variance genes (sparse expression)
+#   - A few negative/zero-like time values (tests validation guard)
+#   - Numeric (0/1) status instead of factor (tests both encodings)
+#   - Some missing values in predictors
+#
+# Design:
+#   - 60 patients, ~55% event rate
+#   - 200 gene expression features (GENE_001 to GENE_200)
+#   - No clinical covariates (pure genomic)
+#   - Signal from 2 gene modules (20 genes each)
+
+create_plscox_genomic <- function() {
+  n <- 60
+  p <- 200
+
+  # --- Build sparse block correlation ---
+  sigma <- diag(p)
+
+  # Module 1: genes 1-20 (proliferation signature)
+  mod1 <- 1:20
+  for (i in mod1) {
+    for (j in mod1) {
+      if (i != j) sigma[i, j] <- 0.55
+    }
+  }
+
+  # Module 2: genes 80-100 (immune response)
+  mod2 <- 80:100
+  for (i in mod2) {
+    for (j in mod2) {
+      if (i != j) sigma[i, j] <- 0.45
+    }
+  }
+
+  # Ensure positive definiteness
+  eigen_vals <- eigen(sigma)$values
+  if (any(eigen_vals <= 0)) {
+    sigma <- sigma + diag(p) * (abs(min(eigen_vals)) + 0.01)
+    diag(sigma) <- 1
+  }
+
+  # Generate gene expression (log2 scale, centered around 6-10)
+  gene_data <- mvrnorm(n = n, mu = rep(0, p), Sigma = sigma)
+  gene_means <- runif(p, min = 5, max = 11)
+  gene_sds <- runif(p, min = 0.3, max = 1.8)
+  for (j in 1:p) {
+    gene_data[, j] <- gene_data[, j] * gene_sds[j] + gene_means[j]
+  }
+
+  # Make ~10 genes near-zero-variance (sparse expression)
+  sparse_genes <- sample(setdiff(1:p, c(mod1, mod2)), 10)
+  for (sg in sparse_genes) {
+    gene_data[, sg] <- gene_means[sg] + rnorm(n, sd = 0.01)
+  }
+
+  gene_data <- round(gene_data, 4)
+  colnames(gene_data) <- paste0("GENE_", sprintf("%03d", 1:p))
+
+  # True signal from modules
+  latent_prolif <- rowMeans(gene_data[, mod1[1:15]])
+  latent_immune <- rowMeans(gene_data[, mod2[1:12]])
+
+  linear_pred <- 0.10 * scale(latent_prolif) - 0.07 * scale(latent_immune)
+
+  # Generate survival
+  survival_times <- rweibull(n, shape = 1.2,
+                             scale = exp(-as.numeric(linear_pred) * 0.5) * 30)
+
+  admin_censor <- 48
+  loss_followup <- rexp(n, rate = 0.025)
+  censoring_times <- pmin(admin_censor, loss_followup)
+
+  observed_time <- round(pmin(survival_times, censoring_times), 1)
+  observed_time[observed_time < 0.1] <- 0.1
+  event <- as.integer(survival_times <= censoring_times)
+
+  # Add ~3% missing values in gene expression
+  n_missing <- round(n * p * 0.03)
+  miss_rows <- sample(n, n_missing, replace = TRUE)
+  miss_cols <- sample(p, n_missing, replace = TRUE)
+  for (k in seq_len(n_missing)) {
+    gene_data[miss_rows[k], miss_cols[k]] <- NA
+  }
+
+  plscox_genomic <- data.frame(
+    patient_id = paste0("GEN_", sprintf("%03d", 1:n)),
+    os_time = observed_time,
+    os_event = event,  # numeric 0/1 encoding
+    gene_data
+  )
+
+  return(plscox_genomic)
+}
+
+
+# ==============================================================================
 # Generate and save datasets
 # ==============================================================================
 
@@ -241,6 +343,7 @@ print("Generating test datasets for plscox function...")
 
 plscox_metabolomics <- create_plscox_metabolomics()
 plscox_small <- create_plscox_small()
+plscox_genomic <- create_plscox_genomic()
 
 # Display summary information
 cat("\n", paste(rep("=", 60), collapse = ""), "\n")
@@ -269,17 +372,32 @@ cat("Predictor columns:", sum(grepl("^MARKER_", names(plscox_small))),
     "markers\n")
 
 
+# --- Dataset 3 summary ---
+cat("\nDataset 3: Genomic p>>n Dataset (plscox_genomic)\n")
+cat("Dimensions:", nrow(plscox_genomic), "x", ncol(plscox_genomic), "\n")
+cat("Events:", sum(plscox_genomic$os_event == 1), "/",
+    nrow(plscox_genomic),
+    "(", round(100 * sum(plscox_genomic$os_event == 1) /
+                 nrow(plscox_genomic), 1), "%)\n")
+cat("Median follow-up:", round(median(plscox_genomic$os_time), 1), "months\n")
+cat("Predictor columns:", sum(grepl("^GENE_", names(plscox_genomic))),
+    "genes (p >> n)\n")
+cat("Missing values:", sum(is.na(plscox_genomic)), "\n")
+
 # --- Save datasets ---
 
 # Save using helper functions
 save_data_multi_format(plscox_metabolomics, "plscox_metabolomics")
 save_data_multi_format(plscox_small, "plscox_small")
+save_data_multi_format(plscox_genomic, "plscox_genomic")
 
 # Also save CSV to data-raw for easy inspection
 write.csv(plscox_metabolomics,
           "data-raw/plscox_metabolomics.csv", row.names = FALSE)
 write.csv(plscox_small,
           "data-raw/plscox_small.csv", row.names = FALSE)
+write.csv(plscox_genomic,
+          "data-raw/plscox_genomic.csv", row.names = FALSE)
 
 
 # ==============================================================================
@@ -317,12 +435,28 @@ cat("     - Results more variable across bootstrap replicates\n")
 cat("   Good for testing: LOO CV, small-sample performance,\n")
 cat("                     bootstrap stability, algorithm convergence\n")
 
+cat("\n3. GENOMIC p>>n DATASET (n=60, p=200)\n")
+cat("   Purpose: True high-dimensional gene expression scenario\n")
+cat("   Design: 200 genes, 2 co-expressed modules + noise genes\n")
+cat("   True signal: Proliferation (GENE_001-020) and immune (GENE_080-100)\n")
+cat("   Challenge: p >> n, near-zero-variance genes, missing values\n")
+cat("   Uses numeric 0/1 status (tests non-factor encoding path)\n")
+cat("   Expected PLS behavior:\n")
+cat("     - 2 optimal components should suffice\n")
+cat("     - Sparse PLS should identify signal genes\n")
+cat("     - Near-zero-variance genes should be filtered/downweighted\n")
+cat("   Good for testing: p>>n, sparse PLS, missing data handling,\n")
+cat("                     numeric status encoding, component selection\n")
+
 cat("\nThese datasets provide comprehensive scenarios for testing plscox:\n")
 cat("  - Block-correlated predictors (natural for omics data)\n")
 cat("  - Known latent component structure (validates PLS recovery)\n")
 cat("  - Realistic event rates and follow-up patterns\n")
-cat("  - Multiple dimensionality levels (p=80 and p=25)\n")
+cat("  - Multiple dimensionality levels (p=25, p=80, p=200)\n")
 cat("  - Mixed clinical + high-dimensional predictors\n")
+cat("  - True p>>n scenario (genomic dataset)\n")
+cat("  - Missing data and near-zero-variance features\n")
+cat("  - Both factor and numeric status encodings\n")
 cat("  - Suitable for all cross-validation strategies\n")
 
 cat("\nTest datasets created successfully!\n")

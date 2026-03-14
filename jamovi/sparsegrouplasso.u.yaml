@@ -22,6 +22,12 @@ children:
             name: event_var
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (event_var)
+          - type: LevelSelector
+            name: censorLevel
+            enable: (event_var)
       - type: TargetLayoutBox
         label: Predictor Variables
         children:

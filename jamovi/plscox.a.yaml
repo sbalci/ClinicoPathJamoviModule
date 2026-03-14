@@ -38,6 +38,26 @@ options:
           - factor
           - numeric
 
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (status)
+      description:
+          R: >
+            Level of `status` considered as the event. For binary factor outcomes,
+            if left empty the second observed level is used; for numeric binary
+            outcomes, the larger observed value is used (or 1 for 0/1 coding).
+
+    - name: censorLevel
+      title: Censored Level
+      type: Level
+      variable: (status)
+      description:
+          R: >
+            Level of `status` considered as censored (no event). Together with
+            `outcomeLevel`, this defines a strict two-level encoding: rows whose
+            status matches neither level are treated as missing and excluded.
+
     - name: predictors
       title: 'High-dimensional Predictors'
       type: Variables
@@ -103,34 +123,52 @@ options:
       default: standardize
       description: 'Method for scaling predictor variables'
 
-    - name: pls_algorithm
-      title: 'PLS Algorithm'
-      type: List
-      options:
-          - title: 'NIPALS'
-            name: nipals
-          - title: 'Kernel PLS'
-            name: kernel
-          - title: 'Wide Kernel PLS'
-            name: widekernelpls
-      default: nipals
-      description: 'Algorithm for PLS computation'
-
-    - name: max_iterations
-      title: 'Maximum Iterations'
-      type: Integer
-      default: 100
-      min: 50
-      max: 1000
-      description: 'Maximum iterations for PLS algorithm convergence'
-
     - name: tolerance
       title: 'Convergence Tolerance'
       type: Number
       default: 1e-06
       min: 1e-10
       max: 1e-03
-      description: 'Tolerance for algorithm convergence'
+      description: 'Tolerance for algorithm convergence (jamovi default: 1e-06, plsRcox default: 1e-12)'
+
+    - name: tie_method
+      title: 'Tie Handling Method'
+      type: List
+      options:
+          - title: 'Efron (recommended)'
+            name: efron
+          - title: 'Breslow'
+            name: breslow
+      default: efron
+      description: 'Method for handling tied event times in Cox model (plsRcox default: efron)'
+
+    - name: sparse_pls
+      title: 'Sparse PLS'
+      type: Bool
+      default: false
+      description: 'Enable sparse PLS for automatic variable selection (plsRcox default: false)'
+
+    - name: limQ2set
+      title: 'Q-squared Limit'
+      type: Number
+      default: 0.0975
+      min: 0.0
+      max: 1.0
+      description: 'Q-squared threshold for PLS component stopping criterion (plsRcox default: 0.0975)'
+
+    - name: pvals_expli
+      title: 'P-value Variable Selection'
+      type: Bool
+      default: false
+      description: 'Use p-value based predictor selection during PLS fitting (plsRcox default: false)'
+
+    - name: alpha_pvals_expli
+      title: 'P-value Threshold'
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.50
+      description: 'Significance level for p-value based variable selection (plsRcox default: 0.05)'
 
     - name: bootstrap_validation
       title: 'Bootstrap Validation'

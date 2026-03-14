@@ -34,17 +34,19 @@ devtools::load_all(".")
 The **PLS Cox Regression** module (`plscox`) combines Partial Least Squares (PLS)
 dimensionality reduction with Cox proportional hazards modeling for high-dimensional
 survival data. Instead of selecting individual variables like LASSO, PLS creates
-**latent components** — weighted combinations of all predictors that maximally
-explain survival variation.
+**latent components** -- weighted combinations of all predictors that maximally
+explain covariance with the survival outcome.
 
 Key features:
 
-- **Multiple PLS algorithms** (NIPALS, Kernel PLS, Wide Kernel PLS)
-- **Component selection** via cross-validation, information criteria, or manual
-- **Multiple scaling methods** (standardization, normalization, min-max)
-- **Bootstrap validation** and **permutation testing**
-- **Risk group stratification** with survival curves
-- **Feature importance** (variable contributions to components)
+- **Component selection** via cross-validation (log-likelihood, C-index), information criteria (BIC, AIC), or manual
+- **Multiple scaling methods** (standardization, unit variance, min-max, none)
+- **Advanced PLS settings** (sparse PLS, Q-squared stopping, p-value variable selection)
+- **Bootstrap validation** (Harrell optimism-corrected C-index)
+- **Permutation testing** for overall model significance
+- **Risk group stratification** with Kaplan-Meier survival curves
+- **Variable importance** (Cox-weighted PLS loadings)
+- **Data suitability assessment** (traffic-light system with 6 checks)
 
 ---
 
@@ -71,109 +73,70 @@ Key features:
 ## How PLS Cox Works
 
 1. **Extract PLS components**: Find linear combinations of X that maximize
-   covariance with survival response
+   covariance with the survival response
 2. **Select components**: Choose the optimal number via CV or information criteria
 3. **Fit Cox model**: Use selected components as predictors in Cox regression
 4. **Interpret**: Back-project component loadings to understand original variable contributions
-
-$$T_k = X w_k \quad \text{(component scores)}$$
-$$h(t) = h_0(t) \exp(\alpha_1 T_1 + \alpha_2 T_2 + \cdots + \alpha_K T_K)$$
-
-where $w_k$ are PLS weight vectors and $T_k$ are component scores.
-
----
-
-## PLS Algorithms Compared
-
-| Algorithm | Speed | Memory | Best For |
-|-----------|-------|--------|----------|
-| **NIPALS** (default) | Fast | Low | Standard use, moderate p |
-| **Kernel PLS** | Fast | Higher | Large p, when NIPALS is slow |
-| **Wide Kernel PLS** | Fast | Moderate | Very wide data (p >> n) |
 
 ---
 
 ## Datasets Used in This Guide
 
-| Dataset | N | Events | Predictors | Description |
-|---------|---|--------|------------|-------------|
-| Synthetic "metabolomics" | 120 | ~60 | 80 metabolites + 3 clinical | Metabolomic survival study |
-| Synthetic "small" | 50 | ~30 | 25 biomarkers | Small sample edge case |
+```{r datasets-table, echo=FALSE, results='asis'}
+cat("| Dataset | N | Events | Predictors | Time Var | Status Var | Description |
+|---------|---|--------|------------|----------|------------|-------------|
+| `plscox_metabolomics` | 120 | ~50% | 80 metabolites + 3 clinical | `survival_months` | `death` | Metabolomic survival study with 3 latent pathways |
+| `plscox_small` | 50 | ~60% | 25 biomarkers | `time_months` | `status` | Small sample edge case |
+| `plscox_genomic` | 60 | ~55% | 200 genes | `os_time` | `os_event` (numeric 0/1) | True p>>n with missing data |
+")
+```
+
+```{r load-datasets}
+data_path2 <- "data/"
+
+# Load metabolomics dataset (n=120, p=80)
+load(paste0(data_path2, "plscox_metabolomics.rda"))
+cat("Metabolomics: N =", nrow(plscox_metabolomics),
+    "| Events =", sum(plscox_metabolomics$death == "Dead"),
+    "| Predictors =", sum(grepl("^METAB_", names(plscox_metabolomics))), "+ 3 clinical\n")
+
+# Load small dataset (n=50, p=25)
+load(paste0(data_path2, "plscox_small.rda"))
+cat("Small: N =", nrow(plscox_small),
+    "| Events =", sum(plscox_small$status == "Dead"),
+    "| Predictors =", sum(grepl("^MARKER_", names(plscox_small))), "\n")
+
+# Load genomic dataset (n=60, p=200)
+load(paste0(data_path2, "plscox_genomic.rda"))
+cat("Genomic: N =", nrow(plscox_genomic),
+    "| Events =", sum(plscox_genomic$os_event == 1),
+    "| Predictors =", sum(grepl("^GENE_", names(plscox_genomic))),
+    "| Missing values =", sum(is.na(plscox_genomic)), "\n")
+```
 
 ---
 
-## 1. Basic PLS Cox Analysis
+## 1. Basic PLS Cox Analysis (Default Settings)
 
-```{r metabolomics-data}
-# Simulate metabolomics survival data
-# Signal comes from 2-3 latent pathways affecting clusters of metabolites
-set.seed(42)
-n <- 120
-p_metab <- 80
+This demonstrates all default settings: 5 components, 10-fold CV, CV log-likelihood
+selection, standardization scaling, and all outputs/plots enabled.
 
-# Latent biological factors
-pathway1 <- rnorm(n)  # Affects metabolites 1-15
-pathway2 <- rnorm(n)  # Affects metabolites 20-35
-pathway3 <- rnorm(n)  # Affects metabolites 50-65
-
-# Generate metabolite measurements from latent factors + noise
-metab_matrix <- matrix(rnorm(n * p_metab, sd = 0.5), nrow = n)
-colnames(metab_matrix) <- paste0("METAB_", sprintf("%03d", 1:p_metab))
-
-# Pathway 1 loads on metabolites 1-15
-for (j in 1:15) {
-  loading <- runif(1, 0.3, 0.8) * sample(c(-1, 1), 1)
-  metab_matrix[, j] <- metab_matrix[, j] + loading * pathway1
-}
-# Pathway 2 loads on metabolites 20-35
-for (j in 20:35) {
-  loading <- runif(1, 0.3, 0.7) * sample(c(-1, 1), 1)
-  metab_matrix[, j] <- metab_matrix[, j] + loading * pathway2
-}
-# Pathway 3 loads on metabolites 50-65
-for (j in 50:65) {
-  loading <- runif(1, 0.2, 0.6) * sample(c(-1, 1), 1)
-  metab_matrix[, j] <- metab_matrix[, j] + loading * pathway3
-}
-
-# Clinical variables
-age <- rnorm(n, 58, 12)
-gender <- factor(sample(c("Male", "Female"), n, replace = TRUE))
-bmi <- rnorm(n, 26, 4)
-
-# Survival depends on pathway1 and pathway2 + age
-lp <- 0.5 * pathway1 - 0.4 * pathway2 + 0.02 * (age - 58)
-surv_time <- rweibull(n, shape = 1.3, scale = 30 * exp(-lp * 0.3))
-censor_time <- runif(n, 6, 48)
-time <- pmax(pmin(surv_time, censor_time), 0.1)
-status <- factor(ifelse(surv_time <= censor_time, "Dead", "Alive"),
-                 levels = c("Alive", "Dead"))
-
-data_metab <- data.frame(
-  follow_up = time, vital_status = status,
-  age = age, gender = gender, bmi = bmi,
-  as.data.frame(metab_matrix)
-)
-
-cat("N:", n, "Events:", sum(status == "Dead"),
-    "Event rate:", round(mean(status == "Dead"), 2), "\n")
-cat("Metabolites:", p_metab, "Clinical:", 3, "\n")
-```
-
-```{r basic-pls}
-pred_all <- c("age", "gender", "bmi",
-              paste0("METAB_", sprintf("%03d", 1:p_metab)))
+```{r basic-pls-defaults}
+metab_predictors <- c("age", "gender", "bmi",
+                       paste0("METAB_", sprintf("%03d", 1:80)))
 
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
-  pls_algorithm = "nipals",
   cross_validation = "k10",
   component_selection = "cv_loglik",
   scaling_method = "standardize",
+  suitabilityCheck = TRUE,
   plot_components = TRUE,
   plot_loadings = TRUE,
   plot_scores = TRUE,
@@ -187,22 +150,24 @@ plscox(
 ```
 
 Expected: PLS should identify 2-3 important components reflecting the underlying
-pathway structure. Metabolites 1-15 and 20-35 should have high loadings on the
-first two components.
+pathway structure. Metabolites in blocks 1-15, 25-40, and 55-70 should have
+high loadings on the first few components.
 
 ---
 
 ## 2. Component Selection Methods
 
-### Cross-validated log-likelihood (default)
+### Cross-Validated Log-Likelihood (default)
 
-```{r cv-loglik}
+```{r cv-loglik-selection}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
-  pls_components = 10,  # Try up to 10
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
   component_selection = "cv_loglik",
   cross_validation = "k10",
   plot_validation = TRUE,
@@ -211,14 +176,16 @@ plscox(
 )
 ```
 
-### Cross-validated C-index
+### Cross-Validated C-Index
 
-```{r cv-cindex}
+```{r cv-cindex-selection}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 10,
   component_selection = "cv_cindex",
   cross_validation = "k10",
@@ -227,14 +194,16 @@ plscox(
 )
 ```
 
-### Information criteria (BIC, AIC)
+### BIC (no cross-validation needed)
 
-```{r bic}
+```{r bic-selection}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 10,
   component_selection = "bic",
   cross_validation = "none",
@@ -243,12 +212,16 @@ plscox(
 )
 ```
 
-```{r aic}
+### AIC
+
+```{r aic-selection}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 10,
   component_selection = "aic",
   cross_validation = "none",
@@ -257,15 +230,17 @@ plscox(
 )
 ```
 
-### Manual (fixed number)
+### Manual (fixed number of components)
 
-```{r manual}
+```{r manual-selection}
 # Use exactly 3 components (based on domain knowledge)
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 3,
   component_selection = "manual",
   cross_validation = "none",
@@ -277,70 +252,36 @@ plscox(
 
 ---
 
-## 3. PLS Algorithms
+## 3. Cross-Validation Methods
 
-### Kernel PLS (faster for large p)
+### 10-Fold CV (default)
 
-```{r kernel}
+```{r cv-k10}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
-  pls_algorithm = "kernel",
-  component_selection = "cv_loglik",
   cross_validation = "k10",
-  plot_validation = TRUE,
-  feature_importance = TRUE
-)
-```
-
-### Wide Kernel PLS (optimized for p >> n)
-
-```{r widekernelpls}
-plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
-  pls_components = 5,
-  pls_algorithm = "widekernelpls",
-  component_selection = "cv_loglik",
-  cross_validation = "k10",
-  plot_validation = TRUE,
-  feature_importance = TRUE
-)
-```
-
----
-
-## 4. Cross-Validation Methods
-
-### Leave-One-Out CV (most thorough, slowest)
-
-```{r loo}
-plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
-  pls_components = 5,
-  cross_validation = "loo",
   component_selection = "cv_loglik",
   plot_validation = TRUE,
   prediction_accuracy = TRUE
 )
 ```
 
-### 5-Fold CV (faster, less variance than LOO)
+### 5-Fold CV (faster, slightly more bias)
 
-```{r k5}
+```{r cv-k5}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
   cross_validation = "k5",
   component_selection = "cv_loglik",
@@ -349,19 +290,60 @@ plscox(
 )
 ```
 
+### Leave-One-Out CV (small samples only)
+
+```{r cv-loo}
+small_predictors <- paste0("MARKER_", sprintf("%02d", 1:25))
+
+plscox(
+  data = plscox_small,
+  time = "time_months",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = small_predictors,
+  pls_components = 5,
+  cross_validation = "loo",
+  component_selection = "cv_loglik",
+  plot_validation = TRUE,
+  prediction_accuracy = TRUE
+)
+```
+
 ---
 
-## 5. Scaling Methods
+## 4. Scaling Methods
 
-Variable scaling matters greatly for PLS since it's based on covariances.
+Variable scaling is critical for PLS since it operates on covariances.
 
-```{r scaling-comparison}
-# Unit variance scaling
+### Standardization (Z-scores, default)
+
+```{r scaling-standardize}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  scaling_method = "standardize",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+```
+
+### Unit Variance Scaling (no centering)
+
+```{r scaling-unit-variance}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
   scaling_method = "unit_variance",
   component_selection = "cv_loglik",
@@ -370,15 +352,130 @@ plscox(
 )
 ```
 
-```{r minmax}
-# Min-max scaling
+### Min-Max Scaling (range [0,1])
+
+```{r scaling-minmax}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
   scaling_method = "minmax",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+```
+
+### No Scaling
+
+```{r scaling-none}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  scaling_method = "none",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+```
+
+---
+
+## 5. Advanced PLS Settings
+
+### Sparse PLS (automatic variable selection within components)
+
+```{r sparse-pls}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  sparse_pls = TRUE,
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE
+)
+```
+
+### Convergence Tolerance
+
+```{r tolerance-strict}
+# Strict tolerance for higher precision
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  tolerance = 1e-10,
+  component_selection = "manual",
+  feature_importance = TRUE
+)
+```
+
+### Q-Squared Limit (PLS stopping criterion)
+
+```{r limq2set}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  limQ2set = 0.5,
+  component_selection = "manual",
+  feature_importance = TRUE
+)
+```
+
+### P-Value Based Variable Selection
+
+```{r pvals-expli}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  pvals_expli = TRUE,
+  alpha_pvals_expli = 0.05,
+  component_selection = "manual",
+  feature_importance = TRUE
+)
+```
+
+### Tie Handling Method
+
+```{r tie-method-breslow}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  tie_method = "breslow",
   component_selection = "cv_loglik",
   cross_validation = "k10",
   prediction_accuracy = TRUE
@@ -389,14 +486,18 @@ plscox(
 
 ## 6. Bootstrap Validation
 
-Bootstrap validation assesses the stability and reliability of component selection.
+Bootstrap validation assesses model overfitting using Harrell's optimism-corrected
+C-index. Each bootstrap iteration: (1) fit model on bootstrap sample, (2) assess
+on bootstrap and original data, (3) compute optimism.
 
-```{r bootstrap}
+```{r bootstrap-validation}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
   component_selection = "cv_loglik",
   cross_validation = "k10",
@@ -411,13 +512,16 @@ plscox(
 ## 7. Permutation Testing
 
 Test whether the PLS components capture real survival signal or random patterns.
+The p-value is the proportion of permuted C-indices that exceed the original.
 
-```{r permutation}
+```{r permutation-testing}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
   component_selection = "cv_loglik",
   cross_validation = "k10",
@@ -431,13 +535,37 @@ plscox(
 
 ## 8. Risk Stratification
 
-```{r risk-groups}
-# Stratify into 2, 3, or 4 risk groups
+Patients are stratified into risk groups based on quantiles of the PLS-derived
+linear predictor from the Cox model.
+
+### Binary Risk Groups
+
+```{r risk-groups-2}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  risk_groups = 2,
+  plot_survival = TRUE,
+  confidence_intervals = TRUE
+)
+```
+
+### Quartile Risk Groups
+
+```{r risk-groups-4}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 3,
   component_selection = "manual",
   risk_groups = 4,
@@ -449,41 +577,65 @@ plscox(
 
 ---
 
-## 9. Small Sample Analysis
+## 9. Data Suitability Assessment
 
-```{r small-data}
-# 50 patients, 25 biomarkers
-set.seed(99)
-n2 <- 50
-p2 <- 25
+The traffic-light assessment checks 6 criteria: events-per-variable, reduction need,
+sample size, event rate, multicollinearity, and data quality.
 
-# Simple latent structure
-latent <- rnorm(n2)
-X2 <- matrix(rnorm(n2 * p2, sd = 0.5), nrow = n2)
-for (j in 1:8) X2[, j] <- X2[, j] + runif(1, 0.3, 0.6) * latent
-colnames(X2) <- paste0("BIO_", sprintf("%02d", 1:p2))
-
-lp2 <- 0.4 * latent
-surv2 <- rweibull(n2, 1.2, 24 * exp(-lp2 * 0.3))
-cens2 <- runif(n2, 6, 36)
-time2 <- pmax(pmin(surv2, cens2), 0.1)
-status2 <- factor(ifelse(surv2 <= cens2, "Dead", "Alive"),
-                  levels = c("Alive", "Dead"))
-
-data_small <- data.frame(
-  time = time2, status = status2,
-  as.data.frame(X2)
+```{r suitability-metabolomics}
+# Metabolomics data: expected mostly green
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  suitabilityCheck = TRUE,
+  plot_components = FALSE,
+  plot_loadings = FALSE,
+  plot_scores = FALSE,
+  plot_validation = FALSE,
+  plot_survival = FALSE
 )
-
-cat("N:", n2, "Events:", sum(status2 == "Dead"), "\n")
 ```
 
-```{r small-run}
+```{r suitability-genomic}
+# Genomic p>>n data: expected yellow/red for EPV and data quality
+gene_predictors <- paste0("GENE_", sprintf("%03d", 1:200))
+
 plscox(
-  data = data_small,
-  time = "time",
+  data = plscox_genomic,
+  time = "os_time",
+  status = "os_event",
+  outcomeLevel = "1",
+  censorLevel = "0",
+  predictors = gene_predictors,
+  pls_components = 5,
+  component_selection = "manual",
+  suitabilityCheck = TRUE,
+  plot_components = FALSE,
+  plot_loadings = FALSE,
+  plot_scores = FALSE,
+  plot_validation = FALSE,
+  plot_survival = FALSE
+)
+```
+
+---
+
+## 10. Small Sample Analysis
+
+```{r small-sample-analysis}
+plscox(
+  data = plscox_small,
+  time = "time_months",
   status = "status",
-  predictors = paste0("BIO_", sprintf("%02d", 1:25)),
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = paste0("MARKER_", sprintf("%02d", 1:25)),
   pls_components = 3,
   cross_validation = "k5",
   component_selection = "cv_loglik",
@@ -493,20 +645,52 @@ plscox(
   plot_loadings = TRUE,
   plot_survival = TRUE,
   feature_importance = TRUE,
-  prediction_accuracy = TRUE
+  prediction_accuracy = TRUE,
+  suitabilityCheck = TRUE
 )
 ```
 
 ---
 
-## 10. All Plots
+## 11. High-Dimensional Genomic Analysis (p >> n)
 
-```{r all-plots}
+This is the core PLS use case: more genes than patients.
+
+```{r genomic-pls}
 plscox(
-  data = data_metab,
-  time = "follow_up",
-  status = "vital_status",
-  predictors = c("age", "gender", "bmi", paste0("METAB_", sprintf("%03d", 1:80))),
+  data = plscox_genomic,
+  time = "os_time",
+  status = "os_event",
+  outcomeLevel = "1",
+  censorLevel = "0",
+  predictors = gene_predictors,
+  pls_components = 5,
+  component_selection = "bic",
+  cross_validation = "none",
+  scaling_method = "standardize",
+  risk_groups = 3,
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  plot_scores = TRUE,
+  plot_survival = TRUE,
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE,
+  suitabilityCheck = TRUE
+)
+```
+
+---
+
+## 12. All Plots Demonstration
+
+```{r all-plots-demo}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
   pls_components = 5,
   component_selection = "cv_loglik",
   cross_validation = "k10",
@@ -524,29 +708,145 @@ plscox(
 
 ---
 
+## 13. Full Validation Pipeline
+
+Combine bootstrap validation and permutation testing for publication-quality results.
+
+```{r full-validation}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  component_selection = "cv_cindex",
+  cross_validation = "k5",
+  scaling_method = "standardize",
+  bootstrap_validation = TRUE,
+  n_bootstrap = 100,
+  permutation_test = TRUE,
+  n_permutations = 50,
+  risk_groups = 4,
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  plot_scores = TRUE,
+  plot_validation = TRUE,
+  plot_survival = TRUE,
+  confidence_intervals = TRUE,
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE,
+  suitabilityCheck = TRUE
+)
+```
+
+---
+
+## 14. Edge Cases
+
+### Single Component Model
+
+```{r edge-single-component}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 1,
+  component_selection = "manual",
+  plot_loadings = TRUE,
+  feature_importance = TRUE
+)
+```
+
+### Few Predictors
+
+```{r edge-few-predictors}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi"),
+  pls_components = 1,
+  component_selection = "manual",
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE
+)
+```
+
+### Minimal Output (no plots, no optional tables)
+
+```{r edge-minimal-output}
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  suitabilityCheck = FALSE,
+  plot_components = FALSE,
+  plot_loadings = FALSE,
+  plot_scores = FALSE,
+  plot_validation = FALSE,
+  plot_survival = FALSE,
+  confidence_intervals = FALSE,
+  feature_importance = FALSE,
+  prediction_accuracy = FALSE,
+  bootstrap_validation = FALSE,
+  permutation_test = FALSE
+)
+```
+
+---
+
 ## Interpreting Results
 
-### Component Summary
+### Model Summary
+
+The Model Summary HTML shows: sample size, events, predictors, number of PLS
+components used, selection method, scaling, CV method, tie handling, tolerance,
+and training C-index with likelihood ratio and Wald tests.
+
+### Component Selection Table
 
 | Column | Meaning |
 |--------|---------|
-| Component | PLS component number |
-| Variance Explained | Proportion of X variance captured |
-| Cumulative Variance | Running total of variance explained |
-| Cox Coefficient | Association with survival (from Cox model) |
-| P-value | Significance of component in Cox model |
+| Components | Number of PLS components considered |
+| CV Score | Cross-validation score (log-likelihood, C-index, AIC, or BIC) |
+| SE | Standard error of CV score (when available) |
+| C-Index | Concordance index for that number of components (AIC/BIC only) |
+| Selected | "Yes" marks the optimal number of components |
 
-### Variable Loadings
+### Model Coefficients Table
 
-Loadings indicate how much each original variable contributes to each component.
-Variables with high absolute loadings on survival-significant components are
-the most important predictors.
+| Column | Meaning |
+|--------|---------|
+| PLS Component | Component identifier (PLS_1, PLS_2, ...) |
+| Coefficient | Cox regression coefficient |
+| Hazard Ratio | exp(coefficient) |
+| HR Lower CI / HR Upper CI | 95% confidence interval for HR |
+| Standard Error | SE of the coefficient |
+| Z-value | Wald test statistic |
+| p-value | Significance of component in Cox model |
 
-### Feature Importance
+### Variable Loadings Table
 
-Variables are ranked by their weighted contribution across all selected components.
-This provides a single importance score per variable, making it easy to identify
-the most survival-relevant metabolites/biomarkers.
+Variables are sorted by Cox-weighted importance: `|loadings| * |cox_coefficients|`.
+This accounts for both how much a variable contributes to each component AND
+how much each component matters for survival.
+
+### Risk Stratification Table
+
+Patients are divided into quantile-based risk groups. Risk Group 1 is always the
+reference (HR = 1.0). Higher-numbered groups should have progressively higher HRs.
 
 ---
 
@@ -558,29 +858,31 @@ the most survival-relevant metabolites/biomarkers.
 | **PLS** | Supervised | Covariance between X and Y (survival) |
 
 PLS components are specifically constructed to predict survival, while PCA
-components may capture variance unrelated to the outcome. **PLS is preferred**
-for survival prediction.
+components may capture variance unrelated to the outcome.
 
 ---
 
 ## Common Pitfalls
 
-1. **Too many components**: More components = overfitting. Always use cross-validation
-   to select the optimal number. The CV curve should show a clear minimum or plateau.
+1. **Too many components**: More components can mean overfitting. Always use
+   cross-validation to select the optimal number.
 
-2. **Ignoring variable scaling**: Metabolites measured on different scales (e.g.,
-   nmol/L vs mg/dL) dominate PLS components if not standardized. Always use
-   `scaling_method = "standardize"` (the default).
+2. **Ignoring variable scaling**: Metabolites on different scales dominate PLS
+   if not standardized. Always use `scaling_method = "standardize"` (the default).
 
-3. **Not validating**: PLS models can overfit, especially with many components.
-   Use bootstrap validation and/or permutation testing to assess reliability.
+3. **Not validating**: Use bootstrap validation and/or permutation testing to
+   assess reliability. The training C-index overestimates true performance.
 
-4. **Interpreting loadings as individual variable effects**: A high loading
-   means the variable contributes to a component, not that it has an independent
-   effect on survival. Groups of correlated variables share loading magnitude.
+4. **Interpreting loadings as independent effects**: A high loading means the
+   variable contributes to a component, not that it has an independent causal
+   effect. Groups of correlated variables share loading magnitude.
 
-5. **Using LOO CV for large datasets**: Leave-one-out CV is computationally
+5. **Using LOO CV for large datasets**: Leave-one-out is computationally
    expensive and can be unstable. Use 5- or 10-fold CV for n > 50.
+
+6. **Sparse PLS with too few components**: Sparse PLS may return NULL component
+   scores for some configurations. If this happens, try increasing components
+   or disabling sparse mode.
 
 ---
 
@@ -588,10 +890,11 @@ for survival prediction.
 
 | Function | Use When |
 |----------|----------|
-| **LASSO Cox** | Want sparse individual variable selection |
-| **Adaptive LASSO** | Oracle property variable selection |
-| **SCAD Cox** | Non-convex penalties for unbiased estimation |
-| **High-Dimensional Cox** | Multiple regularization methods in one interface |
+| **LASSO Cox** (`lassocox`) | Want sparse individual variable selection |
+| **Adaptive LASSO** (`adaptivelasso`) | Oracle property variable selection |
+| **NCV Reg Cox** (`ncvregcox`) | SCAD/MCP non-convex penalties |
+| **High-Dimensional Cox** (`highdimcox`) | Multiple regularization methods |
+| **PCA Cox** (`pcacox`) | Unsupervised dimensionality reduction |
 | **Multivariable Survival** | Standard Cox with few predictors |
 
 ---

@@ -2,21 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../OncoPath"
-		},
-		{
-			"path": "../jsurvival"
-		},
-		{
-			"path": "../jjstatsplot"
-		},
-		{
-			"path": "../meddecide"
-		},
-		{
-			"path": "../ClinicoPathDescriptives"
 		}
 	],
 	"settings": {}

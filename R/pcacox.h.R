@@ -8,6 +8,8 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             time = NULL,
             status = NULL,
+            outcomeLevel = NULL,
+            censorLevel = NULL,
             predictors = NULL,
             suitabilityCheck = TRUE,
             clinical_vars = NULL,
@@ -56,6 +58,14 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor",
                     "numeric"))
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(status)")
+            private$..censorLevel <- jmvcore::OptionLevel$new(
+                "censorLevel",
+                censorLevel,
+                variable="(status)")
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
                 predictors,
@@ -192,6 +202,8 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..time)
             self$.addOption(private$..status)
+            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..censorLevel)
             self$.addOption(private$..predictors)
             self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..clinical_vars)
@@ -221,6 +233,8 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         time = function() private$..time$value,
         status = function() private$..status$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
+        censorLevel = function() private$..censorLevel$value,
         predictors = function() private$..predictors$value,
         suitabilityCheck = function() private$..suitabilityCheck$value,
         clinical_vars = function() private$..clinical_vars$value,
@@ -249,6 +263,8 @@ pcacoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..time = NA,
         ..status = NA,
+        ..outcomeLevel = NA,
+        ..censorLevel = NA,
         ..predictors = NA,
         ..suitabilityCheck = NA,
         ..clinical_vars = NA,
@@ -319,6 +335,8 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -583,6 +601,8 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "n_components")))
             self$add(jmvcore::Html$new(
@@ -659,6 +679,8 @@ pcacoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param time Survival time variable
 #' @param status Event status variable
+#' @param outcomeLevel Level of status variable indicating event occurred
+#' @param censorLevel Level of status variable indicating censored (no event)
 #' @param predictors Variables for principal component analysis
 #' @param suitabilityCheck assess if data is suitable for the selected PCA Cox
 #'   model
@@ -721,6 +743,8 @@ pcacox <- function(
     data,
     time,
     status,
+    outcomeLevel,
+    censorLevel,
     predictors,
     suitabilityCheck = TRUE,
     clinical_vars,
@@ -766,6 +790,8 @@ pcacox <- function(
     options <- pcacoxOptions$new(
         time = time,
         status = status,
+        outcomeLevel = outcomeLevel,
+        censorLevel = censorLevel,
         predictors = predictors,
         suitabilityCheck = suitabilityCheck,
         clinical_vars = clinical_vars,

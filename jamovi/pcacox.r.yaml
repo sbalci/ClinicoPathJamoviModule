@@ -10,6 +10,8 @@ items:
       clearWith:
           - time
           - status
+          - outcomeLevel
+          - censorLevel
           - predictors
 
     - name: suitabilityReport
@@ -235,6 +237,8 @@ items:
       clearWith:
           - time
           - status
+          - outcomeLevel
+          - censorLevel
           - predictors
           - n_components
 

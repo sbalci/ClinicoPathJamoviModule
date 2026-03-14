@@ -377,7 +377,7 @@ create_genomic_highdim <- function() {
 
   # Add correlation structure: genes 1-5 are pathway A, 6-10 pathway B
   for (i in 2:5) X[, i] <- X[, 1] * 0.6 + rnorm(n) * 0.8
-  for (i in 7:10) X[, 6] <- X[, 6] * 0.5 + rnorm(n) * 0.85
+  for (i in 7:10) X[, i] <- X[, 6] * 0.5 + rnorm(n) * 0.85
 
   # Sparse true effects: only 6 genes truly prognostic
   true_coef <- rep(0, p)

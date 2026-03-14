@@ -155,7 +155,18 @@ sparsegrouplassoClass <- R6::R6Class(
             total_n <- nrow(data)
             events <- 0
             if (!is.null(event_var) && event_var %in% names(data)) {
-                events <- sum(as.numeric(as.logical(data[[event_var]])), na.rm = TRUE)
+                event_level <- as.character(self$options$outcomeLevel)
+                event_data_raw <- data[[event_var]]
+                if (is.factor(event_data_raw)) {
+                    events <- sum(as.character(event_data_raw) == event_level, na.rm = TRUE)
+                } else {
+                    event_level_num <- suppressWarnings(as.numeric(event_level))
+                    if (!is.na(event_level_num)) {
+                        events <- sum(event_data_raw == event_level_num, na.rm = TRUE)
+                    } else {
+                        events <- sum(as.character(event_data_raw) == event_level, na.rm = TRUE)
+                    }
+                }
             }
             n_vars <- length(pred_vars)
             epv <- ifelse(n_vars > 0, events / n_vars, 0)
@@ -256,8 +267,44 @@ sparsegrouplassoClass <- R6::R6Class(
                 return(NULL)
             }
 
-            # Convert event variable to numeric if needed
-            data[[eventVar]] <- as.numeric(as.logical(data[[eventVar]]))
+            # Two-level outcome encoding using outcomeLevel / censorLevel
+            event_data <- data[[eventVar]]
+            event_level <- as.character(self$options$outcomeLevel)
+            censor_level <- as.character(self$options$censorLevel)
+
+            event_numeric <- rep(NA_real_, length(event_data))
+
+            if (is.factor(event_data)) {
+                event_chr <- as.character(event_data)
+                event_numeric[event_chr == event_level] <- 1
+                event_numeric[event_chr == censor_level] <- 0
+            } else {
+                event_level_num <- suppressWarnings(as.numeric(event_level))
+                censor_level_num <- suppressWarnings(as.numeric(censor_level))
+                if (!is.na(event_level_num)) event_numeric[event_data == event_level_num] <- 1
+                if (!is.na(censor_level_num)) event_numeric[event_data == censor_level_num] <- 0
+            }
+
+            n_excluded_outcome <- sum(is.na(event_numeric) & !is.na(event_data))
+            if (n_excluded_outcome > 0) {
+                self$results$todo$setContent(paste0(
+                    "<div class='alert alert-warning'><strong>Note:</strong> ",
+                    n_excluded_outcome, " row(s) excluded because outcome value matched neither ",
+                    "event level ('", event_level, "') nor censored level ('", censor_level, "').</div>"
+                ))
+            }
+
+            # Remove rows where event encoding produced NA
+            keep_rows <- !is.na(event_numeric)
+            data <- data[keep_rows, , drop = FALSE]
+            data[[eventVar]] <- event_numeric[keep_rows]
+
+            if (nrow(data) < 10) {
+                self$results$instructions$setContent(
+                    "<html><body><div style='color: red;'><b>Insufficient data:</b> Need at least 10 complete observations after event encoding.</div></body></html>"
+                )
+                return(NULL)
+            }
 
             # Ensure predictor variables are numeric
             for (var in predVars) {

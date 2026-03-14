@@ -8,6 +8,8 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         initialize = function(
             time_var = NULL,
             event_var = NULL,
+            outcomeLevel = NULL,
+            censorLevel = NULL,
             pred_vars = NULL,
             suitabilityCheck = TRUE,
             group_definition = "factor_based",
@@ -73,6 +75,14 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 permitted=list(
                     "factor",
                     "numeric"))
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(event_var)")
+            private$..censorLevel <- jmvcore::OptionLevel$new(
+                "censorLevel",
+                censorLevel,
+                variable="(event_var)")
             private$..pred_vars <- jmvcore::OptionVariables$new(
                 "pred_vars",
                 pred_vars,
@@ -303,6 +313,8 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 
             self$.addOption(private$..time_var)
             self$.addOption(private$..event_var)
+            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..censorLevel)
             self$.addOption(private$..pred_vars)
             self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..group_definition)
@@ -350,6 +362,8 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     active = list(
         time_var = function() private$..time_var$value,
         event_var = function() private$..event_var$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
+        censorLevel = function() private$..censorLevel$value,
         pred_vars = function() private$..pred_vars$value,
         suitabilityCheck = function() private$..suitabilityCheck$value,
         group_definition = function() private$..group_definition$value,
@@ -396,6 +410,8 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     private = list(
         ..time_var = NA,
         ..event_var = NA,
+        ..outcomeLevel = NA,
+        ..censorLevel = NA,
         ..pred_vars = NA,
         ..suitabilityCheck = NA,
         ..group_definition = NA,
@@ -496,6 +512,8 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "time_var",
                     "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
                     "pred_vars",
                     "alpha_sgl",
                     "selection_criterion"),
@@ -920,6 +938,13 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param data the data as a data frame
 #' @param time_var the time-to-event variable
 #' @param event_var the event indicator variable (0/1 or FALSE/TRUE)
+#' @param outcomeLevel Level of \code{event_var} that represents the event of
+#'   interest (coded as 1). Rows matching neither this level nor
+#'   \code{censorLevel} are excluded as NA.
+#' @param censorLevel Level of \code{event_var} that represents censoring
+#'   (coded as 0). Together with \code{outcomeLevel}, this defines a strict
+#'   two-level encoding: rows whose event value matches neither level are
+#'   treated as missing and excluded.
 #' @param pred_vars the predictor variables for the model
 #' @param suitabilityCheck assess if data is suitable for the selected
 #'   regularized Cox model
@@ -1006,6 +1031,8 @@ sparsegrouplasso <- function(
     data,
     time_var,
     event_var,
+    outcomeLevel,
+    censorLevel,
     pred_vars,
     suitabilityCheck = TRUE,
     group_definition = "factor_based",
@@ -1070,6 +1097,8 @@ sparsegrouplasso <- function(
     options <- sparsegrouplassoOptions$new(
         time_var = time_var,
         event_var = event_var,
+        outcomeLevel = outcomeLevel,
+        censorLevel = censorLevel,
         pred_vars = pred_vars,
         suitabilityCheck = suitabilityCheck,
         group_definition = group_definition,

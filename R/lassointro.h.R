@@ -83,27 +83,27 @@ lassointroResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="overview",
-                title="",
+                title="Method Overview",
                 visible="(showOverview)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="decisionGuide",
-                title="",
+                title="Decision Flowchart",
                 visible="(showDecisionGuide)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalScenarios",
-                title="",
+                title="Clinical Scenarios",
                 visible="(showClinicalScenarios)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
-                title="",
+                title="Assumptions & Pitfalls",
                 visible="(showAssumptions)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossary",
-                title="",
+                title="Glossary",
                 visible="(showGlossary)"))}))
 
 lassointroBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

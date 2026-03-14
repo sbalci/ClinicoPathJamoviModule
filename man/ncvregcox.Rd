@@ -8,6 +8,8 @@ ncvregcox(
   data,
   time,
   event,
+  outcomeLevel,
+  censorLevel,
   covariates,
   penalty = "SCAD",
   cv_folds = 10,
@@ -17,7 +19,8 @@ ncvregcox(
   standardize = TRUE,
   plot_path = TRUE,
   plot_cv = TRUE,
-  variable_importance = TRUE
+  variable_importance = TRUE,
+  suitabilityCheck = TRUE
 )
 }
 \arguments{
@@ -27,6 +30,16 @@ ncvregcox(
 
 \item{event}{event indicator (1=event, 0=censored)}
 
+\item{outcomeLevel}{Level of \code{event} considered as the event (e.g.,
+death, recurrence). For binary factor outcomes, if left empty the second
+observed level is used; for numeric binary outcomes, the larger observed
+value is used (or 1 for 0/1 coding).}
+
+\item{censorLevel}{Level of \code{event} considered as censored (no event).
+Together with \code{outcomeLevel}, this defines a strict two-level
+encoding: rows whose event value matches neither level are treated as
+missing and excluded.}
+
 \item{covariates}{predictor variables for high-dimensional analysis}
 
 \item{penalty}{Type of penalty function for variable selection}
@@ -35,9 +48,14 @@ ncvregcox(
 
 \item{lambda_type}{Lambda selection criterion}
 
-\item{alpha}{Mixing parameter for elastic net (1=lasso, 0=ridge)}
+\item{alpha}{Mixing parameter for elastic net (1=pure penalty, values near
+0=ridge-like). ncvreg requires alpha > 0; pure ridge (alpha=0) is not
+supported.}
 
-\item{gamma}{SCAD gamma parameter or MCP gamma parameter}
+\item{gamma}{Tuning parameter controlling concavity of the penalty. SCAD
+recommended default is 3.7 (Fan & Li 2001). MCP recommended default is 3.0
+(Zhang 2010). When MCP is selected and gamma is left at 3.7, the
+MCP-recommended default of 3.0 is used automatically.}
 
 \item{standardize}{Standardize covariates before fitting}
 
@@ -47,11 +65,16 @@ ncvregcox(
 
 \item{variable_importance}{Calculate and display variable importance
 metrics}
+
+\item{suitabilityCheck}{Run a comprehensive data suitability assessment
+before analysis. Checks sample size, events-per-variable ratio,
+multicollinearity,  and whether regularization is needed.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$model_summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$selected_variables} \tab \tab \tab \tab \tab a table \cr
 \code{results$variable_importance} \tab \tab \tab \tab \tab a table \cr
@@ -61,7 +84,6 @@ A results object containing:
 \code{results$regularization_path} \tab \tab \tab \tab \tab an image \cr
 \code{results$cv_error_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$variable_selection_plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$coefficient_comparison} \tab \tab \tab \tab \tab an image \cr
 \code{results$model_interpretation} \tab \tab \tab \tab \tab a html \cr
 }
 

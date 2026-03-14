@@ -8,9 +8,11 @@ adaptivelasso(
   data,
   time,
   event,
-  event_level = NULL,
+  event_level,
+  censor_level,
   predictors,
-  strata = NULL,
+  strata,
+  suitabilityCheck = TRUE,
   weight_method = "ridge",
   alpha = 1,
   gamma = 1,
@@ -44,7 +46,6 @@ adaptivelasso(
   plot_diagnostics = FALSE,
   tie_method = "breslow",
   standardize = TRUE,
-  intercept = FALSE,
   parallel_computing = FALSE,
   n_cores = 2,
   convergence_threshold = 1e-07,
@@ -58,12 +59,18 @@ adaptivelasso(
 \item{time}{Time to event variable (numeric). For right-censored data, this
 is the  time from study entry to event or censoring.}
 
-\item{event}{Event indicator variable. For survival analysis: 0 = censored,
-1 = event. For multi-level variables, choose the event level of interest.}
+\item{event}{Event indicator variable. For binary outcomes use 0 =
+censored, 1 = event. For multi-level variables, choose the event level of
+interest.}
 
 \item{event_level}{Level of the event variable to be treated as the event
 of interest. For binary factors this can be left empty and the second level
 is used.}
+
+\item{censor_level}{Level of the event variable to be treated as censored
+(no event). When specified together with Event Level, rows matching neither
+level are excluded from analysis. For binary factors this can be left empty
+and the first level is used.}
 
 \item{predictors}{Variables to include in the adaptive LASSO Cox model. Can
 include continuous, ordinal, and nominal variables. Automatic
@@ -71,6 +78,9 @@ standardization is applied for optimal penalty performance.}
 
 \item{strata}{Optional stratification variable. When provided, stratified
 Cox structures are used for penalized fitting and refitted Cox summaries.}
+
+\item{suitabilityCheck}{assess if data is suitable for the selected
+Adaptive LASSO model}
 
 \item{weight_method}{Method for calculating adaptive weights. Ridge
 provides stable weights with shrinkage, univariate uses individual Cox
@@ -183,9 +193,6 @@ better approximation but is computationally more intensive.}
 \item{standardize}{Standardize predictors before fitting. Recommended for
 optimal penalty performance with mixed-scale variables.}
 
-\item{intercept}{Retained for compatibility. Cox proportional hazards models
-do not estimate an intercept term, so this option has no effect.}
-
 \item{parallel_computing}{Use parallel computing for cross-validation and
 stability-selection resampling to reduce computation time.}
 
@@ -206,7 +213,8 @@ sampling. Ensures reproducible results across analyses.}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 \code{results$selectionPath} \tab \tab \tab \tab \tab a table \cr
 \code{results$cvResults} \tab \tab \tab \tab \tab a table \cr

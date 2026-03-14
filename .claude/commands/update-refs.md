@@ -87,6 +87,10 @@ jamovi/00refs.yaml
 - **DO NOT remove or modify item-level refs** - they are intentional and specific to that output item
 - This tool only manages the **top-level `refs:` section**
 
+### Module Reference Convention
+
+**All functions must include `ClinicoPathJamoviModule` (not `ClinicoPath`) as the first entry in their top-level `refs:` section.** This is the standard module-level reference for every analysis. When adding or updating refs, always ensure `ClinicoPathJamoviModule` is present as the first ref item, replacing any `ClinicoPath` entry if found.
+
 ### Steps Performed
 
 1. **Detect packages in `.b.R`**

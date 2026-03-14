@@ -38,10 +38,12 @@ children:
         label: Outcome Variable Options
         style: list-inline
         children:
-          - type: TextBox
+          - type: ComboBox
             name: outcomeLevel
-            format: string
             label: Event Level
+          - type: ComboBox
+            name: censorLevel
+            label: Censored Level
   - type: CollapseBox
     label: Data Suitability
     collapsed: false
@@ -87,6 +89,11 @@ children:
             name: subsampling_iterations
             format: number
             label: Subsampling Iterations
+            enable: (stability_selection)
+          - type: TextBox
+            name: subsampling_ratio
+            format: number
+            label: Subsampling Ratio (0.1–0.9)
             enable: (stability_selection)
           - type: TextBox
             name: stability_threshold

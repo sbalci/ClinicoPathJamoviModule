@@ -46,7 +46,7 @@ options:
           R: survival time variable
 
     - name: event
-      title: Event Variable  
+      title: Event Variable
       type: Variable
       suggested:
           - nominal
@@ -54,6 +54,27 @@ options:
           - factor
       description:
           R: event indicator (1=event, 0=censored)
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (event)
+      description:
+        R: >
+          Level of `event` considered as the event (e.g., death, recurrence).
+          For binary factor outcomes, if left empty the second observed level
+          is used; for numeric binary outcomes, the larger observed value is
+          used (or 1 for 0/1 coding).
+
+    - name: censorLevel
+      title: Censored Level
+      type: Level
+      variable: (event)
+      description:
+        R: >
+          Level of `event` considered as censored (no event). Together with
+          `outcomeLevel`, this defines a strict two-level encoding: rows whose
+          event value matches neither level are treated as missing and excluded.
 
     - name: covariates
       title: Covariates
@@ -104,19 +125,26 @@ options:
       title: Elastic Net Mixing Parameter
       type: Number
       default: 1.0
-      min: 0.0
+      min: 0.01
       max: 1.0
       description:
-          R: Mixing parameter for elastic net (1=lasso, 0=ridge)
+          R: >
+            Mixing parameter for elastic net (1=pure penalty, values near 0=ridge-like).
+            ncvreg requires alpha > 0; pure ridge (alpha=0) is not supported.
 
     - name: gamma
-      title: SCAD/MCP Parameter
+      title: SCAD/MCP Tuning Parameter
       type: Number
       default: 3.7
       min: 1.1
       max: 10.0
       description:
-          R: SCAD gamma parameter or MCP gamma parameter
+          R: >
+            Tuning parameter controlling concavity of the penalty.
+            SCAD recommended default is 3.7 (Fan & Li 2001).
+            MCP recommended default is 3.0 (Zhang 2010).
+            When MCP is selected and gamma is left at 3.7, the
+            MCP-recommended default of 3.0 is used automatically.
 
     - name: standardize
       title: Standardize Variables

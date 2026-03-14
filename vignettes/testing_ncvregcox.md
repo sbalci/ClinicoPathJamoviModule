@@ -2,16 +2,20 @@
 
 ## Overview
 
-This guide covers systematic testing of the `ncvregcox` function, which performs penalized Cox regression using SCAD, MCP, or Lasso penalties for variable selection in survival data. Every option from `ncvregcox.a.yaml` is covered with specific test scenarios.
+This guide covers systematic testing of the `ncvregcox` function, which performs penalized Cox regression using **SCAD or MCP** penalties for variable selection in survival data. Every option from `ncvregcox.a.yaml` is covered with specific test scenarios.
+
+Note: ncvregcox does **not** support Lasso. For Lasso-based Cox regression, use the `lassocox` function instead.
 
 ## Test Datasets
 
-Two datasets are provided in `data/`:
+Four datasets are provided in `data/`:
 
 | Dataset | n | Covariates | True Effects | Purpose |
 |---------|---|------------|--------------|---------|
 | `ncvregcox_clinical` | 200 | 14 (10 continuous + 4 categorical) | 5-6 | Realistic clinical study with mixed types and moderate correlations |
 | `ncvregcox_sparse` | 100 | 30 (all continuous) | 4 | High-dimensional sparse scenario for penalty comparison |
+| `ncvregcox_small` | 25 | 5 | 2-3 | Small-sample edge case for stability and warning checks |
+| `ncvregcox_collinear` | 150 | 10 (all continuous, r>0.9) | 3 | Highly collinear predictors for multicollinearity stress testing |
 
 ### ncvregcox_clinical Variable Map
 
@@ -44,15 +48,31 @@ Two datasets are provided in `data/`:
 | x20 | -0.4 | Independent |
 | All others | 0 | Various |
 
+### ncvregcox_small Variable Map
+
+| Variable | Type | Notes |
+|----------|------|-------|
+| `time` | numeric | Survival time |
+| `event` | factor (0/1) | Event indicator |
+| `x1`-`x5` | numeric | 5 continuous covariates, 2-3 true effects |
+
+### ncvregcox_collinear Variable Map
+
+| Variable | Type | Notes |
+|----------|------|-------|
+| `time` | numeric | Survival time |
+| `event` | factor (0/1) | Event indicator |
+| `x1`-`x10` | numeric | 10 continuous covariates with pairwise correlations > 0.9 |
+
 ---
 
 ## Test Scenarios
 
-### 1. Penalty Function Comparison (SCAD vs MCP vs Lasso)
+### 1. Penalty Function Comparison (SCAD vs MCP)
 
-**Option:** `penalty` (List: SCAD / MCP / lasso)
+**Option:** `penalty` (List: SCAD / MCP)
 
-Use `ncvregcox_sparse` to compare the three penalties with identical settings otherwise.
+Use `ncvregcox_sparse` to compare the two penalties with identical settings otherwise.
 
 #### Test 1a: SCAD (default)
 ```
@@ -75,13 +95,7 @@ Same as 1a, but penalty: MCP, gamma: 3.0
 ```
 **Expected:** MCP with default gamma=3.0 tends to produce sparser solutions than SCAD. Should select the 4 true variables with high probability.
 
-#### Test 1c: Lasso
-```
-Same as 1a, but penalty: lasso
-```
-**Expected:** Lasso may over-select variables from correlated Block 1 (x2, x3, x4 alongside x1). This demonstrates why non-convex penalties are preferred.
-
-**Comparison check:** The Variable Importance table and Selected Variables table should show differences across penalties. SCAD/MCP coefficient estimates for true variables should be closer to the true values (0.8, -0.6, 0.7, -0.4) than Lasso estimates, which are biased toward zero.
+**Comparison check:** The Variable Importance table and Selected Variables table should show differences across penalties. Both SCAD and MCP coefficient estimates for true variables should be close to the true values (0.8, -0.6, 0.7, -0.4) thanks to the oracle property of non-convex penalties.
 
 ---
 
@@ -106,12 +120,12 @@ gamma: 3.7
 ```
 **Expected:** Balanced variable selection. The recommended default for SCAD (Fan & Li, 2001).
 
-#### Test 2c: High gamma (approaches Lasso behavior)
+#### Test 2c: High gamma
 ```
 penalty: SCAD
 gamma: 8.0
 ```
-**Expected:** As gamma increases, SCAD approaches Lasso behavior. Variable selection should look more like Test 1c.
+**Expected:** As gamma increases, the SCAD penalty shape changes. Variable selection may become less aggressive on medium-sized coefficients.
 
 #### Test 2d: Gamma with MCP
 ```
@@ -153,7 +167,9 @@ Same as 3a, but lambda_type: 1se
 
 ### 4. Alpha (Elastic Net Mixing)
 
-**Option:** `alpha` (Number: 0.0-1.0, default 1.0)
+**Option:** `alpha` (Number: 0.01-1.0, default 1.0)
+
+Note: ncvreg requires alpha > 0, so the minimum is 0.01 (not 0.0). Pure ridge regression is not supported.
 
 #### Test 4a: Pure penalty (alpha = 1.0, default)
 ```
@@ -170,10 +186,10 @@ alpha: 0.5
 ```
 **Expected:** Blend of SCAD and ridge. Should handle correlated variables (Block 1) better by grouping them rather than selecting one arbitrarily. May select more variables from Block 1 but with smaller coefficients.
 
-#### Test 4c: Near-ridge (alpha = 0.1)
+#### Test 4c: Near-ridge (alpha = 0.01)
 ```
 penalty: SCAD
-alpha: 0.1
+alpha: 0.01
 ```
 **Expected:** Almost pure ridge penalty. Very little variable selection -- most coefficients will be non-zero but shrunken. The Selected Variables table should show nearly all 30 variables.
 
@@ -184,6 +200,13 @@ penalty: SCAD
 alpha: 0.7
 ```
 **Expected:** With clinical data containing both continuous and categorical variables, alpha < 1 may help with the dummy-variable expansion of categorical predictors by grouping related dummies.
+
+#### Test 4e: Alpha at boundary (alpha = 0.01)
+```
+penalty: MCP
+alpha: 0.01
+```
+**Expected:** Should run without error. ncvreg requires alpha > 0, so 0.01 is the minimum allowed value. Model should fit but produce minimal variable selection.
 
 ---
 
@@ -295,9 +318,178 @@ cv_folds: 15
 
 ---
 
-### 9. Edge Cases
+### 9. Outcome Level and Censor Level
 
-#### Test 9a: All noise variables
+**Options:** `outcomeLevel` (Level), `censorLevel` (Level)
+
+These options allow explicit specification of which factor level represents the event and which represents censoring.
+
+#### Test 9a: Default behavior (no levels specified)
+```
+Dataset: ncvregcox_clinical
+time: time
+event: event
+(outcomeLevel and censorLevel left empty)
+```
+**Expected:** The function auto-detects levels. For a binary 0/1 factor, "1" is treated as the event and "0" as censored.
+
+#### Test 9b: Explicit outcomeLevel only
+```
+Dataset: ncvregcox_clinical
+time: time
+event: event
+outcomeLevel: "1"
+```
+**Expected:** Identical results to 9a. Explicitly setting the event level to "1" should match the auto-detection behavior.
+
+#### Test 9c: Explicit both levels
+```
+Dataset: ncvregcox_clinical
+time: time
+event: event
+outcomeLevel: "1"
+censorLevel: "0"
+```
+**Expected:** Both levels explicitly set. Results should match 9a. Rows with event values matching neither level would be excluded (none in this dataset).
+
+#### Test 9d: Reversed levels
+```
+Dataset: ncvregcox_clinical
+time: time
+event: event
+outcomeLevel: "0"
+censorLevel: "1"
+```
+**Expected:** The meaning of event and censoring is reversed. The model should still fit but coefficients will have opposite signs compared to 9a (hazard ratios become protective and vice versa). This tests that the level mapping is applied correctly.
+
+#### Test 9e: Multi-level event variable
+If a dataset has event coded as a factor with levels like "Dead", "Alive", "Lost":
+```
+outcomeLevel: "Dead"
+censorLevel: "Alive"
+```
+**Expected:** Rows with "Lost" are excluded as missing. The model fits on only "Dead" (event=1) and "Alive" (event=0) rows. This is the primary use case for these options.
+
+---
+
+### 10. Suitability Check
+
+**Option:** `suitabilityCheck` (Bool, default true)
+
+The suitability assessment runs a traffic-light system of checks before the main analysis.
+
+#### Test 10a: Suitability check enabled (default)
+```
+Dataset: ncvregcox_clinical
+covariates: all 14
+suitabilityCheck: true
+```
+**Expected:** The `suitabilityReport` HTML output appears. It should contain:
+- Sample size adequacy check (n=200 with 14 covariates should pass)
+- Events-per-variable ratio (should be adequate)
+- Multicollinearity assessment (tumor_diameter and ldh_level are correlated -- may flag)
+- Whether regularization is needed (with 14 covariates and n=200, regularization is recommended)
+
+#### Test 10b: Suitability check disabled
+```
+suitabilityCheck: false
+```
+**Expected:** The `suitabilityReport` HTML output is hidden. The analysis proceeds directly to fitting without the pre-check. All other outputs should be unaffected.
+
+#### Test 10c: Suitability with small sample
+```
+Dataset: ncvregcox_small (n=25)
+covariates: x1, x2, x3, x4, x5
+suitabilityCheck: true
+```
+**Expected:** The suitability report should flag concerns:
+- Low sample size (n=25)
+- Low events-per-variable ratio (with 5 covariates and likely ~10-12 events, EPV is around 2-3)
+- Recommendation to reduce covariates or increase sample size
+- Traffic light should show amber or red for sample size
+
+#### Test 10d: Suitability with collinear data
+```
+Dataset: ncvregcox_collinear (n=150, r>0.9)
+covariates: x1, x2, ..., x10
+suitabilityCheck: true
+```
+**Expected:** The suitability report should flag severe multicollinearity (r>0.9 between predictors). The multicollinearity check should be red/amber. The report should recommend considering variable reduction or elastic net mixing (alpha < 1) to handle collinearity.
+
+#### Test 10e: Suitability with sparse data
+```
+Dataset: ncvregcox_sparse (n=100, p=30)
+covariates: x1, x2, ..., x30
+suitabilityCheck: true
+```
+**Expected:** The suitability report should flag the high p/n ratio (30 covariates with only 100 observations). Regularization is clearly needed. Events-per-variable ratio will be low.
+
+---
+
+### 11. Small Sample Edge Cases
+
+#### Test 11a: Small sample basic fit
+```
+Dataset: ncvregcox_small (n=25)
+covariates: x1, x2, x3, x4, x5
+penalty: SCAD
+gamma: 3.7
+cv_folds: 5
+lambda_type: 1se
+```
+**Expected:** Should complete without error. With n=25, use fewer CV folds (5 is reasonable). The 1se rule should produce a very sparse model (0-2 variables). High variance in CV estimates is expected.
+
+#### Test 11b: Small sample with MCP
+```
+Dataset: ncvregcox_small (n=25)
+penalty: MCP
+gamma: 3.0
+cv_folds: 3
+```
+**Expected:** MCP with minimal folds on small data. Should still converge. The model may select 0 variables with aggressive penalization.
+
+#### Test 11c: Small sample with too many folds
+```
+Dataset: ncvregcox_small (n=25)
+cv_folds: 20
+```
+**Expected:** Each fold would have only ~1 observation. The function should either handle this gracefully (reducing folds automatically) or produce a meaningful error/warning. This tests the boundary condition where cv_folds approaches n.
+
+---
+
+### 12. Collinear Data Edge Cases
+
+#### Test 12a: Collinear data with SCAD
+```
+Dataset: ncvregcox_collinear (n=150, 10 vars, r>0.9)
+penalty: SCAD
+alpha: 1.0
+gamma: 3.7
+```
+**Expected:** With pure SCAD penalty and high collinearity, the model may arbitrarily select one variable from each collinear pair. Variable selection results may be unstable across CV folds.
+
+#### Test 12b: Collinear data with elastic net mixing
+```
+Dataset: ncvregcox_collinear
+penalty: SCAD
+alpha: 0.3
+```
+**Expected:** Elastic net mixing (alpha=0.3) should handle collinearity better by grouping correlated variables. More variables should be selected compared to 12a, with smaller but non-zero coefficients distributed across collinear groups.
+
+#### Test 12c: Collinear data with MCP
+```
+Dataset: ncvregcox_collinear
+penalty: MCP
+alpha: 1.0
+gamma: 3.0
+```
+**Expected:** MCP is more aggressive than SCAD. With high collinearity, it may select fewer variables and produce a sparser model. Compare against 12a to see penalty differences under collinearity.
+
+---
+
+### 13. General Edge Cases
+
+#### Test 13a: All noise variables
 ```
 Dataset: ncvregcox_clinical
 covariates: bmi, crp, albumin, wbc_count, neutrophil_ratio, platelet_count, gender, histology
@@ -305,33 +497,33 @@ covariates: bmi, crp, albumin, wbc_count, neutrophil_ratio, platelet_count, gend
 ```
 **Expected:** With lambda.1se, the model should select zero or very few variables. The Selected Variables table should be empty or near-empty. Model interpretation should note no variables were selected.
 
-#### Test 9b: Single covariate
+#### Test 13b: Single covariate
 ```
 covariates: tumor_diameter
 ```
 **Expected:** Should run without error. The penalty effectively becomes a univariate shrinkage estimator. The regularization path has only one line.
 
-#### Test 9c: All categorical covariates
+#### Test 13c: All categorical covariates
 ```
 covariates: gender, t_stage, n_stage, histology
 ```
 **Expected:** The design matrix will contain dummy variables. ncvreg handles factor expansion internally. Check that the Selected Variables table reports meaningful variable names (not just dummy codes).
 
-#### Test 9d: Missing data
+#### Test 13d: Missing data
 ```
 Dataset: ncvregcox_clinical (has 6 NA values)
 covariates: all 14
 ```
 **Expected:** Rows with NA are dropped (complete-case analysis). The model should note how many observations were used (approximately 194-200). No errors from missing data.
 
-#### Test 9e: Very high gamma
+#### Test 13e: Very high gamma
 ```
 penalty: SCAD
 gamma: 10.0
 ```
-**Expected:** SCAD penalty approaches Lasso. Variable selection results should resemble the Lasso test.
+**Expected:** The SCAD penalty shape changes at high gamma. Variable selection may differ from the default.
 
-#### Test 9f: Very low gamma (near boundary)
+#### Test 13f: Very low gamma (near boundary)
 ```
 penalty: MCP
 gamma: 1.1
@@ -342,20 +534,39 @@ gamma: 1.1
 
 ## Complete Option Coverage Checklist
 
-| Option | YAML Name | Type | Default | Tested In |
-|--------|-----------|------|---------|-----------|
-| Time Variable | `time` | Variable (numeric) | -- | All tests |
-| Event Variable | `event` | Variable (factor) | -- | All tests |
-| Covariates | `covariates` | Variables (numeric/factor) | -- | All tests |
-| Penalty Function | `penalty` | List (SCAD/MCP/lasso) | SCAD | Tests 1a-1c |
-| SCAD/MCP Parameter | `gamma` | Number (1.1-10.0) | 3.7 | Tests 2a-2d, 9e-9f |
-| Elastic Net Mixing | `alpha` | Number (0.0-1.0) | 1.0 | Tests 4a-4d |
-| CV Folds | `cv_folds` | Number (3-20) | 10 | Tests 8a-8d |
-| Lambda Selection | `lambda_type` | List (min/1se) | min | Tests 3a-3b |
-| Standardize | `standardize` | Bool | true | Tests 5a-5b |
-| Regularization Path Plot | `plot_path` | Bool | true | Tests 6a-6c |
-| CV Error Plot | `plot_cv` | Bool | true | Tests 6a-6c |
-| Variable Importance | `variable_importance` | Bool | true | Tests 7a-7b |
+All 15 options from `ncvregcox.a.yaml` are covered:
+
+| Option | YAML Name | Type | Default | Range/Values | Tested In |
+|--------|-----------|------|---------|--------------|-----------|
+| Data | `data` | Data | -- | -- | All tests |
+| Time Variable | `time` | Variable (numeric) | -- | -- | All tests |
+| Event Variable | `event` | Variable (factor) | -- | -- | All tests |
+| Event Level | `outcomeLevel` | Level | (auto) | Levels of event | Tests 9a-9e |
+| Censored Level | `censorLevel` | Level | (auto) | Levels of event | Tests 9a-9e |
+| Covariates | `covariates` | Variables (numeric/factor) | -- | -- | All tests |
+| Penalty Function | `penalty` | List | SCAD | SCAD / MCP | Tests 1a-1b |
+| CV Folds | `cv_folds` | Number | 10 | 3-20 | Tests 8a-8d, 11a-11c |
+| Lambda Selection | `lambda_type` | List | min | min / 1se | Tests 3a-3b |
+| Elastic Net Mixing | `alpha` | Number | 1.0 | 0.01-1.0 | Tests 4a-4e |
+| SCAD/MCP Parameter | `gamma` | Number | 3.7 | 1.1-10.0 | Tests 2a-2d, 13e-13f |
+| Standardize | `standardize` | Bool | true | true/false | Tests 5a-5b |
+| Regularization Path Plot | `plot_path` | Bool | true | true/false | Tests 6a-6c |
+| CV Error Plot | `plot_cv` | Bool | true | true/false | Tests 6a-6c |
+| Variable Importance | `variable_importance` | Bool | true | true/false | Tests 7a-7b |
+| Suitability Check | `suitabilityCheck` | Bool | true | true/false | Tests 10a-10e |
+
+---
+
+## Automated Test Files
+
+Four test files exist under `tests/testthat/`:
+
+| File | Coverage |
+|------|----------|
+| `test-ncvregcox-basic.R` | Core functionality: SCAD and MCP fitting, default options, output structure |
+| `test-ncvregcox-arguments.R` | Systematic option variation: penalty, gamma, alpha, lambda_type, cv_folds, standardize, outcomeLevel, censorLevel, suitabilityCheck |
+| `test-ncvregcox-edge-cases.R` | Boundary conditions: single covariate, all noise, all categorical, missing data, extreme gamma, small sample (ncvregcox_small), collinear data (ncvregcox_collinear) |
+| `test-ncvregcox-integration.R` | End-to-end workflows: full clinical pipeline, sparse data pipeline, penalty comparison, plot toggling, suitability check integration |
 
 ---
 
@@ -380,7 +591,8 @@ ncvregcox(
   standardize = TRUE,
   plot_path = TRUE,
   plot_cv = TRUE,
-  variable_importance = TRUE
+  variable_importance = TRUE,
+  suitabilityCheck = TRUE
 )
 ```
 
@@ -403,16 +615,78 @@ ncvregcox(
   standardize = TRUE,
   plot_path = TRUE,
   plot_cv = TRUE,
-  variable_importance = TRUE
+  variable_importance = TRUE,
+  suitabilityCheck = TRUE
 )
 ```
 
-### Penalty comparison loop
+### Smoke test with ncvregcox_small (edge case)
+```r
+data(ncvregcox_small, package = "ClinicoPath")
+
+ncvregcox(
+  data = ncvregcox_small,
+  time = "time",
+  event = "event",
+  covariates = c("x1", "x2", "x3", "x4", "x5"),
+  penalty = "SCAD",
+  gamma = 3.7,
+  alpha = 1.0,
+  cv_folds = 5,
+  lambda_type = "1se",
+  standardize = TRUE,
+  plot_path = TRUE,
+  plot_cv = TRUE,
+  variable_importance = TRUE,
+  suitabilityCheck = TRUE
+)
+```
+
+### Smoke test with ncvregcox_collinear (edge case)
+```r
+data(ncvregcox_collinear, package = "ClinicoPath")
+
+ncvregcox(
+  data = ncvregcox_collinear,
+  time = "time",
+  event = "event",
+  covariates = paste0("x", 1:10),
+  penalty = "SCAD",
+  gamma = 3.7,
+  alpha = 0.5,
+  cv_folds = 10,
+  lambda_type = "min",
+  standardize = TRUE,
+  plot_path = TRUE,
+  plot_cv = TRUE,
+  variable_importance = TRUE,
+  suitabilityCheck = TRUE
+)
+```
+
+### outcomeLevel / censorLevel test
+```r
+data(ncvregcox_clinical, package = "ClinicoPath")
+
+ncvregcox(
+  data = ncvregcox_clinical,
+  time = "time",
+  event = "event",
+  outcomeLevel = "1",
+  censorLevel = "0",
+  covariates = c("age", "tumor_diameter", "t_stage"),
+  penalty = "SCAD",
+  cv_folds = 10,
+  suitabilityCheck = TRUE
+)
+```
+
+### Penalty comparison loop (SCAD vs MCP)
 ```r
 data(ncvregcox_sparse, package = "ClinicoPath")
 cov_names <- paste0("x", 1:30)
 
-for (pen in c("SCAD", "MCP", "lasso")) {
+for (pen in c("SCAD", "MCP")) {
   cat("\n===", pen, "===\n")
   result <- ncvregcox(
     data = ncvregcox_sparse,
@@ -422,7 +696,8 @@ for (pen in c("SCAD", "MCP", "lasso")) {
     penalty = pen,
     gamma = ifelse(pen == "MCP", 3.0, 3.7),
     cv_folds = 10,
-    lambda_type = "min"
+    lambda_type = "min",
+    suitabilityCheck = FALSE
   )
   cat("Selected variables:", result$model_summary$asDF$n_selected, "\n")
 }
@@ -434,11 +709,16 @@ for (pen in c("SCAD", "MCP", "lasso")) {
 
 For a correct implementation, the following should hold:
 
-1. **SCAD/MCP should outperform Lasso** on the sparse dataset for recovering true variables (fewer false positives, less coefficient bias).
-2. **Lambda.1se should give sparser models** than lambda.min across all penalty types.
+1. **SCAD and MCP should both recover true variables** on the sparse dataset with few false positives and minimal coefficient bias, thanks to their oracle properties.
+2. **Lambda.1se should give sparser models** than lambda.min across both penalty types.
 3. **Gamma near the lower bound** should give the sparsest models (strongest penalization for medium coefficients).
-4. **Alpha < 1** should select more correlated variables together (group effect).
-5. **Standardization** should produce different variable selection when variables are on vastly different scales.
-6. **All output tables** (model_summary, selected_variables, variable_importance, cross_validation_results, model_comparison, convergence_info) should populate without errors.
-7. **All four plots** (regularization_path, cv_error_plot, variable_selection_plot, coefficient_comparison) should render when enabled.
-8. **Edge cases** (single covariate, all noise, all categorical) should not crash.
+4. **Alpha < 1** should select more correlated variables together (group effect) and help with collinear data.
+5. **Alpha minimum is 0.01** (not 0.0) because ncvreg requires alpha > 0.
+6. **Standardization** should produce different variable selection when variables are on vastly different scales.
+7. **outcomeLevel/censorLevel** should correctly remap event factor levels and exclude rows that match neither level.
+8. **suitabilityCheck** should produce a traffic-light HTML report flagging sample size, EPV, multicollinearity, and regularization need.
+9. **Small sample data (n=25)** should complete without crash; suitability check should flag concerns.
+10. **Collinear data (r>0.9)** should be handled; suitability check should flag multicollinearity; elastic net mixing should help.
+11. **All output tables** (model_summary, selected_variables, variable_importance, cross_validation_results, model_comparison, convergence_info) should populate without errors.
+12. **All plots** (regularization_path, cv_error_plot, variable_selection_plot) should render when enabled and hide when disabled.
+13. **Edge cases** (single covariate, all noise, all categorical) should not crash.

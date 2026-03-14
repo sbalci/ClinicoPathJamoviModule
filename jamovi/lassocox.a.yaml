@@ -51,6 +51,16 @@ options:
           if left empty the second observed level is used; for numeric binary
           outcomes, the larger observed value is used (or 1 for 0/1 coding).
 
+    - name: censorLevel
+      title: Censored Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: >
+          Level of `outcome` considered as censored (no event). Together with
+          `outcomeLevel`, this defines a strict two-level encoding: rows whose
+          outcome matches neither level are treated as missing and excluded.
+
     - name: explanatory
       title: Explanatory Variables
       type: Variables
@@ -127,7 +137,8 @@ options:
       default: true
       description:
         R: >
-          Whether to show the coefficient path plot.
+          Whether to show a bar plot of selected-variable coefficients at the
+          chosen lambda value.
 
     - name: survival_plot
       title: Risk Group Survival Plot
@@ -147,6 +158,15 @@ options:
           excluded rows receive missing values).
 
     # Explanatory Output Options
+    - name: showSummary
+      title: Show Results Summary
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display a natural-language summary paragraph of the main results,
+          suitable for copying into reports or manuscripts.
+
     - name: showExplanations
       title: Show Method Explanations
       type: Bool
@@ -189,7 +209,7 @@ options:
       default: false
       description:
         R: >
-          Compare LASSO Cox results with standard Cox regression to demonstrate
-          the benefits of regularization and variable selection.
+          Compare post-LASSO Cox refit (selected variables) with standard Cox
+          using all encoded predictors. Intended as an exploratory comparison.
 
 ...

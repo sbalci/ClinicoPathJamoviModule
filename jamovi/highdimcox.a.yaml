@@ -92,11 +92,19 @@ options:
 
   - name: outcomeLevel
     title: Event Level
-    type: String
-    default: '1'
+    type: Level
+    variable: (outcome)
     description:
         R: >
-          Level of outcome variable indicating event
+          Level of outcome variable indicating event occurred
+
+  - name: censorLevel
+    title: Censored Level
+    type: Level
+    variable: (outcome)
+    description:
+        R: >
+          Level of outcome variable indicating censored (no event)
 
   - name: regularization_method
     title: Regularization Method
@@ -166,6 +174,16 @@ options:
         R: >
           Number of subsampling iterations for stability selection
 
+  - name: subsampling_ratio
+    title: Subsampling Ratio
+    type: Number
+    min: 0.1
+    max: 0.9
+    default: 0.5
+    description:
+        R: >
+          Proportion of observations to sample in each stability selection iteration
+
   - name: stability_threshold
     title: Stability Threshold
     type: Number
@@ -179,7 +197,7 @@ options:
   - name: show_regularization_path
     title: Show Regularization Path
     type: Bool
-    default: true
+    default: false
     description:
         R: >
           Display regularization path plot
@@ -187,7 +205,7 @@ options:
   - name: show_cv_plot
     title: Show Cross-Validation Plot
     type: Bool
-    default: true
+    default: false
     description:
         R: >
           Display cross-validation error plot
@@ -211,7 +229,7 @@ options:
   - name: show_model_diagnostics
     title: Show Model Diagnostics
     type: Bool
-    default: true
+    default: false
     description:
         R: >
           Display model diagnostic plots

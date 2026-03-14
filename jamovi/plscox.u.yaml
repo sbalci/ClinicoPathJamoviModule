@@ -22,6 +22,12 @@ children:
             name: status
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (status)
+          - type: LevelSelector
+            name: censorLevel
+            enable: (status)
       - type: TargetLayoutBox
         label: High-dimensional Predictors
         children:
@@ -55,23 +61,31 @@ children:
           - type: ComboBox
             name: cross_validation
           - type: ComboBox
-            name: pls_algorithm
-          - type: ComboBox
             name: scaling_method
 
   - type: CollapseBox
-    label: Advanced Algorithm Settings
+    label: Advanced PLS Settings
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
-          - type: TextBox
-            name: max_iterations
-            format: number
+          - type: ComboBox
+            name: tie_method
           - type: TextBox
             name: tolerance
             format: number
+          - type: TextBox
+            name: limQ2set
+            format: number
+          - type: CheckBox
+            name: sparse_pls
+          - type: CheckBox
+            name: pvals_expli
+          - type: TextBox
+            name: alpha_pvals_expli
+            format: number
+            enable: (pvals_expli)
 
   - type: CollapseBox
     label: Validation

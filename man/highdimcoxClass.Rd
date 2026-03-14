@@ -24,16 +24,7 @@ The highdimcoxClass implements advanced high-dimensional Cox regression with:
 \strong{High-Dimensional Specific Features:}
 \itemize{
 \item Stability selection for robust variable identification
-\item Bootstrap-based variable importance assessment
-\item Screening methods for ultra-high dimensional data
-\item Cross-validation optimized for high-dimensional settings
-\item Regularization path analysis and visualization
-}
-
-\strong{Model Assessment & Validation:}
-\itemize{
-\item Time-dependent prediction accuracy
-\item High-dimensional model diagnostics
+\item Comprehensive model validation and diagnostics
 \item Variable importance rankings
 \item Stability-based confidence measures
 }

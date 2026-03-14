@@ -16,12 +16,25 @@ lassointroClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         },
 
         # =====================================================================
-        # HTML Content Generators — plain styling for jamovi readability
+        # HTML Content Generators
         # =====================================================================
 
+        .cssBlock = function() {
+            '<style>
+            .lg { max-width: 780px; line-height: 1.6; }
+            .lg table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+            .lg th { padding: 8px; text-align: left; border-bottom: 2px solid #333; }
+            .lg th.center { text-align: center; }
+            .lg td { padding: 8px; border-bottom: 1px solid #ccc; }
+            .lg td.center { text-align: center; }
+            .lg td.vtop, .lg th.vtop { vertical-align: top; width: 28%; }
+            .lg .callout { background: #f8f4e8; border-left: 4px solid #c9a825; padding: 12px 16px; margin: 16px 0; }
+            </style>'
+        },
+
         .overviewHtml = function() {
-            paste0(
-'<div style="max-width: 780px; line-height: 1.6;">
+            paste0(private$.cssBlock(),
+'<div class="lg">
 
 <h2>Penalized Cox Regression Guide</h2>
 <p>Choosing the right method for variable selection in survival analysis.</p>
@@ -30,77 +43,77 @@ lassointroClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 who have survival data with many potential predictors and need to identify which variables
 truly matter for patient outcomes.</p>
 
+<div class="callout">
+<strong>When NOT to use penalized regression:</strong>
+If you have fewer than ~15 candidate predictors and an events-per-variable ratio above 10
+(e.g., 150 events with 12 variables), standard multivariable Cox regression is usually better.
+It gives you p-values, confidence intervals, and unbiased hazard ratios without penalization.
+Use the Survival &rarr; Multivariable Survival menu instead.
+</div>
+
 <h3>Available Methods (Increasing Complexity)</h3>
 
-<table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+<table>
 <thead>
   <tr>
-    <th style="padding: 8px; text-align: left; border-bottom: 2px solid #333;">Method</th>
-    <th style="padding: 8px; text-align: left; border-bottom: 2px solid #333;">Best For</th>
-    <th style="padding: 8px; text-align: left; border-bottom: 2px solid #333;">Complexity</th>
-    <th style="padding: 8px; text-align: left; border-bottom: 2px solid #333;">Menu Location</th>
+    <th>Method</th>
+    <th>Best For</th>
+    <th>Complexity</th>
+    <th>Menu Location</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>LASSO Cox</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      First-line variable selection. Automatically drops irrelevant predictors. Start here if unsure.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Basic</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Penalized Cox &rarr; LASSO Cox</td>
+    <td><strong>LASSO Cox</strong></td>
+    <td>First-line variable selection. Automatically drops irrelevant predictors. Start here if unsure.</td>
+    <td>Basic</td>
+    <td>Penalized Cox &rarr; LASSO Cox</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Adaptive LASSO Cox</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      More accurate selection when you need statistical consistency.
+    <td><strong>Adaptive LASSO Cox</strong></td>
+    <td>More accurate selection when you need statistical consistency.
       Uses data-driven weights to penalize less important variables more heavily.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Moderate</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Penalized Cox &rarr; Adaptive LASSO Cox</td>
+    <td>Moderate</td>
+    <td>Penalized Cox &rarr; Adaptive LASSO Cox</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Elastic Net Cox</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      When predictors are moderately correlated.
+    <td><strong>Elastic Net Cox</strong></td>
+    <td>When predictors are moderately correlated.
       Keeps groups of correlated variables together instead of picking just one arbitrarily.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Moderate</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Penalized Cox &rarr; Elastic Net Cox</td>
+    <td>Moderate</td>
+    <td>Penalized Cox &rarr; Elastic Net Cox</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Group LASSO Cox</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      When variables naturally form groups (e.g., grouped by genes, pathways, or categories). Drops or keeps whole groups at a time.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Advanced</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Penalized Cox (Drafts) &rarr; Group LASSO Cox</td>
+    <td><strong>Group LASSO Cox</strong></td>
+    <td>When variables naturally form groups (e.g., grouped by genes, pathways, or categories). Drops or keeps whole groups at a time.</td>
+    <td>Advanced</td>
+    <td>Penalized Cox (Drafts) &rarr; Group LASSO Cox</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Sparse Group LASSO</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Similar to Group LASSO, but can drop individual variables within a selected group. Highly flexible for clustered features.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Advanced</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Penalized Cox (Drafts) &rarr; Sparse Group LASSO</td>
+    <td><strong>Sparse Group LASSO</strong></td>
+    <td>Similar to Group LASSO, but can drop individual variables within a selected group. Highly flexible for clustered features.</td>
+    <td>Advanced</td>
+    <td>Penalized Cox (Drafts) &rarr; Sparse Group LASSO</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>SCAD/MCP Cox</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      When you need unbiased coefficient estimates. Standard LASSO shrinks large effects
+    <td><strong>SCAD/MCP Cox</strong></td>
+    <td>When you need unbiased coefficient estimates. Standard LASSO shrinks large effects
       toward zero; SCAD and MCP do not.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Advanced</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Penalized Cox &rarr; SCAD/MCP Cox</td>
+    <td>Advanced</td>
+    <td>Penalized Cox &rarr; SCAD/MCP Cox</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>PCA Cox</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Reduces variables into linearly uncorrelated primary components. Excellent for severe multicollinearity.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Moderate</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Dimension Reduction Cox &rarr; PCA Cox</td>
+    <td><strong>PCA Cox</strong></td>
+    <td>Reduces variables into linearly uncorrelated primary components. Excellent for severe multicollinearity.</td>
+    <td>Moderate</td>
+    <td>Dimension Reduction Cox &rarr; PCA Cox</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>PLS Cox</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      When you have far more variables than patients (e.g., genomic data, radiomic features).
+    <td><strong>PLS Cox</strong></td>
+    <td>When you have far more variables than patients (e.g., genomic data, radiomic features).
       Creates outcome-aware composite scores rather than just variance-based components.</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Advanced</td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">Dimension Reduction Cox &rarr; PLS Cox</td>
+    <td>Advanced</td>
+    <td>Dimension Reduction Cox &rarr; PLS Cox</td>
   </tr>
 </tbody>
 </table>
@@ -113,8 +126,8 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
         },
 
         .decisionGuideHtml = function() {
-            paste0(
-'<div style="max-width: 780px; line-height: 1.6;">
+            paste0(private$.cssBlock(),
+'<div class="lg">
 
 <h3>Decision Flowchart: Which Method Should I Use?</h3>
 
@@ -152,72 +165,72 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
 
 <h3>Quick Comparison Table</h3>
 
-<table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+<table>
 <thead>
   <tr>
-    <th style="padding: 6px; text-align: left; border-bottom: 2px solid #333;">Feature</th>
-    <th style="padding: 6px; text-align: center; border-bottom: 2px solid #333;">LASSO</th>
-    <th style="padding: 6px; text-align: center; border-bottom: 2px solid #333;">Adaptive</th>
-    <th style="padding: 6px; text-align: center; border-bottom: 2px solid #333;">Elastic Net</th>
-    <th style="padding: 6px; text-align: center; border-bottom: 2px solid #333;">Grouped</th>
-    <th style="padding: 6px; text-align: center; border-bottom: 2px solid #333;">SCAD/MCP</th>
-    <th style="padding: 6px; text-align: center; border-bottom: 2px solid #333;">PCA/PLS</th>
+    <th>Feature</th>
+    <th class="center">LASSO</th>
+    <th class="center">Adaptive</th>
+    <th class="center">Elastic Net</th>
+    <th class="center">Grouped</th>
+    <th class="center">SCAD/MCP</th>
+    <th class="center">PCA/PLS</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-    <td style="padding: 6px; border-bottom: 1px solid #ccc;">Drops variables</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
+    <td>Drops variables</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">No</td>
   </tr>
   <tr>
-    <td style="padding: 6px; border-bottom: 1px solid #ccc;">Handles heavy collinearity</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">By Group</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
+    <td>Handles heavy collinearity</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">Yes</td>
+    <td class="center">By Group</td>
+    <td class="center">No</td>
+    <td class="center">Yes</td>
   </tr>
   <tr>
-    <td style="padding: 6px; border-bottom: 1px solid #ccc;">Unbiased coefficient estimates</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Partial</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">N/A</td>
+    <td>Unbiased coefficient estimates</td>
+    <td class="center">No</td>
+    <td class="center">Partial</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">Yes</td>
+    <td class="center">N/A</td>
   </tr>
   <tr>
-    <td style="padding: 6px; border-bottom: 1px solid #ccc;">High-dimensional (p &gt; n)</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
+    <td>High-dimensional (p &gt; n)</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
+    <td class="center">Yes</td>
   </tr>
   <tr>
-    <td style="padding: 6px; border-bottom: 1px solid #ccc;">Oracle consistency</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">Yes</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">No</td>
+    <td>Oracle consistency</td>
+    <td class="center">No</td>
+    <td class="center">Yes</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">Yes</td>
+    <td class="center">No</td>
   </tr>
   <tr>
-    <td style="padding: 6px; border-bottom: 1px solid #ccc;">Suggested minimum events</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">~40</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">~60</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">~40</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">~50</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">~60</td>
-    <td style="padding: 6px; text-align: center; border-bottom: 1px solid #ccc;">~20</td>
+    <td>Suggested minimum events</td>
+    <td class="center">~40</td>
+    <td class="center">~60</td>
+    <td class="center">~40</td>
+    <td class="center">~50</td>
+    <td class="center">~60</td>
+    <td class="center">~20</td>
   </tr>
 </tbody>
 </table>
@@ -226,8 +239,8 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
         },
 
         .clinicalScenariosHtml = function() {
-            paste0(
-'<div style="max-width: 780px; line-height: 1.6;">
+            paste0(private$.cssBlock(),
+'<div class="lg">
 
 <h3>Clinical Scenarios</h3>
 
@@ -265,37 +278,33 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
         },
 
         .assumptionsHtml = function() {
-            paste0(
-'<div style="max-width: 780px; line-height: 1.6;">
+            paste0(private$.cssBlock(),
+'<div class="lg">
 
 <h3>Key Assumptions (All Penalized Cox Methods)</h3>
 
-<table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+<table>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc; width: 28%; vertical-align: top;"><strong>Proportional hazards</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      The hazard ratio between groups must remain constant over time.
+    <td class="vtop"><strong>Proportional hazards</strong></td>
+    <td>The hazard ratio between groups must remain constant over time.
       Violation is common with immunotherapy data (delayed treatment effects) or
       when comparing different tumor subtypes.
       Check with Schoenfeld residuals in standard Cox regression first.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc; vertical-align: top;"><strong>Sufficient events</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      The events-per-variable (EPV) ratio should be at least 2 for LASSO
+    <td class="vtop"><strong>Sufficient events</strong></td>
+    <td>The events-per-variable (EPV) ratio should be at least 2 for LASSO
       (vs. 10&ndash;20 for standard Cox). With fewer events, results become unreliable
       regardless of method. The LASSO Cox suitability assessment reports EPV automatically.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc; vertical-align: top;"><strong>Non-informative censoring</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Patients lost to follow-up should not differ systematically from those
+    <td class="vtop"><strong>Non-informative censoring</strong></td>
+    <td>Patients lost to follow-up should not differ systematically from those
       who remain. If sicker patients drop out earlier, results will be biased.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc; vertical-align: top;"><strong>Linear predictor effects</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      All penalized Cox methods assume linear relationships between
+    <td class="vtop"><strong>Linear predictor effects</strong></td>
+    <td>All penalized Cox methods assume linear relationships between
       continuous predictors and log-hazard. Non-linear effects (e.g., J-shaped
       BMI-mortality curve) need to be pre-specified using categorization or
       spline terms.</td>
@@ -336,60 +345,52 @@ apparent and cross-validated performance in the model output.</p>
         },
 
         .glossaryHtml = function() {
-            paste0(
-'<div style="max-width: 780px; line-height: 1.6;">
+            paste0(private$.cssBlock(),
+'<div class="lg">
 
 <h3>Glossary of Key Terms</h3>
 
-<table style="width: 100%; border-collapse: collapse;">
+<table>
   <tr>
-    <th style="padding: 8px; text-align: left; border-bottom: 2px solid #333; width: 28%;">Term</th>
-    <th style="padding: 8px; text-align: left; border-bottom: 2px solid #333;">Plain Language Explanation</th>
+    <th class="vtop">Term</th>
+    <th>Plain Language Explanation</th>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>LASSO</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Least Absolute Shrinkage and Selection Operator. Simultaneously
+    <td><strong>LASSO</strong></td>
+    <td>Least Absolute Shrinkage and Selection Operator. Simultaneously
       selects important variables and shrinks less important ones to exactly zero
       (effectively removing them).</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Penalization / Regularization</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Adding a &ldquo;cost&rdquo; for including variables in the model. Prevents
+    <td><strong>Penalization / Regularization</strong></td>
+    <td>Adding a &ldquo;cost&rdquo; for including variables in the model. Prevents
       overfitting when you have many candidate predictors.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Lambda (&lambda;)</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Controls how aggressively variables are removed. Higher lambda = fewer variables
+    <td><strong>Lambda (&lambda;)</strong></td>
+    <td>Controls how aggressively variables are removed. Higher lambda = fewer variables
       kept. Chosen automatically by cross-validation.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Group / Sparse Group Penalty</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Instead of evaluating variables alone, evaluates them by a factor group ID or clustering logic, preserving biological/categorical relationships collectively.</td>
+    <td><strong>Group / Sparse Group Penalty</strong></td>
+    <td>Instead of evaluating variables alone, evaluates them by a factor group ID or clustering logic, preserving biological/categorical relationships collectively.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>C-index (Concordance Index)</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      The probability that a patient with higher predicted risk dies sooner than a randomly paired patient with lower predicted risk. In all these modules, it is calculating an "in-sample" internal C-index which may suffer optimism bias.</td>
+    <td><strong>C-index (Concordance Index)</strong></td>
+    <td>The probability that a patient with higher predicted risk dies sooner than a randomly paired patient with lower predicted risk. In all these modules, it is calculating an "in-sample" internal C-index which may suffer optimism bias.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Events-per-variable (EPV)</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Number of outcome events divided by the number of candidate predictors. Included in the built-in Data Suitability checks across the penalized Cox modules.</td>
+    <td><strong>Events-per-variable (EPV)</strong></td>
+    <td>Number of outcome events divided by the number of candidate predictors. Included in the built-in Data Suitability checks across the penalized Cox modules.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>Shrinkage bias</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      LASSO pushes coefficients toward zero, making hazard ratios artificially closer to 1.0. 
+    <td><strong>Shrinkage bias</strong></td>
+    <td>LASSO pushes coefficients toward zero, making hazard ratios artificially closer to 1.0.
       SCAD and MCP penalties avoid this specifically for large coefficients.</td>
   </tr>
   <tr>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;"><strong>PCA / PLS</strong></td>
-    <td style="padding: 8px; border-bottom: 1px solid #ccc;">
-      Instead of selecting variables, dimensionality reduction creates composite scores
+    <td><strong>PCA / PLS</strong></td>
+    <td>Instead of selecting variables, dimensionality reduction creates composite scores
       (components). Principal Components (PCA) explains the data\'s variance, while Partial Least Squares (PLS) components explain variance <i>directed by survival outcomes</i>.</td>
   </tr>
 </table>

@@ -9,14 +9,17 @@ lassocox(
   elapsedtime,
   outcome,
   outcomeLevel,
+  censorLevel,
   explanatory,
   lambda = "lambda.1se",
   nfolds = 10,
+  random_seed = 123456,
   standardize = TRUE,
   suitabilityCheck = TRUE,
   cv_plot = TRUE,
   coef_plot = TRUE,
   survival_plot = TRUE,
+  showSummary = FALSE,
   showExplanations = FALSE,
   showMethodologyNotes = FALSE,
   includeClinicalGuidance = FALSE,
@@ -30,21 +33,35 @@ lassocox(
 \item{elapsedtime}{The numeric variable representing follow-up time until
 the event or last observation.}
 
-\item{outcome}{The outcome variable. Typically indicates event status
-(e.g., death, recurrence).}
+\item{outcome}{Binary event indicator variable (event vs censored). Can be
+factor or numeric with exactly two observed values.}
 
-\item{outcomeLevel}{The level of \code{outcome} considered as the event.}
+\item{outcomeLevel}{Level of \code{outcome} considered as the event. For
+binary factor outcomes, if left empty the second observed level is used;
+for numeric binary outcomes, the larger observed value is used (or 1 for
+0/1 coding).}
+
+\item{censorLevel}{Level of \code{outcome} considered as censored (no
+event). Together with \code{outcomeLevel}, this defines a strict two-level
+encoding: rows whose outcome matches neither level are treated as missing
+and excluded.}
 
 \item{explanatory}{Variables to be considered for selection in the
-Lasso-Cox regression.}
+Lasso-Cox regression. Constant variables are removed automatically before
+fitting.}
 
 \item{lambda}{Method for selecting the optimal lambda parameter from
 cross-validation.}
 
-\item{nfolds}{Number of folds for cross-validation.}
+\item{nfolds}{Number of folds for cross-validation. Fold count is reduced
+automatically when sample size is limited.}
+
+\item{random_seed}{Random seed for reproducible cross-validation fold
+assignment.}
 
 \item{standardize}{Whether to standardize predictor variables before
-fitting.}
+fitting. If enabled, reported coefficients are on the standardized
+predictor scale.}
 
 \item{suitabilityCheck}{Run a comprehensive data suitability assessment
 before LASSO analysis. Checks sample size, events-per-variable ratio,
@@ -52,9 +69,14 @@ multicollinearity, and whether regularization is needed.}
 
 \item{cv_plot}{Whether to show the cross-validation plot.}
 
-\item{coef_plot}{Whether to show the coefficient path plot.}
+\item{coef_plot}{Whether to show a bar plot of selected-variable
+coefficients at the chosen lambda value.}
 
-\item{survival_plot}{Whether to show survival curves by risk groups.}
+\item{survival_plot}{Whether to show survival curves by risk groups. Uses
+\code{survminer} if available, with a base-R fallback otherwise.}
+
+\item{showSummary}{Display a natural-language summary paragraph of the main
+results, suitable for copying into reports or manuscripts.}
 
 \item{showExplanations}{Display detailed explanations of LASSO Cox
 regression methodology, including regularization concepts and
@@ -70,9 +92,9 @@ outcomes.}
 \item{showVariableImportance}{Display analysis of variable importance
 rankings and selection patterns across different lambda values.}
 
-\item{showModelComparison}{Compare LASSO Cox results with standard Cox
-regression to demonstrate the benefits of regularization and variable
-selection.}
+\item{showModelComparison}{Compare post-LASSO Cox refit (selected
+variables) with standard Cox using all encoded predictors. Intended as an
+exploratory comparison.}
 }
 \value{
 A results object containing:
@@ -86,6 +108,7 @@ A results object containing:
 \code{results$coef_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$survival_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$riskScore} \tab \tab \tab \tab \tab an output \cr
+\code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
 \code{results$lassoExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$methodologyNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalGuidance} \tab \tab \tab \tab \tab a html \cr
@@ -108,6 +131,7 @@ analysis.
 }
 \examples{
 \donttest{
-# example will be added
+lassocox(data = data, elapsedtime = "Time", outcome = "Status",
+    outcomeLevel = "1", explanatory = vars(age, stage, grade))
 }
 }

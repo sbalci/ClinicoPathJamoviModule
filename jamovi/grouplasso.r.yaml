@@ -9,9 +9,9 @@ items:
       visible: false
 
     - name: todo
-      title: Analysis Todo
+      title: ''
       type: Html
-      visible: false
+      visible: true
 
     - name: suitabilityReport
       title: Data Suitability Assessment
@@ -20,6 +20,8 @@ items:
       clearWith:
           - time
           - event
+          - outcomeLevel
+          - censorLevel
           - predictors
           - suitabilityCheck
 
@@ -31,6 +33,7 @@ items:
         - predictors
         - group_definition
         - group_structure
+        - factor_grouping
       columns:
         - name: group_id
           title: Group ID
@@ -62,6 +65,8 @@ items:
       clearWith:
         - time
         - event
+        - outcomeLevel
+        - censorLevel
         - predictors
         - penalty_type
         - cv_folds
@@ -97,7 +102,6 @@ items:
       type: Table
       visible: (show_path_summary)
       clearWith:
-        - lambda_sequence
         - n_lambda
         - penalty_type
       columns:
@@ -129,8 +133,7 @@ items:
       visible: (show_cv_results)
       clearWith:
         - cv_folds
-        - cv_measure
-        - lambda_sequence
+        - n_lambda
       columns:
         - name: criterion
           title: Criterion
@@ -199,6 +202,8 @@ items:
       clearWith:
         - time
         - event
+        - outcomeLevel
+        - censorLevel
         - predictors
         - penalty_type
       columns:
@@ -277,29 +282,32 @@ items:
       type: Image
       width: 600
       height: 500
+      renderFun: .renderPathPlot
       visible: (plot_regularization_path)
       requiresData: true
       clearWith:
         - predictors
         - penalty_type
-        - lambda_sequence
+        - n_lambda
+        - lambda_min_ratio
 
     - name: cvPlot
       title: Cross-Validation Curve
       type: Image
       width: 500
       height: 400
+      renderFun: .renderCVPlot
       visible: (plot_cv_curve)
       requiresData: true
       clearWith:
         - cv_folds
-        - cv_measure
 
     - name: importancePlot
       title: Group Importance
       type: Image
       width: 500
       height: 400
+      renderFun: .renderImportancePlot
       visible: (plot_group_importance)
       requiresData: true
       clearWith:
@@ -311,6 +319,7 @@ items:
       type: Image
       width: 500
       height: 400
+      renderFun: .renderStabilityPlot
       visible: (plot_stability)
       requiresData: true
       clearWith:
@@ -322,16 +331,17 @@ items:
       type: Image
       width: 600
       height: 400
+      renderFun: .renderGroupStructurePlot
       visible: (plot_group_structure)
       requiresData: true
       clearWith:
         - group_definition
         - group_structure
+        - factor_grouping
 
 
 refs:
     - ClinicoPathJamoviModule
-
     - survival
-    - glmnet
+    - grpreg
 ...

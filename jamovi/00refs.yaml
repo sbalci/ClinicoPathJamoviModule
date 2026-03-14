@@ -883,6 +883,14 @@ refs:
         publisher: '[R package version 4.1-8]. Retrieved from https://CRAN.R-project.org/package=glmnet'
         url: https://CRAN.R-project.org/package=glmnet
 
+    grpreg:
+        type: 'software'
+        author: Patrick Breheny
+        year: 2025
+        title: "grpreg: Regularization Paths for Regression Models with Grouped Covariates"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=grpreg'
+        url: https://CRAN.R-project.org/package=grpreg
+
     pwr:
         type: 'software'
         author: ""
@@ -2491,4 +2499,36 @@ refs:
         title: "ggVennDiagram: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggVennDiagram'
         url: https://CRAN.R-project.org/package=ggVennDiagram
+
+    logistf:
+        type: 'software'
+        author: "Heinze G, Ploner M, Jiricka L"
+        year: "2024"
+        title: "logistf: Firth's Bias-Reduced Logistic Regression"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=logistf'
+        url: https://CRAN.R-project.org/package=logistf
+
+    coxphf:
+        type: 'software'
+        author: "Heinze G, Ploner M"
+        year: "2024"
+        title: "coxphf: Cox Regression with Firth's Penalized Likelihood"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=coxphf'
+        url: https://CRAN.R-project.org/package=coxphf
+
+    doParallel:
+        type: 'software'
+        author:
+        year:
+        title: "doParallel: R package"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=doParallel'
+        url: https://CRAN.R-project.org/package=doParallel
+
+    foreach:
+        type: 'software'
+        author:
+        year:
+        title: "foreach: R package"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=foreach'
+        url: https://CRAN.R-project.org/package=foreach
 ...

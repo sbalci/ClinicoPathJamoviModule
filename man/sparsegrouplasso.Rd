@@ -8,7 +8,10 @@ sparsegrouplasso(
   data,
   time_var,
   event_var,
+  outcomeLevel,
+  censorLevel,
   pred_vars,
+  suitabilityCheck = TRUE,
   group_definition = "factor_based",
   custom_groups = "",
   pathway_info,
@@ -59,7 +62,19 @@ sparsegrouplasso(
 
 \item{event_var}{the event indicator variable (0/1 or FALSE/TRUE)}
 
+\item{outcomeLevel}{Level of \code{event_var} that represents the event of
+interest (coded as 1). Rows matching neither this level nor
+\code{censorLevel} are excluded as NA.}
+
+\item{censorLevel}{Level of \code{event_var} that represents censoring
+(coded as 0). Together with \code{outcomeLevel}, this defines a strict
+two-level encoding: rows whose event value matches neither level are
+treated as missing and excluded.}
+
 \item{pred_vars}{the predictor variables for the model}
+
+\item{suitabilityCheck}{assess if data is suitable for the selected
+regularized Cox model}
 
 \item{group_definition}{method for defining variable groups}
 
@@ -157,6 +172,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 \code{results$groupStructure} \tab \tab \tab \tab \tab a table \cr

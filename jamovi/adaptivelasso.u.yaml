@@ -35,13 +35,13 @@ children:
             name: strata
             maxItemCount: 1
             isTarget: true
-
   - type: LayoutBox
     margin: large
     children:
       - type: LevelSelector
         name: event_level
-
+      - type: LevelSelector
+        name: censor_level
   - type: CollapseBox
     label: Model Parameters
     collapsed: false
@@ -66,7 +66,6 @@ children:
             format: number
           - type: ComboBox
             name: cv_measure
-
   - type: CollapseBox
     label: Stability Selection
     collapsed: true
@@ -92,7 +91,6 @@ children:
             name: subsampling_ratio
             format: number
             enable: (stability_selection)
-
   - type: CollapseBox
     label: Risk Groups and Predictions
     collapsed: true
@@ -110,7 +108,6 @@ children:
             enable: (baseline_survival)
           - type: CheckBox
             name: baseline_survival
-
   - type: CollapseBox
     label: Tables
     collapsed: true
@@ -129,7 +126,6 @@ children:
             name: show_cv_results
           - type: CheckBox
             name: show_diagnostics
-
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -144,6 +140,7 @@ children:
             name: plot_cv_curve
           - type: CheckBox
             name: plot_stability
+            enable: (stability_selection)
           - type: CheckBox
             name: plot_survival_curves
           - type: CheckBox
@@ -151,7 +148,6 @@ children:
             enable: (baseline_survival)
           - type: CheckBox
             name: plot_diagnostics
-
   - type: CollapseBox
     label: Diagnostics
     collapsed: true
@@ -166,7 +162,6 @@ children:
             name: influence_diagnostics
           - type: CheckBox
             name: goodness_of_fit
-
   - type: CollapseBox
     label: Advanced Options
     collapsed: true
@@ -205,8 +200,6 @@ children:
             name: tie_method
           - type: CheckBox
             name: standardize
-          - type: CheckBox
-            name: intercept
       - type: LayoutBox
         margin: large
         children:

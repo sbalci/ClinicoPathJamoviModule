@@ -9,21 +9,24 @@ highdimcox(
   elapsedtime,
   outcome,
   predictors,
-  outcomeLevel = "1",
+  outcomeLevel,
+  censorLevel,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
   cv_method = "cv_1se",
   cv_folds = 10,
   stability_selection = FALSE,
-  bootstrap_iterations = 500,
+  subsampling_iterations = 500,
+  subsampling_ratio = 0.5,
   stability_threshold = 0.8,
-  show_regularization_path = TRUE,
-  show_cv_plot = TRUE,
+  show_regularization_path = FALSE,
+  show_cv_plot = FALSE,
   show_variable_importance = TRUE,
   show_coefficients_table = TRUE,
-  show_model_diagnostics = TRUE,
+  show_model_diagnostics = FALSE,
   showSummaries = FALSE,
-  showExplanations = FALSE
+  showExplanations = FALSE,
+  suitabilityCheck = TRUE
 )
 }
 \arguments{
@@ -35,7 +38,9 @@ highdimcox(
 
 \item{predictors}{High-dimensional predictor variables}
 
-\item{outcomeLevel}{Level of outcome variable indicating event}
+\item{outcomeLevel}{Level of outcome variable indicating event occurred}
+
+\item{censorLevel}{Level of outcome variable indicating censored (no event)}
 
 \item{regularization_method}{Regularization method for high-dimensional Cox
 regression}
@@ -49,8 +54,11 @@ regression}
 \item{stability_selection}{Perform stability selection for variable
 importance}
 
-\item{bootstrap_iterations}{Number of bootstrap iterations for stability
-selection}
+\item{subsampling_iterations}{Number of subsampling iterations for
+stability selection}
+
+\item{subsampling_ratio}{Proportion of observations to sample in each
+stability selection iteration}
 
 \item{stability_threshold}{Threshold for stability selection}
 
@@ -67,16 +75,20 @@ selection}
 \item{showSummaries}{Generate natural language summaries}
 
 \item{showExplanations}{Show methodology explanations}
+
+\item{suitabilityCheck}{Run a comprehensive data suitability assessment
+before analysis. Checks sample size, events-per-variable ratio,
+multicollinearity,  and whether regularization is needed.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$selectedVariables} \tab \tab \tab \tab \tab a table \cr
 \code{results$regularizationMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$stabilityResults} \tab \tab \tab \tab \tab a table \cr
-\code{results$dimensionalityReduction} \tab \tab \tab \tab \tab a table \cr
 \code{results$regularizationPath} \tab \tab \tab \tab \tab an image \cr
 \code{results$cvPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$variableImportance} \tab \tab \tab \tab \tab an image \cr
@@ -126,7 +138,7 @@ highdimcox(
     regularization_method = "elastic_net",
     alpha_value = 0.5,
     stability_selection = TRUE,
-    bootstrap_iterations = 500
+    subsampling_iterations = 500
 )
 }
 }

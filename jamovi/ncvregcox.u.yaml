@@ -22,6 +22,12 @@ children:
             name: event
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (event)
+          - type: LevelSelector
+            name: censorLevel
+            enable: (event)
       - type: TargetLayoutBox
         label: Covariates
         children:

@@ -20,9 +20,9 @@ plscoxClass <- R6::R6Class(
                 <b>Analysis Steps:</b>
                 <ul>
                 <li>1. Select your <b>Time Variable</b> (follow-up time)</li>
-                <li>2. Select your <b>Status Variable</b> (event indicator: 1=event, 0=censored)</li>
+                <li>2. Select your <b>Status Variable</b> and choose the <b>Event Level</b> and <b>Censored Level</b></li>
                 <li>3. Select your <b>High-dimensional Predictors</b> (genes, proteins, etc.)</li>
-                <li>4. Configure PLS parameters (number of components, algorithm)</li>
+                <li>4. Configure PLS parameters (number of components, scaling)</li>
                 <li>5. Choose cross-validation method for component selection</li>
                 <li>6. Select validation and visualization options</li>
                 </ul>
@@ -105,15 +105,23 @@ plscoxClass <- R6::R6Class(
             time_var <- data[[time]]
             status_var <- data[[status]]
 
-            # Handle status variable (ensure 0/1 coding)
-            if (is.factor(status_var)) {
-                status_levels <- levels(status_var)
-                if (length(status_levels) == 2) {
-                    status_var <- as.numeric(status_var) - 1
-                } else {
-                    self$results$modelSummary$setContent("<h3>Error: Status Variable</h3><p>Status variable must be binary (0/1 or factor with 2 levels)</p>")
-                    return()
-                }
+            # Handle status variable using two-level encoding
+            # Rows matching neither outcomeLevel nor censorLevel are excluded as NA
+            event_data <- status_var
+            event_chr <- if (is.factor(event_data)) as.character(event_data) else as.character(event_data)
+            event_level <- as.character(self$options$outcomeLevel)
+            censor_level <- as.character(self$options$censorLevel)
+
+            status_var <- rep(NA_real_, length(event_data))
+            status_var[event_chr == event_level] <- 1
+            status_var[event_chr == censor_level] <- 0
+
+            # Validate that the encoding produced usable data
+            if (all(is.na(status_var))) {
+                self$results$modelSummary$setContent(
+                    "<h3>Error: Status Variable</h3><p>No rows matched the selected Event Level or Censored Level. Please check that the levels match actual values in your data.</p>"
+                )
+                return()
             }
 
             # Create predictor matrix with proper factor handling
@@ -160,9 +168,26 @@ plscoxClass <- R6::R6Class(
 
             # Check minimum sample size
             n_events <- sum(status_var)
-            if (n_events < 10) {
-                self$results$modelSummary$setContent("<h3>Warning: Insufficient Events</h3><p>Less than 10 events observed. Results may be unreliable. Consider collecting more data.</p>")
+            if (n_events < 5) {
+                self$results$modelSummary$setContent("<h3>Error: Insufficient Events</h3><p>Fewer than 5 events observed. PLS Cox regression cannot produce meaningful results. Consider collecting more data.</p>")
                 return()
+            }
+
+            # Validate time values (must be positive for Surv())
+            if (any(time_var <= 0, na.rm = TRUE)) {
+                n_bad_time <- sum(time_var <= 0, na.rm = TRUE)
+                valid_time <- time_var > 0 & !is.na(time_var)
+                time_var <- time_var[valid_time]
+                status_var <- status_var[valid_time]
+                pred_matrix <- pred_matrix[valid_time, , drop = FALSE]
+                missing_note <- paste0(missing_note,
+                    "<p><i>Note: ", n_bad_time, " observations with non-positive survival times were excluded.</i></p>")
+                n_events <- sum(status_var)
+                if (length(time_var) < 5 || n_events < 5) {
+                    self$results$modelSummary$setContent(
+                        "<h3>Error: Insufficient Data</h3><p>Too few valid observations remain after excluding non-positive times.</p>")
+                    return()
+                }
             }
 
             # Variable scaling (plsRcox has its own scaleX parameter, but we
@@ -184,11 +209,14 @@ plscoxClass <- R6::R6Class(
             # else: scaling_method == "none", no scaling
 
             # Read all user options
-            pls_algorithm <- self$options$pls_algorithm
             component_selection <- self$options$component_selection
-            max_iterations_opt <- self$options$max_iterations
             tolerance_opt <- self$options$tolerance
             show_ci <- self$options$confidence_intervals
+            tie_method <- self$options$tie_method
+            sparse_pls <- self$options$sparse_pls
+            limQ2set_opt <- self$options$limQ2set
+            pvals_expli_opt <- self$options$pvals_expli
+            alpha_pvals_opt <- self$options$alpha_pvals_expli
 
             # Assess data suitability if requested
             if (self$options$suitabilityCheck) {
@@ -235,6 +263,7 @@ plscoxClass <- R6::R6Class(
 
                     pls_cv <- plsRcox::cv.plsRcox(
                         data = cv_data_list,
+                        method = tie_method,
                         nt = max_components,
                         nfold = cv_folds,
                         scaleX = use_plsRcox_scaling,
@@ -272,9 +301,17 @@ plscoxClass <- R6::R6Class(
                         )
                     }
 
+                } else if (cv_method == "none" && component_selection %in% c("cv_loglik", "cv_cindex")) {
+                    # CV-based selection requested but CV disabled — fall back to manual
+                    optimal_nt <- min(self$options$pls_components, max_components)
+                    missing_note <- paste0(missing_note,
+                        "<p><i>Note: CV-based component selection requires cross-validation to be enabled. ",
+                        "Using manual selection (", optimal_nt, " components) since CV is set to 'None'.</i></p>")
+
                 } else if (component_selection %in% c("bic", "aic")) {
                     # Fit models with 1..max_components and pick by AIC/BIC
                     ic_values <- numeric(max_components)
+                    c_index_values <- rep(NA_real_, max_components)
                     for (k in seq_len(max_components)) {
                         tryCatch({
                             tmp_model <- plsRcox::plsRcox(
@@ -283,6 +320,11 @@ plscoxClass <- R6::R6Class(
                                 event = status_var,
                                 nt = k,
                                 scaleX = use_plsRcox_scaling,
+                                tol_Xi = tolerance_opt,
+                                limQ2set = limQ2set_opt,
+                                sparse = sparse_pls,
+                                pvals.expli = pvals_expli_opt,
+                                alpha.pvals.expli = alpha_pvals_opt,
                                 verbose = FALSE
                             )
                             tmp_scores <- tmp_model$tt
@@ -292,7 +334,7 @@ plscoxClass <- R6::R6Class(
                                 "survival::Surv(time, status) ~",
                                 paste(colnames(tmp_scores), collapse = " + ")
                             ))
-                            tmp_cox <- survival::coxph(tmp_formula, data = tmp_cox_data)
+                            tmp_cox <- survival::coxph(tmp_formula, data = tmp_cox_data, method = tie_method)
                             if (component_selection == "aic") {
                                 ic_values[k] <- extractAIC(tmp_cox)[2]
                             } else {
@@ -300,6 +342,7 @@ plscoxClass <- R6::R6Class(
                                 df_val <- extractAIC(tmp_cox)[1]
                                 ic_values[k] <- aic_val + (df_val * (log(nrow(tmp_cox_data)) - 2))
                             }
+                            c_index_values[k] <- summary(tmp_cox)$concordance[1]
                         }, error = function(e) {
                             ic_values[k] <<- Inf
                         })
@@ -311,7 +354,7 @@ plscoxClass <- R6::R6Class(
                         n_components = seq_len(max_components),
                         cv_score = ic_values,
                         se_cv_score = NA,
-                        c_index = NA,
+                        c_index = c_index_values,
                         selected = ifelse(seq_len(max_components) == optimal_nt, "Yes", "No")
                     )
                 } else {
@@ -327,6 +370,20 @@ plscoxClass <- R6::R6Class(
                             values = as.list(cv_results[row_i, ])
                         )
                     }
+                } else {
+                    comp_sel_label <- switch(component_selection,
+                        manual = "Manual",
+                        aic = "AIC",
+                        bic = "BIC",
+                        cv_loglik = "CV Log-Likelihood",
+                        cv_cindex = "CV C-Index",
+                        component_selection
+                    )
+                    self$results$componentSelection$setNote(
+                        'selection',
+                        paste0('Component selection: ', comp_sel_label,
+                               '. Using ', optimal_nt, ' component(s).')
+                    )
                 }
 
                 # Fit final PLS Cox model with optimal components
@@ -337,13 +394,25 @@ plscoxClass <- R6::R6Class(
                     nt = optimal_nt,
                     scaleX = use_plsRcox_scaling,
                     tol_Xi = tolerance_opt,
+                    limQ2set = limQ2set_opt,
+                    sparse = sparse_pls,
+                    pvals.expli = pvals_expli_opt,
+                    alpha.pvals.expli = alpha_pvals_opt,
                     verbose = FALSE
                 )
 
-                # Extract PLS components
+                # Extract PLS components (sparse PLS may use different field names)
                 pls_scores <- pls_model$tt
                 if (is.null(pls_scores)) {
-                    self$results$modelSummary$setContent("<h3>Error</h3><p>PLS model did not produce component scores. Check your data and settings.</p>")
+                    pls_scores <- pls_model$variatesX
+                }
+                if (is.null(pls_scores)) {
+                    pls_scores <- pls_model$scores
+                }
+                if (is.null(pls_scores)) {
+                    self$results$modelSummary$setContent(
+                        "<h3>Error</h3><p>PLS model did not produce component scores. This may occur with sparse PLS or unusual data configurations. Try disabling Sparse PLS or adjusting the Q-squared limit.</p>"
+                    )
                     return()
                 }
                 colnames(pls_scores) <- paste0("PLS_", seq_len(ncol(pls_scores)))
@@ -358,15 +427,9 @@ plscoxClass <- R6::R6Class(
                 cox_formula <- as.formula(paste("survival::Surv(time, status) ~",
                                                paste(colnames(pls_scores), collapse = " + ")))
 
-                cox_model <- survival::coxph(cox_formula, data = cox_data)
+                cox_model <- survival::coxph(cox_formula, data = cox_data, method = tie_method)
 
                 # Model summary
-                algo_label <- switch(pls_algorithm,
-                    nipals = "NIPALS",
-                    kernel = "Kernel PLS",
-                    widekernelpls = "Wide Kernel PLS",
-                    pls_algorithm
-                )
                 comp_sel_label <- switch(component_selection,
                     cv_loglik = "Cross-Validated Log-Likelihood",
                     cv_cindex = "Cross-Validated C-Index",
@@ -385,10 +448,14 @@ plscoxClass <- R6::R6Class(
                 <li>Number of events: {n_events}</li>
                 <li>Number of predictors: {ncol(pred_matrix)}</li>
                 <li>PLS components used: {optimal_nt}</li>
-                <li>PLS algorithm: {algo_label}</li>
+                <li>PLS algorithm: NIPALS (plsRcox default){if (sparse_pls) ' [Sparse mode]' else ''}</li>
                 <li>Component selection: {comp_sel_label}</li>
                 <li>Scaling method: {scaling_method}</li>
-                <li>Cross-validation: {cv_method} ({cv_folds} folds)</li>
+                <li>Cross-validation: {if (cv_method == 'none') 'None' else paste0(cv_method, ' (', cv_folds, ' folds)')}</li>
+                <li>Tie handling: {tie_method}</li>
+                <li>Convergence tolerance: {tolerance_opt}</li>
+                <li>Q-squared limit: {limQ2set_opt}</li>
+                {if (pvals_expli_opt) paste0('<li>P-value variable selection: alpha = ', alpha_pvals_opt, '</li>') else ''}
                 </ul>
 
                 <p><b>Model Performance:</b></p>
@@ -427,13 +494,22 @@ plscoxClass <- R6::R6Class(
                     loadings_matrix <- pls_model$wwetoile
 
                     if (!is.null(loadings_matrix) && nrow(loadings_matrix) > 0) {
-                        # Calculate variable importance scores
-                        importance_scores <- apply(abs(loadings_matrix), 1, function(x) sqrt(sum(x^2)))
+                        # Cox-coefficient-weighted importance: accounts for which
+                        # components actually matter for survival prediction
+                        cox_coefs_abs <- abs(coef(cox_model))
+                        n_comp_use <- min(length(cox_coefs_abs), ncol(loadings_matrix))
+                        importance_scores <- as.numeric(
+                            abs(loadings_matrix[, seq_len(n_comp_use), drop = FALSE]) %*%
+                            cox_coefs_abs[seq_len(n_comp_use)]
+                        )
 
                         # Sort by importance
                         sorted_idx <- order(-importance_scores)
 
-                        for (vi in sorted_idx) {
+                        # Limit to top 100 variables for performance with high-dimensional data
+                        top_n <- min(100, length(sorted_idx))
+                        for (idx_i in seq_len(top_n)) {
+                            vi <- sorted_idx[idx_i]
                             row_vals <- list(
                                 variable = rownames(loadings_matrix)[vi],
                                 component_1 = if (ncol(loadings_matrix) >= 1) loadings_matrix[vi, 1] else NA,
@@ -442,6 +518,13 @@ plscoxClass <- R6::R6Class(
                                 importance_score = importance_scores[vi]
                             )
                             self$results$variableLoadings$addRow(rowKey = vi, values = row_vals)
+                        }
+                        if (length(sorted_idx) > 100) {
+                            self$results$variableLoadings$setNote(
+                                'truncated',
+                                paste0('Showing top 100 of ', length(sorted_idx),
+                                       ' variables, ranked by Cox-weighted importance.')
+                            )
                         }
                     }
                 }
@@ -479,14 +562,19 @@ plscoxClass <- R6::R6Class(
                 risk_groups <- self$options$risk_groups
                 linear_pred <- predict(cox_model, type = "lp")
                 risk_quantiles <- quantile(linear_pred, probs = seq(0, 1, length.out = risk_groups + 1))
-                # Ensure unique breaks
-                if (length(unique(risk_quantiles)) < length(risk_quantiles)) {
-                    risk_quantiles <- unique(risk_quantiles)
-                    risk_groups <- length(risk_quantiles) - 1
+                # Ensure unique breaks — collapse gracefully when too few unique values
+                risk_quantiles <- unique(risk_quantiles)
+                risk_groups_actual <- length(risk_quantiles) - 1
+                if (risk_groups_actual < 2) {
+                    # Too few unique predicted values for meaningful stratification
+                    risk_categories <- factor(rep("Risk Group 1", length(linear_pred)))
+                    risk_groups <- 1
+                } else {
+                    risk_groups <- risk_groups_actual
+                    risk_categories <- cut(linear_pred, breaks = risk_quantiles,
+                                         labels = paste("Risk Group", seq_len(risk_groups)),
+                                         include.lowest = TRUE)
                 }
-                risk_categories <- cut(linear_pred, breaks = risk_quantiles,
-                                     labels = paste("Risk Group", seq_len(risk_groups)),
-                                     include.lowest = TRUE)
 
                 # Risk group analysis
                 risk_data <- data.frame(
@@ -498,6 +586,11 @@ plscoxClass <- R6::R6Class(
                 # Survival analysis by risk group
                 risk_fit <- survival::survfit(survival::Surv(time, status) ~ risk_group, data = risk_data)
                 fit_summary <- summary(risk_fit)$table
+                # Ensure fit_summary is always a matrix (single-stratum returns a named vector)
+                if (is.null(dim(fit_summary))) {
+                    fit_summary <- matrix(fit_summary, nrow = 1,
+                                         dimnames = list(NULL, names(fit_summary)))
+                }
 
                 for (gi in seq_len(risk_groups)) {
                     rg_name <- paste("Risk Group", gi)
@@ -506,8 +599,18 @@ plscoxClass <- R6::R6Class(
                     n_ev <- sum(rg_subset$status)
 
                     # Median survival from survfit table
-                    med_surv <- if (nrow(fit_summary) >= gi) fit_summary[gi, "median"] else NA
-                    se_med <- if (nrow(fit_summary) >= gi) fit_summary[gi, "se(median)"] else NA
+                    med_surv <- tryCatch(
+                        if (nrow(fit_summary) >= gi) fit_summary[gi, "median"] else NA,
+                        error = function(e) NA
+                    )
+                    # survfit summary doesn't have se(median); compute from CI width
+                    se_med <- tryCatch({
+                        if (nrow(fit_summary) >= gi) {
+                            lcl <- fit_summary[gi, "0.95LCL"]
+                            ucl <- fit_summary[gi, "0.95UCL"]
+                            if (!is.na(lcl) && !is.na(ucl)) (ucl - lcl) / (2 * 1.96) else NA
+                        } else NA
+                    }, error = function(e) NA)
 
                     hr_val <- NA
                     hr_p <- NA
@@ -520,7 +623,8 @@ plscoxClass <- R6::R6Class(
                             if (nrow(subset_data) > 0 && length(unique(subset_data$risk_group)) == 2) {
                                 subset_cox <- survival::coxph(
                                     survival::Surv(time, status) ~ risk_group,
-                                    data = subset_data
+                                    data = subset_data,
+                                    method = tie_method
                                 )
                                 hr_val <- exp(coef(subset_cox))
                                 hr_p <- summary(subset_cox)$coefficients[, "Pr(>|z|)"]
@@ -542,20 +646,25 @@ plscoxClass <- R6::R6Class(
                     )
                 }
 
-                # Store plot data as serializable data frames (avoid protobuf issues)
-                private$plsResults <- list(
+                # Store plot data via image$setState() for protobuf-safe serialization
+                plot_state <- list(
                     pls_scores = as.data.frame(pls_scores),
                     loadings_matrix = if (!is.null(pls_model$wwetoile)) as.data.frame(pls_model$wwetoile) else NULL,
-                    inf_crit = pls_model$InfCrit,
-                    time_var = time_var,
-                    status_var = status_var,
-                    risk_categories = risk_categories,
-                    optimal_nt = optimal_nt,
-                    cv_results = cv_results,
-                    cox_concordance = summary(cox_model)$concordance[1],
-                    cox_concordance_se = summary(cox_model)$concordance[2],
-                    linear_pred = linear_pred
+                    inf_crit = tryCatch(as.data.frame(pls_model$InfCrit), error = function(e) NULL),
+                    time_var = as.numeric(time_var),
+                    status_var = as.numeric(status_var),
+                    risk_categories = as.character(risk_categories),
+                    optimal_nt = as.integer(optimal_nt),
+                    cv_results = if (!is.null(cv_results)) as.data.frame(cv_results) else NULL,
+                    feature_importance = self$options$feature_importance,
+                    confidence_intervals = self$options$confidence_intervals
                 )
+
+                self$results$componentPlot$setState(plot_state)
+                self$results$loadingsPlot$setState(plot_state)
+                self$results$scoresPlot$setState(plot_state)
+                self$results$validationPlot$setState(plot_state)
+                self$results$survivalPlot$setState(plot_state)
 
                 # Clinical guidance
                 guidance_text <- "
@@ -622,22 +731,26 @@ plscoxClass <- R6::R6Class(
 
                 self$results$technicalNotes$setContent(technical_text)
 
-                # Bootstrap validation
+                # Bootstrap validation (Harrell's optimism-corrected)
                 if (self$options$bootstrap_validation) {
                     n_bootstrap <- self$options$n_bootstrap
 
-                    bootstrap_c_indices <- numeric(n_bootstrap)
+                    # Step 1: Apparent performance on original data
+                    apparent_c <- summary(cox_model)$concordance[1]
+
+                    optimism_values <- numeric(n_bootstrap)
                     valid_bootstraps <- 0
 
                     for (i in seq_len(n_bootstrap)) {
                         tryCatch({
-                            # Resample
+                            # Resample with replacement
                             boot_idx <- sample(nrow(pred_matrix), replace = TRUE)
                             boot_X <- pred_matrix[boot_idx, , drop = FALSE]
                             boot_time <- time_var[boot_idx]
                             boot_status <- status_var[boot_idx]
 
                             if (sum(boot_status) > 5) {
+                                # Step 2a: Fit PLS-Cox on bootstrap sample
                                 boot_pls <- plsRcox::plsRcox(
                                     Xplan = boot_X,
                                     time = boot_time,
@@ -645,24 +758,60 @@ plscoxClass <- R6::R6Class(
                                     nt = optimal_nt,
                                     scaleX = use_plsRcox_scaling,
                                     tol_Xi = tolerance_opt,
+                                    limQ2set = limQ2set_opt,
+                                    sparse = sparse_pls,
+                                    pvals.expli = pvals_expli_opt,
+                                    alpha.pvals.expli = alpha_pvals_opt,
                                     verbose = FALSE
                                 )
 
                                 boot_scores <- boot_pls$tt
-                                if (!is.null(boot_scores)) {
+                                boot_weights <- boot_pls$wwetoile
+                                if (!is.null(boot_scores) && !is.null(boot_weights)) {
+                                    # Fit Cox on bootstrap PLS scores
                                     boot_cox_data <- data.frame(
                                         time = boot_time,
                                         status = boot_status,
                                         boot_scores
                                     )
                                     colnames(boot_cox_data)[3:ncol(boot_cox_data)] <- paste0("Comp", seq_len(ncol(boot_scores)))
-
                                     boot_formula <- as.formula(paste("survival::Surv(time, status) ~",
-                                                                   paste(colnames(boot_cox_data)[3:ncol(boot_cox_data)], collapse = " + ")))
+                                        paste(colnames(boot_cox_data)[3:ncol(boot_cox_data)], collapse = " + ")))
+                                    boot_cox <- survival::coxph(boot_formula, data = boot_cox_data, method = tie_method)
 
-                                    boot_c <- survival::concordance(boot_formula, data = boot_cox_data, reverse = TRUE)$concordance
+                                    # Apparent C-index on bootstrap sample
+                                    boot_apparent_c <- survival::concordance(
+                                        boot_formula, data = boot_cox_data, reverse = TRUE
+                                    )$concordance
+
+                                    # Step 2b: Apply bootstrap model to ORIGINAL data
+                                    # Project original data through bootstrap PLS weights
+                                    orig_X_proj <- pred_matrix
+                                    if (use_plsRcox_scaling && !is.null(boot_pls$MX) && !is.null(boot_pls$sX)) {
+                                        # Center and scale using bootstrap parameters
+                                        boot_sX <- boot_pls$sX
+                                        boot_sX[boot_sX == 0] <- 1  # avoid division by zero
+                                        orig_X_proj <- scale(orig_X_proj, center = boot_pls$MX, scale = boot_sX)
+                                    }
+                                    orig_scores_boot <- orig_X_proj %*% boot_weights
+
+                                    # Compute LP using bootstrap Cox coefficients
+                                    boot_coefs <- coef(boot_cox)
+                                    n_coefs <- min(length(boot_coefs), ncol(orig_scores_boot))
+                                    orig_lp <- as.numeric(
+                                        orig_scores_boot[, seq_len(n_coefs), drop = FALSE] %*%
+                                        boot_coefs[seq_len(n_coefs)]
+                                    )
+
+                                    # C-index on original data using bootstrap model
+                                    boot_test_c <- survival::concordance(
+                                        survival::Surv(time_var, status_var) ~ orig_lp,
+                                        reverse = TRUE
+                                    )$concordance
+
+                                    # Step 2c: Optimism for this iteration
                                     valid_bootstraps <- valid_bootstraps + 1
-                                    bootstrap_c_indices[valid_bootstraps] <- boot_c
+                                    optimism_values[valid_bootstraps] <- boot_apparent_c - boot_test_c
                                 }
                             }
                         }, error = function(e) {
@@ -671,21 +820,23 @@ plscoxClass <- R6::R6Class(
                     }
 
                     if (valid_bootstraps > 0) {
-                        bootstrap_c_indices <- bootstrap_c_indices[seq_len(valid_bootstraps)]
-                        mean_boot_c <- mean(bootstrap_c_indices)
-                        sd_boot_c <- sd(bootstrap_c_indices)
-                        ci_lower <- quantile(bootstrap_c_indices, 0.025)
-                        ci_upper <- quantile(bootstrap_c_indices, 0.975)
+                        optimism_values <- optimism_values[seq_len(valid_bootstraps)]
+                        mean_optimism <- mean(optimism_values)
+                        corrected_c <- apparent_c - mean_optimism
+                        se_optimism <- sd(optimism_values)
+                        ci_lower <- corrected_c - 1.96 * se_optimism
+                        ci_upper <- corrected_c + 1.96 * se_optimism
 
                         bootstrap_text <- glue::glue("
-                        <h3>Bootstrap Validation Results</h3>
+                        <h3>Bootstrap Validation Results (Harrell's Optimism-Corrected)</h3>
                         <p><b>Bootstrap validation with {valid_bootstraps} successful replications</b> (Target: {n_bootstrap})</p>
                         <ul>
-                        <li><b>Mean Bootstrap C-Index:</b> {round(mean_boot_c, 3)}</li>
-                        <li><b>Standard Error:</b> {round(sd_boot_c, 3)}</li>
-                        <li><b>95% Confidence Interval:</b> {round(ci_lower, 3)} - {round(ci_upper, 3)}</li>
+                        <li><b>Apparent C-Index:</b> {round(apparent_c, 3)}</li>
+                        <li><b>Mean Optimism:</b> {round(mean_optimism, 3)}</li>
+                        <li><b>Optimism-Corrected C-Index:</b> {round(corrected_c, 3)}</li>
+                        <li><b>95% CI:</b> {round(ci_lower, 3)} - {round(ci_upper, 3)}</li>
                         </ul>
-                        <p><i>Note:</i> Confidence intervals reflect the variability of the model performance on resampled data (internal validity).</p>
+                        <p><i>Interpretation:</i> The optimism-corrected C-index accounts for overfitting by comparing bootstrap model performance on bootstrap vs. original data. Values closer to the apparent C-index indicate less overfitting; large optimism suggests the model may not generalize well.</p>
                         ")
                     } else {
                         bootstrap_text <- "<h3>Bootstrap Validation Failed</h3><p>Could not generate valid bootstrap models (possibly due to small sample size or convergence issues).</p>"
@@ -719,6 +870,10 @@ plscoxClass <- R6::R6Class(
                                 nt = optimal_nt,
                                 scaleX = use_plsRcox_scaling,
                                 tol_Xi = tolerance_opt,
+                                limQ2set = limQ2set_opt,
+                                sparse = sparse_pls,
+                                pvals.expli = pvals_expli_opt,
+                                alpha.pvals.expli = alpha_pvals_opt,
                                 verbose = FALSE
                             )
 
@@ -734,7 +889,7 @@ plscoxClass <- R6::R6Class(
                                 perm_formula <- as.formula(paste("survival::Surv(time, status) ~",
                                                                paste(colnames(perm_cox_data)[3:ncol(perm_cox_data)], collapse = " + ")))
 
-                                perm_c <- survival::concordance(perm_formula, data = perm_cox_data)$concordance
+                                perm_c <- survival::concordance(perm_formula, data = perm_cox_data, reverse = TRUE)$concordance
                                 valid_perms <- valid_perms + 1
                                 perm_c_indices[valid_perms] <- perm_c
                             }
@@ -774,11 +929,12 @@ plscoxClass <- R6::R6Class(
 
         # Plotting functions
         .plotComponents = function(image, ...) {
-            if (is.null(private$plsResults)) return(FALSE)
+            plotData <- image$state
+            if (is.null(plotData)) return(FALSE)
 
             # Use InfCrit from plsRcox model for component information
-            inf_crit <- private$plsResults$inf_crit
-            optimal_nt <- private$plsResults$optimal_nt
+            inf_crit <- plotData$inf_crit
+            optimal_nt <- plotData$optimal_nt
 
             if (is.null(inf_crit)) {
                 # Fallback: plot component index vs Cox concordance contribution
@@ -830,10 +986,11 @@ plscoxClass <- R6::R6Class(
         },
 
         .plotLoadings = function(image, ...) {
-            if (is.null(private$plsResults)) return(FALSE)
-            if (!self$options$feature_importance) return(FALSE)
+            plotData <- image$state
+            if (is.null(plotData)) return(FALSE)
+            if (!isTRUE(plotData$feature_importance)) return(FALSE)
 
-            loadings_df <- private$plsResults$loadings_matrix
+            loadings_df <- plotData$loadings_matrix
             if (is.null(loadings_df)) return(FALSE)
 
             loadings_matrix <- as.matrix(loadings_df)
@@ -906,11 +1063,12 @@ plscoxClass <- R6::R6Class(
         },
 
         .plotScores = function(image, ...) {
-            if (is.null(private$plsResults)) return(FALSE)
+            plotData <- image$state
+            if (is.null(plotData)) return(FALSE)
 
-            pls_scores <- as.matrix(private$plsResults$pls_scores)
-            time_var <- private$plsResults$time_var
-            status_var <- private$plsResults$status_var
+            pls_scores <- as.matrix(plotData$pls_scores)
+            time_var <- plotData$time_var
+            status_var <- plotData$status_var
 
             # Plot first component scores vs survival
             if (ncol(pls_scores) >= 1) {
@@ -942,10 +1100,11 @@ plscoxClass <- R6::R6Class(
         },
 
         .plotValidation = function(image, ...) {
-            if (is.null(private$plsResults)) return(FALSE)
-            if (is.null(private$plsResults$cv_results)) return(FALSE)
+            plotData <- image$state
+            if (is.null(plotData)) return(FALSE)
+            if (is.null(plotData$cv_results)) return(FALSE)
 
-            cv_results <- private$plsResults$cv_results
+            cv_results <- plotData$cv_results
 
             p <- ggplot2::ggplot(cv_results, ggplot2::aes(x = n_components, y = cv_score)) +
                 ggplot2::geom_line(color = "blue", linewidth = 1) +
@@ -982,11 +1141,12 @@ plscoxClass <- R6::R6Class(
         },
 
         .plotSurvival = function(image, ...) {
-            if (is.null(private$plsResults)) return(FALSE)
+            plotData <- image$state
+            if (is.null(plotData)) return(FALSE)
 
-            time_var <- private$plsResults$time_var
-            status_var <- private$plsResults$status_var
-            risk_categories <- private$plsResults$risk_categories
+            time_var <- plotData$time_var
+            status_var <- plotData$status_var
+            risk_categories <- plotData$risk_categories
 
             # Create survival data
             risk_data <- data.frame(
@@ -1008,7 +1168,7 @@ plscoxClass <- R6::R6Class(
                     data = risk_data,
                     risk.table = FALSE,
                     pval = TRUE,
-                    conf.int = self$options$confidence_intervals,
+                    conf.int = isTRUE(plotData$confidence_intervals),
                     title = "Risk-Stratified Survival Curves",
                     subtitle = "Survival curves by PLS-based risk groups",
                     xlab = "Time",
@@ -1054,9 +1214,9 @@ plscoxClass <- R6::R6Class(
                 )
             } else {
                 checks$epv <- list(
-                    color = "yellow", label = "Events-Per-Variable (Overall)",
+                    color = "red", label = "Events-Per-Variable (Overall)",
                     value = sprintf("%.3f (n_events=%d, p=%d)", epv, n_events, p),
-                    detail = "Ultra-low EPV. Standard Cox would fail. PLS is an excellent approach here as it massively reduces dimensionality."
+                    detail = "Extremely low EPV. Even with PLS dimensionality reduction, results will be highly unstable. Consider collecting more data or reducing predictors."
                 )
             }
 
@@ -1219,8 +1379,6 @@ plscoxClass <- R6::R6Class(
             html <- paste0(html, "</tbody></table>")
 
             self$results$suitabilityReport$setContent(html)
-        },
-
-        plsResults = NULL
+        }
     )
 )

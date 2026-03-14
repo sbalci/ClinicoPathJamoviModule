@@ -71,6 +71,17 @@ options:
             Level of the event variable to be treated as the event of interest.
             For binary factors this can be left empty and the second level is used.
 
+    - name: censor_level
+      title: Censored Level
+      type: Level
+      variable: (event)
+      description:
+          R: >
+            Level of the event variable to be treated as censored (no event).
+            When specified together with Event Level, rows matching neither
+            level are excluded from analysis. For binary factors this can be
+            left empty and the first level is used.
+
     - name: predictors
       title: Predictor Variables
       type: Variables
@@ -461,15 +472,6 @@ options:
           R: >
             Standardize predictors before fitting. Recommended for optimal
             penalty performance with mixed-scale variables.
-
-    - name: intercept
-      title: Include Intercept
-      type: Bool
-      default: false
-      description:
-          R: >
-            Retained for compatibility. Cox proportional hazards models
-            do not estimate an intercept term, so this option has no effect.
 
     - name: parallel_computing
       title: Parallel Computing

@@ -120,6 +120,45 @@ Rscript _updateModules.R
 ---
 <!-- prepare an agent team to work on functions: lassointro, lassocox, adaptivelasso, highdimcox, ncvregcox, plscox, grouplasso, sparsegrouplasso, pcacox: -->
 
+
+
+/check-function-full grouplasso
+/review-function grouplasso
+/fix-function grouplasso
+/generate-test-data grouplasso
+/update-refs grouplasso
+/document-function grouplasso
+
+/check-function sparsegrouplasso
+/check-function-base sparsegrouplasso
+/check-function-full sparsegrouplasso
+/review-function sparsegrouplasso
+/fix-function sparsegrouplasso
+/generate-test-data sparsegrouplasso
+/update-refs sparsegrouplasso
+/document-function sparsegrouplasso
+
+/check-function pcacox
+/check-function-base pcacox
+/check-function-full pcacox
+/review-function pcacox
+/fix-function pcacox
+/generate-test-data pcacox
+/update-refs pcacox
+/document-function pcacox
+
+add firthregression to lassointro
+
+/check-function firthregression
+/check-function-base firthregression
+/check-function-full firthregression
+/review-function firthregression
+/fix-function firthregression
+/generate-test-data firthregression
+/update-refs firthregression
+/document-function firthregression
+
+
 prepare an agent team to work on function: lassocox:
 - all agents are experts in R-package and jamovi development and biostatistics working with pathologists and clinicians.
 - lead agent will orchestrate the team, observe agent process, delegate next work, update the sonograph log file. Will make sure no functionality is removed and favor functionality. finally, it will check if jmvtools::prepare();devtools::document() is error free. 

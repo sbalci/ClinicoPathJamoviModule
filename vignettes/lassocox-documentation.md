@@ -13,6 +13,24 @@
 
 ## 1a. Changelog
 
+- Date: 2026-03-09 (update 3)
+- Summary: Added missing option/result, corrected suitability check count, fixed table schemas.
+- Changes:
+  - Options: Added missing `showSummary` option to Sections 2, 3.
+  - Results: Added `summaryText` Html output to Section 5. Corrected `coefficients` table schema to include `ci_lower`, `ci_upper`, `p_value` columns. Fixed `variableImportance` column titles: "Path Inclusion Proportion", "Importance Rank".
+  - Backend: Corrected suitability assessment from 6 to 7 checks (added Proportional Hazards check). Added `.populateSummary()` method to Section 4.5.
+  - Datasets: Added `lassocox_genomic` and `lassocox_multicollinear` to Section 9.
+
+- Date: 2026-03-08 (update 2)
+- Summary: Accuracy fixes and missing option after full code audit.
+- Changes:
+  - Options: Added missing `random_seed` option to Sections 2, 3, and 4.
+  - Backend: Updated `.populateModelSummary()` row count from 7 to up to 9 (Event Level Used, Rows Excluded).
+  - Results schema: Corrected `modelSummary.statistic` column title from `(empty)` to `Statistic`.
+  - Appendix: Fixed multicollinearity thresholds (second yellow tier is 0.7-0.9, third is 0.9-0.99).
+  - UI: Corrected explanatory output checkbox location (inside "Explanatory Output" CollapseBox, not "Bottom LayoutBox").
+  - Clarified `standardize` downstream: `.cleanData` applies `scale()` then `.fitModel` passes `standardize=FALSE` to glmnet.
+
 - Date: 2026-03-08
 - Summary: Created canonical `lassocox-documentation.md` from existing `lassocox_documentation.md` baseline with full skill-spec sections.
 - Changes:
@@ -41,12 +59,14 @@
 | `cv_plot` / CheckBox | Cross-validation Plot | `cv_plot` (Bool) | default: `true` | Inside "Plots" CollapseBox (collapsed) |
 | `coef_plot` / CheckBox | Coefficient Plot | `coef_plot` (Bool) | default: `true` | Inside "Plots" CollapseBox (collapsed) |
 | `survival_plot` / CheckBox | Risk Group Survival Plot | `survival_plot` (Bool) | default: `true` | Inside "Plots" CollapseBox (collapsed) |
+| `random_seed` / TextBox | Random Seed | `random_seed` (Integer) | default: `123456`; min: `1`; max: `999999` | Inside bottom LayoutBox, always visible |
 | `riskScore` / Output | Add Risk Score to Data | `riskScore` (Output) | -- | Inside "Output Options" CollapseBox (collapsed) |
-| `showExplanations` / CheckBox | Show Method Explanations | `showExplanations` (Bool) | default: `false` | Bottom LayoutBox, always visible |
-| `showMethodologyNotes` / CheckBox | Detailed Methodology Notes | `showMethodologyNotes` (Bool) | default: `false` | Bottom LayoutBox, always visible |
-| `includeClinicalGuidance` / CheckBox | Clinical Interpretation Guidance | `includeClinicalGuidance` (Bool) | default: `false` | Bottom LayoutBox, always visible |
-| `showVariableImportance` / CheckBox | Variable Importance Analysis | `showVariableImportance` (Bool) | default: `false` | Bottom LayoutBox, always visible |
-| `showModelComparison` / CheckBox | Model Comparison Analysis | `showModelComparison` (Bool) | default: `false` | Bottom LayoutBox, always visible |
+| `showExplanations` / CheckBox | Show Method Explanations | `showExplanations` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
+| `showMethodologyNotes` / CheckBox | Detailed Methodology Notes | `showMethodologyNotes` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
+| `includeClinicalGuidance` / CheckBox | Clinical Interpretation Guidance | `includeClinicalGuidance` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
+| `showVariableImportance` / CheckBox | Variable Importance Analysis | `showVariableImportance` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
+| `showSummary` / CheckBox | Show Results Summary | `showSummary` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
+| `showModelComparison` / CheckBox | Model Comparison Analysis | `showModelComparison` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
 
 ---
 
@@ -61,12 +81,14 @@
 | `explanatory` | Variables | -- | Candidate predictors (>=2 required) | `.cleanData`: checked for constants, create design matrix via `model.matrix()`; column count drives suitability checks |
 | `lambda` | List | `lambda.1se` | Lambda selection method (`lambda.min` or `lambda.1se`) | `.fitModel`: `switch(self$options$lambda, ...)` selects optimal lambda from `cv.glmnet` |
 | `nfolds` | Integer | `10` (min: 3) | Number of CV folds | `.fitModel`: capped at `n/3`; passed to `cv.glmnet(nfolds=...)` |
-| `standardize` | Bool | `true` | Standardize predictors before fitting | `.cleanData`: if true, applies `scale()` and stores scaling info; `.fitModel` passes `standardize=FALSE` to glmnet (already done) |
+| `random_seed` | Integer | `123456` (min: 1, max: 999999) | Random seed for reproducible CV fold assignment | `.fitModel`: passed to `set.seed()` and `.makeStratifiedFoldId()` for deterministic fold creation |
+| `standardize` | Bool | `true` | Standardize predictors before fitting | `.cleanData`: if true, applies `scale()` to design matrix and stores center/scale info; `.fitModel` then passes `standardize=FALSE` to glmnet because standardization was already applied |
 | `suitabilityCheck` | Bool | `true` | Run data suitability assessment | `.run`: gates call to `.assessSuitability()` |
 | `cv_plot` | Bool | `true` | Show cross-validation plot | `.savePlotData`: gates `setState` on `cv_plot` image; `.cvPlot` render function checks this flag |
 | `coef_plot` | Bool | `true` | Show coefficient bar plot | `.savePlotData`: gates `setState` on `coef_plot` image; `.coefPlot` render function checks this flag |
 | `survival_plot` | Bool | `true` | Show risk-group survival curves | `.savePlotData`: gates `setState` on `survival_plot` image; `.survivalPlot` render function checks this flag |
 | `riskScore` | Output | -- | Save calculated risk scores to dataset | `.savePlotData`: `self$results$riskScore$setValues(full_risk_scores)` |
+| `showSummary` | Bool | `false` | Display natural-language summary of results | `.savePlotData`: gates `.populateSummary(results)` |
 | `showExplanations` | Bool | `false` | Display LASSO methodology explanation | `.initializeExplanations`: gates `.populateLassoExplanation()`; `.savePlotData`: gates CV/reg-path/risk-score explanations |
 | `showMethodologyNotes` | Bool | `false` | Display technical methodology notes | `.initializeExplanations`: gates `.populateMethodologyNotes()` |
 | `includeClinicalGuidance` | Bool | `false` | Display clinical interpretation guidance | `.initializeExplanations`: gates `.populateClinicalGuidance()` |
@@ -113,7 +135,8 @@ Returns: `list(time, status, X, n, n_events, n_censored, variable_names, origina
 
 | Option accessed | Logic |
 |---|---|
-| `self$options$nfolds` | Capped to `max(3, min(nfolds, n/3))`; passed to `cv.glmnet()` |
+| `self$options$nfolds` | Capped to `max(3, min(nfolds, n-1))`; passed to `cv.glmnet()` |
+| `self$options$random_seed` | Parsed to integer (fallback 123456); passed to `set.seed()` and `.makeStratifiedFoldId()` |
 | `self$options$lambda` | `switch()` to pick `lambda.min` or `lambda.1se` from CV result |
 
 Key steps:
@@ -130,7 +153,7 @@ Returns: `list(cv_fit, final_model, coef_matrix, selected_vars, lambda_optimal, 
 
 | Method | Result object | What it populates |
 |---|---|---|
-| `.populateModelSummary(results)` | `self$results$modelSummary` | 7 rows: Total Variables, Selected Variables, Selection Proportion, Optimal Lambda, Sample Size, Events, Censoring Rate |
+| `.populateModelSummary(results)` | `self$results$modelSummary` | Up to 9 rows: Total Variables, Selected Variables, Selection Proportion, Optimal Lambda, Sample Size, Events, Censoring Rate, Event Level Used, and (if any rows excluded) Rows Excluded (Missing Data) |
 | `.populateCoefficients(results)` | `self$results$coefficients` | One row per selected variable: variable name, coefficient, hazard ratio, importance. Adds scale note if standardized. |
 | `.populatePerformance(results)` | `self$results$performance` | Up to 3 rows: C-index (with SE and interpretation), Log-rank p-value, Hazard Ratio (High vs Low Risk with 95% CI) |
 | `.savePlotData(results)` | `cv_plot`, `coef_plot`, `survival_plot` states; `riskScore` output; plus `variableImportance` and `modelComparison` tables | Sets plain-numeric state for each plot; populates optional tables; writes risk score output |
@@ -142,7 +165,8 @@ Returns: `list(cv_fit, final_model, coef_matrix, selected_vars, lambda_optimal, 
 | `.populateCrossValidationExplanation()` | `self$results$crossValidationExplanation` | Static HTML explaining the CV plot |
 | `.populateRegularizationPathExplanation()` | `self$results$regularizationPathExplanation` | Static HTML explaining the coefficient plot |
 | `.populateRiskScoreExplanation()` | `self$results$riskScoreExplanation` | Static HTML explaining risk scores and survival curves |
-| `.assessSuitability(data)` | `self$results$suitabilityReport` (via `.generateSuitabilityHtml()`) | 6-check traffic-light HTML: EPV, Regularization Need, Sample Size, Event Rate, Multicollinearity, Data Quality |
+| `.populateSummary(results)` | `self$results$summaryText` | Natural-language summary paragraph with sample size, events, selected variables, C-index, HR, and standardization note |
+| `.assessSuitability(data)` | `self$results$suitabilityReport` (via `.generateSuitabilityHtml()`) | 7-check traffic-light HTML: EPV, Regularization Need, Sample Size, Event Rate, Multicollinearity, Data Quality, Proportional Hazards |
 
 ### 4.6 Plot Render Functions
 
@@ -171,6 +195,7 @@ All plot functions check their respective boolean option first and return early 
 | `coef_plot` | Image | Coefficient Plot | `(coef_plot)` | coef_plot + model options |
 | `survival_plot` | Image | Risk Group Survival Plot | `(survival_plot)` | survival_plot + model options |
 | `riskScore` | Output | Add Risk Score to Data | -- | model options |
+| `summaryText` | Html | Results Summary | `(showSummary)` | showSummary + input vars + model options |
 | `lassoExplanation` | Html | Understanding LASSO Cox Regression | `(showExplanations)` | showExplanations |
 | `methodologyNotes` | Html | LASSO Cox Methodology Notes | `(showMethodologyNotes)` | showMethodologyNotes |
 | `clinicalGuidance` | Html | Clinical Interpretation Guidance | `(includeClinicalGuidance)` | includeClinicalGuidance |
@@ -186,17 +211,20 @@ All plot functions check their respective boolean option first and return early 
 
 | Column | Title | Type |
 |---|---|---|
-| `statistic` | (empty) | text |
+| `statistic` | Statistic | text |
 | `value` | Value | text |
 
 **coefficients**
 
-| Column | Title | Type |
-|---|---|---|
-| `variable` | Variable | text |
-| `coefficient` | Coefficient | number |
-| `hazardRatio` | Hazard Ratio | number |
-| `importance` | Importance | number |
+| Column | Title | Type | Format | SuperTitle |
+|---|---|---|---|---|
+| `variable` | Variable | text | -- | -- |
+| `coefficient` | Coefficient | number | zto | -- |
+| `hazardRatio` | Hazard Ratio | number | zto | -- |
+| `ci_lower` | Lower | number | zto | 95% CI |
+| `ci_upper` | Upper | number | zto | 95% CI |
+| `p_value` | p | number | zto,pvalue | -- |
+| `importance` | Importance | number | zto | -- |
 
 **performance**
 
@@ -212,8 +240,8 @@ All plot functions check their respective boolean option first and return early 
 |---|---|---|---|
 | `variable` | Variable | text | -- |
 | `importance_score` | Importance Score | number | zto |
-| `selection_frequency` | Selection Frequency | number | pc |
-| `stability_rank` | Stability Rank | integer | -- |
+| `selection_frequency` | Path Inclusion Proportion | number | pc |
+| `stability_rank` | Importance Rank | integer | -- |
 
 **modelComparison**
 
@@ -374,9 +402,9 @@ flowchart TD
 1. **User interacts with UI controls** -- drags variables into target boxes, adjusts options in collapse panels.
 2. **Backend validation (`.init()`)** -- checks package dependencies; if variables are missing, shows welcome message and hides result panes.
 3. **Data cleaning (`.cleanData()`)** -- validates time (non-negative, no NA), outcome (binary), explanatory (>=2, no constants), creates design matrix, optionally standardizes.
-4. **Suitability assessment (`.assessSuitability()`)** -- if enabled, runs 6 checks (EPV, regularization need, sample size, event rate, multicollinearity, data quality) and generates traffic-light HTML. Advisory only, never blocks analysis.
+4. **Suitability assessment (`.assessSuitability()`)** -- if enabled, runs 7 checks (EPV, regularization need, sample size, event rate, multicollinearity, data quality, proportional hazards) and generates traffic-light HTML. Advisory only, never blocks analysis.
 5. **Model fitting (`.fitModel()`)** -- runs `cv.glmnet()` with alpha=1, selects lambda, fits final model, extracts coefficients, calculates risk scores, computes performance metrics.
-6. **Results population** -- fills `modelSummary` (7 rows), `coefficients` (per selected variable), `performance` (C-index, log-rank, HR). Saves protobuf-safe plot states. Populates optional tables and explanatory HTML.
+6. **Results population** -- fills `modelSummary` (up to 9 rows), `coefficients` (per selected variable), `performance` (C-index, log-rank, HR). Saves protobuf-safe plot states. Populates optional tables and explanatory HTML.
 7. **Plot rendering** -- jamovi calls `.cvPlot()`, `.coefPlot()`, `.survivalPlot()` with saved state; each builds a ggplot2 or survminer plot.
 8. **Display** -- jamovi applies `.r.yaml` visibility rules to show/hide outputs.
 
@@ -398,6 +426,7 @@ graph TD
   lambda --> coefficients
   lambda --> performance
   nfolds["nfolds"] --> modelSummary
+  random_seed["random_seed"] --> modelSummary
   standardize["standardize"] --> modelSummary
   standardize --> coefficients
   suitabilityCheck["suitabilityCheck"] --> suitabilityReport["suitabilityReport"]
@@ -432,7 +461,8 @@ graph TD
 | Option | If changed | Recalculates | Notes |
 |---|---|---|---|
 | `lambda` | Only lambda selection changes | `modelSummary`, `coefficients`, `performance`, all plots | Fast (no re-CV); different variable selection |
-| `nfolds` | Cross-validation rerun | All model outputs | More folds = slower but more stable; auto-capped at `n/3` |
+| `nfolds` | Cross-validation rerun | All model outputs | More folds = slower but more stable; auto-capped at `n-1` |
+| `random_seed` | CV fold assignment changes | All model outputs | Different seed = potentially different variable selection; use a fixed seed for reproducibility |
 | `standardize` | Design matrix rescaled | All model outputs | Should almost always be `true`; turning off risks unfair penalization |
 
 ### Display Options
@@ -490,6 +520,7 @@ explanatory:
   - lymph_nodes
 lambda: "lambda.1se"
 nfolds: 10
+random_seed: 123456
 standardize: true
 suitabilityCheck: true
 cv_plot: true
@@ -504,8 +535,8 @@ showModelComparison: false
 
 ### Expected Outputs
 
-- **suitabilityReport**: Traffic-light HTML assessing 6 dimensions of data suitability
-- **modelSummary**: Table with 7 rows (total vars, selected vars, proportion, lambda, n, events, censoring rate)
+- **suitabilityReport**: Traffic-light HTML assessing 7 dimensions of data suitability
+- **modelSummary**: Table with up to 9 rows (total vars, selected vars, proportion, lambda, n, events, censoring rate, event level used, and optionally rows excluded)
 - **coefficients**: Table with one row per selected variable (variable name, coefficient, HR, importance)
 - **performance**: Table with C-index, log-rank p-value, hazard ratio (High vs Low Risk)
 - **cv_plot**: ggplot2 showing partial likelihood deviance vs log(lambda) with error bars and vertical lines at lambda.min / lambda.1se
@@ -520,6 +551,8 @@ showModelComparison: false
 | `lassocox_lung_cancer` | `data/lassocox_lung_cancer.rda` | Standard survival data |
 | `lassocox_cardiovascular` | `data/lassocox_cardiovascular.rda` | Cardiovascular outcomes |
 | `lassocox_small_cohort` | `data/lassocox_small_cohort.rda` | Small sample edge case |
+| `lassocox_genomic` | `data/lassocox_genomic.rda` | High-dimensional genomic features (p >> n) |
+| `lassocox_multicollinear` | `data/lassocox_multicollinear.rda` | Correlated predictors stress test |
 
 ---
 
@@ -603,7 +636,7 @@ cindex_result <- survival::concordance(y ~ risk_scores, reverse = TRUE)
 | Regularization Need | p >= n/3 (LASSO indicated) | p <= 10 && EPV >= 20 (standard Cox may suffice) | -- |
 | Sample Size | n >= 100 | 20 <= n < 100 | n < 20 |
 | Event Rate | 20%-80% | 10%-20% or 80%-90% | <10% or >90% |
-| Multicollinearity | max abs(r) < 0.7 | 0.7 <= max abs(r) < 0.99 | max abs(r) >= 0.99 |
+| Multicollinearity | max abs(r) < 0.7 | 0.7 <= max abs(r) < 0.9 (moderate) or 0.9 <= max abs(r) < 0.99 (high) | max abs(r) >= 0.99 |
 | Data Quality | No issues | <5% missing | >5% missing or constant predictors |
 
 Overall verdict: worst individual color, except if only regularization check is yellow and everything else is green, overall stays green.

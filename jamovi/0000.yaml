@@ -3573,6 +3573,23 @@ analyses:
       sparse, interpretable solutions. The method supports tie handling in
       refitted Cox models, optional stratification for Cox modeling, and
       bootstrap-based stability selection.
+  - title: Firth's Penalized Likelihood Regression
+    name: firthregression
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalT
+    menuSubgroup: Penalized Cox Regression
+    menuTitle: Firth Regression
+    menuSubtitle: Bias reduction for small samples, rare events, and separation.
+    description: >
+      Firth's penalized likelihood regression for both logistic (binary outcome)
+      and Cox proportional hazards (survival) models. Addresses small-sample
+      bias, complete/quasi-complete separation, and rare events by adding a
+      Jeffreys-prior penalty to the likelihood. Provides profile likelihood
+      confidence intervals, penalized likelihood ratio tests, and separation
+      diagnostics. Particularly valuable in clinical settings with low event
+      counts, unbalanced predictors, or when standard maximum likelihood
+      estimates become infinite due to separation.
   - title: Bayesian Model Averaging
     name: bayesianma
     ns: ClinicoPath
@@ -3591,11 +3608,11 @@ analyses:
     description: >
       Group LASSO for Cox proportional hazards models enabling simultaneous
       selection of pre-defined variable groups while maintaining within-group
-      structure. This method extends traditional LASSO by applying penalties at
-      the group level, making it ideal for categorical variables with multiple
-      dummy codes, grouped biomarkers, or structured predictors like gene
-      pathways. The implementation supports overlapping groups, adaptive group
-      weights, sparse group LASSO combining group and individual penalties, and
+      structure. This method applies the group LASSO penalty (L1/L2 mixed norm)
+      at the group level using the grpreg package, ensuring entire groups of
+      variables are selected or excluded together. Ideal for categorical
+      variables with multiple dummy codes, grouped biomarkers, or structured
+      predictors like gene pathways. Supports adaptive group weights and
       comprehensive cross-validation for optimal penalty selection. Particularly
       valuable for genomic survival analysis, clinical prediction models with
       natural variable groupings, and scenarios requiring interpretable

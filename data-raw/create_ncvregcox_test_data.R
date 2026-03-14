@@ -235,13 +235,105 @@ create_ncvregcox_sparse <- function() {
 
 
 # =============================================================================
-# Generate both datasets
+# Dataset 3: ncvregcox_small (n=25, 5 covariates)
+# =============================================================================
+# Small-sample edge case designed to test:
+#   - Low EPV warnings
+#   - Suitability assessment traffic-light system
+#   - Stability with very few events
+#   - CV folds > n/3 scenario
+
+create_ncvregcox_small <- function() {
+  set.seed(2024 + 99)
+  n <- 25
+
+  age <- round(rnorm(n, mean = 60, sd = 10))
+  marker1 <- round(rnorm(n, mean = 50, sd = 15), 1)
+  marker2 <- round(rnorm(n, mean = 100, sd = 30), 1)
+  marker3 <- round(rnorm(n, mean = 5, sd = 2), 2)
+  grade <- factor(sample(c("Low", "High"), n, replace = TRUE, prob = c(0.6, 0.4)),
+                  levels = c("Low", "High"))
+
+  lp <- 0.03 * (age - 60) + 0.02 * (marker1 - 50) + 0.5 * (grade == "High")
+  survival_times <- rweibull(n, shape = 1.1, scale = 30 * exp(-lp / 1.1))
+  survival_times <- pmax(0.5, survival_times)
+
+  censor_times <- rexp(n, rate = 0.02)
+  observed_time <- round(pmin(survival_times, censor_times), 1)
+  event_numeric <- as.integer(survival_times <= censor_times)
+
+  ncvregcox_small <- data.frame(
+    time    = observed_time,
+    event   = factor(event_numeric, levels = c(0, 1)),
+    age     = age,
+    marker1 = marker1,
+    marker2 = marker2,
+    marker3 = marker3,
+    grade   = grade,
+    stringsAsFactors = FALSE
+  )
+
+  return(ncvregcox_small)
+}
+
+
+# =============================================================================
+# Dataset 4: ncvregcox_collinear (n=150, 10 covariates, high multicollinearity)
+# =============================================================================
+# Tests SCAD/MCP behavior under extreme collinearity (r > 0.9).
+# Designed to trigger:
+#   - Multicollinearity suitability check (red)
+#   - Unstable variable selection
+#   - Comparison of SCAD vs MCP stability
+
+create_ncvregcox_collinear <- function() {
+  set.seed(2024 + 77)
+  n <- 150
+
+  x1 <- rnorm(n)
+  x2 <- x1 + rnorm(n, sd = 0.1)   # r ~ 0.995 with x1
+  x3 <- x1 + rnorm(n, sd = 0.3)   # r ~ 0.96 with x1
+  x4 <- rnorm(n)
+  x5 <- x4 + rnorm(n, sd = 0.15)  # r ~ 0.99 with x4
+  x6 <- rnorm(n)
+  x7 <- rnorm(n)
+  x8 <- rnorm(n)
+  x9 <- rnorm(n)
+  x10 <- rnorm(n)
+
+  # True model: only x1 and x6 matter
+  lp <- 0.7 * x1 + 0.5 * x6
+  survival_times <- rweibull(n, shape = 1.2, scale = 24 * exp(-lp / 1.2))
+  survival_times <- pmax(0.3, survival_times)
+
+  censor_times <- rexp(n, rate = 0.015)
+  observed_time <- round(pmin(survival_times, censor_times), 1)
+  event_numeric <- as.integer(survival_times <= censor_times)
+
+  ncvregcox_collinear <- data.frame(
+    time  = observed_time,
+    event = factor(event_numeric, levels = c(0, 1)),
+    x1 = round(x1, 4), x2 = round(x2, 4), x3 = round(x3, 4),
+    x4 = round(x4, 4), x5 = round(x5, 4), x6 = round(x6, 4),
+    x7 = round(x7, 4), x8 = round(x8, 4), x9 = round(x9, 4),
+    x10 = round(x10, 4),
+    stringsAsFactors = FALSE
+  )
+
+  return(ncvregcox_collinear)
+}
+
+
+# =============================================================================
+# Generate all datasets
 # =============================================================================
 cat("Generating test datasets for ncvregcox function...\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
 
-ncvregcox_clinical <- create_ncvregcox_clinical()
-ncvregcox_sparse   <- create_ncvregcox_sparse()
+ncvregcox_clinical   <- create_ncvregcox_clinical()
+ncvregcox_sparse     <- create_ncvregcox_sparse()
+ncvregcox_small      <- create_ncvregcox_small()
+ncvregcox_collinear  <- create_ncvregcox_collinear()
 
 # --- Summary statistics ---
 cat("\nDataset 1: ncvregcox_clinical\n")
@@ -264,6 +356,20 @@ cat("  Covariates: 30 continuous (all standardized)\n")
 cat("  True effects: x1 (+0.8), x5 (-0.6), x12 (+0.7), x20 (-0.4)\n")
 cat("  Correlation blocks: x1-x5 (rho=0.4), x6-x10 (rho=0.3), x11-x15 (rho=0.2)\n")
 
+cat("\nDataset 3: ncvregcox_small\n")
+cat("  Dimensions: ", nrow(ncvregcox_small), " x ", ncol(ncvregcox_small), "\n")
+cat("  Events:     ", sum(ncvregcox_small$event == "1", na.rm = TRUE), " / ",
+    nrow(ncvregcox_small), "\n")
+cat("  Covariates: 4 continuous + 1 categorical = 5 total\n")
+cat("  Purpose: Small-sample edge case for EPV warnings and suitability checks\n")
+
+cat("\nDataset 4: ncvregcox_collinear\n")
+cat("  Dimensions: ", nrow(ncvregcox_collinear), " x ", ncol(ncvregcox_collinear), "\n")
+cat("  Events:     ", sum(ncvregcox_collinear$event == "1", na.rm = TRUE), " / ",
+    nrow(ncvregcox_collinear), "\n")
+cat("  Covariates: 10 continuous with high multicollinearity (r > 0.9)\n")
+cat("  Purpose: Extreme collinearity edge case for suitability red flags\n")
+
 
 # =============================================================================
 # Save datasets
@@ -271,8 +377,10 @@ cat("  Correlation blocks: x1-x5 (rho=0.4), x6-x10 (rho=0.3), x11-x15 (rho=0.2)\
 cat("\n", paste(rep("-", 60), collapse = ""), "\n")
 cat("Saving datasets...\n")
 
-save_data_multi_format(ncvregcox_clinical, "ncvregcox_clinical", save_csv = TRUE)
-save_data_multi_format(ncvregcox_sparse,   "ncvregcox_sparse",   save_csv = TRUE)
+save_data_multi_format(ncvregcox_clinical,   "ncvregcox_clinical",   save_csv = TRUE)
+save_data_multi_format(ncvregcox_sparse,     "ncvregcox_sparse",     save_csv = TRUE)
+save_data_multi_format(ncvregcox_small,      "ncvregcox_small",      save_csv = TRUE)
+save_data_multi_format(ncvregcox_collinear,  "ncvregcox_collinear",  save_csv = TRUE)
 
 
 # =============================================================================
@@ -282,7 +390,7 @@ cat("\n", paste(rep("=", 60), collapse = ""), "\n")
 cat("TESTING GUIDE FOR ncvregcox DATASETS\n")
 cat(paste(rep("=", 60), collapse = ""), "\n")
 
-cat("\n1. ncvregcox_clinical (Clinical Scenario)\n")
+cat("\n1. ncvregcox_clinical (Clinical Scenario, n=200)\n")
 cat("   Purpose: Realistic clinicopathological study with mixed types\n")
 cat("   Variables with true effects:\n")
 cat("     - age (continuous, weak)\n")
@@ -299,7 +407,7 @@ cat("     - Gamma variations (3.7 vs lower) affect how aggressively noise is dro
 cat("     - Standardization matters because scales differ (age~62, ldh~220, crp~5)\n")
 cat("     - Lambda 1se should give sparser model than lambda min\n")
 
-cat("\n2. ncvregcox_sparse (High-Dimensional Scenario)\n")
+cat("\n2. ncvregcox_sparse (High-Dimensional Scenario, n=100, p=30)\n")
 cat("   Purpose: Demonstrate SCAD/MCP advantage over Lasso\n")
 cat("   True signal: 4 variables out of 30 (87% sparsity)\n")
 cat("   Correlated blocks test variable selection under collinearity\n")
@@ -307,5 +415,19 @@ cat("   Test scenarios:\n")
 cat("     - SCAD/MCP should recover x1, x5, x12, x20 more accurately than Lasso\n")
 cat("     - Lasso may over-select correlated noise variables\n")
 cat("     - Alpha < 1 (elastic net) may help with correlated blocks\n")
+
+cat("\n3. ncvregcox_small (Small Sample Edge Case, n=25)\n")
+cat("   Purpose: Test low-EPV warnings and suitability checks\n")
+cat("   Test scenarios:\n")
+cat("     - Should trigger STRONG_WARNING or WARNING for low events\n")
+cat("     - Suitability check should show yellow/red for sample size\n")
+cat("     - CV folds may need to be reduced (e.g., 3-5)\n")
+
+cat("\n4. ncvregcox_collinear (Extreme Collinearity, n=150, p=10)\n")
+cat("   Purpose: Test behavior under r > 0.9 collinearity\n")
+cat("   Test scenarios:\n")
+cat("     - Suitability check should flag red for multicollinearity\n")
+cat("     - SCAD/MCP selection may be unstable (x1 vs x2 vs x3 swap)\n")
+cat("     - Compare alpha=1 vs alpha=0.5 for stability\n")
 
 cat("\nTest datasets created successfully.\n")

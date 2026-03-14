@@ -50,6 +50,25 @@ options:
       description:
           R: the event indicator variable (0/1 or FALSE/TRUE)
 
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (event_var)
+      description:
+          R: >
+            Level of `event_var` that represents the event of interest (coded as 1).
+            Rows matching neither this level nor `censorLevel` are excluded as NA.
+
+    - name: censorLevel
+      title: Censored Level
+      type: Level
+      variable: (event_var)
+      description:
+          R: >
+            Level of `event_var` that represents censoring (coded as 0).
+            Together with `outcomeLevel`, this defines a strict two-level encoding:
+            rows whose event value matches neither level are treated as missing and excluded.
+
     - name: pred_vars
       title: Predictor Variables
       type: Variables

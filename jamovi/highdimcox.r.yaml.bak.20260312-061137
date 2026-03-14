@@ -1,0 +1,259 @@
+---
+name:  highdimcox
+title: High-Dimensional Cox Regression
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Analysis
+      type: Html
+      visible: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - suitabilityCheck
+
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - elapsedtime
+          - outcome
+          - outcomeLevel
+          - censorLevel
+          - predictors
+          - suitabilityCheck
+
+    - name: modelSummary
+      title: Model Summary
+      type: Html
+      visible: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - regularization_method
+        - alpha_value
+        - cv_method
+        - cv_folds
+
+    - name: selectedVariables
+      title: Selected Variables
+      type: Table
+      visible: (show_coefficients_table)
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - regularization_method
+        - alpha_value
+        - cv_method
+        - cv_folds
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: coefficient
+            title: β
+            type: number
+          - name: hazard_ratio
+            title: HR
+            type: number
+          - name: importance_score
+            title: Importance
+            type: number
+
+    - name: regularizationMetrics
+      title: Regularization Metrics
+      type: Table
+      visible: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - regularization_method
+        - alpha_value
+        - cv_method
+        - cv_folds
+      columns:
+          - name: metric
+            title: Metric
+            type: text
+          - name: value
+            title: Value
+            type: text
+          - name: interpretation
+            title: Interpretation
+            type: text
+
+    - name: stabilityResults
+      title: Stability Selection Results
+      type: Table
+      visible: (stability_selection)
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - stability_selection
+        - subsampling_iterations
+        - subsampling_ratio
+        - stability_threshold
+        - regularization_method
+        - alpha_value
+      columns:
+          - name: variable
+            title: Variable
+            type: text
+          - name: selection_probability
+            title: Selection Probability
+            type: number
+          - name: stable
+            title: Stable Selection
+            type: text
+          - name: importance_rank
+            title: Importance Rank
+            type: integer
+
+
+
+    - name: regularizationPath
+      title: Regularization Path
+      type: Image
+      visible: (show_regularization_path)
+      width: 600
+      height: 500
+      renderFun: .plot_regularization_path
+      requiresData: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - alpha_value
+        - regularization_method
+        - cv_method
+        - cv_folds
+
+    - name: cvPlot
+      title: Cross-Validation Plot
+      type: Image
+      visible: (show_cv_plot)
+      width: 500
+      height: 400
+      renderFun: .plot_cv
+      requiresData: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - cv_folds
+        - cv_method
+        - alpha_value
+        - regularization_method
+
+    - name: variableImportance
+      title: Variable Importance Plot
+      type: Image
+      visible: (show_variable_importance)
+      width: 500
+      height: 400
+      renderFun: .plot_variable_importance
+      requiresData: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - alpha_value
+        - regularization_method
+        - cv_method
+        - cv_folds
+
+    - name: modelDiagnostics
+      title: Model Diagnostics
+      type: Image
+      visible: (show_model_diagnostics)
+      width: 600
+      height: 500
+      renderFun: .plot_model_diagnostics
+      requiresData: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - regularization_method
+        - alpha_value
+        - cv_method
+        - cv_folds
+
+    - name: stabilityPlot
+      title: Stability Selection Plot
+      type: Image
+      visible: (stability_selection)
+      width: 500
+      height: 400
+      renderFun: .plot_stability
+      requiresData: true
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - stability_selection
+        - subsampling_iterations
+        - subsampling_ratio
+        - stability_threshold
+        - regularization_method
+        - alpha_value
+
+    - name: analysisSummary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummaries)
+      clearWith:
+        - elapsedtime
+        - outcome
+        - outcomeLevel
+        - censorLevel
+        - predictors
+        - regularization_method
+        - alpha_value
+        - cv_method
+        - cv_folds
+        - stability_selection
+        - subsampling_iterations
+        - subsampling_ratio
+        - stability_threshold
+
+    - name: methodExplanation
+      title: Methodology
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - regularization_method
+
+refs:
+    - ClinicoPath
+
+    - survival
+    - glmnet
+...

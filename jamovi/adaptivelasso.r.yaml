@@ -8,15 +8,31 @@ items:
       type: Html
       visible: false
 
-    - name: todo
-      title: Analysis Todo
+    - name: notices
+      title: Important Information
       type: Html
-      visible: false
+      clearWith:
+        - time
+        - event
+        - event_level
+        - censor_level
+        - predictors
+        - weight_method
+        - alpha
+        - gamma
+        - cv_folds
+        - stability_selection
 
     - name: suitabilityReport
       title: Data Suitability Assessment
       type: Html
       visible: (suitabilityCheck)
+      clearWith:
+        - time
+        - event
+        - event_level
+        - censor_level
+        - predictors
 
     - name: coefficients
       title: Selected Variables and Coefficients
@@ -25,10 +41,15 @@ items:
       clearWith:
         - time
         - event
+        - event_level
+        - censor_level
         - predictors
         - weight_method
         - alpha
+        - gamma
         - cv_folds
+        - lambda_sequence
+        - tie_method
       columns:
         - name: variable
           title: Variable
@@ -69,6 +90,7 @@ items:
         - lambda_custom_min
         - lambda_single
         - n_lambda
+        - cv_measure
       columns:
         - name: step
           title: Step
@@ -132,6 +154,11 @@ items:
       type: Table
       visible: (stability_selection)
       clearWith:
+        - time
+        - event
+        - event_level
+        - censor_level
+        - predictors
         - stability_threshold
         - bootstrap_samples
         - subsampling_ratio
@@ -206,11 +233,16 @@ items:
     - name: riskGroups
       title: Risk Group Analysis
       type: Table
-      visible: true
+      visible: (show_coefficients)
       clearWith:
         - risk_groups
         - time
         - event
+        - event_level
+        - censor_level
+        - predictors
+        - weight_method
+        - alpha
       columns:
         - name: risk_group
           title: Risk Group
@@ -344,4 +376,7 @@ refs:
 
     - survival
     - glmnet
+    - parallel
+    - doParallel
+    - foreach
 ...

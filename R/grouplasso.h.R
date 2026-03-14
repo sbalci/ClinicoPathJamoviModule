@@ -9,23 +9,20 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             suitabilityCheck = TRUE,
             time = NULL,
             event = NULL,
+            outcomeLevel = NULL,
+            censorLevel = NULL,
             predictors = NULL,
-            strata = NULL,
             group_definition = "automatic",
             group_structure = "",
             factor_grouping = TRUE,
             penalty_type = "group_lasso",
-            alpha = 0.5,
             group_weights = "sqrt_size",
             custom_weights = "",
             cv_folds = 10,
-            cv_measure = "deviance",
-            lambda_sequence = "auto",
-            n_lambda = 50,
-            lambda_min_ratio = 0.01,
-            algorithm = "coordinate",
-            max_iterations = 1000,
-            tolerance = 0.000001,
+            n_lambda = 100,
+            lambda_min_ratio = 0.001,
+            max_iterations = 10000,
+            tolerance = 0.001,
             selection_threshold = 1e-8,
             stability_selection = FALSE,
             bootstrap_samples = 100,
@@ -44,10 +41,7 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plot_stability = FALSE,
             plot_group_structure = FALSE,
             standardize = TRUE,
-            center_groups = FALSE,
             adaptive_weights_method = "ridge",
-            warm_start = TRUE,
-            parallel_computing = FALSE,
             random_seed = 123, ...) {
 
             super$initialize(
@@ -76,6 +70,14 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor",
                     "numeric"))
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
+                "outcomeLevel",
+                outcomeLevel,
+                variable="(event)")
+            private$..censorLevel <- jmvcore::OptionLevel$new(
+                "censorLevel",
+                censorLevel,
+                variable="(event)")
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
                 predictors,
@@ -86,22 +88,13 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "numeric",
                     "factor"))
-            private$..strata <- jmvcore::OptionVariable$new(
-                "strata",
-                strata,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                permitted=list(
-                    "factor"))
             private$..group_definition <- jmvcore::OptionList$new(
                 "group_definition",
                 group_definition,
                 options=list(
                     "automatic",
                     "custom",
-                    "factor_based",
-                    "biological"),
+                    "factor_based"),
                 default="automatic")
             private$..group_structure <- jmvcore::OptionString$new(
                 "group_structure",
@@ -116,16 +109,10 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 penalty_type,
                 options=list(
                     "group_lasso",
-                    "sparse_group",
-                    "adaptive_group",
-                    "overlapping"),
+                    "group_mcp",
+                    "group_scad",
+                    "adaptive_group"),
                 default="group_lasso")
-            private$..alpha <- jmvcore::OptionNumber$new(
-                "alpha",
-                alpha,
-                default=0.5,
-                min=0,
-                max=1)
             private$..group_weights <- jmvcore::OptionList$new(
                 "group_weights",
                 group_weights,
@@ -133,7 +120,6 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "equal",
                     "sqrt_size",
                     "group_size",
-                    "adaptive",
                     "custom"),
                 default="sqrt_size")
             private$..custom_weights <- jmvcore::OptionString$new(
@@ -146,54 +132,30 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=10,
                 min=3,
                 max=20)
-            private$..cv_measure <- jmvcore::OptionList$new(
-                "cv_measure",
-                cv_measure,
-                options=list(
-                    "deviance",
-                    "C",
-                    "brier"),
-                default="deviance")
-            private$..lambda_sequence <- jmvcore::OptionList$new(
-                "lambda_sequence",
-                lambda_sequence,
-                options=list(
-                    "auto",
-                    "custom",
-                    "single"),
-                default="auto")
             private$..n_lambda <- jmvcore::OptionInteger$new(
                 "n_lambda",
                 n_lambda,
-                default=50,
+                default=100,
                 min=10,
-                max=200)
+                max=500)
             private$..lambda_min_ratio <- jmvcore::OptionNumber$new(
                 "lambda_min_ratio",
                 lambda_min_ratio,
-                default=0.01,
+                default=0.001,
                 min=0.000001,
                 max=0.1)
-            private$..algorithm <- jmvcore::OptionList$new(
-                "algorithm",
-                algorithm,
-                options=list(
-                    "coordinate",
-                    "proximal",
-                    "admm"),
-                default="coordinate")
             private$..max_iterations <- jmvcore::OptionInteger$new(
                 "max_iterations",
                 max_iterations,
-                default=1000,
+                default=10000,
                 min=100,
-                max=10000)
+                max=100000)
             private$..tolerance <- jmvcore::OptionNumber$new(
                 "tolerance",
                 tolerance,
-                default=0.000001,
-                min=1e-10,
-                max=0.001)
+                default=0.001,
+                min=1e-8,
+                max=0.1)
             private$..selection_threshold <- jmvcore::OptionNumber$new(
                 "selection_threshold",
                 selection_threshold,
@@ -276,26 +238,13 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "standardize",
                 standardize,
                 default=TRUE)
-            private$..center_groups <- jmvcore::OptionBool$new(
-                "center_groups",
-                center_groups,
-                default=FALSE)
             private$..adaptive_weights_method <- jmvcore::OptionList$new(
                 "adaptive_weights_method",
                 adaptive_weights_method,
                 options=list(
                     "ridge",
-                    "univariate",
-                    "ols"),
+                    "univariate"),
                 default="ridge")
-            private$..warm_start <- jmvcore::OptionBool$new(
-                "warm_start",
-                warm_start,
-                default=TRUE)
-            private$..parallel_computing <- jmvcore::OptionBool$new(
-                "parallel_computing",
-                parallel_computing,
-                default=FALSE)
             private$..random_seed <- jmvcore::OptionInteger$new(
                 "random_seed",
                 random_seed,
@@ -306,21 +255,18 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..suitabilityCheck)
             self$.addOption(private$..time)
             self$.addOption(private$..event)
+            self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..censorLevel)
             self$.addOption(private$..predictors)
-            self$.addOption(private$..strata)
             self$.addOption(private$..group_definition)
             self$.addOption(private$..group_structure)
             self$.addOption(private$..factor_grouping)
             self$.addOption(private$..penalty_type)
-            self$.addOption(private$..alpha)
             self$.addOption(private$..group_weights)
             self$.addOption(private$..custom_weights)
             self$.addOption(private$..cv_folds)
-            self$.addOption(private$..cv_measure)
-            self$.addOption(private$..lambda_sequence)
             self$.addOption(private$..n_lambda)
             self$.addOption(private$..lambda_min_ratio)
-            self$.addOption(private$..algorithm)
             self$.addOption(private$..max_iterations)
             self$.addOption(private$..tolerance)
             self$.addOption(private$..selection_threshold)
@@ -341,31 +287,25 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plot_stability)
             self$.addOption(private$..plot_group_structure)
             self$.addOption(private$..standardize)
-            self$.addOption(private$..center_groups)
             self$.addOption(private$..adaptive_weights_method)
-            self$.addOption(private$..warm_start)
-            self$.addOption(private$..parallel_computing)
             self$.addOption(private$..random_seed)
         }),
     active = list(
         suitabilityCheck = function() private$..suitabilityCheck$value,
         time = function() private$..time$value,
         event = function() private$..event$value,
+        outcomeLevel = function() private$..outcomeLevel$value,
+        censorLevel = function() private$..censorLevel$value,
         predictors = function() private$..predictors$value,
-        strata = function() private$..strata$value,
         group_definition = function() private$..group_definition$value,
         group_structure = function() private$..group_structure$value,
         factor_grouping = function() private$..factor_grouping$value,
         penalty_type = function() private$..penalty_type$value,
-        alpha = function() private$..alpha$value,
         group_weights = function() private$..group_weights$value,
         custom_weights = function() private$..custom_weights$value,
         cv_folds = function() private$..cv_folds$value,
-        cv_measure = function() private$..cv_measure$value,
-        lambda_sequence = function() private$..lambda_sequence$value,
         n_lambda = function() private$..n_lambda$value,
         lambda_min_ratio = function() private$..lambda_min_ratio$value,
-        algorithm = function() private$..algorithm$value,
         max_iterations = function() private$..max_iterations$value,
         tolerance = function() private$..tolerance$value,
         selection_threshold = function() private$..selection_threshold$value,
@@ -386,30 +326,24 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plot_stability = function() private$..plot_stability$value,
         plot_group_structure = function() private$..plot_group_structure$value,
         standardize = function() private$..standardize$value,
-        center_groups = function() private$..center_groups$value,
         adaptive_weights_method = function() private$..adaptive_weights_method$value,
-        warm_start = function() private$..warm_start$value,
-        parallel_computing = function() private$..parallel_computing$value,
         random_seed = function() private$..random_seed$value),
     private = list(
         ..suitabilityCheck = NA,
         ..time = NA,
         ..event = NA,
+        ..outcomeLevel = NA,
+        ..censorLevel = NA,
         ..predictors = NA,
-        ..strata = NA,
         ..group_definition = NA,
         ..group_structure = NA,
         ..factor_grouping = NA,
         ..penalty_type = NA,
-        ..alpha = NA,
         ..group_weights = NA,
         ..custom_weights = NA,
         ..cv_folds = NA,
-        ..cv_measure = NA,
-        ..lambda_sequence = NA,
         ..n_lambda = NA,
         ..lambda_min_ratio = NA,
-        ..algorithm = NA,
         ..max_iterations = NA,
         ..tolerance = NA,
         ..selection_threshold = NA,
@@ -430,10 +364,7 @@ grouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plot_stability = NA,
         ..plot_group_structure = NA,
         ..standardize = NA,
-        ..center_groups = NA,
         ..adaptive_weights_method = NA,
-        ..warm_start = NA,
-        ..parallel_computing = NA,
         ..random_seed = NA)
 )
 
@@ -468,7 +399,7 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "survival",
-                    "glmnet"))
+                    "grpreg"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -477,8 +408,8 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Analysis Todo",
-                visible=FALSE))
+                title="",
+                visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="suitabilityReport",
@@ -487,6 +418,8 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "suitabilityCheck")))
             self$add(jmvcore::Table$new(
@@ -497,7 +430,8 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "predictors",
                     "group_definition",
-                    "group_structure"),
+                    "group_structure",
+                    "factor_grouping"),
                 columns=list(
                     list(
                         `name`="group_id", 
@@ -536,6 +470,8 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "penalty_type",
                     "cv_folds"),
@@ -578,7 +514,6 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Regularization Path Summary",
                 visible="(show_path_summary)",
                 clearWith=list(
-                    "lambda_sequence",
                     "n_lambda",
                     "penalty_type"),
                 columns=list(
@@ -616,8 +551,7 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(show_cv_results)",
                 clearWith=list(
                     "cv_folds",
-                    "cv_measure",
-                    "lambda_sequence"),
+                    "n_lambda"),
                 columns=list(
                     list(
                         `name`="criterion", 
@@ -699,6 +633,8 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "time",
                     "event",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "penalty_type"),
                 columns=list(
@@ -791,29 +727,32 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Group Regularization Path",
                 width=600,
                 height=500,
+                renderFun=".renderPathPlot",
                 visible="(plot_regularization_path)",
                 requiresData=TRUE,
                 clearWith=list(
                     "predictors",
                     "penalty_type",
-                    "lambda_sequence")))
+                    "n_lambda",
+                    "lambda_min_ratio")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cvPlot",
                 title="Cross-Validation Curve",
                 width=500,
                 height=400,
+                renderFun=".renderCVPlot",
                 visible="(plot_cv_curve)",
                 requiresData=TRUE,
                 clearWith=list(
-                    "cv_folds",
-                    "cv_measure")))
+                    "cv_folds")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="importancePlot",
                 title="Group Importance",
                 width=500,
                 height=400,
+                renderFun=".renderImportancePlot",
                 visible="(plot_group_importance)",
                 requiresData=TRUE,
                 clearWith=list(
@@ -825,6 +764,7 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Stability Selection",
                 width=500,
                 height=400,
+                renderFun=".renderStabilityPlot",
                 visible="(plot_stability)",
                 requiresData=TRUE,
                 clearWith=list(
@@ -836,11 +776,13 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Group Structure Visualization",
                 width=600,
                 height=400,
+                renderFun=".renderGroupStructurePlot",
                 visible="(plot_group_structure)",
                 requiresData=TRUE,
                 clearWith=list(
                     "group_definition",
-                    "group_structure")))}))
+                    "group_structure",
+                    "factor_grouping")))}))
 
 grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "grouplassoBase",
@@ -850,7 +792,7 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "grouplasso",
-                version = c(0,0,31),
+                version = c(0,0,37),
                 options = options,
                 results = grouplassoResults$new(options=options),
                 data = data,
@@ -867,11 +809,11 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Group LASSO for Cox proportional hazards models enabling simultaneous 
 #' selection of pre-defined variable groups while maintaining within-group 
-#' structure. This method extends traditional LASSO by applying penalties at 
-#' the group level, making it ideal for categorical variables with multiple 
-#' dummy codes, grouped biomarkers, or structured predictors like gene 
-#' pathways. The implementation supports overlapping groups, adaptive group 
-#' weights, sparse group LASSO combining group and individual penalties, and 
+#' structure. This method applies the group LASSO penalty (L1/L2 mixed norm) 
+#' at the group level using the grpreg package, ensuring entire groups of 
+#' variables are selected or excluded together. Ideal for categorical 
+#' variables with multiple dummy codes, grouped biomarkers, or structured 
+#' predictors like gene pathways. Supports adaptive group weights and 
 #' comprehensive cross-validation for optimal penalty selection. Particularly 
 #' valuable for genomic survival analysis, clinical prediction models with 
 #' natural variable groupings, and scenarios requiring interpretable 
@@ -894,65 +836,59 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param suitabilityCheck Run a comprehensive data suitability assessment
 #'   before analysis. Checks sample size, events-per-variable ratio,
-#'   multicollinearity,  and whether regularization is needed.
+#'   multicollinearity, and whether regularization is needed.
 #' @param time Time to event variable (numeric). For right-censored data, this
-#'   is the  time from study entry to event or censoring.
+#'   is the time from study entry to event or censoring.
 #' @param event Event indicator variable. For survival analysis: 0 = censored,
 #'   1 = event. For competing risks: 0 = censored, 1+ = different event types.
+#' @param outcomeLevel Level of \code{event} that represents the event of
+#'   interest (coded as 1). Rows matching neither this level nor
+#'   \code{censorLevel} are excluded as NA.
+#' @param censorLevel Level of \code{event} that represents censoring (coded
+#'   as 0). Together with \code{outcomeLevel}, this defines a strict two-level
+#'   encoding: rows whose event value matches neither level are treated as
+#'   missing and excluded.
 #' @param predictors Variables to include in the group LASSO Cox model.
-#'   Variables can be grouped based on biological, clinical, or statistical
-#'   criteria. Factor variables are automatically converted to dummy variables.
-#' @param strata Optional stratification variable for stratified Cox
-#'   regression. Creates separate baseline hazards for each stratum.
+#'   Variables can be grouped based on clinical or statistical criteria. Factor
+#'   variables are automatically converted to dummy variables.
 #' @param group_definition Method for defining variable groups. Automatic
-#'   groups by data type, custom allows manual specification, factor-based
-#'   groups dummy variables from same factor, biological supports pathway-based
-#'   groupings.
+#'   groups each original variable (with its dummy columns) as a separate group.
+#'   Custom allows manual specification. Factor-based groups dummy variables
+#'   from the same factor together.
 #' @param group_structure Custom group assignment as comma-separated list.
 #'   Format: 'var1:group1, var2:group1, var3:group2'. Only used when
-#'   group_definition is 'custom'. Groups can overlap.
-#' @param factor_grouping Automatically group dummy variables from the same
-#'   factor variable. Ensures that factor variables are selected/excluded as
-#'   complete units.
-#' @param penalty_type Type of group penalty. Group LASSO selects entire
-#'   groups, sparse group combines group and individual penalties, adaptive uses
-#'   data-driven weights, overlapping handles variables belonging to multiple
-#'   groups.
-#' @param alpha Mixing parameter for sparse group LASSO. 0 = pure group LASSO,
-#'   1 = pure individual LASSO, intermediate values combine both penalties. Only
-#'   used for sparse group LASSO.
-#' @param group_weights Method for calculating group-specific penalty weights.
-#'   Square root of group size is standard, adaptive uses initial estimates,
-#'   custom allows user-specified weights.
+#'   group_definition is 'custom'.
+#' @param factor_grouping When using automatic grouping, automatically group
+#'   dummy variables from the same factor variable into a single group. Ensures
+#'   that factor variables are selected or excluded as complete units.
+#' @param penalty_type Type of group penalty via grpreg. Group LASSO (L1/L2
+#'   mixed norm) selects entire groups simultaneously. Group MCP and Group SCAD
+#'   provide non-convex alternatives with less bias for large coefficients.
+#'   Adaptive Group LASSO uses data-driven penalty weights for improved oracle
+#'   properties.
+#' @param group_weights Method for calculating group-specific penalty
+#'   multipliers passed to grpreg. Square root of group size is the standard
+#'   choice. Custom allows user-specified weights.
 #' @param custom_weights Custom weights for each group as comma-separated
 #'   values. Order should match group numbering. Only used with custom weights.
 #' @param cv_folds Number of folds for cross-validation to select optimal
 #'   penalty parameter. More folds provide better estimates but increase
 #'   computation time.
-#' @param cv_measure Performance measure for cross-validation. Deviance is
-#'   standard for Cox models, C-index focuses on discrimination, Brier score
-#'   provides calibration-aware selection.
-#' @param lambda_sequence Specification of penalty parameter sequence.
-#'   Automatic uses data-driven range, custom allows user-defined range.
 #' @param n_lambda Number of lambda values in the regularization path. More
 #'   values provide finer resolution but increase computation time.
 #' @param lambda_min_ratio Ratio of smallest to largest lambda in automatic
 #'   sequence. Smaller values explore stronger penalties.
-#' @param algorithm Optimization algorithm for group LASSO. Coordinate descent
-#'   is standard and efficient, proximal gradient handles complex penalties,
-#'   ADMM works well for overlapping groups.
-#' @param max_iterations Maximum iterations for optimization algorithm.
-#'   Increase if convergence warnings occur.
+#' @param max_iterations Maximum iterations for the coordinate descent
+#'   algorithm. Increase if convergence warnings occur.
 #' @param tolerance Convergence tolerance for optimization. Smaller values
 #'   provide more precise solutions but increase computation time.
 #' @param selection_threshold Threshold for determining selected groups.
 #'   Groups with maximum coefficient magnitude below this value are considered
 #'   unselected.
-#' @param stability_selection Perform stability selection across bootstrap
-#'   samples to identify robust group selection patterns and reduce selection
-#'   variability.
-#' @param bootstrap_samples Number of bootstrap samples for stability
-#'   selection. More samples provide more stable group selection.
+#' @param stability_selection Perform stability selection across subsamples to
+#'   identify robust group selection patterns and reduce selection variability.
+#' @param bootstrap_samples Number of subsamples for stability selection. More
+#'   samples provide more stable group selection.
 #' @param stability_threshold Minimum selection frequency for groups in
 #'   stability selection. Higher thresholds provide more conservative selection.
 #' @param nested_cv Perform nested cross-validation for unbiased performance
@@ -979,19 +915,15 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plot_group_importance Visualize relative importance of selected
 #'   groups based on coefficient norms and selection frequency.
 #' @param plot_stability Plot stability selection results showing group
-#'   selection frequencies across bootstrap samples.
+#'   selection frequencies across subsamples.
 #' @param plot_group_structure Visualize group structure and variable
-#'   assignments with overlap indicators for complex grouping schemes.
+#'   assignments.
 #' @param standardize Standardize variables before fitting. Recommended for
 #'   optimal penalty performance across different variable scales.
-#' @param center_groups Center variables within their respective groups before
-#'   applying penalties. Can improve performance for heterogeneous groups.
 #' @param adaptive_weights_method Method for calculating adaptive weights for
-#'   groups. Ridge provides stable estimates, univariate uses marginal effects.
-#' @param warm_start Use warm start initialization for faster convergence
-#'   along the regularization path.
-#' @param parallel_computing Use parallel computing for cross-validation and
-#'   bootstrap procedures to reduce computation time.
+#'   groups. Only used when penalty_type is adaptive_group. Ridge provides
+#'   stable estimates via ridge Cox regression. Univariate uses marginal Cox
+#'   regression for each group separately.
 #' @param random_seed Random seed for cross-validation folds and bootstrap
 #'   sampling. Ensures reproducible results across analyses.
 #' @return A results object containing:
@@ -1027,23 +959,20 @@ grouplasso <- function(
     suitabilityCheck = TRUE,
     time,
     event,
+    outcomeLevel,
+    censorLevel,
     predictors,
-    strata,
     group_definition = "automatic",
     group_structure = "",
     factor_grouping = TRUE,
     penalty_type = "group_lasso",
-    alpha = 0.5,
     group_weights = "sqrt_size",
     custom_weights = "",
     cv_folds = 10,
-    cv_measure = "deviance",
-    lambda_sequence = "auto",
-    n_lambda = 50,
-    lambda_min_ratio = 0.01,
-    algorithm = "coordinate",
-    max_iterations = 1000,
-    tolerance = 0.000001,
+    n_lambda = 100,
+    lambda_min_ratio = 0.001,
+    max_iterations = 10000,
+    tolerance = 0.001,
     selection_threshold = 1e-8,
     stability_selection = FALSE,
     bootstrap_samples = 100,
@@ -1062,10 +991,7 @@ grouplasso <- function(
     plot_stability = FALSE,
     plot_group_structure = FALSE,
     standardize = TRUE,
-    center_groups = FALSE,
     adaptive_weights_method = "ridge",
-    warm_start = TRUE,
-    parallel_computing = FALSE,
     random_seed = 123) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -1074,36 +1000,30 @@ grouplasso <- function(
     if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
     if ( ! missing(event)) event <- jmvcore::resolveQuo(jmvcore::enquo(event))
     if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
-    if ( ! missing(strata)) strata <- jmvcore::resolveQuo(jmvcore::enquo(strata))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(time), time, NULL),
             `if`( ! missing(event), event, NULL),
-            `if`( ! missing(predictors), predictors, NULL),
-            `if`( ! missing(strata), strata, NULL))
+            `if`( ! missing(predictors), predictors, NULL))
 
-    for (v in strata) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- grouplassoOptions$new(
         suitabilityCheck = suitabilityCheck,
         time = time,
         event = event,
+        outcomeLevel = outcomeLevel,
+        censorLevel = censorLevel,
         predictors = predictors,
-        strata = strata,
         group_definition = group_definition,
         group_structure = group_structure,
         factor_grouping = factor_grouping,
         penalty_type = penalty_type,
-        alpha = alpha,
         group_weights = group_weights,
         custom_weights = custom_weights,
         cv_folds = cv_folds,
-        cv_measure = cv_measure,
-        lambda_sequence = lambda_sequence,
         n_lambda = n_lambda,
         lambda_min_ratio = lambda_min_ratio,
-        algorithm = algorithm,
         max_iterations = max_iterations,
         tolerance = tolerance,
         selection_threshold = selection_threshold,
@@ -1124,10 +1044,7 @@ grouplasso <- function(
         plot_stability = plot_stability,
         plot_group_structure = plot_group_structure,
         standardize = standardize,
-        center_groups = center_groups,
         adaptive_weights_method = adaptive_weights_method,
-        warm_start = warm_start,
-        parallel_computing = parallel_computing,
         random_seed = random_seed)
 
     analysis <- grouplassoClass$new(

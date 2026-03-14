@@ -1,8 +1,8 @@
 ---
-title: "High-Dimensional Cox Regression for Survival Analysis"
+title: "High-Dimensional Cox Regression - Comprehensive Guide"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{High-Dimensional Cox Regression for Survival Analysis}
+  %\VignetteIndexEntry{High-Dimensional Cox Regression - Comprehensive Guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,12 +20,12 @@ knitr::opts_chunk$set(
   fig.height = 5
 )
 devtools::load_all(".")
+data_path <- "data-raw/non-rda/"
+data_path2 <- "data/"
 ```
 
 > **Note:** The `highdimcox()` function is designed for use within **jamovi's GUI**.
-> The code examples below show the R syntax for reference. To run interactively,
-> use `devtools::load_all()` and call the R6 class directly:
-> `highdimcoxClass$new(options = highdimcoxOptions$new(...), data = mydata)`.
+> The code examples below show the R syntax for reference.
 
 # High-Dimensional Cox Regression
 
@@ -51,6 +51,7 @@ Key features:
 - **Stability selection** via bootstrap for robust variable identification
 - **Variable importance** and coefficient visualization
 - **Model diagnostics** and performance metrics
+- **Data suitability assessment** with traffic-light checks
 
 ---
 
@@ -61,7 +62,7 @@ regression fails. Regularization adds a penalty to prevent overfitting.
 
 | Method | Penalty | Alpha | Selects Variables? | Best For |
 |--------|---------|-------|-------------------|----------|
-| **LASSO** | $\lambda \sum \|\beta_j\|$ | 1.0 | Yes (sets to zero) | Sparse models |
+| **LASSO** | $\lambda \sum |\beta_j|$ | 1.0 | Yes (sets to zero) | Sparse models |
 | **Ridge** | $\lambda \sum \beta_j^2$ | 0.0 | No (shrinks all) | Prediction, collinearity |
 | **Elastic Net** | Mixed L1+L2 | 0.5 | Yes (grouped) | Correlated groups |
 | **Adaptive LASSO** | Weighted L1 | 1.0 | Yes (oracle) | Publication models |
@@ -103,6 +104,8 @@ age <- rnorm(n, 62, 10)
 gender <- factor(sample(c("Male", "Female"), n, replace = TRUE))
 stage <- factor(sample(c("I", "II", "III"), n, replace = TRUE,
                        prob = c(0.3, 0.4, 0.3)))
+grade <- factor(sample(1:3, n, replace = TRUE))
+treatment <- factor(sample(c("A", "B"), n, replace = TRUE))
 
 # Survival times
 lp <- gene_matrix %*% true_effects + 0.02 * (age - 62) + 0.3 * (as.numeric(stage) - 1)
@@ -116,6 +119,7 @@ data_genomic <- data.frame(
   survival_months = time,
   vital_status = event,
   age = age, gender = gender, stage = stage,
+  grade = grade, treatment = treatment,
   as.data.frame(gene_matrix)
 )
 
@@ -125,24 +129,23 @@ cat("Predictors:", ncol(data_genomic) - 2, "\n")
 ```
 
 ```{r lasso-run}
-# All gene + clinical predictors
-pred_vars <- c("age", "gender", "stage",
-               paste0("GENE_", sprintf("%03d", 1:p_genes)))
+# All gene predictors (no clinical for clean LASSO demonstration)
+gene_vars <- paste0("GENE_", sprintf("%03d", 1:p_genes))
 
 highdimcox(
   data = data_genomic,
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars,
+  censorLevel = "Alive",
+  predictors = gene_vars,
   regularization_method = "lasso",
   cv_method = "cv_1se",
   cv_folds = 10,
   show_regularization_path = TRUE,
   show_cv_plot = TRUE,
   show_variable_importance = TRUE,
-  show_coefficients_table = TRUE,
-  show_model_diagnostics = TRUE
+  show_coefficients_table = TRUE
 )
 ```
 
@@ -159,7 +162,8 @@ highdimcox(
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars,
+  censorLevel = "Alive",
+  predictors = gene_vars,
   regularization_method = "ridge",
   cv_method = "cv_min",
   cv_folds = 10,
@@ -169,6 +173,9 @@ highdimcox(
 )
 ```
 
+Note: Ridge regression **never** sets coefficients to exactly zero. All
+variables are retained. A table note explains this behavior.
+
 ---
 
 ## 3. Elastic Net (Default)
@@ -176,11 +183,15 @@ highdimcox(
 The recommended starting point — combines LASSO selection with Ridge stability.
 
 ```{r elastic-net}
+pred_vars <- c("age", "gender", "stage",
+               paste0("GENE_", sprintf("%03d", 1:p_genes)))
+
 highdimcox(
   data = data_genomic,
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
+  censorLevel = "Alive",
   predictors = pred_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
@@ -195,6 +206,9 @@ highdimcox(
 
 ### Alpha Tuning
 
+The alpha parameter controls the balance between L1 (LASSO) and L2 (Ridge).
+Higher alpha → more variable selection; lower alpha → more shrinkage.
+
 ```{r alpha-tuning}
 # More LASSO-like (alpha = 0.8)
 highdimcox(
@@ -202,7 +216,8 @@ highdimcox(
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars,
+  censorLevel = "Alive",
+  predictors = gene_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.8,
   cv_folds = 10,
@@ -215,7 +230,9 @@ highdimcox(
 
 ## 4. Adaptive LASSO
 
-Two-stage approach with oracle properties — best for publishable models.
+Two-stage approach: first fits Ridge to get initial coefficient estimates,
+then uses inverse-coefficient weights to penalize unimportant variables more
+heavily. This gives oracle variable selection properties.
 
 ```{r adaptive}
 highdimcox(
@@ -223,7 +240,8 @@ highdimcox(
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars,
+  censorLevel = "Alive",
+  predictors = gene_vars,
   regularization_method = "adaptive_lasso",
   cv_method = "cv_1se",
   cv_folds = 10,
@@ -238,8 +256,9 @@ highdimcox(
 
 ## 5. Stability Selection
 
-Bootstrap-based stability selection identifies variables that are consistently
-selected across many random subsamples.
+Bootstrap-based stability selection identifies variables consistently selected
+across many random subsamples. This follows Meinshausen & Buhlmann (2010)
+with a fixed lambda across all subsamples for proper error control.
 
 ```{r stability}
 highdimcox(
@@ -247,12 +266,14 @@ highdimcox(
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars,
+  censorLevel = "Alive",
+  predictors = gene_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
   cv_folds = 10,
   stability_selection = TRUE,
-  bootstrap_iterations = 100,
+  subsampling_iterations = 100,
+  subsampling_ratio = 0.5,
   stability_threshold = 0.8,
   show_variable_importance = TRUE,
   show_coefficients_table = TRUE
@@ -260,6 +281,27 @@ highdimcox(
 ```
 
 Variables selected in >80% of bootstrap iterations are considered robustly important.
+
+### Custom Stability Parameters
+
+```{r stability-custom}
+# Lower threshold and different subsampling ratio
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = gene_vars,
+  regularization_method = "lasso",
+  cv_folds = 10,
+  stability_selection = TRUE,
+  subsampling_iterations = 200,
+  subsampling_ratio = 0.6,
+  stability_threshold = 0.6,
+  show_coefficients_table = TRUE
+)
+```
 
 ---
 
@@ -274,7 +316,8 @@ highdimcox(
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars,
+  censorLevel = "Alive",
+  predictors = gene_vars,
   regularization_method = "lasso",
   cv_method = "cv_min",
   cv_folds = 10,
@@ -290,7 +333,8 @@ highdimcox(
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars,
+  censorLevel = "Alive",
+  predictors = gene_vars,
   regularization_method = "lasso",
   cv_method = "cv_1se",
   cv_folds = 10,
@@ -301,7 +345,47 @@ highdimcox(
 
 ---
 
-## 7. Smaller Dataset (Proteomic)
+## 7. Data Suitability Assessment
+
+The suitability check runs 6 diagnostics with traffic-light indicators:
+
+1. **Events-Per-Variable (EPV)** — green ≥10, yellow ≥1, red <1
+2. **Regularization Need** — green if p ≥ n/3
+3. **Sample Size** — green ≥100, yellow ≥30, red <30
+4. **Event Rate** — green 20–80%, yellow otherwise
+5. **Multicollinearity** — max pairwise |r| (skipped if p > 2000)
+6. **Data Quality** — missing data and constant predictors
+
+```{r suitability}
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = gene_vars,
+  suitabilityCheck = TRUE,
+  show_coefficients_table = TRUE
+)
+```
+
+```{r suitability-off}
+# Disable suitability assessment
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = gene_vars,
+  suitabilityCheck = FALSE,
+  show_coefficients_table = TRUE
+)
+```
+
+---
+
+## 8. Smaller Dataset (Proteomic)
 
 ```{r proteomic-data}
 # 80 patients, 50 protein markers
@@ -326,7 +410,8 @@ event2 <- factor(ifelse(surv_time2 <= censor_time2, "Dead", "Alive"),
 data_proteomic <- data.frame(
   time = time2, status = event2,
   age = rnorm(n2, 55, 12),
-  gender = factor(sample(c("M", "F"), n2, replace = TRUE)),
+  sex = factor(sample(c("M", "F"), n2, replace = TRUE)),
+  tumor_size_cm = rnorm(n2, 3.5, 1.2),
   as.data.frame(prot_matrix)
 )
 
@@ -335,13 +420,15 @@ cat("N:", n2, "Events:", sum(event2 == "Dead"),
 ```
 
 ```{r proteomic-run}
-prot_vars <- c("age", "gender", paste0("PROT_", sprintf("%02d", 1:p_prot)))
+prot_vars <- c("age", "sex", "tumor_size_cm",
+               paste0("PROT_", sprintf("%02d", 1:p_prot)))
 
 highdimcox(
   data = data_proteomic,
   elapsedtime = "time",
   outcome = "status",
   outcomeLevel = "Dead",
+  censorLevel = "Alive",
   predictors = prot_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
@@ -357,7 +444,35 @@ highdimcox(
 
 ---
 
-## 8. Explanatory Output
+## 9. Mixed Predictors (Clinical + Genomic)
+
+Demonstrates automatic factor dummy-encoding for mixed predictor types.
+
+```{r mixed-predictors}
+mixed_vars <- c("age", "gender", "stage", "grade", "treatment",
+                paste0("GENE_", sprintf("%03d", 1:20)))
+
+highdimcox(
+  data = data_genomic,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = mixed_vars,
+  regularization_method = "elastic_net",
+  alpha_value = 0.5,
+  cv_folds = 10,
+  show_coefficients_table = TRUE,
+  show_variable_importance = TRUE
+)
+```
+
+Factor variables like `stage` and `gender` are automatically converted to
+dummy variables (e.g., "stage: II", "stage: III") in the output.
+
+---
+
+## 10. Explanatory Output
 
 ```{r explanatory}
 highdimcox(
@@ -365,12 +480,102 @@ highdimcox(
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
-  predictors = pred_vars[1:20],  # Subset for readability
+  censorLevel = "Alive",
+  predictors = gene_vars[1:20],
   regularization_method = "elastic_net",
   cv_folds = 10,
   show_coefficients_table = TRUE,
   showSummaries = TRUE,
   showExplanations = TRUE
+)
+```
+
+---
+
+## 11. Full-Feature Demonstration
+
+All options enabled simultaneously.
+
+```{r full-feature}
+highdimcox(
+  data = data_proteomic,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = prot_vars,
+  regularization_method = "elastic_net",
+  alpha_value = 0.7,
+  cv_method = "cv_min",
+  cv_folds = 5,
+  stability_selection = TRUE,
+  subsampling_iterations = 100,
+  subsampling_ratio = 0.5,
+  stability_threshold = 0.7,
+  suitabilityCheck = TRUE,
+  show_regularization_path = TRUE,
+  show_cv_plot = TRUE,
+  show_variable_importance = TRUE,
+  show_coefficients_table = TRUE,
+  show_model_diagnostics = TRUE,
+  showSummaries = TRUE,
+  showExplanations = TRUE
+)
+```
+
+---
+
+## 12. Edge Cases
+
+### Small sample (near minimum)
+
+```{r edge-small-sample}
+small_data <- data_proteomic[1:35, ]
+
+highdimcox(
+  data = small_data,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = paste0("PROT_", sprintf("%02d", 1:10)),
+  regularization_method = "elastic_net",
+  cv_folds = 5,
+  show_coefficients_table = TRUE,
+  suitabilityCheck = TRUE
+)
+```
+
+### Below minimum observations
+
+```{r edge-below-min}
+tiny_data <- data_proteomic[1:20, ]
+
+highdimcox(
+  data = tiny_data,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = paste0("PROT_", sprintf("%02d", 1:5)),
+  show_coefficients_table = TRUE
+)
+```
+
+### All censored (no events)
+
+```{r edge-no-events}
+no_events <- data_genomic
+no_events$vital_status <- factor("Alive", levels = c("Alive", "Dead"))
+
+highdimcox(
+  data = no_events,
+  elapsedtime = "survival_months",
+  outcome = "vital_status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = gene_vars[1:20],
+  show_coefficients_table = TRUE
 )
 ```
 
@@ -382,22 +587,30 @@ highdimcox(
 
 | Column | Meaning |
 |--------|---------|
-| Variable | Predictor name |
-| Coefficient | Regularized log hazard ratio |
-| Hazard Ratio | exp(coefficient) |
+| Variable | Predictor name (or "Variable: Level" for factor dummies) |
+| Coefficient (β) | Regularized log hazard ratio |
+| Hazard Ratio (HR) | exp(coefficient) — HR > 1 = increased risk |
 | Importance | Absolute coefficient value |
 
 ### Variable Importance Plot
 
-Variables are ranked by the absolute value of their regularized coefficients.
-The plot shows which predictors have the strongest association with survival
-after accounting for regularization.
+Variables ranked by absolute regularized coefficient. Top 25 shown.
+Selected variables (non-zero coefficients) are highlighted.
 
 ### Regularization Path
 
-The coefficient path plot shows how each variable's coefficient changes as the
-penalty strength (lambda) increases. Variables that persist at higher lambda values
-are more robust predictors.
+Shows how each variable's coefficient changes as lambda increases.
+Variables that persist at higher lambda values are more robust predictors.
+
+### Cross-Validation Plot
+
+Shows partial likelihood deviance vs log(lambda) with confidence bands.
+Vertical lines mark lambda.min (red) and lambda.1se (green).
+
+### Stability Selection
+
+Variables with selection probability ≥ threshold are marked as "stable".
+Higher selection frequency = more reliable predictor.
 
 ---
 
@@ -424,7 +637,7 @@ are more robust predictors.
    instead of 10 to ensure adequate events per fold.
 
 3. **Ignoring stability selection**: A single regularized model may give unstable
-   variable selections. Use stability selection (bootstrap_iterations >= 200)
+   variable selections. Use stability selection (subsampling_iterations >= 200)
    for robust results.
 
 4. **Comparing models with different alpha values**: Models with different alpha
@@ -434,17 +647,21 @@ are more robust predictors.
 5. **Not reporting the regularization method**: Always report which method
    (LASSO/Ridge/Elastic Net), alpha value, CV method, and number of selected variables.
 
+6. **Training C-index overestimates performance**: The reported C-index is
+   computed on the training data and is optimistically biased. Always validate
+   on external data before clinical use.
+
 ---
 
 ## Related ClinicoPath Functions
 
 | Function | Use When |
 |----------|----------|
-| **LASSO Cox** | Pure LASSO with suitability assessment and clinical guidance |
-| **Adaptive LASSO** | Oracle property weights for improved selection |
-| **SCAD Cox** | Non-convex penalties avoiding LASSO bias |
-| **PLS Cox** | Dimensionality reduction approach for very high p |
-| **Multivariable Survival** | Standard Cox when p is small |
+| **LASSO Cox** (`lassocox`) | Pure LASSO with suitability assessment and clinical guidance |
+| **Adaptive LASSO** (`adaptivelasso`) | Dedicated adaptive LASSO with more stability options |
+| **SCAD Cox** (`ncvregcox`) | Non-convex penalties (SCAD, MCP) avoiding LASSO bias |
+| **PLS Cox** (`plscox`) | Dimensionality reduction approach for very high p |
+| **Multivariable Survival** (`survival`) | Standard Cox when p is small |
 
 ---
 
@@ -454,3 +671,4 @@ are more robust predictors.
 - Simon N, et al. Regularization paths for Cox's proportional hazards model via coordinate descent. *J Stat Softw*. 2011;39(5):1-13.
 - Meinshausen N, Buhlmann P. Stability selection. *J R Stat Soc Ser B*. 2010;72(4):417-473.
 - Tibshirani R. Regression shrinkage and selection via the lasso. *J R Stat Soc Ser B*. 1996;58(1):267-288.
+- Zou H. The adaptive lasso and its oracle properties. *J Am Stat Assoc*. 2006;101(476):1418-1429.

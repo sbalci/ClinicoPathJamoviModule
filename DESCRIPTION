@@ -313,6 +313,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests:
     rmarkdown,
+    plsRcox,
     randomForestSRC,
     OncoDataSets,
     coxphw,
@@ -331,10 +332,14 @@ Suggests:
     BoomSpikeSlab,
     rstanarm,
     logistf,
+    coxphf,
+    doParallel,
+    foreach,
     naniar,
     parttree,
     tiff,
-    quarto
+    quarto,
+    grpreg
 Config/testthat/edition: 3
 Collate: 
     '00jmv.R'
@@ -611,6 +616,8 @@ Collate:
     'featurequality.h.R'
     'finegray.b.R'
     'finegray.h.R'
+    'firthregression.b.R'
+    'firthregression.h.R'
     'flexcomprisk.b.R'
     'flexcomprisk.h.R'
     'flexiblerelativesurvival.b.R'
@@ -919,8 +926,6 @@ Collate:
     'precisionrecall.h.R'
     'predmodel.b.R'
     'predmodel.h.R'
-    'principalcox.b.R'
-    'principalcox.h.R'
     'progressionsurvival.b.R'
     'progressionsurvival.h.R'
     'pseudosurvival.b.R'

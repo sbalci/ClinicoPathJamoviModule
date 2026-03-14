@@ -1,0 +1,193 @@
+---
+name: firthregression
+title: "Firth's Penalized Likelihood Regression"
+menuGroup: SurvivalT
+menuSubgroup: Penalized Cox Regression
+menuTitle: Firth Regression
+menuSubtitle: Bias reduction for small samples, rare events, and separation.
+version: '0.0.37'
+jas: '1.2'
+
+description:
+    main: >
+        Firth's penalized likelihood regression for both logistic (binary outcome)
+        and Cox proportional hazards (survival) models. Addresses small-sample bias,
+        complete/quasi-complete separation, and rare events by adding a Jeffreys-prior
+        penalty to the likelihood. Provides profile likelihood confidence intervals,
+        penalized likelihood ratio tests, and separation diagnostics. Particularly
+        valuable in clinical settings with low event counts, unbalanced predictors,
+        or when standard maximum likelihood estimates become infinite due to separation.
+    R:
+        dontrun: true
+        usage: |
+            # Firth logistic regression
+            firthregression(data = mydata, analysisType = "logistic",
+                outcome = "mortality",
+                predictors = c("age", "stage", "biomarker"))
+
+            # Firth Cox regression
+            firthregression(data = mydata, analysisType = "cox",
+                time = "follow_up_time", outcome = "status",
+                predictors = c("age", "stage", "biomarker"))
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: analysisType
+      title: Analysis Type
+      type: List
+      options:
+        - title: "Firth Logistic Regression (Binary Outcome)"
+          name: logistic
+        - title: "Firth Cox Regression (Survival Outcome)"
+          name: cox
+      default: logistic
+      description:
+          R: >
+            Type of regression model. Logistic uses logistf package for binary
+            outcomes with Jeffreys-prior bias reduction. Cox uses coxphf package
+            for survival outcomes with Firth-type penalized partial likelihood.
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time to event variable (numeric). Required only for Cox regression.
+            For right-censored data, this is the time from study entry to event
+            or censoring.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Outcome variable. For logistic regression, a binary variable.
+            For Cox regression, the event indicator (0 = censored, 1 = event).
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: >
+            Level of the outcome variable to be treated as the event of interest.
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [continuous, ordinal, nominal]
+      permitted: [numeric, factor]
+      description:
+          R: >
+            Variables to include in the model. Can include continuous, ordinal,
+            and nominal variables.
+
+    # Suitability assessment
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+          R: Assess if data is suitable for the selected Firth regression model.
+
+    # Confidence interval
+    - name: ciLevel
+      title: Confidence Level
+      type: Number
+      default: 0.95
+      min: 0.80
+      max: 0.99
+      description:
+          R: >
+            Confidence level for confidence intervals. Default is 0.95 for
+            95% confidence intervals.
+
+    - name: ciMethod
+      title: CI Method
+      type: List
+      options:
+        - title: "Profile Likelihood (Recommended)"
+          name: profile
+        - title: "Wald"
+          name: wald
+      default: profile
+      description:
+          R: >
+            Method for computing confidence intervals. Profile likelihood CIs
+            are recommended as they are more accurate, especially with small
+            samples and near separation. Wald CIs are faster but can be
+            unreliable in these situations.
+
+    # Separation detection
+    - name: separationCheck
+      title: Separation Detection
+      type: Bool
+      default: true
+      description:
+          R: >
+            Check for complete and quasi-complete separation in the data.
+            Separation causes standard maximum likelihood to fail with
+            infinite coefficient estimates.
+
+    # Compare with standard model
+    - name: compareStandard
+      title: Compare with Standard Model
+      type: Bool
+      default: true
+      description:
+          R: >
+            Fit the standard (unpenalized) model alongside Firth's penalized
+            model to show bias reduction. Useful for assessing how much the
+            penalty changes the estimates.
+
+    # Tables
+    - name: showModelFit
+      title: Model Fit Statistics
+      type: Bool
+      default: true
+      description:
+          R: Display model fit statistics including log-likelihood and AIC.
+
+    # Plots
+    - name: forestPlot
+      title: Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Forest plot showing odds ratios (logistic) or hazard ratios (Cox)
+            with confidence intervals on a log scale.
+
+    - name: separationPlot
+      title: Separation Diagnostic Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Diagnostic visualization showing data distributions by outcome
+            for each predictor. Helps identify separation patterns.
+
+    # Explanatory output
+    - name: showSummary
+      title: Results Summary
+      type: Bool
+      default: false
+      description:
+          R: Natural-language summary of results.
+
+    - name: showExplanations
+      title: Method Explanations
+      type: Bool
+      default: false
+      description:
+          R: Explanatory text about Firth's method and when to use it.
+
+...

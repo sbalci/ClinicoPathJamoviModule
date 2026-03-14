@@ -1,0 +1,216 @@
+---
+name: firthregression
+jrs: '1.1'
+title: Analysis Results
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: false
+
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+        - outcome
+        - time
+        - predictors
+        - analysisType
+        - outcomeLevel
+
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+        - outcome
+        - time
+        - predictors
+        - analysisType
+        - outcomeLevel
+
+    - name: coefficients
+      title: Firth Regression Coefficients
+      type: Table
+      visible: true
+      clearWith:
+        - outcome
+        - time
+        - predictors
+        - analysisType
+        - outcomeLevel
+        - ciLevel
+        - ciMethod
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: coefficient
+          title: Coefficient
+          type: number
+          format: zto
+        - name: se
+          title: SE
+          type: number
+          format: zto
+        - name: effect_size
+          title: OR / HR
+          type: number
+          format: zto
+        - name: lower_ci
+          title: Lower CI
+          type: number
+          format: zto
+        - name: upper_ci
+          title: Upper CI
+          type: number
+          format: zto
+        - name: p_value
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: bias_reduction
+          title: Bias Reduction (%)
+          type: number
+          format: zto
+          visible: (compareStandard)
+
+    - name: modelFit
+      title: Model Fit Statistics
+      type: Table
+      visible: (showModelFit)
+      clearWith:
+        - outcome
+        - time
+        - predictors
+        - analysisType
+        - outcomeLevel
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: firth_value
+          title: Firth Model
+          type: text
+        - name: standard_value
+          title: Standard Model
+          type: text
+          visible: (compareStandard)
+
+    - name: separationDiagnostics
+      title: Separation Diagnostics
+      type: Table
+      visible: (separationCheck)
+      clearWith:
+        - outcome
+        - predictors
+        - analysisType
+        - outcomeLevel
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: type
+          title: Variable Type
+          type: text
+        - name: separation_status
+          title: Status
+          type: text
+        - name: detail
+          title: Detail
+          type: text
+
+    - name: comparisonTable
+      title: Firth vs Standard Model Comparison
+      type: Table
+      visible: (compareStandard)
+      clearWith:
+        - outcome
+        - time
+        - predictors
+        - analysisType
+        - outcomeLevel
+        - ciLevel
+      columns:
+        - name: variable
+          title: Variable
+          type: text
+        - name: firth_coef
+          title: Firth Coefficient
+          type: number
+          format: zto
+        - name: standard_coef
+          title: Standard Coefficient
+          type: number
+          format: zto
+        - name: firth_effect
+          title: Firth OR/HR
+          type: number
+          format: zto
+        - name: standard_effect
+          title: Standard OR/HR
+          type: number
+          format: zto
+        - name: firth_p
+          title: Firth p
+          type: number
+          format: zto,pvalue
+        - name: standard_p
+          title: Standard p
+          type: number
+          format: zto,pvalue
+
+    - name: forestPlotImage
+      title: Forest Plot
+      type: Image
+      width: 600
+      height: 450
+      visible: (forestPlot)
+      renderFun: .renderForestPlot
+      requiresData: true
+      clearWith:
+        - outcome
+        - time
+        - predictors
+        - analysisType
+        - outcomeLevel
+        - ciLevel
+
+    - name: separationPlotImage
+      title: Separation Diagnostic Plot
+      type: Image
+      width: 600
+      height: 500
+      visible: (separationPlot)
+      renderFun: .renderSeparationPlot
+      requiresData: true
+      clearWith:
+        - outcome
+        - predictors
+        - analysisType
+        - outcomeLevel
+
+    - name: summaryText
+      title: Results Summary
+      type: Html
+      visible: (showSummary)
+      clearWith:
+        - outcome
+        - time
+        - predictors
+        - analysisType
+        - outcomeLevel
+
+    - name: explanationText
+      title: About Firth's Method
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+        - analysisType
+
+refs:
+    - ClinicoPathJamoviModule
+    - logistf
+    - coxphf
+    - survival
+...

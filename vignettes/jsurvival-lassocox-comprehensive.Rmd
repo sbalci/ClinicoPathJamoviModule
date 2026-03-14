@@ -100,6 +100,9 @@ use the **Penalized Cox Regression** module.
 | Synthetic "collinear" | 100 | 45 | 4 (2 correlated) | Multicollinearity detection |
 | Synthetic "categorical" | 100 | 40 | 3 factors | All categorical predictors |
 | `histopathology` | 250 | ~100 | 8 mixed | Real clinical pathology data |
+| `lassocox_genomic` | 80 | -- | 50 gene features | High-dimensional genomic scenario |
+| `lassocox_multicollinear` | 180 | -- | 12 correlated | Multicollinearity stress test |
+| `lassocox_breast_cancer` | 250 | -- | 20 clinical | Breast cancer clinicopathological |
 
 ---
 
@@ -347,6 +350,7 @@ lassocox(
   cv_plot = TRUE,
   coef_plot = TRUE,
   survival_plot = TRUE,
+  showSummary = TRUE,              # Natural-language results paragraph for manuscripts
   showExplanations = TRUE,         # LASSO methodology + plot explanations
   showMethodologyNotes = TRUE,     # Technical details
   includeClinicalGuidance = TRUE   # Clinical interpretation guide
@@ -426,6 +430,8 @@ where only LASSO-selected variables have non-zero coefficients.
 | Variable | Predictor name |
 | Coefficient | Log hazard ratio (positive = risk, negative = protective) |
 | Hazard Ratio | exp(coefficient) — multiplicative effect on hazard |
+| 95% CI (Lower/Upper) | Confidence interval from post-selection unpenalized Cox refit |
+| p | P-value from post-selection Cox refit (interpret with caution) |
 | Importance | Absolute coefficient value |
 
 ### Performance Table
@@ -532,6 +538,67 @@ When reporting LASSO Cox results, consider these example phrasings:
 
 > "Variables were selected using LASSO regression with 10-fold cross-validation,
 > and selected predictors were entered into the multivariable Cox model."
+
+---
+
+## 9. Using Real Test Datasets
+
+The package includes several realistic test datasets for LASSO Cox analysis.
+
+### Breast cancer clinical data
+
+```{r real-breast-cancer}
+data(lassocox_breast_cancer)
+
+lassocox(
+  data = lassocox_breast_cancer,
+  elapsedtime = "survival_months",
+  outcome = "death",
+  outcomeLevel = "Dead",
+  explanatory = c("age", "tumor_size_cm", "grade", "lymph_nodes_positive",
+                   "ki67_percent", "er_status", "her2_status", "lvi"),
+  suitabilityCheck = FALSE,
+  lambda = "lambda.1se",
+  nfolds = 10,
+  standardize = TRUE,
+  cv_plot = TRUE,
+  coef_plot = TRUE,
+  survival_plot = TRUE,
+  showSummary = TRUE
+)
+```
+
+The `showSummary = TRUE` option produces a natural-language results paragraph
+suitable for copying into manuscripts or reports.
+
+---
+
+## 10. Reproducibility with Random Seeds
+
+The `random_seed` option ensures reproducible cross-validation fold assignments.
+Using the same seed produces identical results every time.
+
+```{r seed-demo}
+# Fixed seed for reproducible results
+lassocox(
+  data = data_green,
+  elapsedtime = "time",
+  outcome = "status",
+  outcomeLevel = "event",
+  explanatory = c("var1", "var2", "var3"),
+  suitabilityCheck = FALSE,
+  random_seed = 42,
+  lambda = "lambda.1se",
+  nfolds = 5,
+  standardize = TRUE,
+  cv_plot = FALSE,
+  coef_plot = FALSE,
+  survival_plot = FALSE
+)
+```
+
+Different seeds may produce different variable selections, especially when
+predictors have similar importance. For publications, always report the seed used.
 
 ---
 

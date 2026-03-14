@@ -8,12 +8,17 @@ pcacox(
   data,
   time,
   status,
+  outcomeLevel,
+  censorLevel,
   predictors,
+  suitabilityCheck = TRUE,
   clinical_vars,
   pca_method = "supervised",
   n_components = 5,
   component_selection = "cv",
   cv_folds = 10,
+  sparse_parameter = 0.1,
+  confidence_level = 0.95,
   variance_threshold = 0.8,
   scaling = TRUE,
   centering = TRUE,
@@ -27,6 +32,7 @@ pcacox(
   plot_biplot = TRUE,
   plot_survival = TRUE,
   risk_score = TRUE,
+  show_model_comparison = FALSE,
   pathway_analysis = FALSE,
   feature_importance = TRUE
 )
@@ -38,7 +44,14 @@ pcacox(
 
 \item{status}{Event status variable}
 
+\item{outcomeLevel}{Level of status variable indicating event occurred}
+
+\item{censorLevel}{Level of status variable indicating censored (no event)}
+
 \item{predictors}{Variables for principal component analysis}
+
+\item{suitabilityCheck}{assess if data is suitable for the selected PCA Cox
+model}
 
 \item{clinical_vars}{Clinical predictors to retain in model}
 
@@ -49,6 +62,10 @@ pcacox(
 \item{component_selection}{Selection criteria for PCs}
 
 \item{cv_folds}{K-fold CV parameter}
+
+\item{sparse_parameter}{Sparsity alpha/beta parameter}
+
+\item{confidence_level}{Confidence interval width}
 
 \item{variance_threshold}{Proportion of variance threshold}
 
@@ -76,6 +93,9 @@ pcacox(
 
 \item{risk_score}{Calculate combined risk score}
 
+\item{show_model_comparison}{Calculate and compare sequential component
+additions}
+
 \item{pathway_analysis}{Analyze biological pathways}
 
 \item{feature_importance}{Rank features by contribution}
@@ -84,6 +104,7 @@ pcacox(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$pcaSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$coxResults} \tab \tab \tab \tab \tab a table \cr
@@ -91,6 +112,7 @@ A results object containing:
 \code{results$modelPerformance} \tab \tab \tab \tab \tab a table \cr
 \code{results$featureImportance} \tab \tab \tab \tab \tab a table \cr
 \code{results$riskScore} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelComparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$screePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$loadingsPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$biplot} \tab \tab \tab \tab \tab an image \cr

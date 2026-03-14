@@ -1,23 +1,28 @@
-# Testing Guide: highdimcox -- High-Dimensional Cox Regression
+# Testing Guide: highdimcox — High-Dimensional Cox Regression
 
-This document provides numbered test scenarios that cover every option in the
-`highdimcox` analysis. Use the two bundled datasets (`highdimcox_genomic` and
-`highdimcox_proteomic`) to run through these scenarios in jamovi or from R.
+All test datasets are in `data/` (RDA). Generate them by running:
+
+```r
+source("data-raw/create_highdimcox_test_data.R")
+```
+
+Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
+
+## Changelog
+
+- **2026-03-12**: Resync with current `.a.yaml`. Removed stale references to
+  `variable_selection`, `bootstrap_iterations`, `cv_glmnet`. Added
+  `suitabilityCheck`, `censorLevel`, `subsampling_ratio` scenarios. Updated
+  option names throughout. Added data suitability test section.
 
 ---
 
 ## Test Datasets
 
-| Dataset | n | Predictors | Event Rate | outcomeLevel | Time Variable | Outcome Variable |
-|---|---|---|---|---|---|---|
-| `highdimcox_genomic` | 150 | 100 genes + 5 clinical | ~50 % | `"Dead"` | `survival_months` | `vital_status` |
-| `highdimcox_proteomic` | 80 | 50 proteins + 3 clinical | ~65 % | `"Dead"` | `follow_up_months` | `event_status` |
-
-Generate the datasets by running:
-
-```r
-source("data-raw/create_highdimcox_test_data.R")
-```
+| Dataset | n | Predictors | Event Rate | outcomeLevel | censorLevel | Time Variable | Outcome Variable |
+|---|---|---|---|---|---|---|---|
+| `highdimcox_genomic` | 150 | 100 genes + 5 clinical | ~50% | `"Dead"` | `"Alive"` | `survival_months` | `vital_status` |
+| `highdimcox_proteomic` | 80 | 50 proteins + 3 clinical | ~65% | `"Dead"` | `"Alive"` | `follow_up_months` | `event_status` |
 
 ---
 
@@ -25,621 +30,363 @@ source("data-raw/create_highdimcox_test_data.R")
 
 ### 1. Default Run (Elastic Net, 1-SE Rule)
 
-**Purpose:** Verify the analysis runs end-to-end with all default options.
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 1 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | All defaults (`regularization_method="elastic_net"`, `alpha_value=0.5`, `cv_method="cv_1se"`, `cv_folds=10`) |
 
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100))
-)
-```
+**Expected:** Elastic Net (alpha=0.5), 10-fold CV, 1-SE lambda. Default outputs visible: variable importance plot, coefficients table, regularization metrics, model summary. Suitability report visible. Stability selection tables/plots hidden.
 
-**Expected:** Elastic Net (alpha = 0.5), 10-fold CV, 1-SE lambda. All default
-output sections visible (regularization path, CV plot, variable importance,
-coefficients table, model diagnostics). Stability selection tables/plots hidden.
+**Options covered:** `elapsedtime`, `outcome`, `predictors`, `outcomeLevel`, `regularization_method`, `alpha_value`, `cv_method`, `cv_folds`, `suitabilityCheck`, `show_variable_importance`, `show_coefficients_table`
 
 ---
 
 ### 2. LASSO Regularization
 
-**Purpose:** Test pure L1 penalty -- alpha should be forced to 1.0.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100)),
-  regularization_method = "lasso"
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 2 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | `regularization_method="lasso"` |
 
 **Check:**
-- Regularization Metrics table reports alpha = 1.0.
-- Fewer selected variables than ridge.
-- Some coefficients are exactly zero.
+- Regularization Metrics table reports alpha = 1.0
+- Fewer selected variables than ridge
+- Some coefficients exactly zero
 
 ---
 
 ### 3. Ridge Regularization
 
-**Purpose:** Test pure L2 penalty -- alpha should be forced to 0.0.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100)),
-  regularization_method = "ridge"
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 3 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | `regularization_method="ridge"` |
 
 **Check:**
-- Alpha reported as 0.0.
-- All (or nearly all) predictors retained with non-zero coefficients.
-- Coefficients are shrunk toward zero but not exactly zero.
+- Alpha reported as 0.0
+- All (or nearly all) predictors retained with non-zero coefficients
+- Note added about Ridge not performing variable selection
 
 ---
 
 ### 4. Adaptive LASSO
 
-**Purpose:** Test data-driven penalty weights.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  regularization_method = "adaptive_lasso"
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 4 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01`–`PROT_50` | `regularization_method="adaptive_lasso"` |
 
 **Check:**
-- Model runs without error.
-- Selected variable set may differ from standard LASSO.
+- Model runs without error
+- Internal Ridge fit produces adaptive weights
+- Selected variable set may differ from standard LASSO
 
 ---
 
 ### 5. Elastic Net with Custom Alpha
 
-**Purpose:** Test user-specified alpha blending between L1 and L2.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100)),
-  regularization_method = "elastic_net",
-  alpha_value = 0.8
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 5 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | `regularization_method="elastic_net"`, `alpha_value=0.8` |
 
 **Check:**
-- Alpha reported as 0.8 in Regularization Metrics.
-- Behavior closer to LASSO than default (alpha=0.5).
+- Alpha reported as 0.8 in Regularization Metrics
+- Behavior closer to LASSO than default (alpha=0.5)
 
 ---
 
-### 6. CV Method -- Minimum CV Error
+### 6. CV Method — Minimum CV Error
 
-**Purpose:** Select lambda.min instead of lambda.1se.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  cv_method = "cv_min"
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 6 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01`–`PROT_50` | `cv_method="cv_min"` |
 
 **Check:**
-- Selected Lambda matches Lambda Min in Regularization Metrics.
-- Typically selects more variables than the 1-SE rule.
+- Selected Lambda matches Lambda Min in Regularization Metrics
+- Typically selects more variables than the 1-SE rule
 
 ---
 
-### 7. CV Method -- Standard K-Fold CV
+### 7. Custom Number of CV Folds
 
-**Purpose:** Test the cv_glmnet option path.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  cv_method = "cv_glmnet"
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 7a | `highdimcox_proteomic` | same as #6 | `cv_folds=3` |
+| 7b | `highdimcox_proteomic` | same as #6 | `cv_folds=20` |
 
 **Check:**
-- Analysis completes. Lambda selection follows the 1-SE default path
-  (cv_glmnet uses the same underlying mechanism as cv_1se in current
-  implementation).
+- Both extremes run without error
+- Model Summary reports the correct fold count
 
 ---
 
-### 8. Custom Number of CV Folds
+### 8. Stability Selection (Default Parameters)
 
-**Purpose:** Test non-default cv_folds values at the boundaries.
-
-```r
-# Minimum folds
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  cv_folds = 3
-)
-
-# Maximum folds (LOOCV-like)
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  cv_folds = 20
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 8 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01`–`PROT_50` | `regularization_method="lasso"`, `stability_selection=TRUE`, `subsampling_iterations=500`, `stability_threshold=0.8` |
 
 **Check:**
-- Both extremes run without error.
-- Model Summary reports the correct fold count.
+- Stability Selection Results table visible
+- Stability Selection Plot visible
+- At least some variables with selection probability >= 0.8
+- Variables ranked by selection probability
 
 ---
 
-### 9. Stability Selection (Default Parameters)
+### 9. Stability Selection — Custom Parameters
 
-**Purpose:** Enable stability selection with default bootstrap_iterations=500
-and stability_threshold=0.8.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  regularization_method = "lasso",
-  stability_selection = TRUE
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 9 | `highdimcox_proteomic` | same as #8 | `stability_selection=TRUE`, `subsampling_iterations=100`, `subsampling_ratio=0.6`, `stability_threshold=0.5` |
 
 **Check:**
-- Stability Selection Results table is visible.
-- Stability Selection Plot is visible.
-- At least some variables show selection probability >= 0.8.
-- Variables ranked by selection probability.
+- Lower threshold selects more "stable" variables
+- Fewer iterations completes faster
+- Custom subsampling ratio applied (60% per iteration)
 
 ---
 
-### 10. Stability Selection -- Custom Threshold and Iterations
+### 10. Data Suitability Assessment
 
-**Purpose:** Test boundary values for stability parameters.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  stability_selection = TRUE,
-  bootstrap_iterations = 100,
-  stability_threshold = 0.5
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 10a | `highdimcox_genomic` | all 100 genes | `suitabilityCheck=TRUE` (default) |
+| 10b | `highdimcox_genomic` | all 100 genes | `suitabilityCheck=FALSE` |
 
 **Check:**
-- Lower threshold selects more "stable" variables.
-- Fewer bootstrap iterations makes analysis faster.
-- Results still valid and informative.
+- 10a: Suitability report visible with 6 checks (EPV, regularization need, sample size, event rate, multicollinearity, data quality)
+- 10b: Suitability report hidden
 
 ---
 
-### 11. Variable Selection -- Stepwise
+### 11. Toggle All Plots Off
 
-**Purpose:** Test post-regularization stepwise variable selection.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  variable_selection = "stepwise"
-)
-```
-
-**Check:**
-- Analysis completes (or gracefully reports if not yet implemented).
-- If implemented, the final model may have fewer variables than pure
-  regularization.
-
----
-
-### 12. Variable Selection -- Best Subset
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:20)),
-  variable_selection = "best_subset"
-)
-```
-
-**Check:** Same as scenario 11. Use fewer predictors since best subset is
-computationally expensive.
-
----
-
-### 13. Variable Selection -- Forward Selection
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  variable_selection = "forward_selection"
-)
-```
-
----
-
-### 14. Toggle All Plots Off
-
-**Purpose:** Verify all plot Image items can be hidden.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100)),
-  show_regularization_path = FALSE,
-  show_cv_plot = FALSE,
-  show_variable_importance = FALSE,
-  show_model_diagnostics = FALSE
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 11 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `show_regularization_path=FALSE`, `show_cv_plot=FALSE`, `show_variable_importance=FALSE`, `show_model_diagnostics=FALSE` |
 
 **Check:** No plot/image output. Tables still present.
 
 ---
 
-### 15. Toggle Coefficients Table Off
+### 12. Toggle Coefficients Table Off
 
-**Purpose:** Verify the selected variables table and model summary can be hidden.
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 12 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `show_coefficients_table=FALSE` |
 
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100)),
-  show_coefficients_table = FALSE
-)
-```
-
-**Check:** `selectedVariables` table and `modelSummary` html are not visible.
+**Check:** `selectedVariables` table not visible.
 
 ---
 
-### 16. Show Analysis Summaries
+### 13. Show Analysis Summaries
 
-**Purpose:** Test natural language summary generation.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100)),
-  showSummaries = TRUE
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 13 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `showSummaries=TRUE` |
 
 **Check:**
-- `analysisSummary` HTML output is visible.
-- Contains method description, lambda value, and variable counts.
+- `analysisSummary` HTML output visible
+- Contains method description, lambda value, variable counts, C-index
 
 ---
 
-### 17. Show Method Explanations
+### 14. Show Method Explanations
 
-**Purpose:** Test methodology documentation output.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:100)),
-  showExplanations = TRUE
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 14 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `showExplanations=TRUE` |
 
 **Check:**
-- `methodExplanation` HTML output is visible.
-- Contains sections on regularization methods, cross-validation, stability
-  selection, and clinical interpretation.
+- `methodExplanation` HTML output visible
+- Contains sections on regularization methods, CV, stability selection, clinical interpretation
 
 ---
 
-### 18. Combined: Summaries + Explanations + Stability
+### 15. Combined: Summaries + Explanations + Stability
 
-**Purpose:** All optional output enabled simultaneously.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:50)),
-  stability_selection = TRUE,
-  bootstrap_iterations = 200,
-  showSummaries = TRUE,
-  showExplanations = TRUE
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 15 | `highdimcox_proteomic` | `PROT_01`–`PROT_50` | `stability_selection=TRUE`, `subsampling_iterations=200`, `showSummaries=TRUE`, `showExplanations=TRUE` |
 
 **Check:**
-- All tables, plots, summaries, and explanations render without error.
-- Stability summary is included in the analysis summary text.
+- All tables, plots, summaries, and explanations render without error
+- Stability summary included in analysis summary text
 
 ---
 
-### 19. Mixed Predictor Types (Numeric + Factor)
+### 16. Mixed Predictor Types (Numeric + Factor)
 
-**Purpose:** Include clinical factor variables alongside numeric gene data.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = c("age", "gender", "stage", "grade", "treatment",
-                  paste0("GENE_", sprintf("%03d", 1:20)))
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 16 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `age`, `gender`, `stage`, `grade`, `treatment`, `GENE_001`–`GENE_020` | default |
 
 **Check:**
-- Factor variables are converted to numeric internally.
-- No errors from mixed types in the predictor matrix.
+- Factor variables dummy-encoded internally via `model.matrix()`
+- No errors from mixed types
+- Display names show "stage: II", "stage: III" for factor dummies
 
 ---
 
-### 20. Minimal Predictors (Single Predictor)
+### 17. Minimal Predictors (Single Predictor)
 
-**Purpose:** Edge case -- only one predictor variable.
-
-```r
-highdimcox(
-  data = highdimcox_genomic,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = "GENE_003"
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 17 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_003` | default |
 
 **Check:**
-- Analysis either runs or provides a meaningful error message.
-- glmnet requires at least 2 predictors; verify graceful handling.
+- Analysis either runs or provides a meaningful error
+- glmnet requires at least 2 columns; verify graceful handling
 
 ---
 
-### 21. All Observations Censored (Edge Case)
+### 18. All Observations Censored (Zero Events)
 
-**Purpose:** Dataset with no events to verify error handling.
-
-```r
-genomic_no_events <- highdimcox_genomic
-genomic_no_events$vital_status <- factor("Alive",
-  levels = c("Alive", "Dead"))
-
-highdimcox(
-  data = genomic_no_events,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:50))
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 18 | Modified `highdimcox_genomic` (all `vital_status = "Alive"`) | predictors: `GENE_001`–`GENE_050` | default |
 
 **Check:**
-- Informative error message about zero events.
-- No unhandled crash.
+- Validation error: "No rows match event level 'Dead'"
+- No unhandled crash
 
 ---
 
-### 22. Very Few Events (Edge Case)
+### 19. Very Few Events (<5%)
 
-**Purpose:** Dataset with only a handful of events.
-
-```r
-set.seed(42)
-genomic_few_events <- highdimcox_genomic
-genomic_few_events$vital_status <- factor(
-  ifelse(runif(150) < 0.05, "Dead", "Alive"),
-  levels = c("Alive", "Dead")
-)
-
-highdimcox(
-  data = genomic_few_events,
-  elapsedtime = "survival_months",
-  outcome = "vital_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("GENE_", sprintf("%03d", 1:50))
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 19 | Modified `highdimcox_genomic` (~5% events) | predictors: `GENE_001`–`GENE_050` | default |
 
 **Check:**
-- Model either fits with a warning or reports insufficient events.
+- Warning about low events displayed in todo HTML
+- Model either fits or reports insufficient events
 
 ---
 
-### 23. Small Sample Size (Near Minimum)
+### 20. Small Sample Size (Near Minimum)
 
-**Purpose:** Test with n close to the MIN_OBSERVATIONS threshold (30).
-
-```r
-small_data <- highdimcox_proteomic[1:35, ]
-
-highdimcox(
-  data = small_data,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:10)),
-  cv_folds = 5
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 20 | `highdimcox_proteomic[1:35, ]` | predictors: `PROT_01`–`PROT_10`, `cv_folds=5` | default |
 
 **Check:**
-- Analysis runs (n=35 > MIN_OBSERVATIONS=30).
-- Fewer CV folds appropriate for small n.
+- Analysis runs (n=35 > MIN_OBSERVATIONS=30)
+- Fewer CV folds appropriate for small n
+- Suitability report flags small sample size (yellow)
 
 ---
 
-### 24. Below Minimum Observations (Edge Case)
+### 21. Below Minimum Observations
 
-**Purpose:** Verify rejection when n < 30.
-
-```r
-tiny_data <- highdimcox_proteomic[1:20, ]
-
-highdimcox(
-  data = tiny_data,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = paste0("PROT_", sprintf("%02d", 1:5))
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 21 | `highdimcox_proteomic[1:20, ]` | predictors: `PROT_01`–`PROT_05` | default |
 
 **Check:**
-- Validation returns early.
-- Informative error about insufficient observations.
+- Validation returns early with error about insufficient observations (<30)
+- Informative error message displayed
+
+---
+
+### 22. Outcome Level Validation
+
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 22a | `highdimcox_genomic` | `outcomeLevel="Dead"`, `censorLevel="Dead"` (same level) | default |
+| 22b | `highdimcox_genomic` | `outcomeLevel="NonExistent"` | default |
+
+**Check:**
+- 22a: Validation error — levels must be different
+- 22b: Validation error — no rows match event level
+
+---
+
+### 23. Missing Data in Predictors
+
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 23 | Modified `highdimcox_genomic` (20% NA in GENE_001–GENE_005) | all genes | default |
+
+**Check:**
+- Rows with missing values excluded (complete-case analysis)
+- Warning about excluded rows in todo HTML
+- Suitability report flags data quality issue
+
+---
+
+### 24. Constant Predictors
+
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 24 | Modified `highdimcox_genomic` (GENE_001–GENE_005 all set to constant) | all genes | default |
+
+**Check:**
+- Constant columns removed before model fitting
+- Warning about removed constant predictors
+- Analysis proceeds with remaining predictors
 
 ---
 
 ### 25. Method Comparison (All Four Regularizations)
 
-**Purpose:** Run all four methods on the same dataset and compare results.
-
-```r
-methods <- c("lasso", "ridge", "elastic_net", "adaptive_lasso")
-predictors <- paste0("PROT_", sprintf("%02d", 1:50))
-
-results <- lapply(methods, function(m) {
-  highdimcox(
-    data = highdimcox_proteomic,
-    elapsedtime = "follow_up_months",
-    outcome = "event_status",
-    outcomeLevel = "Dead",
-    predictors = predictors,
-    regularization_method = m
-  )
-})
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 25 | `highdimcox_proteomic` | predictors: `PROT_01`–`PROT_50` | `regularization_method` = each of `lasso`, `ridge`, `elastic_net`, `adaptive_lasso` |
 
 **Check:**
-- All four complete without error.
-- LASSO selects fewest variables; Ridge retains most.
-- Elastic Net is intermediate.
+- All four complete without error
+- LASSO selects fewest variables; Ridge retains most
+- Elastic Net intermediate
 
 ---
 
-### 26. Proteomic Dataset with Stability + All Outputs
+### 26. Full-Feature Stress Test
 
-**Purpose:** Full-feature stress test on the smaller dataset.
-
-```r
-highdimcox(
-  data = highdimcox_proteomic,
-  elapsedtime = "follow_up_months",
-  outcome = "event_status",
-  outcomeLevel = "Dead",
-  predictors = c("age", "sex", "tumor_size_cm",
-                  paste0("PROT_", sprintf("%02d", 1:50))),
-  regularization_method = "elastic_net",
-  alpha_value = 0.7,
-  cv_method = "cv_min",
-  cv_folds = 5,
-  variable_selection = "none",
-  stability_selection = TRUE,
-  bootstrap_iterations = 200,
-  stability_threshold = 0.6,
-  show_regularization_path = TRUE,
-  show_cv_plot = TRUE,
-  show_variable_importance = TRUE,
-  show_coefficients_table = TRUE,
-  show_model_diagnostics = TRUE,
-  showSummaries = TRUE,
-  showExplanations = TRUE
-)
-```
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 26 | `highdimcox_proteomic` | predictors: `age`, `sex`, `tumor_size_cm`, `PROT_01`–`PROT_50` | `regularization_method="elastic_net"`, `alpha_value=0.7`, `cv_method="cv_min"`, `cv_folds=5`, `stability_selection=TRUE`, `subsampling_iterations=200`, `subsampling_ratio=0.6`, `stability_threshold=0.6`, all show_* = TRUE, `showSummaries=TRUE`, `showExplanations=TRUE`, `suitabilityCheck=TRUE` |
 
 **Check:**
-- Every output section is populated.
-- No serialization errors from plot states.
-- Analysis summary mentions stability selection results.
+- Every output section populated
+- No serialization errors from plot states
+- Analysis summary mentions stability selection results
+- Suitability report includes all 6 checks
 
 ---
 
-## Option Coverage Checklist
+### 27. p >> n Scenario (More Predictors Than Observations)
 
-| YAML Option | Type | Default | Tested In |
-|---|---|---|---|
-| `elapsedtime` | Variable | -- | All scenarios |
-| `outcome` | Variable | -- | All scenarios |
-| `predictors` | Variables | -- | All scenarios |
-| `outcomeLevel` | String | `"1"` | All (overridden to `"Dead"`) |
-| `regularization_method` | List | `elastic_net` | #1-5, #25 |
-| `alpha_value` | Number | `0.5` | #5, #26 |
-| `cv_method` | List | `cv_1se` | #1, #6, #7, #26 |
-| `cv_folds` | Integer | `10` | #8, #23, #26 |
-| `variable_selection` | List | `none` | #11, #12, #13 |
-| `stability_selection` | Bool | `FALSE` | #9, #10, #18, #26 |
-| `bootstrap_iterations` | Integer | `500` | #9, #10, #18, #26 |
-| `stability_threshold` | Number | `0.8` | #9, #10, #26 |
-| `show_regularization_path` | Bool | `TRUE` | #14, #26 |
-| `show_cv_plot` | Bool | `TRUE` | #14, #26 |
-| `show_variable_importance` | Bool | `TRUE` | #14, #26 |
-| `show_coefficients_table` | Bool | `TRUE` | #15, #26 |
-| `show_model_diagnostics` | Bool | `TRUE` | #14, #26 |
-| `showSummaries` | Bool | `FALSE` | #16, #18, #26 |
-| `showExplanations` | Bool | `FALSE` | #17, #18, #26 |
+| # | File | Variables | Options to Test |
+|---|------|-----------|-----------------|
+| 27 | `highdimcox_proteomic` (n=80) | all 50 proteins + all 3 clinical = 53 predictors + dummy-encoded | `regularization_method="elastic_net"`, `cv_folds=5` |
+
+**Check:**
+- Analysis handles high p/n ratio gracefully
+- Suitability report flags high-dimensional setting (green for regularization need)
+
+---
+
+## COMPLETE OPTION COVERAGE CHECKLIST
+
+- [x] `elapsedtime` — all scenarios
+- [x] `outcome` — all scenarios
+- [x] `predictors` — all scenarios
+- [x] `outcomeLevel` — all scenarios, edge cases #18, #22
+- [x] `censorLevel` — #22a
+- [x] `suitabilityCheck` — #10a (true), #10b (false)
+- [x] `regularization_method` — #1 (elastic_net), #2 (lasso), #3 (ridge), #4 (adaptive_lasso), #25 (all four)
+- [x] `alpha_value` — #5 (0.8), #26 (0.7)
+- [x] `cv_method` — #1 (cv_1se), #6 (cv_min), #26 (cv_min)
+- [x] `cv_folds` — #7a (3), #7b (20), #20 (5), #26 (5)
+- [x] `stability_selection` — #8 (true), #9 (true), #15 (true), #26 (true)
+- [x] `subsampling_iterations` — #8 (500), #9 (100), #15 (200), #26 (200)
+- [x] `subsampling_ratio` — #9 (0.6), #26 (0.6)
+- [x] `stability_threshold` — #8 (0.8), #9 (0.5), #26 (0.6)
+- [x] `show_regularization_path` — #11 (false), #26 (true)
+- [x] `show_cv_plot` — #11 (false), #26 (true)
+- [x] `show_variable_importance` — #11 (false), default (true)
+- [x] `show_coefficients_table` — #12 (false), default (true)
+- [x] `show_model_diagnostics` — #11 (false), #26 (true)
+- [x] `showSummaries` — #13 (true), #15 (true), #26 (true)
+- [x] `showExplanations` — #14 (true), #15 (true), #26 (true)
 
 ---
 
@@ -647,11 +394,16 @@ highdimcox(
 
 | Scenario | Test # | Expected Behavior |
 |---|---|---|
-| Single predictor | #20 | Graceful error or degenerate model |
-| All censored (0 events) | #21 | Informative error, no crash |
-| Very few events (<5%) | #22 | Warning or reduced model |
-| n near minimum (35) | #23 | Runs with fewer CV folds |
-| n below minimum (<30) | #24 | Validation rejects early |
-| Mixed numeric + factor predictors | #19 | Automatic conversion |
+| Single predictor | #17 | Graceful error or degenerate model |
+| All censored (0 events) | #18 | Informative validation error |
+| Very few events (<5%) | #19 | Warning in todo HTML |
+| n near minimum (35) | #20 | Runs with fewer CV folds |
+| n below minimum (<30) | #21 | Validation rejects early |
+| Same event/censor level | #22a | Validation error |
+| Invalid outcome level | #22b | Validation error |
+| Missing data in predictors | #23 | Complete-case exclusion, data quality warning |
+| Constant predictors | #24 | Removed, warning, analysis proceeds |
+| Mixed numeric + factor predictors | #16 | Automatic dummy encoding |
 | All outputs enabled | #26 | Every section populated |
-| All plots disabled | #14 | Only tables visible |
+| All plots disabled | #11 | Only tables visible |
+| p >> n | #27 | Handled by regularization |

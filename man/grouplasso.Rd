@@ -6,8 +6,11 @@
 \usage{
 grouplasso(
   data,
+  suitabilityCheck = TRUE,
   time,
   event,
+  outcomeLevel,
+  censorLevel,
   predictors,
   strata,
   group_definition = "automatic",
@@ -53,11 +56,24 @@ grouplasso(
 \arguments{
 \item{data}{The data as a data frame.}
 
+\item{suitabilityCheck}{Run a comprehensive data suitability assessment
+before analysis. Checks sample size, events-per-variable ratio,
+multicollinearity,  and whether regularization is needed.}
+
 \item{time}{Time to event variable (numeric). For right-censored data, this
 is the  time from study entry to event or censoring.}
 
 \item{event}{Event indicator variable. For survival analysis: 0 = censored,
 1 = event. For competing risks: 0 = censored, 1+ = different event types.}
+
+\item{outcomeLevel}{Level of \code{event} that represents the event of
+interest (coded as 1). Rows matching neither this level nor
+\code{censorLevel} are excluded as NA.}
+
+\item{censorLevel}{Level of \code{event} that represents censoring (coded
+as 0). Together with \code{outcomeLevel}, this defines a strict two-level
+encoding: rows whose event value matches neither level are treated as
+missing and excluded.}
 
 \item{predictors}{Variables to include in the group LASSO Cox model.
 Variables can be grouped based on biological, clinical, or statistical
@@ -199,11 +215,13 @@ A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$groupSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 \code{results$pathSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$cvResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$stabilityResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$modelPerformanceNote} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelPerformance} \tab \tab \tab \tab \tab a table \cr
 \code{results$nestedCVResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$permutationResults} \tab \tab \tab \tab \tab a table \cr

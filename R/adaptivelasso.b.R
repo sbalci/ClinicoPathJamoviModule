@@ -3,7 +3,8 @@ adaptivelassoClass <- R6::R6Class(
     inherit = adaptivelassoBase,
     private = list(
         .init = function() {
-            if (is.null(self$data) || is.null(self$options$time) || is.null(self$options$event)) {
+            if (is.null(self$data) || is.null(self$options$time) || is.null(self$options$event) ||
+                length(self$options$predictors) == 0) {
                 private$.showMessage(
                     "<html>
                     <head>
@@ -36,6 +37,8 @@ adaptivelassoClass <- R6::R6Class(
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             if (is.null(self$data) || is.null(self$options$time) || is.null(self$options$event) ||
                 length(self$options$predictors) == 0) {
                 return()
@@ -77,10 +80,18 @@ adaptivelassoClass <- R6::R6Class(
             }, error = function(e) {
                 private$.showMessage(
                     paste0("<html><body><h3>Analysis Error</h3><p>",
-                           "Error in adaptive LASSO fitting: ", e$message,
+                           "Error in adaptive LASSO fitting: ", private$.escapeHtml(e$message),
                            "</p><p>Try reducing the number of predictors or adjusting penalty settings.</p></body></html>")
                 )
             })
+        },
+
+        .escapeHtml = function(x) {
+            x <- gsub("&", "&amp;", as.character(x))
+            x <- gsub("<", "&lt;", x)
+            x <- gsub(">", "&gt;", x)
+            x <- gsub("\"", "&quot;", x)
+            x
         },
 
         .showMessage = function(message_html) {
@@ -91,6 +102,53 @@ adaptivelassoClass <- R6::R6Class(
         .hideMessage = function() {
             self$results$instructions$setVisible(FALSE)
             self$results$instructions$setContent("")
+        },
+
+        # Notice collection (HTML-based to avoid protobuf serialization errors)
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                return()
+            }
+
+            typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = "\u26d4"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = "\u26a0\ufe0f"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = "\u26a0\ufe0f"),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "\u2139\ufe0f")
+            )
+
+            html <- "<div style='margin: 10px 0;'>"
+
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]]
+                if (is.null(style)) style <- typeStyles$INFO
+
+                safe_title <- gsub("<", "&lt;", gsub("&", "&amp;", notice$title))
+                safe_content <- gsub("<", "&lt;", gsub("&", "&amp;", notice$content))
+
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    style$icon, " ", safe_title, "</strong><br>",
+                    "<span style='color: #374151;'>", safe_content, "</span>",
+                    "</div>"
+                )
+            }
+
+            html <- paste0(html, "</div>")
+            self$results$notices$setContent(html)
         },
 
         .assessSuitability = function() {
@@ -183,6 +241,12 @@ adaptivelassoClass <- R6::R6Class(
                                "<span style='color: green;'>✓ <b>Adequate Events:</b> Sample size is sufficient for this number of predictors without regularization, but Adaptive LASSO may still improve parsimony.</span>",
                     "</div>",
                     missing_text,
+                    if (missing_pct > 0) paste0(
+                        "<div style='color: #555; margin-top: 5px; font-size: 0.9em;'>",
+                        "<i>Note: EPV is based on total screened observations (N=", total_n, "). ",
+                        "The actual model uses ", complete_cases, " complete cases after listwise deletion, ",
+                        "which may yield a different effective EPV.</i></div>"
+                    ) else "",
                 "</div></html>"
             )
             
@@ -198,6 +262,14 @@ adaptivelassoClass <- R6::R6Class(
                 }
             }
 
+            censor_level <- self$options$censor_level
+            if (!is.null(censor_level)) {
+                censor_level <- as.character(censor_level)
+                if (!nzchar(censor_level)) {
+                    censor_level <- NULL
+                }
+            }
+
             if (is.factor(event_raw) || is.character(event_raw)) {
                 event_chr <- as.character(event_raw)
                 event_levels <- if (is.factor(event_raw)) levels(event_raw) else sort(unique(event_chr))
@@ -208,19 +280,55 @@ adaptivelassoClass <- R6::R6Class(
                             ok = FALSE,
                             message = paste0(
                                 "<html><body><h3>Invalid Event Level</h3><p>Selected event level ('",
-                                event_level,
+                                private$.escapeHtml(event_level),
                                 "') is not present in the event variable.</p></body></html>"
                             )
                         ))
                     }
-                    event_values <- as.numeric(event_chr == event_level)
-                    return(list(ok = TRUE, values = event_values, event_level = event_level))
+                    if (!is.null(censor_level) && !(censor_level %in% event_levels)) {
+                        return(list(
+                            ok = FALSE,
+                            message = paste0(
+                                "<html><body><h3>Invalid Censored Level</h3><p>Selected censored level ('",
+                                private$.escapeHtml(censor_level),
+                                "') is not present in the event variable.</p></body></html>"
+                            )
+                        ))
+                    }
+                    if (!is.null(censor_level) && event_level == censor_level) {
+                        return(list(
+                            ok = FALSE,
+                            message = "<html><body><h3>Invalid Level Selection</h3><p>Event Level and Censored Level cannot be the same.</p></body></html>"
+                        ))
+                    }
+
+                    # Two-level encoding: event_level -> 1, censor_level -> 0, else -> NA
+                    event_numeric <- rep(NA_real_, length(event_chr))
+                    event_numeric[event_chr == event_level] <- 1
+                    if (!is.null(censor_level)) {
+                        event_numeric[event_chr == censor_level] <- 0
+                    } else {
+                        # No censor_level specified: everything that is not the event is censored
+                        event_numeric[event_chr != event_level & !is.na(event_chr)] <- 0
+                    }
+                    n_excluded <- sum(is.na(event_numeric) & !is.na(event_chr))
+                    return(list(ok = TRUE, values = event_numeric,
+                                event_level = event_level,
+                                censor_level = censor_level,
+                                n_excluded = n_excluded))
                 }
 
                 if (length(event_levels) == 2) {
-                    default_level <- event_levels[2]
-                    event_values <- as.numeric(event_chr == default_level)
-                    return(list(ok = TRUE, values = event_values, event_level = default_level))
+                    default_event <- event_levels[2]
+                    default_censor <- event_levels[1]
+                    event_numeric <- rep(NA_real_, length(event_chr))
+                    event_numeric[event_chr == default_event] <- 1
+                    event_numeric[event_chr == default_censor] <- 0
+                    n_excluded <- sum(is.na(event_numeric) & !is.na(event_chr))
+                    return(list(ok = TRUE, values = event_numeric,
+                                event_level = default_event,
+                                censor_level = default_censor,
+                                n_excluded = n_excluded))
                 }
 
                 return(list(
@@ -252,25 +360,60 @@ adaptivelassoClass <- R6::R6Class(
                         message = "<html><body><h3>Invalid Event Level</h3><p>Event Level must be numeric for numeric event variables.</p></body></html>"
                     ))
                 }
-                event_values <- as.numeric(event_num == event_level_num)
-                return(list(ok = TRUE, values = event_values, event_level = as.character(event_level_num)))
+                censor_level_num <- NULL
+                if (!is.null(censor_level)) {
+                    censor_level_num <- suppressWarnings(as.numeric(censor_level))
+                    if (is.na(censor_level_num)) {
+                        return(list(
+                            ok = FALSE,
+                            message = "<html><body><h3>Invalid Censored Level</h3><p>Censored Level must be numeric for numeric event variables.</p></body></html>"
+                        ))
+                    }
+                    if (event_level_num == censor_level_num) {
+                        return(list(
+                            ok = FALSE,
+                            message = "<html><body><h3>Invalid Level Selection</h3><p>Event Level and Censored Level cannot be the same.</p></body></html>"
+                        ))
+                    }
+                }
+
+                event_numeric <- rep(NA_real_, length(event_num))
+                event_numeric[event_num == event_level_num] <- 1
+                if (!is.null(censor_level_num)) {
+                    event_numeric[event_num == censor_level_num] <- 0
+                } else {
+                    event_numeric[event_num != event_level_num & !is.na(event_num)] <- 0
+                }
+                n_excluded <- sum(is.na(event_numeric) & !is.na(event_num))
+                return(list(ok = TRUE, values = event_numeric,
+                            event_level = as.character(event_level_num),
+                            censor_level = if (!is.null(censor_level_num)) as.character(censor_level_num) else NULL,
+                            n_excluded = n_excluded))
             }
 
             if (all(unique_vals %in% c(0, 1))) {
-                return(list(ok = TRUE, values = as.numeric(event_num), event_level = "1"))
+                return(list(ok = TRUE, values = as.numeric(event_num),
+                            event_level = "1", censor_level = "0", n_excluded = 0L))
             }
 
             if (length(unique_vals) == 2) {
-                default_level_num <- max(unique_vals)
-                event_values <- as.numeric(event_num == default_level_num)
-                return(list(ok = TRUE, values = event_values, event_level = as.character(default_level_num)))
+                default_event_num <- max(unique_vals)
+                default_censor_num <- min(unique_vals)
+                event_numeric <- rep(NA_real_, length(event_num))
+                event_numeric[event_num == default_event_num] <- 1
+                event_numeric[event_num == default_censor_num] <- 0
+                n_excluded <- sum(is.na(event_numeric) & !is.na(event_num))
+                return(list(ok = TRUE, values = event_numeric,
+                            event_level = as.character(default_event_num),
+                            censor_level = as.character(default_censor_num),
+                            n_excluded = n_excluded))
             }
 
             return(list(
                 ok = FALSE,
                 message = paste0(
                     "<html><body><h3>Event Level Required</h3><p>Numeric event variable has non-binary values (",
-                    paste(unique_vals, collapse = ", "),
+                    private$.escapeHtml(paste(unique_vals, collapse = ", ")),
                     "). Please set Event Level to define the event of interest.</p></body></html>"
                 )
             ))
@@ -370,11 +513,28 @@ adaptivelassoClass <- R6::R6Class(
             }
             event_values <- event_parse$values
 
+            # Exclude rows matching neither event_level nor censor_level
+            n_excluded <- event_parse$n_excluded
+            if (!is.null(n_excluded) && n_excluded > 0) {
+                keep_rows <- !is.na(event_values)
+                analysis_data <- analysis_data[keep_rows, , drop = FALSE]
+                time_values <- time_values[keep_rows]
+                event_values <- event_values[keep_rows]
+                private$.addNotice(
+                    "INFO",
+                    "Rows Excluded by Event Encoding",
+                    paste0(n_excluded, " row(s) excluded because outcome value matched neither ",
+                           "the event level ('", event_parse$event_level,
+                           "') nor the censored level ('", event_parse$censor_level, "').")
+                )
+            }
+
             n_events <- sum(event_values == 1, na.rm = TRUE)
-            if (n_events < 3) {
+            if (n_events < 5) {
                 private$.showMessage(
-                    "<html><body><h3>Insufficient Events</h3>
-                    <p>Need at least 3 events for survival modeling.</p></body></html>"
+                    paste0("<html><body><h3>Insufficient Events</h3>",
+                           "<p>Only ", n_events, " events detected. Need at least 5 events for survival modeling. ",
+                           "Consider collecting more follow-up data or combining event categories.</p></body></html>")
                 )
                 return(NULL)
             }
@@ -385,7 +545,7 @@ adaptivelassoClass <- R6::R6Class(
 
             # Remove constant columns (zero variance) before standardization
             col_vars <- apply(x_matrix, 2, var, na.rm = TRUE)
-            constant_cols <- which(col_vars == 0 | is.na(col_vars))
+            constant_cols <- which(col_vars < 1e-10 | is.na(col_vars))
             if (length(constant_cols) > 0) {
                 x_matrix <- x_matrix[, -constant_cols, drop = FALSE]
             }
@@ -771,6 +931,7 @@ adaptivelassoClass <- R6::R6Class(
             n_vars <- ncol(cox_data$x)
 
             selection_matrix <- matrix(0, nrow = n_boot, ncol = n_vars)
+            n_failed <- 0L
 
             set.seed(self$options$random_seed)
 
@@ -780,13 +941,21 @@ adaptivelassoClass <- R6::R6Class(
                 boot_idx <- sample(nrow(cox_data$x), n_sub, replace = FALSE)
 
                 boot_x <- cox_data$x[boot_idx, , drop = FALSE]
-                boot_y <- y_glmnet[boot_idx, ]
+                # Rebuild Surv (and stratifySurv if applicable) for bootstrap sample
+                boot_surv <- cox_data$y[boot_idx, ]
+                # Ensure Surv class is preserved after subsetting
+                if (!inherits(boot_surv, "Surv")) {
+                    boot_surv <- survival::Surv(boot_surv[, 1], boot_surv[, 2])
+                }
+                if (!is.null(cox_data$strata)) {
+                    boot_surv <- glmnet::stratifySurv(boot_surv, strata = cox_data$strata[boot_idx])
+                }
 
                 tryCatch({
                     # Fit adaptive LASSO on bootstrap sample
                     boot_fit <- glmnet::glmnet(
                         x = boot_x,
-                        y = boot_y,
+                        y = boot_surv,
                         family = "cox",
                         alpha = self$options$alpha,
                         penalty.factor = adaptive_weights,
@@ -797,7 +966,7 @@ adaptivelassoClass <- R6::R6Class(
                     boot_nfold <- min(5, self$options$cv_folds, max(3, n_sub - 1))
                     boot_cv <- glmnet::cv.glmnet(
                         x = boot_x,
-                        y = boot_y,
+                        y = boot_surv,
                         family = "cox",
                         alpha = self$options$alpha,
                         penalty.factor = adaptive_weights,
@@ -811,7 +980,7 @@ adaptivelassoClass <- R6::R6Class(
                     selection_matrix[b, ] <- as.numeric(abs(boot_coef) > 1e-8)
 
                 }, error = function(e) {
-                    # Skip this bootstrap sample if it fails
+                    n_failed <<- n_failed + 1L
                 })
             }
 
@@ -824,7 +993,8 @@ adaptivelassoClass <- R6::R6Class(
             return(list(
                 selection_frequencies = selection_freq,
                 stable_variables = cox_data$pred_names[stable_selection],
-                selection_matrix = selection_matrix
+                selection_matrix = selection_matrix,
+                n_failed = n_failed
             ))
         },
 
@@ -895,6 +1065,77 @@ adaptivelassoClass <- R6::R6Class(
             if (self$options$plot_diagnostics) {
                 private$.plotDiagnosticsData(adaptive_results, cox_data)
             }
+
+            # --- Notices (HTML-based to avoid protobuf serialization errors) ---
+            private$.noticeList <- list()
+
+            # No variables selected
+            if (adaptive_results$diagnostics$n_selected == 0) {
+                private$.addNotice(
+                    "WARNING",
+                    "No Variables Selected",
+                    "No variables were selected by adaptive LASSO at the optimal lambda. Consider relaxing the penalty or using a different weight method."
+                )
+            }
+
+            # EPV-based notices
+            n_selected <- adaptive_results$diagnostics$n_selected
+            if (n_selected > 0) {
+                epv <- cox_data$n_events / n_selected
+                if (epv < 5) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        "Very Low Events Per Variable",
+                        sprintf("EPV = %.1f. Model may be severely overfit; interpret coefficients with caution and consider external validation.", epv)
+                    )
+                } else if (epv < 10) {
+                    private$.addNotice(
+                        "WARNING",
+                        "Moderate Events Per Variable",
+                        sprintf("EPV = %.1f. Penalized estimates help, but bootstrap validation is recommended.", epv)
+                    )
+                }
+            }
+
+            # PH violation
+            ph_p <- adaptive_results$diagnostics$ph_global_p
+            if (!is.null(ph_p) && !is.na(ph_p) && ph_p < 0.05) {
+                private$.addNotice(
+                    "WARNING",
+                    "Proportional Hazards Assumption",
+                    sprintf("PH assumption may be violated (global p = %.4f). Consider time-varying coefficients or stratification.", ph_p)
+                )
+            }
+
+            # Stability selection bootstrap failure warning
+            if (!is.null(adaptive_results$stability) &&
+                !is.null(adaptive_results$stability$n_failed)) {
+                n_failed <- adaptive_results$stability$n_failed
+                n_boot <- self$options$bootstrap_samples
+                fail_pct <- 100 * n_failed / n_boot
+                if (fail_pct > 20) {
+                    private$.addNotice(
+                        "WARNING",
+                        "Bootstrap Failures",
+                        sprintf("Stability selection: %d of %d bootstrap samples (%.0f%%) failed. Results may be unreliable; consider increasing sample size or reducing predictors.",
+                                n_failed, n_boot, fail_pct)
+                    )
+                }
+            }
+
+            # Analysis complete (info)
+            private$.addNotice(
+                "INFO",
+                "Analysis Complete",
+                sprintf("Adaptive LASSO completed: %d/%d variables selected from %d observations (%d events) using %s weights.",
+                        adaptive_results$diagnostics$n_selected,
+                        length(adaptive_results$adaptive_weights),
+                        cox_data$n_obs,
+                        cox_data$n_events,
+                        self$options$weight_method)
+            )
+
+            private$.renderNotices()
         },
 
         .populateCoefficients = function(adaptive_results, cox_data) {
@@ -924,6 +1165,7 @@ adaptivelassoClass <- R6::R6Class(
                 length(diag$cox_coefs) == length(selected_idx) &&
                 length(diag$cox_se) == length(selected_idx)
 
+            z_crit <- qnorm(0.975)
             for (j in seq_along(selected_idx)) {
                 idx <- selected_idx[j]
                 penalized_coef <- coef_vec[idx]
@@ -931,8 +1173,8 @@ adaptivelassoClass <- R6::R6Class(
 
                 if (has_refit) {
                     se_val <- diag$cox_se[j]
-                    lower <- coef_val - 1.96 * se_val
-                    upper <- coef_val + 1.96 * se_val
+                    lower <- coef_val - z_crit * se_val
+                    upper <- coef_val + z_crit * se_val
                 } else {
                     se_val <- NA
                     lower <- NA
@@ -952,7 +1194,11 @@ adaptivelassoClass <- R6::R6Class(
 
             table$setNote(
                 "se_note",
-                "Displayed coefficients/SE/CI are from unpenalized Cox refit on selected variables. Adaptive weights come from penalized fitting."
+                paste0(
+                    "Coefficients/SE/CI from unpenalized Cox refit on selected variables. ",
+                    "CIs do not account for the variable selection step and may be optimistically narrow. ",
+                    "Consider stability selection or bootstrap validation for more robust inference."
+                )
             )
         },
 
@@ -966,7 +1212,7 @@ adaptivelassoClass <- R6::R6Class(
             # Create path summary
             n_lambda <- length(cv_fit$lambda)
             n_steps <- min(20, n_lambda)
-            step_indices <- round(seq(1, n_lambda, length.out = n_steps))
+            step_indices <- unique(round(seq(1, n_lambda, length.out = n_steps)))
 
             for (s in seq_along(step_indices)) {
                 i <- step_indices[s]
@@ -1039,12 +1285,18 @@ adaptivelassoClass <- R6::R6Class(
                 NA
             }
 
+            # Compute stability scores as normalized selection frequency
+            # relative to threshold (> 1 means stably selected)
             for (i in seq_len(p)) {
+                freq_i <- stability$selection_frequencies[i]
+                # Stability score: ratio of selection frequency to threshold
+                # Values > 1 indicate stable selection; closer to 0 = rarely selected
+                stability_score_i <- if (threshold > 0) freq_i / threshold else freq_i
                 table$addRow(rowKey = i, values = list(
                     variable = var_names[i],
-                    selection_frequency = stability$selection_frequencies[i],
-                    stability_score = stability$selection_frequencies[i],
-                    stable_selection = if (stability$selection_frequencies[i] >= threshold) "Stable" else "Unstable",
+                    selection_frequency = freq_i,
+                    stability_score = stability_score_i,
+                    stable_selection = if (freq_i >= threshold) "Stable" else "Unstable",
                     error_bound = pfer_bound
                 ))
             }
@@ -1147,8 +1399,9 @@ adaptivelassoClass <- R6::R6Class(
                 tryCatch({
                     se <- as.numeric(diag$cox_fit$concordance["std"])
                     if (!is.na(se) && se > 0) {
-                        lower <- max(0, conc_val - 1.96 * se)
-                        upper <- min(1, conc_val + 1.96 * se)
+                        z_crit <- qnorm(0.975)
+                        lower <- max(0, conc_val - z_crit * se)
+                        upper <- min(1, conc_val + z_crit * se)
                         conc_ci <- paste0("[", round(lower, 3), ", ", round(upper, 3), "]")
                     }
                 }, error = function(e) {})
@@ -1199,7 +1452,17 @@ adaptivelassoClass <- R6::R6Class(
 
             diag <- adaptive_results$diagnostics
             selected_idx <- diag$selected_idx
-            if (is.null(selected_idx) || length(selected_idx) == 0) return()
+            if (is.null(selected_idx) || length(selected_idx) == 0) {
+                table$addRow(rowKey = 1, values = list(
+                    risk_group = "No variables selected",
+                    n_subjects = as.integer(nrow(cox_data$data)),
+                    n_events = as.integer(cox_data$n_events),
+                    median_survival = NA,
+                    survival_range = "",
+                    hazard_ratio = NA
+                ))
+                return()
+            }
 
             requested_groups <- self$options$risk_groups
             coef_vec <- as.vector(adaptive_results$coef_min)
@@ -1428,15 +1691,20 @@ adaptivelassoClass <- R6::R6Class(
         .plotCVCurve = function(adaptive_results) {
             image <- self$results$cvPlot
             cv_fit <- adaptive_results$cv_fit
-            plot_data <- list(
+            n_pts <- length(cv_fit$lambda)
+            plot_data <- data.frame(
                 lambda = as.numeric(cv_fit$lambda),
                 cvm = as.numeric(cv_fit$cvm),
                 cvsd = as.numeric(cv_fit$cvsd),
                 cvup = as.numeric(cv_fit$cvup),
                 cvlo = as.numeric(cv_fit$cvlo),
-                lambda_min = as.numeric(cv_fit$lambda.min),
-                lambda_1se = as.numeric(cv_fit$lambda.1se),
-                measure_label = if (self$options$cv_measure == "C") "C-index" else "Partial Likelihood Deviance"
+                lambda_min = rep(as.numeric(cv_fit$lambda.min), n_pts),
+                lambda_1se = rep(as.numeric(cv_fit$lambda.1se), n_pts),
+                stringsAsFactors = FALSE
+            )
+            plot_data$measure_label <- rep(
+                if (self$options$cv_measure == "C") "C-index" else "Partial Likelihood Deviance",
+                n_pts
             )
             image$setState(plot_data)
         },
@@ -1448,11 +1716,12 @@ adaptivelassoClass <- R6::R6Class(
                 if (length(var_names) != length(adaptive_results$stability$selection_frequencies)) {
                     var_names <- paste0("V", seq_along(adaptive_results$stability$selection_frequencies))
                 }
-                plot_data <- list(
+                plot_data <- data.frame(
                     selection_frequencies = as.numeric(adaptive_results$stability$selection_frequencies),
                     var_names = var_names,
-                    threshold = as.numeric(self$options$stability_threshold)
+                    stringsAsFactors = FALSE
                 )
+                attr(plot_data, "threshold") <- as.numeric(self$options$stability_threshold)
                 image$setState(plot_data)
             } else {
                 image$setState(NULL)
@@ -1499,7 +1768,10 @@ adaptivelassoClass <- R6::R6Class(
                 return(TRUE)
             }
             log_lambda <- log(state$lambda)
-            y_label <- if (!is.null(state$measure_label)) state$measure_label else "CV Metric"
+            measure_label <- if (!is.null(state$measure_label)) state$measure_label[1] else "CV Metric"
+            y_label <- measure_label
+            lambda_min_val <- state$lambda_min[1]
+            lambda_1se_val <- state$lambda_1se[1]
             plot(log_lambda, state$cvm, type = "n",
                  xlab = "Log(Lambda)", ylab = y_label,
                  main = "Cross-Validation Curve",
@@ -1508,9 +1780,9 @@ adaptivelassoClass <- R6::R6Class(
                     c(state$cvup, rev(state$cvlo)),
                     col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
             lines(log_lambda, state$cvm, col = "red", lwd = 2)
-            abline(v = log(state$lambda_min), lty = 2, col = "blue")
-            if (!is.null(state$lambda_1se))
-                abline(v = log(state$lambda_1se), lty = 3, col = "blue")
+            abline(v = log(lambda_min_val), lty = 2, col = "blue")
+            if (!is.na(lambda_1se_val))
+                abline(v = log(lambda_1se_val), lty = 3, col = "blue")
             return(TRUE)
         },
 
@@ -1524,7 +1796,8 @@ adaptivelassoClass <- R6::R6Class(
             barplot(freq, las = 2, main = "Stability Selection",
                     ylab = "Selection Frequency", col = "steelblue",
                     cex.names = 0.7)
-            abline(h = state$threshold, lty = 2, col = "red")
+            threshold_val <- attr(state, "threshold")
+            if (!is.null(threshold_val)) abline(h = threshold_val, lty = 2, col = "red")
             return(TRUE)
         },
 
@@ -1622,6 +1895,11 @@ adaptivelassoClass <- R6::R6Class(
             self$results$stabilityResults$setVisible(self$options$stability_selection)
             self$results$modelDiagnostics$setVisible(self$options$show_diagnostics)
             self$results$performanceMetrics$setVisible(self$options$goodness_of_fit)
+            self$results$riskGroups$setVisible(self$options$show_coefficients)
+            self$results$predictions$setVisible(
+                isTRUE(self$options$baseline_survival) &&
+                nchar(trimws(self$options$time_points %||% "")) > 0
+            )
         }
     )
 )

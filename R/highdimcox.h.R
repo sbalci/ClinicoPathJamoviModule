@@ -9,19 +9,21 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             elapsedtime = NULL,
             outcome = NULL,
             predictors = NULL,
-            outcomeLevel = "1",
+            outcomeLevel = NULL,
+            censorLevel = NULL,
             regularization_method = "elastic_net",
             alpha_value = 0.5,
             cv_method = "cv_1se",
             cv_folds = 10,
             stability_selection = FALSE,
             subsampling_iterations = 500,
+            subsampling_ratio = 0.5,
             stability_threshold = 0.8,
-            show_regularization_path = TRUE,
-            show_cv_plot = TRUE,
+            show_regularization_path = FALSE,
+            show_cv_plot = FALSE,
             show_variable_importance = TRUE,
             show_coefficients_table = TRUE,
-            show_model_diagnostics = TRUE,
+            show_model_diagnostics = FALSE,
             showSummaries = FALSE,
             showExplanations = FALSE,
             suitabilityCheck = TRUE, ...) {
@@ -58,10 +60,14 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "numeric",
                     "factor"))
-            private$..outcomeLevel <- jmvcore::OptionString$new(
+            private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
-                default="1")
+                variable="(outcome)")
+            private$..censorLevel <- jmvcore::OptionLevel$new(
+                "censorLevel",
+                censorLevel,
+                variable="(outcome)")
             private$..regularization_method <- jmvcore::OptionList$new(
                 "regularization_method",
                 regularization_method,
@@ -100,6 +106,12 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=100,
                 max=1000,
                 default=500)
+            private$..subsampling_ratio <- jmvcore::OptionNumber$new(
+                "subsampling_ratio",
+                subsampling_ratio,
+                min=0.1,
+                max=0.9,
+                default=0.5)
             private$..stability_threshold <- jmvcore::OptionNumber$new(
                 "stability_threshold",
                 stability_threshold,
@@ -109,11 +121,11 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..show_regularization_path <- jmvcore::OptionBool$new(
                 "show_regularization_path",
                 show_regularization_path,
-                default=TRUE)
+                default=FALSE)
             private$..show_cv_plot <- jmvcore::OptionBool$new(
                 "show_cv_plot",
                 show_cv_plot,
-                default=TRUE)
+                default=FALSE)
             private$..show_variable_importance <- jmvcore::OptionBool$new(
                 "show_variable_importance",
                 show_variable_importance,
@@ -125,7 +137,7 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..show_model_diagnostics <- jmvcore::OptionBool$new(
                 "show_model_diagnostics",
                 show_model_diagnostics,
-                default=TRUE)
+                default=FALSE)
             private$..showSummaries <- jmvcore::OptionBool$new(
                 "showSummaries",
                 showSummaries,
@@ -143,12 +155,14 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..outcome)
             self$.addOption(private$..predictors)
             self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..censorLevel)
             self$.addOption(private$..regularization_method)
             self$.addOption(private$..alpha_value)
             self$.addOption(private$..cv_method)
             self$.addOption(private$..cv_folds)
             self$.addOption(private$..stability_selection)
             self$.addOption(private$..subsampling_iterations)
+            self$.addOption(private$..subsampling_ratio)
             self$.addOption(private$..stability_threshold)
             self$.addOption(private$..show_regularization_path)
             self$.addOption(private$..show_cv_plot)
@@ -164,12 +178,14 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         outcome = function() private$..outcome$value,
         predictors = function() private$..predictors$value,
         outcomeLevel = function() private$..outcomeLevel$value,
+        censorLevel = function() private$..censorLevel$value,
         regularization_method = function() private$..regularization_method$value,
         alpha_value = function() private$..alpha_value$value,
         cv_method = function() private$..cv_method$value,
         cv_folds = function() private$..cv_folds$value,
         stability_selection = function() private$..stability_selection$value,
         subsampling_iterations = function() private$..subsampling_iterations$value,
+        subsampling_ratio = function() private$..subsampling_ratio$value,
         stability_threshold = function() private$..stability_threshold$value,
         show_regularization_path = function() private$..show_regularization_path$value,
         show_cv_plot = function() private$..show_cv_plot$value,
@@ -184,12 +200,14 @@ highdimcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..outcome = NA,
         ..predictors = NA,
         ..outcomeLevel = NA,
+        ..censorLevel = NA,
         ..regularization_method = NA,
         ..alpha_value = NA,
         ..cv_method = NA,
         ..cv_folds = NA,
         ..stability_selection = NA,
         ..subsampling_iterations = NA,
+        ..subsampling_ratio = NA,
         ..stability_threshold = NA,
         ..show_regularization_path = NA,
         ..show_cv_plot = NA,
@@ -237,6 +255,8 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "elapsedtime",
                     "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "suitabilityCheck")))
             self$add(jmvcore::Html$new(
@@ -247,18 +267,40 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "elapsedtime",
                     "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "suitabilityCheck")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelSummary",
                 title="Model Summary",
-                visible="(show_coefficients_table)"))
+                visible=TRUE,
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "regularization_method",
+                    "alpha_value",
+                    "cv_method",
+                    "cv_folds")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="selectedVariables",
                 title="Selected Variables",
                 visible="(show_coefficients_table)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "regularization_method",
+                    "alpha_value",
+                    "cv_method",
+                    "cv_folds"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -281,6 +323,16 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="regularizationMetrics",
                 title="Regularization Metrics",
                 visible=TRUE,
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "regularization_method",
+                    "alpha_value",
+                    "cv_method",
+                    "cv_folds"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -299,6 +351,18 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="stabilityResults",
                 title="Stability Selection Results",
                 visible="(stability_selection)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "stability_selection",
+                    "subsampling_iterations",
+                    "subsampling_ratio",
+                    "stability_threshold",
+                    "regularization_method",
+                    "alpha_value"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -326,9 +390,15 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".plot_regularization_path",
                 requiresData=TRUE,
                 clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "alpha_value",
-                    "regularization_method")))
+                    "regularization_method",
+                    "cv_method",
+                    "cv_folds")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cvPlot",
@@ -339,9 +409,15 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".plot_cv",
                 requiresData=TRUE,
                 clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
                     "cv_folds",
                     "cv_method",
-                    "predictors")))
+                    "alpha_value",
+                    "regularization_method")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="variableImportance",
@@ -352,9 +428,15 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".plot_variable_importance",
                 requiresData=TRUE,
                 clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "alpha_value",
-                    "regularization_method")))
+                    "regularization_method",
+                    "cv_method",
+                    "cv_folds")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="modelDiagnostics",
@@ -365,9 +447,15 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".plot_model_diagnostics",
                 requiresData=TRUE,
                 clearWith=list(
-                    "predictors",
                     "elapsedtime",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "regularization_method",
+                    "alpha_value",
+                    "cv_method",
+                    "cv_folds")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="stabilityPlot",
@@ -378,18 +466,43 @@ highdimcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".plot_stability",
                 requiresData=TRUE,
                 clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
                     "stability_selection",
-                    "stability_threshold")))
+                    "subsampling_iterations",
+                    "subsampling_ratio",
+                    "stability_threshold",
+                    "regularization_method",
+                    "alpha_value")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
                 title="Analysis Summary",
-                visible="(showSummaries)"))
+                visible="(showSummaries)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "regularization_method",
+                    "alpha_value",
+                    "cv_method",
+                    "cv_folds",
+                    "stability_selection",
+                    "subsampling_iterations",
+                    "subsampling_ratio",
+                    "stability_threshold")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodExplanation",
                 title="Methodology",
-                visible="(showExplanations)"))}))
+                visible="(showExplanations)",
+                clearWith=list(
+                    "regularization_method")))}))
 
 highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "highdimcoxBase",
@@ -454,7 +567,8 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param elapsedtime Time variable for survival analysis
 #' @param outcome Event indicator variable
 #' @param predictors High-dimensional predictor variables
-#' @param outcomeLevel Level of outcome variable indicating event
+#' @param outcomeLevel Level of outcome variable indicating event occurred
+#' @param censorLevel Level of outcome variable indicating censored (no event)
 #' @param regularization_method Regularization method for high-dimensional Cox
 #'   regression
 #' @param alpha_value Alpha parameter for elastic net (0=ridge, 1=lasso)
@@ -464,6 +578,8 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   importance
 #' @param subsampling_iterations Number of subsampling iterations for
 #'   stability selection
+#' @param subsampling_ratio Proportion of observations to sample in each
+#'   stability selection iteration
 #' @param stability_threshold Threshold for stability selection
 #' @param show_regularization_path Display regularization path plot
 #' @param show_cv_plot Display cross-validation error plot
@@ -504,19 +620,21 @@ highdimcox <- function(
     elapsedtime,
     outcome,
     predictors,
-    outcomeLevel = "1",
+    outcomeLevel,
+    censorLevel,
     regularization_method = "elastic_net",
     alpha_value = 0.5,
     cv_method = "cv_1se",
     cv_folds = 10,
     stability_selection = FALSE,
     subsampling_iterations = 500,
+    subsampling_ratio = 0.5,
     stability_threshold = 0.8,
-    show_regularization_path = TRUE,
-    show_cv_plot = TRUE,
+    show_regularization_path = FALSE,
+    show_cv_plot = FALSE,
     show_variable_importance = TRUE,
     show_coefficients_table = TRUE,
-    show_model_diagnostics = TRUE,
+    show_model_diagnostics = FALSE,
     showSummaries = FALSE,
     showExplanations = FALSE,
     suitabilityCheck = TRUE) {
@@ -540,12 +658,14 @@ highdimcox <- function(
         outcome = outcome,
         predictors = predictors,
         outcomeLevel = outcomeLevel,
+        censorLevel = censorLevel,
         regularization_method = regularization_method,
         alpha_value = alpha_value,
         cv_method = cv_method,
         cv_folds = cv_folds,
         stability_selection = stability_selection,
         subsampling_iterations = subsampling_iterations,
+        subsampling_ratio = subsampling_ratio,
         stability_threshold = stability_threshold,
         show_regularization_path = show_regularization_path,
         show_cv_plot = show_cv_plot,

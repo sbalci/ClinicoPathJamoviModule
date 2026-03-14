@@ -8,14 +8,19 @@ plscox(
   data,
   time,
   status,
+  outcomeLevel,
+  censorLevel,
   predictors,
   pls_components = 5,
   cross_validation = "k10",
   component_selection = "cv_loglik",
   scaling_method = "standardize",
-  pls_algorithm = "nipals",
-  max_iterations = 100,
   tolerance = 1e-06,
+  tie_method = "efron",
+  sparse_pls = FALSE,
+  limQ2set = 0.0975,
+  pvals_expli = FALSE,
+  alpha_pvals_expli = 0.05,
   bootstrap_validation = FALSE,
   n_bootstrap = 200,
   permutation_test = FALSE,
@@ -28,7 +33,8 @@ plscox(
   risk_groups = 3,
   confidence_intervals = TRUE,
   feature_importance = TRUE,
-  prediction_accuracy = TRUE
+  prediction_accuracy = TRUE,
+  suitabilityCheck = TRUE
 )
 }
 \arguments{
@@ -37,6 +43,16 @@ plscox(
 \item{time}{.}
 
 \item{status}{.}
+
+\item{outcomeLevel}{Level of \code{status} considered as the event. For
+binary factor outcomes, if left empty the second observed level is used;
+for numeric binary outcomes, the larger observed value is used (or 1 for
+0/1 coding).}
+
+\item{censorLevel}{Level of \code{status} considered as censored (no
+event). Together with \code{outcomeLevel}, this defines a strict two-level
+encoding: rows whose status matches neither level are treated as missing
+and excluded.}
 
 \item{predictors}{.}
 
@@ -49,11 +65,23 @@ components}
 
 \item{scaling_method}{Method for scaling predictor variables}
 
-\item{pls_algorithm}{Algorithm for PLS computation}
+\item{tolerance}{Tolerance for algorithm convergence (jamovi default:
+1e-06, plsRcox default: 1e-12)}
 
-\item{max_iterations}{Maximum iterations for PLS algorithm convergence}
+\item{tie_method}{Method for handling tied event times in Cox model
+(plsRcox default: efron)}
 
-\item{tolerance}{Tolerance for algorithm convergence}
+\item{sparse_pls}{Enable sparse PLS for automatic variable selection
+(plsRcox default: false)}
+
+\item{limQ2set}{Q-squared threshold for PLS component stopping criterion
+(plsRcox default: 0.0975)}
+
+\item{pvals_expli}{Use p-value based predictor selection during PLS fitting
+(plsRcox default: false)}
+
+\item{alpha_pvals_expli}{Significance level for p-value based variable
+selection (plsRcox default: 0.05)}
 
 \item{bootstrap_validation}{Perform bootstrap validation of model
 performance}
@@ -84,11 +112,16 @@ ratios}
 
 \item{prediction_accuracy}{Assess model prediction accuracy using C-index
 and other metrics}
+
+\item{suitabilityCheck}{Run a comprehensive data suitability assessment
+before analysis. Checks sample size, events-per-variable ratio,
+multicollinearity,  and whether regularization is needed.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$componentSelection} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelCoefficients} \tab \tab \tab \tab \tab a table \cr

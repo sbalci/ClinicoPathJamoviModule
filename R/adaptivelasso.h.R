@@ -9,6 +9,7 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             time = NULL,
             event = NULL,
             event_level = NULL,
+            censor_level = NULL,
             predictors = NULL,
             strata = NULL,
             suitabilityCheck = TRUE,
@@ -45,7 +46,6 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             plot_diagnostics = FALSE,
             tie_method = "breslow",
             standardize = TRUE,
-            intercept = FALSE,
             parallel_computing = FALSE,
             n_cores = 2,
             convergence_threshold = 1e-7,
@@ -77,6 +77,10 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..event_level <- jmvcore::OptionLevel$new(
                 "event_level",
                 event_level,
+                variable="(event)")
+            private$..censor_level <- jmvcore::OptionLevel$new(
+                "censor_level",
+                censor_level,
                 variable="(event)")
             private$..predictors <- jmvcore::OptionVariables$new(
                 "predictors",
@@ -270,10 +274,6 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "standardize",
                 standardize,
                 default=TRUE)
-            private$..intercept <- jmvcore::OptionBool$new(
-                "intercept",
-                intercept,
-                default=FALSE)
             private$..parallel_computing <- jmvcore::OptionBool$new(
                 "parallel_computing",
                 parallel_computing,
@@ -306,6 +306,7 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..time)
             self$.addOption(private$..event)
             self$.addOption(private$..event_level)
+            self$.addOption(private$..censor_level)
             self$.addOption(private$..predictors)
             self$.addOption(private$..strata)
             self$.addOption(private$..suitabilityCheck)
@@ -342,7 +343,6 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..plot_diagnostics)
             self$.addOption(private$..tie_method)
             self$.addOption(private$..standardize)
-            self$.addOption(private$..intercept)
             self$.addOption(private$..parallel_computing)
             self$.addOption(private$..n_cores)
             self$.addOption(private$..convergence_threshold)
@@ -353,6 +353,7 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         time = function() private$..time$value,
         event = function() private$..event$value,
         event_level = function() private$..event_level$value,
+        censor_level = function() private$..censor_level$value,
         predictors = function() private$..predictors$value,
         strata = function() private$..strata$value,
         suitabilityCheck = function() private$..suitabilityCheck$value,
@@ -389,7 +390,6 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plot_diagnostics = function() private$..plot_diagnostics$value,
         tie_method = function() private$..tie_method$value,
         standardize = function() private$..standardize$value,
-        intercept = function() private$..intercept$value,
         parallel_computing = function() private$..parallel_computing$value,
         n_cores = function() private$..n_cores$value,
         convergence_threshold = function() private$..convergence_threshold$value,
@@ -399,6 +399,7 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..time = NA,
         ..event = NA,
         ..event_level = NA,
+        ..censor_level = NA,
         ..predictors = NA,
         ..strata = NA,
         ..suitabilityCheck = NA,
@@ -435,7 +436,6 @@ adaptivelassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..plot_diagnostics = NA,
         ..tie_method = NA,
         ..standardize = NA,
-        ..intercept = NA,
         ..parallel_computing = NA,
         ..n_cores = NA,
         ..convergence_threshold = NA,
@@ -448,7 +448,7 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
         coefficients = function() private$.items[["coefficients"]],
         selectionPath = function() private$.items[["selectionPath"]],
@@ -474,7 +474,10 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "survival",
-                    "glmnet"))
+                    "glmnet",
+                    "parallel",
+                    "doParallel",
+                    "foreach"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -482,14 +485,30 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="todo",
-                title="Analysis Todo",
-                visible=FALSE))
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "event_level",
+                    "censor_level",
+                    "predictors",
+                    "weight_method",
+                    "alpha",
+                    "gamma",
+                    "cv_folds",
+                    "stability_selection")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="suitabilityReport",
                 title="Data Suitability Assessment",
-                visible="(suitabilityCheck)"))
+                visible="(suitabilityCheck)",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "event_level",
+                    "censor_level",
+                    "predictors")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coefficients",
@@ -498,10 +517,15 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "time",
                     "event",
+                    "event_level",
+                    "censor_level",
                     "predictors",
                     "weight_method",
                     "alpha",
-                    "cv_folds"),
+                    "gamma",
+                    "cv_folds",
+                    "lambda_sequence",
+                    "tie_method"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -548,7 +572,8 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "lambda_custom_max",
                     "lambda_custom_min",
                     "lambda_single",
-                    "n_lambda"),
+                    "n_lambda",
+                    "cv_measure"),
                 columns=list(
                     list(
                         `name`="step", 
@@ -624,6 +649,11 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Stability Selection Results",
                 visible="(stability_selection)",
                 clearWith=list(
+                    "time",
+                    "event",
+                    "event_level",
+                    "censor_level",
+                    "predictors",
                     "stability_threshold",
                     "bootstrap_samples",
                     "subsampling_ratio"),
@@ -711,11 +741,16 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="riskGroups",
                 title="Risk Group Analysis",
-                visible=TRUE,
+                visible="(show_coefficients)",
                 clearWith=list(
                     "risk_groups",
                     "time",
-                    "event"),
+                    "event",
+                    "event_level",
+                    "censor_level",
+                    "predictors",
+                    "weight_method",
+                    "alpha"),
                 columns=list(
                     list(
                         `name`="risk_group", 
@@ -913,6 +948,10 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param event_level Level of the event variable to be treated as the event
 #'   of interest. For binary factors this can be left empty and the second level
 #'   is used.
+#' @param censor_level Level of the event variable to be treated as censored
+#'   (no event). When specified together with Event Level, rows matching neither
+#'   level are excluded from analysis. For binary factors this can be left empty
+#'   and the first level is used.
 #' @param predictors Variables to include in the adaptive LASSO Cox model. Can
 #'   include continuous, ordinal, and nominal variables. Automatic
 #'   standardization is applied for optimal penalty performance.
@@ -998,8 +1037,6 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   better approximation but is computationally more intensive.
 #' @param standardize Standardize predictors before fitting. Recommended for
 #'   optimal penalty performance with mixed-scale variables.
-#' @param intercept Retained for compatibility. Cox proportional hazards
-#'   models do not estimate an intercept term, so this option has no effect.
 #' @param parallel_computing Use parallel computing for cross-validation and
 #'   stability-selection resampling to reduce computation time.
 #' @param n_cores Number of CPU cores for parallel computation when enabled.
@@ -1014,7 +1051,7 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$selectionPath} \tab \tab \tab \tab \tab a table \cr
@@ -1044,6 +1081,7 @@ adaptivelasso <- function(
     time,
     event,
     event_level,
+    censor_level,
     predictors,
     strata,
     suitabilityCheck = TRUE,
@@ -1080,7 +1118,6 @@ adaptivelasso <- function(
     plot_diagnostics = FALSE,
     tie_method = "breslow",
     standardize = TRUE,
-    intercept = FALSE,
     parallel_computing = FALSE,
     n_cores = 2,
     convergence_threshold = 1e-7,
@@ -1107,6 +1144,7 @@ adaptivelasso <- function(
         time = time,
         event = event,
         event_level = event_level,
+        censor_level = censor_level,
         predictors = predictors,
         strata = strata,
         suitabilityCheck = suitabilityCheck,
@@ -1143,7 +1181,6 @@ adaptivelasso <- function(
         plot_diagnostics = plot_diagnostics,
         tie_method = tie_method,
         standardize = standardize,
-        intercept = intercept,
         parallel_computing = parallel_computing,
         n_cores = n_cores,
         convergence_threshold = convergence_threshold,
