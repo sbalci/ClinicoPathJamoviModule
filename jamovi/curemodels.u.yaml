@@ -41,6 +41,11 @@ children:
         margin: large
         children:
           - type: ComboBox
+            name: smcure_model_type
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
             name: cure_link
       - type: LayoutBox
         margin: large

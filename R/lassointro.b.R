@@ -44,11 +44,14 @@ who have survival data with many potential predictors and need to identify which
 truly matter for patient outcomes.</p>
 
 <div class="callout">
-<strong>When NOT to use penalized regression:</strong>
+<strong>When NOT to use variable-selection penalized regression (LASSO etc.):</strong>
 If you have fewer than ~15 candidate predictors and an events-per-variable ratio above 10
 (e.g., 150 events with 12 variables), standard multivariable Cox regression is usually better.
 It gives you p-values, confidence intervals, and unbiased hazard ratios without penalization.
-Use the Survival &rarr; Multivariable Survival menu instead.
+Use the Survival &rarr; Multivariable Survival menu instead.<br><br>
+<strong>Exception:</strong> If you have very few events (&lt;20), rare outcomes, or encounter
+complete/quasi-complete separation (infinite coefficients), use <strong>Firth Regression</strong>
+even with few predictors. Firth is not for variable selection &mdash; it is for bias correction.
 </div>
 
 <h3>Available Methods (Increasing Complexity)</h3>
@@ -103,6 +106,14 @@ Use the Survival &rarr; Multivariable Survival menu instead.
     <td>Penalized Cox &rarr; SCAD/MCP Cox</td>
   </tr>
   <tr>
+    <td><strong>Firth Regression</strong></td>
+    <td>When you have small samples, rare events, or complete/quasi-complete separation.
+      Firth&rsquo;s penalized likelihood removes first-order bias without variable selection.
+      Supports both logistic (binary outcome) and Cox (survival) models.</td>
+    <td>Basic</td>
+    <td>Penalized Cox &rarr; Firth Regression</td>
+  </tr>
+  <tr>
     <td><strong>PCA Cox</strong></td>
     <td>Reduces variables into linearly uncorrelated primary components. Excellent for severe multicollinearity.</td>
     <td>Moderate</td>
@@ -119,7 +130,9 @@ Use the Survival &rarr; Multivariable Survival menu instead.
 </table>
 
 <p><strong>Rule of thumb:</strong> Start with LASSO Cox. If your predictors are highly correlated,
-switch to Elastic Net Cox. If the variables form known biological groupings, use Group LASSO. If you have more variables than patients and just want composite dimensions, use PLS or PCA.
+switch to Elastic Net Cox. If the variables form known biological groupings, use Group LASSO.
+If you have more variables than patients and just want composite dimensions, use PLS or PCA.
+If you have very few events, rare outcomes, or separation issues, use Firth Regression for bias-corrected estimates.
 Check the Decision Guide section for a step-by-step flowchart.</p>
 
 </div>')
@@ -158,9 +171,15 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
 
 <p><strong>Step 5: Event checks (The EPV Rule)</strong></p>
 <ul>
-  <li>&lt; 10 events &rarr; Penalized regression is likely unreliable. Use Kaplan-Meier or univariate Cox.</li>
-  <li>10&ndash;50 events &rarr; Use LASSO or Elastic Net with caution. Let the module\'s Suitability Assessment guide you.</li>
+  <li>&lt; 10 events &rarr; Standard penalized regression is unreliable. Use <strong>Firth Regression</strong> for bias-corrected estimates, or Kaplan-Meier / univariate Cox.</li>
+  <li>10&ndash;50 events &rarr; Use LASSO or Elastic Net with caution. If complete separation is detected, switch to <strong>Firth Regression</strong>. Let the module\'s Suitability Assessment guide you.</li>
   <li>&gt; 50 events &rarr; Any method above is statistically appropriate.</li>
+</ul>
+
+<p><strong>Step 6: Is complete or quasi-complete separation an issue?</strong></p>
+<ul>
+  <li>Yes (a predictor perfectly predicts the outcome, or a category has zero events) &rarr; Use <strong>Firth Regression</strong>. Standard logistic/Cox regression will produce infinite coefficients.</li>
+  <li>No &rarr; Use the method selected above.</li>
 </ul>
 
 <h3>Quick Comparison Table</h3>
@@ -174,6 +193,7 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
     <th class="center">Elastic Net</th>
     <th class="center">Grouped</th>
     <th class="center">SCAD/MCP</th>
+    <th class="center">Firth</th>
     <th class="center">PCA/PLS</th>
   </tr>
 </thead>
@@ -186,6 +206,17 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
     <td class="center">Yes</td>
     <td class="center">Yes</td>
     <td class="center">No</td>
+    <td class="center">No</td>
+  </tr>
+  <tr>
+    <td>Handles separation</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">Yes</td>
+    <td class="center">N/A</td>
   </tr>
   <tr>
     <td>Handles heavy collinearity</td>
@@ -193,6 +224,7 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
     <td class="center">No</td>
     <td class="center">Yes</td>
     <td class="center">By Group</td>
+    <td class="center">No</td>
     <td class="center">No</td>
     <td class="center">Yes</td>
   </tr>
@@ -203,6 +235,7 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
     <td class="center">No</td>
     <td class="center">No</td>
     <td class="center">Yes</td>
+    <td class="center">Yes</td>
     <td class="center">N/A</td>
   </tr>
   <tr>
@@ -212,7 +245,18 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
     <td class="center">Yes</td>
     <td class="center">Yes</td>
     <td class="center">Yes</td>
+    <td class="center">No</td>
     <td class="center">Yes</td>
+  </tr>
+  <tr>
+    <td>Logistic (binary outcome)</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">No</td>
+    <td class="center">Yes</td>
+    <td class="center">No</td>
   </tr>
   <tr>
     <td>Oracle consistency</td>
@@ -221,6 +265,7 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
     <td class="center">No</td>
     <td class="center">No</td>
     <td class="center">Yes</td>
+    <td class="center">N/A</td>
     <td class="center">No</td>
   </tr>
   <tr>
@@ -230,6 +275,7 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
     <td class="center">~40</td>
     <td class="center">~50</td>
     <td class="center">~60</td>
+    <td class="center">~5</td>
     <td class="center">~20</td>
   </tr>
 </tbody>
@@ -267,6 +313,12 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
 <p><strong>Scenario:</strong> You have expression data for 50 genes in 300 colorectal cancer patients, and want accurate hazard ratios to build a predictive nomogram.</p>
 <p><strong>Recommended: Adaptive LASSO Cox, then SCAD/MCP Cox</strong></p>
 <p>With plenty of events and variables, you can use Adaptive LASSO for consistent variable selection (Oracle property). For nomogram construction, SCAD/MCP prevents standard LASSO\'s "shrinkage bias", giving you unbiased hazard ratio estimates for the important genes.</p>
+<hr>
+
+<h4>Pathologist: Rare Tumor Subtype with Few Events</h4>
+<p><strong>Scenario:</strong> You are studying 45 patients with a rare sarcoma subtype. Only 8 patients died. You have 5 clinical predictors (age, grade, size, margins, mitotic count). Standard logistic/Cox regression produces infinite coefficients for margin status because all positive-margin patients died.</p>
+<p><strong>Recommended: Firth Regression</strong></p>
+<p>Firth\'s penalized likelihood adds a Jeffreys-prior penalty that prevents infinite estimates from separation. It provides bias-corrected odds ratios (logistic) or hazard ratios (Cox) even with as few as 5 events. The built-in separation diagnostics will confirm whether separation is present and quantify the bias reduction compared to standard regression.</p>
 <hr>
 
 <h4>Clinician: Multivariable Prognostic Model with Standard Clinical Variables</h4>
@@ -341,6 +393,19 @@ Even with penalization, LASSO can overfit when events are scarce. A C-index of 0
 in a dataset with 30 events is almost certainly overfitted. Look at the gap between
 apparent and cross-validated performance in the model output.</p>
 
+<p><strong>6. Not using Firth regression when separation occurs.</strong>
+If a category of a predictor has zero events (e.g., all Grade 1 patients survived),
+standard regression produces infinite odds/hazard ratios. LASSO may technically &ldquo;work&rdquo;
+by shrinking the coefficient, but the underlying problem remains. Firth regression is the
+correct solution: it adds a principled bias correction that produces finite, interpretable
+estimates. The Firth Regression module includes automatic separation detection.</p>
+
+<p><strong>7. Confusing Firth with LASSO penalties.</strong>
+Firth&rsquo;s penalty (Jeffreys prior) serves a different purpose than LASSO. Firth corrects
+bias &mdash; it keeps all variables in the model. LASSO performs variable selection &mdash; it removes
+variables. They are complementary: use Firth for small-sample bias correction with a known
+set of variables; use LASSO for discovering which variables matter from a large candidate set.</p>
+
 </div>')
         },
 
@@ -392,6 +457,22 @@ apparent and cross-validated performance in the model output.</p>
     <td><strong>PCA / PLS</strong></td>
     <td>Instead of selecting variables, dimensionality reduction creates composite scores
       (components). Principal Components (PCA) explains the data\'s variance, while Partial Least Squares (PLS) components explain variance <i>directed by survival outcomes</i>.</td>
+  </tr>
+  <tr>
+    <td><strong>Firth Regression</strong></td>
+    <td>Penalized likelihood method that adds a Jeffreys-prior penalty to correct first-order bias in maximum likelihood estimation. Unlike LASSO (which selects variables), Firth keeps all variables but produces finite, bias-corrected estimates. Essential when standard regression fails due to separation or rare events.</td>
+  </tr>
+  <tr>
+    <td><strong>Complete Separation</strong></td>
+    <td>When a predictor perfectly predicts the outcome (e.g., all patients with positive margins died). Standard regression gives infinite coefficients. Firth regression prevents this.</td>
+  </tr>
+  <tr>
+    <td><strong>Quasi-complete Separation</strong></td>
+    <td>Nearly perfect prediction except for a few overlapping cases. Standard regression produces extremely large, unstable coefficients. Firth regression stabilizes them.</td>
+  </tr>
+  <tr>
+    <td><strong>Profile Likelihood CI</strong></td>
+    <td>Confidence intervals computed by inverting the likelihood ratio test rather than using Wald approximation. More accurate for small samples and extreme estimates. Available in Firth Regression.</td>
   </tr>
 </table>
 

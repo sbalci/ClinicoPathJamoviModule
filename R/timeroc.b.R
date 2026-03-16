@@ -34,6 +34,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .data = NULL,
         .fit = NULL,
         .timepoints = NULL,
+        .primary_roc = NULL,
         
         .init = function() {
             # Show welcome message if variables not selected
@@ -477,17 +478,20 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         auc <- fit$AUC[idx]
                         
                         # Calculate SE and CIs using correct index
-                        se <- ifelse(is.list(fit$inference) && !is.null(fit$inference$vect_sd_1), 
-                                   round(fit$inference$vect_sd_1[idx], 3), "N/A")
-                        
+                        se <- if (is.list(fit$inference) && !is.null(fit$inference$vect_sd_1)) {
+                            round(fit$inference$vect_sd_1[idx], 3)
+                        } else {
+                            NaN
+                        }
+
                         # Calculate CI logic handled in display
-                        if (se != "N/A") {
+                        if (!is.nan(se)) {
                             se_val <- as.numeric(se)
                             ci_lower <- round(pmax(0, auc - 1.96 * se_val), 3)
                             ci_upper <- round(pmin(1, auc + 1.96 * se_val), 3)
                         } else {
-                            ci_lower <- "N/A"
-                            ci_upper <- "N/A"
+                            ci_lower <- NaN
+                            ci_upper <- NaN
                         }
                         
                         row <- list(
@@ -690,6 +694,11 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .compareToBaseline = function() {
+            if (is.null(private$.fit$var.AUC)) {
+                self$results$modelComparison$setContent(
+                    "<p>Enable 'Bootstrap Confidence Intervals' to compute model comparison (variance estimates are required).</p>")
+                return()
+            }
             auc_values <- private$.fit$AUC
             se_values <- sqrt(private$.fit$var.AUC)
             timepoints <- private$.timepoints
@@ -835,11 +844,11 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ggplot2::theme(
                     plot.title = ggplot2::element_text(size = 14, face = "bold"),
                     plot.subtitle = ggplot2::element_text(size = 10),
-                    plot.caption = ggplot2::element_text(size = 8, style = "italic"),
+                    plot.caption = ggplot2::element_text(size = 8, face = "italic"),
                     axis.title = ggplot2::element_text(size = 12),
                     axis.text = ggplot2::element_text(size = 10),
                     panel.grid.minor = ggplot2::element_blank(),
-                    panel.grid.major = ggplot2::element_line(alpha = 0.3)
+                    panel.grid.major = ggplot2::element_line(colour = "grey80")
                 )
 
             # Add smoothing if requested and feasible
@@ -856,6 +865,81 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             print(p)
+            TRUE
+        },
+
+        .plotBinaryROC = function(image, ...) {
+            # Render function for binaryROCPlot declared in r.yaml
+            if (!self$options$plotROC || is.null(private$.primary_roc))
+                return(FALSE)
+
+            primary_roc <- private$.primary_roc
+            auc_val <- round(as.numeric(primary_roc$auc), 3)
+
+            # Collect all ROC objects for overlay
+            roc_list <- list(primary_roc)
+            roc_labels <- sprintf("%s (AUC = %.3f)", self$options$marker, auc_val)
+            roc_colors <- c("blue")
+
+            # If comparison markers exist, build their ROC objects
+            if (self$options$compareROCs && !is.null(self$options$markers)) {
+                palette <- c("red", "green4", "purple", "orange", "brown", "cyan4")
+                color_idx <- 1
+                data <- private$.data
+                for (m in self$options$markers) {
+                    if (m == self$options$marker) next
+                    tryCatch({
+                        m_data <- jmvcore::toNumeric(self$data[[m]])
+                        ok <- complete.cases(data$status, m_data)
+                        if (sum(ok) < 10) next
+                        comp_roc <- pROC::roc(
+                            response  = data$status[ok],
+                            predictor = m_data[ok],
+                            levels    = c(0, 1),
+                            direction = "<",
+                            quiet     = TRUE
+                        )
+                        roc_list   <- c(roc_list, list(comp_roc))
+                        roc_labels <- c(roc_labels,
+                            sprintf("%s (AUC = %.3f)", m, round(as.numeric(comp_roc$auc), 3)))
+                        roc_colors <- c(roc_colors,
+                            palette[((color_idx - 1) %% length(palette)) + 1])
+                        color_idx  <- color_idx + 1
+                    }, error = function(e) NULL)
+                }
+            }
+
+            # Draw the plot using base graphics (pROC style)
+            pROC::plot.roc(roc_list[[1]],
+                col        = roc_colors[1],
+                lwd        = 2,
+                main       = sprintf("Binary ROC Curve: %s", self$options$marker),
+                legacy.axes = TRUE,
+                print.auc  = FALSE)
+
+            # Reference diagonal
+            abline(0, 1, lty = 2, col = "gray60", lwd = 1.5)
+
+            # Overlay comparison curves
+            if (length(roc_list) > 1) {
+                for (k in 2:length(roc_list)) {
+                    pROC::plot.roc(roc_list[[k]],
+                        col = roc_colors[k], lwd = 2,
+                        add = TRUE, print.auc = FALSE)
+                }
+            }
+
+            # Legend
+            legend("bottomright",
+                legend = roc_labels,
+                col    = roc_colors,
+                lwd    = 2,
+                bty    = "n",
+                cex    = 0.85)
+
+            # Grid
+            grid(col = "lightgray", lty = 1, lwd = 0.5)
+
             TRUE
         }
     )

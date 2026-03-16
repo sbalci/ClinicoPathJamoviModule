@@ -28,7 +28,15 @@ items:
       title: PCA Summary
       type: Table
       visible: true
-      rows: 1
+      clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
+          - predictors
+          - pca_method
+          - n_components
+          - component_selection
       columns:
           - name: component
             title: 'Component'
@@ -50,7 +58,16 @@ items:
       title: Cox Model Results
       type: Table
       visible: true
-      rows: 1
+      clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
+          - predictors
+          - pca_method
+          - n_components
+          - component_selection
+          - confidence_level
       columns:
           - name: variable
             title: 'Variable'
@@ -82,7 +99,10 @@ items:
       title: Component Loadings (Top Features)
       type: Table
       visible: true
-      rows: 1
+      clearWith:
+          - predictors
+          - pca_method
+          - n_components
       columns:
           - name: component
             title: 'Component'
@@ -104,7 +124,15 @@ items:
       title: Model Performance
       type: Table
       visible: true
-      rows: 1
+      clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
+          - predictors
+          - pca_method
+          - n_components
+          - component_selection
       columns:
           - name: metric
             title: 'Metric'
@@ -126,7 +154,10 @@ items:
       title: Feature Importance Rankings
       type: Table
       visible: (feature_importance)
-      rows: 1
+      clearWith:
+          - predictors
+          - pca_method
+          - n_components
       columns:
           - name: feature
             title: 'Feature'
@@ -145,7 +176,14 @@ items:
       title: Risk Score Analysis
       type: Table
       visible: (risk_score)
-      rows: 1
+      clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
+          - predictors
+          - pca_method
+          - n_components
       columns:
           - name: risk_group
             title: 'Risk Group'
@@ -171,6 +209,13 @@ items:
       title: Model Comparison (Variable Components)
       type: Table
       visible: (show_model_comparison)
+      clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
+          - predictors
+          - pca_method
       columns:
           - name: model
             title: 'Model'
@@ -198,7 +243,12 @@ items:
       height: 400
       renderFun: .plotScree
       visible: (plot_scree)
+      requiresData: true
       clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
           - predictors
           - n_components
           - pca_method
@@ -210,6 +260,7 @@ items:
       height: 500
       renderFun: .plotLoadings
       visible: (plot_loadings)
+      requiresData: true
       clearWith:
           - predictors
           - n_components
@@ -222,7 +273,12 @@ items:
       height: 500
       renderFun: .plotBiplot
       visible: (plot_biplot)
+      requiresData: true
       clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
           - predictors
           - n_components
           - pca_method
@@ -234,6 +290,7 @@ items:
       height: 500
       renderFun: .plotSurvival
       visible: (plot_survival)
+      requiresData: true
       clearWith:
           - time
           - status
@@ -258,7 +315,7 @@ items:
       visible: (permutation_test)
 
     - name: pathwayAnalysis
-      title: Pathway Enrichment Analysis
+      title: Feature Cluster Analysis
       type: Html
       visible: (pathway_analysis)
 
@@ -274,8 +331,8 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
-    - superpc
     - survival
-    - stringr
+    - superpc
+    - sparsepca
+    - kernlab
 ...

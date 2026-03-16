@@ -17,6 +17,19 @@ items:
       title: Analysis Summary
       type:  Html
       visible: true
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - graystest
+          - subdistribution
+          - timepoints
+          - confidencelevel
 
     - name:  survivalTable
       title: Survival Analysis Results
@@ -45,7 +58,17 @@ items:
       title: Cumulative Incidence Function
       type:  Table
       visible: (analysistype:compete)
-      rows: 1
+      rows: 0
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timepoints
       columns:
           - name: time
             title: 'Time'
@@ -75,6 +98,12 @@ items:
           - outcome
           - overalltime
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cifColors
+          - showrisksets
 
     - name:  stackedPlot
       title: Stacked Probability Plot
@@ -87,6 +116,13 @@ items:
           - explanatory
           - outcome
           - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cifColors
+          - showStackedPlot
 
     - name:  kmvscifPlot
       title: 1-KM vs CIF Comparison
@@ -99,6 +135,13 @@ items:
           - explanatory
           - outcome
           - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cifColors
+          - showKMvsCIF
 
     - name:  interpretation
       title: Clinical Interpretation

@@ -1,7 +1,7 @@
 ---
 name: relativesurvival
 title: Relative Survival Analysis
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: Advanced Survival
 menuSubtitle: 'Population-Based Survival Comparison'
 version: '0.0.3'
@@ -108,14 +108,36 @@ options:
           name: mn
         - title: French Population (survexp.fr)
           name: fr
-        - title: Italian Population (survexp.it)
-          name: it
+        - title: Slovenian Population (slopop)
+          name: slovenia
+        - title: Turkey Population (WHO)
+          name: turkey
+        - title: German Population (WHO)
+          name: germany
+        - title: UK Population (WHO)
+          name: uk
+        - title: Italian Population (WHO)
+          name: italy
+        - title: Japanese Population (WHO)
+          name: japan
+        - title: Spanish Population (WHO)
+          name: spain
+        - title: Brazilian Population (WHO)
+          name: brazil
+        - title: South Korean Population (WHO)
+          name: south_korea
+        - title: Chinese Population (WHO)
+          name: china
+        - title: Indian Population (WHO)
+          name: india
         - title: Custom Rate Table
           name: custom
       default: us
       description:
           ui: >
-            Reference population mortality rates
+            Reference population mortality rates. US/Minnesota/French/Slovenian tables
+            are from the relsurv package. Other countries use WHO Global Health Observatory
+            life table data bundled with this module.
           R: >
             Population rate table for expected survival
 

@@ -4,6 +4,32 @@ sparsegrouplassoClass <- R6::R6Class(
     private = list(
         .pathwayWarning = NULL,
 
+        # ══════════════════════════════════════════════════════════════
+        # Notice Helper
+        # ══════════════════════════════════════════════════════════════
+        .insertNotice = function(name, type, content, position = 999) {
+            tryCatch({
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = name,
+                    type = type
+                )
+                notice$setContent(content)
+                self$results$insert(position, notice)
+            }, error = function(e) {
+                tryCatch({
+                    existing <- self$results$todo$content
+                    if (is.null(existing) || nchar(existing) == 0) existing <- ""
+                    label <- switch(as.character(type),
+                        "1" = "ERROR", "2" = "WARNING", "3" = "WARNING", "4" = "INFO", "NOTE")
+                    self$results$todo$setContent(paste0(
+                        existing, "<p><strong>", label, ":</strong> ", content, "</p>"
+                    ))
+                    self$results$todo$setVisible(TRUE)
+                }, error = function(e2) NULL)
+            })
+        },
+
         .init = function() {
             if (is.null(self$options$time_var) || is.null(self$options$event_var)) {
                 self$results$instructions$setContent(
@@ -102,6 +128,9 @@ sparsegrouplassoClass <- R6::R6Class(
         },
 
         .run = function() {
+            # Set visibility for adaptive weights table (no negation support in .r.yaml)
+            self$results$adaptiveWeights$setVisible(self$options$weight_type != "none")
+
             # Check for required variables
             if (is.null(self$options$time_var) || is.null(self$options$event_var) ||
                 is.null(self$options$pred_vars) || length(self$options$pred_vars) < 2) {
@@ -109,10 +138,19 @@ sparsegrouplassoClass <- R6::R6Class(
             }
 
             # Validate package availability
-            if (!requireNamespace("glmnet", quietly = TRUE) ||
-                !requireNamespace("survival", quietly = TRUE)) {
-                self$results$instructions$setContent(
-                    "<html><body><div style='color: red;'><b>Missing packages:</b> 'glmnet' and 'survival' are required for this analysis.</div></body></html>"
+            if (!requireNamespace("glmnet", quietly = TRUE)) {
+                private$.insertNotice(
+                    'missingGlmnet', jmvcore::NoticeType$ERROR,
+                    "Package 'glmnet' is required for Sparse Group LASSO Cox regression. Install with: install.packages('glmnet')",
+                    position = 1
+                )
+                return()
+            }
+            if (!requireNamespace("survival", quietly = TRUE)) {
+                private$.insertNotice(
+                    'missingSurvival', jmvcore::NoticeType$ERROR,
+                    "Package 'survival' is required. Install with: install.packages('survival')",
+                    position = 1
                 )
                 return()
             }
@@ -134,11 +172,68 @@ sparsegrouplassoClass <- R6::R6Class(
                 results <- private$.performSparseGroupLASSO(data)
                 if (!is.null(results)) {
                     private$.populateResults(results, data)
+
+                    # Clinical notices based on results
+                    n_events <- sum(results$y_event == 1)
+                    n_vars <- ncol(results$X)
+                    n_selected <- sum(abs(results$cv_results$optimal_coefficients) > 1e-8)
+
+                    if (n_events < 10) {
+                        private$.insertNotice(
+                            'veryLowEvents', jmvcore::NoticeType$STRONG_WARNING,
+                            sprintf("Only %d events detected. Results are highly unreliable with fewer than 10 events. Consider collecting more data.", n_events),
+                            position = 1
+                        )
+                    } else if (n_events < 20) {
+                        private$.insertNotice(
+                            'lowEvents', jmvcore::NoticeType$WARNING,
+                            sprintf("Only %d events detected. Penalized models need adequate events for stable variable selection.", n_events)
+                        )
+                    }
+
+                    if (n_selected == 0) {
+                        private$.insertNotice(
+                            'noSelection', jmvcore::NoticeType$WARNING,
+                            "No variables were selected at the optimal lambda. All coefficients are zero. Consider relaxing the penalty (lower alpha) or checking data quality."
+                        )
+                    }
+
+                    # C-index warning
+                    if (!is.null(results$cv_results$optimal_coefficients) && n_selected > 0) {
+                        tryCatch({
+                            lp <- as.numeric(results$X %*% results$cv_results$optimal_coefficients)
+                            conc <- survival::concordance(
+                                survival::Surv(results$y_time, results$y_event) ~ lp, reverse = TRUE
+                            )
+                            if (!is.na(conc$concordance) && conc$concordance < 0.5) {
+                                private$.insertNotice(
+                                    'poorDiscrimination', jmvcore::NoticeType$STRONG_WARNING,
+                                    sprintf("Training C-index = %.3f is below 0.5, indicating worse-than-chance discrimination. Review variable selection and data quality.", conc$concordance),
+                                    position = 1
+                                )
+                            }
+                        }, error = function(e) NULL)
+                    }
+
+                    # Success notice
+                    penalty_label <- sprintf("Sparse Group LASSO (alpha=%.2f)", self$options$alpha_sgl)
+                    n_groups <- max(results$groups)
+                    n_groups_sel <- if (n_selected > 0) {
+                        length(unique(results$groups[abs(results$cv_results$optimal_coefficients) > 1e-8]))
+                    } else 0L
+
+                    private$.insertNotice(
+                        'analysisComplete', jmvcore::NoticeType$INFO,
+                        sprintf("%s completed: %d/%d variables selected across %d/%d groups, using %d-fold CV with %d observations (%d events).",
+                                penalty_label, n_selected, n_vars, n_groups_sel, n_groups,
+                                self$options$cv_folds, nrow(results$X), n_events)
+                    )
                 }
             }, error = function(e) {
-                self$results$instructions$setContent(
-                    paste0("<html><body><div style='color: red;'>",
-                           "<b>Analysis Error:</b> ", e$message, "</div></body></html>")
+                private$.insertNotice(
+                    'analysisError', jmvcore::NoticeType$ERROR,
+                    sprintf("Error in Sparse Group LASSO fitting: %s", e$message),
+                    position = 1
                 )
             })
         },
@@ -185,8 +280,25 @@ sparsegrouplassoClass <- R6::R6Class(
                                      "</div>")
             }
 
-            # 3. Multicollinearity placeholder (SGL handles this well)
-            collin_text <- "<div style='color: green; margin-top: 5px;'>✓ Group structures will help manage correlated predictors.</div>"
+            # 3. Multicollinearity assessment
+            collin_text <- ""
+            tryCatch({
+                num_vars <- pred_vars[sapply(pred_vars, function(v) is.numeric(data[[v]]))]
+                if (length(num_vars) >= 2) {
+                    cor_mat <- cor(data[, num_vars, drop = FALSE], use = "pairwise.complete.obs")
+                    diag(cor_mat) <- 0
+                    max_cor <- max(abs(cor_mat), na.rm = TRUE)
+                    if (max_cor >= 0.9) {
+                        collin_text <- sprintf("<div style='color: orange; margin-top: 5px;'>Note: High pairwise correlation detected (max |r| = %.2f). Group structure will help manage correlated predictors.</div>", max_cor)
+                    } else if (max_cor >= 0.7) {
+                        collin_text <- sprintf("<div style='color: green; margin-top: 5px;'>Moderate pairwise correlations detected (max |r| = %.2f). Group structure will help manage correlated predictors.</div>", max_cor)
+                    } else {
+                        collin_text <- sprintf("<div style='color: green; margin-top: 5px;'>No concerning multicollinearity (max |r| = %.2f).</div>", max_cor)
+                    }
+                }
+            }, error = function(e) {
+                collin_text <<- ""
+            })
 
             # Construct HTML
             content <- paste0(
@@ -243,10 +355,10 @@ sparsegrouplassoClass <- R6::R6Class(
             }
 
             if (length(missingVars) > 0) {
-                self$results$instructions$setContent(
-                    paste0("<html><body><div style='color: red;'>",
-                           "<b>Missing variables:</b> ", paste(missingVars, collapse = ", "),
-                           "</div></body></html>")
+                private$.insertNotice(
+                    'missingVars', jmvcore::NoticeType$ERROR,
+                    sprintf("Missing variables in data: %s", paste(missingVars, collapse = ", ")),
+                    position = 1
                 )
                 return(NULL)
             }
@@ -261,8 +373,10 @@ sparsegrouplassoClass <- R6::R6Class(
             data <- data[complete.cases(data), , drop = FALSE]
 
             if (nrow(data) < 10) {
-                self$results$instructions$setContent(
-                    "<html><body><div style='color: red;'><b>Insufficient data:</b> Need at least 10 complete observations.</div></body></html>"
+                private$.insertNotice(
+                    'insufficientData', jmvcore::NoticeType$ERROR,
+                    sprintf("Need at least 10 complete observations. Only %d available after removing missing data.", nrow(data)),
+                    position = 1
                 )
                 return(NULL)
             }
@@ -287,11 +401,11 @@ sparsegrouplassoClass <- R6::R6Class(
 
             n_excluded_outcome <- sum(is.na(event_numeric) & !is.na(event_data))
             if (n_excluded_outcome > 0) {
-                self$results$todo$setContent(paste0(
-                    "<div class='alert alert-warning'><strong>Note:</strong> ",
-                    n_excluded_outcome, " row(s) excluded because outcome value matched neither ",
-                    "event level ('", event_level, "') nor censored level ('", censor_level, "').</div>"
-                ))
+                private$.insertNotice(
+                    'excludedRows', jmvcore::NoticeType$WARNING,
+                    sprintf("%d row(s) excluded because outcome value matched neither event level ('%s') nor censored level ('%s').",
+                            n_excluded_outcome, event_level, censor_level)
+                )
             }
 
             # Remove rows where event encoding produced NA
@@ -300,8 +414,31 @@ sparsegrouplassoClass <- R6::R6Class(
             data[[eventVar]] <- event_numeric[keep_rows]
 
             if (nrow(data) < 10) {
-                self$results$instructions$setContent(
-                    "<html><body><div style='color: red;'><b>Insufficient data:</b> Need at least 10 complete observations after event encoding.</div></body></html>"
+                private$.insertNotice(
+                    'insufficientDataEncoding', jmvcore::NoticeType$ERROR,
+                    sprintf("Need at least 10 complete observations after event encoding. Only %d remain.", nrow(data)),
+                    position = 1
+                )
+                return(NULL)
+            }
+
+            # Validate time values
+            time_vals <- as.numeric(data[[timeVar]])
+            if (any(time_vals <= 0, na.rm = TRUE)) {
+                n_nonpos <- sum(time_vals <= 0, na.rm = TRUE)
+                private$.insertNotice(
+                    'nonPositiveTime', jmvcore::NoticeType$ERROR,
+                    sprintf("All survival times must be positive. Found %d non-positive value(s). Check the time variable.", n_nonpos),
+                    position = 1
+                )
+                return(NULL)
+            }
+
+            if (sum(data[[eventVar]] == 1) == 0) {
+                private$.insertNotice(
+                    'noEvents', jmvcore::NoticeType$ERROR,
+                    "No events detected after encoding. All observations are censored. The model cannot be fitted.",
+                    position = 1
                 )
                 return(NULL)
             }
@@ -371,8 +508,11 @@ sparsegrouplassoClass <- R6::R6Class(
                 X <- scale(X, center = FALSE, scale = TRUE)
             }
 
-            # Define groups
-            groups <- private$.defineGroups(X, data, actual_pred_vars)
+            # Define groups (pass both original and actual pred_vars)
+            groups <- private$.defineGroups(X, data, actual_pred_vars, predVars)
+
+            # Build descriptive group names from member variables
+            group_names <- private$.buildGroupNames(groups, actual_pred_vars, predVars)
 
             # Generate lambda sequence
             lambda_seq <- private$.generateLambdaSequence(X, y_time, y_event, groups)
@@ -389,10 +529,20 @@ sparsegrouplassoClass <- R6::R6Class(
                 stability_results <- private$.performStabilitySelection(X, y_time, y_event, groups, lambda_seq)
             }
 
+            # Bootstrap confidence intervals if requested
+            bootstrap_ci <- NULL
+            if (self$options$confidence_intervals) {
+                bootstrap_ci <- private$.bootstrapConfidenceIntervals(
+                    X, y_time, y_event, groups, cv_results$optimal_lambda, adaptive_weights
+                )
+            }
+
             return(list(
                 cv_results = cv_results,
                 stability_results = stability_results,
+                bootstrap_ci = bootstrap_ci,
                 groups = groups,
+                group_names = group_names,
                 lambda_seq = lambda_seq,
                 adaptive_weights = adaptive_weights,
                 X = X,
@@ -402,12 +552,49 @@ sparsegrouplassoClass <- R6::R6Class(
             ))
         },
 
-        .defineGroups = function(X, data, pred_vars) {
+        .buildGroupNames = function(groups, col_names, original_pred_vars) {
+            # Build descriptive group names from their member variables
+            unique_groups <- sort(unique(groups))
+            names_map <- character(max(groups))
+
+            for (g in unique_groups) {
+                g_idx <- which(groups == g)
+                g_cols <- col_names[g_idx]
+
+                if (length(g_cols) == 1) {
+                    # Single variable: use its name directly
+                    names_map[g] <- g_cols
+                } else {
+                    # Multiple variables: find common original predictor name
+                    matched_orig <- NULL
+                    for (pv in original_pred_vars) {
+                        if (all(g_cols == pv | startsWith(g_cols, paste0(pv, "_")))) {
+                            matched_orig <- pv
+                            break
+                        }
+                    }
+                    if (!is.null(matched_orig)) {
+                        names_map[g] <- matched_orig
+                    } else {
+                        # Truncate long lists
+                        if (length(g_cols) <= 3) {
+                            names_map[g] <- paste(g_cols, collapse = ", ")
+                        } else {
+                            names_map[g] <- paste0(paste(g_cols[1:2], collapse = ", "), " +", length(g_cols) - 2, " more")
+                        }
+                    }
+                }
+            }
+            return(names_map)
+        },
+
+        .defineGroups = function(X, data, pred_vars, original_pred_vars = NULL) {
             method <- self$options$group_definition
             groups <- NULL
+            orig_pv <- if (!is.null(original_pred_vars)) original_pred_vars else self$options$pred_vars
 
             if (method == "factor_based") {
-                groups <- private$.factorBasedGrouping(X, data, pred_vars)
+                groups <- private$.factorBasedGrouping(X, data, pred_vars, orig_pv)
             } else if (method == "custom") {
                 groups <- private$.customGrouping(pred_vars)
             } else if (method == "pathway_based") {
@@ -426,32 +613,37 @@ sparsegrouplassoClass <- R6::R6Class(
             return(groups)
         },
 
-        .factorBasedGrouping = function(X, data, pred_vars) {
-            # Group variables based on their original factor structure
-            groups <- rep(1, ncol(X))
-            current_group <- 1
-            col_index <- 1
+        .factorBasedGrouping = function(X, data, pred_vars, original_pred_vars = NULL) {
+            # Group X columns by their originating predictor variable.
+            # After dummy encoding, "ecog" (factor with levels 0,1,2,3)
+            # becomes columns "ecog_1", "ecog_2", "ecog_3" in X.
+            # We map each X column back to its original predictor name
+            # and assign all dummies from the same predictor to one group.
+            x_cols <- colnames(X)
+            groups <- rep(0L, ncol(X))
+            current_group <- 1L
 
-            for (var in pred_vars) {
-                if (var %in% names(data)) {
-                    # Original variable exists - assign group
-                    groups[col_index] <- current_group
-                    col_index <- col_index + 1
-                    current_group <- current_group + 1
-                } else {
-                    # Check for dummy variables
-                    dummy_vars <- colnames(X)[grepl(paste0("^", var, "_"), colnames(X))]
-                    if (length(dummy_vars) > 0) {
-                        # Assign same group to all dummies of this variable
-                        for (dummy_var in dummy_vars) {
-                            dummy_index <- which(colnames(X) == dummy_var)
-                            if (length(dummy_index) > 0) {
-                                groups[dummy_index] <- current_group
-                            }
-                        }
-                        current_group <- current_group + 1
-                    }
+            # Use original predictor names (before dummy expansion) for matching
+            orig_vars <- if (!is.null(original_pred_vars)) original_pred_vars else pred_vars
+            # Sort by descending length to avoid prefix collisions
+            sorted_idx <- order(nchar(orig_vars), decreasing = TRUE)
+
+            for (idx in sorted_idx) {
+                var <- orig_vars[idx]
+                # Match exact name or name followed by "_" (dummy suffix)
+                matched <- which(x_cols == var | startsWith(x_cols, paste0(var, "_")))
+                matched <- matched[groups[matched] == 0L]
+                if (length(matched) > 0) {
+                    groups[matched] <- current_group
+                    current_group <- current_group + 1L
                 }
+            }
+
+            # Assign remaining unmatched columns to their own groups
+            unmatched <- which(groups == 0L)
+            for (j in unmatched) {
+                groups[j] <- current_group
+                current_group <- current_group + 1L
             }
 
             return(groups)
@@ -479,45 +671,90 @@ sparsegrouplassoClass <- R6::R6Class(
             pathway_var <- self$options$pathway_info
             if (!pathway_var %in% names(data)) return(NULL)
 
-            # Use pathway information to group variables
-            # The pathway variable should contain group labels for each observation.
-            # We attempt to use it if it has as many unique values as needed,
-            # but this mapping is inherently approximate for observation-level labels.
-            pathway_info <- data[[pathway_var]]
-            unique_pathways <- unique(pathway_info)
-            groups <- rep(1, length(pred_vars))
+            # The pathway variable must be a factor with exactly as many levels
+            # as there are predictor variables. Each level names the pathway/group
+            # for the corresponding predictor (in order).
+            # E.g., with pred_vars = c("EGFR","BRAF","TP53","MDM2"),
+            # pathway_info might have first 4 unique values: "RTK","RAS","p53","p53"
+            # mapping each predictor to its pathway.
+            pathway_data <- data[[pathway_var]]
+            unique_pathways <- if (is.factor(pathway_data)) levels(pathway_data) else unique(pathway_data)
 
-            # NOTE: This is a simplified cyclic assignment because the pathway
-            # variable describes observations, not predictor columns.
-            # A proper implementation would require a separate variable-to-pathway
-            # mapping file or annotation. Results should be interpreted with caution.
-            for (i in seq_along(pred_vars)) {
-                groups[i] <- (i - 1) %% length(unique_pathways) + 1
+            if (length(unique_pathways) < 2) {
+                private$.pathwayWarning <- "Pathway variable has fewer than 2 unique levels. Falling back to individual groups."
+                return(NULL)
             }
 
-            # Store warning for display in results
-            private$.pathwayWarning <- paste0(
-                "WARNING: Pathway-based grouping used cyclic (modulo) assignment ",
-                "because the pathway variable describes observations, not predictors. ",
-                "For proper pathway-based grouping, provide a variable whose levels ",
-                "correspond to predictor variable memberships, or use custom grouping."
-            )
+            # Strategy: if # unique pathway levels == # predictors, assume 1:1 mapping
+            # (each observation's pathway value tells which group that predictor belongs to).
+            # Otherwise, try name-matching between pathway levels and predictor variable names.
+            groups <- rep(1L, length(pred_vars))
+
+            # Try prefix matching: check if any pathway level appears as prefix in a predictor name
+            # This handles cases like pathway levels "EGFR_pathway", "PI3K_pathway" matching
+            # predictor names "EGFR_score", "EGFR_expression", "PI3K_activity"
+            matched <- FALSE
+            for (i in seq_along(pred_vars)) {
+                for (j in seq_along(unique_pathways)) {
+                    pw <- as.character(unique_pathways[j])
+                    pv <- pred_vars[i]
+                    # Match if predictor starts with pathway name (with separator)
+                    # or pathway name contains predictor name
+                    if (startsWith(pv, paste0(pw, "_")) || startsWith(pv, paste0(pw, "."))) {
+                        groups[i] <- j
+                        matched <- TRUE
+                        break
+                    }
+                }
+            }
+
+            if (!matched) {
+                # Fallback: use custom_groups syntax or sequential assignment
+                # Use the first n values from the pathway variable as group assignments
+                pw_values <- as.character(pathway_data[1:min(length(pred_vars), length(pathway_data))])
+                pw_mapping <- match(pw_values, unique_pathways)
+                pw_mapping[is.na(pw_mapping)] <- 1L
+                groups <- pw_mapping[seq_along(pred_vars)]
+
+                private$.pathwayWarning <- paste0(
+                    "Pathway grouping used the first ", length(pred_vars),
+                    " values from the pathway variable as group assignments. ",
+                    "For precise control, use Custom Groups with explicit index-based specification."
+                )
+            }
 
             return(groups)
         },
 
         .variableTypeGrouping = function(data, pred_vars) {
-            groups <- rep(1, length(pred_vars))
-            group_id <- 1
+            # After dummy encoding, pred_vars may no longer exist in data.
+            # We need to classify based on the ORIGINAL data before dummies.
+            # Use self$data (original) to determine types, then map to X columns.
+            original_data <- self$data
+            x_cols <- colnames(data)
+            x_cols <- x_cols[!x_cols %in% c(self$options$time_var, self$options$event_var)]
+            if (!is.null(self$options$pathway_info) && self$options$pathway_info != "") {
+                x_cols <- x_cols[x_cols != self$options$pathway_info]
+            }
 
-            # Group by variable type
-            for (i in seq_along(pred_vars)) {
-                var <- pred_vars[i]
-                if (var %in% names(data)) {
-                    if (is.numeric(data[[var]])) {
-                        groups[i] <- 1  # Numeric group
-                    } else {
-                        groups[i] <- 2  # Categorical group
+            groups <- rep(1L, length(x_cols))
+            # Group 1 = continuous, Group 2 = categorical-derived
+
+            for (i in seq_along(x_cols)) {
+                col <- x_cols[i]
+                # Check if this column is a dummy from a factor
+                is_dummy <- FALSE
+                for (pv in pred_vars) {
+                    if (col != pv && startsWith(col, paste0(pv, "_"))) {
+                        is_dummy <- TRUE
+                        break
+                    }
+                }
+                if (is_dummy) {
+                    groups[i] <- 2L
+                } else if (col %in% names(original_data)) {
+                    if (is.factor(original_data[[col]]) || is.character(original_data[[col]])) {
+                        groups[i] <- 2L
                     }
                 }
             }
@@ -528,21 +765,20 @@ sparsegrouplassoClass <- R6::R6Class(
         .correlationBasedGrouping = function(X) {
             if (ncol(X) < 2) return(rep(1, ncol(X)))
 
-            # Calculate correlation matrix
             cor_matrix <- cor(X, use = "complete.obs")
             threshold <- self$options$correlation_threshold
 
-            # Simple clustering based on correlation
-            groups <- rep(1, ncol(X))
-            current_group <- 1
+            # Greedy clustering: unassigned variables (0) get grouped
+            groups <- rep(0L, ncol(X))
+            current_group <- 1L
 
             for (i in 1:ncol(X)) {
-                if (groups[i] == 0) next  # Already assigned
+                if (groups[i] != 0L) next  # Already assigned
 
-                # Find variables highly correlated with variable i
-                high_cor <- which(abs(cor_matrix[i, ]) >= threshold)
+                # Find unassigned variables highly correlated with variable i
+                high_cor <- which(abs(cor_matrix[i, ]) >= threshold & groups == 0L)
                 groups[high_cor] <- current_group
-                current_group <- current_group + 1
+                current_group <- current_group + 1L
             }
 
             return(groups)
@@ -550,14 +786,9 @@ sparsegrouplassoClass <- R6::R6Class(
 
         .generateLambdaSequence = function(X, y_time, y_event, groups) {
             if (self$options$lambda_sequence == "custom" && self$options$custom_lambda != "") {
-                # Parse custom lambda values
                 lambda_values <- as.numeric(strsplit(self$options$custom_lambda, ",")[[1]])
                 return(sort(lambda_values[!is.na(lambda_values)], decreasing = TRUE))
             }
-
-            # Automatic lambda sequence
-            n <- nrow(X)
-            p <- ncol(X)
 
             # Estimate lambda_max (when all coefficients are zero)
             lambda_max <- private$.estimateLambdaMax(X, y_time, y_event)
@@ -565,9 +796,23 @@ sparsegrouplassoClass <- R6::R6Class(
             lambda_min_ratio <- self$options$lambda_min_ratio
             n_lambda <- self$options$n_lambda
 
+            if (self$options$lambda_sequence == "adaptive") {
+                # Adaptive: use glmnet's own lambda sequence (data-driven spacing)
+                tryCatch({
+                    y_surv <- survival::Surv(y_time, y_event)
+                    auto_fit <- glmnet::glmnet(
+                        x = X, y = y_surv, family = "cox",
+                        alpha = self$options$alpha_sgl,
+                        standardize = FALSE,
+                        nlambda = n_lambda
+                    )
+                    return(auto_fit$lambda)
+                }, error = function(e) NULL)
+            }
+
+            # Default auto: log-spaced sequence
             lambda_min <- lambda_max * lambda_min_ratio
             lambda_seq <- exp(seq(log(lambda_max), log(lambda_min), length.out = n_lambda))
-
             return(lambda_seq)
         },
 
@@ -727,17 +972,52 @@ sparsegrouplassoClass <- R6::R6Class(
             y_surv <- survival::Surv(y_time, y_event)
 
             # Fit cross-validated Cox model with glmnet
-            # alpha_sgl maps to glmnet alpha for L1/L2 mixing
             nfolds_safe <- max(3, min(cv_folds, floor(sum(y_event) / 3)))
-            cv_fit <- glmnet::cv.glmnet(
-                x = X, y = y_surv,
-                family = "cox",
-                alpha = alpha_sgl,
-                penalty.factor = penalty_factor,
-                nfolds = nfolds_safe,
-                standardize = FALSE,
-                lambda = lambda_seq
-            )
+            cv_repeats <- self$options$cv_repeats
+
+            if (cv_repeats > 1) {
+                # Repeated CV: average CV errors across repeats
+                cvm_accum <- NULL
+                cvsd_accum <- NULL
+                for (r in seq_len(cv_repeats)) {
+                    set.seed(self$options$seed_value + r - 1)
+                    cv_r <- glmnet::cv.glmnet(
+                        x = X, y = y_surv,
+                        family = "cox",
+                        alpha = alpha_sgl,
+                        penalty.factor = penalty_factor,
+                        nfolds = nfolds_safe,
+                        standardize = FALSE,
+                        lambda = lambda_seq
+                    )
+                    if (is.null(cvm_accum)) {
+                        cvm_accum <- cv_r$cvm
+                        cvsd_accum <- cv_r$cvsd^2
+                    } else {
+                        cvm_accum <- cvm_accum + cv_r$cvm
+                        cvsd_accum <- cvsd_accum + cv_r$cvsd^2
+                    }
+                }
+                # Use last cv_r as template, overwrite with averaged values
+                cv_fit <- cv_r
+                cv_fit$cvm <- cvm_accum / cv_repeats
+                cv_fit$cvsd <- sqrt(cvsd_accum / cv_repeats)
+                cv_fit$cvup <- cv_fit$cvm + cv_fit$cvsd
+                cv_fit$cvlo <- cv_fit$cvm - cv_fit$cvsd
+                cv_fit$lambda.min <- cv_fit$lambda[which.min(cv_fit$cvm)]
+                idx_1se <- which(cv_fit$cvm <= min(cv_fit$cvm) + cv_fit$cvsd[which.min(cv_fit$cvm)])
+                cv_fit$lambda.1se <- cv_fit$lambda[min(idx_1se)]
+            } else {
+                cv_fit <- glmnet::cv.glmnet(
+                    x = X, y = y_surv,
+                    family = "cox",
+                    alpha = alpha_sgl,
+                    penalty.factor = penalty_factor,
+                    nfolds = nfolds_safe,
+                    standardize = FALSE,
+                    lambda = lambda_seq
+                )
+            }
 
             # Fit full model across the lambda sequence
             full_fit <- glmnet::glmnet(
@@ -749,12 +1029,8 @@ sparsegrouplassoClass <- R6::R6Class(
                 lambda = lambda_seq
             )
 
-            # Extract coefficient path
-            coef_matrix <- as.matrix(coef(full_fit, s = lambda_seq))
-            coefficients_path <- matrix(0, nrow = n_vars, ncol = length(lambda_seq))
-            for (l in seq_along(lambda_seq)) {
-                coefficients_path[, l] <- as.numeric(coef(full_fit, s = lambda_seq[l]))
-            }
+            # Extract coefficient path (single call, no per-lambda loop)
+            coefficients_path <- as.matrix(coef(full_fit, s = lambda_seq))
 
             # Calculate deviance and df for each lambda
             deviance_path <- numeric(length(lambda_seq))
@@ -775,8 +1051,8 @@ sparsegrouplassoClass <- R6::R6Class(
                 cv_se[l] <- cv_fit$cvsd[idx]
             }
 
-            # Select optimal lambda
-            optimal_index <- private$.selectOptimalLambda(cv_mean, cv_se, lambda_seq, df_path)
+            # Select optimal lambda (pass n_obs for AIC/BIC/EBIC)
+            optimal_index <- private$.selectOptimalLambda(cv_mean, cv_se, lambda_seq, df_path, n_obs = nrow(X))
 
             return(list(
                 coefficients_path = coefficients_path,
@@ -831,39 +1107,15 @@ sparsegrouplassoClass <- R6::R6Class(
             })
         },
 
-        .softThreshold = function(x, lambda) {
-            sign(x) * pmax(0, abs(x) - lambda)
-        },
-
-        .calculatePredictionError = function(X_test, y_test_time, y_test_event, coefficients) {
-            # Calculate prediction error using 1 - C-index (Harrell's concordance)
-            if (sum(abs(coefficients)) == 0) {
-                return(0.5)  # Null model: random concordance
-            }
-
-            linear_pred <- as.numeric(X_test %*% coefficients)
-
-            if (var(linear_pred) == 0) {
-                return(0.5)
-            }
-
-            tryCatch({
-                y_surv <- survival::Surv(y_test_time, y_test_event)
-                # Higher risk score = worse prognosis, so reverse = TRUE
-                cindex_result <- survival::concordance(y_surv ~ linear_pred, reverse = TRUE)
-                error <- 1 - cindex_result$concordance
-                return(ifelse(is.na(error), 0.5, error))
-            }, error = function(e) {
-                return(0.5)
-            })
+        .logSumExp = function(x) {
+            # Numerically stable log(sum(exp(x)))
+            m <- max(x)
+            m + log(sum(exp(x - m)))
         },
 
         .calculateDeviance = function(X, y_time, y_event, coefficients) {
-            # Calculate -2 * Cox partial log-likelihood
+            # Calculate -2 * Cox partial log-likelihood (Breslow)
             if (sum(abs(coefficients)) == 0) {
-                # Null model partial log-likelihood
-                # Under null model (beta=0), the partial log-likelihood simplifies
-                # to sum over events of -log(n_at_risk_i)
                 order_idx <- order(y_time)
                 sorted_event <- y_event[order_idx]
                 n <- length(y_time)
@@ -875,26 +1127,18 @@ sparsegrouplassoClass <- R6::R6Class(
                 return(-2 * null_loglik)
             }
 
-            # Cox partial log-likelihood calculation
             linear_pred <- as.numeric(X %*% coefficients)
-            # Use survival::coxph.detail or direct computation
             tryCatch({
-                y_surv <- survival::Surv(y_time, y_event)
-                # Fit a Cox model with the linear predictor as offset
-                # The partial log-likelihood at beta is computed directly
                 order_idx <- order(y_time)
                 sorted_lp <- linear_pred[order_idx]
                 sorted_event <- y_event[order_idx]
                 n <- length(y_time)
 
-                # Breslow partial log-likelihood
                 loglik <- 0
-                log_sum_exp <- log(sum(exp(sorted_lp)))
                 for (i in 1:n) {
                     if (sorted_event[i] == 1) {
-                        # At each event time, subtract log of risk set sum
                         risk_set_lp <- sorted_lp[i:n]
-                        log_risk_sum <- log(sum(exp(risk_set_lp)))
+                        log_risk_sum <- private$.logSumExp(risk_set_lp)
                         loglik <- loglik + sorted_lp[i] - log_risk_sum
                     }
                 }
@@ -904,38 +1148,44 @@ sparsegrouplassoClass <- R6::R6Class(
             })
         },
 
-        .selectOptimalLambda = function(cv_mean, cv_se, lambda_seq, df_path) {
+        .selectOptimalLambda = function(cv_mean, cv_se, lambda_seq, df_path, n_obs = NULL) {
             criterion <- self$options$selection_criterion
-            
-            if (criterion == "cv_deviance") {
-                # Select lambda with minimum CV error
+
+            if (criterion == "cv_deviance" || criterion == "cv_c_index") {
+                # Both use minimum CV error (glmnet cvm is deviance-based)
                 return(which.min(cv_mean))
-            } else if (criterion == "cv_c_index") {
-                # Select lambda with maximum C-index (minimum error)
-                return(which.min(cv_mean))
-            } else if (criterion == "aic") {
-                # Simplified AIC calculation
-                aic_values <- cv_mean + 2 * df_path / length(cv_mean)
+            }
+
+            # For information criteria, n = number of observations (not lambdas)
+            n <- if (!is.null(n_obs)) n_obs else length(cv_mean)
+            p_total <- max(df_path, na.rm = TRUE)
+
+            if (criterion == "aic") {
+                # AIC = deviance + 2 * df
+                aic_values <- cv_mean * n + 2 * df_path
                 return(which.min(aic_values))
             } else if (criterion == "bic") {
-                # Simplified BIC calculation
-                bic_values <- cv_mean + log(length(cv_mean)) * df_path / length(cv_mean)
+                # BIC = deviance + log(n) * df
+                bic_values <- cv_mean * n + log(n) * df_path
                 return(which.min(bic_values))
             } else if (criterion == "ebic") {
-                # Extended BIC
+                # Extended BIC = BIC + 2 * gamma * log(choose(p, df))
                 gamma <- self$options$ebic_gamma
-                n <- length(cv_mean)
-                p <- max(df_path)
-                ebic_values <- cv_mean + log(n) * df_path / n + 2 * gamma * log(choose(p, df_path)) / n
+                log_choose <- numeric(length(df_path))
+                for (k in seq_along(df_path)) {
+                    dk <- max(0, min(df_path[k], p_total))
+                    log_choose[k] <- if (dk > 0 && dk < p_total) lchoose(p_total, dk) else 0
+                }
+                ebic_values <- cv_mean * n + log(n) * df_path + 2 * gamma * log_choose
                 return(which.min(ebic_values))
             }
-            
-            return(which.min(cv_mean))  # Default
+
+            return(which.min(cv_mean))
         },
 
         .performStabilitySelection = function(X, y_time, y_event, groups, lambda_seq) {
             # Stability selection: subsample repeatedly and fit entire lambda path
-            n_bootstrap <- 50  # Reduced from 100 since glmnet path fitting is heavier
+            n_bootstrap <- min(self$options$bootstrap_samples, 200)
             subsample_ratio <- self$options$stability_subsample
             threshold <- self$options$stability_threshold
             alpha_sgl <- self$options$alpha_sgl
@@ -1034,9 +1284,19 @@ sparsegrouplassoClass <- R6::R6Class(
                 private$.populateValidationTable(results)
             }
 
+            # Populate solution path
+            if (self$options$show_path) {
+                private$.populateSolutionPath(results)
+            }
+
             # Populate stability results if available
             if (self$options$stability_selection && !is.null(results$stability_results)) {
                 private$.populateStabilityTable(results)
+            }
+
+            # Populate adaptive weights table
+            if (self$options$weight_type != "none" && !is.null(results$adaptive_weights)) {
+                private$.populateAdaptiveWeightsTable(results)
             }
 
             # Generate plots (set state for render functions)
@@ -1106,6 +1366,7 @@ sparsegrouplassoClass <- R6::R6Class(
             optimal_coefs <- results$cv_results$optimal_coefficients
             var_names <- results$variable_names
             groups <- results$groups
+            has_ci <- !is.null(results$bootstrap_ci)
 
             # Only show selected variables
             selected_idx <- which(abs(optimal_coefs) > 1e-8)
@@ -1117,26 +1378,52 @@ sparsegrouplassoClass <- R6::R6Class(
                     coefficient = 0,
                     hazard_ratio = 1,
                     standardized_coef = 0,
+                    ci_lower = NA,
+                    ci_upper = NA,
                     importance = 0,
                     selection_frequency = 0
                 ))
                 return()
             }
 
+            # Compute selection frequency: stability > bootstrap > default (1.0)
+            sel_freq <- rep(1.0, length(optimal_coefs))
+            if (!is.null(results$stability_results)) {
+                probs <- results$stability_results$selection_probs
+                sel_freq <- apply(probs, 1, max)
+            } else if (has_ci) {
+                # Use bootstrap inclusion frequency as proxy
+                boot_coefs <- results$bootstrap_ci$boot_coefs
+                sel_freq <- colMeans(abs(boot_coefs) > 1e-8)
+            }
+
             for (i in selected_idx) {
                 coef_val <- optimal_coefs[i]
-                
+
+                ci_lo <- if (has_ci) results$bootstrap_ci$ci_lower[i] else NA
+                ci_hi <- if (has_ci) results$bootstrap_ci$ci_upper[i] else NA
+
                 row_values <- list(
                     variable = var_names[i],
-                    group = paste0("Group ", groups[i]),
+                    group = results$group_names[groups[i]],
                     coefficient = coef_val,
                     hazard_ratio = exp(coef_val),
-                    standardized_coef = coef_val,  # Already standardized if option was selected
+                    standardized_coef = coef_val,
+                    ci_lower = ci_lo,
+                    ci_upper = ci_hi,
                     importance = abs(coef_val),
-                    selection_frequency = 1.0  # For final model, always 1
+                    selection_frequency = sel_freq[i]
                 )
 
                 table$addRow(rowKey = var_names[i], values = row_values)
+            }
+
+            if (has_ci) {
+                alpha <- self$options$alpha_level
+                table$setNote("ci", paste0(
+                    "CI: ", round((1 - alpha) * 100), "% bootstrap percentile interval (",
+                    self$options$bootstrap_samples, " resamples)."
+                ))
             }
         },
 
@@ -1146,6 +1433,8 @@ sparsegrouplassoClass <- R6::R6Class(
             groups <- results$groups
             var_names <- results$variable_names
             optimal_coefs <- results$cv_results$optimal_coefficients
+            alpha_sgl <- self$options$alpha_sgl
+            adaptive_weights <- results$adaptive_weights
 
             unique_groups <- unique(groups)
 
@@ -1155,12 +1444,20 @@ sparsegrouplassoClass <- R6::R6Class(
                 n_selected_in_group <- sum(abs(group_coefs) > 1e-8)
                 sparsity_within <- (length(group_vars) - n_selected_in_group) / length(group_vars) * 100
 
+                # Compute the actual group penalty (same formula as .fitSparseGroupLASSO)
+                group_size <- length(group_vars)
+                avg_pf <- mean(sapply(group_vars, function(j) {
+                    pf_ind <- adaptive_weights$individual[j]
+                    pf_grp <- adaptive_weights$group[g] * sqrt(group_size)
+                    alpha_sgl * pf_ind + (1 - alpha_sgl) * pf_grp
+                }))
+
                 row_values <- list(
                     group_id = g,
-                    group_name = paste0("Group ", g),
-                    n_variables = length(group_vars),
+                    group_name = results$group_names[g],
+                    n_variables = group_size,
                     group_selected = ifelse(n_selected_in_group > 0, "Yes", "No"),
-                    group_penalty = 1.0,  # Simplified
+                    group_penalty = avg_pf,
                     sparsity_within = sparsity_within,
                     variables_list = paste(var_names[group_vars], collapse = ", ")
                 )
@@ -1228,50 +1525,65 @@ sparsegrouplassoClass <- R6::R6Class(
 
             cv_results <- results$cv_results
             optimal_idx <- cv_results$optimal_index
+            y_surv <- survival::Surv(results$y_time, results$y_event)
 
-            # Compute actual C-index for the selected model
-            cindex_val <- NA
-            tryCatch({
-                optimal_coefs <- cv_results$optimal_coefficients
-                if (sum(abs(optimal_coefs) > 1e-8) > 0) {
-                    risk_scores <- as.numeric(results$X %*% optimal_coefs)
-                    y_surv <- survival::Surv(results$y_time, results$y_event)
-                    cindex_result <- survival::concordance(y_surv ~ risk_scores, reverse = TRUE)
-                    cindex_val <- cindex_result$concordance
-                }
-            }, error = function(e) {
-                cindex_val <<- NA
-            })
-
-            selected_groups <- if (sum(abs(cv_results$optimal_coefficients) > 1e-8) > 0) {
-                length(unique(results$groups[abs(cv_results$optimal_coefficients) > 1e-8]))
-            } else {
-                0L
+            # Helper: fit a reference model at a given alpha and extract metrics
+            .fitReference <- function(alpha_val, label) {
+                tryCatch({
+                    nfolds_safe <- max(3, min(self$options$cv_folds,
+                                              floor(sum(results$y_event) / 3)))
+                    ref_cv <- glmnet::cv.glmnet(
+                        x = results$X, y = y_surv,
+                        family = "cox", alpha = alpha_val,
+                        nfolds = nfolds_safe, standardize = FALSE
+                    )
+                    ref_coefs <- as.numeric(coef(ref_cv, s = ref_cv$lambda.min))
+                    n_sel <- sum(abs(ref_coefs) > 1e-8)
+                    n_grp_sel <- if (n_sel > 0) length(unique(results$groups[abs(ref_coefs) > 1e-8])) else 0L
+                    cv_err <- min(ref_cv$cvm, na.rm = TRUE)
+                    ci <- NA
+                    if (n_sel > 0) {
+                        lp <- as.numeric(results$X %*% ref_coefs)
+                        ci <- survival::concordance(y_surv ~ lp, reverse = TRUE)$concordance
+                    }
+                    list(method = label, n_selected = as.integer(n_sel),
+                         n_groups_selected = as.integer(n_grp_sel),
+                         cv_error = cv_err, c_index = ci, relative_performance = "Fitted")
+                }, error = function(e) {
+                    list(method = label, n_selected = NA_integer_,
+                         n_groups_selected = NA_integer_,
+                         cv_error = NA, c_index = NA,
+                         relative_performance = paste0("Error: ", e$message))
+                })
             }
 
-            methods <- list(
-                list(method = paste0("Sparse Group LASSO (alpha=", self$options$alpha_sgl, ")"),
-                     n_selected = as.integer(cv_results$df_path[optimal_idx]),
-                     n_groups_selected = as.integer(selected_groups),
-                     cv_error = cv_results$cv_mean[optimal_idx],
-                     c_index = cindex_val,
-                     relative_performance = "Selected"),
-                list(method = "Group LASSO (alpha=0)",
-                     n_selected = NA,
-                     n_groups_selected = NA,
-                     cv_error = NA,
-                     c_index = NA,
-                     relative_performance = "Reference (not fitted)"),
-                list(method = "LASSO (alpha=1)",
-                     n_selected = NA,
-                     n_groups_selected = NA,
-                     cv_error = NA,
-                     c_index = NA,
-                     relative_performance = "Reference (not fitted)")
+            # SGL model (already fitted)
+            sgl_coefs <- cv_results$optimal_coefficients
+            sgl_n <- sum(abs(sgl_coefs) > 1e-8)
+            sgl_grp <- if (sgl_n > 0) length(unique(results$groups[abs(sgl_coefs) > 1e-8])) else 0L
+            sgl_ci <- NA
+            tryCatch({
+                if (sgl_n > 0) {
+                    lp <- as.numeric(results$X %*% sgl_coefs)
+                    sgl_ci <- survival::concordance(y_surv ~ lp, reverse = TRUE)$concordance
+                }
+            }, error = function(e) NULL)
+
+            sgl_row <- list(
+                method = sprintf("Sparse Group LASSO (alpha=%.2f)", self$options$alpha_sgl),
+                n_selected = as.integer(sgl_n),
+                n_groups_selected = as.integer(sgl_grp),
+                cv_error = cv_results$cv_mean[optimal_idx],
+                c_index = sgl_ci,
+                relative_performance = "Selected"
             )
 
-            for (method in methods) {
-                table$addRow(rowKey = method$method, values = method)
+            # Fit Group LASSO (alpha near 0) and LASSO (alpha=1)
+            grp_row <- .fitReference(0.05, "Group LASSO (alpha~0)")
+            lasso_row <- .fitReference(1.0, "LASSO (alpha=1)")
+
+            for (row in list(sgl_row, grp_row, lasso_row)) {
+                table$addRow(rowKey = row$method, values = row)
             }
         },
 
@@ -1315,20 +1627,81 @@ sparsegrouplassoClass <- R6::R6Class(
             selection_probs <- stability_results$selection_probs
             stable_vars <- stability_results$stable_vars
             threshold <- stability_results$threshold
+            lambda_subset <- stability_results$lambda_seq
 
-            for (i in 1:length(var_names)) {
+            for (i in seq_along(var_names)) {
                 max_prob <- max(selection_probs[i, ])
-                
+
+                # Find first and last lambda where variable was selected (prob > 0)
+                selected_lambdas <- which(selection_probs[i, ] > 0)
+                first_sel <- if (length(selected_lambdas) > 0) lambda_subset[min(selected_lambdas)] else NA
+                last_sel <- if (length(selected_lambdas) > 0) lambda_subset[max(selected_lambdas)] else NA
+
                 row_values <- list(
                     variable = var_names[i],
-                    group = paste0("Group ", groups[i]),
+                    group = results$group_names[groups[i]],
                     selection_probability = max_prob * 100,
                     stable_selection = ifelse(stable_vars[i], "Yes", "No"),
-                    first_selected = NA,  # Would need more detailed tracking
-                    last_selected = NA
+                    first_selected = first_sel,
+                    last_selected = last_sel
                 )
 
                 table$addRow(rowKey = var_names[i], values = row_values)
+            }
+        },
+
+        .populateSolutionPath = function(results) {
+            table <- self$results$solutionPath
+            cv_results <- results$cv_results
+            lambda_seq <- cv_results$lambda_seq
+            n_vars <- nrow(cv_results$coefficients_path)
+            groups <- results$groups
+
+            n_show <- min(20, length(lambda_seq))
+            indices <- round(seq(1, length(lambda_seq), length.out = n_show))
+
+            for (j in seq_along(indices)) {
+                idx <- indices[j]
+                coefs_l <- cv_results$coefficients_path[, idx]
+                selected <- abs(coefs_l) > 1e-8
+                n_sel <- sum(selected)
+                n_groups_sel <- if (any(selected)) length(unique(groups[selected])) else 0L
+                sparsity <- (n_vars - n_sel) / n_vars * 100
+
+                table$addRow(rowKey = j, values = list(
+                    lambda_index = as.integer(idx),
+                    lambda_value = lambda_seq[idx],
+                    n_selected_vars = as.integer(n_sel),
+                    n_selected_groups = as.integer(n_groups_sel),
+                    deviance = cv_results$deviance_path[idx],
+                    df = cv_results$df_path[idx],
+                    sparsity_level = sparsity
+                ))
+            }
+        },
+
+        .populateAdaptiveWeightsTable = function(results) {
+            table <- self$results$adaptiveWeights
+            var_names <- results$variable_names
+            groups <- results$groups
+            weights <- results$adaptive_weights
+
+            for (i in seq_along(var_names)) {
+                g <- groups[i]
+                ind_w <- weights$individual[i]
+                grp_w <- weights$group[g]
+                combined <- ind_w * grp_w
+
+                rationale <- if (ind_w < 1) "Strong initial effect → less penalty" else "Weak initial effect → more penalty"
+
+                table$addRow(rowKey = var_names[i], values = list(
+                    variable = var_names[i],
+                    group = results$group_names[g],
+                    individual_weight = ind_w,
+                    group_weight = grp_w,
+                    combined_weight = combined,
+                    weight_rationale = rationale
+                ))
             }
         },
 
@@ -1341,6 +1714,42 @@ sparsegrouplassoClass <- R6::R6Class(
                 cv_mean = as.numeric(cv_results$cv_mean),
                 cv_se = as.numeric(cv_results$cv_se),
                 optimal_index = as.integer(cv_results$optimal_index)
+            ))
+        },
+
+        .bootstrapConfidenceIntervals = function(X, y_time, y_event, groups, optimal_lambda, adaptive_weights) {
+            n_boot <- self$options$bootstrap_samples
+            alpha <- self$options$alpha_level
+            n <- nrow(X)
+            n_vars <- ncol(X)
+
+            boot_coefs <- matrix(0, nrow = n_boot, ncol = n_vars)
+
+            for (b in seq_len(n_boot)) {
+                boot_idx <- sample(n, n, replace = TRUE)
+                boot_X <- X[boot_idx, , drop = FALSE]
+                boot_time <- y_time[boot_idx]
+                boot_event <- y_event[boot_idx]
+
+                tryCatch({
+                    coefs_b <- private$.fitSGLassoSingleLambda(
+                        boot_X, boot_time, boot_event,
+                        groups, optimal_lambda, adaptive_weights
+                    )
+                    boot_coefs[b, ] <- coefs_b
+                }, error = function(e) {
+                    # Leave zeros for failed bootstrap
+                })
+            }
+
+            # Compute percentile CIs
+            ci_lower <- apply(boot_coefs, 2, quantile, probs = alpha / 2, na.rm = TRUE)
+            ci_upper <- apply(boot_coefs, 2, quantile, probs = 1 - alpha / 2, na.rm = TRUE)
+
+            return(list(
+                ci_lower = ci_lower,
+                ci_upper = ci_upper,
+                boot_coefs = boot_coefs
             ))
         },
 
@@ -1361,6 +1770,7 @@ sparsegrouplassoClass <- R6::R6Class(
             image <- self$results$groupSelectionPlot
             image$setState(list(
                 groups = as.integer(results$groups),
+                group_names = as.character(results$group_names),
                 variable_names = as.character(results$variable_names),
                 optimal_coefficients = as.numeric(results$cv_results$optimal_coefficients)
             ))
@@ -1507,9 +1917,10 @@ sparsegrouplassoClass <- R6::R6Class(
 
             if (length(var_names) == 0) return()
 
+            grp_labels <- if (!is.null(state$group_names)) state$group_names[groups] else paste0("Group ", groups)
             plot_data <- data.frame(
                 variable = factor(var_names, levels = rev(var_names)),
-                group = factor(paste0("Group ", groups)),
+                group = factor(grp_labels),
                 coefficient = coefs,
                 selected = abs(coefs) > 1e-8,
                 stringsAsFactors = FALSE

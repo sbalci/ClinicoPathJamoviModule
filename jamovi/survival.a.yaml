@@ -443,6 +443,107 @@ options:
         represent groups with different baseline hazards.
       default: null
 
+    - name: age_adjustment
+      title: "Age-Adjusted Analysis"
+      type: Bool
+      default: false
+      description: >-
+        Enable age adjustment in Cox regression. When enabled, age is included
+        as a covariate in the Cox model, providing age-adjusted hazard ratios.
+        Recommended when comparing groups that may differ in age distribution.
+
+    - name: age_variable
+      title: "Age Variable"
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+      description: >-
+        Continuous variable representing patient age at diagnosis or study entry.
+        Used as a covariate in Cox regression for age adjustment. Must be numeric.
+
+    - name: age_interaction
+      title: "Test Age Interaction"
+      type: Bool
+      default: false
+      description: >-
+        Test whether age modifies the effect of the explanatory variable on
+        survival (age-group interaction). Reports the interaction term p-value.
+
+    - name: age_stratified_cox
+      title: "Age-Stratified Cox Model"
+      type: Bool
+      default: false
+      description: >-
+        Stratify the Cox model by age groups instead of adjusting as a covariate.
+        Allows different baseline hazards for each age group without assuming a
+        linear age effect.
+
+    - name: age_group_cutpoints
+      title: "Age Group Cutpoints"
+      type: String
+      default: '50, 65, 75'
+      description: >-
+        Comma-separated age cutpoints for creating age groups. For example,
+        50, 65, 75 creates groups less than 50, 50-64, 65-74, 75 and above.
+
+    - name: age_time_scale
+      title: "Age as Time Scale"
+      type: Bool
+      default: false
+      description: >-
+        Use biological age as the time axis instead of follow-up time.
+        The Cox model becomes Surv(age_at_entry, age_at_event, event).
+        Most rigorous for cancer epidemiology where age drives risk.
+
+    - name: age_standardization
+      title: "Age Standardization (SMR)"
+      type: Bool
+      default: false
+      description: >-
+        Compute age-standardized mortality using direct or indirect
+        standardization. Reports Standardized Mortality Ratio comparing
+        observed vs expected deaths by age group.
+
+    - name: age_standardization_method
+      title: "Standardization Method"
+      type: List
+      options:
+        - title: Indirect (SMR)
+          name: indirect
+        - title: Direct
+          name: direct
+      default: indirect
+      description: >-
+        Indirect standardization computes SMR (observed/expected).
+        Direct standardization applies age-specific rates to a standard population.
+
+    - name: age_stratified_km
+      title: "Age-Stratified KM Plots"
+      type: Bool
+      default: false
+      description: >-
+        Show Kaplan-Meier survival curves stratified by age groups.
+        Displays separate curves for each age group within the explanatory variable.
+
+    - name: adjusted_curves
+      title: "Adjusted Survival Curves"
+      type: Bool
+      default: false
+      description: >-
+        Show Kaplan-Meier-style survival curves adjusted for age using the
+        Cox model. Displays what the survival curves would look like after
+        removing the effect of age differences between groups.
+
+    - name: remark_checklist
+      title: "REMARK Reporting Checklist"
+      type: Bool
+      default: false
+      description: >-
+        Display a REMARK (REporting recommendations for tumor MARKer
+        prognostic studies) checklist showing which reporting items are
+        addressed by the current analysis configuration.
+
     - name: residual_diagnostics
       title: "Model Residual Diagnostics"
       type: Bool

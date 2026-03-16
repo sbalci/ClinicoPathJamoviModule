@@ -211,10 +211,10 @@
         `url`="https://CRAN.R-project.org/package=psycho.R"), 
     `survival`=list(
         `type`="software", 
-        `author`="Terry M Therneau, Thomas Lumley", 
-        `year`=2019, 
+        `author`="Terry M Therneau", 
+        `year`=2026, 
         `title`="survival: Survival Analysis", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survival", 
+        `publisher`="[R package version 3.8-6]. Retrieved from https://CRAN.R-project.org/package=survival", 
         `url`="https://CRAN.R-project.org/package=survival"), 
     `survminer`=list(
         `type`="software", 
@@ -729,14 +729,14 @@
         `author`="Jerome Friedman, Trevor Hastie, Rob Tibshirani, Balasubramanian Narasimhan, Kenneth Tay, Noah Simon", 
         `year`=2025, 
         `title`="glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models", 
-        `publisher`="[R package version 4.1-8]. Retrieved from https://CRAN.R-project.org/package=glmnet", 
+        `publisher`="[R package version 4.1-10]. Retrieved from https://CRAN.R-project.org/package=glmnet", 
         `url`="https://CRAN.R-project.org/package=glmnet"), 
     `grpreg`=list(
         `type`="software", 
         `author`="Patrick Breheny", 
-        `year`=2025, 
+        `year`=2024, 
         `title`="grpreg: Regularization Paths for Regression Models with Grouped Covariates", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=grpreg", 
+        `publisher`="[R package version 3.5.0]. Retrieved from https://CRAN.R-project.org/package=grpreg", 
         `url`="https://CRAN.R-project.org/package=grpreg"), 
     `pwr`=list(
         `type`="software", 
@@ -1179,6 +1179,20 @@
         `title`="flexsurvcure: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=flexsurvcure", 
         `url`="https://CRAN.R-project.org/package=flexsurvcure"), 
+    `npcure`=list(
+        `type`="software", 
+        `author`="Lopez-Cheda A, Cao R, Jager-Honz S, Keilegom IV", 
+        `year`="2021", 
+        `title`="npcure: An R Package for Nonparametric Inference in Mixture Cure Models", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=npcure", 
+        `url`="https://CRAN.R-project.org/package=npcure"), 
+    `cuRe`=list(
+        `type`="software", 
+        `author`="Boekel LW, Andersson TM-L, Dickman PW, Jakobsen LH", 
+        `year`="2023", 
+        `title`="cuRe: Parametric Cure Model Estimation", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=cuRe", 
+        `url`="https://CRAN.R-project.org/package=cuRe"), 
     `visdat`=list(
         `type`="software", 
         `author`="", 
@@ -2172,4 +2186,18 @@
         `year`=NULL, 
         `title`="foreach: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=foreach", 
-        `url`="https://CRAN.R-project.org/package=foreach"))
+        `url`="https://CRAN.R-project.org/package=foreach"), 
+    `sparsepca`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=NULL, 
+        `title`="sparsepca: R package", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=sparsepca", 
+        `url`="https://CRAN.R-project.org/package=sparsepca"), 
+    `kernlab`=list(
+        `type`="software", 
+        `author`=NULL, 
+        `year`=NULL, 
+        `title`="kernlab: R package", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=kernlab", 
+        `url`="https://CRAN.R-project.org/package=kernlab"))

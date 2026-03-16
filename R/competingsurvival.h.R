@@ -36,7 +36,8 @@ competingsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "ordinal",
                     "nominal"),
                 permitted=list(
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..overalltime <- jmvcore::OptionVariable$new(
                 "overalltime",
                 overalltime,
@@ -212,7 +213,20 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="summary",
                 title="Analysis Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "graystest",
+                    "subdistribution",
+                    "timepoints",
+                    "confidencelevel")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survivalTable",
@@ -246,7 +260,17 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="cuminc",
                 title="Cumulative Incidence Function",
                 visible="(analysistype:compete)",
-                rows=1,
+                rows=0,
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "overalltime",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "timepoints"),
                 columns=list(
                     list(
                         `name`="time", 
@@ -280,7 +304,13 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "explanatory",
                     "outcome",
                     "overalltime",
-                    "analysistype")))
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cifColors",
+                    "showrisksets")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="stackedPlot",
@@ -292,7 +322,14 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 clearWith=list(
                     "explanatory",
                     "outcome",
-                    "overalltime")))
+                    "overalltime",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cifColors",
+                    "showStackedPlot")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="kmvscifPlot",
@@ -304,7 +341,14 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 clearWith=list(
                     "explanatory",
                     "outcome",
-                    "overalltime")))
+                    "overalltime",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cifColors",
+                    "showKMvsCIF")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -385,7 +429,7 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @export
 competingsurvival <- function(
     data,
-    explanatory,
+    explanatory = NULL,
     overalltime,
     outcome,
     dod,

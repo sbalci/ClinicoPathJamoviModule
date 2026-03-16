@@ -169,6 +169,8 @@ refs:
     - parallel
     - smcure
     - flexsurvcure
+    - npcure
+    - cuRe
     - glue
     - stringr
 ...

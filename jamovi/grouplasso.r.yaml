@@ -362,4 +362,5 @@ refs:
     - ClinicoPathJamoviModule
     - survival
     - grpreg
+    - glmnet
 ...

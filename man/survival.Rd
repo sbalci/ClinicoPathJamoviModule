@@ -49,6 +49,17 @@ survival(
   rmst_tau = 0,
   stratified_cox = FALSE,
   strata_variable = NULL,
+  age_adjustment = FALSE,
+  age_variable = NULL,
+  age_interaction = FALSE,
+  age_stratified_cox = FALSE,
+  age_group_cutpoints = "50, 65, 75",
+  age_time_scale = FALSE,
+  age_standardization = FALSE,
+  age_standardization_method = "indirect",
+  age_stratified_km = FALSE,
+  adjusted_curves = FALSE,
+  remark_checklist = FALSE,
   residual_diagnostics = FALSE,
   loglog = FALSE,
   showExplanations = FALSE,
@@ -199,6 +210,51 @@ hazard.}
 regression. This variable should represent groups with different baseline
 hazards.}
 
+\item{age_adjustment}{Enable age adjustment in Cox regression. When
+enabled, age is included as a covariate in the Cox model, providing
+age-adjusted hazard ratios. Recommended when comparing groups that may
+differ in age distribution.}
+
+\item{age_variable}{Continuous variable representing patient age at
+diagnosis or study entry. Used as a covariate in Cox regression for age
+adjustment. Must be numeric.}
+
+\item{age_interaction}{Test whether age modifies the effect of the
+explanatory variable on survival (age-group interaction). Reports the
+interaction term p-value.}
+
+\item{age_stratified_cox}{Stratify the Cox model by age groups instead of
+adjusting as a covariate. Allows different baseline hazards for each age
+group without assuming a linear age effect.}
+
+\item{age_group_cutpoints}{Comma-separated age cutpoints for creating age
+groups. For example, 50, 65, 75 creates groups less than 50, 50-64, 65-74,
+75 and above.}
+
+\item{age_time_scale}{Use biological age as the time axis instead of
+follow-up time. The Cox model becomes Surv(age_at_entry, age_at_event,
+event). Most rigorous for cancer epidemiology where age drives risk.}
+
+\item{age_standardization}{Compute age-standardized mortality using direct
+or indirect standardization. Reports Standardized Mortality Ratio comparing
+observed vs expected deaths by age group.}
+
+\item{age_standardization_method}{Indirect standardization computes SMR
+(observed/expected). Direct standardization applies age-specific rates to a
+standard population.}
+
+\item{age_stratified_km}{Show Kaplan-Meier survival curves stratified by
+age groups. Displays separate curves for each age group within the
+explanatory variable.}
+
+\item{adjusted_curves}{Show Kaplan-Meier-style survival curves adjusted for
+age using the Cox model. Displays what the survival curves would look like
+after removing the effect of age differences between groups.}
+
+\item{remark_checklist}{Display a REMARK (REporting recommendations for
+tumor MARKer prognostic studies) checklist showing which reporting items
+are addressed by the current analysis configuration.}
+
 \item{residual_diagnostics}{Calculate and display Cox model residuals for
 diagnostic purposes, including Martingale, deviance, score, and Schoenfeld
 residuals.}
@@ -312,6 +368,18 @@ A results object containing:
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$ageAdjustedCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$ageAdjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$ageInteractionTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$ageAdjustedInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$ageAdjustedExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$ageTimeScaleTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$ageTimeScaleInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$ageStandardizationTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$ageStandardizationInterpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$ageStratifiedKMPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$adjustedCurvesPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$remarkChecklist} \tab \tab \tab \tab \tab a html \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr

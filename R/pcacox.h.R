@@ -325,9 +325,10 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Principal Component Cox Models",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "superpc",
                     "survival",
-                    "stringr"))
+                    "superpc",
+                    "sparsepca",
+                    "kernlab"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -353,7 +354,15 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="pcaSummary",
                 title="PCA Summary",
                 visible=TRUE,
-                rows=1,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pca_method",
+                    "n_components",
+                    "component_selection"),
                 columns=list(
                     list(
                         `name`="component", 
@@ -380,7 +389,16 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="coxResults",
                 title="Cox Model Results",
                 visible=TRUE,
-                rows=1,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pca_method",
+                    "n_components",
+                    "component_selection",
+                    "confidence_level"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -420,7 +438,10 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="componentLoadings",
                 title="Component Loadings (Top Features)",
                 visible=TRUE,
-                rows=1,
+                clearWith=list(
+                    "predictors",
+                    "pca_method",
+                    "n_components"),
                 columns=list(
                     list(
                         `name`="component", 
@@ -447,7 +468,15 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="modelPerformance",
                 title="Model Performance",
                 visible=TRUE,
-                rows=1,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pca_method",
+                    "n_components",
+                    "component_selection"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -474,7 +503,10 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="featureImportance",
                 title="Feature Importance Rankings",
                 visible="(feature_importance)",
-                rows=1,
+                clearWith=list(
+                    "predictors",
+                    "pca_method",
+                    "n_components"),
                 columns=list(
                     list(
                         `name`="feature", 
@@ -497,7 +529,14 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="riskScore",
                 title="Risk Score Analysis",
                 visible="(risk_score)",
-                rows=1,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pca_method",
+                    "n_components"),
                 columns=list(
                     list(
                         `name`="risk_group", 
@@ -529,6 +568,13 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="modelComparison",
                 title="Model Comparison (Variable Components)",
                 visible="(show_model_comparison)",
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pca_method"),
                 columns=list(
                     list(
                         `name`="model", 
@@ -562,7 +608,12 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=400,
                 renderFun=".plotScree",
                 visible="(plot_scree)",
+                requiresData=TRUE,
                 clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "n_components",
                     "pca_method")))
@@ -574,6 +625,7 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotLoadings",
                 visible="(plot_loadings)",
+                requiresData=TRUE,
                 clearWith=list(
                     "predictors",
                     "n_components",
@@ -586,7 +638,12 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotBiplot",
                 visible="(plot_biplot)",
+                requiresData=TRUE,
                 clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
                     "predictors",
                     "n_components",
                     "pca_method")))
@@ -598,6 +655,7 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotSurvival",
                 visible="(plot_survival)",
+                requiresData=TRUE,
                 clearWith=list(
                     "time",
                     "status",
@@ -623,7 +681,7 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="pathwayAnalysis",
-                title="Pathway Enrichment Analysis",
+                title="Feature Cluster Analysis",
                 visible="(pathway_analysis)"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -706,7 +764,8 @@ pcacoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param risk_score Calculate combined risk score
 #' @param show_model_comparison Calculate and compare sequential component
 #'   additions
-#' @param pathway_analysis Analyze biological pathways
+#' @param pathway_analysis Group features by their dominant PC and rank by
+#'   survival-weighted importance
 #' @param feature_importance Rank features by contribution
 #' @return A results object containing:
 #' \tabular{llllll}{

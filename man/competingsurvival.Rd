@@ -6,7 +6,7 @@
 \usage{
 competingsurvival(
   data,
-  explanatory,
+  explanatory = NULL,
   overalltime,
   outcome,
   dod,

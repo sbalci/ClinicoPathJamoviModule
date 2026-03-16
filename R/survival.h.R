@@ -49,6 +49,17 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             rmst_tau = 0,
             stratified_cox = FALSE,
             strata_variable = NULL,
+            age_adjustment = FALSE,
+            age_variable = NULL,
+            age_interaction = FALSE,
+            age_stratified_cox = FALSE,
+            age_group_cutpoints = "50, 65, 75",
+            age_time_scale = FALSE,
+            age_standardization = FALSE,
+            age_standardization_method = "indirect",
+            age_stratified_km = FALSE,
+            adjusted_curves = FALSE,
+            remark_checklist = FALSE,
             residual_diagnostics = FALSE,
             loglog = FALSE,
             showExplanations = FALSE,
@@ -330,6 +341,57 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..age_adjustment <- jmvcore::OptionBool$new(
+                "age_adjustment",
+                age_adjustment,
+                default=FALSE)
+            private$..age_variable <- jmvcore::OptionVariable$new(
+                "age_variable",
+                age_variable,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..age_interaction <- jmvcore::OptionBool$new(
+                "age_interaction",
+                age_interaction,
+                default=FALSE)
+            private$..age_stratified_cox <- jmvcore::OptionBool$new(
+                "age_stratified_cox",
+                age_stratified_cox,
+                default=FALSE)
+            private$..age_group_cutpoints <- jmvcore::OptionString$new(
+                "age_group_cutpoints",
+                age_group_cutpoints,
+                default="50, 65, 75")
+            private$..age_time_scale <- jmvcore::OptionBool$new(
+                "age_time_scale",
+                age_time_scale,
+                default=FALSE)
+            private$..age_standardization <- jmvcore::OptionBool$new(
+                "age_standardization",
+                age_standardization,
+                default=FALSE)
+            private$..age_standardization_method <- jmvcore::OptionList$new(
+                "age_standardization_method",
+                age_standardization_method,
+                options=list(
+                    "indirect",
+                    "direct"),
+                default="indirect")
+            private$..age_stratified_km <- jmvcore::OptionBool$new(
+                "age_stratified_km",
+                age_stratified_km,
+                default=FALSE)
+            private$..adjusted_curves <- jmvcore::OptionBool$new(
+                "adjusted_curves",
+                adjusted_curves,
+                default=FALSE)
+            private$..remark_checklist <- jmvcore::OptionBool$new(
+                "remark_checklist",
+                remark_checklist,
+                default=FALSE)
             private$..residual_diagnostics <- jmvcore::OptionBool$new(
                 "residual_diagnostics",
                 residual_diagnostics,
@@ -495,6 +557,17 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..rmst_tau)
             self$.addOption(private$..stratified_cox)
             self$.addOption(private$..strata_variable)
+            self$.addOption(private$..age_adjustment)
+            self$.addOption(private$..age_variable)
+            self$.addOption(private$..age_interaction)
+            self$.addOption(private$..age_stratified_cox)
+            self$.addOption(private$..age_group_cutpoints)
+            self$.addOption(private$..age_time_scale)
+            self$.addOption(private$..age_standardization)
+            self$.addOption(private$..age_standardization_method)
+            self$.addOption(private$..age_stratified_km)
+            self$.addOption(private$..adjusted_curves)
+            self$.addOption(private$..remark_checklist)
             self$.addOption(private$..residual_diagnostics)
             self$.addOption(private$..export_survival_data)
             self$.addOption(private$..loglog)
@@ -566,6 +639,17 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rmst_tau = function() private$..rmst_tau$value,
         stratified_cox = function() private$..stratified_cox$value,
         strata_variable = function() private$..strata_variable$value,
+        age_adjustment = function() private$..age_adjustment$value,
+        age_variable = function() private$..age_variable$value,
+        age_interaction = function() private$..age_interaction$value,
+        age_stratified_cox = function() private$..age_stratified_cox$value,
+        age_group_cutpoints = function() private$..age_group_cutpoints$value,
+        age_time_scale = function() private$..age_time_scale$value,
+        age_standardization = function() private$..age_standardization$value,
+        age_standardization_method = function() private$..age_standardization_method$value,
+        age_stratified_km = function() private$..age_stratified_km$value,
+        adjusted_curves = function() private$..adjusted_curves$value,
+        remark_checklist = function() private$..remark_checklist$value,
         residual_diagnostics = function() private$..residual_diagnostics$value,
         export_survival_data = function() private$..export_survival_data$value,
         loglog = function() private$..loglog$value,
@@ -636,6 +720,17 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..rmst_tau = NA,
         ..stratified_cox = NA,
         ..strata_variable = NA,
+        ..age_adjustment = NA,
+        ..age_variable = NA,
+        ..age_interaction = NA,
+        ..age_stratified_cox = NA,
+        ..age_group_cutpoints = NA,
+        ..age_time_scale = NA,
+        ..age_standardization = NA,
+        ..age_standardization_method = NA,
+        ..age_stratified_km = NA,
+        ..adjusted_curves = NA,
+        ..remark_checklist = NA,
         ..residual_diagnostics = NA,
         ..export_survival_data = NA,
         ..loglog = NA,
@@ -679,6 +774,18 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tCoxtext2 = function() private$.items[["tCoxtext2"]],
         coxRegressionHeading3 = function() private$.items[["coxRegressionHeading3"]],
         coxRegressionExplanation = function() private$.items[["coxRegressionExplanation"]],
+        ageAdjustedCoxHeading = function() private$.items[["ageAdjustedCoxHeading"]],
+        ageAdjustedCoxTable = function() private$.items[["ageAdjustedCoxTable"]],
+        ageInteractionTable = function() private$.items[["ageInteractionTable"]],
+        ageAdjustedInterpretation = function() private$.items[["ageAdjustedInterpretation"]],
+        ageAdjustedExplanation = function() private$.items[["ageAdjustedExplanation"]],
+        ageTimeScaleTable = function() private$.items[["ageTimeScaleTable"]],
+        ageTimeScaleInterpretation = function() private$.items[["ageTimeScaleInterpretation"]],
+        ageStandardizationTable = function() private$.items[["ageStandardizationTable"]],
+        ageStandardizationInterpretation = function() private$.items[["ageStandardizationInterpretation"]],
+        ageStratifiedKMPlot = function() private$.items[["ageStratifiedKMPlot"]],
+        adjustedCurvesPlot = function() private$.items[["adjustedCurvesPlot"]],
+        remarkChecklist = function() private$.items[["remarkChecklist"]],
         cox_ph = function() private$.items[["cox_ph"]],
         phInterpretation = function() private$.items[["phInterpretation"]],
         plot8 = function() private$.items[["plot8"]],
@@ -910,8 +1017,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent",
-                    "contexpl")))
+                    "multievent")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="coxRegressionHeading3",
@@ -927,6 +1033,261 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
+                name="ageAdjustedCoxHeading",
+                title="Age-Adjusted Cox Regression",
+                visible="(age_adjustment)",
+                clearWith=list(
+                    "age_adjustment",
+                    "age_variable",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ageAdjustedCoxTable",
+                title="Age-Adjusted Cox Regression",
+                visible="(age_adjustment)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="text"),
+                    list(
+                        `name`="hr_unadjusted", 
+                        `title`="HR (Unadjusted)", 
+                        `type`="text"),
+                    list(
+                        `name`="hr_age_adjusted", 
+                        `title`="HR (Age-Adjusted)", 
+                        `type`="text")),
+                clearWith=list(
+                    "age_adjustment",
+                    "age_variable",
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ageInteractionTable",
+                title="Age x Group Interaction Test",
+                visible="(age_interaction)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="coef", 
+                        `title`="Coefficient", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="hr", 
+                        `title`="HR", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="z", 
+                        `title`="z", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "age_adjustment",
+                    "age_interaction",
+                    "age_variable",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ageAdjustedInterpretation",
+                title="Age Adjustment Interpretation",
+                visible="(age_adjustment)",
+                clearWith=list(
+                    "age_adjustment",
+                    "age_variable",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ageAdjustedExplanation",
+                title="Understanding Age-Adjusted Survival Analysis",
+                visible="(age_adjustment && showExplanations)",
+                clearWith=list(
+                    "age_adjustment")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ageTimeScaleTable",
+                title="Cox Model with Age as Time Scale",
+                visible="(age_time_scale)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="hr", 
+                        `title`="HR", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "age_time_scale",
+                    "age_variable",
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ageTimeScaleInterpretation",
+                title="Age Time Scale Interpretation",
+                visible="(age_time_scale)",
+                clearWith=list(
+                    "age_time_scale",
+                    "age_variable",
+                    "explanatory")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ageStandardizationTable",
+                title="Age-Standardized Mortality",
+                visible="(age_standardization)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="observed", 
+                        `title`="Observed Deaths", 
+                        `type`="integer"),
+                    list(
+                        `name`="expected", 
+                        `title`="Expected Deaths", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="smr", 
+                        `title`="SMR", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="smr_ci_lower", 
+                        `title`="SMR 95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="smr_ci_upper", 
+                        `title`="SMR 95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "age_standardization",
+                    "age_standardization_method",
+                    "age_variable",
+                    "age_group_cutpoints",
+                    "explanatory",
+                    "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="ageStandardizationInterpretation",
+                title="Age Standardization Interpretation",
+                visible="(age_standardization)",
+                clearWith=list(
+                    "age_standardization",
+                    "age_variable",
+                    "explanatory")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="ageStratifiedKMPlot",
+                title="Age-Stratified Kaplan-Meier Curves",
+                width=700,
+                height=500,
+                renderFun=".plotAgeStratifiedKM",
+                visible="(age_stratified_km)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "age_stratified_km",
+                    "age_variable",
+                    "age_group_cutpoints",
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime",
+                    "ci95",
+                    "risktable")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="adjustedCurvesPlot",
+                title="Adjusted Survival Curves",
+                width=700,
+                height=500,
+                renderFun=".plotAdjustedCurves",
+                visible="(adjusted_curves)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "adjusted_curves",
+                    "age_adjustment",
+                    "age_variable",
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime",
+                    "ci95")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="remarkChecklist",
+                title="REMARK Reporting Checklist",
+                visible="(remark_checklist)",
+                clearWith=list(
+                    "remark_checklist",
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime",
+                    "age_adjustment")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
                 name="cox_ph",
                 title="Proportional Hazards Assumption",
                 visible="(ph_cox)",
@@ -938,8 +1299,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent",
-                    "contexpl")))
+                    "multievent")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="phInterpretation",
@@ -953,8 +1313,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent",
-                    "contexpl")))
+                    "multievent")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot8",
@@ -1104,9 +1463,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rate_multiplier",
                     "time_intervals",
                     "person_time",
-                    "outcome",
-                    "outcomeLevel",
-                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -1123,9 +1479,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rate_multiplier",
                     "time_intervals",
                     "person_time",
-                    "outcome",
-                    "outcomeLevel",
-                    "elapsedtime",
                     "fudate",
                     "dxdate",
                     "tint",
@@ -2098,6 +2451,40 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param strata_variable Variable to use for stratification in Cox
 #'   regression. This variable should represent groups with different baseline
 #'   hazards.
+#' @param age_adjustment Enable age adjustment in Cox regression. When
+#'   enabled, age is included as a covariate in the Cox model, providing
+#'   age-adjusted hazard ratios. Recommended when comparing groups that may
+#'   differ in age distribution.
+#' @param age_variable Continuous variable representing patient age at
+#'   diagnosis or study entry. Used as a covariate in Cox regression for age
+#'   adjustment. Must be numeric.
+#' @param age_interaction Test whether age modifies the effect of the
+#'   explanatory variable on survival (age-group interaction). Reports the
+#'   interaction term p-value.
+#' @param age_stratified_cox Stratify the Cox model by age groups instead of
+#'   adjusting as a covariate. Allows different baseline hazards for each age
+#'   group without assuming a linear age effect.
+#' @param age_group_cutpoints Comma-separated age cutpoints for creating age
+#'   groups. For example, 50, 65, 75 creates groups less than 50, 50-64, 65-74,
+#'   75 and above.
+#' @param age_time_scale Use biological age as the time axis instead of
+#'   follow-up time. The Cox model becomes Surv(age_at_entry, age_at_event,
+#'   event). Most rigorous for cancer epidemiology where age drives risk.
+#' @param age_standardization Compute age-standardized mortality using direct
+#'   or indirect standardization. Reports Standardized Mortality Ratio comparing
+#'   observed vs expected deaths by age group.
+#' @param age_standardization_method Indirect standardization computes SMR
+#'   (observed/expected). Direct standardization applies age-specific rates to a
+#'   standard population.
+#' @param age_stratified_km Show Kaplan-Meier survival curves stratified by
+#'   age groups. Displays separate curves for each age group within the
+#'   explanatory variable.
+#' @param adjusted_curves Show Kaplan-Meier-style survival curves adjusted for
+#'   age using the Cox model. Displays what the survival curves would look like
+#'   after removing the effect of age differences between groups.
+#' @param remark_checklist Display a REMARK (REporting recommendations for
+#'   tumor MARKer prognostic studies) checklist showing which reporting items
+#'   are addressed by the current analysis configuration.
 #' @param residual_diagnostics Calculate and display Cox model residuals for
 #'   diagnostic purposes, including Martingale, deviance, score, and Schoenfeld
 #'   residuals.
@@ -2187,6 +2574,18 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ageAdjustedCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$ageAdjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ageInteractionTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ageAdjustedInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ageAdjustedExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ageTimeScaleTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ageTimeScaleInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ageStandardizationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ageStandardizationInterpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$ageStratifiedKMPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$adjustedCurvesPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$remarkChecklist} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
@@ -2296,6 +2695,17 @@ survival <- function(
     rmst_tau = 0,
     stratified_cox = FALSE,
     strata_variable = NULL,
+    age_adjustment = FALSE,
+    age_variable = NULL,
+    age_interaction = FALSE,
+    age_stratified_cox = FALSE,
+    age_group_cutpoints = "50, 65, 75",
+    age_time_scale = FALSE,
+    age_standardization = FALSE,
+    age_standardization_method = "indirect",
+    age_stratified_km = FALSE,
+    adjusted_curves = FALSE,
+    remark_checklist = FALSE,
     residual_diagnostics = FALSE,
     loglog = FALSE,
     showExplanations = FALSE,
@@ -2329,6 +2739,7 @@ survival <- function(
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(strata_variable)) strata_variable <- jmvcore::resolveQuo(jmvcore::enquo(strata_variable))
+    if ( ! missing(age_variable)) age_variable <- jmvcore::resolveQuo(jmvcore::enquo(age_variable))
     if ( ! missing(rcs_variable)) rcs_variable <- jmvcore::resolveQuo(jmvcore::enquo(rcs_variable))
     if (missing(data))
         data <- jmvcore::marshalData(
@@ -2339,6 +2750,7 @@ survival <- function(
             `if`( ! missing(explanatory), explanatory, NULL),
             `if`( ! missing(outcome), outcome, NULL),
             `if`( ! missing(strata_variable), strata_variable, NULL),
+            `if`( ! missing(age_variable), age_variable, NULL),
             `if`( ! missing(rcs_variable), rcs_variable, NULL))
 
     for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -2388,6 +2800,17 @@ survival <- function(
         rmst_tau = rmst_tau,
         stratified_cox = stratified_cox,
         strata_variable = strata_variable,
+        age_adjustment = age_adjustment,
+        age_variable = age_variable,
+        age_interaction = age_interaction,
+        age_stratified_cox = age_stratified_cox,
+        age_group_cutpoints = age_group_cutpoints,
+        age_time_scale = age_time_scale,
+        age_standardization = age_standardization,
+        age_standardization_method = age_standardization_method,
+        age_stratified_km = age_stratified_km,
+        adjusted_curves = adjusted_curves,
+        remark_checklist = remark_checklist,
         residual_diagnostics = residual_diagnostics,
         loglog = loglog,
         showExplanations = showExplanations,

@@ -175,6 +175,7 @@ items:
         - analysisType
         - outcomeLevel
         - ciLevel
+        - ciMethod
 
     - name: separationPlotImage
       title: Separation Diagnostic Plot

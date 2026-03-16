@@ -29,6 +29,7 @@ options:
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      default: null
 
     - name: overalltime
       title: 'Overall Time (in months)'

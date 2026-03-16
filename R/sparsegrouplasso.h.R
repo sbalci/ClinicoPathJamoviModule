@@ -29,11 +29,6 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             weight_power = 1,
             standardize_vars = TRUE,
             center_vars = TRUE,
-            orthogonalize_groups = FALSE,
-            max_iterations = 1000,
-            convergence_threshold = 0.000001,
-            warm_start = TRUE,
-            parallel_cv = FALSE,
             seed_value = 42,
             show_summary = TRUE,
             show_coefficients = TRUE,
@@ -156,7 +151,6 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 selection_criterion,
                 options=list(
                     "cv_deviance",
-                    "cv_c_index",
                     "aic",
                     "bic",
                     "ebic"),
@@ -202,30 +196,6 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "center_vars",
                 center_vars,
                 default=TRUE)
-            private$..orthogonalize_groups <- jmvcore::OptionBool$new(
-                "orthogonalize_groups",
-                orthogonalize_groups,
-                default=FALSE)
-            private$..max_iterations <- jmvcore::OptionInteger$new(
-                "max_iterations",
-                max_iterations,
-                min=100,
-                max=10000,
-                default=1000)
-            private$..convergence_threshold <- jmvcore::OptionNumber$new(
-                "convergence_threshold",
-                convergence_threshold,
-                min=1e-8,
-                max=0.001,
-                default=0.000001)
-            private$..warm_start <- jmvcore::OptionBool$new(
-                "warm_start",
-                warm_start,
-                default=TRUE)
-            private$..parallel_cv <- jmvcore::OptionBool$new(
-                "parallel_cv",
-                parallel_cv,
-                default=FALSE)
             private$..seed_value <- jmvcore::OptionInteger$new(
                 "seed_value",
                 seed_value,
@@ -334,11 +304,6 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..weight_power)
             self$.addOption(private$..standardize_vars)
             self$.addOption(private$..center_vars)
-            self$.addOption(private$..orthogonalize_groups)
-            self$.addOption(private$..max_iterations)
-            self$.addOption(private$..convergence_threshold)
-            self$.addOption(private$..warm_start)
-            self$.addOption(private$..parallel_cv)
             self$.addOption(private$..seed_value)
             self$.addOption(private$..show_summary)
             self$.addOption(private$..show_coefficients)
@@ -383,11 +348,6 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         weight_power = function() private$..weight_power$value,
         standardize_vars = function() private$..standardize_vars$value,
         center_vars = function() private$..center_vars$value,
-        orthogonalize_groups = function() private$..orthogonalize_groups$value,
-        max_iterations = function() private$..max_iterations$value,
-        convergence_threshold = function() private$..convergence_threshold$value,
-        warm_start = function() private$..warm_start$value,
-        parallel_cv = function() private$..parallel_cv$value,
         seed_value = function() private$..seed_value$value,
         show_summary = function() private$..show_summary$value,
         show_coefficients = function() private$..show_coefficients$value,
@@ -431,11 +391,6 @@ sparsegrouplassoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..weight_power = NA,
         ..standardize_vars = NA,
         ..center_vars = NA,
-        ..orthogonalize_groups = NA,
-        ..max_iterations = NA,
-        ..convergence_threshold = NA,
-        ..warm_start = NA,
-        ..parallel_cv = NA,
         ..seed_value = NA,
         ..show_summary = NA,
         ..show_coefficients = NA,
@@ -488,7 +443,8 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Analysis Results",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "survival"))
+                    "survival",
+                    "glmnet"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -536,6 +492,10 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Selected Coefficients",
                 visible="(show_coefficients)",
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
                     "pred_vars",
                     "alpha_sgl",
                     "lambda_sequence",
@@ -570,6 +530,16 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="number", 
                         `format`="zto"),
                     list(
+                        `name`="ci_lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="selection_frequency", 
                         `title`="Selection Frequency", 
                         `type`="number", 
@@ -580,6 +550,10 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Group Structure",
                 visible="(show_groups)",
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
                     "pred_vars",
                     "group_definition",
                     "custom_groups"),
@@ -620,6 +594,11 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Regularization Path",
                 visible="(show_path)",
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
                     "alpha_sgl",
                     "lambda_sequence"),
                 columns=list(
@@ -661,6 +640,12 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Performance Metrics",
                 visible="(show_performance)",
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
+                    "alpha_sgl",
                     "selection_criterion",
                     "cv_folds"),
                 columns=list(
@@ -693,6 +678,12 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Cross-Validation Results",
                 visible="(show_validation)",
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
+                    "alpha_sgl",
                     "cv_folds",
                     "cv_repeats",
                     "selection_criterion"),
@@ -724,7 +715,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="adaptiveWeights",
                 title="Adaptive Weights",
-                visible="(weight_type:none)",
+                visible=TRUE,
                 clearWith=list(
                     "weight_type",
                     "weight_power"),
@@ -798,6 +789,11 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Method Comparison",
                 visible="(show_performance)",
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
                     "alpha_sgl",
                     "selection_criterion"),
                 columns=list(
@@ -837,6 +833,12 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(plot_cv_error)",
                 requiresData=TRUE,
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
+                    "alpha_sgl",
                     "lambda_sequence",
                     "cv_folds",
                     "selection_criterion")))
@@ -850,9 +852,13 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(plot_coefficients)",
                 requiresData=TRUE,
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
                     "alpha_sgl",
-                    "lambda_sequence",
-                    "pred_vars")))
+                    "lambda_sequence")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="groupSelectionPlot",
@@ -863,6 +869,11 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(plot_groups)",
                 requiresData=TRUE,
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
                     "group_definition",
                     "alpha_sgl",
                     "lambda_sequence")))
@@ -876,6 +887,11 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(plot_sparsity)",
                 requiresData=TRUE,
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
                     "alpha_sgl",
                     "lambda_sequence",
                     "selection_criterion")))
@@ -889,6 +905,12 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(plot_stability)",
                 requiresData=TRUE,
                 clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
+                    "alpha_sgl",
                     "stability_selection",
                     "stability_threshold",
                     "stability_subsample")))
@@ -963,7 +985,10 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   Example: "0.001,0.01,0.1,1"
 #' @param lambda_min_ratio ratio of smallest to largest lambda value
 #' @param n_lambda number of lambda values in the sequence
-#' @param selection_criterion criterion for selecting optimal lambda
+#' @param selection_criterion Criterion for selecting optimal lambda. CV
+#'   Deviance uses cross-validated partial likelihood deviance (recommended).
+#'   AIC/BIC/EBIC add model complexity penalties to the deviance for more
+#'   parsimonious selection.
 #' @param cv_folds number of folds for cross-validation
 #' @param cv_repeats number of repeated cross-validation runs
 #' @param ebic_gamma gamma parameter for Extended BIC (0 = standard BIC)
@@ -971,12 +996,6 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param weight_power power parameter for adaptive weights
 #' @param standardize_vars whether to standardize predictor variables
 #' @param center_vars whether to center predictor variables
-#' @param orthogonalize_groups whether to orthogonalize variables within
-#'   groups
-#' @param max_iterations maximum number of iterations for optimization
-#' @param convergence_threshold convergence threshold for optimization
-#' @param warm_start whether to use warm start for lambda sequence
-#' @param parallel_cv whether to use parallel processing for CV
 #' @param seed_value random seed for reproducible results
 #' @param show_summary show model summary table
 #' @param show_coefficients show coefficient estimates table
@@ -1052,11 +1071,6 @@ sparsegrouplasso <- function(
     weight_power = 1,
     standardize_vars = TRUE,
     center_vars = TRUE,
-    orthogonalize_groups = FALSE,
-    max_iterations = 1000,
-    convergence_threshold = 0.000001,
-    warm_start = TRUE,
-    parallel_cv = FALSE,
     seed_value = 42,
     show_summary = TRUE,
     show_coefficients = TRUE,
@@ -1118,11 +1132,6 @@ sparsegrouplasso <- function(
         weight_power = weight_power,
         standardize_vars = standardize_vars,
         center_vars = center_vars,
-        orthogonalize_groups = orthogonalize_groups,
-        max_iterations = max_iterations,
-        convergence_threshold = convergence_threshold,
-        warm_start = warm_start,
-        parallel_cv = parallel_cv,
         seed_value = seed_value,
         show_summary = show_summary,
         show_coefficients = show_coefficients,

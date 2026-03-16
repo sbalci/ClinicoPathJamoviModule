@@ -1,0 +1,453 @@
+---
+title: "Group LASSO Cox Regression - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Group LASSO Cox Regression - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+data_path <- "data-raw/non-rda/"
+data_path2 <- "data/"
+```
+
+> **Note:** The `grouplasso()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference.
+
+# Group LASSO for Survival Analysis
+
+## Overview
+
+Group LASSO fits penalized Cox proportional hazards models that select or remove pre-defined variable groups simultaneously. Unlike standard LASSO (which selects individual variables), Group LASSO uses an L1/L2 mixed norm penalty at the group level via the `grpreg` R package. This ensures that entire groups of variables (e.g., all dummy codes from a categorical variable, genes in a pathway, or biomarkers in a clinical panel) are selected or excluded together.
+
+The module supports four penalty types (Group LASSO, Group MCP, Group SCAD, Adaptive Group LASSO), multiple grouping strategies, stability selection for robust variable identification, nested cross-validation for unbiased performance assessment, and permutation testing for statistical significance.
+
+This analysis is particularly valuable for genomic survival studies with natural pathway groupings, clinical prediction models with domain-based predictor sets, and any scenario where interpretable group-wise feature selection is preferred over individual variable selection.
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Predictors | Events | Primary Use |
+|---------|---|-----------|--------|-------------|
+| `grouplasso_biomarker` | 200 | 15 (mixed numeric + factor) | ~100 | Breast cancer biomarker panel with 5 clinical groups |
+| `grouplasso_genomic` | 120 | 30 (all continuous) | ~60 | Gene expression data with 6 pathway groups |
+| `grouplasso_small` | 60 | 8 (mixed) | ~30 | Small clinical cohort for edge-case testing |
+
+---
+
+## 1. Basic Group LASSO with Automatic Grouping
+
+### Default analysis with breast cancer biomarker data
+
+This example uses automatic grouping, where each original variable (and its dummy codes for factors) forms a separate group.
+
+```{r basic-biomarker}
+biomarker <- read.csv(paste0(data_path, "grouplasso_biomarker.csv"))
+str(biomarker)
+table(biomarker$status)
+
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  group_definition = "automatic",
+  factor_grouping = TRUE,
+  penalty_type = "group_lasso",
+  group_weights = "sqrt_size",
+  cv_folds = 10,
+  suitabilityCheck = TRUE
+)
+```
+
+Look for: The suitability report (EPV, sample size, multicollinearity), group summary showing which groups were selected, coefficient table with hazard ratios, and the three default plots.
+
+---
+
+## 2. Penalty Type Comparison
+
+### Group MCP — non-convex penalty with less bias
+
+Group MCP provides less shrinkage for large coefficients, potentially selecting fewer but more confident groups.
+
+```{r penalty-mcp}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  penalty_type = "group_mcp",
+  suitabilityCheck = FALSE
+)
+```
+
+### Group SCAD
+
+```{r penalty-scad}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  penalty_type = "group_scad",
+  suitabilityCheck = FALSE
+)
+```
+
+### Adaptive Group LASSO with ridge initialization
+
+Adaptive Group LASSO uses data-driven weights from an initial ridge Cox model, applying stronger penalties to less important groups.
+
+```{r penalty-adaptive}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  penalty_type = "adaptive_group",
+  adaptive_weights_method = "ridge",
+  suitabilityCheck = FALSE
+)
+```
+
+---
+
+## 3. Custom Group Definitions
+
+### Manual group assignment for clinical domains
+
+Define 5 clinical domain groups explicitly.
+
+```{r custom-groups}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  group_definition = "custom",
+  group_structure = "age:1, bmi:1, tumor_size:2, grade:2, lvi:2, er:3, pr:3, her2:3, ki67:3, albumin:4, ldh:4, crp:4, chemo:5, radiation:5, hormonal:5",
+  plot_group_structure = TRUE,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: The group structure plot showing the variable-to-group assignment, and the group summary table reflecting the custom grouping.
+
+---
+
+## 4. Genomic Pathway Analysis
+
+### Gene pathway grouping with custom group structure
+
+The genomic dataset has 30 gene expression variables organized into 6 biological pathways.
+
+```{r genomic-pathways}
+genomic <- read.csv(paste0(data_path, "grouplasso_genomic.csv"))
+str(genomic)
+
+grouplasso(
+  data = genomic,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Progressed",
+  censorLevel = "Stable",
+  predictors = c("CCND1", "CCNE1", "CDK4", "CDK6", "RB1",
+                 "PIK3CA", "AKT1", "PTEN", "MTOR", "TSC1",
+                 "TP53", "MDM2", "ATM", "CHEK2", "CDKN2A",
+                 "KRAS", "BRAF", "MAP2K1", "ERK1", "ERK2",
+                 "BCL2", "BAX", "BIRC5", "CASP3", "CASP8",
+                 "VEGFA", "FLT1", "KDR", "ANGPT1", "ANGPT2"),
+  group_definition = "custom",
+  group_structure = "CCND1:1, CCNE1:1, CDK4:1, CDK6:1, RB1:1, PIK3CA:2, AKT1:2, PTEN:2, MTOR:2, TSC1:2, TP53:3, MDM2:3, ATM:3, CHEK2:3, CDKN2A:3, KRAS:4, BRAF:4, MAP2K1:4, ERK1:4, ERK2:4, BCL2:5, BAX:5, BIRC5:5, CASP3:5, CASP8:5, VEGFA:6, FLT1:6, KDR:6, ANGPT1:6, ANGPT2:6",
+  cv_folds = 5,
+  suitabilityCheck = TRUE,
+  plot_group_structure = TRUE
+)
+```
+
+Look for: Which pathways (groups) are selected. The data was generated with true signal in Cell Cycle (1), p53 (3), and Angiogenesis (6) pathways.
+
+---
+
+## 5. Group Weight Methods
+
+### Equal weights
+
+```{r weights-equal}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  group_weights = "equal",
+  suitabilityCheck = FALSE
+)
+```
+
+### Custom weights — penalize treatment group more heavily
+
+```{r weights-custom}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  group_definition = "custom",
+  group_structure = "age:1, bmi:1, tumor_size:2, grade:2, lvi:2, er:3, pr:3, her2:3, ki67:3, albumin:4, ldh:4, crp:4, chemo:5, radiation:5, hormonal:5",
+  group_weights = "custom",
+  custom_weights = "1.0, 1.0, 1.0, 1.0, 2.0",
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: The treatment group (group 5) gets a heavier penalty and may be less likely to be selected.
+
+---
+
+## 6. Stability Selection
+
+### Robust group identification via subsampling
+
+Stability selection repeatedly fits the model on random subsamples and tracks which groups are consistently selected.
+
+```{r stability-selection}
+grouplasso(
+  data = genomic,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Progressed",
+  censorLevel = "Stable",
+  predictors = c("CCND1", "CCNE1", "CDK4", "CDK6", "RB1",
+                 "PIK3CA", "AKT1", "PTEN", "MTOR", "TSC1",
+                 "TP53", "MDM2", "ATM", "CHEK2", "CDKN2A",
+                 "KRAS", "BRAF", "MAP2K1", "ERK1", "ERK2",
+                 "BCL2", "BAX", "BIRC5", "CASP3", "CASP8",
+                 "VEGFA", "FLT1", "KDR", "ANGPT1", "ANGPT2"),
+  group_definition = "custom",
+  group_structure = "CCND1:1, CCNE1:1, CDK4:1, CDK6:1, RB1:1, PIK3CA:2, AKT1:2, PTEN:2, MTOR:2, TSC1:2, TP53:3, MDM2:3, ATM:3, CHEK2:3, CDKN2A:3, KRAS:4, BRAF:4, MAP2K1:4, ERK1:4, ERK2:4, BCL2:5, BAX:5, BIRC5:5, CASP3:5, CASP8:5, VEGFA:6, FLT1:6, KDR:6, ANGPT1:6, ANGPT2:6",
+  stability_selection = TRUE,
+  bootstrap_samples = 50,
+  stability_threshold = 0.6,
+  plot_stability = TRUE,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: Groups with selection frequency above the 0.6 threshold (dashed red line in the plot) are considered stable. The stability results table shows per-group frequencies and scores.
+
+---
+
+## 7. Nested Cross-Validation
+
+### Unbiased performance estimation
+
+Nested CV provides an honest estimate of out-of-sample performance by separating model selection (inner CV) from performance evaluation (outer CV).
+
+```{r nested-cv}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  nested_cv = TRUE,
+  cv_folds = 5,
+  inner_cv_folds = 3,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: The nested CV results table showing per-fold performance (C-index), optimal lambda, and number of selected groups. Compare the average performance to the training C-index to assess overfitting.
+
+---
+
+## 8. Permutation Testing
+
+### Statistical significance of group selection
+
+Permutation testing assesses whether the observed group selection and model performance are better than would be expected by chance.
+
+```{r permutation-test}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  permutation_test = TRUE,
+  n_permutations = 50,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: The permutation results table with three test statistics (N Groups Selected, CV Deviance, Concordance Index). Small p-values indicate the model captures genuine signal.
+
+---
+
+## 9. Clinical Output Panels
+
+### Results summary for reports
+
+```{r clinical-summary}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  showSummary = TRUE,
+  showExplanations = TRUE,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: The summary panel provides a plain-language paragraph suitable for tumor board notes, including penalty type, number of selected groups, hazard ratios for top variables, and C-index. The explanations panel covers what Group LASSO does, when to use it, assumptions, and interpretation tips.
+
+---
+
+## 10. Advanced Algorithm Settings
+
+### Unstandardized variables with tight convergence
+
+```{r advanced-settings}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "tumor_size", "grade", "lvi",
+                 "er", "pr", "her2", "ki67",
+                 "albumin", "ldh", "crp",
+                 "chemo", "radiation", "hormonal"),
+  standardize = FALSE,
+  tolerance = 1e-6,
+  max_iterations = 50000,
+  selection_threshold = 1e-4,
+  random_seed = 42,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: With `standardize=FALSE`, variables on different scales may have different effective penalties. The higher `selection_threshold` may classify borderline variables as "not selected."
+
+---
+
+## 11. Small Sample Edge Case
+
+### Small clinical cohort with reduced CV folds
+
+```{r small-sample}
+small_data <- read.csv(paste0(data_path, "grouplasso_small.csv"))
+str(small_data)
+table(small_data$status)
+
+grouplasso(
+  data = small_data,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "ecog", "tumor_size", "grade",
+                 "hemoglobin", "wbc", "platelets", "ldh"),
+  group_definition = "custom",
+  group_structure = "age:1, ecog:1, tumor_size:2, grade:2, hemoglobin:3, wbc:3, platelets:3, ldh:3",
+  cv_folds = 5,
+  suitabilityCheck = TRUE
+)
+```
+
+Look for: The suitability report should flag the small sample size. The model may select fewer groups with wider confidence intervals.
+
+---
+
+## 12. Minimal Input — Factor-Based Grouping
+
+### Using factor_based grouping method
+
+```{r factor-based}
+grouplasso(
+  data = biomarker,
+  time = "time",
+  event = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("grade", "lvi", "her2", "chemo", "radiation", "hormonal"),
+  group_definition = "factor_based",
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: Each factor variable (grade, lvi, her2, chemo, radiation, hormonal) forms its own group with all its dummy variables included together.
+
+---
+
+## References
+
+- Breheny P, Huang J (2015). "Group descent algorithms for nonconvex penalized linear and logistic regression models with grouped predictors." *Statistics and Computing*, 25(2), 173-187.
+- Yuan M, Lin Y (2006). "Model selection and estimation in regression with grouped variables." *Journal of the Royal Statistical Society: Series B*, 68(1), 49-67.
+- Meinshausen N, Buhlmann P (2010). "Stability selection." *Journal of the Royal Statistical Society: Series B*, 72(4), 417-473.
+- Therneau TM (2026). *survival: Survival Analysis*. R package version 3.8-6.
+- Friedman J, Hastie T, Tibshirani R (2025). *glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models*. R package version 4.1-10.

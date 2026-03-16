@@ -46,6 +46,10 @@ items:
       type: Table
       visible: (show_coefficients)
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
         - pred_vars
         - alpha_sgl
         - lambda_sequence
@@ -73,6 +77,14 @@ items:
           title: Importance
           type: number
           format: zto
+        - name: ci_lower
+          title: CI Lower
+          type: number
+          format: zto
+        - name: ci_upper
+          title: CI Upper
+          type: number
+          format: zto
         - name: selection_frequency
           title: Selection Frequency
           type: number
@@ -83,6 +95,10 @@ items:
       type: Table
       visible: (show_groups)
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
         - pred_vars
         - group_definition
         - custom_groups
@@ -116,6 +132,11 @@ items:
       type: Table
       visible: (show_path)
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
         - alpha_sgl
         - lambda_sequence
       columns:
@@ -150,6 +171,12 @@ items:
       type: Table
       visible: (show_performance)
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
+        - alpha_sgl
         - selection_criterion
         - cv_folds
       columns:
@@ -177,6 +204,12 @@ items:
       type: Table
       visible: (show_validation)
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
+        - alpha_sgl
         - cv_folds
         - cv_repeats
         - selection_criterion
@@ -203,7 +236,7 @@ items:
     - name: adaptiveWeights
       title: Adaptive Weights
       type: Table
-      visible: (weight_type:none)
+      visible: true
       clearWith:
         - weight_type
         - weight_power
@@ -265,6 +298,11 @@ items:
       type: Table
       visible: (show_performance)
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
         - alpha_sgl
         - selection_criterion
       columns:
@@ -298,6 +336,12 @@ items:
       visible: (plot_cv_error)
       requiresData: true
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
+        - alpha_sgl
         - lambda_sequence
         - cv_folds
         - selection_criterion
@@ -311,9 +355,13 @@ items:
       visible: (plot_coefficients)
       requiresData: true
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
         - alpha_sgl
         - lambda_sequence
-        - pred_vars
 
     - name: groupSelectionPlot
       title: Group Selection Pattern
@@ -324,6 +372,11 @@ items:
       visible: (plot_groups)
       requiresData: true
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
         - group_definition
         - alpha_sgl
         - lambda_sequence
@@ -337,6 +390,11 @@ items:
       visible: (plot_sparsity)
       requiresData: true
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
         - alpha_sgl
         - lambda_sequence
         - selection_criterion
@@ -350,6 +408,12 @@ items:
       visible: (plot_stability)
       requiresData: true
       clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
+        - alpha_sgl
         - stability_selection
         - stability_threshold
         - stability_subsample
@@ -361,6 +425,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - survival
+    - glmnet
 ...

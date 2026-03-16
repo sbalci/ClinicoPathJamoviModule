@@ -29,12 +29,18 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get variable names from labels
             mytime <- names(all_labels)[all_labels == self$options$overalltime]
             myoutcome <- names(all_labels)[all_labels == self$options$outcome]
-            myexplanatory <- names(all_labels)[all_labels == self$options$explanatory]
-            
+
+            # Handle optional explanatory variable
+            myexplanatory <- NULL
+            if (!is.null(self$options$explanatory) && nchar(self$options$explanatory) > 0) {
+                myexplanatory <- names(all_labels)[all_labels == self$options$explanatory]
+                if (length(myexplanatory) == 0) myexplanatory <- NULL
+            }
+
             return(list(
                 "mydata_labelled" = mydata,
                 "mytime_labelled" = mytime,
-                "myoutcome_labelled" = myoutcome, 
+                "myoutcome_labelled" = myoutcome,
                 "myexplanatory_labelled" = myexplanatory
             ))
         },
@@ -49,7 +55,7 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # If no variable selected Initial Message ----
-            if (is.null(self$options$explanatory) || is.null(self$options$outcome) || is.null(self$options$overalltime)) {
+            if (is.null(self$options$outcome) || is.null(self$options$overalltime)) {
                 todo <- glue::glue("
 <br>Welcome to Competing Survival Analysis<br><hr><br>
 <br>
@@ -347,16 +353,19 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                     self$results$summary$setContent(paste0(current_summary, notice_text))
                 }
 
-                # Store data for plotting
-                self$results$comprisksPlot$setState(list(
-                    "data" = mydata,
+                # Store data for plotting (convert to base data.frame for protobuf safety)
+                plot_state <- list(
+                    "data" = as.data.frame(mydata),
                     "time_var" = mytime,
                     "status_var" = "status_crr",
                     "group_var" = myexplanatory,
                     "cuminc" = cuminc_result,
                     "showrisksets" = showrisksets,
                     "timepoints" = timepoints
-                ))
+                )
+                self$results$comprisksPlot$setState(plot_state)
+                self$results$stackedPlot$setState(plot_state)
+                self$results$kmvscifPlot$setState(plot_state)
                 
             }, error = function(e) {
                 stop(paste("Competing risks analysis failed:", e$message))
@@ -645,52 +654,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 }
             }
             
-            # Format Gray's test results
-            if (!is.null(grays_test_result)) {
-                grays_text <- "<h4>Gray's Test Results</h4><ul>"
-                
-                if (!is.null(grays_test_result$disease_death)) {
-                    grays_text <- paste0(grays_text,
-                        "<li>Disease Death: χ² = ", 
-                        round(grays_test_result$disease_death$statistic, 2),
-                        ", df = ", grays_test_result$disease_death$df,
-                        ", p = ", round(grays_test_result$disease_death$p_value, 4),
-                        "</li>"
-                    )
-                }
-                
-                if (!is.null(grays_test_result$other_death)) {
-                    grays_text <- paste0(grays_text,
-                        "<li>Other Cause Death: χ² = ", 
-                        round(grays_test_result$other_death$statistic, 2),
-                        ", df = ", grays_test_result$other_death$df,
-                        ", p = ", round(grays_test_result$other_death$p_value, 4),
-                        "</li>"
-                    )
-                }
-                
-                grays_text <- paste0(grays_text, "</ul>")
-                
-                # Add to summary
-                current_summary <- self$results$summary$content
-                self$results$summary$setContent(paste0(current_summary, grays_text))
-            }
-            
-            # Format cumulative incidence at timepoints
-            if (!is.null(cuminc_timepoints)) {
-                private$.formatCumulativeIncidenceTimepoints(cuminc_timepoints)
-            }
-
-            # Format cumulative incidence results
-            if (!is.null(cuminc_result)) {
-                private$.formatCumulativeIncidence(cuminc_result, timepoints)
-            }
-
-            # Note: Advanced risk stratification and time-dependent CIF functions
-            # are available (.performRiskStratification, .performTimeDependentCIF)
-            # but not currently integrated into output to reduce computation cost
-
-            # Generate summary (only list features actually implemented and displayed)
+            # Build complete summary HTML before setting content once
             summary_text <- glue::glue(
                 "<h3>Competing Risks Analysis Results</h3>
                 <p>Analysis includes:</p>
@@ -702,7 +666,67 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 <p>Results account for the competing nature of different death causes.</p>"
             )
 
+            # Append Gray's test results to summary
+            if (!is.null(grays_test_result)) {
+                grays_text <- "<h4>Gray's Test Results</h4><ul>"
+
+                if (!is.null(grays_test_result$disease_death)) {
+                    grays_text <- paste0(grays_text,
+                        "<li>Disease Death: \u03C7\u00B2 = ",
+                        round(grays_test_result$disease_death$statistic, 2),
+                        ", df = ", grays_test_result$disease_death$df,
+                        ", p = ", round(grays_test_result$disease_death$p_value, 4),
+                        "</li>"
+                    )
+                }
+
+                if (!is.null(grays_test_result$other_death)) {
+                    grays_text <- paste0(grays_text,
+                        "<li>Other Cause Death: \u03C7\u00B2 = ",
+                        round(grays_test_result$other_death$statistic, 2),
+                        ", df = ", grays_test_result$other_death$df,
+                        ", p = ", round(grays_test_result$other_death$p_value, 4),
+                        "</li>"
+                    )
+                }
+
+                grays_text <- paste0(grays_text, "</ul>")
+                summary_text <- paste0(summary_text, grays_text)
+            }
+
+            # Append cumulative incidence at timepoints to summary
+            if (!is.null(cuminc_timepoints) && length(cuminc_timepoints) > 0) {
+                timepoint_text <- "<h4>Cumulative Incidence at Key Time Points</h4>"
+                timepoint_text <- paste0(timepoint_text, "<table border='1' style='border-collapse: collapse;'>")
+                timepoint_text <- paste0(timepoint_text, "<tr><th>Time (months)</th><th>Group</th><th>Estimate</th><th>95% CI</th></tr>")
+
+                for (tp_name in names(cuminc_timepoints)) {
+                    tp_data <- cuminc_timepoints[[tp_name]]
+
+                    for (group_name in names(tp_data)) {
+                        group_data <- tp_data[[group_name]]
+
+                        timepoint_text <- paste0(timepoint_text,
+                            "<tr><td>", group_data$time, "</td>",
+                            "<td>", group_name, "</td>",
+                            "<td>", round(group_data$estimate, 3), "</td>",
+                            "<td>(", round(group_data$ci_lower, 3), ", ",
+                            round(group_data$ci_upper, 3), ")</td></tr>"
+                        )
+                    }
+                }
+
+                timepoint_text <- paste0(timepoint_text, "</table>")
+                summary_text <- paste0(summary_text, timepoint_text)
+            }
+
+            # Set the complete summary content once
             self$results$summary$setContent(summary_text)
+
+            # Format cumulative incidence results into the cuminc table
+            if (!is.null(cuminc_result)) {
+                private$.formatCumulativeIncidence(cuminc_result, timepoints)
+            }
             private$.generateInterpretation("Competing Risks")
         },
         

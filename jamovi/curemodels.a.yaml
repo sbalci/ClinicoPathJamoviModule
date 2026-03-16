@@ -83,6 +83,21 @@ options:
           R: >
             Type of cure model: mixture (smcure), non-mixture (flexsurvcure), cuRe, npcure, or all
 
+    - name: smcure_model_type
+      title: 'smcure Survival Model Type'
+      type: List
+      options:
+        - title: Proportional Hazards (Cox PH)
+          name: ph
+        - title: Accelerated Failure Time
+          name: aft
+      default: ph
+      description:
+          ui: >
+            Survival model type for the uncured fraction in smcure (PH or AFT)
+          R: >
+            Survival model type for smcure: 'ph' (proportional hazards) or 'aft' (accelerated failure time)
+
     - name: cure_link
       title: 'Link Function for Cure Probability'
       type: List

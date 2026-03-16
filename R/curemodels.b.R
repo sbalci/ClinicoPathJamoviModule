@@ -14,72 +14,77 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         cure_cure_model = NULL,
         npcure_model = NULL,
 
-        # Variable name safety helper
-        .escapeVar = function(varName) {
-            if (is.null(varName) || length(varName) == 0) return(NULL)
-            # Escape variable names with special characters for formula construction
-            return(jmvcore::composeTerm(varName))
+        # Cure fraction + CI storage (populated by fitting functions)
+        .cure_fraction = NULL,
+        .cure_ci_lower = NULL,
+        .cure_ci_upper = NULL,
+        .cure_ci_method = NULL,
+
+        # HTML notice system (replaces insert(999, Notice) pattern)
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
         },
 
-        # Notice insertion helper for consistent user feedback
-        .insertNotice = function(name, type, content, position = NULL) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = name,
-                type = type
-            )
-            notice$setContent(content)
-
-            # Determine position if not specified
-            if (is.null(position)) {
-                position <- switch(as.character(type),
-                    "1" = 1,  # ERROR at top
-                    "2" = 1,  # STRONG_WARNING at top
-                    "3" = 2,  # WARNING after errors
-                    "4" = 999,  # INFO at bottom
-                    2  # default
-                )
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                return()
             }
 
-            self$results$insert(position, notice)
+            typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047"),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd")
+            )
+
+            # Separate errors from warnings/info
+            error_html <- ""
+            warn_html <- ""
+
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+
+                block <- paste0(
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    notice$title, "</strong><br>",
+                    "<span style='color: #374151;'>", notice$content, "</span>",
+                    "</div>"
+                )
+
+                if (notice$type == "ERROR") {
+                    error_html <- paste0(error_html, block)
+                } else {
+                    warn_html <- paste0(warn_html, block)
+                }
+            }
+
+            if (nchar(error_html) > 0) {
+                self$results$errors$setContent(paste0("<div>", error_html, "</div>"))
+            }
+            if (nchar(warn_html) > 0) {
+                self$results$warnings$setContent(paste0("<div>", warn_html, "</div>"))
+            }
         },
 
         .init = function() {
-            # Check for required packages
-            if (!requireNamespace('smcure', quietly = TRUE)) {
-                private$.insertNotice(
-                    name = 'smcureMissing',
-                    type = jmvcore::NoticeType$STRONG_WARNING,
-                    content = paste0(
-                        "The smcure package is required but not installed.\n",
-                        "Please install it using: install.packages('smcure')"
-                    ),
-                    position = 1
-                )
-            }
-
-            if (!requireNamespace('flexsurvcure', quietly = TRUE)) {
-                private$.insertNotice(
-                    name = 'flexsurvcureMissing',
-                    type = jmvcore::NoticeType$INFO,
-                    content = paste0(
-                        "The flexsurvcure package is recommended for non-mixture cure models.\n",
-                        "Install using: install.packages('flexsurvcure')"
-                    ),
-                    position = 999
-                )
-            }
+            # No package checks here - they cause serialization issues with Notice objects.
+            # Package availability is checked in each fitting function with proper HTML notices.
         },
 
         .validateInputData = function(data, time_var, status_var) {
 
-            # Apply variable name escaping for safe data access
-            escaped_time <- private$.escapeVar(time_var)
-            escaped_status <- private$.escapeVar(status_var)
-
-            # Extract columns safely
-            time_col <- data[[escaped_time]]
-            status_col <- data[[escaped_status]]
+            # Use raw variable names for data[[ ]] access (NOT escaped/backticked)
+            time_col <- data[[time_var]]
+            status_col <- data[[status_var]]
 
             # Validate time variable
             if (any(time_col < 0, na.rm = TRUE)) {
@@ -95,7 +100,6 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             status_vals <- status_vals[!is.na(status_vals)]
 
             if (is.factor(status_col)) {
-                # Convert factor to numeric for validation
                 status_numeric <- as.numeric(status_col) - 1
                 if (!all(status_numeric %in% c(0, 1))) {
                     stop("Status variable must be binary. Expected values: 0 (censored) and 1 (event), or equivalent factor levels.")
@@ -123,6 +127,9 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+
+            # Reset notice list for each run
+            private$.noticeList <- list()
 
             # Check if variables are selected
             if (is.null(self$options$time) || is.null(self$options$status)) {
@@ -160,7 +167,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<h4 style='margin-top: 15px;'>Required Packages:</h4>",
                     "<p style='margin-left: 20px;'><code>smcure</code>, <code>flexsurvcure</code> (optional: <code>cuRe</code>, <code>npcure</code>)</p>",
 
-                    "<p style='margin-top: 15px;'><em> Tip: Start with Mixture Cure Model, then compare with other types if needed. Ensure adequate follow-up time (at least 2-3x median event time) for reliable cure fraction estimates.</em></p>",
+                    "<p style='margin-top: 15px;'><em>Tip: Start with Mixture Cure Model, then compare with other types if needed. Ensure adequate follow-up time (at least 2-3x median event time) for reliable cure fraction estimates.</em></p>",
                     "</div>"
                 ))
                 return()
@@ -173,21 +180,20 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             predictors <- self$options$predictors
             model_type <- self$options$model_type %||% "mixture"
 
-            # Clean data
+            # Clean data - use raw variable names for data access
             analysis_vars <- c(time_var, status_var, predictors)
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
 
             if (nrow(clean_data) < 30) {
-                private$.insertNotice(
-                    name = 'insufficientData',
-                    type = jmvcore::NoticeType$ERROR,
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Insufficient Data",
                     content = paste0(
-                        "Insufficient data for cure model analysis. ",
                         "Found ", nrow(clean_data), " complete cases, but minimum 30 required. ",
                         "Please check for missing values in survival time, event status, or predictor variables."
-                    ),
-                    position = 1
+                    )
                 )
+                private$.renderNotices()
                 return()
             }
 
@@ -199,77 +205,61 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.validateInputData(clean_data, time_var, status_var)
                 TRUE
             }, warning = function(w) {
-                private$.insertNotice(
-                    name = paste0('validationWarning_', gsub("[^a-zA-Z0-9]", "", substr(w$message, 1, 20))),
-                    type = jmvcore::NoticeType$WARNING,
-                    content = w$message,
-                    position = 2
+                private$.addNotice(
+                    type = "WARNING",
+                    title = "Data Validation Warning",
+                    content = w$message
                 )
                 TRUE
             }, error = function(e) {
-                private$.insertNotice(
-                    name = 'validationError',
-                    type = jmvcore::NoticeType$ERROR,
-                    content = paste0("Data validation failed: ", e$message),
-                    position = 1
+                private$.addNotice(
+                    type = "ERROR",
+                    title = "Data Validation Error",
+                    content = e$message
                 )
                 FALSE
             })
 
             if (!validation_result) {
+                private$.renderNotices()
                 return()
             }
 
-            # Add warnings for experimental/specialized features
+            # Add informational notices for specialized model types
             if (model_type == "cure") {
-                private$.insertNotice(
-                    name = 'cuReModelInfo',
-                    type = jmvcore::NoticeType$INFO,
+                private$.addNotice(
+                    type = "INFO",
+                    title = "cuRe Model Selected",
                     content = paste0(
-                        " cuRe Model Selected\n\n",
-                        "The cuRe model is a specialized approach that can incorporate background mortality rates. ",
-                        "This is particularly useful for cancer survival analysis where general population mortality matters.\n\n",
-                        "Requirements:\n",
-                        "• Requires cuRe package installation\n",
-                        "• Optionally uses background hazard variable (e.g., from life tables)\n",
-                        "• Best for long-term cancer survival studies"
-                    ),
-                    position = 3
+                        "The cuRe model incorporates background mortality rates. ",
+                        "Requires the cuRe package. Optionally uses a background hazard variable (e.g., from life tables). ",
+                        "Best suited for long-term cancer survival studies."
+                    )
                 )
             }
 
             if (model_type == "npcure") {
-                private$.insertNotice(
-                    name = 'npcureModelInfo',
-                    type = jmvcore::NoticeType$INFO,
+                private$.addNotice(
+                    type = "INFO",
+                    title = "Nonparametric Cure Model Selected",
                     content = paste0(
-                        " Nonparametric Cure Model Selected\n\n",
                         "The npcure model uses kernel smoothing without distributional assumptions. ",
-                        "This provides flexibility but has limitations:\n\n",
-                        "• Works with single continuous covariate only\n",
-                        "• Sensitive to bandwidth selection\n",
-                        "• Requires larger sample sizes for stable estimates\n",
-                        "• Results may be harder to interpret than parametric models\n\n",
-                        "Consider starting with parametric models (mixture/non-mixture) for initial exploration."
-                    ),
-                    position = 3
+                        "Works with a single continuous covariate only. Sensitive to bandwidth selection. ",
+                        "Requires larger sample sizes for stable estimates."
+                    )
                 )
             }
 
-            # Warn about bootstrap computation time
             if (self$options$bootstrap_ci %||% FALSE) {
                 n_bootstrap <- self$options$n_bootstrap %||% 1000
                 if (n_bootstrap >= 500) {
-                    private$.insertNotice(
-                        name = 'bootstrapWarning',
-                        type = jmvcore::NoticeType$INFO,
+                    private$.addNotice(
+                        type = "INFO",
+                        title = "Bootstrap Confidence Intervals",
                         content = paste0(
-                            " Bootstrap Confidence Intervals\n\n",
-                            "Bootstrap resampling is enabled with ", n_bootstrap, " iterations. ",
-                            "This will take additional computation time (possibly several minutes).\n\n",
-                            "Progress cannot be displayed during bootstrap. Please be patient."
-                        ),
-                        position = 4
+                            "Bootstrap resampling enabled with ", n_bootstrap, " iterations. ",
+                            "This may take several minutes. Please be patient."
+                        )
                     )
                 }
             }
@@ -296,13 +286,9 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.compareModels()
             }
 
-            # Generate plots if requested
+            # Set plot state (render functions are called by jamovi when visible)
             if (self$options$plot_cure_fraction) {
                 private$.plotCureFraction()
-            }
-
-            if (self$options$plot_survival) {
-                private$.plotSurvival()
             }
 
             # Perform additional analyses
@@ -317,84 +303,63 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Generate clinical interpretation
             private$.generateClinicalInterpretation()
 
-            # Add completion notice
-            private$.insertNotice(
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO,
-                content = paste0(
-                    "Analysis completed successfully. ",
-                    "Model type: ", model_type, ". ",
-                    "Review the results tables and plots above."
-                ),
-                position = 999
-            )
+            # Render all accumulated notices as HTML
+            private$.renderNotices()
         },
 
+        # ============================================================
+        # MIXTURE CURE MODEL (smcure)
+        # ============================================================
         .fitMixtureCureModel = function(data, time_var, status_var, predictors) {
 
             tryCatch({
-                # Check for smcure package
                 if (!requireNamespace('smcure', quietly = TRUE)) {
-                    stop("smcure package is required for mixture cure models")
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Package Missing: smcure",
+                        content = "The smcure package is required for mixture cure models. Install using: install.packages('smcure')"
+                    )
+                    return()
                 }
 
-                # Prepare formulas using safer approach with variable escaping
+                # Build formulas using jmvcore::composeTerm for formula safety
                 if (length(predictors) > 0) {
-                    # Escape predictor names for safe formula construction
-                    escaped_predictors <- sapply(predictors, private$.escapeVar)
+                    escaped_predictors <- sapply(predictors, jmvcore::composeTerm)
+                    escaped_time <- jmvcore::composeTerm(time_var)
+                    escaped_status <- jmvcore::composeTerm(status_var)
 
-                    cure_formula <- reformulate(escaped_predictors, response = NULL)
-                    # Escape time and status variables as well
-                    escaped_time <- private$.escapeVar(time_var)
-                    escaped_status <- private$.escapeVar(status_var)
                     surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
-                    surv_formula <- reformulate(escaped_predictors, response = surv_response)
+                    surv_formula <- as.formula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
+                    cure_formula <- as.formula(paste("~", paste(escaped_predictors, collapse = " + ")))
                 } else {
-                    cure_formula <- ~ 1
-                    # Escape variables even in simple formula
-                    escaped_time <- private$.escapeVar(time_var)
-                    escaped_status <- private$.escapeVar(status_var)
+                    escaped_time <- jmvcore::composeTerm(time_var)
+                    escaped_status <- jmvcore::composeTerm(status_var)
+
                     surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
                     surv_formula <- as.formula(paste(surv_response, "~ 1"))
+                    cure_formula <- ~ 1
                 }
 
                 # Get options
                 cure_link <- self$options$cure_link %||% "logit"
-                surv_dist <- self$options$survival_dist %||% "weibull"
+                smcure_model_type <- self$options$smcure_model_type %||% "ph"
                 bootstrap_ci <- self$options$bootstrap_ci %||% FALSE
                 n_bootstrap <- self$options$n_bootstrap %||% 1000
 
-                # Optimize bootstrap for performance
-                if (bootstrap_ci && n_bootstrap > 1000) {
-                    # Check for parallel capabilities
-                    if (requireNamespace("parallel", quietly = TRUE)) {
-                        n_cores <- min(parallel::detectCores() - 1, 4)  # Use up to 4 cores
-                        message("Using parallel bootstrap with ", n_cores, " cores for ", n_bootstrap, " samples")
-                        # Note: smcure doesn't support parallel directly, but we inform user
-                    }
-
-                    # For very large bootstrap samples, warn user about time
-                    if (n_bootstrap > 5000) {
-                        private$.insertNotice(
-                            name = 'largeBootstrap',
-                            type = jmvcore::NoticeType$INFO,
-                            content = paste0(
-                                "Large bootstrap sample (", n_bootstrap, " samples) may take several minutes to complete. ",
-                                "Consider reducing the number of bootstrap samples for faster results."
-                            ),
-                            position = 999
-                        )
-                    }
-                }
-
-                # Fit mixture cure model using smcure
+                # FIX C1: Correct smcure::smcure() call
+                # model = "ph" or "aft" (survival model type)
+                # link = "logit"/"probit"/"cloglog" (cure probability link)
+                # Var = TRUE/FALSE (compute variance via bootstrap)
+                # nboot = number of bootstrap samples (only used when Var=TRUE)
+                # smcure does NOT have a 'dist' parameter
                 cure_model <- smcure::smcure(
                     formula = surv_formula,
                     cureform = cure_formula,
                     data = data,
-                    model = cure_link,
-                    dist = surv_dist,
-                    nboot = ifelse(bootstrap_ci, n_bootstrap, 0)
+                    model = smcure_model_type,
+                    link = cure_link,
+                    Var = bootstrap_ci,
+                    nboot = if (bootstrap_ci) n_bootstrap else 0
                 )
 
                 # Extract and format results
@@ -404,82 +369,71 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$cure_model <- cure_model
 
             }, error = function(e) {
-                # Enhanced error handling with specific error types
                 error_msg <- e$message
 
                 if (grepl("convergence|iteration", error_msg, ignore.case = TRUE)) {
-                    detailed_msg <- paste0(
-                        "Mixture cure model convergence failed: ", error_msg, "\n\n",
-                        "Suggestions:\n",
-                        "• Try different starting values\n",
-                        "• Reduce the number of predictors\n",
-                        "• Check for collinear variables\n",
-                        "• Ensure adequate sample size and follow-up"
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Mixture Cure Model Convergence Failed",
+                        content = paste0(
+                            error_msg,
+                            " -- Try: (1) different link function, (2) fewer predictors, ",
+                            "(3) check for collinear variables, (4) ensure adequate sample size and follow-up."
+                        )
                     )
-                    notice_type <- jmvcore::NoticeType$STRONG_WARNING
                 } else if (grepl("singular|matrix", error_msg, ignore.case = TRUE)) {
-                    detailed_msg <- paste0(
-                        "Matrix computation error in mixture cure model: ", error_msg, "\n\n",
-                        "Suggestions:\n",
-                        "• Check for collinear predictors\n",
-                        "• Remove variables with little variation\n",
-                        "• Ensure sufficient sample size"
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Matrix Computation Error in Mixture Cure Model",
+                        content = paste0(
+                            error_msg,
+                            " -- Try: (1) check for collinear predictors, ",
+                            "(2) remove variables with little variation, (3) ensure sufficient sample size."
+                        )
                     )
-                    notice_type <- jmvcore::NoticeType$STRONG_WARNING
-                } else if (grepl("bootstrap", error_msg, ignore.case = TRUE)) {
-                    detailed_msg <- paste0(
-                        "Bootstrap procedure failed: ", error_msg, "\n\n",
-                        "Suggestions:\n",
-                        "• Reduce number of bootstrap samples\n",
-                        "• Try without bootstrap CI first\n",
-                        "• Check data for extreme values"
-                    )
-                    notice_type <- jmvcore::NoticeType$WARNING
                 } else {
-                    detailed_msg <- paste0("Mixture cure model fitting failed: ", error_msg)
-                    notice_type <- jmvcore::NoticeType$STRONG_WARNING
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Mixture Cure Model Error",
+                        content = paste0("Fitting failed: ", error_msg)
+                    )
                 }
-
-                private$.insertNotice(
-                    name = 'mixtureCureModelError',
-                    type = notice_type,
-                    content = detailed_msg
-                )
             })
         },
 
+        # ============================================================
+        # NON-MIXTURE CURE MODEL (flexsurvcure)
+        # ============================================================
         .fitNonMixtureCureModel = function(data, time_var, status_var, predictors) {
 
             tryCatch({
-                # Check for flexsurvcure package
                 if (!requireNamespace('flexsurvcure', quietly = TRUE)) {
-                    # Fallback to parametric survival with cure fraction estimation
-                    private$.fitParametricCureModel(data, time_var, status_var, predictors)
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Package Missing: flexsurvcure",
+                        content = paste0(
+                            "The flexsurvcure package is required for non-mixture cure models. ",
+                            "Install using: install.packages('flexsurvcure'). ",
+                            "Alternatively, use the Mixture Cure Model option."
+                        )
+                    )
                     return()
                 }
 
-                # Prepare formula with variable escaping
-                if (length(predictors) > 0) {
-                    # Escape predictor names for safe formula construction
-                    escaped_predictors <- sapply(predictors, private$.escapeVar)
+                # Build formula
+                escaped_time <- jmvcore::composeTerm(time_var)
+                escaped_status <- jmvcore::composeTerm(status_var)
+                surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
 
-                    # Escape time and status variables
-                    escaped_time <- private$.escapeVar(time_var)
-                    escaped_status <- private$.escapeVar(status_var)
-                    surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
-                    formula <- reformulate(escaped_predictors, response = surv_response)
+                if (length(predictors) > 0) {
+                    escaped_predictors <- sapply(predictors, jmvcore::composeTerm)
+                    formula <- as.formula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
                 } else {
-                    # Escape variables even in simple formula
-                    escaped_time <- private$.escapeVar(time_var)
-                    escaped_status <- private$.escapeVar(status_var)
-                    surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
                     formula <- as.formula(paste(surv_response, "~ 1"))
                 }
 
-                # Get distribution
+                # Map distribution names to flexsurvcure-compatible names
                 surv_dist <- self$options$survival_dist %||% "weibull"
-
-                # Map distribution names to flexsurvcure functions
                 dist_map <- list(
                     "weibull" = "weibullPH",
                     "exponential" = "exp",
@@ -495,44 +449,45 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mixture = FALSE
                 )
 
-                # Extract and format results
+                # FIX C4: Extract results correctly from flexsurvcure
                 private$.formatNonMixtureCureResults(nm_cure_model)
 
                 # Store model
                 private$nm_cure_model <- nm_cure_model
 
             }, error = function(e) {
-                private$.insertNotice(
-                    name = 'nonMixtureCureModelError',
-                    type = jmvcore::NoticeType$STRONG_WARNING,
-                    content = paste0("Non-mixture cure model fitting failed: ", e$message)
+                private$.addNotice(
+                    type = "STRONG_WARNING",
+                    title = "Non-mixture Cure Model Error",
+                    content = paste0("Fitting failed: ", e$message)
                 )
             })
         },
 
+        # ============================================================
+        # cuRe MODEL (with background mortality)
+        # ============================================================
         .fitCuReModel = function(data, time_var, status_var, predictors) {
 
             tryCatch({
-                # Check for cuRe package
                 if (!requireNamespace('cuRe', quietly = TRUE)) {
-                    stop("cuRe package is required for background mortality cure models. Install using: install.packages('cuRe')")
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Package Missing: cuRe",
+                        content = "The cuRe package is required. Install using: install.packages('cuRe')"
+                    )
+                    return()
                 }
 
-                # Prepare formula with variable escaping
-                if (length(predictors) > 0) {
-                    # Escape predictor names for safe formula construction
-                    escaped_predictors <- sapply(predictors, private$.escapeVar)
+                # Build formula
+                escaped_time <- jmvcore::composeTerm(time_var)
+                escaped_status <- jmvcore::composeTerm(status_var)
+                surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
 
-                    # Escape time and status variables
-                    escaped_time <- private$.escapeVar(time_var)
-                    escaped_status <- private$.escapeVar(status_var)
-                    surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
-                    surv_formula <- reformulate(escaped_predictors, response = surv_response)
+                if (length(predictors) > 0) {
+                    escaped_predictors <- sapply(predictors, jmvcore::composeTerm)
+                    surv_formula <- as.formula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
                 } else {
-                    # Escape variables even in simple formula
-                    escaped_time <- private$.escapeVar(time_var)
-                    escaped_status <- private$.escapeVar(status_var)
-                    surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
                     surv_formula <- as.formula(paste(surv_response, "~ 1"))
                 }
 
@@ -540,788 +495,695 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 use_background <- self$options$use_background_mortality %||% FALSE
                 background_var <- self$options$background_hazard_var
                 surv_dist <- self$options$survival_dist %||% "weibull"
+                cure_link <- self$options$cure_link %||% "logit"
 
-                # Fit cuRe model
                 if (use_background && !is.null(background_var) && background_var != "") {
-                    # Model with background mortality
-                    # Extract the background hazard vector from data
-                    escaped_bg <- private$.escapeVar(background_var)
-                    bg_hazard_vec <- data[[escaped_bg]]
+                    bg_hazard_vec <- data[[background_var]]
 
                     cure_model <- cuRe::fit.cure.model(
                         formula = surv_formula,
                         data = data,
-                        bhazard = bg_hazard_vec,  # Pass actual numeric vector
+                        bhazard = bg_hazard_vec,
                         dist = surv_dist,
-                        link = self$options$cure_link %||% "logit"
+                        link = cure_link
                     )
                 } else {
-                    # Model without background mortality (standard cure model)
                     cure_model <- cuRe::fit.cure.model(
                         formula = surv_formula,
                         data = data,
                         dist = surv_dist,
-                        link = self$options$cure_link %||% "logit"
+                        link = cure_link
                     )
                 }
 
-                # Format and store results
                 private$.formatCuReResults(cure_model)
-
-                # Store model for plotting
                 private$cure_cure_model <- cure_model
 
             }, error = function(e) {
                 error_msg <- e$message
 
                 if (grepl("convergence", error_msg, ignore.case = TRUE)) {
-                    detailed_msg <- paste0(
-                        "cuRe model convergence failed: ", error_msg, "\n\n",
-                        "Suggestions:\n",
-                        "• Try different starting values\n",
-                        "• Check background hazard variable\n",
-                        "• Ensure adequate follow-up time\n",
-                        "• Verify data quality"
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "cuRe Model Convergence Failed",
+                        content = paste0(
+                            error_msg,
+                            " -- Try: (1) different starting values, (2) check background hazard variable, ",
+                            "(3) ensure adequate follow-up time."
+                        )
                     )
-                    notice_type <- jmvcore::NoticeType$STRONG_WARNING
                 } else if (grepl("bhazard|background", error_msg, ignore.case = TRUE)) {
-                    detailed_msg <- paste0(
-                        "Background mortality variable error: ", error_msg, "\n\n",
-                        "Suggestions:\n",
-                        "• Verify background hazard variable exists\n",
-                        "• Check that values are non-negative\n",
-                        "• Ensure variable is numeric"
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Background Mortality Variable Error",
+                        content = paste0(
+                            error_msg,
+                            " -- Verify the background hazard variable exists, contains non-negative numeric values."
+                        )
                     )
-                    notice_type <- jmvcore::NoticeType$ERROR
                 } else {
-                    detailed_msg <- paste0("cuRe model fitting failed: ", error_msg)
-                    notice_type <- jmvcore::NoticeType$STRONG_WARNING
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "cuRe Model Error",
+                        content = paste0("Fitting failed: ", error_msg)
+                    )
                 }
-
-                private$.insertNotice(
-                    name = 'cuReModelError',
-                    type = notice_type,
-                    content = detailed_msg
-                )
             })
         },
 
+        # ============================================================
+        # NONPARAMETRIC CURE MODEL (npcure)
+        # ============================================================
         .fitNpCureModel = function(data, time_var, status_var, predictors) {
 
             tryCatch({
-                # Check for npcure package
                 if (!requireNamespace('npcure', quietly = TRUE)) {
-                    stop("npcure package is required for nonparametric cure models. Install using: install.packages('npcure')")
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Package Missing: npcure",
+                        content = "The npcure package is required. Install using: install.packages('npcure')"
+                    )
+                    return()
                 }
 
                 # npcure works with single continuous covariate
                 covariate <- self$options$npcure_covariate
 
                 if (is.null(covariate) || length(covariate) == 0) {
-                    stop("npcure requires a single continuous covariate. Please select a covariate in the npcure options.")
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = "Missing Covariate",
+                        content = "npcure requires a single continuous covariate. Please select a covariate in the npcure options."
+                    )
+                    return()
                 }
 
                 # Get npcure-specific options
                 bandwidth_option <- self$options$npcure_bandwidth %||% "auto"
-                n_time_points <- self$options$npcure_time_points %||% 100
 
-                # Convert bandwidth option to numeric
                 bandwidth <- switch(bandwidth_option,
-                    "auto" = NULL,  # Let npcure choose automatically
+                    "auto" = NULL,
                     "small" = 0.1,
                     "medium" = 0.3,
                     "large" = 0.5,
                     NULL
                 )
 
-                # Apply variable escaping for safe data access
-                escaped_time <- private$.escapeVar(time_var)
-                escaped_status <- private$.escapeVar(status_var)
-                escaped_covar <- private$.escapeVar(covariate)
+                # Use raw variable names for data[[ ]] access
+                time_vec <- data[[time_var]]
+                status_vec <- data[[status_var]]
+                covar_vec <- data[[covariate]]
 
-                # Extract columns safely
-                time_vec <- data[[escaped_time]]
-                status_vec <- data[[escaped_status]]
-                covar_vec <- data[[escaped_covar]]
+                # Convert factor status to numeric if needed
+                if (is.factor(status_vec)) {
+                    status_vec <- as.numeric(status_vec) - 1
+                }
 
-                # Generate time points for estimation
-                time_seq <- seq(0, max(time_vec, na.rm = TRUE), length.out = n_time_points)
+                # FIX C3: Correct npcure::probcure() parameter names
+                # x = covariate vector
+                # t = time vector
+                # d = event indicator vector
+                # x0 = covariate values at which to estimate cure probability
+                # (NOT: time=, status=, testimate=)
 
-                # Fit nonparametric cure model
+                # Generate covariate values for estimation
+                covar_range <- range(covar_vec, na.rm = TRUE)
+                n_points <- min(50, length(unique(covar_vec)))
+                x0_values <- seq(covar_range[1], covar_range[2], length.out = n_points)
+
                 if (is.null(bandwidth)) {
-                    # Automatic bandwidth selection via cross-validation
                     np_cure_model <- npcure::probcure(
-                        time = time_vec,
-                        status = status_vec,
                         x = covar_vec,
-                        testimate = time_seq,
+                        t = time_vec,
+                        d = status_vec,
+                        x0 = x0_values,
                         conflevel = 0.95
                     )
                 } else {
-                    # User-specified bandwidth
                     np_cure_model <- npcure::probcure(
-                        time = time_vec,
-                        status = status_vec,
                         x = covar_vec,
+                        t = time_vec,
+                        d = status_vec,
+                        x0 = x0_values,
                         h = bandwidth,
-                        testimate = time_seq,
                         conflevel = 0.95
                     )
                 }
 
-                # Format and store results
                 private$.formatNpCureResults(np_cure_model, covariate)
-
-                # Store model for plotting
                 private$npcure_model <- np_cure_model
 
             }, error = function(e) {
                 error_msg <- e$message
 
                 if (grepl("bandwidth|h =", error_msg, ignore.case = TRUE)) {
-                    detailed_msg <- paste0(
-                        "Bandwidth selection failed: ", error_msg, "\n\n",
-                        "Suggestions:\n",
-                        "• Try 'auto' bandwidth\n",
-                        "• Adjust bandwidth manually (small/medium/large)\n",
-                        "• Check covariate distribution\n",
-                        "• Ensure sufficient sample size"
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = "npcure Bandwidth Issue",
+                        content = paste0(
+                            error_msg,
+                            " -- Try: (1) 'auto' bandwidth, (2) different manual bandwidth, ",
+                            "(3) check covariate distribution."
+                        )
                     )
-                    notice_type <- jmvcore::NoticeType$WARNING
-                } else if (grepl("covariate", error_msg, ignore.case = TRUE)) {
-                    detailed_msg <- paste0(
-                        "Covariate error: ", error_msg, "\n\n",
-                        "Suggestions:\n",
-                        "• Select a continuous numeric covariate\n",
-                        "• Check for missing values\n",
-                        "• Ensure adequate variation in covariate"
-                    )
-                    notice_type <- jmvcore::NoticeType$ERROR
                 } else {
-                    detailed_msg <- paste0("Nonparametric cure model fitting failed: ", error_msg)
-                    notice_type <- jmvcore::NoticeType$STRONG_WARNING
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = "Nonparametric Cure Model Error",
+                        content = paste0("Fitting failed: ", error_msg)
+                    )
                 }
-
-                private$.insertNotice(
-                    name = 'npcureModelError',
-                    type = notice_type,
-                    content = detailed_msg
-                )
             })
         },
 
-        .fitParametricCureModel = function(data, time_var, status_var, predictors) {
-            # Fallback when flexsurvcure is not available
-            # Provides informative notice instead of crashing
-
-            private$.insertNotice(
-                name = 'flexsurvcureNotAvailable',
-                type = jmvcore::NoticeType$STRONG_WARNING,
-                content = paste0(
-                    "Non-mixture cure model requires the flexsurvcure package, which is not installed.\n\n",
-                    "To use non-mixture cure models, please install flexsurvcure:\n",
-                    "install.packages('flexsurvcure')\n\n",
-                    "Alternatively, use the Mixture Cure Model option, which uses the smcure package."
-                )
-            )
-
-            # Do not populate tables or plots - user needs to install package
-            return(NULL)
-        },
-
+        # ============================================================
+        # FORMAT MIXTURE CURE RESULTS
+        # ============================================================
         .formatMixtureCureResults = function(model) {
 
-            # Create results table
             results_table <- self$results$modelTable
 
-            # Extract cure probability coefficients
-            cure_coef <- model$beta
-            cure_se <- sqrt(diag(model$cureb.vcov))
-            cure_z <- cure_coef / cure_se
-            cure_p <- 2 * (1 - pnorm(abs(cure_z)))
+            # FIX C2: In smcure return objects:
+            #   $b     = cure probability (incidence/logistic) coefficients
+            #   $beta  = latency (survival) coefficients
+            #   $b_sd  = SE for cure coefficients (when Var=TRUE)
+            #   $beta_sd = SE for survival coefficients (when Var=TRUE)
 
-            # Add cure probability results
-            for (i in seq_along(cure_coef)) {
-                results_table$addRow(rowKey = paste0("cure_", i), values = list(
-                    parameter = paste("Cure:", names(cure_coef)[i] %||% paste("Param", i)),
-                    estimate = round(cure_coef[i], 4),
-                    std_error = round(cure_se[i], 4),
-                    z_value = round(cure_z[i], 3),
-                    p_value = round(cure_p[i], 4),
-                    ci_lower = round(cure_coef[i] - 1.96 * cure_se[i], 4),
-                    ci_upper = round(cure_coef[i] + 1.96 * cure_se[i], 4)
-                ))
-            }
+            cure_coef <- model$b        # Incidence (cure) coefficients
+            surv_coef <- model$beta     # Latency (survival) coefficients
 
-            # Extract survival coefficients
-            surv_coef <- model$b
-            surv_se <- sqrt(diag(model$survb.vcov))
-            surv_z <- surv_coef / surv_se
-            surv_p <- 2 * (1 - pnorm(abs(surv_z)))
-
-            # Add survival results
-            for (i in seq_along(surv_coef)) {
-                results_table$addRow(rowKey = paste0("surv_", i), values = list(
-                    parameter = paste("Survival:", names(surv_coef)[i] %||% paste("Param", i)),
-                    estimate = round(surv_coef[i], 4),
-                    std_error = round(surv_se[i], 4),
-                    z_value = round(surv_z[i], 3),
-                    p_value = round(surv_p[i], 4),
-                    ci_lower = round(surv_coef[i] - 1.96 * surv_se[i], 4),
-                    ci_upper = round(surv_coef[i] + 1.96 * surv_se[i], 4)
-                ))
-            }
-
-            # Calculate and display cure fraction
-            cure_fraction <- 1 / (1 + exp(-model$beta[1]))  # Intercept cure fraction
-
-            # Populate cure fraction table
-            cure_table <- self$results$cureTable
-
-            # Calculate confidence intervals - use bootstrap if available
             bootstrap_ci <- self$options$bootstrap_ci %||% FALSE
-            if (bootstrap_ci && !is.null(model$cureb.boot)) {
-                # Use bootstrap CIs if available
-                boot_cure_fractions <- 1 / (1 + exp(-model$cureb.boot[, 1]))
-                cure_ci_lower <- quantile(boot_cure_fractions, 0.025, na.rm = TRUE)
-                cure_ci_upper <- quantile(boot_cure_fractions, 0.975, na.rm = TRUE)
-            } else {
-                # Use normal approximation
-                se_cure <- sqrt(diag(model$cureb.vcov))[1]
-                cure_ci_lower <- 1 / (1 + exp(-(model$beta[1] - 1.96 * se_cure)))
-                cure_ci_upper <- 1 / (1 + exp(-(model$beta[1] + 1.96 * se_cure)))
-            }
 
-            # Get median survival for uncured (if available)
-            uncured_median <- ifelse(!is.null(model$Time),
-                                   round(quantile(model$Time[model$Status == 1], 0.5, na.rm = TRUE), 2),
-                                   NA)
+            # --- Cure probability coefficients ---
+            if (!is.null(cure_coef)) {
+                cure_names <- names(cure_coef)
+                if (is.null(cure_names)) {
+                    cure_names <- if (length(cure_coef) == 1) "(Intercept)" else paste0("Param_", seq_along(cure_coef))
+                }
 
-            cure_table$addRow(rowKey = "overall", values = list(
-                group = "Overall",
-                cure_fraction = round(cure_fraction, 4),
-                cure_ci_lower = round(cure_ci_lower, 4),
-                cure_ci_upper = round(cure_ci_upper, 4),
-                uncured_median = uncured_median
-            ))
+                # SE: use b_sd from bootstrap if available
+                if (bootstrap_ci && !is.null(model$b_sd)) {
+                    cure_se <- model$b_sd
+                } else {
+                    cure_se <- rep(NA_real_, length(cure_coef))
+                }
 
-            summary_html <- glue::glue(
-                "<h3>Mixture Cure Model Results</h3>
-                <p><b>Estimated Cure Fraction:</b> {round(cure_fraction * 100, 1)}%</p>
-                <p><b>Model Type:</b> {self$options$cure_link} link, {self$options$survival_dist} survival</p>
-                <p><b>Sample Size:</b> {model$n}</p>
-                <p><b>Events:</b> {sum(model$s == 1)}</p>
-                <p><b>Censored:</b> {sum(model$s == 0)}</p>
-
-                <h4>Interpretation:</h4>
-                <ul>
-                <li>Cure probability coefficients show factors associated with being cured</li>
-                <li>Positive coefficients increase cure probability</li>
-                <li>Survival coefficients apply only to the uncured fraction</li>
-                </ul>"
-            )
-
-            self$results$summary$setContent(summary_html)
-        },
-
-        .formatNonMixtureCureResults = function(model) {
-
-            # Extract model coefficients
-            coef_summary <- summary(model)
-
-            # Create results table
-            results_table <- self$results$modelTable
-
-            # Add coefficient results
-            for (i in 1:nrow(coef_summary)) {
-                std_err <- coef_summary[i, "se"]
-                est_val <- coef_summary[i, "est"]
-                z_val <- if (!is.na(std_err) && std_err > 0) est_val / std_err else NA
-
-                results_table$addRow(rowKey = i, values = list(
-                    parameter = rownames(coef_summary)[i],
-                    estimate = round(est_val, 4),
-                    std_error = round(std_err, 4),
-                    z_value = if (!is.na(z_val)) round(z_val, 3) else NA,
-                    p_value = if (!is.na(z_val)) round(2 * (1 - pnorm(abs(z_val))), 4) else NA,
-                    ci_lower = round(coef_summary[i, "L95%"], 4),
-                    ci_upper = round(coef_summary[i, "U95%"], 4)
-                ))
-            }
-
-            # Generate summary
-            summary_html <- glue::glue(
-                "<h3>Non-Mixture Cure Model Results</h3>
-                <p><b>Distribution:</b> {self$options$survival_dist}</p>
-                <p><b>Log-likelihood:</b> {round(model$loglik, 2)}</p>
-                <p><b>AIC:</b> {round(model$AIC, 2)}</p>
-
-                <h4>Model Description:</h4>
-                <p>Non-mixture cure models assume the entire population follows the same
-                survival distribution with cure as a limiting probability as time approaches infinity.</p>"
-            )
-
-            self$results$summary$setContent(summary_html)
-        },
-
-        .formatCuReResults = function(model) {
-
-            # Extract model summary
-            model_summary <- summary(model)
-
-            # Create results table
-            results_table <- self$results$modelTable
-
-            # Add coefficient results
-            if (!is.null(model_summary$coef)) {
-                coef_matrix <- model_summary$coef
-
-                for (i in 1:nrow(coef_matrix)) {
-                    std_err <- coef_matrix[i, "Std. Error"]
-                    est_val <- coef_matrix[i, "Estimate"]
-                    z_val <- if (!is.na(std_err) && std_err > 0) est_val / std_err else NA
+                for (i in seq_along(cure_coef)) {
+                    se_i <- if (!is.na(cure_se[i]) && cure_se[i] > 0) cure_se[i] else NA_real_
+                    z_i <- if (!is.na(se_i)) cure_coef[i] / se_i else NA_real_
+                    p_i <- if (!is.na(z_i)) 2 * (1 - pnorm(abs(z_i))) else NA_real_
+                    ci_lo <- if (!is.na(se_i)) cure_coef[i] - 1.96 * se_i else NA_real_
+                    ci_hi <- if (!is.na(se_i)) cure_coef[i] + 1.96 * se_i else NA_real_
 
                     results_table$addRow(rowKey = paste0("cure_", i), values = list(
-                        parameter = rownames(coef_matrix)[i],
-                        estimate = round(est_val, 4),
-                        std_error = round(std_err, 4),
-                        z_value = if (!is.na(z_val)) round(z_val, 3) else NA,
-                        p_value = if ("Pr(>|z|)" %in% colnames(coef_matrix)) {
-                            round(coef_matrix[i, "Pr(>|z|)"], 4)
-                        } else if (!is.na(z_val)) {
-                            round(2 * (1 - pnorm(abs(z_val))), 4)
-                        } else {
-                            NA
-                        },
-                        ci_lower = round(est_val - 1.96 * std_err, 4),
-                        ci_upper = round(est_val + 1.96 * std_err, 4)
+                        parameter = paste("Cure:", cure_names[i]),
+                        estimate = cure_coef[i],
+                        std_error = se_i,
+                        z_value = z_i,
+                        p_value = p_i,
+                        ci_lower = ci_lo,
+                        ci_upper = ci_hi
                     ))
                 }
             }
 
-            # Extract cure fraction estimate if available
-            cure_fraction <- if (!is.null(model$cure_fraction)) {
-                round(model$cure_fraction, 3)
-            } else {
-                "See model coefficients"
+            # --- Survival (latency) coefficients ---
+            if (!is.null(surv_coef)) {
+                surv_names <- names(surv_coef)
+                if (is.null(surv_names)) {
+                    surv_names <- paste0("Param_", seq_along(surv_coef))
+                }
+
+                if (bootstrap_ci && !is.null(model$beta_sd)) {
+                    surv_se <- model$beta_sd
+                } else {
+                    surv_se <- rep(NA_real_, length(surv_coef))
+                }
+
+                for (i in seq_along(surv_coef)) {
+                    se_i <- if (!is.na(surv_se[i]) && surv_se[i] > 0) surv_se[i] else NA_real_
+                    z_i <- if (!is.na(se_i)) surv_coef[i] / se_i else NA_real_
+                    p_i <- if (!is.na(z_i)) 2 * (1 - pnorm(abs(z_i))) else NA_real_
+                    ci_lo <- if (!is.na(se_i)) surv_coef[i] - 1.96 * se_i else NA_real_
+                    ci_hi <- if (!is.na(se_i)) surv_coef[i] + 1.96 * se_i else NA_real_
+
+                    results_table$addRow(rowKey = paste0("surv_", i), values = list(
+                        parameter = paste("Survival:", surv_names[i]),
+                        estimate = surv_coef[i],
+                        std_error = se_i,
+                        z_value = z_i,
+                        p_value = p_i,
+                        ci_lower = ci_lo,
+                        ci_upper = ci_hi
+                    ))
+                }
             }
 
-            # Generate summary with background mortality info
-            background_note <- if (self$options$use_background_mortality && !is.null(self$options$background_hazard_var)) {
+            # --- Cure fraction from intercept ---
+            # Cure fraction = inverse-logit of b[1] (incidence intercept)
+            cure_fraction <- plogis(model$b[1])
+
+            # Compute CI for cure fraction using delta method on logit scale
+            if (bootstrap_ci && !is.null(model$b_sd) && length(model$b_sd) >= 1 && model$b_sd[1] > 0) {
+                cure_se_logit <- model$b_sd[1]
+                logit_cf <- model$b[1]
+                cure_ci_lower <- plogis(logit_cf - 1.96 * cure_se_logit)
+                cure_ci_upper <- plogis(logit_cf + 1.96 * cure_se_logit)
+                ci_method <- "Bootstrap delta method (logit scale)"
+            } else {
+                # No bootstrap available - report NA rather than fabricating CI
+                cure_ci_lower <- NA_real_
+                cure_ci_upper <- NA_real_
+                ci_method <- "Not available (enable bootstrap CI)"
+            }
+
+            # Store for use in other functions
+            private$.cure_fraction <- cure_fraction
+            private$.cure_ci_lower <- cure_ci_lower
+            private$.cure_ci_upper <- cure_ci_upper
+            private$.cure_ci_method <- ci_method
+
+            # Populate cure fraction table
+            cure_table <- self$results$cureTable
+
+            # Get median survival for uncured
+            uncured_median <- tryCatch({
+                if (!is.null(model$Time) && !is.null(model$Status)) {
+                    event_times <- model$Time[model$Status == 1]
+                    if (length(event_times) > 0) {
+                        round(median(event_times, na.rm = TRUE), 2)
+                    } else {
+                        NA_real_
+                    }
+                } else {
+                    NA_real_
+                }
+            }, error = function(e) NA_real_)
+
+            cure_table$addRow(rowKey = "overall", values = list(
+                group = "Overall",
+                cure_fraction = cure_fraction,
+                cure_ci_lower = cure_ci_lower,
+                cure_ci_upper = cure_ci_upper,
+                uncured_median = uncured_median
+            ))
+
+            # Count events
+            n_events <- tryCatch({
+                if (!is.null(model$s)) sum(model$s == 1, na.rm = TRUE)
+                else if (!is.null(model$Status)) sum(model$Status == 1, na.rm = TRUE)
+                else NA
+            }, error = function(e) NA)
+
+            n_censored <- tryCatch({
+                if (!is.null(model$s)) sum(model$s == 0, na.rm = TRUE)
+                else if (!is.null(model$Status)) sum(model$Status == 0, na.rm = TRUE)
+                else NA
+            }, error = function(e) NA)
+
+            n_total <- tryCatch({
+                if (!is.null(model$n)) model$n
+                else if (!is.null(model$s)) length(model$s)
+                else nrow(private$cure_data)
+            }, error = function(e) nrow(private$cure_data))
+
+            smcure_type <- self$options$smcure_model_type %||% "ph"
+            smcure_type_label <- if (smcure_type == "ph") "Proportional Hazards" else "Accelerated Failure Time"
+
+            # Build CI text
+            ci_text <- if (!is.na(cure_ci_lower) && !is.na(cure_ci_upper)) {
+                paste0(" (95% CI: ", round(cure_ci_lower * 100, 1), "%-", round(cure_ci_upper * 100, 1), "%)")
+            } else {
+                " (CI not available; enable bootstrap for confidence intervals)"
+            }
+
+            summary_html <- paste0(
+                "<h3>Mixture Cure Model Results</h3>",
+                "<p><b>Estimated Cure Fraction:</b> ", round(cure_fraction * 100, 1), "%", ci_text, "</p>",
+                "<p><b>Survival Model Type:</b> ", smcure_type_label, "</p>",
+                "<p><b>Link Function:</b> ", self$options$cure_link %||% "logit", "</p>",
+                "<p><b>Sample Size:</b> ", n_total, "</p>",
+                "<p><b>Events:</b> ", n_events, "</p>",
+                "<p><b>Censored:</b> ", n_censored, "</p>",
+                "<h4>Interpretation:</h4>",
+                "<ul>",
+                "<li>Cure probability coefficients ($b) show factors associated with being cured</li>",
+                "<li>Positive cure coefficients increase cure probability (on ", self$options$cure_link %||% "logit", " scale)</li>",
+                "<li>Survival coefficients ($beta) apply only to the uncured fraction</li>",
+                "</ul>"
+            )
+
+            self$results$summary$setContent(summary_html)
+        },
+
+        # ============================================================
+        # FORMAT NON-MIXTURE CURE RESULTS (flexsurvcure)
+        # ============================================================
+        .formatNonMixtureCureResults = function(model) {
+
+            results_table <- self$results$modelTable
+
+            # FIX C4: Use model$res.t for parameter estimates
+            # model$res.t is a matrix with columns: est, L95%, U95%
+            # (and optionally se)
+            res_matrix <- model$res.t
+
+            if (!is.null(res_matrix) && nrow(res_matrix) > 0) {
+                param_names <- rownames(res_matrix)
+
+                for (i in seq_len(nrow(res_matrix))) {
+                    est_val <- res_matrix[i, "est"]
+                    ci_lo <- res_matrix[i, "L95%"]
+                    ci_hi <- res_matrix[i, "U95%"]
+                    # SE may or may not be present
+                    se_val <- if ("se" %in% colnames(res_matrix)) res_matrix[i, "se"] else NA_real_
+                    z_val <- if (!is.na(se_val) && se_val > 0) est_val / se_val else NA_real_
+                    p_val <- if (!is.na(z_val)) 2 * (1 - pnorm(abs(z_val))) else NA_real_
+
+                    results_table$addRow(rowKey = paste0("nm_", i), values = list(
+                        parameter = param_names[i],
+                        estimate = est_val,
+                        std_error = se_val,
+                        z_value = z_val,
+                        p_value = p_val,
+                        ci_lower = ci_lo,
+                        ci_upper = ci_hi
+                    ))
+                }
+            }
+
+            # Extract cure fraction from theta parameter
+            # In flexsurvcure, theta is the cure probability parameter
+            # For non-mixture (promotion time) models, theta is on the probability scale
+            cure_fraction <- NA_real_
+            cure_ci_lower <- NA_real_
+            cure_ci_upper <- NA_real_
+
+            if ("theta" %in% rownames(res_matrix)) {
+                theta_est <- res_matrix["theta", "est"]
+                theta_lo <- res_matrix["theta", "L95%"]
+                theta_hi <- res_matrix["theta", "U95%"]
+
+                # theta is on probability scale for flexsurvcure
+                cure_fraction <- theta_est
+                cure_ci_lower <- theta_lo
+                cure_ci_upper <- theta_hi
+            }
+
+            # Store for clinical interpretation
+            private$.cure_fraction <- cure_fraction
+            private$.cure_ci_lower <- cure_ci_lower
+            private$.cure_ci_upper <- cure_ci_upper
+            private$.cure_ci_method <- "Profile likelihood (flexsurvcure)"
+
+            # Populate cure table if we have a cure fraction
+            if (!is.na(cure_fraction)) {
+                cure_table <- self$results$cureTable
+                cure_table$addRow(rowKey = "overall", values = list(
+                    group = "Overall",
+                    cure_fraction = cure_fraction,
+                    cure_ci_lower = cure_ci_lower,
+                    cure_ci_upper = cure_ci_upper,
+                    uncured_median = NA_real_
+                ))
+            }
+
+            # Build summary
+            loglik_val <- tryCatch(model$loglik, error = function(e) NA)
+            aic_val <- tryCatch(model$AIC, error = function(e) NA)
+
+            cure_pct_text <- if (!is.na(cure_fraction)) {
+                paste0(round(cure_fraction * 100, 1), "%")
+            } else {
+                "See theta parameter in results table"
+            }
+
+            summary_html <- paste0(
+                "<h3>Non-Mixture Cure Model Results</h3>",
+                "<p><b>Distribution:</b> ", self$options$survival_dist %||% "weibull", "</p>",
+                if (!is.na(loglik_val)) paste0("<p><b>Log-likelihood:</b> ", round(loglik_val, 2), "</p>") else "",
+                if (!is.na(aic_val)) paste0("<p><b>AIC:</b> ", round(aic_val, 2), "</p>") else "",
+                "<p><b>Estimated Cure Fraction (theta):</b> ", cure_pct_text, "</p>",
+                "<h4>Model Description:</h4>",
+                "<p>Non-mixture (promotion time) cure models assume the entire population follows the same ",
+                "survival distribution with cure as a limiting probability as time approaches infinity. ",
+                "The theta parameter directly represents the cure probability.</p>"
+            )
+
+            self$results$summary$setContent(summary_html)
+        },
+
+        # ============================================================
+        # FORMAT cuRe RESULTS
+        # ============================================================
+        .formatCuReResults = function(model) {
+
+            model_summary <- tryCatch(summary(model), error = function(e) NULL)
+            results_table <- self$results$modelTable
+
+            if (!is.null(model_summary) && !is.null(model_summary$coef)) {
+                coef_matrix <- model_summary$coef
+
+                for (i in seq_len(nrow(coef_matrix))) {
+                    est_val <- coef_matrix[i, "Estimate"]
+                    std_err <- if ("Std. Error" %in% colnames(coef_matrix)) coef_matrix[i, "Std. Error"] else NA_real_
+                    z_val <- if (!is.na(std_err) && std_err > 0) est_val / std_err else NA_real_
+
+                    p_val <- if ("Pr(>|z|)" %in% colnames(coef_matrix)) {
+                        coef_matrix[i, "Pr(>|z|)"]
+                    } else if (!is.na(z_val)) {
+                        2 * (1 - pnorm(abs(z_val)))
+                    } else {
+                        NA_real_
+                    }
+
+                    ci_lo <- if (!is.na(std_err)) est_val - 1.96 * std_err else NA_real_
+                    ci_hi <- if (!is.na(std_err)) est_val + 1.96 * std_err else NA_real_
+
+                    results_table$addRow(rowKey = paste0("cure_", i), values = list(
+                        parameter = rownames(coef_matrix)[i],
+                        estimate = est_val,
+                        std_error = std_err,
+                        z_value = z_val,
+                        p_value = p_val,
+                        ci_lower = ci_lo,
+                        ci_upper = ci_hi
+                    ))
+                }
+            }
+
+            # Try to extract cure fraction from cuRe model
+            cure_fraction <- tryCatch({
+                if (!is.null(model$cure_fraction)) {
+                    model$cure_fraction
+                } else {
+                    NA_real_
+                }
+            }, error = function(e) NA_real_)
+
+            if (!is.na(cure_fraction)) {
+                private$.cure_fraction <- cure_fraction
+                private$.cure_ci_lower <- NA_real_
+                private$.cure_ci_upper <- NA_real_
+                private$.cure_ci_method <- "cuRe model estimate"
+
+                cure_table <- self$results$cureTable
+                cure_table$addRow(rowKey = "overall", values = list(
+                    group = "Overall",
+                    cure_fraction = cure_fraction,
+                    cure_ci_lower = NA_real_,
+                    cure_ci_upper = NA_real_,
+                    uncured_median = NA_real_
+                ))
+            }
+
+            background_note <- if ((self$options$use_background_mortality %||% FALSE) && !is.null(self$options$background_hazard_var)) {
                 paste0("<p><b>Background Mortality:</b> Included (variable: ", self$options$background_hazard_var, ")</p>")
             } else {
                 "<p><b>Background Mortality:</b> Not included</p>"
             }
 
-            summary_html <- glue::glue(
-                "<h3>cuRe Model Results</h3>
-                <p><b>Distribution:</b> {self$options$survival_dist %||% 'weibull'}</p>
-                <p><b>Link Function:</b> {self$options$cure_link %||% 'logit'}</p>
-                {background_note}
-                <p><b>Estimated Cure Fraction:</b> {cure_fraction}</p>
+            cure_fraction_text <- if (!is.na(cure_fraction)) {
+                round(cure_fraction, 3)
+            } else {
+                "See model coefficients"
+            }
 
-                <h4>Model Description:</h4>
-                <p>The cuRe model allows incorporation of background mortality rates from the general population.
-                This is particularly useful when analyzing cancer survival where patients may die from competing causes.</p>
-
-                <h4>Key Features:</h4>
-                <ul>
-                <li>Accounts for background population mortality</li>
-                <li>Separates excess hazard due to disease from background risk</li>
-                <li>Provides more accurate cure fraction estimates in aging populations</li>
-                </ul>"
+            summary_html <- paste0(
+                "<h3>cuRe Model Results</h3>",
+                "<p><b>Distribution:</b> ", self$options$survival_dist %||% "weibull", "</p>",
+                "<p><b>Link Function:</b> ", self$options$cure_link %||% "logit", "</p>",
+                background_note,
+                "<p><b>Estimated Cure Fraction:</b> ", cure_fraction_text, "</p>",
+                "<h4>Model Description:</h4>",
+                "<p>The cuRe model allows incorporation of background mortality rates from the general population. ",
+                "This is particularly useful when analyzing cancer survival where patients may die from competing causes.</p>",
+                "<h4>Key Features:</h4>",
+                "<ul>",
+                "<li>Accounts for background population mortality</li>",
+                "<li>Separates excess hazard due to disease from background risk</li>",
+                "<li>Provides more accurate cure fraction estimates in aging populations</li>",
+                "</ul>"
             )
 
             self$results$summary$setContent(summary_html)
         },
 
+        # ============================================================
+        # FORMAT NONPARAMETRIC CURE RESULTS (npcure)
+        # ============================================================
         .formatNpCureResults = function(model, covariate_name) {
 
-            # Create summary table for npcure results
             results_table <- self$results$modelTable
 
-            # npcure provides cure probability estimates across covariate values
-            if (!is.null(model$x)) {
-                # Extract cure probability estimates
-                cure_probs <- model$curerate
-                covariate_vals <- model$x
+            # npcure::probcure returns:
+            #   $q = cure probability estimates at x0 values
+            #   $x0 = covariate values where estimated
+            #   $h = bandwidth used
+            #   $conf = list with $lower and $upper confidence limits
 
-                # Add representative estimates to table
-                n_points <- min(10, length(cure_probs))  # Show up to 10 representative points
+            if (!is.null(model$q) && !is.null(model$x0)) {
+                cure_probs <- model$q
+                covariate_vals <- model$x0
+
+                # Show up to 10 representative points
+                n_points <- min(10, length(cure_probs))
                 indices <- round(seq(1, length(cure_probs), length.out = n_points))
 
                 for (i in seq_along(indices)) {
                     idx <- indices[i]
+                    ci_lo <- if (!is.null(model$conf) && !is.null(model$conf$lower)) model$conf$lower[idx] else NA_real_
+                    ci_hi <- if (!is.null(model$conf) && !is.null(model$conf$upper)) model$conf$upper[idx] else NA_real_
+
                     results_table$addRow(rowKey = paste0("npcure_", i), values = list(
                         parameter = paste0(covariate_name, " = ", round(covariate_vals[idx], 2)),
-                        estimate = round(cure_probs[idx], 4),
-                        std_error = NA,
-                        z_value = NA,
-                        p_value = NA,
-                        ci_lower = if (!is.null(model$lower)) round(model$lower[idx], 4) else NA,
-                        ci_upper = if (!is.null(model$upper)) round(model$upper[idx], 4) else NA
+                        estimate = cure_probs[idx],
+                        std_error = NA_real_,
+                        z_value = NA_real_,
+                        p_value = NA_real_,
+                        ci_lower = ci_lo,
+                        ci_upper = ci_hi
                     ))
                 }
+
+                # Store overall cure fraction as mean across covariate values
+                private$.cure_fraction <- mean(cure_probs, na.rm = TRUE)
+                private$.cure_ci_lower <- NA_real_
+                private$.cure_ci_upper <- NA_real_
+                private$.cure_ci_method <- "Nonparametric kernel smoothing"
             }
 
-            # Get bandwidth info
             bandwidth_info <- if (!is.null(model$h)) {
                 paste0("Bandwidth: ", round(model$h, 4))
             } else {
                 "Bandwidth: Automatic selection"
             }
 
-            # Generate summary
-            summary_html <- glue::glue(
-                "<h3>Nonparametric Cure Model Results (npcure)</h3>
-                <p><b>Covariate:</b> {covariate_name}</p>
-                <p><b>{bandwidth_info}</b></p>
-                <p><b>Number of Time Points:</b> {self$options$npcure_time_points %||% 100}</p>
-
-                <h4>Model Description:</h4>
-                <p>The nonparametric cure model estimates cure probability as a smooth function
-                of a continuous covariate without assuming a parametric form.</p>
-
-                <h4>Key Features:</h4>
-                <ul>
-                <li>No parametric assumptions about cure probability</li>
-                <li>Flexible estimation of cure rate across covariate values</li>
-                <li>Useful for exploratory analysis and model validation</li>
-                <li>Provides visual assessment of cure probability trends</li>
-                </ul>
-
-                <h4>Interpretation:</h4>
-                <p>The table shows estimated cure probabilities at representative values of the covariate.
-                Higher cure probabilities indicate greater likelihood of being in the 'cured' group at that covariate value.</p>"
+            summary_html <- paste0(
+                "<h3>Nonparametric Cure Model Results (npcure)</h3>",
+                "<p><b>Covariate:</b> ", covariate_name, "</p>",
+                "<p><b>", bandwidth_info, "</b></p>",
+                "<h4>Model Description:</h4>",
+                "<p>The nonparametric cure model estimates cure probability as a smooth function ",
+                "of a continuous covariate without assuming a parametric form.</p>",
+                "<h4>Interpretation:</h4>",
+                "<p>The table shows estimated cure probabilities at representative values of the covariate. ",
+                "Higher cure probabilities indicate greater likelihood of being in the 'cured' group at that covariate value.</p>"
             )
 
             self$results$summary$setContent(summary_html)
         },
 
-
-        .plotSurvivalCurves = function() {
-
-            if (is.null(private$cure_model) && is.null(private$nm_cure_model)) return()
-
-            image <- self$results$survivalPlot
-            model <- private$cure_model %||% private$nm_cure_model
-            image$setState(list(model = model))
-        },
-
-        .assessGoodnessOfFit = function() {
-
-            tryCatch({
-                # Perform goodness of fit tests
-                model <- private$cure_model %||% private$nm_cure_model
-
-                if (is.null(model)) return()
-
-                # Populate goodness of fit table
-                gof_table <- self$results$goodnessOfFit
-
-                # LIMITATION NOTICE: These are descriptive diagnostics, not formal hypothesis tests
-                gof_table$addRow(rowKey = "notice", values = list(
-                    test_name = " LIMITATIONS",
-                    statistic = NA,
-                    p_value = NA,
-                    interpretation = "These diagnostics are descriptive only. Formal goodness-of-fit tests for cure models are limited. Use clinical judgment."
-                ))
-
-                # Model information criteria (for model comparison, not absolute fit assessment)
-                if (inherits(model, c("smcure", "flexsurvcure"))) {
-                    aic_val <- tryCatch(model$AIC %||% AIC(model), error = function(e) NA)
-                    if (!is.na(aic_val)) {
-                        gof_table$addRow(rowKey = "aic", values = list(
-                            test_name = "AIC (for model comparison)",
-                            statistic = round(aic_val, 2),
-                            p_value = NA,
-                            interpretation = "Lower AIC suggests better fit among competing models. No absolute threshold."
-                        ))
-                    }
-                }
-
-                # Log-likelihood
-                if (inherits(model, c("smcure"))) {
-                    loglik_val <- model$loglik
-                    gof_table$addRow(rowKey = "loglik", values = list(
-                        test_name = "Log-likelihood",
-                        statistic = round(loglik_val, 2),
-                        p_value = NA,
-                        interpretation = "Higher values indicate better fit. Compare across models, not absolute assessment."
-                    ))
-                }
-
-                # Convergence diagnostics
-                converged <- TRUE
-                convergence_issues <- c()
-
-                # Check parameter estimates for unrealistic values
-                if (inherits(model, "smcure")) {
-                    if (!is.null(model$beta) && any(abs(model$beta) > 10)) {
-                        convergence_issues <- c(convergence_issues, "Large cure coefficients (>10) suggest convergence issues")
-                    }
-                    if (!is.null(model$b) && any(abs(model$b) > 10)) {
-                        convergence_issues <- c(convergence_issues, "Large survival coefficients (>10) suggest numerical instability")
-                    }
-                    # Check for degenerate cure fractions
-                    cure_frac <- tryCatch(plogis(model$beta[1]), error = function(e) NA)
-                    if (!is.na(cure_frac) && (cure_frac < 0.01 || cure_frac > 0.99)) {
-                        convergence_issues <- c(convergence_issues, paste0("Extreme cure fraction (", round(cure_frac*100, 1), "%) suggests model may not fit data"))
-                    }
-                }
-
-                converged <- length(convergence_issues) == 0
-
-                gof_table$addRow(rowKey = "convergence", values = list(
-                    test_name = "Convergence Check",
-                    statistic = ifelse(converged, 1, 0),
-                    p_value = NA,
-                    interpretation = ifelse(converged,
-                        " No obvious convergence issues detected",
-                        paste("", paste(convergence_issues, collapse = "; "))
-                    )
-                ))
-
-                # Sample size adequacy check
-                n_total <- ifelse(!is.null(private$cure_data), nrow(private$cure_data), NA)
-                n_events <- tryCatch({
-                    if (inherits(model, "smcure") && !is.null(model$s)) {
-                        sum(model$s == 1, na.rm = TRUE)
-                    } else {
-                        sum(self$data[[self$options$status]] == 1, na.rm = TRUE)
-                    }
-                }, error = function(e) NA)
-
-                if (!is.na(n_events) && !is.na(n_total)) {
-                    sample_adequacy <- ifelse(n_events >= 50 & n_total >= 200, " Adequate",
-                                            ifelse(n_events >= 20 & n_total >= 100, " Marginal", " Inadequate"))
-
-                    gof_table$addRow(rowKey = "sample_size", values = list(
-                        test_name = "Sample Size Adequacy",
-                        statistic = n_events,
-                        p_value = NA,
-                        interpretation = paste0(sample_adequacy, " (", n_events, " events / ", n_total, " total). Cure models need substantial events for stability.")
-                    ))
-                }
-
-                # Add disclaimer to summary
-                gof_html <- paste0(
-                    "<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
-                    "<h4 style='margin-top:0'> Goodness of Fit Limitations</h4>",
-                    "<p><strong>IMPORTANT:</strong> Cure models lack widely accepted formal goodness-of-fit tests. ",
-                    "The diagnostics above are descriptive only and should be interpreted with caution.</p>",
-                    "<p><strong>Recommendations:</strong></p>",
-                    "<ul>",
-                    "<li>Visually inspect Kaplan-Meier curves for evidence of plateau</li>",
-                    "<li>Use AIC/BIC only for comparing <em>competing</em> cure models, not for absolute fit</li>",
-                    "<li>Check that cure fraction estimate is clinically plausible</li>",
-                    "<li>Ensure adequate follow-up (>2x median event time)</li>",
-                    "<li>Consider consulting a statistician for complex cases</li>",
-                    "</ul>",
-                    "</div>"
-                )
-
-                current_summary <- self$results$summary$content
-                self$results$summary$setContent(paste0(current_summary, gof_html))
-
-            }, error = function(e) {
-                message("Goodness of fit assessment failed: ", e$message)
-            })
-        },
-
-        .performSensitivityAnalysis = function() {
-
-            tryCatch({
-                # LIMITATION: This is a simplified sensitivity check, not full model refitting
-                model <- private$cure_model
-                if (is.null(model)) {
-                    self$results$sensitivityAnalysis$setContent(
-                        "<h4>Sensitivity Analysis</h4><p>No model available for sensitivity analysis.</p>"
-                    )
-                    return()
-                }
-
-                # Extract cure fraction estimate
-                base_cure_fraction <- tryCatch(plogis(model$beta[1]), error = function(e) NA)
-
-                if (is.na(base_cure_fraction)) {
-                    self$results$sensitivityAnalysis$setContent(
-                        "<h4>Sensitivity Analysis</h4><p>Could not extract cure fraction from model.</p>"
-                    )
-                    return()
-                }
-
-                # Get bootstrap CI if available
-                bootstrap_ci <- self$options$bootstrap_ci %||% FALSE
-                has_bootstrap_ci <- !is.null(model$cureb.vcov) && bootstrap_ci
-
-                # Calculate approximate confidence bounds
-                if (has_bootstrap_ci) {
-                    cure_se <- tryCatch(sqrt(diag(model$cureb.vcov)[1]), error = function(e) NA)
-                    if (!is.na(cure_se)) {
-                        # Transform SE to probability scale
-                        logit_cf <- model$beta[1]
-                        ci_lower <- plogis(logit_cf - 1.96 * cure_se)
-                        ci_upper <- plogis(logit_cf + 1.96 * cure_se)
-                    } else {
-                        ci_lower <- max(0, base_cure_fraction - 0.1)
-                        ci_upper <- min(1, base_cure_fraction + 0.1)
-                    }
-                } else {
-                    # Approximate CI without bootstrap
-                    ci_lower <- max(0, base_cure_fraction - 0.1)
-                    ci_upper <- min(1, base_cure_fraction + 0.1)
-                }
-
-                # Assess variability
-                ci_range <- ci_upper - ci_lower
-                is_precise <- ci_range < 0.20  # 20 percentage points
-
-                sens_html <- paste0(
-                    "<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
-                    "<h4 style='margin-top:0'> Sensitivity Analysis Limitations</h4>",
-                    "<p><strong>IMPORTANT:</strong> This is a simplified assessment. For comprehensive sensitivity analysis, ",
-                    "models should be refitted with different assumptions (cure thresholds, distributions, covariates).</p>",
-                    "</div>",
-
-                    "<h4>Cure Fraction Estimate Variability</h4>",
-                    "<p><strong>Point estimate:</strong> ", round(base_cure_fraction * 100, 1), "%</p>",
-
-                    ifelse(has_bootstrap_ci,
-                        paste0("<p><strong>Bootstrap 95% CI:</strong> ", round(ci_lower * 100, 1), "% to ",
-                               round(ci_upper * 100, 1), "%</p>"),
-                        paste0("<p><strong>Approximate 95% CI:</strong> ", round(ci_lower * 100, 1), "% to ",
-                               round(ci_upper * 100, 1), "% <em>(bootstrap CI recommended for precision)</em></p>")
-                    ),
-
-                    "<p><strong>CI width:</strong> ", round(ci_range * 100, 1), " percentage points ",
-                    ifelse(is_precise, "( Relatively precise)", "( Wide - consider more data or bootstrap)"), "</p>",
-
-                    "<h4>Recommendations for Robust Sensitivity Analysis</h4>",
-                    "<ul>",
-                    "<li><strong>Enable bootstrap CI</strong> (", ifelse(has_bootstrap_ci, " Already enabled", " Not enabled"),
-                    ") for more accurate uncertainty quantification</li>",
-                    "<li><strong>Try different cure thresholds:</strong> Rerun analysis with different 'Cure Threshold Time' values ",
-                    "(e.g., 48, 60, 72 months) to see if estimates remain stable</li>",
-                    "<li><strong>Compare distributions:</strong> Try both Weibull and log-normal to assess distributional assumptions</li>",
-                    "<li><strong>Model comparison:</strong> Use 'Compare All Models' option to see if mixture vs non-mixture gives similar results</li>",
-                    "<li><strong>Covariate sensitivity:</strong> If you have predictors, try models with/without them</li>",
-                    "</ul>",
-
-                    "<p><strong>Interpretation:</strong> If estimates remain similar across these variations, results are more robust. ",
-                    "Large changes suggest sensitivity to modeling assumptions.</p>"
-                )
-
-                # Update sensitivity analysis output
-                self$results$sensitivityAnalysis$setContent(sens_html)
-
-            }, error = function(e) {
-                message("Sensitivity analysis failed: ", e$message)
-            })
-        },
-
+        # ============================================================
+        # PLOT: Cure Fraction
+        # ============================================================
         .plotCureFraction = function() {
-
-            if (is.null(private$cure_model)) return()
+            if (is.null(private$cure_model) && is.null(private$nm_cure_model) &&
+                is.null(private$cure_cure_model) && is.null(private$npcure_model)) return()
 
             image <- self$results$cureFractionPlot
-            image$setState(list(model = private$cure_model))
 
-            # Plot will be rendered in .render function
+            # Store state as plain data.frame to avoid protobuf serialization issues
+            cure_frac <- private$.cure_fraction
+            if (is.null(cure_frac) || is.na(cure_frac)) cure_frac <- NA_real_
+
+            image$setState(as.data.frame(list(
+                cure_fraction = cure_frac,
+                ci_lower = private$.cure_ci_lower %||% NA_real_,
+                ci_upper = private$.cure_ci_upper %||% NA_real_
+            )))
         },
 
-        .renderCureFractionPlot = function(image, ...) {
+        .renderCureFractionPlot = function(image, ggtheme, theme, ...) {
 
-            if (is.null(private$cure_model)) return()
+            state <- image$state
+            if (is.null(state)) return(FALSE)
 
-            # Create cure fraction plot
+            cure_fraction <- state$cure_fraction[1]
+            if (is.na(cure_fraction) || cure_fraction < 0 || cure_fraction > 1) return(FALSE)
+
             tryCatch({
                 library(ggplot2)
 
-                # Extract model data
-                model <- private$cure_model
-
-                # Try to extract actual cure fraction from model
-                # smcure models typically store cure probability in $uncureprob or can be calculated
-                cure_fraction <- tryCatch({
-                    if (!is.null(model$uncureprob)) {
-                        # Use average uncure probability to get cure fraction
-                        1 - mean(model$uncureprob, na.rm = TRUE)
-                    } else if (!is.null(model$pi)) {
-                        # Some models store cure fraction directly
-                        mean(model$pi, na.rm = TRUE)
-                    } else {
-                        # Fallback: extract from coefficients if intercept-only model
-                        if (!is.null(model$beta) && length(model$beta) >= 1) {
-                            # Logit transform of intercept gives cure probability
-                            plogis(model$beta[1])
-                        } else {
-                            NA  # Cannot extract, will use fallback
-                        }
-                    }
-                }, error = function(e) NA)
-
-                # Use default if extraction failed
-                if (is.na(cure_fraction) || cure_fraction < 0 || cure_fraction > 1) {
-                    cure_fraction <- 0.3  # Fallback value
-                    caption_text <- "Based on mixture cure model (using default estimate)"
-                } else {
-                    caption_text <- "Based on mixture cure model (estimated from data)"
-                }
-
-                # Create simple cure fraction visualization
                 data_plot <- data.frame(
-                    Group = c("Cured", "Not Cured"),
+                    Group = factor(c("Cured", "Not Cured"), levels = c("Cured", "Not Cured")),
                     Fraction = c(cure_fraction, 1 - cure_fraction)
                 )
 
                 p <- ggplot(data_plot, aes(x = Group, y = Fraction, fill = Group)) +
                     geom_bar(stat = "identity", alpha = 0.8) +
                     scale_fill_manual(values = c("Cured" = "#2E8B57", "Not Cured" = "#CD5C5C")) +
+                    scale_y_continuous(limits = c(0, 1), labels = scales::percent_format()) +
                     labs(
                         title = "Estimated Cure Fractions",
+                        subtitle = paste0("Cure: ", round(cure_fraction * 100, 1), "%"),
                         x = "Population Group",
-                        y = "Proportion",
-                        caption = caption_text
+                        y = "Proportion"
                     ) +
-                    theme_classic() +
+                    ggtheme +
                     theme(legend.position = "none")
+
+                # Add CI error bars if available
+                ci_lo <- state$ci_lower[1]
+                ci_hi <- state$ci_upper[1]
+                if (!is.na(ci_lo) && !is.na(ci_hi)) {
+                    error_data <- data.frame(
+                        Group = factor("Cured", levels = c("Cured", "Not Cured")),
+                        Fraction = cure_fraction,
+                        ci_lower = ci_lo,
+                        ci_upper = ci_hi
+                    )
+                    p <- p + geom_errorbar(data = error_data,
+                        aes(ymin = ci_lower, ymax = ci_upper),
+                        width = 0.2, linewidth = 0.8)
+                }
 
                 print(p)
                 TRUE
 
-            }, error = function(e) {
-                # Fallback plot with generic values
-                plot(1:2, c(0.3, 0.7), type = "h", lwd = 10,
-                     main = "Cure Fractions", xlab = "Group", ylab = "Proportion",
-                     xaxt = "n", ylim = c(0, 1))
-                axis(1, at = 1:2, labels = c("Cured", "Not Cured"))
-                mtext("Note: Using default estimates", side = 1, line = 3, cex = 0.8)
-                TRUE
-            })
+            }, error = function(e) FALSE)
         },
 
-        .plotSurvival = function(image, ...) {
+        # ============================================================
+        # PLOT: Survival Curves
+        # ============================================================
+        .plotSurvival = function(image, ggtheme, theme, ...) {
 
-            if (is.null(private$cure_model) && is.null(private$nm_cure_model)) return()
+            if (is.null(private$cure_data)) return(FALSE)
 
-            # Create survival curves plot
             tryCatch({
                 library(ggplot2)
                 library(survival)
 
-                # Get original data
-                data <- self$data
+                data <- private$cure_data
                 time_var <- self$options$time
                 status_var <- self$options$status
 
-                # Create Kaplan-Meier curve with safe formula construction
-                escaped_time <- private$.escapeVar(time_var)
-                escaped_status <- private$.escapeVar(status_var)
+                escaped_time <- jmvcore::composeTerm(time_var)
+                escaped_status <- jmvcore::composeTerm(status_var)
                 surv_formula <- as.formula(paste0("Surv(", escaped_time, ", ", escaped_status, ") ~ 1"))
                 km_fit <- survfit(surv_formula, data = data)
 
-                # Create survival data frame
                 surv_data <- data.frame(
                     time = km_fit$time,
                     survival = km_fit$surv,
@@ -1329,168 +1191,376 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     upper = km_fit$upper
                 )
 
-                # Try to extract cure fraction for plateau
-                cure_fraction <- tryCatch({
-                    model <- private$cure_model
-                    if (!is.null(model$uncureprob)) {
-                        1 - mean(model$uncureprob, na.rm = TRUE)
-                    } else if (!is.null(model$pi)) {
-                        mean(model$pi, na.rm = TRUE)
-                    } else if (!is.null(model$beta) && length(model$beta) >= 1) {
-                        plogis(model$beta[1])
-                    } else {
-                        0.3  # Fallback
-                    }
-                }, error = function(e) 0.3)
-
-                # Ensure valid range
-                if (is.na(cure_fraction) || cure_fraction < 0 || cure_fraction > 1) {
-                    cure_fraction <- 0.3
-                    caption_suffix <- " (using default cure fraction)"
-                } else {
-                    caption_suffix <- " (estimated from model)"
+                cure_fraction <- private$.cure_fraction
+                if (is.null(cure_fraction) || is.na(cure_fraction)) {
+                    cure_fraction <- NULL
                 }
 
-                # Add simplified cure model prediction
-                # Note: This is a simplified visualization; actual predictions would require
-                # the full model parameter estimates and covariate values
-                cure_model_surv <- exp(-0.1 * surv_data$time) * (1 - cure_fraction) + cure_fraction
-                surv_data$cure_model <- pmax(cure_model_surv, cure_fraction)  # Plateau at cure fraction
-
                 p <- ggplot(surv_data) +
-                    geom_step(aes(x = time, y = survival), color = "black", size = 1, alpha = 0.8) +
+                    geom_step(aes(x = time, y = survival), color = "black", linewidth = 1, alpha = 0.8) +
                     geom_ribbon(aes(x = time, ymin = lower, ymax = upper), alpha = 0.2) +
-                    geom_line(aes(x = time, y = cure_model), color = "red", size = 1, linetype = "dashed") +
                     scale_y_continuous(limits = c(0, 1)) +
                     labs(
-                        title = "Survival Curves: Kaplan-Meier vs Cure Model",
+                        title = "Survival Curve with Cure Model Plateau",
                         x = "Time",
-                        y = "Survival Probability",
-                        caption = paste0("Black: Kaplan-Meier, Red: Simplified cure model", caption_suffix)
+                        y = "Survival Probability"
                     ) +
-                    theme_classic()
+                    ggtheme
+
+                # Add cure fraction plateau line if available
+                if (!is.null(cure_fraction) && cure_fraction > 0 && cure_fraction < 1) {
+                    p <- p +
+                        geom_hline(yintercept = cure_fraction, color = "red",
+                                   linetype = "dashed", linewidth = 1) +
+                        annotate("text", x = max(surv_data$time) * 0.7, y = cure_fraction + 0.04,
+                                 label = paste0("Cure fraction: ", round(cure_fraction * 100, 1), "%"),
+                                 color = "red", size = 3.5)
+                }
 
                 print(p)
                 TRUE
 
+            }, error = function(e) FALSE)
+        },
+
+        # ============================================================
+        # GOODNESS OF FIT
+        # ============================================================
+        .assessGoodnessOfFit = function() {
+
+            tryCatch({
+                model <- private$cure_model %||% private$nm_cure_model %||% private$cure_cure_model
+
+                if (is.null(model)) return()
+
+                gof_table <- self$results$goodnessOfFit
+
+                gof_table$addRow(rowKey = "notice", values = list(
+                    test_name = "LIMITATIONS",
+                    statistic = NA,
+                    p_value = NA,
+                    interpretation = "These diagnostics are descriptive only. Formal goodness-of-fit tests for cure models are limited."
+                ))
+
+                # AIC: only available from flexsurvcure, NOT from smcure
+                if (inherits(model, "flexsurvcure")) {
+                    aic_val <- tryCatch(model$AIC, error = function(e) NA)
+                    if (!is.na(aic_val)) {
+                        gof_table$addRow(rowKey = "aic", values = list(
+                            test_name = "AIC (for model comparison)",
+                            statistic = round(aic_val, 2),
+                            p_value = NA,
+                            interpretation = "Lower AIC suggests better fit among competing models."
+                        ))
+                    }
+
+                    loglik_val <- tryCatch(model$loglik, error = function(e) NA)
+                    if (!is.na(loglik_val)) {
+                        gof_table$addRow(rowKey = "loglik", values = list(
+                            test_name = "Log-likelihood",
+                            statistic = round(loglik_val, 2),
+                            p_value = NA,
+                            interpretation = "Higher values indicate better fit. Compare across models."
+                        ))
+                    }
+                }
+
+                # smcure does NOT provide loglik or AIC - note this clearly
+                if (inherits(model, "smcure")) {
+                    gof_table$addRow(rowKey = "smcure_note", values = list(
+                        test_name = "Note: smcure model",
+                        statistic = NA,
+                        p_value = NA,
+                        interpretation = "smcure does not provide AIC/BIC or log-likelihood. Use non-mixture (flexsurvcure) for information criteria."
+                    ))
+                }
+
+                # Convergence diagnostics for smcure
+                if (inherits(model, "smcure")) {
+                    convergence_issues <- c()
+
+                    # FIX C2: $b = cure, $beta = survival
+                    if (!is.null(model$b) && any(abs(model$b) > 10)) {
+                        convergence_issues <- c(convergence_issues, "Large cure coefficients (>10) suggest convergence issues")
+                    }
+                    if (!is.null(model$beta) && any(abs(model$beta) > 10)) {
+                        convergence_issues <- c(convergence_issues, "Large survival coefficients (>10) suggest numerical instability")
+                    }
+
+                    cure_frac <- tryCatch(plogis(model$b[1]), error = function(e) NA)
+                    if (!is.na(cure_frac) && (cure_frac < 0.01 || cure_frac > 0.99)) {
+                        convergence_issues <- c(convergence_issues,
+                            paste0("Extreme cure fraction (", round(cure_frac * 100, 1), "%) suggests model may not fit well"))
+                    }
+
+                    converged <- length(convergence_issues) == 0
+
+                    gof_table$addRow(rowKey = "convergence", values = list(
+                        test_name = "Convergence Check",
+                        statistic = if (converged) 1 else 0,
+                        p_value = NA,
+                        interpretation = if (converged) "No obvious convergence issues detected"
+                                        else paste(convergence_issues, collapse = "; ")
+                    ))
+                }
+
+                # Sample size adequacy
+                n_total <- if (!is.null(private$cure_data)) nrow(private$cure_data) else NA
+                n_events <- tryCatch({
+                    status_col <- private$cure_data[[self$options$status]]
+                    if (is.factor(status_col)) {
+                        sum(as.numeric(status_col) == 2, na.rm = TRUE)
+                    } else {
+                        sum(status_col == 1, na.rm = TRUE)
+                    }
+                }, error = function(e) NA)
+
+                if (!is.na(n_events) && !is.na(n_total)) {
+                    adequacy <- if (n_events >= 50 && n_total >= 200) "Adequate"
+                               else if (n_events >= 20 && n_total >= 100) "Marginal"
+                               else "Inadequate"
+
+                    gof_table$addRow(rowKey = "sample_size", values = list(
+                        test_name = "Sample Size Adequacy",
+                        statistic = n_events,
+                        p_value = NA,
+                        interpretation = paste0(adequacy, " (", n_events, " events / ", n_total, " total)")
+                    ))
+                }
+
             }, error = function(e) {
-                # Fallback plot
-                plot(1:100, exp(-0.05 * 1:100), type = "l", lwd = 2,
-                     main = "Survival Curves", xlab = "Time", ylab = "Survival Probability",
-                     ylim = c(0, 1))
-                abline(h = 0.3, col = "red", lty = 2, lwd = 2)
-                legend("topright", c("Standard", "Cure plateau"),
-                       col = c("black", "red"), lty = c(1, 2))
-                TRUE
+                private$.addNotice(
+                    type = "WARNING",
+                    title = "Goodness of Fit",
+                    content = paste0("Assessment failed: ", e$message)
+                )
             })
         },
 
+        # ============================================================
+        # SENSITIVITY ANALYSIS
+        # ============================================================
+        .performSensitivityAnalysis = function() {
+
+            tryCatch({
+                cure_fraction <- private$.cure_fraction
+
+                if (is.null(cure_fraction) || is.na(cure_fraction)) {
+                    self$results$sensitivityAnalysis$setContent(
+                        "<h4>Sensitivity Analysis</h4><p>No cure fraction estimate available for sensitivity analysis.</p>"
+                    )
+                    return()
+                }
+
+                ci_lower <- private$.cure_ci_lower
+                ci_upper <- private$.cure_ci_upper
+                ci_method <- private$.cure_ci_method %||% "Not specified"
+                has_ci <- !is.null(ci_lower) && !is.na(ci_lower) && !is.null(ci_upper) && !is.na(ci_upper)
+
+                if (has_ci) {
+                    ci_range <- ci_upper - ci_lower
+                    is_precise <- ci_range < 0.20
+                } else {
+                    ci_range <- NA
+                    is_precise <- NA
+                }
+
+                sens_html <- paste0(
+                    "<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
+                    "<h4 style='margin-top:0'>Sensitivity Analysis Limitations</h4>",
+                    "<p><strong>IMPORTANT:</strong> This is a simplified assessment. For comprehensive sensitivity analysis, ",
+                    "models should be refitted with different assumptions (cure thresholds, distributions, covariates).</p>",
+                    "</div>",
+
+                    "<h4>Cure Fraction Estimate Variability</h4>",
+                    "<p><strong>Point estimate:</strong> ", round(cure_fraction * 100, 1), "%</p>",
+                    "<p><strong>CI method:</strong> ", ci_method, "</p>"
+                )
+
+                if (has_ci) {
+                    sens_html <- paste0(sens_html,
+                        "<p><strong>95% CI:</strong> ", round(ci_lower * 100, 1), "% to ",
+                        round(ci_upper * 100, 1), "%</p>",
+                        "<p><strong>CI width:</strong> ", round(ci_range * 100, 1), " percentage points ",
+                        if (is_precise) "(Relatively precise)" else "(Wide -- consider more data or bootstrap)", "</p>"
+                    )
+                } else {
+                    sens_html <- paste0(sens_html,
+                        "<p><strong>95% CI:</strong> Not available. Enable bootstrap confidence intervals for uncertainty quantification.</p>"
+                    )
+                }
+
+                sens_html <- paste0(sens_html,
+                    "<h4>Recommendations for Robust Sensitivity Analysis</h4>",
+                    "<ul>",
+                    "<li><strong>Enable bootstrap CI</strong> for accurate uncertainty quantification</li>",
+                    "<li><strong>Try different cure thresholds:</strong> Rerun with different 'Cure Threshold Time' values (e.g., 48, 60, 72 months)</li>",
+                    "<li><strong>Compare distributions:</strong> Try Weibull and log-normal to assess distributional assumptions</li>",
+                    "<li><strong>Model comparison:</strong> Use 'Compare All Models' to compare mixture vs non-mixture results</li>",
+                    "<li><strong>Survival model type:</strong> For smcure, compare PH vs AFT model types</li>",
+                    "</ul>"
+                )
+
+                self$results$sensitivityAnalysis$setContent(sens_html)
+
+            }, error = function(e) {
+                self$results$sensitivityAnalysis$setContent(
+                    paste0("<h4>Sensitivity Analysis</h4><p>Failed: ", e$message, "</p>")
+                )
+            })
+        },
+
+        # ============================================================
+        # MODEL COMPARISON
+        # ============================================================
         .compareModels = function() {
 
             tryCatch({
-                # Compare mixture and non-mixture models
                 mixture_model <- private$cure_model
                 nm_model <- private$nm_cure_model
 
-                if (is.null(mixture_model) || is.null(nm_model)) return()
-
-                # Populate model comparison table
                 comp_table <- self$results$modelComparison
 
-                # Mixture model statistics
-                mixture_aic <- mixture_model$AIC %||% AIC(mixture_model)
-                mixture_loglik <- mixture_model$loglik
+                # flexsurvcure provides AIC/BIC/loglik
+                if (!is.null(nm_model) && inherits(nm_model, "flexsurvcure")) {
+                    nm_aic <- tryCatch(nm_model$AIC, error = function(e) NA)
+                    nm_loglik <- tryCatch(as.numeric(logLik(nm_model)), error = function(e) NA)
+                    nm_bic <- tryCatch(BIC(nm_model), error = function(e) NA)
 
-                comp_table$addRow(rowKey = "mixture", values = list(
-                    model = "Mixture Cure Model",
-                    aic = round(mixture_aic, 2),
-                    bic = round(mixture_aic + log(mixture_model$n) * length(mixture_model$beta), 2),  # Approximate BIC
-                    loglik = round(mixture_loglik, 2)
-                ))
+                    comp_table$addRow(rowKey = "nonmixture", values = list(
+                        model = "Non-mixture Cure Model (flexsurvcure)",
+                        aic = if (!is.na(nm_aic)) round(nm_aic, 2) else NA,
+                        bic = if (!is.na(nm_bic)) round(nm_bic, 2) else NA,
+                        loglik = if (!is.na(nm_loglik)) round(nm_loglik, 2) else NA
+                    ))
+                }
 
-                # Non-mixture model statistics
-                nm_aic <- nm_model$AIC %||% AIC(nm_model)
-                nm_loglik <- logLik(nm_model)
+                # smcure does NOT provide AIC/BIC -- be honest about this
+                if (!is.null(mixture_model) && inherits(mixture_model, "smcure")) {
+                    comp_table$addRow(rowKey = "mixture", values = list(
+                        model = "Mixture Cure Model (smcure)",
+                        aic = NA,
+                        bic = NA,
+                        loglik = NA
+                    ))
+                }
 
-                comp_table$addRow(rowKey = "nonmixture", values = list(
-                    model = "Non-mixture Cure Model",
-                    aic = round(nm_aic, 2),
-                    bic = round(BIC(nm_model), 2),
-                    loglik = round(as.numeric(nm_loglik), 2)
-                ))
+                # cuRe model
+                cure_model <- private$cure_cure_model
+                if (!is.null(cure_model)) {
+                    cure_aic <- tryCatch(AIC(cure_model), error = function(e) NA)
+                    cure_loglik <- tryCatch(as.numeric(logLik(cure_model)), error = function(e) NA)
+                    cure_bic <- tryCatch(BIC(cure_model), error = function(e) NA)
 
-                # Add interpretation
-                better_model <- ifelse(mixture_aic < nm_aic, "Mixture", "Non-mixture")
-                interp_html <- glue::glue(
-                    "<h4>Model Comparison</h4>
-                    <p><b>Recommended Model:</b> {better_model} cure model (lower AIC)</p>
-                    <p><b>AIC Difference:</b> {round(abs(mixture_aic - nm_aic), 2)}</p>
-                    <p>Choose the model with lower AIC for better balance of fit and complexity.</p>"
+                    comp_table$addRow(rowKey = "cure", values = list(
+                        model = "cuRe Model",
+                        aic = if (!is.na(cure_aic)) round(cure_aic, 2) else NA,
+                        bic = if (!is.na(cure_bic)) round(cure_bic, 2) else NA,
+                        loglik = if (!is.na(cure_loglik)) round(cure_loglik, 2) else NA
+                    ))
+                }
+
+                # npcure doesn't provide information criteria
+                if (!is.null(private$npcure_model)) {
+                    comp_table$addRow(rowKey = "npcure", values = list(
+                        model = "Nonparametric (npcure)",
+                        aic = NA,
+                        bic = NA,
+                        loglik = NA
+                    ))
+                }
+
+                # Add interpretation noting limitations
+                interp_html <- paste0(
+                    "<h4>Model Comparison</h4>",
+                    "<p><strong>Note:</strong> smcure and npcure do not provide information criteria (AIC/BIC). ",
+                    "Direct comparison is only possible between flexsurvcure and cuRe models.</p>",
+                    "<p>For comparing mixture (smcure) vs non-mixture (flexsurvcure), consider ",
+                    "clinical plausibility and visual assessment of survival curves in addition to statistical criteria.</p>"
                 )
 
                 self$results$interpretation$setContent(interp_html)
 
             }, error = function(e) {
-                message("Model comparison failed: ", e$message)
+                private$.addNotice(
+                    type = "WARNING",
+                    title = "Model Comparison",
+                    content = paste0("Comparison failed: ", e$message)
+                )
             })
         },
 
+        # ============================================================
+        # CLINICAL INTERPRETATION
+        # ============================================================
         .generateClinicalInterpretation = function() {
 
             tryCatch({
-                # Generate comprehensive clinical interpretation
-                model <- private$cure_model %||% private$nm_cure_model
+                cure_fraction <- private$.cure_fraction
 
-                if (is.null(model)) return()
+                if (is.null(cure_fraction) || is.na(cure_fraction)) return()
 
-                # Extract key findings
-                if (!is.null(private$cure_model)) {
-                    cure_fraction <- 1 / (1 + exp(-private$cure_model$beta[1]))
-                    model_type_text <- "mixture cure model"
-                } else {
-                    cure_fraction <- 0.3  # Placeholder for non-mixture
-                    model_type_text <- "non-mixture cure model"
-                }
-
-                # Clinical significance assessment
-                if (cure_fraction > 0.5) {
-                    clinical_significance <- "high proportion of patients may achieve cure"
-                } else if (cure_fraction > 0.2) {
-                    clinical_significance <- "moderate proportion of patients may achieve cure"
-                } else {
-                    clinical_significance <- "small proportion of patients may achieve cure"
-                }
-
-                # Generate comprehensive interpretation
-                interp_html <- glue::glue(
-                    "<h4>Clinical Interpretation</h4>
-                    <p><b>Model Type:</b> {stringr::str_to_title(model_type_text)}</p>
-                    <p><b>Estimated Cure Fraction:</b> {round(cure_fraction * 100, 1)}% (95% CI: {round((cure_fraction - 0.05) * 100, 1)}%-{round((cure_fraction + 0.05) * 100, 1)}%)</p>
-
-                    <h5>Clinical Implications:</h5>
-                    <ul>
-                    <li><b>Population Impact:</b> The analysis suggests that a {clinical_significance}</li>
-                    <li><b>Treatment Strategy:</b> Long-term follow-up protocols should account for the cured fraction</li>
-                    <li><b>Prognosis:</b> Patients surviving beyond the cure threshold have substantially different risk profiles</li>
-                    </ul>
-
-                    <h5>Statistical Considerations:</h5>
-                    <ul>
-                    <li><b>Model Assumptions:</b> Cure models assume a plateau in survival probability</li>
-                    <li><b>Follow-up Requirements:</b> Adequate long-term follow-up is essential for valid cure fraction estimation</li>
-                    <li><b>Validation:</b> Consider external validation in similar patient populations</li>
-                    </ul>
-
-                    <h5>Recommendations:</h5>
-                    <ul>
-                    <li>Monitor cure fraction estimates with longer follow-up</li>
-                    <li>Consider patient-specific factors that may influence cure probability</li>
-                    <li>Validate findings in independent datasets when possible</li>
-                    </ul>"
+                # Determine model type text
+                model_type <- self$options$model_type %||% "mixture"
+                model_type_text <- switch(model_type,
+                    "mixture" = "mixture cure model (smcure)",
+                    "nonmixture" = "non-mixture cure model (flexsurvcure)",
+                    "cure" = "cuRe model (with background mortality)",
+                    "npcure" = "nonparametric cure model (npcure)",
+                    "all" = "multiple cure models",
+                    model_type
                 )
 
-                # Add to interpretation output if not already populated by model comparison
-                current_content <- self$results$interpretation$content
+                # Clinical significance
+                clinical_significance <- if (cure_fraction > 0.5) {
+                    "high proportion of patients may achieve cure"
+                } else if (cure_fraction > 0.2) {
+                    "moderate proportion of patients may achieve cure"
+                } else {
+                    "small proportion of patients may achieve cure"
+                }
+
+                # Build CI text from actual computed values
+                ci_lower <- private$.cure_ci_lower
+                ci_upper <- private$.cure_ci_upper
+                ci_method <- private$.cure_ci_method
+
+                if (!is.null(ci_lower) && !is.na(ci_lower) && !is.null(ci_upper) && !is.na(ci_upper)) {
+                    ci_text <- paste0(round(ci_lower * 100, 1), "%-", round(ci_upper * 100, 1), "%")
+                    ci_note <- paste0(" (95% CI: ", ci_text, "; method: ", ci_method %||% "unspecified", ")")
+                } else {
+                    ci_note <- " (95% CI not available; enable bootstrap for confidence intervals)"
+                }
+
+                interp_html <- paste0(
+                    "<h4>Clinical Interpretation</h4>",
+                    "<p><b>Model Type:</b> ", model_type_text, "</p>",
+                    "<p><b>Estimated Cure Fraction:</b> ", round(cure_fraction * 100, 1), "%", ci_note, "</p>",
+
+                    "<h5>Clinical Implications:</h5>",
+                    "<ul>",
+                    "<li><b>Population Impact:</b> The analysis suggests that a ", clinical_significance, "</li>",
+                    "<li><b>Treatment Strategy:</b> Long-term follow-up protocols should account for the cured fraction</li>",
+                    "<li><b>Prognosis:</b> Patients surviving beyond the cure threshold have substantially different risk profiles</li>",
+                    "</ul>",
+
+                    "<h5>Statistical Considerations:</h5>",
+                    "<ul>",
+                    "<li><b>Model Assumptions:</b> Cure models assume a plateau in survival probability</li>",
+                    "<li><b>Follow-up Requirements:</b> Adequate long-term follow-up is essential for valid cure fraction estimation</li>",
+                    "<li><b>Validation:</b> Consider external validation in similar patient populations</li>",
+                    "</ul>",
+
+                    "<h5>Recommendations:</h5>",
+                    "<ul>",
+                    "<li>Monitor cure fraction estimates with longer follow-up</li>",
+                    "<li>Consider patient-specific factors that may influence cure probability</li>",
+                    "<li>Validate findings in independent datasets when possible</li>",
+                    "</ul>"
+                )
+
+                # Append to interpretation (don't overwrite if model comparison already set content)
+                current_content <- tryCatch(self$results$interpretation$content, error = function(e) "")
                 if (is.null(current_content) || current_content == "") {
                     self$results$interpretation$setContent(interp_html)
                 } else {
@@ -1498,7 +1568,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
             }, error = function(e) {
-                message("Clinical interpretation failed: ", e$message)
+                # Silently fail - clinical interpretation is supplementary
             })
         }
     )

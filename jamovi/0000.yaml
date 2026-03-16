@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.37.01
+version: 0.0.37.02
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -2424,7 +2424,7 @@ analyses:
     name: relativesurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalT
     menuSubgroup: Advanced Survival
     menuTitle: Relative Survival Analysis
     menuSubtitle: Population-Based Survival Comparison

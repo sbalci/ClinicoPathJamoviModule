@@ -40,6 +40,8 @@ grouplasso(
   plot_group_importance = TRUE,
   plot_stability = FALSE,
   plot_group_structure = FALSE,
+  showSummary = FALSE,
+  showExplanations = FALSE,
   standardize = TRUE,
   adaptive_weights_method = "ridge",
   random_seed = 123
@@ -166,6 +168,12 @@ selection frequencies across subsamples.}
 \item{plot_group_structure}{Visualize group structure and variable
 assignments.}
 
+\item{showSummary}{Display a plain-language summary paragraph of the
+analysis results, suitable for pasting into reports or tumor board notes.}
+
+\item{showExplanations}{Display an educational panel explaining what Group
+LASSO does, when to use it, assumptions, and how to interpret the outputs.}
+
 \item{standardize}{Standardize variables before fitting. Recommended for
 optimal penalty performance across different variable scales.}
 
@@ -197,6 +205,8 @@ A results object containing:
 \code{results$importancePlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$stabilityPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$groupStructurePlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
+\code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

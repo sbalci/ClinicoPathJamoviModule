@@ -1,64 +1,68 @@
+# ===============================================================
+# Core Tests: pcacox (Principal Component Cox)
+# ===============================================================
 
-test_that('pcacox analysis works', {
-  skip_if_not_installed('jmvReadWrite')
+library(testthat)
 
-  # Synthetic data generation
-  set.seed(123)
-  n <- 50
-  data <- data.frame(
-    time = runif(n, 1, 100),
-    status = sample(c('A', 'B'), n, replace = TRUE),
-    predictors1 = runif(n, 1, 100),
-    predictors2 = runif(n, 1, 100),
-    predictors3 = runif(n, 1, 100),
-    clinical_vars1 = sample(c('A', 'B'), n, replace = TRUE),
-    clinical_vars2 = sample(c('A', 'B'), n, replace = TRUE),
-    clinical_vars3 = sample(c('A', 'B'), n, replace = TRUE)
+# Helper for common options
+pca_opts <- function(...) {
+  defaults <- list(
+    time = "time", status = "status",
+    outcomeLevel = "Dead", censorLevel = "Alive",
+    predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                   "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+    clinical_vars = NULL,
+    pca_method = "standard", n_components = 3,
+    component_selection = "fixed",
+    suitabilityCheck = FALSE,
+    plot_scree = FALSE, plot_loadings = FALSE,
+    plot_biplot = FALSE, plot_survival = FALSE,
+    bootstrap_validation = FALSE, permutation_test = FALSE,
+    show_model_comparison = FALSE, pathway_analysis = FALSE
   )
+  do.call(pcacoxOptions$new, modifyList(defaults, list(...)))
+}
 
-  # Run analysis
-  expect_no_error({
-    model <- pcacox(
-      data = data,
-    time = 'time',
-    status = 'status',
-    predictors = c('predictors1', 'predictors2', 'predictors3'),
-    clinical_vars = c('clinical_vars1', 'clinical_vars2', 'clinical_vars3'),
-    pca_method = 'supervised',
-    n_components = 5,
-    component_selection = 'cv',
-    cv_folds = 10,
-    variance_threshold = 0.8,
-    scaling = TRUE,
-    centering = TRUE,
-    survival_weighting = TRUE,
-    permutation_test = FALSE,
-    n_permutations = 100,
-    bootstrap_validation = TRUE,
-    n_bootstrap = 100,
-    plot_scree = TRUE,
-    plot_loadings = TRUE,
-    plot_biplot = TRUE,
-    plot_survival = TRUE,
-    risk_score = TRUE,
-    pathway_analysis = FALSE,
-    feature_importance = TRUE
-    )
-  })
-
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'pcacox.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
+test_that("pcacox class can be instantiated", {
+  data(pcacox_clinical, package = "ClinicoPath")
+  expect_no_error(pca_opts())
 })
 
+test_that("pcacox runs with standard PCA", {
+  data(pcacox_clinical, package = "ClinicoPath")
+
+  o <- pca_opts()
+  a <- pcacoxClass$new(options = o, data = pcacox_clinical)
+  expect_no_error(a$run())
+
+  expect_true(nrow(a$results$pcaSummary$asDF) > 0)
+  expect_true(nrow(a$results$coxResults$asDF) > 0)
+  expect_true(nrow(a$results$modelPerformance$asDF) > 0)
+  expect_true(nchar(a$results$technicalDetails$content %||% "") > 0)
+  expect_true(nchar(a$results$clinicalInterpretation$content %||% "") > 0)
+})
+
+test_that("pcacox runs with supervised PCA", {
+  data(pcacox_clinical, package = "ClinicoPath")
+
+  o <- pca_opts(pca_method = "supervised")
+  a <- pcacoxClass$new(options = o, data = pcacox_clinical)
+  expect_no_error(a$run())
+  expect_true(nrow(a$results$coxResults$asDF) > 0)
+})
+
+test_that("pcacox runs with sparse PCA", {
+  data(pcacox_clinical, package = "ClinicoPath")
+
+  o <- pca_opts(pca_method = "sparse", sparse_parameter = 0.1)
+  a <- pcacoxClass$new(options = o, data = pcacox_clinical)
+  expect_no_error(a$run())
+})
+
+test_that("pcacox runs with kernel PCA", {
+  data(pcacox_clinical, package = "ClinicoPath")
+
+  o <- pca_opts(pca_method = "kernel")
+  a <- pcacoxClass$new(options = o, data = pcacox_clinical)
+  expect_no_error(a$run())
+})

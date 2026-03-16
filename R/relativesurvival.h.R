@@ -88,7 +88,17 @@ relativesurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "us",
                     "mn",
                     "fr",
-                    "it",
+                    "slovenia",
+                    "turkey",
+                    "germany",
+                    "uk",
+                    "italy",
+                    "japan",
+                    "spain",
+                    "brazil",
+                    "south_korea",
+                    "china",
+                    "india",
                     "custom"),
                 default="us")
             private$..method <- jmvcore::OptionList$new(

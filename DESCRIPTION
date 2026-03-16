@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.37.01
-Date: 2026-03-07
+Version: 0.0.37.02
+Date: 2026-03-16
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -313,6 +313,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests:
     rmarkdown,
+    condSURV,
     plsRcox,
     randomForestSRC,
     OncoDataSets,
@@ -339,7 +340,11 @@ Suggests:
     parttree,
     tiff,
     quarto,
-    grpreg
+    grpreg,
+    sparsepca,
+    kernlab,
+    superpc,
+    ncvreg
 Config/testthat/edition: 3
 Collate: 
     '00jmv.R'

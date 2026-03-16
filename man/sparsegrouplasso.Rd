@@ -29,11 +29,6 @@ sparsegrouplasso(
   weight_power = 1,
   standardize_vars = TRUE,
   center_vars = TRUE,
-  orthogonalize_groups = FALSE,
-  max_iterations = 1000,
-  convergence_threshold = 1e-06,
-  warm_start = TRUE,
-  parallel_cv = FALSE,
   seed_value = 42,
   show_summary = TRUE,
   show_coefficients = TRUE,
@@ -100,7 +95,10 @@ Example: "0.001,0.01,0.1,1"}
 
 \item{n_lambda}{number of lambda values in the sequence}
 
-\item{selection_criterion}{criterion for selecting optimal lambda}
+\item{selection_criterion}{Criterion for selecting optimal lambda. CV
+Deviance uses cross-validated partial likelihood deviance (recommended).
+AIC/BIC/EBIC add model complexity penalties to the deviance for more
+parsimonious selection.}
 
 \item{cv_folds}{number of folds for cross-validation}
 
@@ -115,17 +113,6 @@ Example: "0.001,0.01,0.1,1"}
 \item{standardize_vars}{whether to standardize predictor variables}
 
 \item{center_vars}{whether to center predictor variables}
-
-\item{orthogonalize_groups}{whether to orthogonalize variables within
-groups}
-
-\item{max_iterations}{maximum number of iterations for optimization}
-
-\item{convergence_threshold}{convergence threshold for optimization}
-
-\item{warm_start}{whether to use warm start for lambda sequence}
-
-\item{parallel_cv}{whether to use parallel processing for CV}
 
 \item{seed_value}{random seed for reproducible results}
 

@@ -96,7 +96,8 @@ model}
 \item{show_model_comparison}{Calculate and compare sequential component
 additions}
 
-\item{pathway_analysis}{Analyze biological pathways}
+\item{pathway_analysis}{Group features by their dominant PC and rank by
+survival-weighted importance}
 
 \item{feature_importance}{Rank features by contribution}
 }

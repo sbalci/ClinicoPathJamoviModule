@@ -1,0 +1,387 @@
+---
+title: "Sparse Group LASSO Cox Regression - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Sparse Group LASSO Cox Regression - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+data_path <- "data-raw/non-rda/"
+data_path2 <- "data/"
+```
+
+> **Note:** The `sparsegrouplasso()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference.
+
+# Sparse Group LASSO for Survival Analysis
+
+## Overview
+
+Sparse Group LASSO combines group-level variable selection with within-group sparsity for penalized Cox proportional hazards models. Unlike standard Group LASSO (which includes or excludes entire groups), Sparse Group LASSO can retain a group while dropping individual variables within it. This is implemented via `glmnet`'s elastic net Cox regression with penalty.factor weighting for group structure.
+
+The module supports 5 grouping strategies (factor-based, custom, pathway-based, variable-type, correlation-based), 4 model selection criteria (CV deviance, AIC, BIC, EBIC), adaptive weighting from initial ridge/LASSO/univariate models, repeated CV, bootstrap confidence intervals, and stability selection.
+
+This analysis is particularly valuable for genomic survival studies where genes belong to pathways (retain pathway but drop uninformative genes), clinical prediction models where factors have multiple categories (drop unimportant levels), and any scenario requiring structured yet sparse variable selection.
+
+---
+
+## Datasets Used in This Guide
+
+| Dataset | N | Predictors | Events | Primary Use |
+|---------|---|-----------|--------|-------------|
+| `sparsegrouplasso_lung` | 180 | 14 (mixed) | 95 | Lung cancer with 4 clinical domains |
+| `sparsegrouplasso_genepanel` | 100 | 40 (continuous) | 43 | 8 gene pathways, signal in 3 |
+| `sparsegrouplasso_small` | 50 | 6 (mixed) | 19 | Small cohort edge case |
+
+---
+
+## 1. Basic Analysis with Automatic Grouping
+
+### Default settings with continuous predictors
+
+```{r basic-continuous}
+lung <- read.csv(paste0(data_path, "sparsegrouplasso_lung.csv"))
+str(lung[, c("time", "status", "age", "smoking_py", "tumor_size", "pdl1")])
+
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  group_definition = "factor_based",
+  alpha_sgl = 0.95,
+  cv_folds = 5,
+  suitabilityCheck = TRUE
+)
+```
+
+Look for: suitability report (EPV, multicollinearity), summary table (optimal lambda, variables/groups selected), coefficients with hazard ratios, group structure showing which groups were selected, and the three default plots.
+
+---
+
+## 2. Mixed Continuous and Factor Predictors
+
+### Factor-based grouping with categorical variables
+
+When factors are included, their dummy variables are automatically grouped together. This ensures e.g., all `ecog` levels are selected or dropped as a unit.
+
+```{r mixed-types}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "sex", "ecog", "histology",
+                "tumor_size", "pdl1"),
+  pathway_info = NULL,
+  group_definition = "factor_based",
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: group structure table showing `ecog` (3 dummy vars in one group) and `histology` (2 dummy vars in one group) with descriptive names.
+
+---
+
+## 3. Alpha Parameter -- Group vs Individual Sparsity
+
+### alpha = 0.3 (group-heavy)
+
+```{r alpha-group}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  alpha_sgl = 0.3,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+### alpha = 0.99 (individual sparsity)
+
+```{r alpha-lasso}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  alpha_sgl = 0.99,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Compare the two: lower alpha tends to select/exclude entire groups, higher alpha allows individual variable selection within retained groups.
+
+---
+
+## 4. Model Selection Criteria
+
+### AIC -- moderate parsimony
+
+```{r criterion-aic}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  selection_criterion = "aic",
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+### BIC -- strong parsimony
+
+```{r criterion-bic}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  selection_criterion = "bic",
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+BIC typically selects fewer variables than CV deviance or AIC due to its stronger penalty for model complexity.
+
+---
+
+## 5. Custom Group Definition
+
+```{r custom-groups}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  group_definition = "custom",
+  custom_groups = "1,2;3,4;5,6;7,8",
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Format: semicolons separate groups, commas separate variable indices within groups. Here: {age,smoking_py}, {tumor_size,pdl1}, {crp,nlr}, {albumin,ldh}.
+
+---
+
+## 6. Adaptive Weights
+
+### Ridge-based adaptive weights
+
+Uses initial ridge Cox estimates to weight the penalty -- variables with stronger initial effects get less penalization.
+
+```{r adaptive-ridge}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  weight_type = "ridge_based",
+  weight_power = 1,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: the Adaptive Weights table showing individual and group weights with rationale.
+
+---
+
+## 7. Bootstrap Confidence Intervals
+
+```{r bootstrap-ci}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1"),
+  pathway_info = NULL,
+  confidence_intervals = TRUE,
+  bootstrap_samples = 100,
+  alpha_level = 0.05,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: CI Lower and CI Upper columns populated in the coefficients table, and selection frequency showing bootstrap inclusion rates.
+
+---
+
+## 8. Stability Selection
+
+```{r stability}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  stability_selection = TRUE,
+  bootstrap_samples = 100,
+  stability_threshold = 0.6,
+  stability_subsample = 0.8,
+  plot_stability = TRUE,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: stability results table with selection probability, first/last selected lambda, and the stability plot with threshold line.
+
+---
+
+## 9. Repeated Cross-Validation
+
+```{r repeated-cv}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  cv_repeats = 3,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Repeated CV averages error curves across multiple random fold assignments for more stable lambda selection.
+
+---
+
+## 10. High-Dimensional Gene Panel
+
+```{r genepanel}
+genepanel <- read.csv(paste0(data_path, "sparsegrouplasso_genepanel.csv"))
+gene_vars <- names(genepanel)[!names(genepanel) %in% c("time", "status")]
+
+sparsegrouplasso(
+  data = genepanel,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Progressed",
+  censorLevel = "Stable",
+  pred_vars = gene_vars,
+  pathway_info = NULL,
+  group_definition = "correlation_based",
+  correlation_threshold = 0.5,
+  cv_folds = 3,
+  n_lambda = 20,
+  suitabilityCheck = TRUE
+)
+```
+
+With 40 predictors and 100 observations, this is a p > n/3 scenario where regularization is essential.
+
+---
+
+## 11. Small Sample Edge Case
+
+```{r small-sample}
+small <- read.csv(paste0(data_path, "sparsegrouplasso_small.csv"))
+
+sparsegrouplasso(
+  data = small,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "tumor_size", "marker1", "marker2"),
+  pathway_info = NULL,
+  cv_folds = 3,
+  suitabilityCheck = TRUE
+)
+```
+
+The suitability report should flag the small sample size and low EPV.
+
+---
+
+## 12. Solution Path and Sparsity Pattern
+
+```{r solution-path}
+sparsegrouplasso(
+  data = lung,
+  time_var = "time",
+  event_var = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                "crp", "nlr", "albumin", "ldh"),
+  pathway_info = NULL,
+  show_path = TRUE,
+  plot_sparsity = TRUE,
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+```
+
+Look for: the regularization path table showing how variables enter/exit across lambda values, and the sparsity pattern plot.
+
+---
+
+## References
+
+- Simon N, Friedman J, Hastie T, Tibshirani R (2013). "A Sparse-Group Lasso." *Journal of Computational and Graphical Statistics*, 22(2), 231-245.
+- Friedman J, Hastie T, Tibshirani R (2025). *glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models*. R package version 4.1-10.
+- Therneau TM (2026). *survival: Survival Analysis*. R package version 3.8-6.
+- Meinshausen N, Buhlmann P (2010). "Stability selection." *JRSS-B*, 72(4), 417-473.

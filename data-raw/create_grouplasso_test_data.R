@@ -232,16 +232,31 @@ cat("Generating grouplasso test datasets...\n")
 grouplasso_biomarker <- create_grouplasso_biomarker()
 cat("  biomarker: n=", nrow(grouplasso_biomarker), ", p=", ncol(grouplasso_biomarker) - 2,
     ", events=", sum(grouplasso_biomarker$status == "Dead"), "\n")
-save_data_multi_format(grouplasso_biomarker, "grouplasso_biomarker")
 
 grouplasso_genomic <- create_grouplasso_genomic()
 cat("  genomic: n=", nrow(grouplasso_genomic), ", p=", ncol(grouplasso_genomic) - 2,
     ", events=", sum(grouplasso_genomic$status == "Progressed"), "\n")
-save_data_multi_format(grouplasso_genomic, "grouplasso_genomic")
 
 grouplasso_small <- create_grouplasso_small()
 cat("  small: n=", nrow(grouplasso_small), ", p=", ncol(grouplasso_small) - 2,
     ", events=", sum(grouplasso_small$status == "Dead"), "\n")
-save_data_multi_format(grouplasso_small, "grouplasso_small")
 
-cat("\nDone. Datasets saved to data/ and data-raw/non-rda/\n")
+# Save .rda files to data/
+save(grouplasso_biomarker, file = "data/grouplasso_biomarker.rda")
+save(grouplasso_genomic,   file = "data/grouplasso_genomic.rda")
+save(grouplasso_small,     file = "data/grouplasso_small.rda")
+
+# Save .csv and .omv files to data-raw/non-rda/
+dir.create("data-raw/non-rda", showWarnings = FALSE, recursive = TRUE)
+
+write.csv(grouplasso_biomarker, "data-raw/non-rda/grouplasso_biomarker.csv", row.names = FALSE)
+write.csv(grouplasso_genomic,   "data-raw/non-rda/grouplasso_genomic.csv",   row.names = FALSE)
+write.csv(grouplasso_small,     "data-raw/non-rda/grouplasso_small.csv",     row.names = FALSE)
+
+if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
+  jmvReadWrite::write_omv(grouplasso_biomarker, "data-raw/non-rda/grouplasso_biomarker.omv")
+  jmvReadWrite::write_omv(grouplasso_genomic,   "data-raw/non-rda/grouplasso_genomic.omv")
+  jmvReadWrite::write_omv(grouplasso_small,     "data-raw/non-rda/grouplasso_small.omv")
+}
+
+cat("\nDone. RDA saved to data/, CSV/OMV saved to data-raw/non-rda/\n")

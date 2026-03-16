@@ -190,8 +190,6 @@ options:
       options:
         - name: cv_deviance
           title: Cross-Validation Deviance
-        - name: cv_c_index
-          title: Cross-Validation C-Index
         - name: aic
           title: Akaike Information Criterion
         - name: bic
@@ -200,7 +198,10 @@ options:
           title: Extended BIC
       default: cv_deviance
       description:
-          R: criterion for selecting optimal lambda
+          R: >
+            Criterion for selecting optimal lambda. CV Deviance uses cross-validated
+            partial likelihood deviance (recommended). AIC/BIC/EBIC add model complexity
+            penalties to the deviance for more parsimonious selection.
 
     - name: cv_folds
       title: Cross-Validation Folds
@@ -267,45 +268,6 @@ options:
       default: true
       description:
           R: whether to center predictor variables
-
-    - name: orthogonalize_groups
-      title: Orthogonalize Groups
-      type: Bool
-      default: false
-      description:
-          R: whether to orthogonalize variables within groups
-
-    - name: max_iterations
-      title: Maximum Iterations
-      type: Integer
-      min: 100
-      max: 10000
-      default: 1000
-      description:
-          R: maximum number of iterations for optimization
-
-    - name: convergence_threshold
-      title: Convergence Threshold
-      type: Number
-      min: 1e-8
-      max: 1e-3
-      default: 1e-6
-      description:
-          R: convergence threshold for optimization
-
-    - name: warm_start
-      title: Warm Start
-      type: Bool
-      default: true
-      description:
-          R: whether to use warm start for lambda sequence
-
-    - name: parallel_cv
-      title: Parallel Cross-Validation
-      type: Bool
-      default: false
-      description:
-          R: whether to use parallel processing for CV
 
     - name: seed_value
       title: Random Seed

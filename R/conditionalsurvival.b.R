@@ -25,9 +25,16 @@ conditionalsurvivalClass <- R6::R6Class(
 
             # Get variables
             timeVar <- self$options$timeVar
-            outcomeVar <- self$options$outcomeVar 
+            outcomeVar <- self$options$outcomeVar
+            # TODO (Bug 4): conditionVar is declared in .a.yaml but never used for
+            #   subgroup/stratified conditional survival. Implement stratified analysis
+            #   or remove from the UI in a future version.
             conditionVar <- self$options$conditionVar
-            
+            # TODO (Bug 5): bandwidth option is declared in .a.yaml but never read.
+            #   Implement kernel bandwidth selection for presmoothed KM when method="pkm".
+            # TODO (Bug 6): plotType option is declared in .a.yaml but never read.
+            #   Implement "probability" and "both" plot types in .createCondSurvPlot().
+
             # Check for required variables
             if (is.null(timeVar) || is.null(outcomeVar)) {
                 return()
@@ -339,29 +346,33 @@ conditionalsurvivalClass <- R6::R6Class(
             if (length(fit$time) == 0 || time <= 0) {
                 return(1.0)
             }
-            
-            # Find closest time point
-            idx <- max(which(fit$time <= time))
-            if (length(idx) == 0 || idx == 0) {
+
+            # Find closest time point (Bug 2 fix: guard against empty which())
+            idx <- which(fit$time <= time)
+            if (length(idx) == 0) {
                 return(1.0)
             }
-            
-            return(fit$surv[idx])
+
+            return(fit$surv[max(idx)])
         },
 
         .getSurvSEAtTime = function(fit, time) {
             # Get survival standard error at specific time from survfit object
-            if (length(fit$time) == 0 || time <= 0 || is.null(fit$std.err)) {
+            # Bug 1 fix: fit$std.err from survival::survfit is the SE of -log(S(t))
+            # (cumulative hazard scale), NOT the SE of S(t) itself.
+            # The actual SE of S(t) = S(t) * fit$std.err  (delta method on log transform).
+            if (length(fit$time) == 0 || time <= 0 || is.null(fit$std.err) || is.null(fit$surv)) {
                 return(0.0)
             }
-            
-            # Find closest time point
-            idx <- max(which(fit$time <= time))
-            if (length(idx) == 0 || idx == 0) {
+
+            # Find closest time point (Bug 2 pattern: guard against empty which())
+            idx <- which(fit$time <= time)
+            if (length(idx) == 0) {
                 return(0.0)
             }
-            
-            return(fit$std.err[idx])
+
+            i <- max(idx)
+            return(fit$surv[i] * fit$std.err[i])
         },
 
         .parseTimePoints = function() {
@@ -384,11 +395,19 @@ conditionalsurvivalClass <- R6::R6Class(
         .getDefaultTimePoints = function(time, condTime) {
             # Generate default time points for analysis
             maxTime <- max(time, na.rm = TRUE)
-            
+
+            # Bug 3 fix: reject when condTime is at or beyond the data horizon
+            if (condTime >= maxTime) {
+                jmvcore::reject(
+                    "Conditioning time ({condTime}) is at or beyond maximum follow-up ({maxTime}). Choose an earlier time.",
+                    code = ""
+                )
+            }
+
             # Create time points starting from condTime
             timePoints <- seq(condTime, maxTime, length.out = 6)
             timePoints <- timePoints[timePoints > condTime]  # Exclude condTime itself
-            
+
             return(round(timePoints, 1))
         },
 

@@ -186,6 +186,61 @@ children:
                         maxItemCount: 1
                         isTarget: true
       - type: Label
+        label: Age Adjustment
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: age_adjustment
+                label: Age-Adjusted Cox Regression
+              - type: VariableSupplier
+                persistentItems: false
+                stretchFactor: 1
+                children:
+                  - type: TargetLayoutBox
+                    label: Age Variable (Continuous)
+                    children:
+                      - type: VariablesListBox
+                        name: age_variable
+                        maxItemCount: 1
+                        isTarget: true
+                        enable: (age_adjustment)
+              - type: CheckBox
+                name: age_interaction
+                label: Test Age x Group Interaction
+                enable: (age_adjustment)
+              - type: CheckBox
+                name: age_stratified_cox
+                label: Stratify Cox by Age Groups
+                enable: (age_adjustment)
+              - type: TextBox
+                name: age_group_cutpoints
+                format: string
+                width: large
+                label: Age Group Cutpoints (comma-separated)
+                enable: (age_adjustment && (age_stratified_cox || age_stratified_km || age_standardization))
+              - type: CheckBox
+                name: age_time_scale
+                label: Age as Time Scale (epidemiologic)
+                enable: (age_adjustment)
+              - type: CheckBox
+                name: age_standardization
+                label: Age Standardization (SMR)
+                enable: (age_adjustment)
+              - type: ComboBox
+                name: age_standardization_method
+                label: Standardization Method
+                enable: (age_adjustment && age_standardization)
+              - type: CheckBox
+                name: age_stratified_km
+                label: Age-Stratified KM Plots
+                enable: (age_adjustment)
+              - type: CheckBox
+                name: adjusted_curves
+                label: Adjusted Survival Curves
+                enable: (age_adjustment)
+      - type: Label
         label: Model Validation
         children:
           - type: LayoutBox
@@ -418,6 +473,9 @@ children:
               - type: CheckBox
                 name: showSummaries
                 label: Show Natural Language Summaries
+              - type: CheckBox
+                name: remark_checklist
+                label: REMARK Reporting Checklist
               - type: CheckBox
                 name: use_parametric
   - type: LayoutBox

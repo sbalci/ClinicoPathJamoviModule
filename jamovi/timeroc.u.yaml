@@ -60,6 +60,7 @@ children:
       - type: TextBox
         name: nboot
         format: number
+        enable: (bootstrapCI)
   - type: LayoutBox
     margin: large
     children:
@@ -83,6 +84,7 @@ children:
         name: compareBaseline
       - type: CheckBox
         name: smoothAUC
+        enable: (plotAUC)
   - type: LayoutBox
     margin: large
     children:

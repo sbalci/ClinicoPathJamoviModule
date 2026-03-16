@@ -175,18 +175,52 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 ratetable_choice <- self$options$ratetable %||% "us"
                 
+                # Load WHO-based ratetable helper
+                load_who_ratetable <- function(country_name) {
+                    rt <- NULL
+                    tryCatch({
+                        data("ratetable_who_collection", package = "ClinicoPath", envir = environment())
+                        collection <- get("ratetable_who_collection", envir = environment())
+                        if (country_name %in% names(collection)) {
+                            rt <- collection[[country_name]]
+                        }
+                    }, error = function(e) {
+                        message("WHO ratetable not available for ", country_name, ": ", e$message)
+                    })
+                    return(rt)
+                }
+
                 rate_table <- switch(ratetable_choice,
-                    "us" = relsurv::survexp.us,
-                    "mn" = relsurv::survexp.mn,
-                    "fr" = relsurv::survexp.fr,
-                    "it" = NULL,  # Would need custom Italian table
-                    "custom" = NULL  # Would need user-provided table
+                    "us"          = relsurv::survexp.us,
+                    "mn"          = relsurv::survexp.mn,
+                    "fr"          = relsurv::survexp.fr,
+                    "slovenia"    = relsurv::slopop,
+                    "turkey"      = {
+                        rt <- NULL
+                        tryCatch({
+                            data("ratetable_turkey", package = "ClinicoPath", envir = environment())
+                            rt <- get("ratetable_turkey", envir = environment())
+                        }, error = function(e) {
+                            rt <- load_who_ratetable("turkey")
+                        })
+                        rt
+                    },
+                    "germany"     = load_who_ratetable("germany"),
+                    "uk"          = load_who_ratetable("uk"),
+                    "italy"       = load_who_ratetable("italy"),
+                    "japan"       = load_who_ratetable("japan"),
+                    "spain"       = load_who_ratetable("spain"),
+                    "brazil"      = load_who_ratetable("brazil"),
+                    "south_korea" = load_who_ratetable("south_korea"),
+                    "china"       = load_who_ratetable("china"),
+                    "india"       = load_who_ratetable("india"),
+                    "custom"      = NULL
                 )
-                
+
                 if (is.null(rate_table)) {
-                    # Use US as default
+                    # Fallback to US as default
                     rate_table <- relsurv::survexp.us
-                    message("Using US population rate table as default")
+                    message("Using US population rate table as default (selected table not available)")
                 }
                 
                 return(rate_table)

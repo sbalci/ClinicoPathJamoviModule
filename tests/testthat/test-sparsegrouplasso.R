@@ -1,81 +1,127 @@
+# ===============================================================
+# Core Tests: sparsegrouplasso (Sparse Group LASSO Cox)
+# ===============================================================
 
-test_that('sparsegrouplasso analysis works', {
-  skip_if_not_installed('jmvReadWrite')
+library(testthat)
 
-  # Synthetic data generation
-  set.seed(123)
-  n <- 50
-  data <- data.frame(
-    time_var = runif(n, 1, 100),
-    event_var = sample(c('A', 'B'), n, replace = TRUE),
-    pred_vars1 = sample(c('A', 'B'), n, replace = TRUE),
-    pred_vars2 = sample(c('A', 'B'), n, replace = TRUE),
-    pred_vars3 = sample(c('A', 'B'), n, replace = TRUE),
-    pathway_info = sample(c('A', 'B'), n, replace = TRUE)
-  )
+test_that("sparsegrouplasso class can be instantiated", {
+  skip_if_not_installed("glmnet")
 
-  # Run analysis
+  data(sparsegrouplasso_lung, package = "ClinicoPath")
+
   expect_no_error({
-    model <- sparsegrouplasso(
-      data = data,
-    time_var = 'time_var',
-    event_var = 'event_var',
-    pred_vars = c('pred_vars1', 'pred_vars2', 'pred_vars3'),
-    group_definition = 'factor_based',
-    pathway_info = 'pathway_info',
-    correlation_threshold = 0.7,
-    alpha_sgl = 0.95,
-    lambda_sequence = 'auto',
-    lambda_min_ratio = 0.001,
-    n_lambda = 10,
-    selection_criterion = 'cv_deviance',
-    cv_folds = 10,
-    cv_repeats = 1,
-    ebic_gamma = 1,
-    weight_type = 'none',
-    weight_power = 1,
-    standardize_vars = TRUE,
-    center_vars = TRUE,
-    orthogonalize_groups = FALSE,
-    max_iterations = 100,
-    convergence_threshold = 1e-8,
-    warm_start = TRUE,
-    parallel_cv = FALSE,
-    seed_value = 42,
-    show_summary = TRUE,
-    show_coefficients = TRUE,
-    show_groups = TRUE,
-    show_path = FALSE,
-    show_performance = TRUE,
-    show_validation = TRUE,
-    plot_cv_error = TRUE,
-    plot_coefficients = TRUE,
-    plot_groups = TRUE,
-    plot_sparsity = FALSE,
-    plot_stability = FALSE,
-    alpha_level = 0.05,
-    confidence_intervals = FALSE,
-    bootstrap_samples = 100,
-    stability_selection = FALSE,
-    stability_threshold = 0.8,
-    stability_subsample = 0.8,
-    showExplanations = TRUE
+    options <- sparsegrouplassoOptions$new(
+      time_var = "time",
+      event_var = "status",
+      outcomeLevel = "Dead",
+      censorLevel = "Alive",
+      pred_vars = c("age", "smoking_py", "tumor_size", "pdl1"),
+      pathway_info = NULL,
+      suitabilityCheck = FALSE,
+      plot_cv_error = FALSE,
+      plot_coefficients = FALSE,
+      plot_groups = FALSE,
+      plot_sparsity = FALSE,
+      plot_stability = FALSE,
+      showExplanations = FALSE,
+      cv_folds = 5,
+      n_lambda = 20,
+      seed_value = 42
     )
   })
-
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'sparsegrouplasso.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
 })
 
+test_that("sparsegrouplasso runs with continuous predictors", {
+  skip_if_not_installed("glmnet")
+
+  data(sparsegrouplasso_lung, package = "ClinicoPath")
+
+  options <- sparsegrouplassoOptions$new(
+    time_var = "time",
+    event_var = "status",
+    outcomeLevel = "Dead",
+    censorLevel = "Alive",
+    pred_vars = c("age", "smoking_py", "tumor_size", "pdl1",
+                  "crp", "nlr", "albumin", "ldh"),
+    pathway_info = NULL,
+    suitabilityCheck = FALSE,
+    plot_cv_error = FALSE,
+    plot_coefficients = FALSE,
+    plot_groups = FALSE,
+    plot_sparsity = FALSE,
+    plot_stability = FALSE,
+    showExplanations = FALSE,
+    cv_folds = 5,
+    n_lambda = 20,
+    seed_value = 42
+  )
+
+  analysis <- sparsegrouplassoClass$new(options = options, data = sparsegrouplasso_lung)
+  expect_no_error(analysis$run())
+
+  # Verify outputs populated
+  expect_true(nrow(analysis$results$summary$asDF) > 0)
+  expect_true(nrow(analysis$results$coefficients$asDF) > 0)
+  expect_true(nrow(analysis$results$groupStructure$asDF) > 0)
+  expect_true(nrow(analysis$results$performance$asDF) > 0)
+})
+
+test_that("sparsegrouplasso runs with mixed continuous and factor predictors", {
+  skip_if_not_installed("glmnet")
+
+  data(sparsegrouplasso_lung, package = "ClinicoPath")
+
+  options <- sparsegrouplassoOptions$new(
+    time_var = "time",
+    event_var = "status",
+    outcomeLevel = "Dead",
+    censorLevel = "Alive",
+    pred_vars = c("age", "smoking_py", "sex", "ecog", "histology"),
+    pathway_info = NULL,
+    group_definition = "factor_based",
+    suitabilityCheck = FALSE,
+    plot_cv_error = FALSE,
+    plot_coefficients = FALSE,
+    plot_groups = FALSE,
+    plot_sparsity = FALSE,
+    plot_stability = FALSE,
+    showExplanations = FALSE,
+    cv_folds = 5,
+    n_lambda = 20,
+    seed_value = 42
+  )
+
+  analysis <- sparsegrouplassoClass$new(options = options, data = sparsegrouplasso_lung)
+  expect_no_error(analysis$run())
+
+  # Verify factor dummies are grouped together
+  g <- analysis$results$groupStructure$asDF
+  ecog_group <- g[grep("ecog", g$variables_list), ]
+  expect_true(nrow(ecog_group) == 1)  # All ecog dummies in one group
+  expect_true(ecog_group$n_variables >= 2)  # Multiple dummy columns
+})
+
+test_that("sparsegrouplasso wrapper works with pathway_info = NULL", {
+  skip_if_not_installed("glmnet")
+
+  data(sparsegrouplasso_lung, package = "ClinicoPath")
+
+  expect_no_error({
+    result <- sparsegrouplasso(
+      data = sparsegrouplasso_lung,
+      time_var = "time",
+      event_var = "status",
+      outcomeLevel = "Dead",
+      censorLevel = "Alive",
+      pred_vars = c("age", "smoking_py", "tumor_size", "pdl1"),
+      pathway_info = NULL,
+      cv_folds = 5,
+      n_lambda = 20,
+      plot_cv_error = FALSE,
+      plot_coefficients = FALSE,
+      plot_groups = FALSE,
+      plot_sparsity = FALSE,
+      plot_stability = FALSE
+    )
+  })
+})

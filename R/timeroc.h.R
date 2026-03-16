@@ -289,7 +289,7 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="markerStats",
                 title="Marker Variable Statistics",
                 visible="(showMarkerStats)",
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="statistic", 

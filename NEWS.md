@@ -1,5 +1,79 @@
 # ClinicoPath News
 
+# ClinicoPath 0.0.37.02
+
+### March 16, 2026 - Penalized Cox Regression Suite: Comprehensive Quality Improvements
+
+---
+
+## Penalized Cox Regression Functions
+
+### Sparse Group LASSO (`sparsegrouplasso`)
+* **Fixed:** AIC/BIC/EBIC formulas used number of lambda values instead of number of observations -- now correctly penalizes model complexity
+* **Fixed:** Deviance calculation numerically unstable for large linear predictors -- implemented log-sum-exp trick
+* **Fixed:** Factor-based grouping misaligned dummy variables -- rewrote column-to-group mapping using original predictor names
+* **Fixed:** Variable-type grouping always produced 1 group after dummy encoding -- now checks original data types
+* **Fixed:** Correlation-based grouping never assigned variables (init to 1, checked for 0) -- fixed initialization
+* **Removed:** `cv_c_index` selection criterion (identical to `cv_deviance`), `orthogonalize_groups`, `max_iterations`, `convergence_threshold` (dead options)
+* **Implemented:** `cv_repeats` (repeated cross-validation with averaged errors)
+* **Implemented:** Bootstrap confidence intervals (`confidence_intervals`, `bootstrap_samples`, `alpha_level`)
+* **Implemented:** Stability selection using `bootstrap_samples` option (was hardcoded to 50)
+* **Implemented:** Selection frequency in coefficients table from bootstrap/stability
+* **Implemented:** Descriptive group names (derived from member variables, not generic "Group N")
+* **Implemented:** Adaptive lambda sequence via `glmnet`'s data-driven spacing
+* **Implemented:** Real method comparison table -- actually fits Group LASSO and LASSO reference models
+* **Implemented:** Stability first_selected/last_selected columns from lambda probabilities
+* **Added:** 12 `jmvcore::Notice` triggers (ERROR, STRONG_WARNING, WARNING, INFO)
+* **Added:** 3 test datasets (lung n=180, genepanel n=100, small n=50) with generation script
+* **Added:** 34 testthat tests across 4 test files
+* **Added:** 4-document documentation suite (developer docs, feature mapping, testing checklist, comprehensive vignette)
+
+### PCA Cox (`pcacox`)
+* **Fixed:** `self$results$errors$setContent()` referenced non-existent output -- crashes on Cox model failure
+* **Fixed:** `.populateModelComparison()` called but never defined -- crashes when enabled
+* **Fixed:** 3 outputs never populated (`crossValidation`, `technicalDetails`, `clinicalInterpretation`)
+* **Fixed:** R-squared mislabeled as Nagelkerke but was Cox-Snell -- implemented correct Nagelkerke correction
+* **Fixed:** Supervised PCA threshold hardcoded to 0.1 -- now uses `superpc::superpc.cv()` for data-driven selection
+* **Fixed:** `survival_weighting=FALSE` had no effect -- now falls back to standard PCA
+* **Fixed:** Feature importance indexing mismatch when `model.matrix` expands factors
+* **Fixed:** `LevelSelector` used `ComboBox` in UI -- corrected to proper `LevelSelector`
+* **Removed:** `Hmisc` dependency from risk score -- replaced with robust jitter + median split fallback
+* **Removed:** `stringr` dependency -- replaced `str_to_title()` with `tools::toTitleCase()`
+* **Removed:** `rows: 1` from all 6 dynamic tables (prevented empty header rows)
+* **Converted:** All 4 plot render functions from base R `plot()` to ggplot2 with `ggtheme` parameter
+* **Replaced:** Pathway analysis placeholder with real loading-based feature cluster analysis
+* **Replaced:** All `message()` calls (6) with `private$.insertNotice()` for user-visible feedback
+* **Added:** 22 `jmvcore::Notice` triggers covering all error/fallback/completion paths
+* **Added:** 2 test datasets (genomic n=150, clinical n=60) with generation script
+* **Added:** 53 testthat tests across 4 test files
+* **Added:** 4-document documentation suite
+
+### Firth Regression (`firthregression`)
+* **Fixed:** `forestPlotImage` clearWith missing `ciMethod` -- CI method changes didn't refresh plot
+* **Added:** Cox mode wald CI info notice (coxphf always uses profile CIs)
+* **Improved:** `modelFit` computation gated behind `showModelFit` flag
+* **Added:** 3 test datasets (standard n=120, separation n=80, smallcox n=50) with generation script
+* **Added:** 43 testthat tests across 4 test files
+* **Added:** 4-document documentation suite
+
+### Group LASSO (`grouplasso`)
+* **Updated:** References synced with CRAN metadata (survival v3.8-6, glmnet v4.1-10, grpreg v3.5.0)
+* **Added:** 4-document documentation suite
+
+### Method Guide (`lassointro`)
+* **Added:** Firth Regression to method overview table, decision flowchart (Steps 5-6), comparison table (8 features), clinical scenarios (rare tumor subtype), glossary (4 new terms), and assumptions/pitfalls (2 new entries)
+
+---
+
+## Data & Testing
+
+* **New test datasets:** 8 datasets across 4 functions (sparsegrouplasso, pcacox, firthregression test data)
+* **New testthat tests:** 130 tests across 12 test files
+* **File organization:** All CSV/OMV files moved to `data-raw/non-rda/`, RDA files in `data/`
+* **Updated refs:** All penalized Cox functions synced with `jamovi/00refs.yaml`
+
+---
+
 # ClinicoPath 0.0.34
 
 ### 🗓️ **January 31, 2026 - RPA Survival Staging & Groome Comparison**

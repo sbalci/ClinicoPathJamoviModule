@@ -193,7 +193,6 @@ items:
           - dxdate
           - tint
           - multievent
-          - contexpl
 
 
 
@@ -211,8 +210,242 @@ items:
           - explanatory
           - outcome
 
+    # Age-Adjusted Cox Regression Results
+    - name: ageAdjustedCoxHeading
+      title: Age-Adjusted Cox Regression
+      type: Preformatted
+      visible: (age_adjustment)
+      clearWith:
+          - age_adjustment
+          - age_variable
+          - explanatory
+          - outcome
 
+    - name: ageAdjustedCoxTable
+      title: 'Age-Adjusted Cox Regression'
+      type: Table
+      visible: (age_adjustment)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: levels
+          title: "Levels"
+          type: text
+        - name: n
+          title: "N"
+          type: text
+        - name: hr_unadjusted
+          title: "HR (Unadjusted)"
+          type: text
+        - name: hr_age_adjusted
+          title: "HR (Age-Adjusted)"
+          type: text
+      clearWith:
+          - age_adjustment
+          - age_variable
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - elapsedtime
 
+    - name: ageInteractionTable
+      title: 'Age x Group Interaction Test'
+      type: Table
+      visible: (age_interaction)
+      rows: 0
+      columns:
+        - name: term
+          title: "Term"
+          type: text
+        - name: coef
+          title: "Coefficient"
+          type: number
+          format: zto
+        - name: hr
+          title: "HR"
+          type: number
+          format: zto
+        - name: se
+          title: "SE"
+          type: number
+          format: zto
+        - name: z
+          title: "z"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - age_adjustment
+          - age_interaction
+          - age_variable
+          - explanatory
+          - outcome
+
+    - name: ageAdjustedInterpretation
+      title: 'Age Adjustment Interpretation'
+      type: Html
+      visible: (age_adjustment)
+      clearWith:
+          - age_adjustment
+          - age_variable
+          - explanatory
+          - outcome
+
+    - name: ageAdjustedExplanation
+      title: 'Understanding Age-Adjusted Survival Analysis'
+      type: Html
+      visible: (age_adjustment && showExplanations)
+      clearWith:
+          - age_adjustment
+
+    # Age as Time Scale Results
+    - name: ageTimeScaleTable
+      title: 'Cox Model with Age as Time Scale'
+      type: Table
+      visible: (age_time_scale)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: levels
+          title: "Levels"
+          type: text
+        - name: hr
+          title: "HR"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "95% CI Lower"
+          type: number
+          format: zto
+        - name: ci_upper
+          title: "95% CI Upper"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - age_time_scale
+          - age_variable
+          - explanatory
+          - outcome
+          - elapsedtime
+
+    - name: ageTimeScaleInterpretation
+      title: 'Age Time Scale Interpretation'
+      type: Html
+      visible: (age_time_scale)
+      clearWith:
+          - age_time_scale
+          - age_variable
+          - explanatory
+
+    # Age Standardization (SMR) Results
+    - name: ageStandardizationTable
+      title: 'Age-Standardized Mortality'
+      type: Table
+      visible: (age_standardization)
+      rows: 0
+      columns:
+        - name: group
+          title: "Group"
+          type: text
+        - name: observed
+          title: "Observed Deaths"
+          type: integer
+        - name: expected
+          title: "Expected Deaths"
+          type: number
+          format: zto
+        - name: smr
+          title: "SMR"
+          type: number
+          format: zto
+        - name: smr_ci_lower
+          title: "SMR 95% CI Lower"
+          type: number
+          format: zto
+        - name: smr_ci_upper
+          title: "SMR 95% CI Upper"
+          type: number
+          format: zto
+        - name: pvalue
+          title: "p-value"
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - age_standardization
+          - age_standardization_method
+          - age_variable
+          - age_group_cutpoints
+          - explanatory
+          - outcome
+
+    - name: ageStandardizationInterpretation
+      title: 'Age Standardization Interpretation'
+      type: Html
+      visible: (age_standardization)
+      clearWith:
+          - age_standardization
+          - age_variable
+          - explanatory
+
+    # Age-Stratified KM Plot
+    - name: ageStratifiedKMPlot
+      title: 'Age-Stratified Kaplan-Meier Curves'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotAgeStratifiedKM
+      visible: (age_stratified_km)
+      requiresData: true
+      clearWith:
+          - age_stratified_km
+          - age_variable
+          - age_group_cutpoints
+          - explanatory
+          - outcome
+          - elapsedtime
+          - ci95
+          - risktable
+
+    # Adjusted Survival Curves
+    - name: adjustedCurvesPlot
+      title: 'Adjusted Survival Curves'
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plotAdjustedCurves
+      visible: (adjusted_curves)
+      requiresData: true
+      clearWith:
+          - adjusted_curves
+          - age_adjustment
+          - age_variable
+          - explanatory
+          - outcome
+          - elapsedtime
+          - ci95
+
+    # REMARK Reporting Checklist
+    - name: remarkChecklist
+      title: 'REMARK Reporting Checklist'
+      type: Html
+      visible: (remark_checklist)
+      clearWith:
+          - remark_checklist
+          - explanatory
+          - outcome
+          - elapsedtime
+          - age_adjustment
 
 
 
@@ -229,7 +462,6 @@ items:
           - dxdate
           - tint
           - multievent
-          - contexpl
 
     - name: phInterpretation
       title: 'Proportional Hazards Assessment & Recommendations'
@@ -244,7 +476,6 @@ items:
           - dxdate
           - tint
           - multievent
-          - contexpl
 
     - name: plot8
       title: '`Proportional Hazards Assumption - ${explanatory}`'
@@ -403,9 +634,6 @@ items:
         - rate_multiplier
         - time_intervals
         - person_time
-        - outcome
-        - outcomeLevel
-        - elapsedtime
         - fudate
         - dxdate
         - tint
@@ -422,9 +650,6 @@ items:
         - rate_multiplier
         - time_intervals
         - person_time
-        - outcome
-        - outcomeLevel
-        - elapsedtime
         - fudate
         - dxdate
         - tint

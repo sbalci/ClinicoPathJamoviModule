@@ -10,6 +10,7 @@ curemodels(
   status,
   predictors,
   model_type = "mixture",
+  smcure_model_type = "ph",
   cure_link = "logit",
   survival_dist = "weibull",
   bootstrap_ci = FALSE,
@@ -37,6 +38,9 @@ curemodels(
 
 \item{model_type}{Type of cure model: mixture (smcure), non-mixture
 (flexsurvcure), cuRe, npcure, or all}
+
+\item{smcure_model_type}{Survival model type for smcure: 'ph' (proportional
+hazards) or 'aft' (accelerated failure time)}
 
 \item{cure_link}{Link function for the cure probability model}
 

@@ -330,14 +330,14 @@ options:
             Calculate and compare sequential component additions
 
     - name: pathway_analysis
-      title: 'Pathway Analysis'
+      title: 'Feature Cluster Analysis'
       type: Bool
       default: false
       description:
           ui: >
-            Perform pathway enrichment analysis
+            Analyze feature clusters by dominant principal component
           R: >
-            Analyze biological pathways
+            Group features by their dominant PC and rank by survival-weighted importance
 
     - name: feature_importance
       title: 'Feature Importance'

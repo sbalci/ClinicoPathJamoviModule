@@ -7,10 +7,52 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "pcacoxClass",
     inherit = pcacoxBase,
     private = list(
-        
+
+        # Private fields (initialized to NULL)
+        clean_data = NULL,
+        time_var = NULL,
+        status_var = NULL,
+        predictors = NULL,
+        clinical_vars = NULL,
+        X_matrix = NULL,
+        pca_result = NULL,
+        pc_scores = NULL,
+        loadings = NULL,
+        eigenvalues = NULL,
+        prop_variance = NULL,
+        cumul_variance = NULL,
+        selected_components = NULL,
+        cox_model = NULL,
+        cox_data = NULL,
+        risk_scores = NULL,
+        risk_groups = NULL,
+        cv_scores = NULL,
+
+        # Notice helper
+        .insertNotice = function(name, type, content, position = 999) {
+            tryCatch({
+                notice <- jmvcore::Notice$new(
+                    options = self$options,
+                    name = name,
+                    type = type
+                )
+                notice$setContent(content)
+                self$results$insert(position, notice)
+            }, error = function(e) {
+                tryCatch({
+                    existing <- self$results$todo$content
+                    if (is.null(existing) || nchar(existing) == 0) existing <- ""
+                    label <- switch(as.character(type),
+                        "1" = "ERROR", "2" = "WARNING", "3" = "WARNING", "4" = "INFO", "NOTE")
+                    self$results$todo$setContent(paste0(
+                        existing, "<p><strong>", label, ":</strong> ", content, "</p>"
+                    ))
+                }, error = function(e2) NULL)
+            })
+        },
+
         .init = function() {
             # Package checks are handled via tryCatch in the methods that use them.
-            # The required 'survival' package is listed in DESCRIPTION Imports.
         },
         
         .run = function() {
@@ -78,23 +120,54 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             n_excluded_outcome <- sum(is.na(event_numeric) & !is.na(event_data))
             if (n_excluded_outcome > 0) {
-                self$results$todo$setContent(paste0(
-                    "<div class='alert alert-warning'><strong>Note:</strong> ",
-                    n_excluded_outcome, " row(s) excluded because outcome value matched neither ",
-                    "the event level ('", event_level, "') nor the censored level ('", censor_level, "').</div>"
-                ))
+                private$.insertNotice(
+                    'excludedRows', jmvcore::NoticeType$WARNING,
+                    sprintf("%d row(s) excluded because outcome value matched neither event level ('%s') nor censored level ('%s').",
+                            n_excluded_outcome, event_level, censor_level)
+                )
             }
 
             # Replace the status column with numeric 0/1 and drop unmatched rows
             clean_data[[status_var]] <- event_numeric
             clean_data <- clean_data[!is.na(clean_data[[status_var]]), ]
 
+            # Validate time values
+            time_vals <- as.numeric(clean_data[[time_var]])
+            if (any(time_vals <= 0, na.rm = TRUE)) {
+                n_nonpos <- sum(time_vals <= 0, na.rm = TRUE)
+                private$.insertNotice(
+                    'nonPositiveTime', jmvcore::NoticeType$ERROR,
+                    sprintf("All survival times must be positive. Found %d non-positive value(s).", n_nonpos),
+                    position = 1
+                )
+                return()
+            }
+
+            # Check for zero events
+            if (sum(clean_data[[status_var]] == 1) == 0) {
+                private$.insertNotice(
+                    'noEvents', jmvcore::NoticeType$ERROR,
+                    "No events detected after encoding. All observations are censored. PCA-Cox cannot be fitted.",
+                    position = 1
+                )
+                return()
+            }
+
             if (nrow(clean_data) < 20) {
-                stop("Insufficient data for PCA-Cox analysis (minimum 20 complete cases required)")
+                private$.insertNotice(
+                    'insufficientData', jmvcore::NoticeType$ERROR,
+                    sprintf("Insufficient data for PCA-Cox analysis. Need at least 20 complete cases, found %d.", nrow(clean_data)),
+                    position = 1
+                )
+                return()
             }
 
             if (length(predictors) > nrow(clean_data)) {
-                message("High-dimensional setting detected: p (", length(predictors), ") > n (", nrow(clean_data), ")")
+                private$.insertNotice(
+                    'highDimensional', jmvcore::NoticeType$WARNING,
+                    sprintf("High-dimensional setting: p (%d) > n (%d). PCA dimensionality reduction is essential.",
+                            length(predictors), nrow(clean_data))
+                )
             }
 
             # Store for use in other methods
@@ -160,22 +233,53 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (self$options$show_model_comparison) {
                     private$.populateModelComparison()
                 }
+
+                # Populate CV results if CV was used
+                if (!is.null(private$cv_scores)) {
+                    private$.populateCrossValidation()
+                }
+
+                # Populate technical details and clinical interpretation
+                private$.populateTechnicalDetails()
+                private$.populateClinicalInterpretation()
+
+                # Clinical notices
+                n_events <- sum(private$clean_data[[private$status_var]])
+                if (n_events < 10) {
+                    private$.insertNotice(
+                        'veryLowEvents', jmvcore::NoticeType$STRONG_WARNING,
+                        sprintf("Only %d events detected. PCA-Cox results are highly unreliable with fewer than 10 events.", n_events),
+                        position = 1
+                    )
+                } else if (n_events < 20) {
+                    private$.insertNotice(
+                        'lowEvents', jmvcore::NoticeType$WARNING,
+                        sprintf("Only %d events detected. Consider reducing the number of components to improve stability.", n_events)
+                    )
+                }
+
+                c_idx <- tryCatch(survival::concordance(private$cox_model)$concordance, error = function(e) NA)
+                if (!is.na(c_idx) && c_idx < 0.5) {
+                    private$.insertNotice(
+                        'poorDiscrimination', jmvcore::NoticeType$STRONG_WARNING,
+                        sprintf("Training C-index = %.3f is below 0.5, indicating worse-than-chance discrimination.", c_idx),
+                        position = 1
+                    )
+                }
+
+                # Success notice
+                private$.insertNotice(
+                    'analysisComplete', jmvcore::NoticeType$INFO,
+                    sprintf("PCA-Cox completed: %d components selected from %d predictors, %d observations (%d events), training C-index = %.3f.",
+                            private$selected_components, length(private$predictors),
+                            nrow(private$clean_data), n_events,
+                            ifelse(is.na(c_idx), 0.5, c_idx))
+                )
             }
 
-            # Pathway analysis (not yet implemented)
+            # Loading-based feature clustering analysis
             if (isTRUE(self$options$pathway_analysis)) {
-                self$results$pathwayAnalysis$setContent(
-                    "<h4>Pathway Enrichment Analysis</h4>
-                    <p><b>Status:</b> This feature is not yet implemented in the current version.</p>
-                    <p>Pathway analysis requires external gene set databases (e.g., MSigDB, KEGG, Reactome)
-                    and is planned for a future release. In the meantime, you can export the feature importance
-                    rankings from this analysis and use dedicated pathway analysis tools such as:</p>
-                    <ul>
-                    <li><b>GSEA</b> (Gene Set Enrichment Analysis)</li>
-                    <li><b>clusterProfiler</b> R package</li>
-                    <li><b>Enrichr</b> web tool</li>
-                    </ul>"
-                )
+                private$.performLoadingClusterAnalysis()
             }
         },
         
@@ -227,10 +331,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.fitPCCoxModel()
                 
             }, error = function(e) {
-                self$results$todo$setContent(
-                    paste0("<html><body><div style='color: red;'>",
-                           "<b>PCA analysis failed:</b> ", htmltools::htmlEscape(e$message), 
-                           "</div></body></html>")
+                private$.insertNotice(
+                    'pcaError', jmvcore::NoticeType$ERROR,
+                    sprintf("PCA analysis failed: %s", e$message),
+                    position = 1
                 )
             })
         },
@@ -323,56 +427,82 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .performSupervisedPCA = function() {
-            
+
+            # If survival_weighting is FALSE, use standard PCA instead
+            if (!isTRUE(self$options$survival_weighting)) {
+                private$.performStandardPCA()
+                return()
+            }
+
             tryCatch({
-                
-                # Check if superpc is available
+
                 if (!requireNamespace('superpc', quietly = TRUE)) {
-                    message("superpc not available, falling back to standard PCA")
+                    private$.insertNotice(
+                        'superpcMissing', jmvcore::NoticeType$WARNING,
+                        "Package 'superpc' not available. Falling back to standard PCA. Install with: install.packages('superpc')"
+                    )
                     private$.performStandardPCA()
                     return()
                 }
-                
+
                 # Prepare data for superpc
-                y <- private$clean_data[[private$status_var]]
-                censoring.status <- private$clean_data[[private$status_var]]
-                
-                # Create superpc data structure
+                censoring_status <- private$clean_data[[private$status_var]]
+
                 data_superpc <- list(
-                    x = t(private$X_matrix),  # superpc expects genes x samples
+                    x = t(private$X_matrix),
                     y = private$clean_data[[private$time_var]],
-                    censoring.status = censoring.status,
+                    censoring.status = censoring_status,
                     featurenames = colnames(private$X_matrix)
                 )
-                
+
                 # Train supervised PC
                 train_result <- superpc::superpc.train(
                     data = data_superpc,
                     type = "survival"
                 )
-                
-                # Get predictions for different numbers of components
-                n_components <- min(self$options$n_components %||% 5, ncol(private$X_matrix), nrow(private$X_matrix))
-                
-                # Extract supervised PC scores
+
+                n_components <- min(self$options$n_components %||% 5,
+                                    ncol(private$X_matrix),
+                                    nrow(private$X_matrix))
+
+                # Select threshold via cross-validation (not hardcoded)
+                cv_folds <- min(self$options$cv_folds %||% 10, floor(nrow(private$X_matrix) / 5))
+                optimal_threshold <- tryCatch({
+                    cv_result <- superpc::superpc.cv(
+                        train_result,
+                        data_superpc,
+                        n.fold = max(3, cv_folds),
+                        n.components = min(3, n_components),
+                        n.threshold = 10
+                    )
+                    # Pick threshold with best CV likelihood ratio
+                    best_idx <- which.max(cv_result$scor[, 1])
+                    cv_result$thresholds[best_idx]
+                }, error = function(e) {
+                    # Fallback: use median absolute score as threshold
+                    median(abs(train_result$feature.scores))
+                })
+
+                # Extract supervised PC scores with CV-selected threshold
                 pred_result <- superpc::superpc.predict(
                     train_result,
                     data_superpc,
                     data_superpc,
-                    threshold = 0.1,
+                    threshold = optimal_threshold,
                     n.components = n_components
                 )
-                
-                # Store results (simplified for demonstration)
+
                 private$pca_result <- train_result
                 private$pc_scores <- matrix(pred_result$v.pred, ncol = n_components)
                 colnames(private$pc_scores) <- paste0("PC", 1:n_components)
-                
-                # Approximate loadings and variance (superpc doesn't directly provide these)
+
                 private$.approximatePCAMetrics()
-                
+
             }, error = function(e) {
-                message("Supervised PCA failed, using standard PCA: ", e$message)
+                private$.insertNotice(
+                    'superpcFailed', jmvcore::NoticeType$WARNING,
+                    sprintf("Supervised PCA failed: %s. Using standard PCA.", e$message)
+                )
                 private$.performStandardPCA()
             })
         },
@@ -414,11 +544,17 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     
                 }, error = function(e) {
-                    message("Sparse PCA failed: ", e$message, ". Falling back to standard PCA.")
+                    private$.insertNotice(
+                        'sparsePCAFailed', jmvcore::NoticeType$WARNING,
+                        sprintf("Sparse PCA failed: %s. Using standard PCA instead.", e$message)
+                    )
                     private$.performStandardPCA()
                 })
             } else {
-                message("sparsepca package not available, using standard PCA")
+                private$.insertNotice(
+                    'sparsePCAMissing', jmvcore::NoticeType$WARNING,
+                    "Package 'sparsepca' not available. Using standard PCA. Install with: install.packages('sparsepca')"
+                )
                 private$.performStandardPCA()
             }
         },
@@ -455,11 +591,17 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.approximatePCAMetrics()
                     
                 }, error = function(e) {
-                    message("Kernel PCA failed: ", e$message, ". Falling back to standard PCA.")
+                    private$.insertNotice(
+                        'kernelPCAFailed', jmvcore::NoticeType$WARNING,
+                        sprintf("Kernel PCA failed: %s. Using standard PCA instead.", e$message)
+                    )
                     private$.performStandardPCA()
                 })
             } else {
-                message("kernlab package not available, using standard PCA")
+                private$.insertNotice(
+                    'kernelPCAMissing', jmvcore::NoticeType$WARNING,
+                    "Package 'kernlab' not available. Using standard PCA. Install with: install.packages('kernlab')"
+                )
                 private$.performStandardPCA()
             }
         },
@@ -507,7 +649,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$selected_components <- max(1, min(private$selected_components, n_components_requested))
                 
             } else if (selection_method == "cv") {
-                # Cross-validation selection (simplified)
+                # Cross-validation selection
                 private$selected_components <- private$.performCVSelection()
                 
             } else {
@@ -591,7 +733,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(optimal_k)
                 
             }, error = function(e) {
-                message("CV selection failed, using fixed number: ", e$message)
+                private$.insertNotice(
+                    'cvSelectionFailed', jmvcore::NoticeType$WARNING,
+                    sprintf("CV component selection failed: %s. Using default %d components.", e$message, min(5, ncol(private$pc_scores)))
+                )
                 return(min(5, ncol(private$pc_scores)))
             })
         },
@@ -656,8 +801,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.calculateModelPerformance()
                 
             }, error = function(e) {
-                self$results$errors$setContent(
-                    paste("Cox model fitting failed:", e$message)
+                private$.insertNotice(
+                    'coxFitError', jmvcore::NoticeType$ERROR,
+                    sprintf("Cox model fitting failed: %s", e$message),
+                    position = 1
                 )
             })
         },
@@ -712,7 +859,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # R-squared (Nagelkerke)
                 loglik <- private$cox_model$loglik
-                r_squared <- 1 - exp((loglik[1] - loglik[2]) * 2 / nrow(private$cox_data))
+                n_obs <- nrow(private$cox_data)
+                cox_snell <- 1 - exp((loglik[1] - loglik[2]) * 2 / n_obs)
+                r_max <- 1 - exp(2 * loglik[1] / n_obs)
+                r_squared <- cox_snell / r_max  # Nagelkerke correction
                 
                 # AIC
                 aic_val <- AIC(private$cox_model)
@@ -742,49 +892,56 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 table$setNote("cindex", "* Note: The Training Concordance Index overestimates true out-of-sample performance, as it is evaluated on the data used for variable selection. See Bootstrap Validation for pessimism-corrected estimates.")
                 
             }, error = function(e) {
-                message("Performance calculation failed: ", e$message)
+                private$.insertNotice(
+                    'perfCalcFailed', jmvcore::NoticeType$WARNING,
+                    sprintf("Performance calculation failed: %s", e$message)
+                )
             })
         },
         
         .calculateFeatureImportance = function() {
-            
+
             tryCatch({
-                
-                if (is.null(private$loadings)) return()
-                
+
+                if (is.null(private$loadings) || is.null(private$cox_model)) return()
+
                 table <- self$results$featureImportance
-                
-                # Calculate importance scores based on loadings and component coefficients
+
                 cox_coef <- coef(private$cox_model)
                 pc_coef <- cox_coef[grepl("PC", names(cox_coef))]
-                
-                # Calculate weighted loadings
-                importance_scores <- numeric(length(private$predictors))
-                names(importance_scores) <- private$predictors
-                
-                for (i in 1:private$selected_components) {
+
+                # Use loading row names (= design matrix columns) for feature names
+                # This handles the case where model.matrix expanded factors into dummies
+                feat_names <- rownames(private$loadings)
+                if (is.null(feat_names)) feat_names <- colnames(private$X_matrix)
+                if (is.null(feat_names)) feat_names <- private$predictors
+                n_feats <- length(feat_names)
+
+                # Calculate weighted loadings across selected components
+                importance_scores <- numeric(n_feats)
+                names(importance_scores) <- feat_names
+
+                n_comp <- min(private$selected_components, ncol(private$loadings))
+                for (i in seq_len(n_comp)) {
                     pc_name <- paste0("PC", i)
                     if (pc_name %in% names(pc_coef)) {
                         loadings_i <- private$loadings[, i]
-                        importance_scores <- importance_scores + abs(pc_coef[pc_name] * loadings_i)
+                        importance_scores <- importance_scores + abs(pc_coef[pc_name] * loadings_i[seq_len(n_feats)])
                     }
                 }
-                
-                # Rank features
+
                 feature_ranks <- rank(-importance_scores)
-                
-                # Show top features
-                top_features <- order(importance_scores, decreasing = TRUE)[1:min(20, length(importance_scores))]
-                
+                top_features <- order(importance_scores, decreasing = TRUE)[1:min(20, n_feats)]
+
                 for (idx in top_features) {
-                    feature_name <- private$predictors[idx]
+                    feature_name <- feat_names[idx]
                     importance <- importance_scores[idx]
                     rank_val <- feature_ranks[idx]
-                    
-                    # Find main contributing PCs
-                    pc_contributions <- abs(private$loadings[idx, 1:private$selected_components])
+
+                    pc_contributions <- abs(private$loadings[idx, seq_len(n_comp)])
                     main_pcs <- paste(paste0("PC", which(pc_contributions > 0.1)), collapse = ", ")
-                    
+                    if (nchar(main_pcs) == 0) main_pcs <- paste0("PC", which.max(pc_contributions))
+
                     table$addRow(rowKey = idx, values = list(
                         feature = feature_name,
                         importance_score = round(importance, 4),
@@ -792,9 +949,12 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         contributing_pcs = main_pcs
                     ))
                 }
-                
+
             }, error = function(e) {
-                message("Feature importance calculation failed: ", e$message)
+                private$.insertNotice(
+                    'featureImportanceError', jmvcore::NoticeType$WARNING,
+                    sprintf("Feature importance calculation failed: %s", e$message)
+                )
             })
         },
         
@@ -808,30 +968,32 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 risk_scores <- predict(private$cox_model, type = "lp")
                 
                 # Divide into risk groups (tertiles)
+                # Use jitter to break ties when quantiles collapse
                 tertiles <- quantile(risk_scores, c(1/3, 2/3), na.rm = TRUE)
-                # Ensure cut breaks are strictly unique
-                if (tertiles[1] == tertiles[2] || min(risk_scores, na.rm=T) == tertiles[1] || max(risk_scores, na.rm=T) == tertiles[2]) {
-                    # Fallback if there are flat distributions preventing pure tertiles
-                    unique_vals <- unique(risk_scores)
-                    if(length(unique_vals) <= 3) {
-                         risk_groups <- factor(risk_scores, labels = paste("Level", seq_along(unique_vals)))
-                    } else {
-                        tertiles <- attr(suppressWarnings(Hmisc::wtd.quantile(risk_scores, probs=c(1/3, 2/3), type="quantile", na.rm=TRUE)), "names")
-                        tertiles <- quantile(jitter(risk_scores), c(1/3, 2/3), na.rm = TRUE)
-                        risk_groups <- cut(risk_scores, 
-                                         breaks = c(-Inf, tertiles, Inf),
-                                         labels = c("Low", "Medium", "High"))
-                    }
+                if (tertiles[1] >= tertiles[2]) {
+                    tertiles <- quantile(jitter(risk_scores, amount = diff(range(risk_scores, na.rm = TRUE)) * 0.001),
+                                         c(1/3, 2/3), na.rm = TRUE)
+                }
+
+                unique_breaks <- unique(c(-Inf, tertiles, Inf))
+                if (length(unique_breaks) < 4) {
+                    # Fallback: median split into 2 groups
+                    med <- median(risk_scores, na.rm = TRUE)
+                    risk_groups <- factor(
+                        ifelse(risk_scores <= med, "Low", "High"),
+                        levels = c("Low", "High")
+                    )
                 } else {
-                    risk_groups <- cut(risk_scores, 
+                    risk_groups <- cut(risk_scores,
                                      breaks = c(-Inf, tertiles, Inf),
                                      labels = c("Low", "Medium", "High"))
                 }
                 
                 # Calculate group statistics
                 table <- self$results$riskScore
-                
-                for (group in c("Low", "Medium", "High")) {
+                group_levels <- levels(risk_groups)
+
+                for (group in group_levels) {
 
                     group_idx <- which(risk_groups == group)
                     n_patients <- length(group_idx)
@@ -883,7 +1045,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$risk_groups <- risk_groups
                 
             }, error = function(e) {
-                message("Risk score calculation failed: ", e$message)
+                private$.insertNotice(
+                    'riskScoreFailed', jmvcore::NoticeType$WARNING,
+                    sprintf("Risk score calculation failed: %s", e$message)
+                )
             })
         },
         
@@ -908,10 +1073,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 "<p><b>PCA Configuration:</b></p>",
                 "<ul>",
-                "<li><b>Method:</b> ", stringr::str_to_title(gsub("_", " ", pca_method)), "</li>",
+                "<li><b>Method:</b> ", tools::toTitleCase(gsub("_", " ", pca_method)), "</li>",
                 "<li><b>Components Selected:</b> ", n_components, "</li>",
                 "<li><b>Variance Explained:</b> ", round(private$cumul_variance[n_components] * 100, 1), "%</li>",
-                "<li><b>Selection Method:</b> ", stringr::str_to_title(gsub("_", " ", self$options$component_selection)), "</li>",
+                "<li><b>Selection Method:</b> ", tools::toTitleCase(gsub("_", " ", self$options$component_selection)), "</li>",
                 "</ul>"
             )
             
@@ -937,6 +1102,214 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$summary$setContent(summary_html)
         },
         
+        .populateModelComparison = function() {
+            if (is.null(private$cox_model) || is.null(private$pc_scores)) return()
+
+            table <- self$results$modelComparison
+            max_k <- min(private$selected_components + 2, ncol(private$pc_scores), nrow(private$clean_data) - 5)
+
+            for (k in 1:max_k) {
+                tryCatch({
+                    pcs_k <- private$pc_scores[, 1:k, drop = FALSE]
+                    cox_data_k <- data.frame(
+                        time = private$clean_data[[private$time_var]],
+                        status = private$clean_data[[private$status_var]],
+                        pcs_k
+                    )
+                    pc_names_k <- colnames(pcs_k)
+                    all_vars_k <- c(pc_names_k, private$clinical_vars)
+                    fml_k <- as.formula(paste("Surv(time, status) ~", paste(all_vars_k, collapse = " + ")))
+
+                    if (length(private$clinical_vars) > 0) {
+                        clin_data <- private$clean_data[, private$clinical_vars, drop = FALSE]
+                        cox_data_k <- cbind(cox_data_k, clin_data)
+                    }
+
+                    model_k <- survival::coxph(fml_k, data = cox_data_k)
+                    c_idx <- survival::concordance(model_k)$concordance
+
+                    table$addRow(rowKey = k, values = list(
+                        model = paste0(k, " PC", ifelse(k > 1, "s", ""),
+                                       if (length(private$clinical_vars) > 0) paste0(" + ", length(private$clinical_vars), " clinical") else ""),
+                        n_components = as.integer(k),
+                        c_index = round(c_idx, 4),
+                        aic = round(AIC(model_k), 2),
+                        bic = round(BIC(model_k), 2),
+                        log_likelihood = round(logLik(model_k), 2)
+                    ))
+                }, error = function(e) NULL)
+            }
+        },
+
+        .populateCrossValidation = function() {
+            if (is.null(private$cv_scores)) return()
+
+            cv_html <- paste0(
+                "<h4>Cross-Validation Component Selection</h4>",
+                "<p>CV C-index for 1 to ", length(private$cv_scores), " components:</p>",
+                "<table border='1' cellpadding='4' cellspacing='0' style='border-collapse:collapse;'>",
+                "<tr><th>Components</th><th>CV C-Index</th><th>Selected</th></tr>"
+            )
+            for (k in seq_along(private$cv_scores)) {
+                is_sel <- if (k == private$selected_components) "<b>Yes</b>" else ""
+                cv_html <- paste0(cv_html,
+                    "<tr><td>", k, "</td><td>", round(private$cv_scores[k], 4),
+                    "</td><td>", is_sel, "</td></tr>")
+            }
+            cv_html <- paste0(cv_html,
+                "</table>",
+                "<p>Optimal: ", private$selected_components,
+                " components (max CV C-index = ", round(max(private$cv_scores, na.rm = TRUE), 4), ")</p>")
+
+            self$results$crossValidation$setContent(cv_html)
+        },
+
+        .populateTechnicalDetails = function() {
+            pca_method <- self$options$pca_method %||% "supervised"
+            sel_method <- self$options$component_selection %||% "fixed"
+            n <- nrow(private$clean_data)
+            p <- length(private$predictors)
+
+            html <- paste0(
+                "<h4>Technical Details</h4>",
+                "<p><b>PCA Method:</b> ", tools::toTitleCase(gsub("_", " ", pca_method)), "</p>",
+                "<ul>",
+                if (pca_method == "supervised") "<li>Supervised PCA via superpc: uses survival information to weight features before extracting components</li>"
+                else if (pca_method == "sparse") paste0("<li>Sparse PCA via sparsepca: sparsity parameter = ", self$options$sparse_parameter, "</li>")
+                else if (pca_method == "kernel") "<li>Kernel PCA via kernlab: Radial Basis Function kernel for nonlinear relationships</li>"
+                else "<li>Standard PCA via prcomp: unsupervised dimensionality reduction</li>",
+                "</ul>",
+                "<p><b>Component Selection:</b> ", tools::toTitleCase(gsub("_", " ", sel_method)), "</p>",
+                "<p><b>Preprocessing:</b> ",
+                if (self$options$centering) "Centered" else "Not centered", " + ",
+                if (self$options$scaling) "Scaled" else "Not scaled", "</p>",
+                "<p><b>Design Matrix:</b> ", n, " observations x ", ncol(private$X_matrix), " columns",
+                if (ncol(private$X_matrix) != p) paste0(" (expanded from ", p, " predictors via indicator variable encoding)") else "",
+                "</p>",
+                "<p><b>Cox Model:</b> Surv(time, status) ~ PC1 + ... + PC", private$selected_components,
+                if (length(private$clinical_vars) > 0) paste0(" + ", paste(private$clinical_vars, collapse = " + ")) else "",
+                "</p>"
+            )
+            self$results$technicalDetails$setContent(html)
+        },
+
+        .populateClinicalInterpretation = function() {
+            if (is.null(private$cox_model)) return()
+
+            c_idx <- survival::concordance(private$cox_model)$concordance
+            n_sel <- private$selected_components
+            n_events <- sum(private$clean_data[[private$status_var]])
+
+            disc_label <- if (c_idx >= 0.7) "good" else if (c_idx >= 0.6) "moderate" else "weak"
+
+            html <- paste0(
+                "<h4>Clinical Interpretation</h4>",
+                "<p>A PCA-Cox model using <b>", n_sel, " principal component",
+                ifelse(n_sel > 1, "s", ""), "</b> was fitted to ",
+                nrow(private$clean_data), " patients (", n_events, " events).</p>",
+                "<p>The model showed <b>", disc_label, " discrimination</b> (training C-index = ",
+                round(c_idx, 3), "). ",
+                if (c_idx >= 0.7) "This suggests the PC-based risk score may be clinically useful for patient stratification."
+                else if (c_idx >= 0.6) "Performance is moderate; consider bootstrap validation to assess overfitting."
+                else "Performance is weak; the PCA components may not capture sufficient survival-relevant variation.",
+                "</p>",
+                "<p><b>Important caveats:</b></p>",
+                "<ul>",
+                "<li>Training C-index overestimates true performance. Use bootstrap validation for realistic estimates.</li>",
+                "<li>PCA components are linear combinations of original features and may lack direct biological interpretability.</li>",
+                "<li>External validation on independent data is essential before clinical deployment.</li>",
+                "</ul>"
+            )
+            self$results$clinicalInterpretation$setContent(html)
+        },
+
+        .performLoadingClusterAnalysis = function() {
+            if (is.null(private$loadings) || is.null(private$cox_model)) return()
+
+            tryCatch({
+                cox_coef <- coef(private$cox_model)
+                pc_coef <- cox_coef[grepl("PC", names(cox_coef))]
+                n_comp <- private$selected_components
+                feat_names <- rownames(private$loadings)
+                if (is.null(feat_names)) feat_names <- private$predictors
+
+                # For each component, identify top contributing features
+                # and compute weighted importance per feature
+                importance <- numeric(length(feat_names))
+                names(importance) <- feat_names
+                for (k in seq_len(n_comp)) {
+                    pc_name <- paste0("PC", k)
+                    if (pc_name %in% names(pc_coef)) {
+                        importance <- importance + abs(pc_coef[pc_name] * private$loadings[, k])
+                    }
+                }
+
+                # Assign each feature to its dominant component
+                dominant_pc <- apply(abs(private$loadings[, 1:n_comp, drop = FALSE]), 1, which.max)
+
+                # Build component-wise feature clusters
+                html <- "<h4>Feature Cluster Analysis by Principal Component</h4>"
+                html <- paste0(html,
+                    "<p>Features are grouped by their dominant principal component (highest absolute loading). ",
+                    "Within each cluster, features are ranked by survival-weighted importance.</p>")
+
+                for (k in seq_len(n_comp)) {
+                    pc_name <- paste0("PC", k)
+                    cluster_idx <- which(dominant_pc == k)
+                    if (length(cluster_idx) == 0) next
+
+                    # Sort by importance within cluster
+                    cluster_imp <- importance[cluster_idx]
+                    cluster_order <- cluster_idx[order(cluster_imp, decreasing = TRUE)]
+
+                    # Cox coefficient for this PC
+                    pc_beta <- if (pc_name %in% names(pc_coef)) pc_coef[pc_name] else NA
+                    hr_text <- if (!is.na(pc_beta)) paste0(" (HR = ", round(exp(pc_beta), 3), ")") else ""
+                    var_pct <- round(private$prop_variance[k] * 100, 1)
+
+                    html <- paste0(html,
+                        "<h5>", pc_name, " Cluster: ", var_pct, "% variance", hr_text, "</h5>",
+                        "<table border='1' cellpadding='3' cellspacing='0' style='border-collapse:collapse; font-size:13px;'>",
+                        "<tr><th>Feature</th><th>Loading</th><th>Importance</th></tr>")
+
+                    n_show <- min(10, length(cluster_order))
+                    for (j in seq_len(n_show)) {
+                        idx <- cluster_order[j]
+                        html <- paste0(html,
+                            "<tr><td>", feat_names[idx], "</td>",
+                            "<td>", round(private$loadings[idx, k], 4), "</td>",
+                            "<td>", round(importance[idx], 4), "</td></tr>")
+                    }
+                    if (length(cluster_order) > n_show) {
+                        html <- paste0(html, "<tr><td colspan='3'><i>... and ",
+                                       length(cluster_order) - n_show, " more features</i></td></tr>")
+                    }
+                    html <- paste0(html, "</table>")
+                }
+
+                # Summary statistics
+                n_features <- length(feat_names)
+                cluster_sizes <- table(dominant_pc)
+                html <- paste0(html,
+                    "<p><b>Summary:</b> ", n_features, " features distributed across ",
+                    n_comp, " components. ",
+                    "Largest cluster: PC", names(which.max(cluster_sizes)),
+                    " (", max(cluster_sizes), " features). ",
+                    "Smallest cluster: PC", names(which.min(cluster_sizes)),
+                    " (", min(cluster_sizes), " features).</p>",
+                    "<p><i>Note: For formal pathway enrichment analysis (GSEA, KEGG, Reactome), ",
+                    "export feature importance rankings and use dedicated tools like clusterProfiler or Enrichr.</i></p>")
+
+                self$results$pathwayAnalysis$setContent(html)
+
+            }, error = function(e) {
+                private$.insertNotice(
+                    'pathwayError', jmvcore::NoticeType$WARNING,
+                    sprintf("Feature cluster analysis could not be completed: %s", e$message)
+                )
+            })
+        },
+
         .prepareScreePlot = function() {
             image <- self$results$screePlot
             # Extract only plain numeric data for protobuf-safe serialization
@@ -1166,148 +1539,191 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
         
-        .plotScree = function(image, ...) {
-            
-            if (is.null(private$eigenvalues)) return()
-            
-            eigenvalues <- private$eigenvalues
+        .plotScree = function(image, ggtheme, theme, ...) {
+
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+
+            eigenvalues <- state$eigenvalues
+            selected <- state$selected
             n_show <- min(20, length(eigenvalues))
-            
-            plot(1:n_show, eigenvalues[1:n_show], 
-                 type = "b", pch = 19, col = "blue",
-                 main = "Scree Plot - Principal Component Eigenvalues",
-                 xlab = "Principal Component", 
-                 ylab = "Eigenvalue",
-                 lwd = 2)
-            
-            # Add variance explained
-            prop_var <- private$prop_variance[1:n_show] * 100
-            text(1:n_show, eigenvalues[1:n_show], 
-                 labels = paste0(round(prop_var, 1), "%"), 
-                 pos = 3, cex = 0.8)
-            
-            # Highlight selected components
-            selected <- private$selected_components
-            if (selected <= n_show) {
-                abline(v = selected, col = "red", lty = 2, lwd = 2)
-                text(selected, max(eigenvalues[1:n_show]), 
-                     paste("Selected:", selected), 
-                     pos = 4, col = "red", cex = 1)
-            }
-            
-            grid(col = "lightgray")
-            
-            TRUE
-        },
-        
-        .plotLoadings = function(image, ...) {
-            
-            if (is.null(private$loadings)) return()
-            
-            # Plot loadings for first few components
-            n_components <- min(private$selected_components, 4)
-            
-            par(mfrow = c(2, 2))
-            
-            for (i in 1:n_components) {
-                loadings_i <- private$loadings[, i]
-                
-                # Show top loadings
-                top_loadings <- sort(abs(loadings_i), decreasing = TRUE)[1:min(20, length(loadings_i))]
-                top_idx <- match(top_loadings, abs(loadings_i))
-                
-                barplot(loadings_i[top_idx], 
-                       main = paste("PC", i, "Loadings (Top Features)"),
-                       las = 2, cex.names = 0.6,
-                       col = ifelse(loadings_i[top_idx] > 0, "blue", "red"))
-            }
-            
-            par(mfrow = c(1, 1))
-            
-            TRUE
-        },
-        
-        .plotBiplot = function(image, ...) {
-            
-            if (is.null(private$pc_scores)) return()
-            
-            # Create PCA biplot
-            pc1 <- private$pc_scores[, 1]
-            pc2 <- private$pc_scores[, 2]
-            
-            # Color by survival status
-            colors <- ifelse(private$clean_data[[private$status_var]] == 1, "red", "blue")
-            
-            plot(pc1, pc2, 
-                 col = colors, pch = 19, alpha = 0.6,
-                 main = "PCA Biplot (PC1 vs PC2)",
-                 xlab = paste("PC1 (", round(private$prop_variance[1] * 100, 1), "%)"),
-                 ylab = paste("PC2 (", round(private$prop_variance[2] * 100, 1), "%)"))
-            
-            # Add legend
-            legend("topright", 
-                   legend = c("Event", "Censored"),
-                   col = c("red", "blue"), 
-                   pch = 19)
-            
-            # Add loading vectors for top features (simplified)
-            if (!is.null(private$loadings)) {
-                # Show only top 5 loadings to avoid clutter
-                pc1_loadings <- private$loadings[, 1]
-                pc2_loadings <- private$loadings[, 2]
-                
-                combined_loadings <- sqrt(pc1_loadings^2 + pc2_loadings^2)
-                top_features <- order(combined_loadings, decreasing = TRUE)[1:5]
-                
-                scale_factor <- min(max(abs(c(pc1, pc2)))) / max(abs(c(pc1_loadings, pc2_loadings))) * 0.7
-                
-                for (i in top_features) {
-                    arrows(0, 0, 
-                           pc1_loadings[i] * scale_factor, 
-                           pc2_loadings[i] * scale_factor,
-                           col = "darkgreen", lwd = 2)
-                    
-                    text(pc1_loadings[i] * scale_factor * 1.1, 
-                         pc2_loadings[i] * scale_factor * 1.1,
-                         private$predictors[i], 
-                         cex = 0.7, col = "darkgreen")
-                }
-            }
-            
-            TRUE
-        },
-        
-        .plotSurvival = function(image, ...) {
-            
-            if (is.null(private$risk_groups) || is.null(private$clean_data)) return()
-            
-            # Create survival curves by risk group
-            surv_data <- data.frame(
-                time = private$clean_data[[private$time_var]],
-                status = private$clean_data[[private$status_var]],
-                risk_group = private$risk_groups
+
+            prop_var <- eigenvalues[1:n_show] / sum(eigenvalues) * 100
+
+            df <- data.frame(
+                pc = 1:n_show,
+                eigenvalue = eigenvalues[1:n_show],
+                pct = prop_var,
+                sel = factor(ifelse(1:n_show <= selected, "Selected", "Not selected"))
             )
-            
-            # Fit survival curves
-            surv_fit <- survival::survfit(Surv(time, status) ~ risk_group, data = surv_data)
-            
-            # Plot survival curves
-            plot(surv_fit, 
-                 col = c("green", "orange", "red"),
-                 lwd = 2,
-                 main = "Survival Curves by PC-Based Risk Groups",
-                 xlab = "Time", 
-                 ylab = "Survival Probability")
-            
-            legend("topright", 
-                   legend = c("Low Risk", "Medium Risk", "High Risk"),
-                   col = c("green", "orange", "red"), 
-                   lwd = 2)
-            
-            # Add risk table
-            times <- seq(0, max(surv_data$time, na.rm = TRUE), length.out = 5)
-            risk_table <- summary(surv_fit, times = times)
-            
+
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = pc, y = eigenvalue)) +
+                ggplot2::geom_line(color = "steelblue", linewidth = 1) +
+                ggplot2::geom_point(ggplot2::aes(color = sel), size = 3) +
+                ggplot2::scale_color_manual(values = c("Selected" = "#2ecc71", "Not selected" = "grey60"),
+                                           name = "") +
+                ggplot2::geom_vline(xintercept = selected + 0.5, linetype = "dashed", color = "red") +
+                ggplot2::geom_text(ggplot2::aes(label = paste0(round(pct, 1), "%")),
+                                   vjust = -1, size = 3) +
+                ggplot2::labs(
+                    title = "Scree Plot",
+                    subtitle = paste(selected, "components selected"),
+                    x = "Principal Component",
+                    y = "Eigenvalue"
+                ) +
+                ggtheme
+
+            print(p)
+            TRUE
+        },
+        
+        .plotLoadings = function(image, ggtheme, theme, ...) {
+
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+
+            loadings_df <- as.data.frame(state$loadings)
+            selected <- state$selected
+            n_comp <- min(selected, 2, ncol(loadings_df))
+
+            # Build long-form data for top loadings of first n_comp PCs
+            plot_data <- data.frame()
+            for (i in 1:n_comp) {
+                vals <- loadings_df[, i]
+                names(vals) <- rownames(loadings_df)
+                top_idx <- order(abs(vals), decreasing = TRUE)[1:min(15, length(vals))]
+                df_i <- data.frame(
+                    feature = factor(names(vals)[top_idx], levels = rev(names(vals)[top_idx])),
+                    loading = vals[top_idx],
+                    component = paste0("PC", i),
+                    direction = ifelse(vals[top_idx] > 0, "Positive", "Negative"),
+                    stringsAsFactors = FALSE
+                )
+                plot_data <- rbind(plot_data, df_i)
+            }
+
+            p <- ggplot2::ggplot(plot_data,
+                    ggplot2::aes(x = feature, y = loading, fill = direction)) +
+                ggplot2::geom_col(alpha = 0.8) +
+                ggplot2::scale_fill_manual(values = c("Positive" = "#3498db", "Negative" = "#e74c3c"),
+                                          name = "Direction") +
+                ggplot2::coord_flip() +
+                ggplot2::facet_wrap(~ component, scales = "free_y") +
+                ggplot2::labs(title = "Component Loadings (Top Features)",
+                             x = "", y = "Loading") +
+                ggtheme
+
+            print(p)
+            TRUE
+        },
+        
+        .plotBiplot = function(image, ggtheme, theme, ...) {
+
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+
+            pc_df <- as.data.frame(state$pc_scores)
+            loadings_df <- as.data.frame(state$loadings)
+
+            if (ncol(pc_df) < 2 || ncol(loadings_df) < 2) return(FALSE)
+
+            pc1 <- pc_df[, 1]
+            pc2 <- pc_df[, 2]
+            event_status <- factor(
+                ifelse(private$clean_data[[private$status_var]] == 1, "Event", "Censored"),
+                levels = c("Event", "Censored")
+            )
+
+            scores_df <- data.frame(PC1 = pc1, PC2 = pc2, Status = event_status)
+
+            # Variance labels
+            pv1 <- round(private$prop_variance[1] * 100, 1)
+            pv2 <- round(private$prop_variance[2] * 100, 1)
+
+            p <- ggplot2::ggplot(scores_df, ggplot2::aes(x = PC1, y = PC2, color = Status)) +
+                ggplot2::geom_point(alpha = 0.6, size = 2) +
+                ggplot2::scale_color_manual(values = c("Event" = "#e74c3c", "Censored" = "#3498db")) +
+                ggplot2::labs(
+                    title = "PCA Biplot",
+                    x = paste0("PC1 (", pv1, "%)"),
+                    y = paste0("PC2 (", pv2, "%)")
+                ) +
+                ggtheme
+
+            # Add top 5 loading vectors
+            l1 <- loadings_df[, 1]
+            l2 <- loadings_df[, 2]
+            combined <- sqrt(l1^2 + l2^2)
+            top5 <- order(combined, decreasing = TRUE)[1:min(5, length(combined))]
+            scale_f <- min(max(abs(pc1)), max(abs(pc2))) / max(abs(c(l1, l2))) * 0.7
+
+            arrow_df <- data.frame(
+                x = 0, y = 0,
+                xend = l1[top5] * scale_f,
+                yend = l2[top5] * scale_f,
+                label = rownames(loadings_df)[top5]
+            )
+            p <- p +
+                ggplot2::geom_segment(data = arrow_df,
+                    ggplot2::aes(x = x, y = y, xend = xend, yend = yend),
+                    arrow = ggplot2::arrow(length = ggplot2::unit(0.2, "cm")),
+                    color = "darkgreen", linewidth = 0.8, inherit.aes = FALSE) +
+                ggplot2::geom_text(data = arrow_df,
+                    ggplot2::aes(x = xend * 1.1, y = yend * 1.1, label = label),
+                    color = "darkgreen", size = 3, inherit.aes = FALSE)
+
+            print(p)
+            TRUE
+        },
+        
+        .plotSurvival = function(image, ggtheme, theme, ...) {
+
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+
+            surv_data <- as.data.frame(state)
+            surv_data$risk_groups <- factor(surv_data$risk_groups)
+
+            surv_fit <- survival::survfit(
+                survival::Surv(time, status) ~ risk_groups, data = surv_data
+            )
+
+            # Build KM data manually for ggplot
+            n_groups <- length(levels(surv_data$risk_groups))
+            group_colors <- c("#2ecc71", "#f39c12", "#e74c3c")[1:n_groups]
+
+            plot_data <- data.frame()
+            for (i in seq_along(surv_fit$strata)) {
+                strata_name <- names(surv_fit$strata)[i]
+                grp_label <- sub("risk_groups=", "", strata_name)
+                n_times <- surv_fit$strata[i]
+                start_idx <- if (i == 1) 1 else sum(surv_fit$strata[1:(i-1)]) + 1
+                end_idx <- sum(surv_fit$strata[1:i])
+
+                df_i <- data.frame(
+                    time = surv_fit$time[start_idx:end_idx],
+                    surv = surv_fit$surv[start_idx:end_idx],
+                    group = grp_label,
+                    stringsAsFactors = FALSE
+                )
+                # Add origin point
+                df_i <- rbind(data.frame(time = 0, surv = 1, group = grp_label), df_i)
+                plot_data <- rbind(plot_data, df_i)
+            }
+
+            p <- ggplot2::ggplot(plot_data,
+                    ggplot2::aes(x = time, y = surv, color = group)) +
+                ggplot2::geom_step(linewidth = 1) +
+                ggplot2::scale_color_manual(values = group_colors, name = "Risk Group") +
+                ggplot2::labs(
+                    title = "Survival by PC-Based Risk Groups",
+                    x = "Time",
+                    y = "Survival Probability"
+                ) +
+                ggplot2::ylim(0, 1) +
+                ggtheme
+
+            print(p)
             TRUE
         }
     )

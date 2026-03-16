@@ -122,37 +122,73 @@ Rscript _updateModules.R
 
 
 
-/update-refs grouplasso
-/document-function grouplasso
 
-/check-function sparsegrouplasso
-/check-function-base sparsegrouplasso
-/check-function-full sparsegrouplasso
-/review-function sparsegrouplasso
-/fix-function sparsegrouplasso
-/generate-test-data sparsegrouplasso
-/update-refs sparsegrouplasso
-/document-function sparsegrouplasso
+/generate-test-data survival
+/update-refs survival
+/document-function survival
 
-/check-function pcacox
-/check-function-base pcacox
-/check-function-full pcacox
-/review-function pcacox
-/fix-function pcacox
-/generate-test-data pcacox
-/update-refs pcacox
-/document-function pcacox
+/check-function relativesurvival
+/check-function-base relativesurvival
+/check-function-full relativesurvival
+/review-function relativesurvival
+/fix-function relativesurvival
+/generate-test-data relativesurvival
+/update-refs relativesurvival
+/document-function relativesurvival
 
-add firthregression to lassointro
 
-/check-function firthregression
-/check-function-base firthregression
-/check-function-full firthregression
-/review-function firthregression
-/fix-function firthregression
-/generate-test-data firthregression
-/update-refs firthregression
-/document-function firthregression
+/check-function stagemigration
+/check-function-base stagemigration
+/check-function-full stagemigration
+/review-function stagemigration
+/fix-function stagemigration
+/generate-test-data stagemigration
+/update-refs stagemigration
+/document-function stagemigration
+
+
+/check-function competingsurvival
+/check-function-base competingsurvival
+/check-function-full competingsurvival
+/review-function competingsurvival
+/fix-function competingsurvival
+/generate-test-data competingsurvival
+/update-refs competingsurvival
+/document-function competingsurvival
+
+
+
+
+/check-function conditionalsurvival
+/check-function-base conditionalsurvival
+/check-function-full conditionalsurvival
+/review-function conditionalsurvival
+/fix-function conditionalsurvival
+/generate-test-data conditionalsurvival
+/update-refs conditionalsurvival
+/document-function conditionalsurvival
+
+
+/check-function timeroc
+/check-function-base timeroc
+/check-function-full timeroc
+/review-function timeroc
+/fix-function timeroc
+/generate-test-data timeroc
+/update-refs timeroc
+/document-function timeroc
+
+
+/check-function curemodels
+/check-function-base curemodels
+/check-function-full curemodels
+/review-function curemodels
+/fix-function curemodels
+/generate-test-data curemodels
+/update-refs curemodels
+/document-function curemodels
+
+
 
 
 prepare an agent team to work on function: lassocox:

@@ -382,7 +382,8 @@ firthregressionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "predictors",
                     "analysisType",
                     "outcomeLevel",
-                    "ciLevel")))
+                    "ciLevel",
+                    "ciMethod")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="separationPlotImage",

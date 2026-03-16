@@ -10,6 +10,7 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             status = NULL,
             predictors = NULL,
             model_type = "mixture",
+            smcure_model_type = "ph",
             cure_link = "logit",
             survival_dist = "weibull",
             bootstrap_ci = FALSE,
@@ -67,6 +68,13 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "npcure",
                     "all"),
                 default="mixture")
+            private$..smcure_model_type <- jmvcore::OptionList$new(
+                "smcure_model_type",
+                smcure_model_type,
+                options=list(
+                    "ph",
+                    "aft"),
+                default="ph")
             private$..cure_link <- jmvcore::OptionList$new(
                 "cure_link",
                 cure_link,
@@ -155,6 +163,7 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..status)
             self$.addOption(private$..predictors)
             self$.addOption(private$..model_type)
+            self$.addOption(private$..smcure_model_type)
             self$.addOption(private$..cure_link)
             self$.addOption(private$..survival_dist)
             self$.addOption(private$..bootstrap_ci)
@@ -175,6 +184,7 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         status = function() private$..status$value,
         predictors = function() private$..predictors$value,
         model_type = function() private$..model_type$value,
+        smcure_model_type = function() private$..smcure_model_type$value,
         cure_link = function() private$..cure_link$value,
         survival_dist = function() private$..survival_dist$value,
         bootstrap_ci = function() private$..bootstrap_ci$value,
@@ -194,6 +204,7 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..status = NA,
         ..predictors = NA,
         ..model_type = NA,
+        ..smcure_model_type = NA,
         ..cure_link = NA,
         ..survival_dist = NA,
         ..bootstrap_ci = NA,
@@ -239,6 +250,8 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "parallel",
                     "smcure",
                     "flexsurvcure",
+                    "npcure",
+                    "cuRe",
                     "glue",
                     "stringr"))
             self$add(jmvcore::Html$new(
@@ -464,6 +477,8 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param predictors Predictor variables for the model
 #' @param model_type Type of cure model: mixture (smcure), non-mixture
 #'   (flexsurvcure), cuRe, npcure, or all
+#' @param smcure_model_type Survival model type for smcure: 'ph' (proportional
+#'   hazards) or 'aft' (accelerated failure time)
 #' @param cure_link Link function for the cure probability model
 #' @param survival_dist Distribution for modeling survival of uncured patients
 #' @param bootstrap_ci Use bootstrap for confidence interval estimation
@@ -509,6 +524,7 @@ curemodels <- function(
     status,
     predictors,
     model_type = "mixture",
+    smcure_model_type = "ph",
     cure_link = "logit",
     survival_dist = "weibull",
     bootstrap_ci = FALSE,
@@ -547,6 +563,7 @@ curemodels <- function(
         status = status,
         predictors = predictors,
         model_type = model_type,
+        smcure_model_type = smcure_model_type,
         cure_link = cure_link,
         survival_dist = survival_dist,
         bootstrap_ci = bootstrap_ci,

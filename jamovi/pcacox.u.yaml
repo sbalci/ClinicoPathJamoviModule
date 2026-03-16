@@ -22,19 +22,12 @@ children:
             name: status
             maxItemCount: 1
             isTarget: true
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Outcome Level Options
-            style: list-inline
-            children:
-              - type: ComboBox
-                name: outcomeLevel
-                label: Event Level
-              - type: ComboBox
-                name: censorLevel
-                label: Censored Level
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (status)
+          - type: LevelSelector
+            name: censorLevel
+            enable: (status)
       - type: TargetLayoutBox
         label: High-Dimensional Predictors
         children:

@@ -49,7 +49,7 @@ items:
       title: Marker Variable Statistics
       type: Table
       visible: (showMarkerStats)
-      rows: 1
+      rows: 0
       columns:
         - name: statistic
           title: "Statistic"

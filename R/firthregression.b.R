@@ -524,7 +524,9 @@ firthregressionClass <- R6::R6Class(
 
             # Populate results
             private$.populateCoefficients(firth_fit, standard_fit, "logistic")
-            private$.populateModelFit(firth_fit, standard_fit, data_info, "logistic")
+            if (isTRUE(self$options$showModelFit)) {
+                private$.populateModelFit(firth_fit, standard_fit, data_info, "logistic")
+            }
 
             if (!is.null(standard_fit) && isTRUE(self$options$compareStandard)) {
                 private$.populateComparison(firth_fit, standard_fit, "logistic")
@@ -565,6 +567,12 @@ firthregressionClass <- R6::R6Class(
                 private$.addNotice("ERROR", "Package Not Available",
                     "The 'coxphf' package is required for Firth Cox regression. Please install it: install.packages('coxphf')")
                 return()
+            }
+
+            # Note: coxphf always uses profile penalized likelihood CIs
+            if (self$options$ciMethod == "wald") {
+                private$.addNotice("INFO", "CI Method Note",
+                    "Firth Cox regression (coxphf) always uses profile penalized likelihood CIs. The Wald CI option applies only to logistic mode.")
             }
 
             analysis_data <- data_info$data
@@ -608,7 +616,9 @@ firthregressionClass <- R6::R6Class(
 
             # Populate results
             private$.populateCoefficients(firth_fit, standard_fit, "cox")
-            private$.populateModelFit(firth_fit, standard_fit, data_info, "cox")
+            if (isTRUE(self$options$showModelFit)) {
+                private$.populateModelFit(firth_fit, standard_fit, data_info, "cox")
+            }
 
             if (!is.null(standard_fit) && isTRUE(self$options$compareStandard)) {
                 private$.populateComparison(firth_fit, standard_fit, "cox")
