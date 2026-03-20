@@ -11,11 +11,11 @@ methods, statistical comparisons, and provides clinical interpretation of result
 \details{
 This analysis provides both time-dependent and binary ROC curve analysis with:
 \itemize{
-\item Time-dependent ROC: Multiple estimation methods (incident, cumulative, static)
+\item Time-dependent ROC: Cumulative/dynamic ROC with IPCW weighting options
 \item Binary ROC: General diagnostic performance evaluation
 \item DeLong test for comparing multiple ROC curves (binary mode)
 \item Bootstrap and Venkatraman tests for ROC comparison
-\item Bootstrap confidence intervals for robust inference
+\item Asymptotic confidence intervals via influence functions
 \item Optimal cutoff calculation using Youden index
 \item Comprehensive visualization (ROC curves and AUC over time)
 \item Clinical interpretation and performance assessment

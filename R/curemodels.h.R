@@ -266,23 +266,54 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="warnings",
                 title="Warnings",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "bootstrap_ci")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="errors",
                 title="Errors",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
                 title="Analysis Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelTable",
                 title="Cure Model Results",
                 visible=TRUE,
                 rows=0,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -319,6 +350,14 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Cure Fraction Summary",
                 visible=TRUE,
                 rows=0,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci"),
                 columns=list(
                     list(
                         `name`="group", 
@@ -347,13 +386,15 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=450,
                 renderFun=".renderCureFractionPlot",
+                requiresData=TRUE,
                 visible="(plot_cure_fraction)",
                 clearWith=list(
                     "time",
                     "status",
                     "predictors",
                     "model_type",
-                    "cure_link")))
+                    "cure_link",
+                    "bootstrap_ci")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
@@ -361,6 +402,7 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=450,
                 renderFun=".plotSurvival",
+                requiresData=TRUE,
                 visible="(plot_survival)",
                 clearWith=list(
                     "time",
@@ -374,6 +416,14 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Goodness of Fit Tests",
                 visible="(goodness_of_fit)",
                 rows=0,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist"),
                 columns=list(
                     list(
                         `name`="test_name", 
@@ -401,13 +451,22 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "time",
                     "status",
                     "predictors",
-                    "cure_threshold")))
+                    "cure_threshold",
+                    "model_type")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
                 title="Model Comparison",
                 visible="(model_type:all)",
                 rows=0,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist"),
                 columns=list(
                     list(
                         `name`="model", 
@@ -429,7 +488,14 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation",
-                visible=TRUE))}))
+                visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "cure_link",
+                    "survival_dist")))}))
 
 curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "curemodelsBase",

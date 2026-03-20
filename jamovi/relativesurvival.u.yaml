@@ -83,6 +83,7 @@ children:
       - type: TextBox
         name: cohort_year
         format: string
+        enable: (period_analysis)
   - type: LayoutBox
     margin: large
     children:
@@ -94,6 +95,7 @@ children:
       - type: TextBox
         name: spline_df
         format: number
+        enable: (regression_model:flexible)
   - type: LayoutBox
     margin: large
     children:

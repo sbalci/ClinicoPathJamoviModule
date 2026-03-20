@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.37.02
-Date: 2026-03-16
+Version: 0.0.37.07
+Date: 2026-03-20
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -92,6 +92,7 @@ Imports:
     rcompanion,
     WRS2,
     PMCMRplus,
+    ordinal,
     broom.mixed,
     skimr,
     kappaSize,
@@ -344,7 +345,9 @@ Suggests:
     sparsepca,
     kernlab,
     superpc,
-    ncvreg
+    ncvreg,
+    relsurv,
+    rstpm2
 Config/testthat/edition: 3
 Collate: 
     '00jmv.R'
@@ -874,6 +877,8 @@ Collate:
     'onesurvival.h.R'
     'optimalcutpoint.b.R'
     'optimalcutpoint.h.R'
+    'ordinalmixedmodel.b.R'
+    'ordinalmixedmodel.h.R'
     'ordinalroc.b.R'
     'ordinalroc.h.R'
     'outbreakanalysis.b.R'

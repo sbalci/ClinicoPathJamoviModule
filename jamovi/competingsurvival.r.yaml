@@ -36,6 +36,19 @@ items:
       type:  Table
       visible: true
       rows: 0
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - confidencelevel
+          - graystest
+          - subdistribution
+          - timepoints
       columns:
           - name: term
             title: 'Variable'
@@ -147,6 +160,70 @@ items:
       title: Clinical Interpretation
       type:  Html
       visible: true
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - confidencelevel
+          - graystest
+          - subdistribution
+          - timepoints
+
+    - name: assumptions
+      title: Assumptions & Caveats
+      type: Html
+      visible: true
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+
+    - name: fineGrayTable
+      title: Fine-Gray Subdistribution Hazard Model
+      type: Table
+      visible: (subdistribution)
+      rows: 0
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+          - dod
+          - dooc
+          - confidencelevel
+          - subdistribution
+      columns:
+          - name: term
+            title: 'Term'
+            type: text
+          - name: coef
+            title: 'Coefficient'
+            type: number
+          - name: hr
+            title: 'HR'
+            type: number
+          - name: hr_lower
+            title: 'HR CI Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR CI Upper'
+            type: number
+          - name: se
+            title: 'SE'
+            type: number
+          - name: z
+            title: 'z'
+            type: number
+          - name: p
+            title: 'p'
+            type: number
+            format: zto,pvalue
 
 
 refs:
@@ -159,4 +236,5 @@ refs:
     - survival
     - cmprsk
     - scales
+    - survminer
 ...

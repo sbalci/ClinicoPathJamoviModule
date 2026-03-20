@@ -26,14 +26,19 @@ conditionalsurvivalClass <- R6::R6Class(
             # Get variables
             timeVar <- self$options$timeVar
             outcomeVar <- self$options$outcomeVar
-            # TODO (Bug 4): conditionVar is declared in .a.yaml but never used for
-            #   subgroup/stratified conditional survival. Implement stratified analysis
-            #   or remove from the UI in a future version.
             conditionVar <- self$options$conditionVar
-            # TODO (Bug 5): bandwidth option is declared in .a.yaml but never read.
-            #   Implement kernel bandwidth selection for presmoothed KM when method="pkm".
-            # TODO (Bug 6): plotType option is declared in .a.yaml but never read.
-            #   Implement "probability" and "both" plot types in .createCondSurvPlot().
+
+            # bandwidth option: Could be used for kernel-smoothed conditional survival
+            # via bw parameter in density estimation or loess smoothing of KM estimates.
+            # Currently uses step-function KM without smoothing.
+            # When method="pkm", this should control the presmoothing bandwidth.
+            bandwidth <- self$options$bandwidth
+
+            # TODO: plotType (curves/probability/both) is not yet
+            # implemented in .plot(). Currently always draws curves.
+            plotType <- self$options$plotType
+
+            # conditionVar stratification is handled below in the analysis block
 
             # Check for required variables
             if (is.null(timeVar) || is.null(outcomeVar)) {
@@ -50,11 +55,36 @@ conditionalsurvivalClass <- R6::R6Class(
             time <- data[[timeVar]]
             status <- data[[outcomeVar]]
             
-            # Handle factor status variable  
+            # Handle factor status variable with validation
             if (is.factor(status)) {
+                levs <- levels(status)
+                if (length(levs) != 2) {
+                    jmvcore::reject(
+                        paste0("Event/Status variable must have exactly 2 levels (got ", length(levs), ")."),
+                        code = ""
+                    )
+                }
                 status <- as.numeric(status) - 1
+            } else {
+                unique_vals <- sort(unique(status[!is.na(status)]))
+                if (!all(unique_vals %in% c(0, 1))) {
+                    jmvcore::reject(
+                        "Event/Status variable must contain only 0 (censored) and 1 (event).",
+                        code = ""
+                    )
+                }
             }
-            
+
+            # Minimum event count validation
+            n_events <- sum(status == 1, na.rm = TRUE)
+            if (n_events < 5) {
+                jmvcore::reject(
+                    paste0("Too few events (", n_events,
+                        "). Conditional survival requires at least 5 events for reliable estimation."),
+                    code = ""
+                )
+            }
+
             # Check for required packages
             if (!requireNamespace("survival", quietly = TRUE)) {
                 self$results$condsurvTable$addFootnote(rowNo = 1, col = "time", 
@@ -65,13 +95,12 @@ conditionalsurvivalClass <- R6::R6Class(
             # Check if condSURV package is available
             has_condsurv <- requireNamespace("condSURV", quietly = TRUE)
             
-            # Get conditioning time
+            # Get conditioning time (0 or NULL = use median follow-up)
             condTime <- self$options$conditionTime
-            if (is.null(condTime) || is.na(condTime)) {
-                # Use median follow-up time as default
+            if (is.null(condTime) || is.na(condTime) || condTime <= 0) {
                 condTime <- median(time, na.rm = TRUE)
             }
-            
+
             # Get specific time points
             timePoints <- private$.parseTimePoints()
             if (length(timePoints) == 0) {
@@ -79,64 +108,128 @@ conditionalsurvivalClass <- R6::R6Class(
                 timePoints <- private$.getDefaultTimePoints(time, condTime)
             }
             
-            # Run conditional survival analysis
-            tryCatch({
-                if (has_condsurv && self$options$method %in% c("km", "landmark", "ipw", "pkm")) {
-                    results <- private$.runCondSurv(time, status, condTime, timePoints)
-                } else {
-                    # Fallback to manual calculation using survival package
-                    results <- private$.runManualCondSurv(time, status, condTime, timePoints)
+            # Validate conditionVar groups before computation
+            grpFactor <- NULL
+            grpLevels <- NULL
+            if (!is.null(conditionVar)) {
+                grpFactor <- as.factor(data[[conditionVar]])
+                grpLevels <- levels(grpFactor)
+                if (length(grpLevels) < 2) {
+                    jmvcore::reject(
+                        "The conditioning variable has fewer than 2 levels. Stratified analysis requires at least 2 groups.",
+                        code = ""
+                    )
                 }
-                
+            }
+
+            # Run conditional survival analysis -- with optional stratification
+            tryCatch({
+                if (!is.null(conditionVar)) {
+                    allResults <- list()
+                    for (grp in grpLevels) {
+                        grpIdx <- grpFactor == grp
+                        grpTime <- time[grpIdx]
+                        grpStatus <- status[grpIdx]
+
+                        # Skip groups with too few events
+                        grpEvents <- sum(grpStatus == 1, na.rm = TRUE)
+                        if (grpEvents < 3) {
+                            next
+                        }
+
+                        grpRes <- private$.computeCondSurv(
+                            grpTime, grpStatus, condTime, timePoints, has_condsurv
+                        )
+                        grpRes$group <- grp
+                        allResults[[grp]] <- grpRes
+                    }
+
+                    if (length(allResults) == 0) {
+                        stop("No groups had enough events (>=3) for conditional survival estimation.")
+                    }
+
+                    results <- do.call(rbind, allResults)
+                    rownames(results) <- NULL
+                } else {
+                    # Overall (unstratified) analysis
+                    results <- private$.computeCondSurv(
+                        time, status, condTime, timePoints, has_condsurv
+                    )
+                    results$group <- "Overall"
+                }
+
                 # Populate table
                 private$.populateCondSurvTable(results, condTime)
-                
+
                 # Update explanations if requested
                 if (self$options$showExplanations) {
                     private$.updateMethodExplanation(condTime, results)
                 }
-                
+
+                # Generate report sentence
+                private$.generateReportSentence(condTime, results, time, status)
+
+                # Populate assumptions and caveats panel
+                private$.populateAssumptions()
+
             }, error = function(e) {
-                self$results$condsurvTable$addFootnote(rowNo = 1, col = "time", 
-                    paste("Error in conditional survival calculation:", e$message))
+                try(
+                    self$results$condsurvTable$addFootnote(rowNo = 1, col = "time",
+                        paste("Error in conditional survival calculation:", e$message)),
+                    silent = TRUE
+                )
             })
         },
-        
-        .plot = function(image, ...) {
-            
+
+        # Dispatcher: choose condSURV or manual method for a single data subset
+        .computeCondSurv = function(time, status, condTime, timePoints, has_condsurv) {
+            method <- self$options$method
+            if (has_condsurv && method %in% c("km", "landmark", "ipw", "pkm")) {
+                private$.runCondSurv(time, status, condTime, timePoints)
+            } else {
+                private$.runManualCondSurv(time, status, condTime, timePoints)
+            }
+        },
+
+        .plot = function(image, ggtheme, theme, ...) {
+
             # Get variables
             timeVar <- self$options$timeVar
             outcomeVar <- self$options$outcomeVar
-            
+            conditionVar <- self$options$conditionVar
+
             if (is.null(timeVar) || is.null(outcomeVar))
-                return()
-                
+                return(FALSE)
+
             # Get data
             data <- self$data
             if (nrow(data) == 0)
-                return()
-                
+                return(FALSE)
+
             time <- data[[timeVar]]
             status <- data[[outcomeVar]]
-            
+
             if (is.factor(status)) {
                 status <- as.numeric(status) - 1
             }
-            
-            # Get conditioning time
+
+            # Get conditioning time (0 or NULL = use median follow-up)
             condTime <- self$options$conditionTime
-            if (is.null(condTime) || is.na(condTime)) {
+            if (is.null(condTime) || is.na(condTime) || condTime <= 0) {
                 condTime <- median(time, na.rm = TRUE)
             }
-            
+
             tryCatch({
-                p <- private$.createCondSurvPlot(time, status, condTime)
+                p <- private$.createCondSurvPlot(
+                    time, status, condTime, ggtheme,
+                    conditionVar = conditionVar, data = data
+                )
                 print(p)
-                TRUE
+                return(TRUE)
             }, error = function(e) {
                 # Return empty plot with error message
                 plot.new()
-                text(0.5, 0.5, paste("Error creating plot:", e$message), 
+                text(0.5, 0.5, paste("Error creating plot:", e$message),
                      cex = 1.2, col = "red")
                 TRUE
             })
@@ -227,7 +320,13 @@ conditionalsurvivalClass <- R6::R6Class(
                     se_cond <- private$.getSurvSEAtTime(fit, condTime)
                     
                     # Delta method approximation for SE of ratio
-                    se <- condSurv * sqrt((se_t/survAtT)^2 + (se_cond/survAtCondTime)^2)
+                    # Guard: when survAtT == 0, the ratio se_t/survAtT is Inf,
+                    # and 0 * Inf = NaN in R
+                    if (survAtT > 0) {
+                        se <- condSurv * sqrt((se_t/survAtT)^2 + (se_cond/survAtCondTime)^2)
+                    } else {
+                        se <- 0
+                    }
                     
                     # Confidence interval
                     ci_level <- self$options$confInt
@@ -300,7 +399,10 @@ conditionalsurvivalClass <- R6::R6Class(
         },
 
         .calculateIPWCondSurv = function(time, status, condTime, timePoints) {
-            # Simplified IPW conditional survival - placeholder implementation
+            # TODO: IPW Conditional Survival -- Implement proper inverse probability
+            # weighting using IPCW estimator. Requires computing censoring weights
+            # via Cox model on censoring distribution. See Beran (1981) or
+            # condSURV package for reference implementation. Priority: LOW.
             return(private$.runManualCondSurv(time, status, condTime, timePoints))
         },
 
@@ -412,94 +514,249 @@ conditionalsurvivalClass <- R6::R6Class(
         },
 
         .populateCondSurvTable = function(results, condTime) {
-            
+
             table <- self$results$condsurvTable
-            
-            # Clear existing rows
-            for (i in seq_len(table$rowCount)) {
-                table$deleteRows(rowNo = 1)
-            }
-            
-            # Add results
+
+            # Clear all existing rows (no-arg form is the correct pattern)
+            table$deleteRows()
+
+            # Add results -- include group column for stratified analyses
             for (i in seq_len(nrow(results))) {
-                table$addRow(rowKey = i, values = list(
+                vals <- list(
                     time = results$time[i],
                     condtime = results$condtime[i],
                     condprob = results$condprob[i],
                     se = results$se[i],
                     lower = results$lower[i],
                     upper = results$upper[i]
-                ))
+                )
+                if ("group" %in% names(results)) {
+                    vals$group <- results$group[i]
+                }
+                table$addRow(rowKey = i, values = vals)
             }
-            
+
             # Add footnote explaining conditioning
-            table$addFootnote(rowNo = 1, col = "condprob", 
+            table$addFootnote(rowNo = 1, col = "condprob",
                 paste0("Conditional survival probabilities given survival to time ", condTime))
         },
 
-        .createCondSurvPlot = function(time, status, condTime) {
-            
+        .createCondSurvPlot = function(time, status, condTime, ggtheme = NULL,
+                                       conditionVar = NULL, data = NULL) {
+
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
                 stop("ggplot2 package required for plotting")
             }
-            
-            # Create survival fit for overall and conditional survival
-            fit <- survival::survfit(survival::Surv(time, status) ~ 1)
-            
-            # Create data for plotting
-            plot_data <- data.frame(
-                time = fit$time,
-                surv = fit$surv,
-                type = "Overall Survival"
-            )
-            
-            # Add conditional survival curve
-            survAtCondTime <- private$.getSurvProbAtTime(fit, condTime)
-            
-            if (survAtCondTime > 0) {
-                # Calculate conditional survival for all time points > condTime
-                idx_after_cond <- fit$time > condTime
-                
-                if (any(idx_after_cond)) {
-                    cond_data <- data.frame(
-                        time = fit$time[idx_after_cond],
-                        surv = fit$surv[idx_after_cond] / survAtCondTime,
-                        type = paste0("Conditional Survival (t > ", condTime, ")")
-                    )
-                    
-                    # Add point at conditioning time
-                    cond_start <- data.frame(
-                        time = condTime,
-                        surv = 1.0,
-                        type = paste0("Conditional Survival (t > ", condTime, ")")
-                    )
-                    
-                    cond_data <- rbind(cond_start, cond_data)
-                    plot_data <- rbind(plot_data, cond_data)
-                }
+
+            # Use jamovi ggtheme if provided, otherwise fall back to theme_minimal
+            if (is.null(ggtheme)) {
+                ggtheme <- ggplot2::theme_minimal()
             }
-            
-            # Create plot
-            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = surv, color = type)) +
-                ggplot2::geom_step(linewidth = 1) +
-                ggplot2::geom_vline(xintercept = condTime, linetype = "dashed", alpha = 0.7) +
-                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-                ggplot2::labs(
-                    title = "Conditional Survival Analysis",
-                    x = "Time",
-                    y = "Survival Probability",
-                    color = "Curve Type"
+
+            # Build plot data: either stratified or overall
+            if (!is.null(conditionVar) && !is.null(data)) {
+                grpFactor <- as.factor(data[[conditionVar]])
+                grpLevels <- levels(grpFactor)
+                plot_data <- data.frame(
+                    time = numeric(0), surv = numeric(0),
+                    type = character(0), group = character(0)
+                )
+
+                for (grp in grpLevels) {
+                    grpIdx <- grpFactor == grp
+                    grpTime <- time[grpIdx]
+                    grpStatus <- status[grpIdx]
+
+                    if (sum(grpStatus == 1, na.rm = TRUE) < 3) next
+
+                    fit <- survival::survfit(survival::Surv(grpTime, grpStatus) ~ 1)
+                    survAtCond <- private$.getSurvProbAtTime(fit, condTime)
+
+                    if (survAtCond > 0) {
+                        idx_after <- fit$time > condTime
+                        if (any(idx_after)) {
+                            cond_df <- data.frame(
+                                time = c(condTime, fit$time[idx_after]),
+                                surv = c(1.0, fit$surv[idx_after] / survAtCond),
+                                type = "Conditional",
+                                group = grp
+                            )
+                            plot_data <- rbind(plot_data, cond_df)
+                        }
+                    }
+                }
+
+                if (nrow(plot_data) == 0) {
+                    stop("No groups had sufficient data for conditional survival plotting")
+                }
+
+                p <- ggplot2::ggplot(
+                    plot_data,
+                    ggplot2::aes(x = time, y = surv, color = group)
                 ) +
-                ggplot2::theme_minimal() +
-                ggplot2::theme(
-                    legend.position = "bottom",
-                    plot.title = ggplot2::element_text(hjust = 0.5)
+                    ggplot2::geom_step(linewidth = 1) +
+                    ggplot2::geom_vline(
+                        xintercept = condTime, linetype = "dashed", alpha = 0.7
+                    ) +
+                    ggplot2::scale_y_continuous(
+                        limits = c(0, 1), labels = scales::percent
+                    ) +
+                    ggplot2::labs(
+                        title = paste0(
+                            "Conditional Survival by ", conditionVar,
+                            " (given T > ", condTime, ")"
+                        ),
+                        x = "Time",
+                        y = "Conditional Survival Probability",
+                        color = conditionVar
+                    ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        legend.position = "bottom",
+                        plot.title = ggplot2::element_text(hjust = 0.5)
+                    ) +
+                    ggplot2::annotate(
+                        "text", x = condTime, y = 0.05,
+                        label = paste("Conditioning\nTime =", condTime),
+                        hjust = 0, vjust = 0, size = 3
+                    )
+
+            } else {
+                # Overall: show both overall KM and conditional survival curve
+                fit <- survival::survfit(survival::Surv(time, status) ~ 1)
+
+                plot_data <- data.frame(
+                    time = fit$time,
+                    surv = fit$surv,
+                    type = "Overall Survival"
+                )
+
+                survAtCondTime <- private$.getSurvProbAtTime(fit, condTime)
+
+                if (survAtCondTime > 0) {
+                    idx_after_cond <- fit$time > condTime
+                    if (any(idx_after_cond)) {
+                        cond_data <- data.frame(
+                            time = c(condTime, fit$time[idx_after_cond]),
+                            surv = c(1.0, fit$surv[idx_after_cond] / survAtCondTime),
+                            type = paste0("Conditional (T > ", condTime, ")")
+                        )
+                        plot_data <- rbind(plot_data, cond_data)
+                    }
+                }
+
+                p <- ggplot2::ggplot(
+                    plot_data,
+                    ggplot2::aes(x = time, y = surv, color = type)
                 ) +
-                ggplot2::annotate("text", x = condTime, y = 0.1, 
-                         label = paste("Conditioning\nTime =", condTime), 
-                         hjust = 0, vjust = 0, size = 3)
-            
+                    ggplot2::geom_step(linewidth = 1) +
+                    ggplot2::geom_vline(
+                        xintercept = condTime, linetype = "dashed", alpha = 0.7
+                    ) +
+                    ggplot2::scale_y_continuous(
+                        limits = c(0, 1), labels = scales::percent
+                    ) +
+                    ggplot2::labs(
+                        title = "Conditional Survival Analysis",
+                        x = "Time",
+                        y = "Survival Probability",
+                        color = "Curve Type"
+                    ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        legend.position = "bottom",
+                        plot.title = ggplot2::element_text(hjust = 0.5)
+                    ) +
+                    ggplot2::annotate(
+                        "text", x = condTime, y = 0.05,
+                        label = paste("Conditioning\nTime =", condTime),
+                        hjust = 0, vjust = 0, size = 3
+                    )
+            }
+
             return(p)
+        },
+
+        .generateReportSentence = function(condTime, results, time, status) {
+
+            method <- self$options$method
+            confInt <- self$options$confInt
+            method_name <- switch(method,
+                "km" = "Kaplan-Meier weights",
+                "landmark" = "landmark",
+                "ipw" = "inverse probability weighting",
+                "pkm" = "presmoothed Kaplan-Meier",
+                method  # fallback: use raw method name
+            )
+
+            # Number at risk at conditioning time
+            n_at_risk <- sum(time >= condTime, na.rm = TRUE)
+
+            # Build report sentences -- one per group
+            groups <- unique(results$group)
+            sentences <- character(0)
+
+            for (grp in groups) {
+                grpRes <- results[results$group == grp, ]
+                # Use the row with the largest time as the "target" time point
+                target_row <- grpRes[which.max(grpRes$time), ]
+
+                grp_label <- if (length(groups) > 1 || grp != "Overall") {
+                    paste0(" in the ", grp, " group")
+                } else {
+                    ""
+                }
+
+                sentence <- sprintf(
+                    paste0(
+                        "Conditional survival analysis was performed using the %s method. ",
+                        "Given survival to %.1f%s (n at risk = %d), the estimated conditional ",
+                        "%.1f-unit survival probability was %.1f%% (%s%% CI: %.1f%%--%.1f%%)."
+                    ),
+                    method_name,
+                    condTime,
+                    grp_label,
+                    n_at_risk,
+                    target_row$time,
+                    target_row$condprob * 100,
+                    round(confInt * 100),
+                    target_row$lower * 100,
+                    target_row$upper * 100
+                )
+                sentences <- c(sentences, sentence)
+            }
+
+            html_content <- paste0(
+                "<h4>Report Sentence (copy-ready)</h4>",
+                "<div style='background-color:#f8f9fa; padding:10px; border-left:3px solid #007bff; margin:8px 0; font-style:italic;'>",
+                paste(sentences, collapse = "<br><br>"),
+                "</div>",
+                "<p style='font-size:0.85em; color:#666;'>",
+                "Tip: Copy the text above directly into your manuscript methods/results section.</p>"
+            )
+
+            self$results$reportSentence$setContent(html_content)
+        },
+
+        .populateAssumptions = function() {
+            assumptions_html <- paste0(
+                "<h4>Assumptions & Caveats</h4>",
+                "<ul>",
+                "<li><b>Non-informative censoring:</b> Censored patients must have the ",
+                "same future survival probability as those who remain under observation.</li>",
+                "<li><b>Conditioning time:</b> Must be within the observed follow-up range. ",
+                "Estimates beyond maximum follow-up are unreliable.</li>",
+                "<li><b>Sample size at conditioning time:</b> The number of patients still ",
+                "at risk at the conditioning time must be adequate. Small risk sets produce ",
+                "unstable estimates.</li>",
+                "<li><b>Interpretation:</b> CS(t|t0) = P(T > t | T > t0). This is NOT ",
+                "the same as the unconditional survival probability.</li>",
+                "<li><b>Clinical use:</b> Conditional survival is most useful for patient ",
+                "counseling after a period of disease-free survival (e.g., '5-year survival ",
+                "given you already survived 2 years').</li>",
+                "</ul>"
+            )
+            self$results$assumptions$setContent(assumptions_html)
         },
 
         .initTodo = function() {

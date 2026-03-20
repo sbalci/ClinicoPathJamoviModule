@@ -84,6 +84,7 @@ relativesurvival(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$netSurvivalTable} \tab \tab \tab \tab \tab a table \cr

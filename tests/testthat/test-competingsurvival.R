@@ -476,10 +476,156 @@ test_that("competingsurvival statistical accuracy", {
             overalltime = "time",
             outcome = "outcome",
             dod = "Dead_of_Disease",
-            dooc = "Dead_of_Other", 
+            dooc = "Dead_of_Other",
             awd = "Alive_w_Disease",
             awod = "Alive_wo_Disease",
             analysistype = "cause"
         )
     })
+})
+
+# ═══════════════════════════════════════════════════════════════════════
+# NEW FEATURES (added after enhancements)
+# ═══════════════════════════════════════════════════════════════════════
+
+test_that("competingsurvival Fine-Gray table populates", {
+  skip_on_cran()
+  skip_if_not_installed("cmprsk")
+  skip_if_not_installed("finalfit")
+
+  set.seed(42)
+  n <- 100
+  df <- data.frame(
+    time = round(pmax(0.5, rexp(n, 0.05) * 12), 1),
+    outcome = factor(sample(c("DoD", "DoOC", "AwD", "AwoD"), n,
+                            replace = TRUE, prob = c(0.35, 0.15, 0.2, 0.3))),
+    group = factor(sample(c("A", "B"), n, replace = TRUE))
+  )
+
+  result <- competingsurvival(
+    data = df,
+    explanatory = "group",
+    overalltime = "time",
+    outcome = "outcome",
+    dod = "DoD",
+    dooc = "DoOC",
+    awd = "AwD",
+    awod = "AwoD",
+    analysistype = "compete",
+    subdistribution = TRUE
+  )
+
+  expect_true(inherits(result, "jmvcoreClass"))
+  expect_false(is.null(result$fineGrayTable))
+})
+
+test_that("competingsurvival assumptions panel renders", {
+  skip_on_cran()
+  skip_if_not_installed("finalfit")
+
+  set.seed(42)
+  n <- 60
+  df <- data.frame(
+    time = round(pmax(0.5, rexp(n, 0.05) * 12), 1),
+    outcome = factor(sample(c("DoD", "DoOC", "AwD", "AwoD"), n,
+                            replace = TRUE, prob = c(0.3, 0.15, 0.25, 0.3))),
+    group = factor(sample(c("X", "Y"), n, replace = TRUE))
+  )
+
+  result <- competingsurvival(
+    data = df,
+    explanatory = "group",
+    overalltime = "time",
+    outcome = "outcome",
+    dod = "DoD",
+    dooc = "DoOC",
+    awd = "AwD",
+    awod = "AwoD",
+    analysistype = "overall"
+  )
+
+  expect_false(is.null(result$assumptions))
+})
+
+test_that("competingsurvival respects confidence level", {
+  skip_on_cran()
+  skip_if_not_installed("cmprsk")
+  skip_if_not_installed("finalfit")
+
+  set.seed(42)
+  n <- 80
+  df <- data.frame(
+    time = round(pmax(0.5, rexp(n, 0.05) * 12), 1),
+    outcome = factor(sample(c("DoD", "DoOC", "AwD", "AwoD"), n,
+                            replace = TRUE, prob = c(0.3, 0.15, 0.25, 0.3))),
+    group = factor(sample(c("A", "B"), n, replace = TRUE))
+  )
+
+  result_95 <- competingsurvival(
+    data = df, explanatory = "group", overalltime = "time",
+    outcome = "outcome", dod = "DoD", dooc = "DoOC",
+    awd = "AwD", awod = "AwoD",
+    analysistype = "compete", confidencelevel = 0.95
+  )
+
+  result_90 <- competingsurvival(
+    data = df, explanatory = "group", overalltime = "time",
+    outcome = "outcome", dod = "DoD", dooc = "DoOC",
+    awd = "AwD", awod = "AwoD",
+    analysistype = "compete", confidencelevel = 0.90
+  )
+
+  expect_true(inherits(result_95, "jmvcoreClass"))
+  expect_true(inherits(result_90, "jmvcoreClass"))
+})
+
+test_that("competingsurvival Gray's test runs when enabled", {
+  skip_on_cran()
+  skip_if_not_installed("cmprsk")
+  skip_if_not_installed("finalfit")
+
+  set.seed(42)
+  n <- 80
+  df <- data.frame(
+    time = round(pmax(0.5, rexp(n, 0.05) * 12), 1),
+    outcome = factor(sample(c("DoD", "DoOC", "AwD", "AwoD"), n,
+                            replace = TRUE, prob = c(0.3, 0.15, 0.25, 0.3))),
+    group = factor(sample(c("A", "B"), n, replace = TRUE))
+  )
+
+  result <- competingsurvival(
+    data = df, explanatory = "group", overalltime = "time",
+    outcome = "outcome", dod = "DoD", dooc = "DoOC",
+    awd = "AwD", awod = "AwoD",
+    analysistype = "compete", graystest = TRUE
+  )
+
+  expect_true(inherits(result, "jmvcoreClass"))
+})
+
+test_that("competingsurvival stacked and KM-vs-CIF plots", {
+  skip_on_cran()
+  skip_if_not_installed("cmprsk")
+  skip_if_not_installed("finalfit")
+
+  set.seed(42)
+  n <- 80
+  df <- data.frame(
+    time = round(pmax(0.5, rexp(n, 0.05) * 12), 1),
+    outcome = factor(sample(c("DoD", "DoOC", "AwD", "AwoD"), n,
+                            replace = TRUE, prob = c(0.3, 0.15, 0.25, 0.3))),
+    group = factor(sample(c("A", "B"), n, replace = TRUE))
+  )
+
+  result <- competingsurvival(
+    data = df, explanatory = "group", overalltime = "time",
+    outcome = "outcome", dod = "DoD", dooc = "DoOC",
+    awd = "AwD", awod = "AwoD",
+    analysistype = "compete",
+    showStackedPlot = TRUE,
+    showKMvsCIF = TRUE
+  )
+
+  expect_false(is.null(result$stackedPlot))
+  expect_false(is.null(result$kmvscifPlot))
 })

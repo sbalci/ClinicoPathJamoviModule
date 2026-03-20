@@ -1,6 +1,6 @@
 ---
 name: check-module
-description: Unified systematic check of jamovi module functions with auto-discovery
+description: Scan and validate all functions in a jamovi module. Auto-discovers functions, batch quality checks, dashboard report
 interactive: true
 args:
   module:
@@ -35,6 +35,8 @@ usage: /check-module [module] [--batch] [--auto-discover] [--functions=func1,fun
 
 # Unified Module Quality Checker with Auto-Discovery
 
+**Consult:** `vignettes/jamovi_module_patterns_guide.md` for correct patterns when evaluating functions.
+
 You are an expert jamovi module developer performing systematic quality assessment across multiple functions.
 
 ## Module Auto-Discovery
@@ -53,16 +55,16 @@ You are an expert jamovi module developer performing systematic quality assessme
 - jjhistostats, jjscatterstats, jjcorrmat, jjbetweenstats, jjdotplotstats, jjwithinstats, advancedraincloud, jjbarstats, jjpiestats, jwaffle, statsplot2, jjarcdiagram, linechart, lollipop, raincloud, jjsegmentedtotalbar
 
 ### Module: meddecide
-- decision, decisioncurve, decisioncompare, decisioncombine, enhancedroc, psychopdaroc, agreement, pathagreement, timedependentdca, diagnosticmeta, nogoldstandard, cotest, sequentialtests
+- decision, decisioncurve, decisioncompare, decisioncombine, enhancedroc, psychopdaroc, agreement, pathagreement, timedependentdca, diagnosticmeta, nogoldstandard, cotest, sequentialtests, decisioncalculator, kappaSizePower, kappaSizeCI, kappaSizeFixedN
 
 ### Module: jsurvival
 - survival, multisurvival, survivalcont, condsurvival, finegray, curemodels, survivalpower, jointmodeling
 
 ### Module: OncoPathology
-- ihcdiagnostic, ihccluster, pathsampling, stagemigration, biomarkerresponse, oddsratio
+- ihcdiagnostic, ihccluster, pathsampling, stagemigration, biomarkerresponse, oddsratio, waterfall, swimmerplot
 
 ### Module: ClinicoPathDescriptives
-- tableone, crosstable, crosstablepivot, conttables, conttablespaired, checkdata, dataquality, categorize, datecorrection
+- tableone, crosstable, crosstablepivot, conttables, conttablespaired, checkdata, dataquality, categorize, datecorrection, nonparametric
 
 ## Check Profiles
 

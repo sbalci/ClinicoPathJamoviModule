@@ -446,12 +446,19 @@ nonparametricClass <- R6::R6Class(
                 alpha <- self$options$alpha_level %||% 0.05
                 interpretation <- private$.interpretTestResult(test_result$p_value, alpha, test_type)
                 
+                # Apply global test count correction
+                reported_p <- test_result$p_value
+                globalN <- self$options$globalTestCount
+                if (!is.null(globalN) && !is.na(globalN) && globalN > 1) {
+                    reported_p <- min(reported_p * globalN, 1)
+                }
+
                 test_table$addRow(rowKey = paste(dep_var, test_type, sep = "_"), values = list(
                     variable = dep_var,
                     test = test_result$test_name,
                     statistic = test_result$statistic,
                     df = test_result$df,
-                    p = test_result$p_value,
+                    p = reported_p,
                     effect_size = effect_size_result$value,
                     effect_measure = effect_size_result$measure,
                     effect_ci_lower = effect_size_result$ci_lower,
@@ -983,31 +990,117 @@ nonparametricClass <- R6::R6Class(
         
         # Placeholder methods for other calculations
         .calculateEpsilonSquared = function(outcome, groups) {
-            list(value = NA, measure = "Epsilon-squared", ci_lower = NA, ci_upper = NA)
+            # Epsilon-squared: alternative to eta-squared for Kruskal-Wallis
+            # eps^2 = H / ((n^2 - 1) / (n + 1))
+            n <- length(outcome)
+            k <- nlevels(groups)
+            ranks <- rank(outcome)
+            group_ranks <- tapply(ranks, groups, sum)
+            group_sizes <- table(groups)
+            H <- (12 / (n * (n + 1))) * sum(group_ranks^2 / group_sizes) - 3 * (n + 1)
+            eps_sq <- H / ((n^2 - 1) / (n + 1))
+            list(value = eps_sq, measure = "Epsilon-squared", ci_lower = NA, ci_upper = NA)
         },
-        
+
         .calculateRankBiserial = function(outcome, groups) {
-            list(value = NA, measure = "Rank-biserial correlation", ci_lower = NA, ci_upper = NA)
+            # Rank-biserial correlation for Mann-Whitney U (2-group)
+            # r = 1 - (2U) / (n1 * n2)
+            if (nlevels(groups) != 2) return(list(value = NA, measure = "Rank-biserial correlation", ci_lower = NA, ci_upper = NA))
+            group_levels <- levels(groups)
+            g1 <- outcome[groups == group_levels[1]]
+            g2 <- outcome[groups == group_levels[2]]
+            n1 <- length(g1)
+            n2 <- length(g2)
+            wt <- wilcox.test(g1, g2, exact = FALSE)
+            U <- wt$statistic
+            r_rb <- 1 - (2 * U) / (n1 * n2)
+            list(value = r_rb, measure = "Rank-biserial correlation", ci_lower = NA, ci_upper = NA)
         },
-        
+
         .calculateCLES = function(outcome, groups) {
-            list(value = NA, measure = "Common Language Effect Size", ci_lower = NA, ci_upper = NA)
+            # Common Language Effect Size: P(X > Y)
+            if (nlevels(groups) != 2) return(list(value = NA, measure = "Common Language Effect Size", ci_lower = NA, ci_upper = NA))
+            group_levels <- levels(groups)
+            g1 <- outcome[groups == group_levels[1]]
+            g2 <- outcome[groups == group_levels[2]]
+            n1 <- length(g1)
+            n2 <- length(g2)
+            greater <- sum(outer(g1, g2, ">"))
+            ties <- sum(outer(g1, g2, "=="))
+            cles <- (greater + 0.5 * ties) / (n1 * n2)
+            list(value = cles, measure = "Common Language Effect Size", ci_lower = NA, ci_upper = NA)
         },
-        
+
         .calculateVarghaDelaney = function(outcome, groups) {
-            list(value = NA, measure = "Vargha-Delaney A", ci_lower = NA, ci_upper = NA)
+            # Vargha-Delaney A: equivalent to CLES (probability of superiority)
+            if (nlevels(groups) != 2) return(list(value = NA, measure = "Vargha-Delaney A", ci_lower = NA, ci_upper = NA))
+            group_levels <- levels(groups)
+            g1 <- outcome[groups == group_levels[1]]
+            g2 <- outcome[groups == group_levels[2]]
+            n1 <- length(g1)
+            n2 <- length(g2)
+            wt <- wilcox.test(g1, g2, exact = FALSE)
+            U <- wt$statistic
+            A <- U / (n1 * n2)
+            list(value = A, measure = "Vargha-Delaney A", ci_lower = NA, ci_upper = NA)
         },
-        
+
         .calculateKendallW = function(outcome, groups) {
-            list(value = NA, measure = "Kendall's W", ci_lower = NA, ci_upper = NA)
+            # Kendall's W for Friedman-type designs (concordance coefficient)
+            # W = chi2_r / (n * (k - 1))
+            # For between-subjects: approximate using Kruskal-Wallis H
+            n <- length(outcome)
+            k <- nlevels(groups)
+            if (k < 2) return(list(value = NA, measure = "Kendall's W", ci_lower = NA, ci_upper = NA))
+            ranks <- rank(outcome)
+            group_ranks <- tapply(ranks, groups, sum)
+            group_sizes <- table(groups)
+            H <- (12 / (n * (n + 1))) * sum(group_ranks^2 / group_sizes) - 3 * (n + 1)
+            # For between-subjects approximation
+            W <- H / (n - 1)
+            W <- max(0, min(1, W))
+            list(value = W, measure = "Kendall's W", ci_lower = NA, ci_upper = NA)
         },
-        
+
         .calculateGlassRankBiserial = function(outcome, groups) {
-            list(value = NA, measure = "Glass's Rank Biserial", ci_lower = NA, ci_upper = NA)
+            # Glass rank-biserial: correlation between binary grouping and ranks
+            if (nlevels(groups) != 2) return(list(value = NA, measure = "Glass's Rank Biserial", ci_lower = NA, ci_upper = NA))
+            group_levels <- levels(groups)
+            ranks <- rank(outcome)
+            r1 <- mean(ranks[groups == group_levels[1]])
+            r2 <- mean(ranks[groups == group_levels[2]])
+            n <- length(outcome)
+            r_glass <- 2 * (r1 - r2) / n
+            list(value = r_glass, measure = "Glass's Rank Biserial", ci_lower = NA, ci_upper = NA)
         },
-        
+
         .calculateSomersD = function(outcome, groups) {
-            list(value = NA, measure = "Somers' D", ci_lower = NA, ci_upper = NA)
+            # Somers' D: asymmetric measure of ordinal association
+            # D = (concordant - discordant) / (concordant + discordant + tied_on_y)
+            n <- length(outcome)
+            if (n < 2) return(list(value = NA, measure = "Somers' D", ci_lower = NA, ci_upper = NA))
+            x_num <- as.numeric(groups)
+            y_num <- as.numeric(outcome)
+            concordant <- 0
+            discordant <- 0
+            tied_y <- 0
+            for (i in 1:(n - 1)) {
+                for (j in (i + 1):n) {
+                    dx <- sign(x_num[j] - x_num[i])
+                    dy <- sign(y_num[j] - y_num[i])
+                    if (dx != 0) {
+                        if (dy != 0) {
+                            if (dx * dy > 0) concordant <- concordant + 1
+                            else discordant <- discordant + 1
+                        } else {
+                            tied_y <- tied_y + 1
+                        }
+                    }
+                }
+            }
+            denom <- concordant + discordant + tied_y
+            D <- if (denom > 0) (concordant - discordant) / denom else NA
+            list(value = D, measure = "Somers' D", ci_lower = NA, ci_upper = NA)
         },
         
         # Plot generation methods (placeholders)

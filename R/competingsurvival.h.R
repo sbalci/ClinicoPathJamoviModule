@@ -184,7 +184,9 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         comprisksPlot = function() private$.items[["comprisksPlot"]],
         stackedPlot = function() private$.items[["stackedPlot"]],
         kmvscifPlot = function() private$.items[["kmvscifPlot"]],
-        interpretation = function() private$.items[["interpretation"]]),
+        interpretation = function() private$.items[["interpretation"]],
+        assumptions = function() private$.items[["assumptions"]],
+        fineGrayTable = function() private$.items[["fineGrayTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -200,7 +202,8 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "finalfit",
                     "survival",
                     "cmprsk",
-                    "scales"))
+                    "scales",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -233,6 +236,19 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Survival Analysis Results",
                 visible=TRUE,
                 rows=0,
+                clearWith=list(
+                    "overalltime",
+                    "outcome",
+                    "explanatory",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "confidencelevel",
+                    "graystest",
+                    "subdistribution",
+                    "timepoints"),
                 columns=list(
                     list(
                         `name`="term", 
@@ -353,7 +369,79 @@ competingsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation",
-                visible=TRUE))}))
+                visible=TRUE,
+                clearWith=list(
+                    "overalltime",
+                    "outcome",
+                    "explanatory",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "confidencelevel",
+                    "graystest",
+                    "subdistribution",
+                    "timepoints")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Assumptions & Caveats",
+                visible=TRUE,
+                clearWith=list(
+                    "overalltime",
+                    "outcome",
+                    "explanatory",
+                    "analysistype")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="fineGrayTable",
+                title="Fine-Gray Subdistribution Hazard Model",
+                visible="(subdistribution)",
+                rows=0,
+                clearWith=list(
+                    "overalltime",
+                    "outcome",
+                    "explanatory",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "confidencelevel",
+                    "subdistribution"),
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="coef", 
+                        `title`="Coefficient", 
+                        `type`="number"),
+                    list(
+                        `name`="hr", 
+                        `title`="HR", 
+                        `type`="number"),
+                    list(
+                        `name`="hr_lower", 
+                        `title`="HR CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="hr_upper", 
+                        `title`="HR CI Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="z", 
+                        `title`="z", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))}))
 
 competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "competingsurvivalBase",
@@ -418,6 +506,8 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$stackedPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$kmvscifPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$fineGrayTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

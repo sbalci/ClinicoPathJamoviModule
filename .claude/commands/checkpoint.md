@@ -1,6 +1,6 @@
 ---
 name: checkpoint
-description: Auto-detect and add checkpoint calls before expensive operations
+description: Insert private$.checkpoint() calls before slow operations in a jamovi function for incremental results and cancel-on-change
 interactive: true
 args:
   function_name:
@@ -30,6 +30,8 @@ examples:
 ---
 
 # Smart Checkpoint Insertion with Auto-Detection
+
+**Consult:** `vignettes/jamovi_b_R_guide.md` for backend patterns and `vignettes/jamovi_module_patterns_guide.md` for state management.
 
 Add `private$.checkpoint()` calls to the specified function before computationally expensive operations. This enables:
 
@@ -179,3 +181,10 @@ for (item in items) {
 ```
 
 Analyze the function $ARGUMENTS and add checkpoints before any expensive operations like loops, statistical tests, or data processing steps.
+
+---
+
+## Related Commands
+
+- `/check-function` -- Validate function structure and performance
+- `/review-function` -- Full code review including performance assessment

@@ -9,9 +9,9 @@ conditionalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             timeVar = NULL,
             outcomeVar = NULL,
             conditionVar = NULL,
-            conditionTime = NULL,
+            conditionTime = 0,
             method = "km",
-            bandwidth = NULL,
+            bandwidth = 0,
             confInt = 0.95,
             timePoints = "",
             plotType = "curves",
@@ -53,7 +53,8 @@ conditionalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "factor"))
             private$..conditionTime <- jmvcore::OptionNumber$new(
                 "conditionTime",
-                conditionTime)
+                conditionTime,
+                default=0)
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -65,7 +66,8 @@ conditionalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 default="km")
             private$..bandwidth <- jmvcore::OptionNumber$new(
                 "bandwidth",
-                bandwidth)
+                bandwidth,
+                default=0)
             private$..confInt <- jmvcore::OptionNumber$new(
                 "confInt",
                 confInt,
@@ -145,7 +147,9 @@ conditionalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         todo = function() private$.items[["todo"]],
         condsurvTable = function() private$.items[["condsurvTable"]],
         survplot = function() private$.items[["survplot"]],
-        methodExplanation = function() private$.items[["methodExplanation"]]),
+        methodExplanation = function() private$.items[["methodExplanation"]],
+        reportSentence = function() private$.items[["reportSentence"]],
+        assumptions = function() private$.items[["assumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -161,8 +165,8 @@ conditionalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Analysis",
-                visible="(showExplanations)"))
+                title="Getting Started",
+                visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="condsurvTable",
@@ -175,8 +179,14 @@ conditionalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "conditionVar",
                     "conditionTime",
                     "method",
-                    "timePoints"),
+                    "timePoints",
+                    "confInt"),
                 columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text", 
+                        `visible`="(conditionVar)"),
                     list(
                         `name`="time", 
                         `title`="Time Point", 
@@ -227,7 +237,36 @@ conditionalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="methodExplanation",
                 title="Method and Interpretation",
-                visible="(showExplanations)"))}))
+                visible="(showExplanations)",
+                clearWith=list(
+                    "timeVar",
+                    "outcomeVar",
+                    "conditionVar",
+                    "conditionTime",
+                    "method",
+                    "confInt")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="reportSentence",
+                title="Report Sentence",
+                visible=TRUE,
+                clearWith=list(
+                    "timeVar",
+                    "outcomeVar",
+                    "conditionVar",
+                    "conditionTime",
+                    "method",
+                    "confInt",
+                    "timePoints")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Assumptions & Caveats",
+                visible=TRUE,
+                clearWith=list(
+                    "timeVar",
+                    "outcomeVar",
+                    "method")))}))
 
 conditionalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "conditionalsurvivalBase",
@@ -267,11 +306,10 @@ conditionalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param timeVar Survival time variable (numeric)
 #' @param outcomeVar Event indicator (0=censored, 1=event)
 #' @param conditionVar Variable for conditional survival estimation
-#' @param conditionTime Time point at which to condition survival (defaults to
+#' @param conditionTime Time point at which to condition survival (0 = use
 #'   median follow-up)
 #' @param method Method for conditional survival estimation
-#' @param bandwidth Bandwidth for kernel smoothing (auto-selected if not
-#'   specified)
+#' @param bandwidth Bandwidth for kernel smoothing (0 = auto-select)
 #' @param confInt Confidence level for intervals
 #' @param timePoints Comma-separated time points for conditional survival
 #'   (e.g., 12,24,60)
@@ -285,6 +323,8 @@ conditionalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   \code{results$condsurvTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$survplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -299,9 +339,9 @@ conditionalsurvival <- function(
     timeVar,
     outcomeVar,
     conditionVar,
-    conditionTime,
+    conditionTime = 0,
     method = "km",
-    bandwidth,
+    bandwidth = 0,
     confInt = 0.95,
     timePoints = "",
     plotType = "curves",

@@ -1,0 +1,563 @@
+---
+title: "Overall, Cause Specific, and Competing Survival - Comprehensive Guide"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Overall, Cause Specific, and Competing Survival - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** `competingsurvival()` is designed primarily for the jamovi GUI. The R syntax
+> shown here is for reference and advanced scripting.
+
+# Competing Risks Survival Analysis
+
+## Overview
+
+In clinical research, patients are often at risk of dying from multiple causes.
+Standard Kaplan-Meier analysis treats competing events (e.g., death from other
+causes) as censored observations, which **overestimates** the actual probability
+of the event of interest. Competing risks methods address this bias.
+
+**Key concepts:**
+
+- **Kaplan-Meier / Overall Survival**: All deaths are events. Simple and
+  familiar, but does not distinguish cause.
+- **Cause-Specific Survival**: Only deaths from the disease of interest are
+  events; competing deaths are censored. Estimates the cause-specific hazard
+  but can overestimate cumulative incidence.
+- **Cumulative Incidence Function (CIF)**: The proper probability of
+  experiencing the event of interest in the presence of competing risks.
+  Always <= 1 minus KM estimate.
+- **Gray's Test**: The competing-risks analog of the log-rank test. Compares
+  CIF curves between groups.
+- **Fine-Gray Model**: Subdistribution hazard regression. Unlike cause-specific
+  Cox, it directly models the CIF, making hazard ratios interpretable in terms
+  of cumulative incidence.
+
+## Datasets
+
+This vignette uses two bundled datasets:
+
+| Dataset | N | Outcome Levels | Key Grouping Variables |
+|---------|---|----------------|------------------------|
+| `competing_survival_data` | 300 | Dead_of_Disease (115), Dead_of_Other (41), Alive_w_Disease (57), Alive_wo_Disease (87) | Treatment (Experimental_Therapy / Standard_Care), Tumor_Stage (I-IV), Sex |
+| `survival_competing` | 180 | Dead of Disease (53), Dead of Other (37), Alive w Disease (35), Alive w/o Disease (55) | treatment (Experimental / Standard), stage (I-IV), molecular_subtype (Type A/B/C) |
+
+```{r load-data}
+data("competing_survival_data")
+data("survival_competing")
+
+cat("--- competing_survival_data ---\n")
+cat("Dimensions:", nrow(competing_survival_data), "x", ncol(competing_survival_data), "\n")
+cat("Outcome distribution:\n")
+print(table(competing_survival_data$Outcome))
+
+cat("\n--- survival_competing ---\n")
+cat("Dimensions:", nrow(survival_competing), "x", ncol(survival_competing), "\n")
+cat("Outcome distribution:\n")
+print(table(survival_competing$outcome))
+```
+
+## 1. Overall Survival
+
+Overall survival treats **all deaths** (disease + other causes) as events.
+Alive patients are censored. This is the broadest survival measure.
+
+```{r overall-survival}
+result_os <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "overall",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease"
+)
+```
+
+With 156 total deaths out of 300 patients, this gives a straightforward hazard
+ratio for Treatment comparing all-cause mortality.
+
+### Overall Survival Without a Group Variable
+
+When no explanatory variable is provided, the function reports median survival
+for the entire cohort.
+
+```{r overall-no-group}
+result_os_nogroup <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  analysistype = "overall",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease"
+)
+```
+
+## 2. Cause-Specific Survival
+
+Cause-specific survival focuses on **disease-related deaths only**. Deaths from
+other causes are treated as censored. This estimates the cause-specific hazard
+but can overestimate the probability of disease death when competing risks are
+substantial.
+
+```{r cause-specific}
+result_css <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "cause",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease"
+)
+```
+
+Only 115 disease deaths are counted as events here. The 41 deaths from other
+causes are censored, which means cause-specific survival is always >= overall
+survival.
+
+## 3. Competing Risks (CIF)
+
+The cumulative incidence function properly accounts for competing events. Unlike
+1-KM, CIF never overestimates the probability of disease death.
+
+```{r competing-risks}
+result_cr <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease"
+)
+```
+
+The `cuminc` table shows the cumulative incidence of disease death and competing
+death at the default timepoints (12, 24, 36, 60 months). The `comprisksPlot`
+displays the CIF curves.
+
+### Competing Risks with the Second Dataset
+
+The `survival_competing` dataset uses different naming conventions for outcome
+levels, demonstrating that the function handles various label formats.
+
+```{r competing-risks-dataset2}
+result_cr2 <- competingsurvival(
+  data = survival_competing,
+  overalltime = "elapsedtime",
+  outcome = "outcome",
+  explanatory = "treatment",
+  analysistype = "compete",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other",
+  awd = "Alive w Disease",
+  awod = "Alive w/o Disease"
+)
+```
+
+## 4. Gray's Test
+
+Gray's test compares cumulative incidence functions between groups. It is the
+competing-risks analog of the log-rank test. Unlike the log-rank test, it tests
+equality of the subdistribution hazard (i.e., the CIF) rather than the
+cause-specific hazard.
+
+```{r grays-test}
+result_gray <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease",
+  graystest = TRUE
+)
+```
+
+The summary output includes the Gray's test chi-squared statistic, degrees of
+freedom, and p-value for each event type.
+
+### Gray's Test with a Multi-Level Group Variable
+
+Using Tumor_Stage (4 levels) to test whether CIF differs across stages:
+
+```{r grays-test-multilevel}
+result_gray_stage <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Tumor_Stage",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease",
+  graystest = TRUE
+)
+```
+
+## 5. Fine-Gray Subdistribution Hazard
+
+The Fine-Gray model estimates the subdistribution hazard ratio (SHR). Unlike
+cause-specific Cox regression, the SHR directly relates to the CIF: a higher
+SHR means a higher cumulative incidence of the event over time.
+
+```{r fine-gray}
+result_fg <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease",
+  subdistribution = TRUE
+)
+```
+
+The `fineGrayTable` shows the coefficient, hazard ratio, confidence interval,
+standard error, z-statistic, and p-value. The `survivalTable` also gains a
+row for "Subdistribution HR (Fine-Gray)" alongside the standard competing
+risks result.
+
+### Fine-Gray with the Second Dataset
+
+```{r fine-gray-dataset2}
+result_fg2 <- competingsurvival(
+  data = survival_competing,
+  overalltime = "elapsedtime",
+  outcome = "outcome",
+  explanatory = "treatment",
+  analysistype = "compete",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other",
+  awd = "Alive w Disease",
+  awod = "Alive w/o Disease",
+  subdistribution = TRUE
+)
+```
+
+## 6. Stacked CIF Plot
+
+The stacked probability plot shows how the total probability is partitioned at
+each time point into three components: CIF for disease death, CIF for competing
+death, and survival probability. They must sum to 100%.
+
+```{r stacked-plot}
+result_stacked <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease",
+  showStackedPlot = TRUE,
+  cifColors = "colorblind"
+)
+```
+
+At time 0, survival is 100% and both CIFs are 0%. As time progresses, survival
+decreases while the cumulative incidence of disease death and competing death
+increase, always summing to 100%.
+
+## 7. KM vs CIF Comparison
+
+This plot directly demonstrates why competing risks methods are necessary. The
+naive 1-KM estimate (which treats competing deaths as censored) overestimates
+the cumulative incidence of disease death compared to the proper CIF.
+
+```{r km-vs-cif}
+result_kmcif <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease",
+  showKMvsCIF = TRUE
+)
+```
+
+The dashed line (1-KM) always lies above the solid line (CIF). The gap between
+them represents the bias introduced by ignoring competing events. This
+difference is clinically meaningful in older populations or when competing
+causes of death are frequent.
+
+## 8. Custom Timepoints and Confidence Level
+
+### Custom CIF Timepoints
+
+By default, cumulative incidence is estimated at 12, 24, 36, and 60 months.
+Custom timepoints can be specified as a comma-separated string.
+
+```{r custom-timepoints}
+result_tp <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease",
+  timepoints = "6,12,18,24,30,36,48,60"
+)
+```
+
+### Adjusting Confidence Level
+
+The default confidence level is 0.95 (95%). You can change this to, for
+example, 0.90 for narrower intervals.
+
+```{r confidence-level}
+result_cl90 <- competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease",
+  subdistribution = TRUE,
+  confidencelevel = 0.90
+)
+```
+
+The Fine-Gray table and timepoint confidence intervals will reflect the 90%
+confidence level.
+
+## 9. Assumptions and Interpretation
+
+### Key Assumptions
+
+1. **Independent censoring**: Censoring must be independent of the event
+   process. If patients are censored because they are sicker (or healthier),
+   all estimates will be biased.
+
+2. **Correct event classification**: Each patient must be correctly classified.
+   Misclassifying a disease death as death from other causes (or vice versa)
+   directly biases CIF estimates.
+
+3. **Complete case analysis**: Observations with missing time, outcome, or
+   grouping variables are excluded. Report the proportion of missing data.
+
+4. **Adequate follow-up**: CIF estimates beyond the maximum observed time are
+   unreliable. Late timepoints should be interpreted cautiously.
+
+5. **Fine-Gray model interpretation**: The subdistribution HR has a different
+   meaning than the cause-specific HR. It reflects both the direct effect on
+   the event and the indirect effect through competing events. An SHR > 1
+   means a group has a higher cumulative incidence over time, which is often
+   the most clinically relevant quantity.
+
+6. **Gray's test**: Tests equality of CIF curves, not cause-specific hazards.
+   It is appropriate when the research question concerns cumulative incidence
+   (probability of event), not the instantaneous rate (hazard).
+
+### When to Use Which Approach
+
+| Research Question | Method | Analysis Type |
+|-------------------|--------|---------------|
+| What is the all-cause mortality? | Overall Survival | `overall` |
+| What is the direct effect of treatment on disease death rate? | Cause-Specific Cox | `cause` |
+| What is the probability of dying from disease accounting for other deaths? | CIF / Fine-Gray | `compete` |
+| Do CIF curves differ between groups? | Gray's Test | `compete` + `graystest = TRUE` |
+| What is the treatment effect on cumulative incidence? | Subdistribution HR | `compete` + `subdistribution = TRUE` |
+
+## 10. Edge Cases
+
+### Minimum Event Requirement
+
+The function requires at least 5 events of each type for competing risks
+analysis. This protects against unstable CIF and Fine-Gray estimates.
+
+```{r too-few-events}
+# Create a small subset with few events
+set.seed(42)
+small_data <- competing_survival_data[sample(1:300, 15), ]
+
+# This may error if disease or competing events < 5
+competingsurvival(
+  data = small_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  dooc = "Dead_of_Other",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease"
+)
+```
+
+### Competing Risks Requires Both Death Types
+
+If only `dod` is defined without `dooc`, competing risks analysis will produce
+an informative error.
+
+```{r missing-dooc}
+competingsurvival(
+  data = competing_survival_data,
+  overalltime = "Overall_Time",
+  outcome = "Outcome",
+  explanatory = "Treatment",
+  analysistype = "compete",
+  dod = "Dead_of_Disease",
+  awd = "Alive_w_Disease",
+  awod = "Alive_wo_Disease"
+)
+```
+
+### All Three Analysis Types in Sequence
+
+A common workflow compares results across all three approaches:
+
+```{r all-three}
+# Overall
+res_all_os <- competingsurvival(
+  data = survival_competing,
+  overalltime = "elapsedtime",
+  outcome = "outcome",
+  explanatory = "treatment",
+  analysistype = "overall",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other",
+  awd = "Alive w Disease",
+  awod = "Alive w/o Disease"
+)
+
+# Cause-specific
+res_all_css <- competingsurvival(
+  data = survival_competing,
+  overalltime = "elapsedtime",
+  outcome = "outcome",
+  explanatory = "treatment",
+  analysistype = "cause",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other",
+  awd = "Alive w Disease",
+  awod = "Alive w/o Disease"
+)
+
+# Competing risks with full features
+res_all_cr <- competingsurvival(
+  data = survival_competing,
+  overalltime = "elapsedtime",
+  outcome = "outcome",
+  explanatory = "treatment",
+  analysistype = "compete",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other",
+  awd = "Alive w Disease",
+  awod = "Alive w/o Disease",
+  graystest = TRUE,
+  subdistribution = TRUE,
+  showStackedPlot = TRUE,
+  showKMvsCIF = TRUE,
+  timepoints = "12,24,36,60",
+  confidencelevel = 0.95
+)
+```
+
+Comparing the hazard ratios across these three analyses reveals how competing
+risks affect the estimated treatment effect. The cause-specific HR captures the
+direct treatment effect on disease death rate. The subdistribution HR captures
+the net treatment effect on cumulative incidence, which is often the quantity
+patients and clinicians care about.
+
+## Complete Option Reference
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `data` | Data | (required) | The data as a data frame |
+| `overalltime` | Variable (numeric) | (required) | Follow-up time in months |
+| `outcome` | Variable (factor) | (required) | Multi-level outcome factor |
+| `explanatory` | Variable (factor) | NULL | Grouping variable for comparison |
+| `dod` | Level | NULL | Level of `outcome` indicating death from disease |
+| `dooc` | Level | NULL | Level of `outcome` indicating death from other causes |
+| `awd` | Level | NULL | Level of `outcome` indicating alive with disease |
+| `awod` | Level | NULL | Level of `outcome` indicating alive without disease |
+| `analysistype` | List | "overall" | Analysis type: "overall", "cause", or "compete" |
+| `graystest` | Bool | FALSE | Perform Gray's test comparing CIF curves between groups |
+| `subdistribution` | Bool | FALSE | Fit Fine-Gray subdistribution hazard model |
+| `timepoints` | String | "12,24,36,60" | Comma-separated time points (months) for CIF estimates |
+| `confidencelevel` | Number | 0.95 | Confidence level for intervals (0.50 to 0.99) |
+| `showrisksets` | Bool | FALSE | Show number at risk summary below CIF plot |
+| `showStackedPlot` | Bool | FALSE | Display stacked CIF + survival probability plot |
+| `showKMvsCIF` | Bool | FALSE | Display 1-KM vs CIF comparison plot |
+| `cifColors` | List | "default" | Color palette: "default" (Red/Blue), "colorblind", or "grayscale" |
+
+### Output Elements
+
+| Output | Type | Visibility |
+|--------|------|------------|
+| `todo` | Html | When no variables selected |
+| `summary` | Html | Always |
+| `survivalTable` | Table | Always |
+| `cuminc` | Table | When `analysistype = "compete"` |
+| `comprisksPlot` | Image | When `analysistype = "compete"` |
+| `stackedPlot` | Image | When `showStackedPlot = TRUE` and `analysistype = "compete"` |
+| `kmvscifPlot` | Image | When `showKMvsCIF = TRUE` and `analysistype = "compete"` |
+| `interpretation` | Html | Always |
+| `assumptions` | Html | Always |
+| `fineGrayTable` | Table | When `subdistribution = TRUE` |
+
+## References
+
+- Fine JP, Gray RJ (1999). A proportional hazards model for the subdistribution
+  of a competing risk. *Journal of the American Statistical Association*,
+  94(446):496-509.
+- Gray RJ (1988). A class of K-sample tests for comparing the cumulative
+  incidence of a competing risk. *Annals of Statistics*, 16(3):1141-1154.
+- Putter H, Fiocco M, Geskus RB (2007). Tutorial in biostatistics: competing
+  risks and multi-state models. *Statistics in Medicine*, 26(11):2389-2430.
+- Austin PC, Lee DS, Fine JP (2016). Introduction to the analysis of survival
+  data in the presence of competing risks. *Circulation*, 133(6):601-609.
+- Dignam JJ, Zhang Q, Kocherginsky M (2012). The use and interpretation of
+  competing risks regression models. *Clinical Cancer Research*,
+  18(8):2301-2308.

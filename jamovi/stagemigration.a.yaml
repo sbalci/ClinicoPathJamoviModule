@@ -140,6 +140,7 @@ options:
         clinical interpretation, and implementation recommendations.
 
     # Accessibility and User Experience Options
+    # TODO: Wire to .b.R — Apply color-blind-safe palette and high-contrast theme when enabled
     - name: enableAccessibilityFeatures
       title: ' Accessibility Features'
       type: Bool
@@ -180,6 +181,7 @@ options:
         and improve performance while maintaining statistical accuracy.
 
     # Analysis Complexity Mode (Progressive Disclosure)
+    # TODO: Wire to .b.R — Map quick/standard/comprehensive to sets of enabled analysis toggles
     - name: complexityMode
       title: 'Analysis Complexity Mode'
       type: List
@@ -1028,6 +1030,7 @@ options:
         method based on the model type. TreeSHAP is fastest for tree models, 
         Kernel SHAP works with any model but is slower.
 
+    # TODO: Wire to .b.R — Gate SHAP summary and dependence plot generation
     - name: generateSHAPPlots
       title: 'Generate SHAP Plots'
       type: Bool
@@ -1126,6 +1129,7 @@ options:
         (e.g., "cancer_death", "disease_progression", "cardiovascular_death"). 
         Must match one of the competing event categories.
 
+    # TODO: Wire to .b.R — Gate cumulative incidence function plot generation
     - name: generateCIFPlots
       title: 'Generate CIF Plots'
       type: Bool
@@ -1144,6 +1148,7 @@ options:
         across staging groups. Tests whether CIF curves differ significantly 
         between stages for each event type.
 
+    # TODO: Wire to .b.R — Pass confidence level to CIF computation instead of hardcoded 0.95
     - name: cifConfidenceLevel
       title: 'CIF Confidence Level'
       type: Number
@@ -1203,6 +1208,7 @@ options:
         over time. Essential for modeling disease progression, remission, 
         relapse, and death in oncology.
 
+    # TODO: Wire to .b.R — Switch between Markov and semi-Markov multi-state transition models
     - name: multiStateModel
       title: 'Multi-State Model Type'
       type: List
@@ -1306,6 +1312,7 @@ options:
         rates for all possible state transitions. Essential for understanding 
         disease progression dynamics.
 
+    # TODO: Wire to .b.R — Gate multi-state transition diagram generation
     - name: multiStateGraphics
       title: 'Multi-State Visualizations'
       type: Bool
@@ -1315,6 +1322,7 @@ options:
         diagrams, probability plots, and Aalen-Johansen estimator curves for 
         state occupancy probabilities.
 
+    # TODO: Wire to .b.R — Stratify multi-state analysis by old vs new staging system
     - name: msStratifyByStaging
       title: 'Stratify by Staging System'
       type: Bool
@@ -1324,6 +1332,7 @@ options:
         compare their ability to predict disease transitions and progression 
         patterns.
 
+    # TODO: Wire to .b.R — Gate cross-validation of multi-state model predictions
     - name: multiStateValidation
       title: 'Multi-State Model Validation'
       type: Bool
@@ -1353,6 +1362,7 @@ options:
         ensemble methods without proportional hazards assumptions, ideal for 
         complex interactions and non-linear relationships.
 
+    # TODO: Wire to .b.R — Switch between RSF (randomForestSRC) and conditional forest (party::cforest) model types
     - name: forestModelType
       title: 'Forest Model Type'
       type: List
@@ -1423,6 +1433,7 @@ options:
         Shows which variables contribute most to survival predictions, 
         complementing SHAP analysis with forest-specific importance metrics.
 
+    # TODO: Wire to .b.R — Pass importance="permutation" or "random" to rfsrc() call
     - name: forestImportanceType
       title: 'Importance Measure'
       type: List
@@ -1477,6 +1488,7 @@ options:
         including C-index, Integrated Brier Score, and time-dependent AUC. 
         Compares forest performance with traditional Cox models.
 
+    # TODO: Wire to .b.R — Already used in visibility rule; gate .populateForestStagingComparison() call
     - name: forestStagingComparison
       title: 'Forest-Based Staging Comparison'
       type: Bool
@@ -1486,6 +1498,7 @@ options:
         non-parametric ensemble methods. Provides robust staging comparison 
         without proportional hazards assumptions.
 
+    # TODO: Wire to .b.R — Enable/disable bootstrap validation of RF model predictions
     - name: forestBootstrap
       title: 'Bootstrap Forest Validation'
       type: Bool
@@ -1495,6 +1508,7 @@ options:
         bootstrap samples. Provides confidence intervals for forest-based 
         predictions and importance measures.
 
+    # TODO: Wire to .b.R — Set number of bootstrap replicates for RF validation
     - name: forestBootstrapSamples
       title: 'Bootstrap Samples'
       type: Number
@@ -1505,14 +1519,67 @@ options:
         Number of bootstrap samples for forest validation. More samples 
         provide more stable confidence intervals but increase computation time.
 
+    # TODO: Wire to .b.R — Gate .populateForestSummary() call; when false skip summary table
     - name: generateForestSummary
       title: 'Forest Analysis Summary'
       type: Bool
       default: false
       description: >-
-        Generate comprehensive summary of random forest analysis including 
-        model performance, variable importance, staging comparison, and 
+        Generate comprehensive summary of random forest analysis including
+        model performance, variable importance, staging comparison, and
         clinical recommendations based on ensemble predictions.
+
+    - name: rfAnalyzeOldStage
+      title: 'Analyze Old Staging System (RF)'
+      type: Bool
+      default: true
+      description:
+          R: Include old staging system in random forest analysis
+
+    - name: rfAnalyzeNewStage
+      title: 'Analyze New Staging System (RF)'
+      type: Bool
+      default: true
+      description:
+          R: Include new staging system in random forest analysis
+
+    - name: rfMtryAuto
+      title: 'Auto-select mtry (RF)'
+      type: Bool
+      default: true
+      description:
+          R: Automatically select number of variables to try at each split
+
+    - name: rfBootstrapType
+      title: 'Bootstrap Type (RF)'
+      type: List
+      options:
+        - title: By Root
+          name: by.root
+        - title: By Node
+          name: by.node
+      default: by.root
+      description:
+          R: Bootstrap sampling strategy for random forest
+
+    - name: rfSamplingType
+      title: 'Sampling Type (RF)'
+      type: List
+      options:
+        - title: With Replacement
+          name: swr
+        - title: Without Replacement
+          name: swor
+      default: swr
+      description:
+          R: Sampling method for random forest bootstrap
+
+    - name: rfMinimalDepth
+      title: 'Minimal Depth Analysis (RF)'
+      type: Bool
+      default: false
+      description:
+          R: Perform minimal depth variable selection analysis
 
     # ============================================================================
     # Cure Models for Populations with Cured Fraction
@@ -1578,6 +1645,7 @@ options:
         survival patterns, enabling comparison of staging discrimination for 
         both cured and susceptible populations.
 
+    # TODO: Wire to .b.R — Switch between parametric (mixture) and non-parametric cure fraction estimation methods
     - name: cureFractionEstimation
       title: 'Cure Fraction Method'
       type: List
@@ -1594,6 +1662,7 @@ options:
         with specified distributions, non-parametric uses Kaplan-Meier plateau 
         detection, both provides validation.
 
+    # TODO: Wire to .b.R — Pass confidence level to cure model CI computation instead of hardcoded 0.95
     - name: cureConfidenceLevel
       title: 'Confidence Level'
       type: Number
@@ -1658,6 +1727,7 @@ options:
         patients.
       default: null
 
+    # TODO: Wire to .b.R — Gate cure model comparison table; compare old vs new staging cure fractions
     - name: cureModelComparison
       title: 'Model Comparison Analysis'
       type: Bool
@@ -1676,6 +1746,7 @@ options:
         stage-specific cure patterns and survival of susceptible patients. 
         Essential for staging validation.
 
+    # TODO: Wire to .b.R — Gate goodness-of-fit diagnostics for cure fraction models
     - name: cureGoodnessOfFit
       title: 'Goodness-of-Fit Testing'
       type: Bool
@@ -1685,6 +1756,7 @@ options:
         tests and visual diagnostic plots. Validates model assumptions and 
         identifies potential misspecification.
 
+    # TODO: Wire to .b.R — Gate .populateCureSummary() call; when false skip summary table
     - name: generateCureSummary
       title: 'Cure Model Summary'
       type: Bool
@@ -1802,6 +1874,7 @@ options:
           accounting for interval censoring. Provides likelihood ratio tests
           and information criteria for model comparison.
 
+    # TODO: Wire to .b.R — Gate interval censoring diagnostic plots
     - name: intervalCensoringPlots
       title: 'Generate Survival Plots'
       type: Bool
@@ -1894,6 +1967,7 @@ options:
           model censoring as outcome. Competing risks treats censoring as
           competing event. Landmark analysis examines censoring patterns.
 
+    # TODO: Wire to .b.R — Select covariates for informative censoring adjustment model
     - name: informativeCensoringCovariates
       title: 'Censoring Mechanism Covariates'
       type: Variables
@@ -1943,6 +2017,7 @@ options:
           imputation imputes censored failure times. Sensitivity analysis
           explores range of possible bias effects.
 
+    # TODO: Wire to .b.R — Select variables for inverse probability weighting in censoring adjustment
     - name: informativeCensoringIPWVariables
       title: 'IPW Model Variables'
       type: Variables
@@ -2004,6 +2079,7 @@ options:
           Used for determining whether censoring appears to be informative
           and for confidence interval construction.
 
+    # TODO: Wire to .b.R — Gate informative censoring diagnostic plots
     - name: informativeCensoringPlots
       title: 'Generate Diagnostic Plots'
       type: Bool
@@ -2104,6 +2180,7 @@ options:
           measures, especially important for heavily censored data where
           traditional standard errors may be unreliable.
 
+    # TODO: Wire to .b.R — Set bootstrap replicates for concordance probability CI
     - name: concordanceProbabilityBootstrapSamples
       title: 'Bootstrap Samples'
       type: Integer
@@ -2139,6 +2216,7 @@ options:
           Provides statistical evidence for staging system discrimination
           differences accounting for heavy censoring.
 
+    # TODO: Wire to .b.R — Select covariates for adjusted concordance probability estimation
     - name: concordanceProbabilityAdjustVariables
       title: 'Adjustment Variables'
       type: Variables
@@ -2203,6 +2281,7 @@ options:
           endpoints that respects the clinical hierarchy of outcomes and provides
           intuitive interpretation for staging system evaluation.
 
+    # TODO: Wire to .b.R — Select composite endpoint hierarchy (death > progression > response)
     - name: winRatioEndpoints
       title: 'Endpoint Hierarchy'
       type: List
@@ -2223,6 +2302,7 @@ options:
           important endpoint, followed by disease-specific outcomes. The hierarchy
           determines how patient pairs are compared.
 
+    # TODO: Wire to .b.R — Specify death indicator variable for win ratio primary endpoint
     - name: winRatioDeathVariable
       title: 'Death/Primary Endpoint Variable'
       type: Variable
@@ -2254,6 +2334,19 @@ options:
           Can be binary (event/no event) or continuous (time to event).
       default: null
 
+    - name: wrSecondaryDirection
+      title: 'Secondary Endpoint Direction'
+      type: List
+      options:
+        - title: Higher is Better
+          name: higher
+        - title: Lower is Better
+          name: lower
+      default: higher
+      description:
+          R: Direction of improvement for secondary endpoint in win ratio
+
+    # TODO: Wire to .b.R — Specify tertiary endpoint variable in win ratio hierarchy
     - name: winRatioTertiaryEndpoint
       title: 'Tertiary Endpoint Variable'
       type: Variable
@@ -2270,6 +2363,7 @@ options:
           are tied. Can be binary or continuous.
       default: null
 
+    # TODO: Wire to .b.R — Specify time-to-event variables per endpoint in win ratio
     - name: winRatioTimeVariables
       title: 'Time Variables for Endpoints'
       type: Variables
@@ -2284,6 +2378,7 @@ options:
           time-to-event comparisons when endpoints are not binary.
       default: null
 
+    # TODO: Wire to .b.R — Select pair matching strategy: all-pairs vs stratified vs nearest-neighbor
     - name: winRatioMatchingStrategy
       title: 'Matching Strategy'
       type: List
@@ -2304,6 +2399,7 @@ options:
           pairs uses pre-specified matching. Stratified performs within-stage
           comparisons. Propensity matching balances baseline characteristics.
 
+    # TODO: Wire to .b.R — Select CI method: bootstrap vs asymptotic for win ratio
     - name: winRatioConfidenceMethod
       title: 'Confidence Interval Method'
       type: List
@@ -2321,6 +2417,7 @@ options:
           Bootstrap is most robust but computationally intensive. Asymptotic
           uses large sample theory. Permutation provides exact p-values.
 
+    # TODO: Wire to .b.R — Set bootstrap replicates for win ratio CI
     - name: winRatioBootstrapSamples
       title: 'Bootstrap Samples'
       type: Integer
@@ -2333,6 +2430,7 @@ options:
           when using bootstrap method. More samples provide more accurate
           intervals but increase computation time.
 
+    # TODO: Wire to .b.R — Pass confidence level to win ratio CI computation
     - name: winRatioConfidenceLevel
       title: 'Confidence Level'
       type: Number
@@ -2345,6 +2443,7 @@ options:
           tests. Standard choices are 0.90, 0.95, or 0.99 for 90 percent, 95 percent, or
           99 percent confidence intervals respectively.
 
+    # TODO: Wire to .b.R — Select tie-breaking strategy: next-endpoint vs split vs random
     - name: winRatioHandleTies
       title: 'Tie Handling Strategy'
       type: List
@@ -2372,6 +2471,7 @@ options:
           endpoint ordering impact, missing data influence, and robustness
           to matching strategy choices.
 
+    # TODO: Wire to .b.R — Enable generalized pairwise comparison extension of win ratio
     - name: winRatioGeneralizedPairwise
       title: 'Generalized Pairwise Comparison'
       type: Bool
@@ -2406,6 +2506,7 @@ options:
           heterogeneity and clustering effects in survival analysis.
       default: null
 
+    # TODO: Wire to .b.R — Select frailty distribution: gamma, gaussian, or log-normal
     - name: frailtyDistribution
       title: 'Frailty Distribution'
       type: List
@@ -2445,6 +2546,7 @@ options:
           Higher values provide more stable estimates but increase 
           computational time.
 
+    # TODO: Wire to .b.R — Gate variance component decomposition table
     - name: frailtyVarianceComponents
       title: 'Variance Components Analysis'
       type: Bool
@@ -2455,6 +2557,7 @@ options:
           total variation explained by cluster-level random effects 
           vs individual-level factors.
 
+    # TODO: Wire to .b.R — Gate heterogeneity test (LRT for frailty variance = 0)
     - name: frailtyHeterogeneityTest
       title: 'Heterogeneity Testing'
       type: Bool
@@ -2475,6 +2578,7 @@ options:
           systems within each cluster/institution to assess consistency 
           of staging performance across centers.
 
+    # TODO: Wire to .b.R — Gate AIC/BIC model selection comparison across frailty distributions
     - name: frailtyModelSelection
       title: 'Model Selection'
       type: Bool
@@ -2485,6 +2589,7 @@ options:
           distributions and model specifications using AIC/BIC criteria 
           and likelihood ratio tests.
 
+    # TODO: Wire to .b.R — Gate predictive accuracy metrics (C-index, Brier) for frailty models
     - name: frailtyPredictiveAccuracy
       title: 'Predictive Accuracy Assessment'
       type: Bool
@@ -2505,6 +2610,7 @@ options:
           influence detection, and goodness-of-fit assessment for frailty 
           models with clustering adjustments.
 
+    # TODO: Wire to .b.R — Gate advanced inference: random effects prediction, shrinkage estimates
     - name: frailtyAdvancedInference
       title: 'Advanced Statistical Inference'
       type: Bool
@@ -2591,6 +2697,7 @@ options:
           Should reflect realistic treatment benefits for staging-guided 
           interventions in the specific clinical context.
 
+    # TODO: Wire to .b.R — Gate staging system clinical utility comparison table
     - name: clinicalUtilityComparison
       title: 'Comparative Utility Assessment'
       type: Bool
@@ -2601,6 +2708,7 @@ options:
           difference analysis and utility improvement quantification across 
           different risk thresholds.
 
+    # TODO: Wire to .b.R — Gate cost-effectiveness analysis: ICER, willingness-to-pay thresholds
     - name: clinicalUtilityCostEffectiveness
       title: 'Cost-Effectiveness Integration'
       type: Bool

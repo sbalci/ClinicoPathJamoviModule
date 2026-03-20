@@ -1,6 +1,6 @@
 ---
 name: update-refs
-description: Parse jamovi .b.R to find packages and sync with refs, optionally fetching CRAN metadata
+description: Sync package references between .b.R, .r.yaml, and 00refs.yaml. Optionally fetch real metadata from CRAN
 interactive: true
 args:
   function_name:
@@ -26,6 +26,8 @@ examples:
 ---
 
 # Update References for Jamovi Function with CRAN Metadata Fetching
+
+**Consult:** `vignettes/jamovi_r_yaml_guide.md` for refs section format and `vignettes/jamovi_b_R_guide.md` for package detection patterns.
 
 Synchronize references between `.b.R`, `jamovi/*.r.yaml`, and `jamovi/00refs.yaml`. Optionally fetch real package metadata from CRAN to populate author, year, and title fields automatically.
 
@@ -407,3 +409,9 @@ else
   fi
 fi
 ```
+
+---
+
+## Related Commands
+
+- `/check-function` -- Validate function including reference consistency

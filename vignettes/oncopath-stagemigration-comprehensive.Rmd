@@ -1,0 +1,937 @@
+---
+title: "Advanced TNM Stage Migration Analysis - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Advanced TNM Stage Migration Analysis - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** The `stagemigration()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference. To run interactively,
+> use `devtools::load_all()` and call the R6 class directly:
+> `stagemigrationClass$new(options = stagemigrationOptions$new(...), data = mydata)`.
+
+# Advanced TNM Stage Migration Analysis
+
+## Overview
+
+When a new edition of the AJCC/TNM staging manual is released, pathologists and
+oncologists face a critical question: *Does the revised staging system actually
+provide better prognostic discrimination than the one it replaces?* This is not a
+trivial question. Patients who were Stage II under the old criteria may become
+Stage III under the new criteria -- or vice versa. If the reclassification
+genuinely separates patients with different prognoses, the new system is an
+improvement. If it simply reshuffles patients without prognostic benefit, or worse,
+introduces the **Will Rogers phenomenon** (where survival appears to improve in
+every stage simply because of patient reclassification), then the new system may be
+misleading.
+
+The `stagemigration` module provides a state-of-the-art statistical toolkit for
+answering this question. It goes far beyond a simple cross-tabulation of old vs.
+new stages. The analysis includes formal discrimination metrics (Harrell's C-index),
+reclassification indices (NRI, IDI), decision curve analysis for clinical utility,
+bootstrap validation for internal validity, and multiple visualization tools for
+presentations and publications. Cancer-type-specific thresholds and interpretation
+guidelines are built in for lung, breast, colorectal, prostate, head and neck, and
+melanoma.
+
+Whether you are preparing a manuscript evaluating AJCC 8th vs. 7th edition staging,
+validating an institutional modification to the standard staging system, or
+assessing a biomarker-enhanced staging proposal, this module provides the full
+analytical framework recommended by current staging validation literature.
+
+---
+
+## Datasets
+
+The examples in this vignette use synthetic datasets that mimic realistic TNM
+staging migration patterns. Because the bundled `.rda` files may require
+regeneration, we create the data inline to guarantee reproducibility.
+
+```{r generate-data}
+set.seed(12345)
+
+# --- Helper functions ---
+generate_survival_times <- function(stage, hazard_base = 0.02,
+                                    stage_multipliers = c(1, 1.5, 2.5, 4)) {
+  stage_numeric <- as.numeric(stage)
+  hazard <- hazard_base * stage_multipliers[stage_numeric]
+  times <- rexp(length(stage), rate = hazard) * 12 + rnorm(length(stage), 0, 2)
+  pmax(times, 0.1)
+}
+
+generate_censoring <- function(survival_times, censoring_rate = 0.3) {
+  prob <- pmin(censoring_rate + (survival_times - median(survival_times)) / 100, 0.8)
+  prob <- pmax(prob, 0.1)
+  rbinom(length(survival_times), 1, 1 - prob)
+}
+
+create_stage_migration <- function(old_stage, migration_prob = 0.25) {
+  new_stage <- as.numeric(old_stage)
+  n <- length(old_stage)
+  migrate <- sample(seq_len(n), size = round(n * migration_prob))
+  for (i in migrate) {
+    cs <- new_stage[i]
+    if (cs == 1) new_stage[i] <- sample(c(1, 2, 3), 1, prob = c(0.4, 0.4, 0.2))
+    else if (cs == 2) new_stage[i] <- sample(1:4, 1, prob = c(0.2, 0.3, 0.3, 0.2))
+    else if (cs == 3) new_stage[i] <- sample(2:4, 1, prob = c(0.2, 0.4, 0.4))
+    else new_stage[i] <- sample(3:4, 1, prob = c(0.1, 0.9))
+  }
+  factor(new_stage, levels = 1:4,
+         labels = c("Stage I", "Stage II", "Stage III", "Stage IV"))
+}
+
+# --- Combined dataset (breast + lung + colorectal, N = 2100) ---
+make_cohort <- function(n, cancer, hazard_base, mig_prob) {
+  age <- pmin(pmax(round(rnorm(n, 64, 12)), 30), 90)
+  sex <- factor(sample(c("Male", "Female"), n, replace = TRUE))
+  old_num <- sample(1:4, n, replace = TRUE, prob = c(0.28, 0.30, 0.24, 0.18))
+  old_stage <- factor(old_num, 1:4,
+                      labels = c("Stage I", "Stage II", "Stage III", "Stage IV"))
+  new_stage <- create_stage_migration(old_stage, migration_prob = mig_prob)
+  st <- generate_survival_times(new_stage, hazard_base = hazard_base,
+                                stage_multipliers = c(0.7, 1.2, 2.0, 3.5))
+  ev <- generate_censoring(st, censoring_rate = 0.35)
+  data.frame(age = age, sex = sex, old_stage = old_stage, new_stage = new_stage,
+             survival_time = round(st, 1), event = ev, cancer_type = cancer,
+             stringsAsFactors = FALSE)
+}
+
+lung_df    <- make_cohort(700, "Lung",       0.015, 0.30)
+breast_df  <- make_cohort(700, "Breast",     0.008, 0.25)
+crc_df     <- make_cohort(700, "Colorectal", 0.012, 0.28)
+
+combined_data <- rbind(lung_df, breast_df, crc_df)
+combined_data$patient_id <- seq_len(nrow(combined_data))
+
+# --- Small sample dataset (N = 50, edge-case testing) ---
+small_data <- make_cohort(50, "Mixed", 0.015, 0.20)
+
+cat("Combined data:", nrow(combined_data), "patients,",
+    sum(combined_data$event), "events\n")
+cat("Small data:", nrow(small_data), "patients,",
+    sum(small_data$event), "events\n")
+```
+
+| Dataset | N | Key Features |
+|---------|---|-------------|
+| `combined_data` | 2100 | Combined breast/lung/colorectal, 4-stage system |
+| `lung_df` | 700 | Lung cancer specific, higher hazard |
+| `breast_df` | 700 | Breast cancer specific, lower hazard |
+| `small_data` | 50 | Small sample for edge-case testing |
+
+---
+
+## 1. Basic Migration Analysis
+
+The simplest use case: compare two staging systems and display the migration matrix
+plus an overview table. This is the starting point for any staging validation.
+
+```{r basic}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "basic",
+  showMigrationOverview = TRUE,
+  showMigrationMatrix = TRUE
+)
+```
+
+The **migration overview** tells you how many patients changed stage (and in which
+direction), while the **migration matrix** shows the exact cross-tabulation. Diagonal
+cells are patients who stayed in the same stage; off-diagonal cells are patients who
+migrated. Above the diagonal = upstaged, below = downstaged.
+
+---
+
+## 2. Analysis Types
+
+The `analysisType` option controls the scope of the analysis. There are four levels:
+
+- **basic** -- Migration matrices and distribution tables only
+- **standard** -- Adds C-index comparison and NRI
+- **comprehensive** -- All statistical methods (default)
+- **publication** -- Optimized output formatting for manuscripts
+
+```{r standard-analysis}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "standard",
+  showMigrationOverview = TRUE,
+  showMigrationMatrix = TRUE,
+  showStageDistribution = TRUE,
+  showStatisticalComparison = TRUE,
+  showMigrationSummary = TRUE
+)
+```
+
+The **stage distribution comparison** shows how patient counts shift between
+systems. The **statistical comparison** provides C-index values for each staging
+system so you can see which one discriminates better.
+
+---
+
+## 3. Net Reclassification Improvement (NRI) and Integrated Discrimination Improvement (IDI)
+
+NRI quantifies whether the new staging system correctly reclassifies patients --
+moving event patients to higher-risk stages and non-event patients to lower-risk
+stages. IDI measures the integrated improvement in predicted probabilities.
+
+These are the gold-standard metrics for staging validation, recommended by Pencina
+et al. (2008) and widely used in AJCC staging literature.
+
+```{r nri-idi}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  calculateNRI = TRUE,
+  nriTimePoints = "12, 24, 60",
+  calculateIDI = TRUE,
+  showMigrationOverview = TRUE,
+  showMigrationMatrix = TRUE
+)
+```
+
+**Interpreting NRI:**
+
+- NRI > 0: Net improvement in classification with the new system
+- NRI > 0.20 (the default `nriClinicalThreshold`): Clinically meaningful improvement
+- The event NRI and non-event NRI components tell you whether the improvement comes
+  from better classification of patients who had events, those who did not, or both
+
+**Interpreting IDI:**
+
+- IDI > 0: Improved discrimination
+- IDI represents the increase in the difference between mean predicted probabilities
+  for events and non-events
+
+---
+
+## 4. C-index Comparison
+
+Harrell's concordance index (C-index) measures the staging system's ability to rank
+patients by their survival prognosis. A C-index of 0.5 means random discrimination;
+1.0 means perfect discrimination. In staging validation, a clinically meaningful
+improvement is typically 0.02 or greater (configurable via `clinicalSignificanceThreshold`).
+
+```{r cindex}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "standard",
+  showConcordanceComparison = TRUE,
+  showStatisticalComparison = TRUE,
+  includeEffectSizes = TRUE,
+  clinicalSignificanceThreshold = 0.02
+)
+```
+
+The concordance comparison table shows:
+
+- C-index for the old staging system
+- C-index for the new staging system
+- The difference (Delta C) and its confidence interval
+- Whether the improvement crosses the clinical significance threshold
+
+---
+
+## 5. Will Rogers Effect Detection
+
+The Will Rogers phenomenon occurs when patient reclassification creates the illusion
+of improvement. Named after Will Rogers' quip about Oklahomans moving to California
+and raising the average intelligence of both states, it can make a new staging system
+appear superior when it is not.
+
+The module detects this by comparing survival within each stage between patients who
+migrated and those who did not. If migrated patients have systematically different
+survival than the non-migrated patients in their new stage, the Will Rogers effect
+is operating.
+
+```{r will-rogers}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  showWillRogersAnalysis = TRUE,
+  showWillRogersVisualization = TRUE,
+  advancedMigrationAnalysis = TRUE,
+  showMigrationHeatmap = TRUE
+)
+```
+
+The **Will Rogers analysis table** provides a multi-criteria evidence assessment
+with a traffic-light grading system (PASS / BORDERLINE / CONCERN / FAIL). The
+**visualization** shows how survival curves shift within stages when patients are
+reclassified.
+
+---
+
+## 6. Bootstrap Validation
+
+Internal validation using the bootstrap is essential for ensuring your findings are
+not over-optimistic. The module performs optimism-corrected estimates of the C-index
+difference, using Harrell's recommended bootstrap procedure.
+
+```{r bootstrap}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  performBootstrap = TRUE,
+  bootstrapReps = 200,
+  useOptimismCorrection = TRUE,
+  showStatisticalComparison = TRUE
+)
+```
+
+With 200 bootstrap repetitions (use 1000 for publications), the output includes:
+
+- Apparent C-index difference (what you see in the data)
+- Optimism estimate (how much the apparent estimate is inflated)
+- Optimism-corrected C-index difference (the honest estimate)
+- Bootstrap confidence intervals
+
+If the optimism-corrected estimate remains above your clinical significance
+threshold, you have robust evidence that the new staging system is genuinely better.
+
+---
+
+## 7. Decision Curve Analysis (DCA)
+
+Decision Curve Analysis moves beyond discrimination to clinical utility. It asks:
+*At what range of decision thresholds does using the new staging system lead to
+better clinical decisions than treating all patients, treating no patients, or using
+the old staging system?*
+
+```{r dca}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  performDCA = TRUE,
+  showDecisionCurves = TRUE,
+  showClinicalInterpretation = TRUE
+)
+```
+
+The **decision curve plot** shows net benefit on the y-axis across threshold
+probabilities on the x-axis. The new staging system is clinically useful at
+thresholds where its curve lies above both the "treat all" and "treat none"
+reference lines, and ideally above the old staging system curve.
+
+---
+
+## 8. Calibration Analysis
+
+Calibration assesses whether the predicted survival probabilities from the staging
+system match observed outcomes. A well-calibrated staging system not only ranks
+patients correctly (discrimination) but also assigns accurate absolute risk estimates.
+
+```{r calibration}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  performCalibration = TRUE,
+  showCalibrationPlots = TRUE
+)
+```
+
+The **calibration plots** compare predicted vs. observed survival. Points lying on
+the 45-degree line indicate perfect calibration. Systematic deviation above the line
+means the model overestimates survival; below the line means it underestimates.
+
+---
+
+## 9. Survival Curves
+
+Kaplan-Meier curves stratified by stage are the most intuitive way to visualize
+staging system performance. Well-separated curves with no crossing indicate good
+prognostic discrimination.
+
+```{r survival-curves}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "standard",
+  showSurvivalCurves = TRUE,
+  survivalPlotType = "separate",
+  showConfidenceIntervals = TRUE,
+  showRiskTables = TRUE,
+  showForestPlot = TRUE
+)
+```
+
+Available `survivalPlotType` options:
+
+- **separate**: Individual KM plots for old and new staging systems
+- **sidebyside**: Old and new systems plotted side by side for visual comparison
+- **overlay**: Both systems overlaid on the same axes
+
+The **forest plot** shows stage-specific hazard ratios with confidence intervals,
+making it easy to compare the magnitude of between-stage separation in each system.
+
+---
+
+## 10. Clinical Presets
+
+For users who do not want to manually configure dozens of options, the module
+provides clinical presets that activate sensible combinations:
+
+```{r preset-research}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  clinicalPreset = "research_study"
+)
+```
+
+| Preset | What It Enables | Best For |
+|--------|----------------|----------|
+| `routine_clinical` | Migration matrix, C-index, basic recommendation | Daily clinical validation |
+| `research_study` | + NRI, survival curves, Will Rogers, bootstrap | Academic research projects |
+| `publication_ready` | All methods + all visualizations | Manuscript preparation |
+| `custom` | Manual control of every option | Advanced users |
+
+The `complexityMode` option works similarly but controls UI complexity in the
+jamovi interface:
+
+- **quick**: Essential outputs only (5-10 min analysis)
+- **standard**: Common validation metrics (30-60 min)
+- **comprehensive**: All methods enabled (1-2 hours for large datasets)
+- **custom**: Full manual control
+
+---
+
+## 11. Cancer-Type-Specific Analysis
+
+Different cancer types have different expected migration patterns and clinically
+meaningful thresholds. Specifying the cancer type adjusts interpretation guidelines.
+
+```{r cancer-type}
+stagemigration(
+  data = lung_df,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  cancerType = "lung",
+  showMigrationOverview = TRUE,
+  showMigrationMatrix = TRUE,
+  showClinicalInterpretation = TRUE,
+  showExplanations = TRUE
+)
+```
+
+Supported cancer types: `general`, `lung`, `breast`, `colorectal`, `prostate`,
+`headneck`, `melanoma`, `other`. Each adjusts thresholds and interpretation text.
+
+---
+
+## 12. Competing Risks Analysis
+
+In many oncology settings, patients face multiple possible events -- cancer-specific
+death and death from other causes. Standard survival analysis treats competing events
+as censored, which can bias estimates. The competing risks framework uses Fine-Gray
+subdistribution hazard models and Cumulative Incidence Functions (CIF) to properly
+handle this.
+
+```{r competing-risks}
+# Add a competing event variable for demonstration
+cr_data <- combined_data
+set.seed(42)
+cr_data$event_type <- ifelse(
+  cr_data$event == 1,
+  sample(c("cancer_death", "other_death"), sum(cr_data$event == 1),
+         replace = TRUE, prob = c(0.75, 0.25)),
+  "censored"
+)
+cr_data$event_type <- factor(cr_data$event_type)
+
+stagemigration(
+  data = cr_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  performCompetingRisks = TRUE,
+  competingEventVar = "event_type",
+  showMigrationOverview = TRUE,
+  showMigrationMatrix = TRUE
+)
+```
+
+The competing risks analysis provides:
+
+- Cumulative incidence functions for each event type
+- Fine-Gray subdistribution hazard ratios comparing staging systems
+- Gray's test for equality of CIF across stages
+
+---
+
+## 13. Random Survival Forests [Experimental]
+
+For a non-parametric comparison that makes no assumptions about proportional hazards,
+the module can fit random survival forests (RSF) to both staging systems and compare
+variable importance and prediction accuracy.
+
+```{r random-forest}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  performRandomForestAnalysis = TRUE,
+  forestModelType = "rsf",
+  forestNTrees = 200,
+  calculateVariableImportance = TRUE,
+  forestDiscriminationMetrics = TRUE,
+  forestStagingComparison = TRUE,
+  showMigrationOverview = TRUE
+)
+```
+
+RSF analysis is computationally expensive. For exploratory work, use `forestNTrees = 200`;
+for publications, use 500-1000. The output includes:
+
+- Variable importance rankings for each staging system
+- C-index from RSF models vs. Cox models
+- Comparison of staging systems in the non-parametric framework
+
+---
+
+## 14. Advanced Features
+
+### Homogeneity and Trend Tests
+
+These tests verify that the staging system satisfies the fundamental requirements:
+patients within the same stage should have similar prognosis (homogeneity), and
+higher stages should consistently have worse prognosis (monotonic trend).
+
+```{r homogeneity-trend}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  performHomogeneityTests = TRUE,
+  performTrendTests = TRUE,
+  performLikelihoodTests = TRUE,
+  calculatePseudoR2 = TRUE,
+  showStatisticalSummary = TRUE,
+  showMethodologyNotes = TRUE
+)
+```
+
+### Multifactorial Analysis
+
+When other prognostic variables (age, grade, biomarkers) are available, the
+multifactorial analysis adjusts the staging comparison for these confounders.
+
+```{r multifactorial}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  enableMultifactorialAnalysis = TRUE,
+  continuousCovariates = "age",
+  categoricalCovariates = "sex",
+  multifactorialComparisonType = "comprehensive",
+  showMultifactorialTables = TRUE,
+  showAdjustedCIndexComparison = TRUE,
+  showNestedModelTests = TRUE
+)
+```
+
+### Time-Dependent ROC Analysis
+
+Compares the discriminative ability of staging systems at specific time points. This
+is especially useful when staging performance changes over time (e.g., a staging system
+may discriminate well at 1 year but poorly at 5 years).
+
+```{r roc-analysis}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  performROCAnalysis = TRUE,
+  rocTimePoints = "12, 24, 60",
+  showROCComparison = TRUE
+)
+```
+
+### RMST and Stage Migration Effect
+
+Restricted Mean Survival Time (RMST) provides a clinically interpretable metric
+that does not depend on the proportional hazards assumption. The Stage Migration
+Effect (SME) formula quantifies the cumulative survival difference across stages.
+
+```{r rmst-sme}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  calculateRMST = TRUE,
+  calculateSME = TRUE,
+  showStatisticalComparison = TRUE
+)
+```
+
+---
+
+## 15. Visualizations
+
+The module produces several publication-quality visualizations:
+
+### Migration Heatmap and Sankey Diagram
+
+```{r heatmap-sankey}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "basic",
+  showMigrationHeatmap = TRUE,
+  showSankeyDiagram = TRUE,
+  showMigrationSurvivalComparison = TRUE
+)
+```
+
+- **Heatmap**: Color-coded migration matrix; darker = more patients. The diagonal
+  shows retention; off-diagonal shows migration flows.
+- **Sankey diagram**: Flow visualization where band thickness represents patient count.
+  Excellent for presentations.
+- **Migration survival comparison**: KM curves showing how survival in each stage
+  changes before and after reclassification.
+
+---
+
+## 16. Edge Cases and Small Samples
+
+The module handles small samples gracefully, with appropriate warnings when sample
+size is insufficient for certain analyses.
+
+```{r small-sample}
+stagemigration(
+  data = small_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "basic",
+  showMigrationOverview = TRUE,
+  showMigrationMatrix = TRUE,
+  showExplanations = TRUE
+)
+```
+
+**Data requirements:**
+
+- Minimum 30 patients (100+ recommended for standard analysis)
+- At least 2 stage levels in both systems
+- Event rate between 5% and 95%
+- For bootstrap: 100+ patients recommended
+- For NRI/IDI: adequate events at each time point
+
+---
+
+## 17. Reporting and Interpretation
+
+### Executive Summary and Copy-Ready Reports
+
+```{r executive-summary}
+stagemigration(
+  data = combined_data,
+  oldStage = "old_stage",
+  newStage = "new_stage",
+  survivalTime = "survival_time",
+  event = "event",
+  eventLevel = "1",
+  analysisType = "comprehensive",
+  calculateNRI = TRUE,
+  calculateIDI = TRUE,
+  performBootstrap = TRUE,
+  bootstrapReps = 200,
+  generateExecutiveSummary = TRUE,
+  generateCopyReadyReport = TRUE,
+  showClinicalInterpretation = TRUE,
+  showAbbreviationGlossary = TRUE
+)
+```
+
+The **executive summary** condenses all findings into a structured overview with key
+metrics and a staging system adoption recommendation. The **copy-ready report**
+generates plain-language paragraphs suitable for direct inclusion in manuscripts or
+clinical reports.
+
+### Guided Mode
+
+For users new to staging validation, `enableGuidedMode = TRUE` provides step-by-step
+guidance, assumption checking, and clinical interpretation assistance throughout the
+analysis.
+
+---
+
+## Complete Option Reference
+
+### Core Variables
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `oldStage` | Variable | -- | Original TNM staging variable (factor) |
+| `newStage` | Variable | -- | Revised TNM staging variable (factor) |
+| `survivalTime` | Variable | -- | Follow-up time in months (numeric) |
+| `event` | Variable | -- | Event status indicator (numeric or factor) |
+| `eventLevel` | Level | -- | Level indicating event occurrence |
+
+### Analysis Control
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `analysisType` | List | `comprehensive` | Scope: basic / standard / comprehensive / publication |
+| `clinicalPreset` | List | `routine_clinical` | Preset configuration: routine / research / publication / custom |
+| `complexityMode` | List | `quick` | UI complexity: quick / standard / comprehensive / custom |
+| `confidenceLevel` | Number | `0.95` | Confidence level for CIs and tests (0.80-0.99) |
+| `cancerType` | List | `general` | Cancer type for tailored thresholds |
+
+### Statistical Methods
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `calculateNRI` | Bool | `FALSE` | Net Reclassification Improvement |
+| `nriTimePoints` | String | `"12, 24, 60"` | Comma-separated NRI time points (months) |
+| `calculateIDI` | Bool | `FALSE` | Integrated Discrimination Improvement |
+| `performROCAnalysis` | Bool | `FALSE` | Time-dependent ROC analysis |
+| `rocTimePoints` | String | `"12, 24, 36, 60"` | Comma-separated ROC time points |
+| `performDCA` | Bool | `FALSE` | Decision Curve Analysis |
+| `performCalibration` | Bool | `FALSE` | Calibration analysis |
+| `performHomogeneityTests` | Bool | `FALSE` | Within-stage homogeneity tests |
+| `performTrendTests` | Bool | `FALSE` | Monotonic trend across stages |
+| `performLikelihoodTests` | Bool | `FALSE` | Likelihood ratio tests |
+| `calculatePseudoR2` | Bool | `FALSE` | Pseudo R-squared measures |
+| `calculateSME` | Bool | `FALSE` | Stage Migration Effect formula |
+| `calculateRMST` | Bool | `FALSE` | Restricted Mean Survival Time |
+
+### Validation
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `performBootstrap` | Bool | `FALSE` | Bootstrap internal validation |
+| `bootstrapReps` | Number | `1000` | Bootstrap repetitions (100-2000) |
+| `performCrossValidation` | Bool | `FALSE` | k-fold cross-validation |
+| `cvFolds` | Number | `5` | Number of CV folds (3-10) |
+| `useOptimismCorrection` | Bool | `FALSE` | Apply optimism correction |
+
+### Clinical Thresholds
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `clinicalSignificanceThreshold` | Number | `0.02` | Minimum C-index improvement considered clinically significant |
+| `nriClinicalThreshold` | Number | `0.20` | Minimum NRI for clinical meaningfulness |
+
+### Table Display
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `showMigrationOverview` | Bool | `TRUE` | Overview table with key migration statistics |
+| `showMigrationSummary` | Bool | `FALSE` | Statistical summary with Chi-square / Fisher tests |
+| `showStageDistribution` | Bool | `FALSE` | Side-by-side stage distribution comparison |
+| `showMigrationMatrix` | Bool | `TRUE` | Detailed cross-tabulation matrix |
+| `showStatisticalComparison` | Bool | `FALSE` | C-index and other statistical metrics |
+| `showConcordanceComparison` | Bool | `FALSE` | Detailed concordance comparison |
+| `showWillRogersAnalysis` | Bool | `FALSE` | Will Rogers phenomenon analysis |
+| `showClinicalInterpretation` | Bool | `FALSE` | Clinical interpretation guide |
+| `showStatisticalSummary` | Bool | `FALSE` | Comprehensive statistical summary |
+| `showMethodologyNotes` | Bool | `FALSE` | Detailed methodology documentation |
+| `showExplanations` | Bool | `TRUE` | Explanatory text for results |
+| `showAbbreviationGlossary` | Bool | `FALSE` | Glossary of abbreviations |
+| `includeEffectSizes` | Bool | `FALSE` | Effect sizes for comparisons |
+| `generateExecutiveSummary` | Bool | `FALSE` | Key findings and recommendations |
+
+### Visualization
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `showMigrationHeatmap` | Bool | `FALSE` | Color-coded migration heatmap |
+| `showSankeyDiagram` | Bool | `FALSE` | Patient flow diagram |
+| `showROCComparison` | Bool | `FALSE` | Time-dependent ROC curves |
+| `showCalibrationPlots` | Bool | `FALSE` | Calibration plots |
+| `showDecisionCurves` | Bool | `FALSE` | Decision curve plots |
+| `showForestPlot` | Bool | `FALSE` | Hazard ratio forest plot |
+| `showWillRogersVisualization` | Bool | `FALSE` | Will Rogers effect visualization |
+| `showMigrationSurvivalComparison` | Bool | `FALSE` | Before/after survival curves |
+| `showSurvivalCurves` | Bool | `FALSE` | Kaplan-Meier survival curves |
+| `survivalPlotType` | List | `separate` | Plot layout: separate / sidebyside / overlay |
+| `showConfidenceIntervals` | Bool | `FALSE` | CIs on survival curves |
+| `showRiskTables` | Bool | `FALSE` | At-risk tables below curves |
+| `plotTimeRange` | String | `"auto"` | Maximum time for plots (months or "auto") |
+
+### Multifactorial Analysis
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enableMultifactorialAnalysis` | Bool | `FALSE` | Enable adjusted comparisons |
+| `continuousCovariates` | Variables | `NULL` | Continuous covariates (e.g., age) |
+| `categoricalCovariates` | Variables | `NULL` | Categorical covariates (e.g., sex) |
+| `multifactorialComparisonType` | List | `comprehensive` | adjusted_cindex / nested_models / stepwise / comprehensive |
+| `baselineModel` | List | `covariates_only` | Reference model for comparison |
+| `performInteractionTests` | Bool | `FALSE` | Test stage-covariate interactions |
+| `stratifiedAnalysis` | Bool | `FALSE` | Stratified subgroup analysis |
+
+### Competing Risks
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `performCompetingRisks` | Bool | `FALSE` | Enable competing risks analysis |
+| `competingEventVar` | Variable | `NULL` | Competing event indicator variable |
+| `performCompetingRisksAdvanced` | Bool | `FALSE` | Advanced Fine-Gray analysis |
+| `competingRisksMethod` | List | `comprehensive` | finegray / causespecific / comprehensive |
+
+### Random Survival Forest
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `performRandomForestAnalysis` | Bool | `FALSE` | Enable RSF analysis |
+| `forestModelType` | List | `rsf` | Forest model type |
+| `forestNTrees` | Number | `500` | Number of trees (100-5000) |
+| `calculateVariableImportance` | Bool | `FALSE` | Variable importance rankings |
+| `forestDiscriminationMetrics` | Bool | `FALSE` | RSF-based C-index |
+
+### User Experience
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enableGuidedMode` | Bool | `FALSE` | Step-by-step analysis guidance |
+| `generateCopyReadyReport` | Bool | `FALSE` | Manuscript-ready text output |
+| `enableAccessibilityFeatures` | Bool | `FALSE` | Color-blind safe palettes |
+| `preferredLanguage` | List | `en` | Output language: en / tr |
+| `optimizeForLargeDatasets` | Bool | `FALSE` | Memory-efficient processing for N > 10,000 |
+
+---
+
+## Recommended Workflow
+
+For a complete staging validation study, we recommend:
+
+1. **Start with the basics**: Run `analysisType = "basic"` to examine migration
+   patterns, migration rates, and the cross-tabulation matrix
+2. **Assess discrimination**: Enable C-index comparison and NRI/IDI to quantify
+   improvement
+3. **Check for Will Rogers**: Always check for the Will Rogers phenomenon before
+   claiming the new system is superior
+4. **Validate internally**: Use bootstrap validation with optimism correction to
+   confirm findings are not over-optimistic
+5. **Assess clinical utility**: Decision curve analysis determines whether improved
+   discrimination translates to better clinical decisions
+6. **Generate the report**: Use `generateExecutiveSummary` and
+   `generateCopyReadyReport` to produce manuscript-ready output
+
+Or simply use `clinicalPreset = "publication_ready"` to enable all of the above in
+one step.
+
+---
+
+## References
+
+1. Pencina MJ, D'Agostino RB Sr, D'Agostino RB Jr, Vasan RS. Evaluating the added
+   predictive ability of a new marker: from area under the ROC curve to
+   reclassification and beyond. *Stat Med*. 2008;27(2):157-172.
+
+2. Feinstein AR, Sosin DM, Wells CK. The Will Rogers phenomenon. Stage migration
+   and new diagnostic techniques as a source of misleading statistics for survival
+   in cancer. *N Engl J Med*. 1985;312(25):1604-1608.
+
+3. Vickers AJ, Elkin EB. Decision curve analysis: a novel method for evaluating
+   prediction models. *Med Decis Making*. 2006;26(6):565-574.
+
+4. Harrell FE Jr, Lee KL, Mark DB. Multivariable prognostic models: issues in
+   developing models, evaluating assumptions and adequacy, and measuring and
+   reducing errors. *Stat Med*. 1996;15(4):361-387.
+
+5. Amin MB, Edge SB, Greene FL, et al., eds. *AJCC Cancer Staging Manual*. 8th ed.
+   Springer; 2017.
+
+6. Fine JP, Gray RJ. A proportional hazards model for the subdistribution of a
+   competing risk. *J Am Stat Assoc*. 1999;94(446):496-509.
+
+7. Royston P, Altman DG. External validation of a Cox prognostic model: principles
+   and methods. *BMC Med Res Methodol*. 2013;13:33.

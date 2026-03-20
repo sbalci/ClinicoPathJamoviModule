@@ -296,17 +296,96 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         },
         
         .generate_effect_sizes = function() {
+
             effect_html <- "<h4>Effect Size Calculations</h4>"
-            effect_html <- paste0(effect_html, "<div style='background-color: #fff8e1; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
-            effect_html <- paste0(effect_html, "<p>Effect sizes provide information about the practical significance of observed differences:</p>")
-            effect_html <- paste0(effect_html, "<ul>")
-            effect_html <- paste0(effect_html, "<li><strong>Categorical associations:</strong> Cramer's V, Phi coefficient</li>")
-            effect_html <- paste0(effect_html, "<li><strong>Odds ratios:</strong> For 2×2 tables</li>")
-            effect_html <- paste0(effect_html, "<li><strong>Cohen's guidelines:</strong> Small (0.1), Medium (0.3), Large (0.5)</li>")
-            effect_html <- paste0(effect_html, "</ul>")
-            effect_html <- paste0(effect_html, "<p style='color: #666; font-style: italic;'>Full crosstable package integration would provide comprehensive effect size calculations with confidence intervals.</p>")
-            effect_html <- paste0(effect_html, "</div>")
-            
+
+            tryCatch({
+                by_var <- self$options$by_var
+                by_data <- as.factor(self$data[[by_var]])
+
+                for (var_name in self$options$vars) {
+
+                    var_data <- self$data[[var_name]]
+                    if (is.null(var_data)) next
+
+                    # Only compute for factor/character variables
+                    if (!is.factor(var_data) && !is.character(var_data)) next
+
+                    var_data <- as.factor(var_data)
+                    complete <- complete.cases(var_data, by_data)
+                    vd <- var_data[complete]
+                    bd <- by_data[complete]
+
+                    ct <- table(vd, bd)
+                    n <- sum(ct)
+                    if (n == 0) next
+
+                    nrow_ct <- nrow(ct)
+                    ncol_ct <- ncol(ct)
+                    k <- min(nrow_ct, ncol_ct)
+
+                    # Chi-square statistic
+                    chi_test <- tryCatch(chisq.test(ct, correct = FALSE),
+                                        error = function(e) NULL)
+                    if (is.null(chi_test)) next
+
+                    chi2 <- chi_test$statistic
+
+                    # Phi coefficient
+                    phi <- sqrt(chi2 / n)
+
+                    # Cramer's V
+                    cramers_v <- sqrt(chi2 / (n * (k - 1)))
+
+                    # Contingency coefficient
+                    cont_coef <- sqrt(chi2 / (chi2 + n))
+
+                    # Interpretation
+                    v_interp <- if (cramers_v < 0.1) "Negligible"
+                                else if (cramers_v < 0.3) "Weak"
+                                else if (cramers_v < 0.5) "Moderate"
+                                else "Strong"
+
+                    effect_html <- paste0(effect_html,
+                        "<div style='background-color: #f5f5f5; padding: 12px; border-radius: 5px; margin: 8px 0;'>",
+                        "<strong>", var_name, " vs. ", by_var, "</strong>",
+                        "<table style='margin-top: 8px; border-collapse: collapse; width: 100%;'>",
+                        "<tr><td style='padding: 4px 8px;'>Chi-square</td><td style='padding: 4px 8px;'>",
+                        sprintf("%.3f (p = %.4f)", chi2, chi_test$p.value), "</td></tr>",
+                        "<tr><td style='padding: 4px 8px;'>Phi coefficient</td><td style='padding: 4px 8px;'>",
+                        sprintf("%.4f", phi), "</td></tr>",
+                        "<tr><td style='padding: 4px 8px;'>Cram\u00e9r's V</td><td style='padding: 4px 8px;'>",
+                        sprintf("%.4f (%s association)", cramers_v, v_interp), "</td></tr>",
+                        "<tr><td style='padding: 4px 8px;'>Contingency coefficient</td><td style='padding: 4px 8px;'>",
+                        sprintf("%.4f", cont_coef), "</td></tr>")
+
+                    # Odds ratio for 2x2 tables
+                    if (nrow_ct == 2 && ncol_ct == 2) {
+                        a <- ct[1, 1]; b <- ct[1, 2]; c <- ct[2, 1]; d <- ct[2, 2]
+                        or_val <- (a * d) / (b * c)
+                        # Woolf confidence interval
+                        se_log_or <- sqrt(1/a + 1/b + 1/c + 1/d)
+                        or_lower <- exp(log(or_val) - 1.96 * se_log_or)
+                        or_upper <- exp(log(or_val) + 1.96 * se_log_or)
+                        effect_html <- paste0(effect_html,
+                            "<tr><td style='padding: 4px 8px;'>Odds Ratio</td><td style='padding: 4px 8px;'>",
+                            sprintf("%.3f (95%% CI: %.3f\u2013%.3f)", or_val, or_lower, or_upper),
+                            "</td></tr>")
+                    }
+
+                    effect_html <- paste0(effect_html, "</table></div>")
+                }
+
+                if (effect_html == "<h4>Effect Size Calculations</h4>") {
+                    effect_html <- paste0(effect_html,
+                        "<p style='color: #666;'>No categorical variable pairs available for effect size calculation.</p>")
+                }
+
+            }, error = function(e) {
+                effect_html <- paste0(effect_html,
+                    "<p style='color: #cc0000;'>Error computing effect sizes: ", e$message, "</p>")
+            })
+
             self$results$effect_sizes$setContent(effect_html)
         },
         

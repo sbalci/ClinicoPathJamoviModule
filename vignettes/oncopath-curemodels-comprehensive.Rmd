@@ -1,0 +1,577 @@
+---
+title: "Cure Models for Long-Term Survivors - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Cure Models for Long-Term Survivors - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** The `curemodels()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference. To run interactively,
+> use `devtools::load_all()` and call the R6 class directly:
+> `curemodelsClass$new(options = curemodelsOptions$new(...), data = mydata)`.
+
+# Cure Models for Long-Term Survivors
+
+## Overview
+
+In many solid tumours, a proportion of patients experience long-term disease-free
+survival that is effectively indistinguishable from the general population. Standard
+survival models (Cox, Kaplan-Meier) assume every patient will eventually experience
+the event, which misrepresents prognosis for cancers with a curable subset. Cure
+models address this by partitioning the population into two groups: patients who are
+statistically cured and patients who remain at risk (uncured). This yields two
+clinically actionable quantities: the **cure fraction** (probability of long-term
+cure) and the **latency distribution** (survival among uncured patients).
+
+The `curemodels` module provides four complementary modelling frameworks:
+
+| Model | R Package | Approach | Best For |
+|-------|-----------|----------|----------|
+| Mixture cure | `smcure` | Separate logistic (cure) + survival (latency) | Standard clinical cure rate estimation |
+| Non-mixture cure | `flexsurvcure` | Cure fraction embedded in parametric survival | Parametric model comparison across distributions |
+| Background-mortality cure | `cuRe` | Excess hazard above population mortality | Long follow-up where background mortality matters |
+| Nonparametric cure | `npcure` | Kernel smoothing, no distributional assumptions | Exploratory analysis without parametric constraints |
+
+---
+
+## Dataset
+
+```{r data-load}
+data("curemodels_test")
+```
+
+```{r data-overview}
+str(curemodels_test)
+```
+
+```{r data-summary}
+summary(curemodels_test[, c("FollowUpMonths", "Recurrence", "Age",
+                             "Treatment", "Stage", "TumorSize")])
+```
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| PatientID | Integer | Unique patient identifier |
+| FollowUpMonths | Numeric | Follow-up time in months |
+| Recurrence | Numeric (0/1) | Event indicator: 0=censored, 1=recurrence |
+| RecurrenceFactor | Factor | Factor version of Recurrence |
+| Age | Numeric | Patient age at diagnosis |
+| Sex | Factor | Male / Female |
+| Treatment | Factor | Surgery Only / Surgery+Adjuvant |
+| Stage | Factor | I / II / III |
+| TumorSize | Numeric | Tumor size in cm |
+| PerformanceStatus | Integer | ECOG PS: 0, 1, or 2 |
+| BackgroundHazard | Numeric | Expected population hazard rate |
+
+```{r data-event-summary}
+cat("Total patients:", nrow(curemodels_test), "\n")
+cat("Events (recurrences):", sum(curemodels_test$Recurrence == 1), "\n")
+cat("Censored:", sum(curemodels_test$Recurrence == 0), "\n")
+cat("Event rate:", round(mean(curemodels_test$Recurrence) * 100, 1), "%\n")
+table(curemodels_test$Treatment)
+table(curemodels_test$Stage)
+```
+
+---
+
+## 1. Package Availability Check
+
+The cure models depend on several specialised R packages. Before running the
+examples, verify they are available.
+
+```{r check-packages}
+required_pkgs <- c("smcure", "flexsurvcure", "cuRe", "npcure")
+available <- sapply(required_pkgs, function(pkg) {
+  requireNamespace(pkg, quietly = TRUE)
+})
+cat("Package availability:\n")
+for (i in seq_along(required_pkgs)) {
+  cat(sprintf("  %s: %s\n", required_pkgs[i],
+              ifelse(available[i], "installed", "NOT FOUND")))
+}
+```
+
+---
+
+## 2. Mixture Cure Model (smcure)
+
+### 2.1 Basic Mixture Cure Model
+
+The simplest case: estimate the overall cure fraction without covariates. The
+mixture cure model decomposes the survival function as:
+
+S(t) = pi + (1 - pi) * S_u(t)
+
+where pi is the cure fraction and S_u(t) is the survival function of uncured patients.
+
+```{r mixture-basic}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "mixture"
+)
+```
+
+### 2.2 Mixture Cure Model with Predictors (PH)
+
+Adding covariates allows estimation of how treatment and stage affect both the
+probability of cure (incidence component) and survival among uncured patients
+(latency component).
+
+```{r mixture-predictors-ph}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = c("Treatment", "Stage"),
+  model_type = "mixture",
+  smcure_model_type = "ph",
+  cure_link = "logit"
+)
+```
+
+The `modelTable` shows two sets of coefficients:
+
+- **Cure component** (`$b`): logistic regression coefficients for cure probability.
+  Positive values indicate higher cure probability.
+- **Survival component** (`$beta`): Cox PH coefficients for uncured patients.
+  Positive values indicate higher hazard (worse survival).
+
+### 2.3 Mixture Cure Model with AFT
+
+The accelerated failure time (AFT) formulation models the latency distribution
+on the log-time scale rather than the hazard scale.
+
+```{r mixture-aft}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = c("Treatment", "Stage"),
+  model_type = "mixture",
+  smcure_model_type = "aft"
+)
+```
+
+In the AFT model, survival coefficients represent acceleration factors:
+positive values mean longer survival (deceleration of time-to-event).
+
+---
+
+## 3. Non-Mixture Cure Model (flexsurvcure)
+
+### 3.1 Weibull Distribution
+
+The non-mixture cure model incorporates the cure fraction directly into the
+survival function rather than as a separate mixture component. The Weibull
+distribution is the most flexible standard parametric form.
+
+```{r nonmixture-weibull}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "nonmixture",
+  survival_dist = "weibull"
+)
+```
+
+### 3.2 Distribution Comparison
+
+Different parametric distributions make different assumptions about the hazard
+shape. Comparing them helps identify the best-fitting latency model.
+
+```{r nonmixture-exponential}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "nonmixture",
+  survival_dist = "exponential"
+)
+```
+
+```{r nonmixture-lognormal}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "nonmixture",
+  survival_dist = "lognormal"
+)
+```
+
+```{r nonmixture-loglogistic}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "nonmixture",
+  survival_dist = "loglogistic"
+)
+```
+
+| Distribution | Hazard Shape | When to Use |
+|-------------|-------------|-------------|
+| Weibull | Monotone increasing or decreasing | Default; most flexible standard choice |
+| Exponential | Constant | When hazard is stable over time |
+| Lognormal | Non-monotone (rises then falls) | When risk peaks then declines |
+| Log-logistic | Non-monotone (rises then falls) | Similar to lognormal, proportional odds model |
+
+---
+
+## 4. Bootstrap Confidence Intervals
+
+Point estimates of the cure fraction are useful, but clinical decisions require
+uncertainty quantification. Bootstrap resampling provides confidence intervals
+for the cure fraction and other parameters.
+
+```{r bootstrap-ci}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "mixture",
+  bootstrap_ci = TRUE,
+  n_bootstrap = 200
+)
+```
+
+For the `smcure` package, bootstrap is performed internally via `Var=TRUE`. For
+`flexsurvcure` and `cuRe`, bootstrap is implemented by resampling the data and
+refitting the model. Use `n_bootstrap = 1000` for publication-quality results;
+`n_bootstrap = 100-200` is sufficient for exploratory analysis.
+
+---
+
+## 5. Cure Threshold and Sensitivity Analysis
+
+### 5.1 Custom Cure Threshold
+
+The cure threshold defines the minimum follow-up time (in months) beyond which
+surviving patients are considered potentially cured. The default is 60 months
+(5 years), which is standard for many solid tumours.
+
+```{r cure-threshold-default}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "mixture",
+  cure_threshold = 60
+)
+```
+
+For cancers with later recurrence patterns (e.g., breast cancer ER+), a longer
+threshold may be appropriate:
+
+```{r cure-threshold-long}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "mixture",
+  cure_threshold = 120
+)
+```
+
+### 5.2 Sensitivity Analysis
+
+Sensitivity analysis systematically varies the cure threshold to assess whether
+the estimated cure fraction is robust or sensitive to this assumption.
+
+```{r sensitivity-analysis}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "mixture",
+  sensitivity_analysis = TRUE,
+  cure_threshold = 60
+)
+```
+
+A stable cure fraction across thresholds (e.g., 36 to 84 months) increases
+confidence in the estimate. Large variation suggests the cure plateau has not
+been reached and longer follow-up may be needed.
+
+---
+
+## 6. Plots
+
+### 6.1 Cure Fraction Plot
+
+A bar chart showing estimated cure fractions by predictor group. Uses a
+colorblind-safe palette (blue/orange).
+
+```{r plot-cure-fraction}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "mixture",
+  plot_cure_fraction = TRUE
+)
+```
+
+When `bootstrap_ci = TRUE`, error bars are added to show the confidence interval
+for each group's cure fraction.
+
+```{r plot-cure-fraction-bootstrap}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "mixture",
+  plot_cure_fraction = TRUE,
+  bootstrap_ci = TRUE,
+  n_bootstrap = 200
+)
+```
+
+### 6.2 Survival Curves
+
+Survival curves overlay the Kaplan-Meier estimate with the fitted cure model
+curve, showing how well the model captures the observed survival pattern.
+
+```{r plot-survival}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "mixture",
+  plot_survival = TRUE
+)
+```
+
+The fitted curve should approach the estimated cure fraction asymptotically:
+it levels off rather than dropping to zero, reflecting the cured subpopulation.
+
+---
+
+## 7. Goodness of Fit
+
+Goodness-of-fit tests assess whether the cure model provides a significantly
+better fit than a standard survival model (which assumes no cure fraction).
+
+```{r goodness-of-fit}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "mixture",
+  goodness_of_fit = TRUE
+)
+```
+
+The `goodnessOfFit` table reports:
+
+- **Likelihood ratio test**: Compares the cure model to a nested model without
+  the cure component. A significant p-value supports the existence of a cure
+  fraction.
+- **AIC/BIC**: Lower values indicate better fit, penalised for model complexity.
+- **Interpretation**: Plain-language summary of the test outcome.
+
+---
+
+## 8. Model Comparison (All Types)
+
+Running all four model types simultaneously provides a comprehensive comparison.
+The `modelComparison` table ranks parametric models by AIC/BIC (npcure is
+nonparametric and excluded from information criteria).
+
+```{r model-comparison-all}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "all",
+  npcure_covariate = "Age",
+  npcure_bandwidth = "auto",
+  npcure_time_points = 100,
+  use_background_mortality = TRUE,
+  background_hazard_var = "BackgroundHazard",
+  plot_cure_fraction = TRUE,
+  plot_survival = TRUE,
+  goodness_of_fit = TRUE
+)
+```
+
+### Interpreting the Comparison
+
+- **Lowest AIC**: Best predictive model (balances fit and complexity)
+- **Lowest BIC**: Most parsimonious model (stronger penalty for complexity)
+- **Cure fractions**: Should be broadly consistent across models if the cure
+  assumption is appropriate; large discrepancies suggest model misspecification
+- **npcure**: Provides a nonparametric benchmark; if parametric models diverge
+  substantially from npcure, the parametric assumptions may be wrong
+
+---
+
+## 9. Edge Cases
+
+### 9.1 No Predictors (Intercept-Only Model)
+
+```{r edge-no-predictors}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "mixture"
+)
+```
+
+### 9.2 cuRe Model Without Background Mortality
+
+```{r edge-cure-no-background}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = "Treatment",
+  model_type = "cure",
+  use_background_mortality = FALSE
+)
+```
+
+### 9.3 cuRe Model with Missing Background Hazard Variable
+
+```{r edge-cure-missing-bhazard}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "cure",
+  use_background_mortality = TRUE
+)
+```
+
+This should produce an informative error about requiring the `background_hazard_var`.
+
+### 9.4 npcure Without Covariate
+
+```{r edge-npcure-no-covariate}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "npcure"
+)
+```
+
+This should produce an informative error about requiring `npcure_covariate`.
+
+### 9.5 Small Sample
+
+```{r edge-small-sample}
+small_data <- curemodels_test[1:20, ]
+curemodels(
+  data = small_data,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  model_type = "mixture"
+)
+```
+
+Expect warnings about small sample size or potential convergence issues.
+
+---
+
+## 10. Clinical Interpretation
+
+The `interpretation` HTML output provides automatically generated clinical
+context for the cure model results. It includes:
+
+1. A statement of the estimated cure fraction with confidence interval (when
+   bootstrap is enabled)
+2. The median survival of uncured patients
+3. Context based on the cure threshold
+4. A copy-ready sentence for the Results section of a manuscript
+5. Clinical recommendations for patient counselling
+
+```{r clinical-interpretation}
+curemodels(
+  data = curemodels_test,
+  time = "FollowUpMonths",
+  status = "Recurrence",
+  predictors = c("Treatment", "Stage"),
+  model_type = "mixture",
+  smcure_model_type = "ph",
+  cure_link = "logit",
+  cure_threshold = 60,
+  bootstrap_ci = TRUE,
+  n_bootstrap = 200,
+  plot_cure_fraction = TRUE,
+  plot_survival = TRUE,
+  goodness_of_fit = TRUE,
+  sensitivity_analysis = TRUE
+)
+```
+
+---
+
+## 11. References
+
+1. Berkson J, Gage RP. Survival curve for cancer patients following treatment.
+   *J Am Stat Assoc*. 1952;47(259):501-515.
+
+2. Boag JW. Maximum likelihood estimates of the proportion of patients cured
+   by cancer therapy. *J R Stat Soc Series B*. 1949;11(1):15-53.
+
+3. Cai C, Zou Y, Peng Y, Zhang J. smcure: An R-package for estimating
+   semiparametric mixture cure models. *Comput Methods Programs Biomed*.
+   2012;108(3):1255-1260.
+
+4. Peng Y, Dear KBG. A nonparametric mixture model for cure rate estimation.
+   *Biometrics*. 2000;56(1):237-243.
+
+5. Andersson TML, Dickman PW, Eloranta S, Lambert PC. Estimating and modelling
+   cure in population-based cancer studies within the framework of flexible
+   parametric survival models. *BMC Med Res Methodol*. 2011;11:96.
+
+6. Lopez-Cheda A, Cao R, Jacome MA, Van Keilegom I. Nonparametric incidence
+   estimation and bootstrap bandwidth selection in mixture cure models.
+   *Comput Stat Data Anal*. 2017;105:144-165.
+
+7. Lambert PC, Thompson JR, Weston CL, Dickman PW. Estimating and modeling
+   the cure fraction in population-based cancer survival analysis.
+   *Biostatistics*. 2007;8(3):576-594.
+
+8. Yu B, Tiwari RC, Cronin KA, Feuer EJ. Cure fraction estimation from the
+   mixture cure models for grouped survival data. *Stat Med*.
+   2004;23(11):1733-1747.
+
+9. De Angelis R, Capocaccia R, Hakulinen T, Soderman B, Verdecchia A.
+   Mixture models for cancer survival analysis: application to
+   population-based data with covariates. *Stat Med*. 1999;18(4):441-454.
+
+10. Sy JP, Taylor JMG. Estimation in a Cox proportional hazards cure model.
+    *Biometrics*. 2000;56(1):227-236.

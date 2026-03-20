@@ -1,6 +1,6 @@
 ---
 name: check-function-full
-description: Comprehensive systematic quality check of a jamovi function (formerly check-function-base)
+description: Deep audit of a jamovi function: notices coverage, external docs comparison, differential runs, clinical readiness. Report-only
 interactive: true
 args:
   function_name:
@@ -40,18 +40,17 @@ args:
     default: auto
     enum: [top, mid, bottom, auto]
 usage: /check-function-full <function_name> [options]
-aliases: /check-function-base (deprecated, use /check-function-full)
 ---
 
 # Comprehensive Jamovi Function Quality Check (Full Analysis with Notices Audit)
 
-> **Note:** This command was formerly named `/check-function-base`. It has been renamed to `/check-function-full` to clarify its comprehensive nature. The old name still works but is deprecated.
-
 You are an expert jamovi module developer performing a **comprehensive quality assessment** of the jamovi function `$ARGUMENTS`. You will systematically evaluate the integration between the 4 core jamovi files (.a.yaml, .b.R, .r.yaml, .u.yaml), **and enforce jamovi Notice best‑practices** (via `jmvcore::Notice`) for errors, strong warnings, warnings, and info messages.
 
-**Use this command when:** You need thorough analysis including differential runs, placeholder detection, external documentation comparison, and notices audit.
+**When to use this command:** Thorough audit-only analysis including differential runs, placeholder detection, external documentation comparison, and notices audit. Does not apply fixes automatically.
 
-**For quicker checks, use:** `/check-function` with appropriate profiles.
+**For day-to-day development with auto-fix:** Use `/check-function` with profiles (quick/standard/production/release).
+
+**Consult these guides** for correct patterns: `vignettes/jamovi_module_patterns_guide.md`, `vignettes/jamovi_notices_guide.md`, `vignettes/jamovi_b_R_guide.md`.
 
 > **Why:** Notices surface user‑facing guidance directly in results and are the canonical UX pattern in jamovi (`jmvcore::Notice` and `jmvcore::NoticeType`). Follow the API recommendations and the internal ClinicoPath guide to produce consistent, actionable messages. 
 
@@ -349,6 +348,14 @@ if (!identical(res_default, res_changed)) message("assume_equal_var = effective.
 - Additional flags can be passed inline, e.g.:
   `/check-function-full myFn notices_mode=audit-only clinical_profile=false`
 
-### Migration Note
+### Note
 
-If you have scripts or documentation referencing `/check-function-base`, update them to use `/check-function-full`. The old command name will continue to work for backward compatibility.
+This command was previously named `/check-function-base`. Use `/check-function-full` going forward.
+
+---
+
+## Related Commands
+
+- `/check-function` -- Quick validate and auto-fix with preset profiles
+- `/fix-function` -- Apply targeted fixes for specific issues
+- `/review-function` -- Detailed code review with clinical readiness assessment

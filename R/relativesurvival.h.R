@@ -263,6 +263,7 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         summary = function() private$.items[["summary"]],
         survivalTable = function() private$.items[["survivalTable"]],
         netSurvivalTable = function() private$.items[["netSurvivalTable"]],
@@ -287,8 +288,8 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "relsurv",
-                    "glue",
-                    "rstpm2"))
+                    "rstpm2",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -299,6 +300,21 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "age",
                     "sex",
                     "year")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
+                visible=TRUE,
+                clearWith=list(
+                    "time",
+                    "status",
+                    "age",
+                    "sex",
+                    "year",
+                    "covariates",
+                    "ratetable",
+                    "method",
+                    "regression_model")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -464,7 +480,8 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 clearWith=list(
                     "time",
                     "status",
-                    "covariates")))
+                    "covariates",
+                    "time_scale")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="expectedPlot",
@@ -477,7 +494,8 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "age",
                     "sex",
                     "year",
-                    "ratetable")))
+                    "ratetable",
+                    "time_scale")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="relativePlot",
@@ -492,7 +510,10 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "age",
                     "sex",
                     "year",
-                    "method")))
+                    "method",
+                    "ratetable",
+                    "time_scale",
+                    "confidence_level")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="excessPlot",
@@ -500,14 +521,16 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=700,
                 height=450,
                 renderFun=".plotExcess",
-                visible="(plot_excess)",
+                visible="(plot_excess && excess_mortality)",
                 clearWith=list(
                     "time",
                     "status",
                     "age",
                     "sex",
                     "year",
-                    "method")))
+                    "method",
+                    "ratetable",
+                    "time_scale")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ageStandardizedTable",
@@ -657,6 +680,7 @@ relativesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$survivalTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$netSurvivalTable} \tab \tab \tab \tab \tab a table \cr

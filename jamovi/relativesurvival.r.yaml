@@ -15,6 +15,21 @@ items:
           - sex
           - year
 
+    - name:  notices
+      title: Notices
+      type:  Html
+      visible: true
+      clearWith:
+          - time
+          - status
+          - age
+          - sex
+          - year
+          - covariates
+          - ratetable
+          - method
+          - regression_model
+
     - name:  summary
       title: Analysis Summary
       type:  Html
@@ -152,6 +167,7 @@ items:
           - time
           - status
           - covariates
+          - time_scale
 
     - name:  expectedPlot
       title: Expected Survival
@@ -165,6 +181,7 @@ items:
           - sex
           - year
           - ratetable
+          - time_scale
 
     - name:  relativePlot
       title: Relative Survival
@@ -180,6 +197,9 @@ items:
           - sex
           - year
           - method
+          - ratetable
+          - time_scale
+          - confidence_level
 
     - name:  excessPlot
       title: Excess Mortality
@@ -187,7 +207,7 @@ items:
       width:  700
       height: 450
       renderFun: .plotExcess
-      visible: (plot_excess)
+      visible: (plot_excess && excess_mortality)
       clearWith:
           - time
           - status
@@ -195,6 +215,8 @@ items:
           - sex
           - year
           - method
+          - ratetable
+          - time_scale
 
     - name:  ageStandardizedTable
       title: Age-Standardized Survival
@@ -266,6 +288,6 @@ refs:
     - ClinicoPathJamoviModule
 
     - relsurv
-    - glue
     - rstpm2
+    - survival
 ...

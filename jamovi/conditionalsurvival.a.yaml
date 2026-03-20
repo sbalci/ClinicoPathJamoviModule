@@ -1,7 +1,7 @@
 ---
 name: conditionalsurvival
 title: Conditional Survival Estimation
-menuGroup: SurvivalD
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Conditional Survival, Landmark Analysis, Advanced Methods'
 version: '0.0.1'
@@ -58,9 +58,10 @@ options:
     - name: conditionTime
       title: Conditioning Time Point
       type: Number
+      default: 0
       description:
           R: >
-            Time point at which to condition survival (defaults to median follow-up)
+            Time point at which to condition survival (0 = use median follow-up)
 
     - name: method
       title: Estimation Method
@@ -82,9 +83,10 @@ options:
     - name: bandwidth
       title: Bandwidth (for smoothing methods)
       type: Number
+      default: 0
       description:
           R: >
-            Bandwidth for kernel smoothing (auto-selected if not specified)
+            Bandwidth for kernel smoothing (0 = auto-select)
 
     - name: confInt
       title: Confidence Level

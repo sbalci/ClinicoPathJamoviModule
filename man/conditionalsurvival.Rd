@@ -9,9 +9,9 @@ conditionalsurvival(
   timeVar,
   outcomeVar,
   conditionVar,
-  conditionTime,
+  conditionTime = 0,
   method = "km",
-  bandwidth,
+  bandwidth = 0,
   confInt = 0.95,
   timePoints = "",
   plotType = "curves",
@@ -29,13 +29,12 @@ conditionalsurvival(
 
 \item{conditionVar}{Variable for conditional survival estimation}
 
-\item{conditionTime}{Time point at which to condition survival (defaults to
+\item{conditionTime}{Time point at which to condition survival (0 = use
 median follow-up)}
 
 \item{method}{Method for conditional survival estimation}
 
-\item{bandwidth}{Bandwidth for kernel smoothing (auto-selected if not
-specified)}
+\item{bandwidth}{Bandwidth for kernel smoothing (0 = auto-select)}
 
 \item{confInt}{Confidence level for intervals}
 
@@ -57,6 +56,8 @@ A results object containing:
 \code{results$condsurvTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$survplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

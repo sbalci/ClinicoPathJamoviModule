@@ -9,28 +9,28 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label:  Original Staging System
+        label: Original Staging System
         children:
           - type: VariablesListBox
             name: oldStage
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label:  New Staging System
+        label: New Staging System
         children:
           - type: VariablesListBox
             name: newStage
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label:  Survival Time (months)
+        label: Survival Time (months)
         children:
           - type: VariablesListBox
             name: survivalTime
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label:  Event Indicator
+        label: Event Indicator
         children:
           - type: VariablesListBox
             name: event
@@ -40,7 +40,7 @@ children:
             name: eventLevel
             label: Event Level (auto-detected if blank)
   - type: CollapseBox
-    label:  Analysis Configuration
+    label: Analysis Configuration
     collapsed: false
     children:
       - type: Label
@@ -90,7 +90,7 @@ children:
                 name: useOptimismCorrection
                 label: Use Optimism Correction
   - type: CollapseBox
-    label:  Basic Outputs
+    label: Basic Outputs
     collapsed: false
     children:
       - type: Label
@@ -101,19 +101,19 @@ children:
             children:
               - type: CheckBox
                 name: showMigrationOverview
-                label:  Overview Summary
+                label: Overview Summary
               - type: CheckBox
                 name: showMigrationMatrix
-                label:  Migration Matrix
+                label: Migration Matrix
               - type: CheckBox
                 name: showStageDistribution
-                label:  Stage Distribution
+                label: Stage Distribution
               - type: CheckBox
                 name: showMigrationSummary
-                label:  Migration Summary
+                label: Migration Summary
               - type: CheckBox
                 name: showStatisticalComparison
-                label:  C-index Comparison
+                label: C-index Comparison
       - type: Label
         label: Interpretation & Reports
         children:
@@ -122,18 +122,18 @@ children:
             children:
               - type: CheckBox
                 name: showExplanations
-                label:  Show Explanations
+                label: Show Explanations
               - type: CheckBox
                 name: generateCopyReadyReport
-                label:  Copy-Ready Summary
+                label: Copy-Ready Summary
               - type: CheckBox
                 name: showAbbreviationGlossary
-                label:  Abbreviation Glossary
+                label: Abbreviation Glossary
               - type: CheckBox
                 name: generateExecutiveSummary
-                label:  Executive Summary
+                label: Executive Summary
   - type: CollapseBox
-    label:  Discrimination & Validation
+    label: Discrimination & Validation
     collapsed: true
     children:
       - type: Label
@@ -220,7 +220,7 @@ children:
                 name: includeEffectSizes
                 label: Include Effect Sizes
   - type: CollapseBox
-    label:  Survival Analysis
+    label: Survival Analysis
     collapsed: true
     children:
       - type: Label
@@ -273,7 +273,7 @@ children:
                 label: '  Detailed Tables'
                 enable: (advancedMigrationAnalysis)
   - type: CollapseBox
-    label:  Multifactorial Analysis
+    label: Multifactorial Analysis
     collapsed: true
     children:
       - type: Label
@@ -343,7 +343,7 @@ children:
                 label: Stratified Analysis
                 enable: (enableMultifactorialAnalysis)
   - type: CollapseBox
-    label:  Competing Risks Analysis
+    label: Competing Risks Analysis
     collapsed: true
     children:
       - type: Label
@@ -427,7 +427,7 @@ children:
                 format: number
                 enable: (generateCIFPlots)
   - type: CollapseBox
-    label:  Clinical Utility Analysis
+    label: Clinical Utility Analysis
     collapsed: true
     children:
       - type: Label
@@ -525,7 +525,7 @@ children:
                 label: Clinical Significance Threshold
                 format: number
   - type: CollapseBox
-    label:  Advanced Models
+    label: Advanced Models
     collapsed: true
     children:
       - type: Label
@@ -597,7 +597,7 @@ children:
             format: number
             enable: (generateStagingSystem)
       - type: Label
-        label: Multi-State Models
+        label: "[Experimental] Multi-State Models"
         children:
           - type: LayoutBox
             margin: large
@@ -670,7 +670,7 @@ children:
           - type: CheckBox
             name: generateMSMSummary
       - type: Label
-        label: Interval Censoring
+        label: "[Experimental] Interval Censoring"
         children:
           - type: LayoutBox
             margin: large
@@ -724,7 +724,7 @@ children:
           - type: CheckBox
             name: intervalCensoringDiagnostics
       - type: Label
-        label: Frailty Models
+        label: "[Experimental] Frailty Models"
         children:
           - type: LayoutBox
             margin: large
@@ -771,7 +771,7 @@ children:
           - type: CheckBox
             name: frailtyAdvancedInference
       - type: Label
-        label: Cure Models
+        label: "[Experimental] Cure Models"
         children:
           - type: LayoutBox
             margin: large
@@ -853,7 +853,7 @@ children:
             label: Generate Summary
             enable: (performCureModelAnalysis)
       - type: Label
-        label: Informative Censoring
+        label: "[Experimental] Informative Censoring"
         children:
           - type: LayoutBox
             margin: large
@@ -987,7 +987,7 @@ children:
             label: Diagnostic Plots
             enable: (performConcordanceProbabilityAnalysis)
       - type: Label
-        label: Win Ratio Analysis
+        label: "[Experimental] Win Ratio Analysis"
         children:
           - type: LayoutBox
             margin: large
@@ -1064,11 +1064,11 @@ children:
             label: Generalized Pairwise
             enable: (performWinRatioAnalysis)
   - type: CollapseBox
-    label:  Machine Learning Methods
+    label: Machine Learning Methods
     collapsed: true
     children:
       - type: Label
-        label: Random Survival Forests
+        label: "[Experimental] Random Survival Forests"
         children:
           - type: LayoutBox
             margin: large
@@ -1150,8 +1150,14 @@ children:
             name: generateForestSummary
             label: Generate Summary
             enable: (performRandomForestAnalysis)
+          - type: CheckBox
+            name: rfAnalyzeOldStage
+          - type: CheckBox
+            name: rfAnalyzeNewStage
+          - type: CheckBox
+            name: rfMtryAuto
       - type: Label
-        label: SHAP Analysis (Explainable AI)
+        label: "[Experimental] SHAP Analysis (Explainable AI)"
         children:
           - type: LayoutBox
             margin: large
@@ -1214,8 +1220,18 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: ComboBox
+        name: wrSecondaryDirection
+  - type: LayoutBox
+    margin: large
+    children:
       - type: CheckBox
         name: frailtyBootstrap
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: rfBootstrapType
   - type: LayoutBox
     margin: large
     children:
@@ -1225,9 +1241,19 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: ComboBox
+        name: rfSamplingType
+  - type: LayoutBox
+    margin: large
+    children:
       - type: TextBox
         name: frailtyBootstrapSamples
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: rfMinimalDepth
   - type: LayoutBox
     margin: large
     children:
@@ -1240,7 +1266,7 @@ children:
         name: intervalCensoringConfidenceLevel
         format: number
   - type: CollapseBox
-    label:  Visualization Options
+    label: Visualization Options
     collapsed: true
     children:
       - type: Label
@@ -1273,7 +1299,7 @@ children:
       - type: CheckBox
         name: performCompetingRisksAdvanced
   - type: CollapseBox
-    label:  Output & Reporting
+    label: Output & Reporting
     collapsed: true
     children:
       - type: Label
@@ -1299,16 +1325,16 @@ children:
             children:
               - type: CheckBox
                 name: enableGuidedMode
-                label:  Guided Mode (step-by-step)
+                label: Guided Mode (step-by-step)
               - type: CheckBox
                 name: enableProgressIndicators
-                label:  Progress Indicators
+                label: Progress Indicators
               - type: CheckBox
                 name: optimizeForLargeDatasets
-                label:  Optimize for Large Data (n>1000)
+                label: Optimize for Large Data (n>1000)
               - type: CheckBox
                 name: enableAccessibilityFeatures
-                label:  Accessibility Features
+                label: Accessibility Features
               - type: ComboBox
                 name: multipleTestingCorrection
                 label: Multiple Testing Correction

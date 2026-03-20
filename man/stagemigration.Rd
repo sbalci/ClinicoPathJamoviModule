@@ -146,6 +146,12 @@ stagemigration(
   forestBootstrap = FALSE,
   forestBootstrapSamples = 100,
   generateForestSummary = FALSE,
+  rfAnalyzeOldStage = TRUE,
+  rfAnalyzeNewStage = TRUE,
+  rfMtryAuto = TRUE,
+  rfBootstrapType = "by.root",
+  rfSamplingType = "swr",
+  rfMinimalDepth = FALSE,
   performCureModelAnalysis = FALSE,
   cureModelType = "mixture",
   cureDistribution = "weibull",
@@ -203,6 +209,7 @@ stagemigration(
   winRatioEndpoints = "death_progression_response",
   winRatioDeathVariable = NULL,
   winRatioSecondaryEndpoint = NULL,
+  wrSecondaryDirection = "higher",
   winRatioTertiaryEndpoint = NULL,
   winRatioTimeVariables = NULL,
   winRatioMatchingStrategy = "all_pairs",
@@ -844,8 +851,23 @@ validation. More samples  provide more stable confidence intervals but
 increase computation time.}
 
 \item{generateForestSummary}{Generate comprehensive summary of random
-forest analysis including  model performance, variable importance, staging
-comparison, and  clinical recommendations based on ensemble predictions.}
+forest analysis including model performance, variable importance, staging
+comparison, and clinical recommendations based on ensemble predictions.}
+
+\item{rfAnalyzeOldStage}{Include old staging system in random forest
+analysis}
+
+\item{rfAnalyzeNewStage}{Include new staging system in random forest
+analysis}
+
+\item{rfMtryAuto}{Automatically select number of variables to try at each
+split}
+
+\item{rfBootstrapType}{Bootstrap sampling strategy for random forest}
+
+\item{rfSamplingType}{Sampling method for random forest bootstrap}
+
+\item{rfMinimalDepth}{Perform minimal depth variable selection analysis}
 
 \item{performCureModelAnalysis}{Perform cure model analysis for populations
 where a fraction of patients  may be effectively cured. Uses mixture models
@@ -1113,6 +1135,9 @@ disease progression, recurrence). This endpoint is evaluated when the
 primary endpoint comparison is tied. Can be binary (event/no event) or
 continuous (time to event).}
 
+\item{wrSecondaryDirection}{Direction of improvement for secondary endpoint
+in win ratio}
+
 \item{winRatioTertiaryEndpoint}{Variable for tertiary endpoint (e.g.,
 response, quality of life). This endpoint is evaluated when both primary
 and secondary comparisons are tied. Can be binary or continuous.}
@@ -1287,7 +1312,7 @@ A results object containing:
 \code{results$stepwiseResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$interactionTests} \tab \tab \tab \tab \tab a table \cr
 \code{results$interactionTestsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
+\code{results$stratifiedAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$integratedAUCAnalysis} \tab \tab \tab \tab \tab a table \cr
@@ -1386,55 +1411,55 @@ A results object containing:
 \code{results$forestModelPerformance} \tab \tab \tab \tab \tab a table \cr
 \code{results$forestSurvivalPredictions} \tab \tab \tab \tab \tab a table \cr
 \code{results$forestCoxComparison} \tab \tab \tab \tab \tab a table \cr
-\code{results$forestStagingComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$forestStagingComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$forestAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$cureFractionEstimates} \tab \tab \tab \tab \tab a table \cr
 \code{results$cureModelParameters} \tab \tab \tab \tab \tab a table \cr
-\code{results$cureModelComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$cureModelComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$stageSpecificCureAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$cureModelBootstrap} \tab \tab \tab \tab \tab a table \cr
 \code{results$cureAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
-\code{results$intervalCensoringOverview} \tab \tab \tab \tab \tab Summary of interval-censored data characteristics and model selection \cr
-\code{results$intervalCensoringNonparametric} \tab \tab \tab \tab \tab Non-parametric maximum likelihood survival estimates for interval-censored data \cr
-\code{results$intervalCensoringParametric} \tab \tab \tab \tab \tab Parametric survival regression results for interval-censored data \cr
-\code{results$intervalCensoringComparison} \tab \tab \tab \tab \tab Model comparison between staging systems accounting for interval censoring \cr
-\code{results$intervalCensoringDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for interval-censored survival models \cr
-\code{results$intervalCensoringSummary} \tab \tab \tab \tab \tab Clinical interpretation and recommendations for interval-censored survival analysis \cr
-\code{results$informativeCensoringOverview} \tab \tab \tab \tab \tab Summary of informative censoring detection analysis and data characteristics \cr
-\code{results$informativeCensoringTests} \tab \tab \tab \tab \tab Statistical tests for detecting informative censoring patterns \cr
-\code{results$informativeCensoringByStage} \tab \tab \tab \tab \tab Comparison of censoring patterns across staging groups \cr
-\code{results$informativeCensoringAdjustment} \tab \tab \tab \tab \tab Survival estimates adjusted for informative censoring effects \cr
-\code{results$informativeCensoringSensitivity} \tab \tab \tab \tab \tab Sensitivity analysis exploring range of potential bias from informative censoring \cr
-\code{results$informativeCensoringDiagnostics} \tab \tab \tab \tab \tab Diagnostic measures for informative censoring assessment \cr
-\code{results$informativeCensoringSummary} \tab \tab \tab \tab \tab Summary of informative censoring findings and recommendations \cr
-\code{results$concordanceProbabilityOverview} \tab \tab \tab \tab \tab Summary of concordance probability analysis for staging system discrimination assessment \cr
-\code{results$concordanceProbabilityEstimates} \tab \tab \tab \tab \tab Concordance probability estimates using multiple methods for robust discrimination assessment \cr
-\code{results$concordanceProbabilityTimeDependentComplex} \tab \tab \tab \tab \tab Time-dependent concordance probability estimates at clinically relevant time points \cr
-\code{results$concordanceProbabilityComparison} \tab \tab \tab \tab \tab Statistical comparison of concordance probabilities between staging systems \cr
-\code{results$concordanceProbabilityRobustness} \tab \tab \tab \tab \tab Robustness analysis for concordance probability estimates under different assumptions \cr
-\code{results$concordanceProbabilityDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for concordance probability analysis validation \cr
-\code{results$concordanceProbabilitySummary} \tab \tab \tab \tab \tab Summary of concordance probability findings and clinical interpretation \cr
-\code{results$winRatioOverview} \tab \tab \tab \tab \tab Summary of win ratio analysis configuration and data characteristics \cr
-\code{results$winRatioPrimaryResults} \tab \tab \tab \tab \tab Primary win ratio analysis results comparing staging systems \cr
-\code{results$winRatioEndpointContributions} \tab \tab \tab \tab \tab Contribution of each endpoint to the overall win ratio \cr
-\code{results$winRatioStageSpecific} \tab \tab \tab \tab \tab Win ratio analysis stratified by staging categories \cr
-\code{results$winRatioSensitivityResults} \tab \tab \tab \tab \tab Sensitivity analysis results for win ratio estimates \cr
-\code{results$winRatioGeneralizedPairwiseResults} \tab \tab \tab \tab \tab Extended metrics from generalized pairwise comparison framework \cr
-\code{results$winRatioSummary} \tab \tab \tab \tab \tab Summary of win ratio findings and clinical interpretation \cr
-\code{results$frailtyModelsOverview} \tab \tab \tab \tab \tab Overview of frailty models analysis for clustered survival data \cr
-\code{results$frailtyModelsComparison} \tab \tab \tab \tab \tab Comparison of staging systems using frailty models with clustering adjustments \cr
-\code{results$frailtyModelsVarianceComponents} \tab \tab \tab \tab \tab Detailed variance components analysis for frailty models \cr
-\code{results$frailtyModelsClusterSpecific} \tab \tab \tab \tab \tab Cluster-specific survival analysis comparing staging systems within institutions \cr
-\code{results$frailtyModelsBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for frailty model parameters and variance components \cr
-\code{results$frailtyModelsDiagnostics} \tab \tab \tab \tab \tab Comprehensive model diagnostics for frailty models including residual analysis and goodness-of-fit \cr
-\code{results$frailtyModelsSummary} \tab \tab \tab \tab \tab Executive summary of frailty models analysis with evidence-based recommendations \cr
-\code{results$clinicalUtilityOverview} \tab \tab \tab \tab \tab Overview of clinical utility index analysis combining discrimination with clinical decision-making value \cr
-\code{results$clinicalUtilityComparison} \tab \tab \tab \tab \tab Comparison of clinical utility between staging systems across different risk thresholds \cr
-\code{results$clinicalUtilityNNT} \tab \tab \tab \tab \tab Number Needed to Treat (NNT) and Number Needed to Harm (NNH) analysis for staging-guided interventions \cr
-\code{results$clinicalUtilityNetBenefit} \tab \tab \tab \tab \tab Net benefit analysis across risk thresholds with comparative utility assessment \cr
-\code{results$clinicalUtilityTimeVarying} \tab \tab \tab \tab \tab Time-varying clinical utility analysis showing how staging system value changes over time \cr
-\code{results$clinicalUtilityBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for clinical utility metrics with confidence intervals \cr
-\code{results$clinicalUtilitySummary} \tab \tab \tab \tab \tab Executive summary of clinical utility analysis with evidence-based recommendations \cr
+\code{results$intervalCensoringOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$intervalCensoringNonparametric} \tab \tab \tab \tab \tab a table \cr
+\code{results$intervalCensoringParametric} \tab \tab \tab \tab \tab a table \cr
+\code{results$intervalCensoringComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$intervalCensoringDiagnosticsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$intervalCensoringSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$informativeCensoringOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$informativeCensoringTests} \tab \tab \tab \tab \tab a table \cr
+\code{results$informativeCensoringByStage} \tab \tab \tab \tab \tab a table \cr
+\code{results$informativeCensoringAdjustment} \tab \tab \tab \tab \tab a table \cr
+\code{results$informativeCensoringSensitivity} \tab \tab \tab \tab \tab a table \cr
+\code{results$informativeCensoringDiagnostics} \tab \tab \tab \tab \tab a table \cr
+\code{results$informativeCensoringSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceProbabilityOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceProbabilityEstimates} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceProbabilityTimeDependentComplex} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceProbabilityComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceProbabilityRobustness} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceProbabilityDiagnosticsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$concordanceProbabilitySummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$winRatioOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$winRatioPrimaryResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$winRatioEndpointContributions} \tab \tab \tab \tab \tab a table \cr
+\code{results$winRatioStageSpecific} \tab \tab \tab \tab \tab a table \cr
+\code{results$winRatioSensitivityResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$winRatioGeneralizedPairwiseResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$winRatioSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$frailtyModelsOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$frailtyModelsComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$frailtyModelsVarianceComponents} \tab \tab \tab \tab \tab a table \cr
+\code{results$frailtyModelsClusterSpecific} \tab \tab \tab \tab \tab a table \cr
+\code{results$frailtyModelsBootstrap} \tab \tab \tab \tab \tab a table \cr
+\code{results$frailtyModelsDiagnostics} \tab \tab \tab \tab \tab a table \cr
+\code{results$frailtyModelsSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilityOverview} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilityComparisonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilityNNTTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilityNetBenefit} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilityTimeVaryingTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilityBootstrapTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalUtilitySummary} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

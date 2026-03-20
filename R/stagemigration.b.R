@@ -205,10 +205,33 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
     inherit = stagemigrationBase,
     private = list(
 
+        # TODO: Architecture — This file is 29,000+ lines. Consider splitting into:
+        #   R/stagemigration-helpers-rf.R — Random Forest methods (~800 lines)
+        #   R/stagemigration-helpers-calibration.R — Calibration methods (~600 lines)
+        #   R/stagemigration-helpers-competing.R — Competing risks methods (~500 lines)
+        #   R/stagemigration-helpers-advanced.R — Win Ratio, Frailty, SHAP, etc.
+        #   Use source() or define additional R6 methods in separate files.
+        #   Priority: LOW (functional as-is, but maintainability concern).
+
         # Escape variable names for safe handling
         .escapeVar = function(x) {
             # Handle variables with spaces/special characters
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        # TODO: Variable Name Safety — .escapeVar is defined but never used.
+        # 92 formula constructions use raw paste("Surv(", var, ")") without escaping.
+        # Variables with spaces/special chars will break. Priority: MEDIUM.
+        # Fix: Replace all paste-based Surv() formula construction with:
+        #   safe_var <- private$.escapeVar(var_name)
+        #   fml <- as.formula(paste0("Surv(", safe_var, ", ", event_var, ") ~ ", stage_var))
+        # Affects ~92 locations. Consider a .buildSurvFormula() helper.
+
+        # Return lower and upper quantile probabilities from confidenceLevel
+        .ciProbs = function() {
+            cl <- self$options$confidenceLevel
+            alpha <- 1 - cl
+            c(alpha / 2, 1 - alpha / 2)
         },
 
         .init = function() {
@@ -329,6 +352,26 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             return(baseReps)
         },
+
+        # TODO: i18n — All user-visible strings are hardcoded English.
+        # When internationalization is implemented:
+        #   1. Wrap all setContent/setNote/addRow text strings with .()
+        #   2. Create jamovi/i18n/en.po and jamovi/i18n/tr.po catalogs
+        #   3. Use .("text with {placeholder}") + jmvcore::format() for dynamic messages
+        #   4. Turkish medical terms: C-indeksi, Tehlike Orani, Guven Araligi
+        #   Priority: LOW (depends on module-wide i18n effort).
+
+        # TODO: Explanations — 14 Html explanation outputs are defined in .r.yaml but never
+        # populated with content. Currently hidden (visible: false). To complete:
+        #   1. Write clinical explanation text for each analysis section
+        #   2. Add setContent() calls gated by isTRUE(self$options$showExplanations)
+        #   3. Restore visibility rules in .r.yaml
+        #   Outputs: migrationMatrixExplanation, nriResultsExplanation, idiResultsExplanation,
+        #   dcaResultsExplanation, pseudoR2ResultsExplanation, trendTestsExplanation,
+        #   homogeneityTestsExplanation, effectSizesExplanation, concordanceComparisonExplanation,
+        #   advancedMigrationExplanation, stageDistributionExplanation,
+        #   statisticalComparisonExplanation, migrationOverviewExplanation, migrationSummaryExplanation
+        #   Priority: MEDIUM (user-facing content quality).
 
         .setExplanationContent = function(resultName, htmlContent) {
             # Centralized explanation content management
@@ -3794,8 +3837,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     self$results$likelihoodTestsExplanation$setContent(likelihood_tests_explanation_html)
                 }
 
-                private$.populateLikelihoodTests(all_results$advanced_metrics)
-                
+                if (isTRUE(self$options$performLikelihoodTests)) {
+                    private$.populateLikelihoodTests(all_results$advanced_metrics)
+                }
+
                 # Populate enhanced LR chi-square comparison with emphasis
                 private$.populateEnhancedLRComparison(all_results$advanced_metrics)
                 
@@ -4224,7 +4269,30 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 if (!is.null(all_results$roc_analysis)) {
-                    self$results$rocComparisonPlot$setState(all_results$roc_analysis)
+                    # Extract only serializable fields to avoid protobuf errors
+                    # with timeROC objects that contain function references
+                    safe_roc <- lapply(all_results$roc_analysis, function(tp) {
+                        if (!is.list(tp)) return(tp)
+                        list(
+                            time_point       = tp$time_point,
+                            old_auc          = tp$old_auc,
+                            new_auc          = tp$new_auc,
+                            auc_improvement  = tp$auc_improvement,
+                            old_ci           = tp$old_ci,
+                            new_ci           = tp$new_ci,
+                            p_value          = tp$p_value,
+                            optimal_cutpoints = tp$optimal_cutpoints,
+                            old_roc = if (!is.null(tp$old_roc)) list(
+                                FP = as.matrix(tp$old_roc$FP),
+                                TP = as.matrix(tp$old_roc$TP)
+                            ) else NULL,
+                            new_roc = if (!is.null(tp$new_roc)) list(
+                                FP = as.matrix(tp$new_roc$FP),
+                                TP = as.matrix(tp$new_roc$TP)
+                            ) else NULL
+                        )
+                    })
+                    self$results$rocComparisonPlot$setState(safe_roc)
                 }
             }
 
@@ -4380,7 +4448,27 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     self$results$decisionCurvesExplanation$setContent(decision_curves_explanation_html)
                 }
 
-                self$results$decisionCurves$setState(all_results$dca_analysis)
+                # Extract only serializable fields to avoid protobuf errors
+                # with dca objects that may contain function references
+                safe_dca <- NULL
+                if (!is.null(all_results$dca_analysis)) {
+                    dca_obj <- all_results$dca_analysis$dca_result
+                    dca_df <- NULL
+                    if (inherits(dca_obj, "dca") && !is.null(dca_obj$dca)) {
+                        dca_df <- as.data.frame(dca_obj$dca)
+                    } else if (is.data.frame(dca_obj)) {
+                        dca_df <- dca_obj
+                    }
+                    # Re-wrap as a plain list matching what .plotDecisionCurves expects:
+                    #   plot_data$dca_result (a dca-like list with $dca data.frame)
+                    #   plot_data$time_horizon
+                    safe_dca <- list(
+                        dca_result   = list(dca = dca_df),
+                        time_horizon = all_results$dca_analysis$time_horizon
+                    )
+                    class(safe_dca$dca_result) <- "dca"
+                }
+                self$results$decisionCurves$setState(safe_dca)
             }
 
             # Survival Curves
@@ -8301,8 +8389,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Bootstrap confidence intervals
                 if (self$options$performBootstrap) {
                     bootstrap_nri <- private$.bootstrapCategoryFreeNRI(data, old_cox, new_cox, time_point)
-                    ci_lower <- quantile(bootstrap_nri, 0.025, na.rm = TRUE)
-                    ci_upper <- quantile(bootstrap_nri, 0.975, na.rm = TRUE)
+                    ci_probs <- private$.ciProbs()
+                    ci_lower <- quantile(bootstrap_nri, ci_probs[1], na.rm = TRUE)
+                    ci_upper <- quantile(bootstrap_nri, ci_probs[2], na.rm = TRUE)
                 } else {
                     # Simple asymptotic CI using correct variance for difference of proportions
                     # Var(p_up - p_down) = (p_up + p_down - (p_up - p_down)^2) / n
@@ -8469,15 +8558,17 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 upstaging_ci <- downstaging_ci <- list(lower = NA, upper = NA, p_value = NA)
                 if (self$options$performBootstrap && sum(upstaged) > 10) {
                     upstaging_boot <- private$.bootstrapCategorySpecificNRI(data, old_cox, new_cox, time_point, "upstaging")
-                    upstaging_ci$lower <- quantile(upstaging_boot, 0.025, na.rm = TRUE)
-                    upstaging_ci$upper <- quantile(upstaging_boot, 0.975, na.rm = TRUE)
+                    ci_probs_up <- private$.ciProbs()
+                    upstaging_ci$lower <- quantile(upstaging_boot, ci_probs_up[1], na.rm = TRUE)
+                    upstaging_ci$upper <- quantile(upstaging_boot, ci_probs_up[2], na.rm = TRUE)
                     upstaging_ci$p_value <- if (length(upstaging_boot) > 0) 2 * min(mean(upstaging_boot >= 0), mean(upstaging_boot <= 0)) else NA
                 }
                 
                 if (self$options$performBootstrap && sum(downstaged) > 10) {
                     downstaging_boot <- private$.bootstrapCategorySpecificNRI(data, old_cox, new_cox, time_point, "downstaging")
-                    downstaging_ci$lower <- quantile(downstaging_boot, 0.025, na.rm = TRUE)
-                    downstaging_ci$upper <- quantile(downstaging_boot, 0.975, na.rm = TRUE)
+                    ci_probs_down <- private$.ciProbs()
+                    downstaging_ci$lower <- quantile(downstaging_boot, ci_probs_down[1], na.rm = TRUE)
+                    downstaging_ci$upper <- quantile(downstaging_boot, ci_probs_down[2], na.rm = TRUE)
                     downstaging_ci$p_value <- if (length(downstaging_boot) > 0) 2 * min(mean(downstaging_boot >= 0), mean(downstaging_boot <= 0)) else NA
                 }
                 
@@ -8597,8 +8688,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (self$options$performBootstrap) {
                     boot_results <- private$.bootstrapWeightedNRI(data, old_cox, new_cox, time_point)
                     if (length(boot_results) > 10) {
-                        ci_lower <- quantile(boot_results, 0.025, na.rm = TRUE)
-                        ci_upper <- quantile(boot_results, 0.975, na.rm = TRUE)
+                        ci_probs_wnri <- private$.ciProbs()
+                        ci_lower <- quantile(boot_results, ci_probs_wnri[1], na.rm = TRUE)
+                        ci_upper <- quantile(boot_results, ci_probs_wnri[2], na.rm = TRUE)
                         p_value <- 2 * min(mean(boot_results >= 0), mean(boot_results <= 0))
                     }
                 }
@@ -8656,8 +8748,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Bootstrap confidence intervals if enabled
                 if (self$options$performBootstrap && !is.na(relative_idi)) {
                     bootstrap_relative_idi <- private$.bootstrapRelativeIDI(data, old_cox, new_cox)
-                    ci_lower <- quantile(bootstrap_relative_idi, 0.025, na.rm = TRUE)
-                    ci_upper <- quantile(bootstrap_relative_idi, 0.975, na.rm = TRUE)
+                    ci_probs_idi <- private$.ciProbs()
+                    ci_lower <- quantile(bootstrap_relative_idi, ci_probs_idi[1], na.rm = TRUE)
+                    ci_upper <- quantile(bootstrap_relative_idi, ci_probs_idi[2], na.rm = TRUE)
                 } else {
                     # Simple asymptotic approximation
                     n_events <- sum(events)
@@ -9627,7 +9720,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 valid_diffs <- bootstrap_diffs[!is.na(bootstrap_diffs) & bootstrap_diffs != 0]
                 if (length(valid_diffs) >= 10) {
-                    return(quantile(valid_diffs, c(0.025, 0.975)))
+                    return(quantile(valid_diffs, private$.ciProbs()))
                 } else {
                     return(NULL)
                 }
@@ -10232,13 +10325,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     # Monotonicity bootstrap results
                     mono_scores <- bootstrap_results$monotonicity_scores[!is.na(bootstrap_results$monotonicity_scores)]
                     if (length(mono_scores) > 0) {
-                        mono_ci <- quantile(mono_scores, c(0.025, 0.975), na.rm = TRUE)
+                        mono_ci <- quantile(mono_scores, private$.ciProbs(), na.rm = TRUE)
                         mono_se <- sd(mono_scores, na.rm = TRUE)
 
                         table$addRow(rowKey="monotonicity_bootstrap", values=list(
                             Metric = "Monotonicity Score (Bootstrap Validated)",
                             Original_System = sprintf("%.3f (SE: %.3f)", mean(mono_scores), mono_se),
-                            New_System = sprintf("95%% CI: [%.3f, %.3f]", mono_ci[1], mono_ci[2]),
+                            New_System = sprintf("%.0f%% CI: [%.3f, %.3f]", self$options$confidenceLevel * 100, mono_ci[1], mono_ci[2]),
                             Comparison = ifelse(mean(mono_scores) > 0.8, "Excellent", ifelse(mean(mono_scores) > 0.6, "Good", "Poor")),
                             Interpretation = sprintf("Bootstrap validation with %d samples", length(mono_scores))
                         ))
@@ -10247,13 +10340,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     # Will Rogers bootstrap results
                     wr_rates <- bootstrap_results$will_rogers_rates[!is.na(bootstrap_results$will_rogers_rates)]
                     if (length(wr_rates) > 0) {
-                        wr_ci <- quantile(wr_rates, c(0.025, 0.975), na.rm = TRUE)
+                        wr_ci <- quantile(wr_rates, private$.ciProbs(), na.rm = TRUE)
                         wr_se <- sd(wr_rates, na.rm = TRUE)
 
                         table$addRow(rowKey="will_rogers_bootstrap", values=list(
                             Metric = "Migration Rate (Bootstrap Validated)",
                             Original_System = sprintf("%.1f%% (SE: %.1f%%)", mean(wr_rates) * 100, wr_se * 100),
-                            New_System = sprintf("95%% CI: [%.1f%%, %.1f%%]", wr_ci[1] * 100, wr_ci[2] * 100),
+                            New_System = sprintf("%.0f%% CI: [%.1f%%, %.1f%%]", self$options$confidenceLevel * 100, wr_ci[1] * 100, wr_ci[2] * 100),
                             Comparison = ifelse(mean(wr_rates) < 0.1, "Low risk", ifelse(mean(wr_rates) < 0.2, "Moderate risk", "High risk")),
                             Interpretation = "Will Rogers phenomenon assessment"
                         ))
@@ -10265,7 +10358,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         improvements <- improvements[!is.na(improvements)]
 
                         if (length(improvements) > 0) {
-                            imp_ci <- quantile(improvements, c(0.025, 0.975), na.rm = TRUE)
+                            imp_ci <- quantile(improvements, private$.ciProbs(), na.rm = TRUE)
                             imp_se <- sd(improvements, na.rm = TRUE)
 
                             significance <- ifelse(imp_ci[1] > 0, "Significant", "Non-significant")
@@ -10273,7 +10366,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             table$addRow(rowKey=paste0(measure_name, "_bootstrap"), values=list(
                                 Metric = paste(tools::toTitleCase(measure_name), "R² Improvement (Bootstrap)"),
                                 Original_System = sprintf("%.4f (SE: %.4f)", mean(improvements), imp_se),
-                                New_System = sprintf("95%% CI: [%.4f, %.4f]", imp_ci[1], imp_ci[2]),
+                                New_System = sprintf("%.0f%% CI: [%.4f, %.4f]", self$options$confidenceLevel * 100, imp_ci[1], imp_ci[2]),
                                 Comparison = significance,
                                 Interpretation = ifelse(mean(improvements) > 0.02, "Clinically meaningful", "Minimal improvement")
                             ))
@@ -10332,7 +10425,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         # Calculate bootstrap statistics
                         boot_mean <- mean(cindex_diffs, na.rm = TRUE)
                         boot_se <- sd(cindex_diffs, na.rm = TRUE)
-                        boot_ci <- quantile(cindex_diffs, c(0.025, 0.975), na.rm = TRUE)
+                        boot_ci <- quantile(cindex_diffs, private$.ciProbs(), na.rm = TRUE)
                         success_rate <- sprintf("%.1f%%", length(cindex_diffs) / length(bootstrap_results$stage_specific_cindices) * 100)
                         
                         # Get apparent improvement from original analysis
@@ -10345,13 +10438,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             }
                         }
                         
-                        # Calculate optimism
-                        optimism <- boot_mean - apparent_improvement
-                        optimism_corrected <- apparent_improvement - optimism
-                        
+                        # Calculate optimism (only when option enabled)
+                        if (isTRUE(self$options$useOptimismCorrection)) {
+                            optimism <- boot_mean - apparent_improvement
+                            optimism_corrected <- apparent_improvement - optimism
+                        } else {
+                            optimism <- NA
+                            optimism_corrected <- NA
+                        }
+
                         # Clinical interpretation
                         clinical_interpretation <- private$.interpretBootstrapOptimism(optimism, success_rate)
-                        
+
                         table$addRow(rowKey = "cindex_improvement", values = list(
                             Metric = "C-index Improvement",
                             Apparent = apparent_improvement,
@@ -10385,7 +10483,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         # Calculate bootstrap statistics for Nagelkerke
                         boot_mean <- mean(nagelkerke_diffs, na.rm = TRUE)
                         boot_se <- sd(nagelkerke_diffs, na.rm = TRUE)
-                        boot_ci <- quantile(nagelkerke_diffs, c(0.025, 0.975), na.rm = TRUE)
+                        boot_ci <- quantile(nagelkerke_diffs, private$.ciProbs(), na.rm = TRUE)
                         success_rate <- sprintf("%.1f%%", length(nagelkerke_diffs) / length(bootstrap_results$pseudo_r2_improvements) * 100)
                         
                         # Get apparent Nagelkerke improvement
@@ -10398,13 +10496,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             }
                         }
                         
-                        # Calculate optimism
-                        optimism <- boot_mean - apparent_improvement
-                        optimism_corrected <- apparent_improvement - optimism
-                        
+                        # Calculate optimism (only when option enabled)
+                        if (isTRUE(self$options$useOptimismCorrection)) {
+                            optimism <- boot_mean - apparent_improvement
+                            optimism_corrected <- apparent_improvement - optimism
+                        } else {
+                            optimism <- NA
+                            optimism_corrected <- NA
+                        }
+
                         # Clinical interpretation
                         clinical_interpretation <- private$.interpretBootstrapOptimism(optimism, success_rate)
-                        
+
                         table$addRow(rowKey = "nagelkerke_improvement", values = list(
                             Metric = "Nagelkerke R² Improvement",
                             Apparent = apparent_improvement,
@@ -10499,10 +10602,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         },
 
         # Plot Functions
-        .plotMigrationHeatmap = function(image, ...) {
+        .plotMigrationHeatmap = function(image, ggtheme, theme, ...) {
             # Create heatmap visualization of migration matrix
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                return()
+                return(FALSE)
             }
 
             # Get state data
@@ -10513,19 +10616,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     basic_migration <- private$.calculateBasicMigration()
                     migration_matrix <- basic_migration$migration_table
                     if (is.null(migration_matrix)) {
-                        return()
+                        return(FALSE)
                     }
                 }, error = function(e) {
-                    return()
+                    return(FALSE)
                 })
             } else {
                 migration_matrix <- plot_data$migration_matrix
             }
 
             # Prepare data for heatmap
-            library(ggplot2)
             if (!requireNamespace("reshape2", quietly = TRUE)) {
-                return()
+                return(FALSE)
             }
 
             # Convert matrix to long format for ggplot2
@@ -10587,7 +10689,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     y = "← Original Staging System"
                 ) +
                 # Theme
-                ggplot2::theme_minimal() +
+                ggtheme +
                 theme(
                     axis.text.x = element_text(angle = 45, hjust = 1, size = 11),
                     axis.text.y = element_text(size = 11),
@@ -10606,21 +10708,20 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             TRUE
         },
 
-        .plotROCComparison = function(image, ...) {
+        .plotROCComparison = function(image, ggtheme, theme, ...) {
             # Create enhanced ROC comparison plot with multiple improvements
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                return()
+                return(FALSE)
             }
 
             # Get state data
             plot_data <- image$state
             if (is.null(plot_data)) {
-                return()
+                return(FALSE)
             }
 
-            library(ggplot2)
             if (!requireNamespace("timeROC", quietly = TRUE)) {
-                return()
+                return(FALSE)
             }
 
             # The ROC data is stored as a list with time points
@@ -10628,7 +10729,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # If there are no time points, return
             if (length(roc_data) == 0) {
-                return()
+                return(FALSE)
             }
 
             # Get the first time point for the main plot
@@ -10637,7 +10738,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Check if we have valid ROC objects
             if (is.null(time_data$old_roc) || is.null(time_data$new_roc)) {
-                return()
+                return(FALSE)
             }
 
             # Extract ROC curve data
@@ -10646,19 +10747,19 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Validate ROC objects structure
             if (is.null(old_roc_obj) || is.null(new_roc_obj)) {
-                return()
+                return(FALSE)
             }
 
             # Check if required components exist and have proper dimensions
             if (!is.matrix(old_roc_obj$FP) || !is.matrix(old_roc_obj$TP) ||
                 !is.matrix(new_roc_obj$FP) || !is.matrix(new_roc_obj$TP)) {
-                return()
+                return(FALSE)
             }
 
             # Check matrix dimensions
             if (ncol(old_roc_obj$FP) < 1 || ncol(old_roc_obj$TP) < 1 ||
                 ncol(new_roc_obj$FP) < 1 || ncol(new_roc_obj$TP) < 1) {
-                return()
+                return(FALSE)
             }
 
             # Create data frames for plotting with more points for smoother curves
@@ -10681,10 +10782,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             old_ci_info <- ""
             new_ci_info <- ""
             if (!is.null(time_data$old_ci) && length(time_data$old_ci) >= 2) {
-                old_ci_info <- sprintf(" (95%% CI: %.3f-%.3f)", time_data$old_ci[1], time_data$old_ci[2])
+                old_ci_info <- sprintf(" (%.0f%% CI: %.3f-%.3f)", self$options$confidenceLevel * 100, time_data$old_ci[1], time_data$old_ci[2])
             }
             if (!is.null(time_data$new_ci) && length(time_data$new_ci) >= 2) {
-                new_ci_info <- sprintf(" (95%% CI: %.3f-%.3f)", time_data$new_ci[1], time_data$new_ci[2])
+                new_ci_info <- sprintf(" (%.0f%% CI: %.3f-%.3f)", self$options$confidenceLevel * 100, time_data$new_ci[1], time_data$new_ci[2])
             }
 
             # Enhanced statistical significance testing
@@ -10720,7 +10821,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                  breaks = seq(0, 1, 0.2), labels = scales::percent_format(accuracy = 1)) +
                 scale_y_continuous(limits = c(0, 1), expand = c(0.01, 0.01),
                                  breaks = seq(0, 1, 0.2), labels = scales::percent_format(accuracy = 1)) +
-                ggplot2::theme_minimal() +
+                ggtheme +
                 theme(
                     plot.title = element_text(hjust = 0.5, size = 16, face = "bold", margin = margin(b = 10)),
                     plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40", margin = margin(b = 15)),
@@ -10825,7 +10926,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                      breaks = seq(0, 1, 0.5), labels = scales::percent_format(accuracy = 1)) +
                     scale_y_continuous(limits = c(0, 1), expand = c(0.02, 0.02),
                                      breaks = seq(0, 1, 0.5), labels = scales::percent_format(accuracy = 1)) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     theme(
                         plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
                         plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40"),
@@ -10866,10 +10967,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             TRUE
         },
 
-        .plotForest = function(image, ...) {
+        .plotForest = function(image, ggtheme, theme, ...) {
             # Create forest plot with hazard ratios
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                return()
+                return(FALSE)
             }
 
             # Get state data
@@ -10878,12 +10979,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Try to get data from parent state if not available
                 plot_data <- image$parent$state
                 if (is.null(plot_data) || is.null(plot_data$old_cox_coef) || is.null(plot_data$new_cox_coef)) {
-                    return()
+                    return(FALSE)
                 }
             }
-
-            library(ggplot2)
-            library(survival)
 
             # Create forest data from Cox model coefficients
             old_coef <- plot_data$old_cox_coef
@@ -10921,10 +11019,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 forest_data <- forest_data[!is.na(forest_data$HR) & !is.na(forest_data$CI_Lower) & !is.na(forest_data$CI_Upper), ]
 
                 if (nrow(forest_data) == 0) {
-                    return()
+                    return(FALSE)
                 }
             }, error = function(e) {
-                return()
+                return(FALSE)
             })
 
             # Add significance indicators
@@ -10991,7 +11089,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Explicitly specify discrete y-axis
                 scale_y_discrete(expand = c(0.02, 0.02)) +
                 # Professional theme with enhanced styling
-                ggplot2::theme_minimal() +
+                ggtheme +
                 theme(
                     plot.title = element_text(hjust = 0.5, size = 16, face = "bold", margin = margin(b = 8)),
                     plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40", margin = margin(b = 15)),
@@ -11063,10 +11161,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             TRUE
         },
 
-        .plotCalibration = function(image, ...) {
+        .plotCalibration = function(image, ggtheme, theme, ...) {
             # Create calibration plots
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                return()
+                return(FALSE)
             }
 
             # Get state data (use image$state for plot-specific data)
@@ -11082,11 +11180,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(TRUE)
             }
 
-            library(ggplot2)
             if (!requireNamespace("gridExtra", quietly = TRUE)) {
-                return()
+                return(FALSE)
             }
-            library(survival)
 
             # Check if we have the necessary data
             if (is.null(plot_data$old_cox_data) || is.null(plot_data$new_cox_data) || is.null(plot_data$data)) {
@@ -11151,7 +11247,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent_format()) +
                 scale_size_continuous(range = c(2, 8), guide = guide_legend(position = "inside")) +
                 coord_fixed(ratio = 1) +
-                ggplot2::theme_minimal() +
+                ggtheme +
                 theme(
                     plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
                     plot.subtitle = element_text(hjust = 0.5, size = 11, color = "gray40"),
@@ -11209,7 +11305,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent_format()) +
                 scale_size_continuous(range = c(2, 8), guide = guide_legend(position = "inside")) +
                 coord_fixed(ratio = 1) +
-                ggplot2::theme_minimal() +
+                ggtheme +
                 theme(
                     plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
                     plot.subtitle = element_text(hjust = 0.5, size = 11, color = "gray40"),
@@ -11378,17 +11474,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             })
         },
 
-        .plotDecisionCurves = function(image, ...) {
+        .plotDecisionCurves = function(image, ggtheme, theme, ...) {
             # Create decision curve analysis plot
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                return()
+                return(FALSE)
             }
 
             # Get state data (use image$state for plot-specific data)
             plot_data <- image$state
             if (is.null(plot_data) || is.null(plot_data$dca_result)) {
                 # Create error message plot if DCA analysis is not available
-                library(ggplot2)
                 p <- ggplot2::ggplot() +
                     ggplot2::annotate("text", x = 0.5, y = 0.5,
                             label = "Decision Curve Analysis unavailable\nEnable DCA analysis in options",
@@ -11399,7 +11494,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 return(TRUE)
             }
 
-            library(ggplot2)
 
             # Extract DCA results from dcurves package
             dca_result <- plot_data$dca_result
@@ -11485,7 +11579,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         scale_y_continuous(
                             expand = c(0.02, 0.02)
                         ) +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         theme(
                             plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
                             plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40"),
@@ -11545,7 +11639,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .createRiskTable = function(surv_fit, time_points, strata_colors = NULL, system_label = "") {
             # Helper function to create risk table for survival fit
-            library(ggplot2)
 
             # Calculate risk table data
             risk_data <- data.frame()
@@ -11605,16 +11698,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             return(risk_data)
         },
 
-        .plotSurvivalCurves = function(image, ...) {
+        .plotSurvivalCurves = function(image, ggtheme, theme, ...) {
             # Create survival curve comparison
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
-                return()
+                return(FALSE)
             }
 
             # Get state data (correct location is image$state, not image$parent$state)
             plot_data <- image$state
             if (is.null(plot_data) || is.null(plot_data$data)) {
-                return()
+                return(FALSE)
             }
 
             tryCatch({
@@ -11658,8 +11751,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     color_palette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442",
                                      "#0072B2", "#D55E00", "#CC79A7", "#999999")
                 } else {
-                    library(viridis)
-                    color_palette <- viridis(max_stages, option = "D")
+                    color_palette <- viridis::viridis(max_stages, option = "D")
                 }
 
                 # Old staging system plot
@@ -11697,7 +11789,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ) +
                     scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
                     scale_x_continuous(limits = c(0, max_time)) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     theme(
                         plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
                         legend.position = "bottom"
@@ -11732,7 +11824,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ) +
                     scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
                     scale_x_continuous(limits = c(0, max_time)) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     theme(
                         plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
                         legend.position = "bottom"
@@ -11756,7 +11848,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         ggplot2::scale_color_manual(values = color_palette[1:n_old_stages], guide = "none") +
                         ggplot2::scale_x_continuous(limits = c(0, max_time), breaks = risk_times) +
                         ggplot2::labs(x = "", y = "", title = "Number at Risk - Original") +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         theme(
                             panel.grid = element_blank(),
                             axis.text.x = element_blank(),
@@ -11771,7 +11863,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         ggplot2::scale_color_manual(values = color_palette[1:n_new_stages], guide = "none") +
                         ggplot2::scale_x_continuous(limits = c(0, max_time), breaks = risk_times) +
                         ggplot2::labs(x = "Time (months)", y = "", title = "Number at Risk - New") +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         theme(
                             panel.grid = element_blank(),
                             axis.text.y = element_text(size = 9),
@@ -11808,8 +11900,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     color_palette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442",
                                      "#0072B2", "#D55E00", "#CC79A7", "#999999")
                 } else {
-                    library(viridis)
-                    color_palette <- viridis(max_stages, option = "D")
+                    color_palette <- viridis::viridis(max_stages, option = "D")
                 }
 
                 # Old staging system data
@@ -11857,7 +11948,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ) +
                     scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
                     scale_x_continuous(limits = c(0, max_time)) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     theme(
                         plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),
                         legend.position = "bottom"
@@ -11882,7 +11973,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ) +
                     scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
                     scale_x_continuous(limits = c(0, max_time)) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     theme(
                         plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),
                         legend.position = "bottom"
@@ -11906,7 +11997,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         ggplot2::scale_color_manual(values = color_palette[1:n_old_stages], guide = "none") +
                         ggplot2::scale_x_continuous(limits = c(0, max_time), breaks = risk_times) +
                         ggplot2::labs(x = "Time (months)", y = "Number at Risk", title = "") +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         theme(
                             panel.grid = element_blank(),
                             axis.text.y = element_text(size = 9),
@@ -11919,7 +12010,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         ggplot2::scale_color_manual(values = color_palette[1:n_new_stages], guide = "none") +
                         ggplot2::scale_x_continuous(limits = c(0, max_time), breaks = risk_times) +
                         ggplot2::labs(x = "Time (months)", y = "Number at Risk", title = "") +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         theme(
                             panel.grid = element_blank(),
                             axis.text.y = element_text(size = 9),
@@ -11984,8 +12075,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                     "#0072B2", "#D55E00", "#CC79A7", "#999999")[1:n_stages]
                 } else {
                     # For more than 8 stages, use viridis color scale
-                    library(viridis)
-                    stage_colors <- viridis(n_stages, option = "D")
+                    stage_colors <- viridis::viridis(n_stages, option = "D")
                 }
                 names(stage_colors) <- unique_stages
 
@@ -11995,9 +12085,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 } else {
                     max(combined_data$time, na.rm = TRUE)
                 }
-
-                # Ensure ggplot2 is loaded
-                library(ggplot2)
 
                 # Create overlay plot with different line types for staging systems
                 # Color by stage (not group) so matching stages have same color
@@ -12035,7 +12122,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ) +
                     scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
                     scale_x_continuous(limits = c(0, max_time)) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     theme(
                         plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
                         legend.position = "bottom",
@@ -12067,7 +12154,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         ggplot2::scale_color_manual(values = stage_colors, guide = "none") +  # Use same colors
                         ggplot2::scale_x_continuous(limits = c(0, max_time), breaks = risk_times) +
                         ggplot2::labs(x = "", y = "", title = "Number at Risk") +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         theme(
                             panel.grid = element_blank(),
                             axis.text.x = element_blank(),
@@ -12080,8 +12167,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         facet_grid(system ~ ., scales = "free_y", space = "free_y")
 
                     # Combine plots using gridExtra
-                    library(gridExtra)
-                    combined_plot <- grid.arrange(p, risk_table,
+                    combined_plot <- gridExtra::grid.arrange(p, risk_table,
                                                 ncol = 1,
                                                 heights = c(4, 1.5))
                     # Note: grid.arrange automatically prints
@@ -12121,7 +12207,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         linetype = "Stage"
                     ) +
                     scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     theme(
                         plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
                         legend.position = "bottom"
@@ -12135,7 +12221,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }, error = function(e) {
                 # Handle any errors in survival curve plotting
                 tryCatch({
-                    library(ggplot2)
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text", x = 0.5, y = 0.5,
                                 label = paste("Error generating survival curves:", e$message),
@@ -14381,8 +14466,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (length(aic_with_var) > 5 && length(aic_without_var) > 5) {
                     aic_diff_samples <- sample(aic_without_var, min(100, length(aic_without_var)), replace = TRUE) - 
                                       sample(aic_with_var, min(100, length(aic_with_var)), replace = TRUE)
-                    ci_lower <- quantile(aic_diff_samples, 0.025, na.rm = TRUE)
-                    ci_upper <- quantile(aic_diff_samples, 0.975, na.rm = TRUE)
+                    ci_probs_aic <- private$.ciProbs()
+                    ci_lower <- quantile(aic_diff_samples, ci_probs_aic[1], na.rm = TRUE)
+                    ci_upper <- quantile(aic_diff_samples, ci_probs_aic[2], na.rm = TRUE)
                 } else {
                     ci_lower <- NA
                     ci_upper <- NA
@@ -15075,7 +15161,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # 6. Populate stratified analysis table
             if (self$options$stratifiedAnalysis && !is.null(multifactorial_results$stratified_results)) {
-                table <- self$results$stratifiedAnalysis
+                table <- self$results$stratifiedAnalysisTable
 
                 for (strat_name in names(multifactorial_results$stratified_results)) {
                     strat_info <- multifactorial_results$stratified_results[[strat_name]]
@@ -15273,7 +15359,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #                         x        = NULL,
         #                         y        = "Number of Patients"
         #                     ) +
-        #                     ggplot2::theme_minimal() +
+        #                     ggtheme +
         #                     ggplot2::theme(
         #                         plot.title      = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
         #                         plot.subtitle   = ggplot2::element_text(hjust = 0.5, size = 12),
@@ -15344,7 +15430,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #                         x = "",
         #                         y = ""
         #                     ) +
-        #                     ggplot2::theme_minimal() +
+        #                     ggtheme +
         #                     ggplot2::theme(
         #                         axis.text.y = ggplot2::element_blank(),
         #                         axis.ticks = ggplot2::element_blank(),
@@ -16123,7 +16209,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             })
         },
 
-        .plotWillRogersEffect = function(image, ...) {
+        .plotWillRogersEffect = function(image, ggtheme, theme, ...) {
             # Create visualization of Will Rogers effect
             
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
@@ -16146,7 +16232,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         hjust = 0.5, vjust = 0.5, size = 4) +
                         ggplot2::theme_void() +
                         ggplot2::labs(title = "Will Rogers Visualization - No State")
-                    return(p)
+                    print(p)
+                    return(TRUE)
                 }
                 
                 # Extract data and parameters from state
@@ -16176,14 +16263,11 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Find stages with significant migration
                 migration_table <- table(data[[old_stage]], data[[new_stage]])
-                message(capture.output(print(migration_table)))
-                
+
                 # Select stages to visualize (those with most migration)
                 migration_counts <- migration_table
                 diag(migration_counts) <- 0  # Exclude unchanged patients
-                
-                message(capture.output(print(migration_counts)))
-                
+
                 # Find the most common migration pattern
                 max_migration <- which(migration_counts == max(migration_counts), arr.ind = TRUE)[1, ]
                 from_stage <- rownames(migration_counts)[max_migration[1]]
@@ -16208,7 +16292,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         hjust = 0.5, vjust = 0.5, size = 4) +
                         ggplot2::theme_void() +
                         ggplot2::labs(title = "Will Rogers Visualization - No Migration")
-                    return(p)
+                    print(p)
+                    return(TRUE)
                 }
                 
                 
@@ -16222,8 +16307,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 
                 # Calculate survival summaries
-                library(survival)
-                
                 # Get survival summaries for annotation
                 before_from_surv <- survival::Surv(before_from[[time_col]], before_from$event_binary)
                 before_from_fit <- survival::survfit(before_from_surv ~ 1)
@@ -16255,9 +16338,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     N_Patients = c(nrow(before_from), nrow(before_to), 
                                   nrow(after_from), nrow(after_to))
                 )
-                
-                message(capture.output(print(summary_data)))
-                
+
                 # Handle NA values
                 na_count <- sum(is.na(summary_data$Median_Survival))
                 summary_data$Median_Survival[is.na(summary_data$Median_Survival)] <- 0
@@ -16277,7 +16358,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         y = "Median Survival (months)",
                         fill = "Period"
                     ) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
                         plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
@@ -16287,24 +16368,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                     label = "Will Rogers Paradox:\nBoth stages may appear\nto improve after migration",
                                     hjust = 0.5, vjust = 1, size = 3, color = "darkred",
                                     fontface = "italic")
-                
-                return(p)
-                
+
+                print(p)
+                return(TRUE)
+
             }, error = function(e) {
-                message(capture.output(traceback()))
-                
                 # Create error message plot
                 p <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
                                     label = paste("Error creating Will Rogers plot:\n", e$message),
                                     hjust = 0.5, vjust = 0.5, size = 4) +
                     ggplot2::theme_void() +
                     ggplot2::labs(title = "Will Rogers Visualization - Error")
-                return(p)
+                print(p)
+                return(TRUE)
             })
         },
 
-        .plotMigrationSurvivalComparison = function(image, ...) {
+        .plotMigrationSurvivalComparison = function(image, ggtheme, theme, ...) {
             # Create Kaplan-Meier survival curve comparison before/after migration
             
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
@@ -16323,7 +16404,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         hjust = 0.5, vjust = 0.5, size = 4) +
                         ggplot2::theme_void() +
                         ggplot2::labs(title = "Migration Survival Comparison - No State")
-                    return(p)
+                    print(p)
+                    return(TRUE)
                 }
                 
                 # Extract data and parameters from state
@@ -16345,10 +16427,6 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 } else {
                 }
                 
-                
-                # Load required packages
-                library(survival)
-                library(ggplot2)
                 
                 # Get unique stages for comparison
                 all_stages <- sort(unique(c(as.character(data[[old_stage]]), as.character(data[[new_stage]]))))
@@ -16414,7 +16492,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         hjust = 0.5, vjust = 0.5, size = 4) +
                         ggplot2::theme_void() +
                         ggplot2::labs(title = "Migration Survival Comparison - Insufficient Data")
-                    return(p)
+                    print(p)
+                    return(TRUE)
                 }
                 
                 # Combine all plot data
@@ -16436,7 +16515,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         color = "Period",
                         linetype = "Period"
                     ) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
                         plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
@@ -16463,24 +16542,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                              hjust = 1.1, vjust = 0,
                                              size = 3, color = ifelse(period_name == "Before Migration", "#E41A1C", "#377EB8"))
                 }
-                
-                return(p)
-                
+
+                print(p)
+                return(TRUE)
+
             }, error = function(e) {
-                message(capture.output(traceback()))
-                
                 # Create error message plot
                 p <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
                                     label = paste("Error creating migration survival comparison:\n", e$message),
                                     hjust = 0.5, vjust = 0.5, size = 4) +
                     ggplot2::theme_void() +
                     ggplot2::labs(title = "Migration Survival Comparison - Error")
-                return(p)
+                print(p)
+                return(TRUE)
             })
         },
 
-        .plotSankeyDiagram = function(image, ...) {
+        .plotSankeyDiagram = function(image, ggtheme, theme, ...) {
             # Create Sankey-style flow diagram showing stage migration patterns
             
             if (is.null(image$parent$options$oldStage) || is.null(image$parent$options$newStage)) {
@@ -16499,15 +16578,14 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         hjust = 0.5, vjust = 0.5, size = 4) +
                         ggplot2::theme_void() +
                         ggplot2::labs(title = "Sankey Diagram - No State")
-                    return(p)
+                    print(p)
+                    return(TRUE)
                 }
                 
                 # Extract data from state
                 migration_matrix <- plot_state$migration_matrix
                 old_stage <- plot_state$old_stage
                 new_stage <- plot_state$new_stage
-                
-                message(capture.output(print(migration_matrix)))
                 
                 # Convert migration matrix to flow data
                 flow_data <- expand.grid(
@@ -16546,7 +16624,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         hjust = 0.5, vjust = 0.5, size = 4) +
                         ggplot2::theme_void() +
                         ggplot2::labs(title = "Sankey Diagram - No Data")
-                    return(p)
+                    print(p)
+                    return(TRUE)
                 }
                 
                 # Create a simple, robust Sankey-style visualization using ggplot2
@@ -16623,8 +16702,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     
                     # Customize the plot
                     ggplot2::scale_fill_manual(values = c("Source" = "#E41A1C", "Target" = "#377EB8")) +
-                    ggplot2::scale_color_manual(values = c("Upstaged" = "#D62728", 
-                                                         "Downstaged" = "#2CA02C",
+                    ggplot2::scale_color_manual(values = c("Upstaged" = "#E69F00",
+                                                         "Downstaged" = "#0072B2",
                                                          "No change" = "#7F7F7F"),
                                               name = "Migration Direction") +
                     ggplot2::scale_size_continuous(range = c(1, 8), guide = "none") +
@@ -16632,12 +16711,12 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ggplot2::labs(
                         title = "Stage Migration Flow Diagram",
                         subtitle = paste0("Patient migration patterns: ", old_stage, " → ", new_stage, 
-                                        "\nRed = Upstaging, Green = Downstaging, Gray = No change"),
+                                        "\nOrange = Upstaging, Blue = Downstaging, Gray = No change"),
                         x = "",
                         y = "Patient Flow",
                         fill = "System"
                     ) +
-                    ggplot2::theme_minimal() +
+                    ggtheme +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
                         plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
@@ -16650,27 +16729,27 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                     label = paste("Original", old_stage), hjust = 0.5, size = 4, fontface = "bold") +
                     ggplot2::annotate("text", x = x_target, y = max(node_positions$y) + 50,
                                     label = paste("New", new_stage), hjust = 0.5, size = 4, fontface = "bold")
-                
-                return(p)
-                
+
+                print(p)
+                return(TRUE)
+
             }, error = function(e) {
-                message(capture.output(traceback()))
-                
                 # Create error message plot
                 p <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
                                     label = paste("Error creating Sankey diagram:\n", e$message),
                                     hjust = 0.5, vjust = 0.5, size = 4) +
                     ggplot2::theme_void() +
                     ggplot2::labs(title = "Sankey Diagram - Error")
-                return(p)
+                print(p)
+                return(TRUE)
             })
         },
         
-        .plotCrossValidation = function(image, ...) {
+        .plotCrossValidation = function(image, ggtheme, theme, ...) {
             # Create cross-validation performance visualization
             if (is.null(image$state)) {
-                return()
+                return(FALSE)
             }
             
             tryCatch({
@@ -16684,7 +16763,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                         label = "No cross-validation results available",
                                         hjust = 0.5, vjust = 0.5, size = 4) +
                         ggplot2::theme_void()
-                    return(p)
+                    print(p)
+                    return(TRUE)
                 }
                 
                 # Create data frame for plotting
@@ -16715,7 +16795,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         y = "C-Index (Discrimination)",
                         color = "Staging System"
                     ) +
-                    ggplot2::theme_bw() +
+                    ggtheme +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
                         plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
@@ -16736,38 +16816,41 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         ggplot2::geom_line(color = "#FF7F00", linewidth = 1) +
                         ggplot2::geom_point(color = "#FF7F00", size = 3) +
                         ggplot2::geom_hline(yintercept = 0, linetype = "solid", color = "black", alpha = 0.5) +
-                        ggplot2::geom_hline(yintercept = 0.02, linetype = "dashed", color = "green", alpha = 0.7) +
-                        ggplot2::geom_hline(yintercept = -0.02, linetype = "dashed", color = "red", alpha = 0.7) +
+                        ggplot2::geom_hline(yintercept = 0.02, linetype = "dashed", color = "#0072B2", alpha = 0.7) +
+                        ggplot2::geom_hline(yintercept = -0.02, linetype = "dashed", color = "#E69F00", alpha = 0.7) +
                         ggplot2::labs(
                             title = "C-Index Improvement by Fold",
                             x = "Cross-Validation Fold",
                             y = "C-Index Difference (New - Original)"
                         ) +
-                        ggplot2::theme_bw() +
+                        ggtheme +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
                             axis.title = ggplot2::element_text(size = 10),
                             axis.text = ggplot2::element_text(size = 9),
                             panel.grid.minor = ggplot2::element_blank()
                         ) +
-                        ggplot2::annotate("text", x = 1, y = 0.021, label = "Clinically meaningful", 
-                                         color = "green", size = 2.5, hjust = 0)
+                        ggplot2::annotate("text", x = 1, y = 0.021, label = "Clinically meaningful",
+                                         color = "#0072B2", size = 2.5, hjust = 0)
                     
                     # Combine plots
                     final_plot <- p / p_diff + patchwork::plot_layout(heights = c(2, 1))
-                    return(final_plot)
+                    print(final_plot)
+                    return(TRUE)
                 }
-                
-                return(p)
-                
+
+                print(p)
+                return(TRUE)
+
             }, error = function(e) {
                 # Create error message plot
                 p <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
                                     label = paste("Error creating plot:\n", e$message),
                                     hjust = 0.5, vjust = 0.5, size = 4) +
                     ggplot2::theme_void()
-                return(p)
+                print(p)
+                return(TRUE)
             })
         },
 
@@ -20646,33 +20729,42 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 )
                 
                 # Stage-specific discrimination for competing risks
-                # Calculate separation between stages for both event types
-                old_primary_rates <- sapply(old_competing_summary, function(x) x$primary_incidence)
-                old_competing_rates <- sapply(old_competing_summary, function(x) x$competing_incidence)
-                
-                new_primary_rates <- sapply(new_competing_summary, function(x) x$primary_incidence)
-                new_competing_rates <- sapply(new_competing_summary, function(x) x$competing_incidence)
-                
-                competing_comparison$discrimination_assessment <- list(
-                    old_system = list(
-                        primary_event_range = if (length(old_primary_rates) > 1) max(old_primary_rates, na.rm = TRUE) - min(old_primary_rates, na.rm = TRUE) else NA,
-                        competing_event_range = if (length(old_competing_rates) > 1) max(old_competing_rates, na.rm = TRUE) - min(old_competing_rates, na.rm = TRUE) else NA,
-                        primary_discrimination = if (length(old_primary_rates) > 1) {
-                            if (max(old_primary_rates, na.rm = TRUE) - min(old_primary_rates, na.rm = TRUE) > 0.2) "Good" 
-                            else if (max(old_primary_rates, na.rm = TRUE) - min(old_primary_rates, na.rm = TRUE) > 0.1) "Moderate"
-                            else "Poor"
-                        } else "Unable to assess"
-                    ),
-                    new_system = list(
-                        primary_event_range = if (length(new_primary_rates) > 1) max(new_primary_rates, na.rm = TRUE) - min(new_primary_rates, na.rm = TRUE) else NA,
-                        competing_event_range = if (length(new_competing_rates) > 1) max(new_competing_rates, na.rm = TRUE) - min(new_competing_rates, na.rm = TRUE) else NA,
-                        primary_discrimination = if (length(new_primary_rates) > 1) {
-                            if (max(new_primary_rates, na.rm = TRUE) - min(new_primary_rates, na.rm = TRUE) > 0.2) "Good" 
-                            else if (max(new_primary_rates, na.rm = TRUE) - min(new_primary_rates, na.rm = TRUE) > 0.1) "Moderate"
-                            else "Poor"
-                        } else "Unable to assess"
+                # Only compute when stratifyByStaging is enabled
+                if (isTRUE(self$options$stratifyByStaging)) {
+                    # Calculate separation between stages for both event types
+                    old_primary_rates <- sapply(old_competing_summary, function(x) x$primary_incidence)
+                    old_competing_rates <- sapply(old_competing_summary, function(x) x$competing_incidence)
+
+                    new_primary_rates <- sapply(new_competing_summary, function(x) x$primary_incidence)
+                    new_competing_rates <- sapply(new_competing_summary, function(x) x$competing_incidence)
+
+                    competing_comparison$discrimination_assessment <- list(
+                        old_system = list(
+                            primary_event_range = if (length(old_primary_rates) > 1) max(old_primary_rates, na.rm = TRUE) - min(old_primary_rates, na.rm = TRUE) else NA,
+                            competing_event_range = if (length(old_competing_rates) > 1) max(old_competing_rates, na.rm = TRUE) - min(old_competing_rates, na.rm = TRUE) else NA,
+                            primary_discrimination = if (length(old_primary_rates) > 1) {
+                                if (max(old_primary_rates, na.rm = TRUE) - min(old_primary_rates, na.rm = TRUE) > 0.2) "Good"
+                                else if (max(old_primary_rates, na.rm = TRUE) - min(old_primary_rates, na.rm = TRUE) > 0.1) "Moderate"
+                                else "Poor"
+                            } else "Unable to assess"
+                        ),
+                        new_system = list(
+                            primary_event_range = if (length(new_primary_rates) > 1) max(new_primary_rates, na.rm = TRUE) - min(new_primary_rates, na.rm = TRUE) else NA,
+                            competing_event_range = if (length(new_competing_rates) > 1) max(new_competing_rates, na.rm = TRUE) - min(new_competing_rates, na.rm = TRUE) else NA,
+                            primary_discrimination = if (length(new_primary_rates) > 1) {
+                                if (max(new_primary_rates, na.rm = TRUE) - min(new_primary_rates, na.rm = TRUE) > 0.2) "Good"
+                                else if (max(new_primary_rates, na.rm = TRUE) - min(new_primary_rates, na.rm = TRUE) > 0.1) "Moderate"
+                                else "Poor"
+                            } else "Unable to assess"
+                        )
                     )
-                )
+                } else {
+                    # Default stub so downstream clinical_recommendations does not error
+                    competing_comparison$discrimination_assessment <- list(
+                        old_system = list(primary_event_range = NA, competing_event_range = NA, primary_discrimination = "Not assessed"),
+                        new_system = list(primary_event_range = NA, competing_event_range = NA, primary_discrimination = "Not assessed")
+                    )
+                }
                 
                 # Clinical recommendations for competing risks
                 competing_comparison$clinical_recommendations <- list(
@@ -21727,7 +21819,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Calculate validation statistics
                 valid_cutpoints <- bootstrap_cutpoints[!is.na(bootstrap_cutpoints)]
                 if (length(valid_cutpoints) > 0) {
-                    cutpoint_ci <- quantile(valid_cutpoints, probs = c(0.025, 0.975))
+                    cutpoint_ci <- quantile(valid_cutpoints, probs = private$.ciProbs())
                     cutpoint_stability <- sd(valid_cutpoints) / mean(valid_cutpoints)  # Coefficient of variation
                 } else {
                     cutpoint_ci <- c(NA, NA)
@@ -24196,8 +24288,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 # Get covariates if specified
                 covariates <- c()
-                if (!is.null(self$options$covariates) && length(self$options$covariates) > 0) {
-                    covariates <- self$options$covariates
+                if (!is.null(self$options$forestCovariates) && length(self$options$forestCovariates) > 0) {
+                    covariates <- self$options$forestCovariates
                 }
 
                 # Perform Random Forest for Old Staging System
@@ -24256,7 +24348,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # Create temporary data with renamed stage variable
                 temp_data <- data
                 temp_data[[stage_name]] <- stage_var
-                temp_data <- temp_data[c("survival_time", "event", stage_name, covariates)]
+                time_col <- self$options$survivalTime
+                event_col <- "event_binary"
+                temp_data <- temp_data[c(time_col, event_col, stage_name, covariates)]
                 names(temp_data)[1:2] <- c("time", "status")
                 
                 # Remove missing values
@@ -24267,9 +24361,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Configure Random Forest parameters
-                ntree <- as.numeric(self$options$rfNumTrees)
-                nodesize <- as.numeric(self$options$rfNodeSize)
-                mtry <- if (self$options$rfMtryAuto) NULL else as.numeric(self$options$rfMtry)
+                ntree <- as.numeric(self$options$forestNTrees)
+                nodesize <- as.numeric(self$options$forestMinNodeSize)
+                mtry <- if (self$options$rfMtryAuto) NULL else as.numeric(self$options$forestMTry)
                 
                 # Fit Random Forest model
                 formula_str <- paste("Surv(time, status) ~", paste(predictor_vars, collapse = " + "))
@@ -24281,7 +24375,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     ntree = ntree,
                     nodesize = nodesize,
                     mtry = mtry,
-                    importance = self$options$rfComputeImportance,
+                    importance = self$options$calculateVariableImportance,
                     bootstrap = if (self$options$rfBootstrapType == "by.root") "by.root" else "by.node",
                     samptype = if (self$options$rfSamplingType == "swr") "swr" else "swor",
                     na.action = "na.impute"
@@ -24294,18 +24388,18 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 results$num_trees <- ntree
                 results$num_variables <- length(predictor_vars)
                 
-                # OOB Performance
-                if (!is.null(rf_model$err.rate)) {
+                # OOB Performance (only when validation is requested)
+                if (isTRUE(self$options$performForestValidation) && !is.null(rf_model$err.rate)) {
                     results$oob_error <- rf_model$err.rate[ntree]
                 }
                 
-                # C-index if available
-                if (!is.null(rf_model$cindex)) {
+                # C-index if available (only when discrimination metrics requested)
+                if (isTRUE(self$options$forestDiscriminationMetrics) && !is.null(rf_model$cindex)) {
                     results$concordance_index <- rf_model$cindex
                 }
 
                 # Variable importance if computed
-                if (self$options$rfComputeImportance && !is.null(rf_model$importance)) {
+                if (self$options$calculateVariableImportance && !is.null(rf_model$importance)) {
                     importance_data <- rf_model$importance
                     if (is.matrix(importance_data)) {
                         # Convert to data frame for easier handling
@@ -24320,13 +24414,17 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
                 # Prediction accuracy on OOB samples if requested
-                if (self$options$rfComputePredictions) {
+                if (self$options$generateSurvivalPredictions) {
                     predictions <- predict(rf_model)
                     if (!is.null(predictions$survival)) {
+                        # Store full predictions for table population
+                        results$predictions <- predictions
+                        results$stage_values <- temp_data[[stage_name]]
+
                         # Compute time-specific predictions at median follow-up
                         median_time <- median(temp_data$time[temp_data$status == 1], na.rm = TRUE)
                         if (!is.na(median_time) && median_time > 0) {
-                            survival_probs <- predictions$survival[, min(ncol(predictions$survival), 
+                            survival_probs <- predictions$survival[, min(ncol(predictions$survival),
                                                                     which.min(abs(predictions$time.interest - median_time)))]
                             results$median_survival_predictions <- mean(survival_probs, na.rm = TRUE)
                         }
@@ -24525,6 +24623,16 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     self$.populateRandomForestSummary(summary_data)
                 }
 
+                # Populate Forest Survival Predictions table
+                if (self$options$generateSurvivalPredictions) {
+                    self$.populateForestSurvivalPredictions(rf_results)
+                }
+
+                # Populate Forest Staging Comparison table
+                if (self$options$forestStagingComparison && length(rf_results) >= 2) {
+                    self$.populateForestStagingComparison(rf_results)
+                }
+
             }, error = function(e) {
                 # Silent error handling for table population
             })
@@ -24575,12 +24683,274 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .populateRandomForestSummary = function(results) {
             tryCatch({
                 table <- self$results$forestAnalysisSummary
-                
+
                 for (result in results) {
                     if (is.list(result) && "Analysis_Component" %in% names(result)) {
                         table$addRow(rowKey = result$Analysis_Component, values = result)
                     }
                 }
+            }, error = function(e) {
+                # Silent error handling for table population
+            })
+        },
+
+        # --------------------------------------------------------------------
+        # Forest Survival Predictions table
+        # Columns: Time_Point, Staging_System, Stage, Survival_Probability,
+        #          Prediction_CI_Lower, Prediction_CI_Upper, Risk_Category,
+        #          Prediction_Quality, Clinical_Interpretation
+        # --------------------------------------------------------------------
+        .populateForestSurvivalPredictions = function(rf_results) {
+            tryCatch({
+                table <- self$results$forestSurvivalPredictions
+
+                # Parse user-specified time points
+                tp_str <- self$options$forestPredictionTimePoints
+                time_points <- as.numeric(unlist(strsplit(tp_str, "\\s*,\\s*")))
+                time_points <- time_points[!is.na(time_points) & time_points > 0]
+                if (length(time_points) == 0) {
+                    time_points <- c(12, 24, 36, 60)
+                }
+
+                # Helper: label for staging system
+                system_labels <- list(
+                    old_stage = paste0("Original (", self$options$oldStage, ")"),
+                    new_stage = paste0("New (", self$options$newStage, ")")
+                )
+
+                row_key <- 0
+                for (sys_key in c("old_stage", "new_stage")) {
+                    res <- rf_results[[sys_key]]
+                    if (is.null(res) || is.null(res$predictions) || is.null(res$stage_values)) next
+
+                    preds   <- res$predictions          # rfsrc predict object
+                    surv_mx <- preds$survival            # rows = obs, cols = time indices
+                    ti      <- preds$time.interest       # time grid from the model
+                    stages  <- res$stage_values          # stage factor for each obs
+
+                    stage_levels <- levels(as.factor(stages))
+
+                    for (tp in time_points) {
+                        # Find closest time index that does not exceed the model grid
+                        if (tp > max(ti)) next
+                        t_idx <- which.min(abs(ti - tp))
+
+                        for (stg in stage_levels) {
+                            mask <- stages == stg
+                            if (sum(mask) < 2) next
+
+                            surv_vals <- surv_mx[mask, t_idx]
+                            mean_surv <- mean(surv_vals, na.rm = TRUE) * 100
+                            se_surv   <- sd(surv_vals, na.rm = TRUE) / sqrt(sum(mask)) * 100
+                            ci_lower  <- max(0,   mean_surv - 1.96 * se_surv)
+                            ci_upper  <- min(100, mean_surv + 1.96 * se_surv)
+
+                            risk_cat <- if (mean_surv >= 80) "Low Risk"
+                                        else if (mean_surv >= 50) "Moderate Risk"
+                                        else if (mean_surv >= 20) "High Risk"
+                                        else "Very High Risk"
+
+                            pred_quality <- if (se_surv < 2) "High"
+                                           else if (se_surv < 5) "Moderate"
+                                           else "Low"
+
+                            clinical <- paste0(
+                                round(mean_surv, 1), "% predicted survival at ",
+                                tp, " months for stage ", stg, " (", risk_cat, ")"
+                            )
+
+                            row_key <- row_key + 1
+                            table$addRow(rowKey = row_key, values = list(
+                                Time_Point              = as.integer(tp),
+                                Staging_System          = system_labels[[sys_key]],
+                                Stage                   = as.character(stg),
+                                Survival_Probability    = round(mean_surv, 1),
+                                Prediction_CI_Lower     = round(ci_lower, 1),
+                                Prediction_CI_Upper     = round(ci_upper, 1),
+                                Risk_Category           = risk_cat,
+                                Prediction_Quality      = pred_quality,
+                                Clinical_Interpretation = clinical
+                            ))
+                        }
+                    }
+                }
+            }, error = function(e) {
+                # Silent error handling for table population
+            })
+        },
+
+        # --------------------------------------------------------------------
+        # Forest-Based Staging System Comparison table
+        # Columns: Analysis_Component, Original_System, New_System,
+        #          Forest_Assessment, Improvement_Magnitude,
+        #          Statistical_Evidence, Clinical_Recommendation
+        # --------------------------------------------------------------------
+        .populateForestStagingComparison = function(rf_results) {
+            tryCatch({
+                table <- self$results$forestStagingComparisonTable
+
+                old <- rf_results$old_stage
+                new <- rf_results$new_stage
+                comp <- rf_results$comparison
+
+                # Row 1 -- Discrimination (C-index)
+                old_c <- if (!is.null(old$concordance_index)) round(old$concordance_index, 4) else NA
+                new_c <- if (!is.null(new$concordance_index)) round(new$concordance_index, 4) else NA
+                c_diff <- if (!is.null(comp$cindex_improvement)) comp$cindex_improvement else NA
+
+                c_assessment <- if (!is.na(c_diff)) {
+                    if (c_diff > 0.05) "Substantial improvement with new staging"
+                    else if (c_diff > 0.01) "Modest improvement with new staging"
+                    else if (c_diff > -0.01) "Comparable discrimination"
+                    else "Original staging discriminates better"
+                } else "Insufficient data"
+
+                c_magnitude <- if (!is.na(c_diff)) {
+                    paste0(ifelse(c_diff >= 0, "+", ""), round(c_diff, 4))
+                } else "N/A"
+
+                c_evidence <- if (!is.na(c_diff)) {
+                    if (abs(c_diff) > 0.05) "Strong"
+                    else if (abs(c_diff) > 0.02) "Moderate"
+                    else "Weak"
+                } else "N/A"
+
+                c_rec <- if (!is.na(c_diff) && c_diff > 0.02) {
+                    "New staging improves risk discrimination"
+                } else if (!is.na(c_diff) && c_diff < -0.02) {
+                    "Retain original staging for discrimination"
+                } else "No clear advantage; consider other criteria"
+
+                table$addRow(rowKey = "discrimination", values = list(
+                    Analysis_Component      = "Discrimination (C-Index)",
+                    Original_System         = if (!is.na(old_c)) as.character(old_c) else "N/A",
+                    New_System              = if (!is.na(new_c)) as.character(new_c) else "N/A",
+                    Forest_Assessment       = c_assessment,
+                    Improvement_Magnitude   = c_magnitude,
+                    Statistical_Evidence    = c_evidence,
+                    Clinical_Recommendation = c_rec
+                ))
+
+                # Row 2 -- Prediction Error (OOB)
+                old_err <- if (!is.null(old$oob_error)) round(old$oob_error, 4) else NA
+                new_err <- if (!is.null(new$oob_error)) round(new$oob_error, 4) else NA
+                err_diff <- if (!is.null(comp$oob_error_improvement)) comp$oob_error_improvement else NA
+
+                err_assessment <- if (!is.na(err_diff)) {
+                    if (err_diff > 0.02) "New staging reduces prediction error"
+                    else if (err_diff > 0) "Marginal error reduction"
+                    else "Original staging has lower error"
+                } else "Insufficient data"
+
+                err_magnitude <- if (!is.na(err_diff)) {
+                    paste0(ifelse(err_diff >= 0, "-", "+"), round(abs(err_diff), 4), " error")
+                } else "N/A"
+
+                err_evidence <- if (!is.na(err_diff)) {
+                    if (abs(err_diff) > 0.03) "Strong"
+                    else if (abs(err_diff) > 0.01) "Moderate"
+                    else "Weak"
+                } else "N/A"
+
+                err_rec <- if (!is.na(err_diff) && err_diff > 0.01) {
+                    "New staging yields more accurate predictions"
+                } else if (!is.na(err_diff) && err_diff < -0.01) {
+                    "Original staging has superior prediction accuracy"
+                } else "Similar prediction accuracy"
+
+                table$addRow(rowKey = "prediction_error", values = list(
+                    Analysis_Component      = "Prediction Error (OOB)",
+                    Original_System         = if (!is.na(old_err)) as.character(old_err) else "N/A",
+                    New_System              = if (!is.na(new_err)) as.character(new_err) else "N/A",
+                    Forest_Assessment       = err_assessment,
+                    Improvement_Magnitude   = err_magnitude,
+                    Statistical_Evidence    = err_evidence,
+                    Clinical_Recommendation = err_rec
+                ))
+
+                # Row 3 -- Variable Importance (stage variable ranking)
+                old_imp <- NULL
+                new_imp <- NULL
+                if (!is.null(old$variable_importance)) {
+                    idx <- which(old$variable_importance$Variable == "Old_Stage")
+                    if (length(idx) > 0) old_imp <- round(old$variable_importance$Importance[idx[1]], 4)
+                }
+                if (!is.null(new$variable_importance)) {
+                    idx <- which(new$variable_importance$Variable == "New_Stage")
+                    if (length(idx) > 0) new_imp <- round(new$variable_importance$Importance[idx[1]], 4)
+                }
+
+                imp_assessment <- if (!is.null(old_imp) && !is.null(new_imp)) {
+                    if (new_imp > old_imp * 1.1) "New staging has higher predictive importance"
+                    else if (old_imp > new_imp * 1.1) "Original staging has higher importance"
+                    else "Similar variable importance"
+                } else "Variable importance not computed"
+
+                imp_magnitude <- if (!is.null(old_imp) && !is.null(new_imp)) {
+                    diff_imp <- new_imp - old_imp
+                    paste0(ifelse(diff_imp >= 0, "+", ""), round(diff_imp, 4))
+                } else "N/A"
+
+                table$addRow(rowKey = "variable_importance", values = list(
+                    Analysis_Component      = "Stage Variable Importance",
+                    Original_System         = if (!is.null(old_imp)) as.character(old_imp) else "N/A",
+                    New_System              = if (!is.null(new_imp)) as.character(new_imp) else "N/A",
+                    Forest_Assessment       = imp_assessment,
+                    Improvement_Magnitude   = imp_magnitude,
+                    Statistical_Evidence    = "Non-parametric (VIMP)",
+                    Clinical_Recommendation = if (!is.null(old_imp) && !is.null(new_imp) && new_imp > old_imp) {
+                        "New staging captures more survival-relevant information"
+                    } else "Review variable importance rankings"
+                ))
+
+                # Row 4 -- Model Complexity
+                old_nvar <- if (!is.null(old$num_variables)) old$num_variables else NA
+                new_nvar <- if (!is.null(new$num_variables)) new$num_variables else NA
+
+                complexity_assess <- if (!is.na(old_nvar) && !is.na(new_nvar)) {
+                    if (new_nvar > old_nvar) "New model is more complex"
+                    else if (new_nvar < old_nvar) "New model is simpler"
+                    else "Equal complexity"
+                } else "N/A"
+
+                table$addRow(rowKey = "complexity", values = list(
+                    Analysis_Component      = "Model Complexity",
+                    Original_System         = if (!is.na(old_nvar)) paste(old_nvar, "predictors") else "N/A",
+                    New_System              = if (!is.na(new_nvar)) paste(new_nvar, "predictors") else "N/A",
+                    Forest_Assessment       = complexity_assess,
+                    Improvement_Magnitude   = if (!is.na(old_nvar) && !is.na(new_nvar)) {
+                        paste0(ifelse(new_nvar - old_nvar >= 0, "+", ""), new_nvar - old_nvar)
+                    } else "N/A",
+                    Statistical_Evidence    = "Structural comparison",
+                    Clinical_Recommendation = "Prefer simpler model when performance is equivalent"
+                ))
+
+                # Row 5 -- Overall Assessment
+                wins_new <- 0
+                wins_old <- 0
+                if (!is.na(c_diff) && c_diff > 0.01) wins_new <- wins_new + 1
+                if (!is.na(c_diff) && c_diff < -0.01) wins_old <- wins_old + 1
+                if (!is.na(err_diff) && err_diff > 0.01) wins_new <- wins_new + 1
+                if (!is.na(err_diff) && err_diff < -0.01) wins_old <- wins_old + 1
+                if (!is.null(old_imp) && !is.null(new_imp) && new_imp > old_imp * 1.05) wins_new <- wins_new + 1
+                if (!is.null(old_imp) && !is.null(new_imp) && old_imp > new_imp * 1.05) wins_old <- wins_old + 1
+
+                overall <- if (wins_new > wins_old) {
+                    "New staging system is preferred by random forest analysis"
+                } else if (wins_old > wins_new) {
+                    "Original staging system performs better overall"
+                } else "No clear winner; clinical context should guide decision"
+
+                table$addRow(rowKey = "overall", values = list(
+                    Analysis_Component      = "Overall Forest Assessment",
+                    Original_System         = paste(wins_old, "metrics favor"),
+                    New_System              = paste(wins_new, "metrics favor"),
+                    Forest_Assessment       = overall,
+                    Improvement_Magnitude   = paste0(wins_new, " vs ", wins_old),
+                    Statistical_Evidence    = "Ensemble consensus",
+                    Clinical_Recommendation = overall
+                ))
+
             }, error = function(e) {
                 # Silent error handling for table population
             })
@@ -24990,7 +25360,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 original_estimate <- cure_model_results$overall_cure_fraction
                 bootstrap_mean <- mean(bootstrap_estimates, na.rm = TRUE)
                 bootstrap_sd <- sd(bootstrap_estimates, na.rm = TRUE)
-                bootstrap_ci <- quantile(bootstrap_estimates, c(0.025, 0.975), na.rm = TRUE)
+                bootstrap_ci <- quantile(bootstrap_estimates, private$.ciProbs(), na.rm = TRUE)
                 bias <- bootstrap_mean - original_estimate
                 
                 return(list(
@@ -25273,7 +25643,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateCureModelComparison = function(results) {
             tryCatch({
-                table <- self$results$cureModelComparison
+                table <- self$results$cureModelComparisonTable
                 
                 for (result in results) {
                     if (is.list(result) && "Comparison_Metric" %in% names(result)) {
@@ -25342,7 +25712,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 left_var <- jmvcore::toB64(self$options$intervalCensoringLeftTime)
                 right_var <- jmvcore::toB64(self$options$intervalCensoringRightTime)
-                stage_var <- jmvcore::toB64(self$options$explanatory)
+                stage_var <- jmvcore::toB64(self$options$oldStage)
                 
                 if (!left_var %in% names(data) || !right_var %in% names(data)) {
                     stop("Specified interval time variables not found in data.")
@@ -25377,7 +25747,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                          Value = as.character(sum(complete_cases)),
                          Description = "Total observations with complete interval data"),
                     list(Characteristic = "Staging Variable", 
-                         Value = self$options$explanatory,
+                         Value = self$options$oldStage,
                          Description = "Variable defining staging categories"),
                     list(Characteristic = "Number of Stages", 
                          Value = as.character(length(unique(stage))),
@@ -25802,9 +26172,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .performInformativeCensoringAnalysis = function(data, all_results) {
             tryCatch({
                 # Validate required variables
-                time_var <- jmvcore::toB64(self$options$outcome)
-                event_var <- jmvcore::toB64(self$options$outcomeEvent)
-                stage_var <- jmvcore::toB64(self$options$explanatory)
+                time_var <- jmvcore::toB64(self$options$survivalTime)
+                event_var <- jmvcore::toB64(self$options$event)
+                stage_var <- jmvcore::toB64(self$options$oldStage)
                 
                 if (!time_var %in% names(data) || !event_var %in% names(data)) {
                     stop("Time and event variables are required for informative censoring analysis.")
@@ -26480,9 +26850,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .performConcordanceProbabilityAnalysis = function(data, all_results) {
             tryCatch({
                 # Validate required variables
-                time_var <- jmvcore::toB64(self$options$outcome)
-                event_var <- jmvcore::toB64(self$options$outcomeEvent)
-                stage_var <- jmvcore::toB64(self$options$explanatory)
+                time_var <- jmvcore::toB64(self$options$survivalTime)
+                event_var <- jmvcore::toB64(self$options$event)
+                stage_var <- jmvcore::toB64(self$options$oldStage)
                 
                 if (!time_var %in% names(data) || !event_var %in% names(data)) {
                     stop("Time and event variables are required for concordance probability analysis.")
@@ -26598,9 +26968,9 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 stage_systems <- list("Current Staging" = stage)
                 
                 # If we have a comparison staging system, add it
-                if (!is.null(self$options$explanatoryNew) && 
-                    jmvcore::toB64(self$options$explanatoryNew) %in% names(data)) {
-                    new_stage_var <- jmvcore::toB64(self$options$explanatoryNew)
+                if (!is.null(self$options$newStage) && 
+                    jmvcore::toB64(self$options$newStage) %in% names(data)) {
+                    new_stage_var <- jmvcore::toB64(self$options$newStage)
                     new_stage <- as.factor(data[[new_stage_var]][complete.cases(time, event, stage)])
                     stage_systems[["New Staging"]] <- new_stage
                 }
@@ -27418,8 +27788,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             tryCatch({
                 
                 # Check required variables
-                time_var <- self$options$timeVar
-                event_var <- self$options$eventVar
+                time_var <- self$options$survivalTime
+                event_var <- self$options$event
                 old_stage_var <- self$options$oldStage
                 new_stage_var <- self$options$newStage
                 
@@ -27462,8 +27832,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 )
                 
                 # Add secondary endpoints if specified
-                if (!is.null(self$options$wrSecondaryEndpoint) && self$options$wrSecondaryEndpoint != "") {
-                    secondary_var <- self$options$wrSecondaryEndpoint
+                if (!is.null(self$options$winRatioSecondaryEndpoint) && self$options$winRatioSecondaryEndpoint != "") {
+                    secondary_var <- self$options$winRatioSecondaryEndpoint
                     if (secondary_var %in% colnames(complete_data)) {
                         endpoints[["secondary"]] <- list(
                             name = paste("Secondary Endpoint:", secondary_var),
@@ -27529,7 +27899,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 
                 # Perform sensitivity analysis if requested
-                if (self$options$wrSensitivityAnalysis) {
+                if (self$options$winRatioSensitivityAnalysis) {
                     
                     # Vary follow-up time cutoffs
                     time_cutoffs <- c(0.5, 0.75, 1.0, 1.25, 1.5) * max(complete_data[[time_var]], na.rm = TRUE)
@@ -27914,8 +28284,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             tryCatch({
                 
                 # Check required variables
-                time_var <- self$options$timeVar
-                event_var <- self$options$eventVar
+                time_var <- self$options$survivalTime
+                event_var <- self$options$event
                 old_stage_var <- self$options$oldStage
                 new_stage_var <- self$options$newStage
                 cluster_var <- self$options$frailtyClusterVariable
@@ -28378,8 +28748,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             tryCatch({
                 
                 # Check required variables
-                time_var <- self$options$timeVar
-                event_var <- self$options$eventVar
+                time_var <- self$options$survivalTime
+                event_var <- self$options$event
                 old_stage_var <- self$options$oldStage
                 new_stage_var <- self$options$newStage
                 
@@ -28789,7 +29159,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateClinicalUtilityComparison = function(results) {
             tryCatch({
-                table <- self$results$clinicalUtilityComparison
+                table <- self$results$clinicalUtilityComparisonTable
                 
                 for (result in results) {
                     if (is.list(result)) {
@@ -28804,7 +29174,7 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateClinicalUtilityNNT = function(results) {
             tryCatch({
-                table <- self$results$clinicalUtilityNNT
+                table <- self$results$clinicalUtilityNNTTable
                 
                 for (result in results) {
                     if (is.list(result)) {
@@ -28833,8 +29203,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateClinicalUtilityTimeVarying = function(results) {
             tryCatch({
-                table <- self$results$clinicalUtilityTimeVarying
-                
+                table <- self$results$clinicalUtilityTimeVaryingTable
+
                 for (result in results) {
                     if (is.list(result)) {
                         row_key <- paste(result$TimePoint, result$StagingSystem, sep = "_")
@@ -28848,8 +29218,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .populateClinicalUtilityBootstrap = function(results) {
             tryCatch({
-                table <- self$results$clinicalUtilityBootstrap
-                
+                table <- self$results$clinicalUtilityBootstrapTable
+
                 for (result in results) {
                     if (is.list(result)) {
                         row_key <- paste(result$Metric, result$StagingSystem, sep = "_")

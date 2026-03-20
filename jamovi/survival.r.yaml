@@ -1500,14 +1500,15 @@ items:
           - outcome
 
 refs:
-    - finalfit
+    - ClinicoPathJamoviModule
     - survival
     - survminer
+    - finalfit
+    - flexsurv
+    - cmprsk
+    - KMunicate
     - survivaltutorial
     - survivalrwnahhas
     - survivalrviews
     - appliedsurvivalanalysisR
-    - ClinicoPathJamoviModule
-    - flexsurv
-
 ...

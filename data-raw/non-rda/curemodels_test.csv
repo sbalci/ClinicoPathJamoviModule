@@ -1,0 +1,251 @@
+"PatientID","FollowUpMonths","Recurrence","RecurrenceFactor","Age","Sex","Treatment","Stage","TumorSize","PerformanceStatus","BackgroundHazard"
+"CM-0001",70.3,0,"Censored",68,"Male","Surgery+Adjuvant","I",5.4,0,0.000964
+"CM-0002",19.6,0,"Censored",50,"Female","Surgery+Adjuvant","III",3.3,1,0.000207
+"CM-0003",2.8,1,"Recurrence",64,"Female","Surgery Only","III",4.2,1,0.000633
+"CM-0004",8.3,1,"Recurrence",61,"Male","Surgery+Adjuvant","III",4.2,0,0.00055
+"CM-0005",42,0,"Censored",55,"Male","Surgery+Adjuvant","II",2.8,1,0.000341
+"CM-0006",61.4,0,"Censored",35,"Male","Surgery+Adjuvant","I",1.2,1,6.9e-05
+"CM-0007",101.3,0,"Censored",NA,"Male","Surgery+Adjuvant","I",2.5,1,0.000314
+"CM-0008",0.9,1,"Recurrence",51,"Female","Surgery+Adjuvant","III",3.7,1,0.000224
+"CM-0009",64.6,0,"Censored",63,"Female","Surgery Only","III",3.7,0,0.000584
+"CM-0010",44.8,1,"Recurrence",57,"Female","Surgery+Adjuvant","II",1.4,2,0.000362
+"CM-0011",17.4,1,"Recurrence",58,"Male","Surgery+Adjuvant","III",3.4,1,0.000433
+"CM-0012",65.1,1,"Recurrence",54,"Male","Surgery+Adjuvant","I",1.8,1,0.000314
+"CM-0013",8.8,1,"Recurrence",60,"Male","Surgery Only","III",4.6,1,0.000508
+"CM-0014",13.8,1,"Recurrence",60,"Male","Surgery Only","III",3.6,1,0.000508
+"CM-0015",81.8,0,"Censored",35,"Female","Surgery+Adjuvant","II",2.8,1,6.2e-05
+"CM-0016",110.5,0,"Censored",77,"Male","Surgery+Adjuvant","III",4.4,2,0.00198
+"CM-0017",15.9,1,"Recurrence",69,"Male","Surgery Only","III",2.2,0,0.001044
+"CM-0018",11,1,"Recurrence",64,"Female","Surgery Only","I",5.2,1,0.000633
+"CM-0019",86,0,"Censored",53,"Male","Surgery+Adjuvant","I",2.3,0,0.00029
+"CM-0020",78.3,0,"Censored",70,"Female","Surgery+Adjuvant","II",0.8,1,0.001023
+"CM-0021",23.8,1,"Recurrence",NA,"Female","Surgery+Adjuvant","III",2.1,2,0.000392
+"CM-0022",39.8,1,"Recurrence",60,"Female","Surgery Only","II",3,1,0.00046
+"CM-0023",4.5,1,"Recurrence",47,"Female","Surgery Only","I",3.2,0,0.000162
+"CM-0024",28.6,1,"Recurrence",78,"Female","Surgery+Adjuvant","III",2.3,0,0.00194
+"CM-0025",0.9,1,"Recurrence",63,"Male","Surgery+Adjuvant","II",2.9,1,0.000646
+"CM-0026",23.6,1,"Recurrence",83,"Female","Surgery+Adjuvant","III",3.9,0,0.002895
+"CM-0027",28.2,1,"Recurrence",81,"Male","Surgery+Adjuvant","II",3.9,0,0.002726
+"CM-0028",23,1,"Recurrence",63,"Male","Surgery Only","I",3.7,2,0.000646
+"CM-0029",33.5,1,"Recurrence",69,"Male","Surgery Only","I",2.1,2,0.001044
+"CM-0030",14,1,"Recurrence",81,"Male","Surgery Only","III",3.8,0,0.002726
+"CM-0031",53,1,"Recurrence",56,"Male","Surgery+Adjuvant","II",5.6,2,0.000369
+"CM-0032",11.7,1,"Recurrence",64,"Male","Surgery Only","III",2.3,0,7e-04
+"CM-0033",8.8,1,"Recurrence",59,"Male","Surgery Only","II",6.4,1,0.000469
+"CM-0034",11.1,1,"Recurrence",66,"Male","Surgery+Adjuvant","II",4.8,1,0.000821
+"CM-0035",83.5,0,"Censored",64,"Female","Surgery+Adjuvant","I",1.6,1,0.000633
+"CM-0036",4.7,1,"Recurrence",75,"Male","Surgery Only","I",2.1,1,0.001687
+"CM-0037",32.3,1,"Recurrence",69,"Female","Surgery Only","II",NA,0,0.000944
+"CM-0038",10.5,1,"Recurrence",52,"Male","Surgery+Adjuvant","III",3.5,1,0.000268
+"CM-0039",24.1,1,"Recurrence",68,"Male","Surgery+Adjuvant","II",2.1,2,0.000964
+"CM-0040",5.8,1,"Recurrence",53,"Male","Surgery+Adjuvant","III",2.5,1,0.00029
+"CM-0041",37.5,1,"Recurrence",49,"Female","Surgery+Adjuvant","II",4.1,1,0.000191
+"CM-0042",96.6,0,"Censored",71,"Female","Surgery+Adjuvant","II",3.9,1,0.001108
+"CM-0043",105.7,0,"Censored",49,"Male","Surgery Only","I",2.4,0,0.000211
+"CM-0044",2.3,1,"Recurrence",65,"Female","Surgery+Adjuvant","II",2.8,0,0.000686
+"CM-0045",15.3,1,"Recurrence",53,"Male","Surgery+Adjuvant","II",2.1,0,0.00029
+"CM-0046",18.8,1,"Recurrence",78,"Male","Surgery Only","III",0.5,0,0.002144
+"CM-0047",9.9,1,"Recurrence",70,"Female","Surgery Only","III",2.6,0,0.001023
+"CM-0048",49.3,0,"Censored",58,"Male","Surgery+Adjuvant","II",2.5,0,0.000433
+"CM-0049",6.7,1,"Recurrence",71,"Female","Surgery+Adjuvant","II",3.3,0,0.001108
+"CM-0050",30,1,"Recurrence",67,"Male","Surgery+Adjuvant","I",2,2,0.000889
+"CM-0051",7.2,1,"Recurrence",49,"Female","Surgery Only","III",4.2,1,0.000191
+"CM-0052",39.3,0,"Censored",60,"Male","Surgery+Adjuvant","I",1.4,0,0.000508
+"CM-0053",38.1,0,"Censored",52,"Female","Surgery Only","II",5.9,0,0.000242
+"CM-0054",23.7,1,"Recurrence",67,"Male","Surgery Only","II",1.8,0,0.000889
+"CM-0055",49.6,0,"Censored",55,"Male","Surgery+Adjuvant","III",4.2,0,0.000341
+"CM-0056",2.5,1,"Recurrence",59,"Male","Surgery Only","II",6.4,0,0.000469
+"CM-0057",14.4,1,"Recurrence",48,"Male","Surgery+Adjuvant","II",2.4,1,0.000195
+"CM-0058",104.8,0,"Censored",51,"Female","Surgery Only","II",2.9,2,0.000224
+"CM-0059",19.7,1,"Recurrence",63,"Male","Surgery+Adjuvant","I",2.5,1,0.000646
+"CM-0060",45.1,0,"Censored",51,"Male","Surgery Only","I",3.7,1,0.000247
+"CM-0061",19.3,1,"Recurrence",60,"Female","Surgery+Adjuvant","III",4.3,1,0.00046
+"CM-0062",11.8,1,"Recurrence",64,"Female","Surgery Only","III",1.2,1,0.000633
+"CM-0063",15.4,1,"Recurrence",60,"Female","Surgery Only","II",2,0,0.00046
+"CM-0064",14.6,1,"Recurrence",59,"Male","Surgery Only","III",1.4,0,0.000469
+"CM-0065",49.8,0,"Censored",43,"Male","Surgery Only","I",4.2,1,0.00013
+"CM-0066",2,1,"Recurrence",59,"Male","Surgery Only","II",4.1,0,0.000469
+"CM-0067",39.5,1,"Recurrence",42,"Male","Surgery+Adjuvant","III",2.4,0,0.00012
+"CM-0068",48.6,1,"Recurrence",75,"Female","Surgery+Adjuvant","II",2,0,0.001526
+"CM-0069",37,0,"Censored",51,"Female","Surgery+Adjuvant","III",1,0,0.000224
+"CM-0070",17.4,1,"Recurrence",64,"Male","Surgery Only","II",4.5,2,7e-04
+"CM-0071",56.1,1,"Recurrence",68,"Male","Surgery Only","I",2.4,2,0.000964
+"CM-0072",66.1,0,"Censored",62,"Female","Surgery+Adjuvant","I",4.6,0,0.000539
+"CM-0073",13.7,1,"Recurrence",77,"Male","Surgery+Adjuvant","III",6.5,0,0.00198
+"CM-0074",12.2,1,"Recurrence",53,"Male","Surgery+Adjuvant","I",5.5,1,0.00029
+"CM-0075",73.6,0,"Censored",67,"Male","Surgery Only","I",2.3,1,0.000889
+"CM-0076",4.3,1,"Recurrence",51,"Male","Surgery Only","III",5.2,1,0.000247
+"CM-0077",35.9,1,"Recurrence",85,"Female","Surgery Only","II",2.5,2,0.003397
+"CM-0078",6.3,1,"Recurrence",70,"Male","Surgery+Adjuvant","III",3.9,0,0.001131
+"CM-0079",7.1,1,"Recurrence",58,"Male","Surgery+Adjuvant","III",3.7,0,0.000433
+"CM-0080",11.5,1,"Recurrence",71,"Female","Surgery+Adjuvant","III",4.3,1,0.001108
+"CM-0081",19.1,1,"Recurrence",49,"Female","Surgery+Adjuvant","III",3.5,0,0.000191
+"CM-0082",20,1,"Recurrence",79,"Female","Surgery+Adjuvant","I",3.9,2,0.002102
+"CM-0083",26.7,1,"Recurrence",49,"Male","Surgery Only","I",4.4,0,0.000211
+"CM-0084",14.5,1,"Recurrence",45,"Male","Surgery Only","II",0.5,1,0.000153
+"CM-0085",63.2,0,"Censored",61,"Female","Surgery Only","I",3.1,0,0.000498
+"CM-0086",24.2,1,"Recurrence",71,"Male","Surgery Only","I",4.1,0,0.001225
+"CM-0087",31.8,1,"Recurrence",62,"Female","Surgery Only","I",3.8,0,0.000539
+"CM-0088",20.2,1,"Recurrence",54,"Female","Surgery Only","I",3.7,0,0.000284
+"CM-0089",8.3,1,"Recurrence",75,"Male","Surgery+Adjuvant","II",6.1,1,0.001687
+"CM-0090",20.7,1,"Recurrence",85,"Male","Surgery+Adjuvant","I",3.3,0,0.003754
+"CM-0091",24.3,1,"Recurrence",40,"Female","Surgery Only","II",3.6,0,9.3e-05
+"CM-0092",73,0,"Censored",78,"Male","Surgery Only","I",3.3,0,0.002144
+"CM-0093",2.8,1,"Recurrence",57,"Male","Surgery+Adjuvant","III",7,0,4e-04
+"CM-0094",62.1,0,"Censored",73,"Male","Surgery Only","III",2.6,0,0.001437
+"CM-0095",14.2,1,"Recurrence",42,"Male","Surgery Only","II",5.1,0,0.00012
+"CM-0096",100.7,0,"Censored",59,"Male","Surgery+Adjuvant","II",5.2,1,0.000469
+"CM-0097",16.5,1,"Recurrence",NA,"Male","Surgery+Adjuvant","III",2.4,1,0.000247
+"CM-0098",9.7,1,"Recurrence",57,"Female","Surgery Only","II",5.4,2,0.000362
+"CM-0099",19.5,1,"Recurrence",50,"Male","Surgery+Adjuvant","II",4.4,1,0.000228
+"CM-0100",49.1,0,"Censored",66,"Female","Surgery+Adjuvant","I",5,0,0.000743
+"CM-0101",15.4,1,"Recurrence",75,"Male","Surgery Only","I",0.9,0,0.001687
+"CM-0102",70.5,0,"Censored",57,"Female","Surgery+Adjuvant","II",2.3,1,0.000362
+"CM-0103",3.7,1,"Recurrence",59,"Male","Surgery+Adjuvant","III",2.9,1,0.000469
+"CM-0104",42.6,1,"Recurrence",50,"Female","Surgery+Adjuvant","III",3.8,2,0.000207
+"CM-0105",9.5,1,"Recurrence",73,"Male","Surgery+Adjuvant","I",3.4,1,0.001437
+"CM-0106",31.8,1,"Recurrence",68,"Male","Surgery Only","II",3.3,0,0.000964
+"CM-0107",5.3,1,"Recurrence",45,"Female","Surgery Only","III",4.4,1,0.000138
+"CM-0108",4.2,1,"Recurrence",78,"Female","Surgery Only","I",4.9,0,0.00194
+"CM-0109",82.6,0,"Censored",49,"Male","Surgery+Adjuvant","II",6,2,0.000211
+"CM-0110",5.4,1,"Recurrence",50,"Female","Surgery+Adjuvant","III",4.4,1,0.000207
+"CM-0111",50.1,0,"Censored",46,"Male","Surgery+Adjuvant","I",1.8,0,0.000166
+"CM-0112",14.8,1,"Recurrence",49,"Male","Surgery+Adjuvant","III",1.4,0,0.000211
+"CM-0113",12.9,1,"Recurrence",58,"Male","Surgery Only","II",5.5,1,0.000433
+"CM-0114",73.5,0,"Censored",68,"Female","Surgery+Adjuvant","I",2.9,2,0.000872
+"CM-0115",1.6,1,"Recurrence",54,"Female","Surgery Only","II",4,2,0.000284
+"CM-0116",73.7,0,"Censored",60,"Female","Surgery+Adjuvant","III",4.1,0,0.00046
+"CM-0117",23.9,1,"Recurrence",59,"Female","Surgery+Adjuvant","II",4.5,0,0.000424
+"CM-0118",85.6,0,"Censored",75,"Female","Surgery+Adjuvant","III",2.9,0,0.001526
+"CM-0119",8.2,1,"Recurrence",85,"Female","Surgery Only","I",3,1,0.003397
+"CM-0120",79.9,0,"Censored",50,"Male","Surgery Only","II",4.2,0,0.000228
+"CM-0121",52.8,0,"Censored",83,"Male","Surgery+Adjuvant","III",NA,0,0.003199
+"CM-0122",63.5,0,"Censored",85,"Male","Surgery Only","II",3.2,2,0.003754
+"CM-0123",2.1,1,"Recurrence",65,"Male","Surgery+Adjuvant","I",2.6,0,0.000758
+"CM-0124",28.1,1,"Recurrence",72,"Female","Surgery+Adjuvant","III",1.9,2,0.001201
+"CM-0125",3.5,1,"Recurrence",43,"Female","Surgery+Adjuvant","II",3.7,1,0.000118
+"CM-0126",41.8,0,"Censored",67,"Male","Surgery+Adjuvant","I",4.2,2,0.000889
+"CM-0127",101.1,0,"Censored",56,"Female","Surgery+Adjuvant","II",3.6,0,0.000334
+"CM-0128",18.3,1,"Recurrence",60,"Female","Surgery+Adjuvant","III",4,0,0.00046
+"CM-0129",5.9,1,"Recurrence",68,"Male","Surgery Only","III",3.4,2,0.000964
+"CM-0130",11.7,1,"Recurrence",73,"Female","Surgery+Adjuvant","III",3.2,0,0.001301
+"CM-0131",43,0,"Censored",61,"Male","Surgery Only","I",1.1,0,0.00055
+"CM-0132",4.1,1,"Recurrence",85,"Male","Surgery Only","III",5.3,2,0.003754
+"CM-0133",61.3,0,"Censored",NA,"Male","Surgery Only","II",5.7,0,0.000964
+"CM-0134",106.2,0,"Censored",60,"Female","Surgery+Adjuvant","II",4.8,0,0.00046
+"CM-0135",90.5,0,"Censored",67,"Male","Surgery+Adjuvant","I",4.4,0,0.000889
+"CM-0136",17.6,1,"Recurrence",61,"Female","Surgery+Adjuvant","II",3.6,0,0.000498
+"CM-0137",0.6,1,"Recurrence",50,"Female","Surgery+Adjuvant","III",2.9,0,0.000207
+"CM-0138",9.1,1,"Recurrence",68,"Female","Surgery+Adjuvant","II",3.8,2,0.000872
+"CM-0139",9.4,1,"Recurrence",72,"Female","Surgery Only","III",2.7,0,0.001201
+"CM-0140",10,1,"Recurrence",66,"Male","Surgery+Adjuvant","III",4.6,2,0.000821
+"CM-0141",67.8,0,"Censored",66,"Female","Surgery+Adjuvant","I",4.1,1,0.000743
+"CM-0142",14,1,"Recurrence",64,"Female","Surgery+Adjuvant","III",3.5,1,0.000633
+"CM-0143",12.8,1,"Recurrence",71,"Female","Surgery Only","II",3.1,0,0.001108
+"CM-0144",105.8,0,"Censored",48,"Male","Surgery+Adjuvant","I",4,2,0.000195
+"CM-0145",77.4,0,"Censored",NA,"Male","Surgery+Adjuvant","I",4.6,1,0.001687
+"CM-0146",9.6,1,"Recurrence",52,"Female","Surgery Only","I",5.6,1,0.000242
+"CM-0147",21.5,1,"Recurrence",66,"Female","Surgery Only","I",NA,0,0.000743
+"CM-0148",60.8,0,"Censored",71,"Male","Surgery+Adjuvant","I",2.6,2,0.001225
+"CM-0149",79.5,0,"Censored",65,"Female","Surgery+Adjuvant","I",6.1,0,0.000686
+"CM-0150",10.6,1,"Recurrence",45,"Male","Surgery+Adjuvant","II",3.3,0,0.000153
+"CM-0151",6.5,1,"Recurrence",62,"Female","Surgery Only","III",5.9,0,0.000539
+"CM-0152",17.2,1,"Recurrence",66,"Female","Surgery Only","II",2.3,1,0.000743
+"CM-0153",4,1,"Recurrence",73,"Female","Surgery Only","III",5.3,0,0.001301
+"CM-0154",66.4,0,"Censored",68,"Male","Surgery+Adjuvant","II",2.2,1,0.000964
+"CM-0155",11.5,1,"Recurrence",68,"Male","Surgery Only","III",2.2,1,0.000964
+"CM-0156",14.4,1,"Recurrence",75,"Male","Surgery+Adjuvant","I",3.9,1,0.001687
+"CM-0157",50.6,0,"Censored",54,"Female","Surgery+Adjuvant","I",3.1,2,0.000284
+"CM-0158",41.7,1,"Recurrence",55,"Male","Surgery Only","II",1.8,1,0.000341
+"CM-0159",8.4,1,"Recurrence",62,"Female","Surgery Only","I",1.8,0,0.000539
+"CM-0160",17.4,1,"Recurrence",66,"Female","Surgery+Adjuvant","II",4,1,0.000743
+"CM-0161",34.6,1,"Recurrence",77,"Male","Surgery Only","II",1.9,0,0.00198
+"CM-0162",79.8,0,"Censored",52,"Male","Surgery+Adjuvant","I",5,0,0.000268
+"CM-0163",8.7,1,"Recurrence",52,"Male","Surgery Only","I",5.4,0,0.000268
+"CM-0164",36,0,"Censored",71,"Male","Surgery+Adjuvant","I",1.7,1,0.001225
+"CM-0165",43.3,0,"Censored",58,"Male","Surgery Only","I",0.9,1,0.000433
+"CM-0166",18.4,1,"Recurrence",60,"Male","Surgery Only","III",0.5,1,0.000508
+"CM-0167",48.5,0,"Censored",69,"Male","Surgery Only","I",4.7,0,0.001044
+"CM-0168",19.9,1,"Recurrence",55,"Female","Surgery+Adjuvant","II",1.9,2,0.000308
+"CM-0169",26.6,1,"Recurrence",54,"Male","Surgery Only","I",5,2,0.000314
+"CM-0170",24.9,1,"Recurrence",59,"Female","Surgery+Adjuvant","III",3.2,0,0.000424
+"CM-0171",3.5,1,"Recurrence",58,"Female","Surgery Only","III",1.5,0,0.000392
+"CM-0172",41.4,0,"Censored",54,"Female","Surgery Only","III",2.2,0,0.000284
+"CM-0173",45,1,"Recurrence",72,"Male","Surgery Only","II",3.6,0,0.001327
+"CM-0174",3.3,1,"Recurrence",57,"Male","Surgery Only","III",6.5,1,4e-04
+"CM-0175",2.1,1,"Recurrence",63,"Male","Surgery Only","III",NA,0,0.000646
+"CM-0176",78.5,0,"Censored",64,"Female","Surgery+Adjuvant","II",1.1,0,0.000633
+"CM-0177",4,1,"Recurrence",42,"Female","Surgery Only","II",2.7,1,0.000109
+"CM-0178",15.4,1,"Recurrence",66,"Female","Surgery Only","III",1.7,2,0.000743
+"CM-0179",4.2,1,"Recurrence",79,"Female","Surgery Only","II",1.9,0,0.002102
+"CM-0180",9.3,1,"Recurrence",62,"Female","Surgery+Adjuvant","III",4.6,1,0.000539
+"CM-0181",18,1,"Recurrence",53,"Female","Surgery Only","II",2.8,1,0.000263
+"CM-0182",15.4,1,"Recurrence",76,"Male","Surgery+Adjuvant","III",5.1,0,0.001827
+"CM-0183",18.5,1,"Recurrence",65,"Female","Surgery+Adjuvant","III",3.9,2,0.000686
+"CM-0184",72.7,0,"Censored",73,"Male","Surgery+Adjuvant","II",3.6,1,0.001437
+"CM-0185",49.5,1,"Recurrence",64,"Female","Surgery+Adjuvant","I",6,0,0.000633
+"CM-0186",15.1,1,"Recurrence",69,"Male","Surgery Only","II",2.7,0,0.001044
+"CM-0187",9.3,1,"Recurrence",78,"Male","Surgery Only","III",4,1,0.002144
+"CM-0188",8.8,1,"Recurrence",69,"Male","Surgery Only","III",8.6,0,0.001044
+"CM-0189",81.1,0,"Censored",66,"Male","Surgery Only","II",3,0,0.000821
+"CM-0190",45.6,0,"Censored",55,"Male","Surgery+Adjuvant","III",6.2,0,0.000341
+"CM-0191",55.7,0,"Censored",68,"Female","Surgery+Adjuvant","III",1.1,2,0.000872
+"CM-0192",20.8,1,"Recurrence",57,"Male","Surgery Only","III",3.9,1,4e-04
+"CM-0193",7.8,0,"Censored",85,"Female","Surgery+Adjuvant","II",2.7,0,0.003397
+"CM-0194",66.4,0,"Censored",66,"Male","Surgery Only","II",1.2,0,0.000821
+"CM-0195",23.4,1,"Recurrence",53,"Female","Surgery+Adjuvant","III",2.6,0,0.000263
+"CM-0196",9.8,1,"Recurrence",80,"Female","Surgery Only","III",7,0,0.002277
+"CM-0197",7.1,1,"Recurrence",57,"Male","Surgery+Adjuvant","II",3.2,1,4e-04
+"CM-0198",60.7,0,"Censored",45,"Male","Surgery+Adjuvant","I",2.7,0,0.000153
+"CM-0199",65,0,"Censored",NA,"Female","Surgery+Adjuvant","II",5.1,1,0.000224
+"CM-0200",93.2,0,"Censored",62,"Male","Surgery+Adjuvant","III",2.5,0,0.000596
+"CM-0201",71.7,0,"Censored",57,"Female","Surgery Only","I",3.9,1,0.000362
+"CM-0202",27.8,1,"Recurrence",67,"Male","Surgery+Adjuvant","II",3.9,0,0.000889
+"CM-0203",59.5,0,"Censored",59,"Male","Surgery+Adjuvant","III",2.9,1,0.000469
+"CM-0204",17.1,1,"Recurrence",42,"Male","Surgery+Adjuvant","II",2.9,0,0.00012
+"CM-0205",13.6,1,"Recurrence",59,"Female","Surgery Only","III",6,0,0.000424
+"CM-0206",24.6,1,"Recurrence",81,"Male","Surgery+Adjuvant","I",3.3,0,0.002726
+"CM-0207",16.3,1,"Recurrence",57,"Male","Surgery+Adjuvant","III",6.8,0,4e-04
+"CM-0208",19.3,1,"Recurrence",56,"Female","Surgery Only","I",3.2,2,0.000334
+"CM-0209",34.9,1,"Recurrence",61,"Male","Surgery+Adjuvant","II",3.1,0,0.00055
+"CM-0210",28.8,1,"Recurrence",80,"Male","Surgery+Adjuvant","II",2.6,2,0.002516
+"CM-0211",21.7,1,"Recurrence",52,"Male","Surgery Only","III",0.5,2,0.000268
+"CM-0212",9,1,"Recurrence",71,"Female","Surgery Only","III",0.7,1,0.001108
+"CM-0213",31.4,1,"Recurrence",55,"Female","Surgery Only","II",3.4,0,0.000308
+"CM-0214",15.4,1,"Recurrence",NA,"Male","Surgery+Adjuvant","II",2.4,0,0.000433
+"CM-0215",51,0,"Censored",58,"Male","Surgery+Adjuvant","II",NA,0,0.000433
+"CM-0216",71.5,0,"Censored",71,"Female","Surgery Only","II",4,0,0.001108
+"CM-0217",9.7,1,"Recurrence",69,"Male","Surgery+Adjuvant","II",2.7,1,0.001044
+"CM-0218",75.4,0,"Censored",NA,"Male","Surgery+Adjuvant","I",5.1,0,0.001557
+"CM-0219",75.6,0,"Censored",74,"Male","Surgery Only","I",2.4,0,0.001557
+"CM-0220",18.4,1,"Recurrence",85,"Female","Surgery+Adjuvant","II",3.8,0,0.003397
+"CM-0221",2.8,1,"Recurrence",63,"Female","Surgery Only","I",4.5,0,0.000584
+"CM-0222",72.4,1,"Recurrence",35,"Male","Surgery Only","II",3.6,0,6.9e-05
+"CM-0223",10,1,"Recurrence",56,"Male","Surgery Only","II",3.2,1,0.000369
+"CM-0224",62.8,0,"Censored",53,"Female","Surgery Only","II",3.1,2,0.000263
+"CM-0225",11.1,1,"Recurrence",59,"Male","Surgery Only","I",2.9,0,0.000469
+"CM-0226",64.4,0,"Censored",75,"Female","Surgery+Adjuvant","II",5.7,0,0.001526
+"CM-0227",18.8,1,"Recurrence",56,"Male","Surgery+Adjuvant","III",3.5,1,0.000369
+"CM-0228",17.8,1,"Recurrence",53,"Male","Surgery Only","I",2.1,0,0.00029
+"CM-0229",3.9,1,"Recurrence",67,"Female","Surgery+Adjuvant","II",2.7,0,0.000805
+"CM-0230",13.4,1,"Recurrence",70,"Male","Surgery+Adjuvant","III",2,2,0.001131
+"CM-0231",12.6,1,"Recurrence",59,"Female","Surgery Only","II",4.2,0,0.000424
+"CM-0232",74.4,0,"Censored",67,"Male","Surgery+Adjuvant","I",3.1,1,0.000889
+"CM-0233",14,1,"Recurrence",67,"Male","Surgery Only","III",3.9,1,0.000889
+"CM-0234",49.6,1,"Recurrence",66,"Male","Surgery+Adjuvant","III",4,0,0.000821
+"CM-0235",10.7,1,"Recurrence",56,"Male","Surgery+Adjuvant","II",0.5,0,0.000369
+"CM-0236",5.4,1,"Recurrence",70,"Female","Surgery+Adjuvant","II",2.2,1,0.001023
+"CM-0237",17.8,1,"Recurrence",37,"Female","Surgery Only","III",6.7,0,7.3e-05
+"CM-0238",50.4,1,"Recurrence",69,"Male","Surgery Only","I",3.8,1,0.001044
+"CM-0239",26.9,1,"Recurrence",66,"Female","Surgery+Adjuvant","III",3.3,1,0.000743
+"CM-0240",8.4,1,"Recurrence",85,"Female","Surgery+Adjuvant","II",4.3,1,0.003397
+"CM-0241",5.2,1,"Recurrence",65,"Female","Surgery+Adjuvant","I",4.3,2,0.000686
+"CM-0242",99.1,0,"Censored",63,"Male","Surgery+Adjuvant","I",1.5,0,0.000646
+"CM-0243",87.4,0,"Censored",75,"Female","Surgery Only","II",3.5,0,0.001526
+"CM-0244",11.6,1,"Recurrence",70,"Male","Surgery+Adjuvant","II",4.6,0,0.001131
+"CM-0245",6,1,"Recurrence",62,"Female","Surgery+Adjuvant","II",3.8,1,0.000539
+"CM-0246",9.4,1,"Recurrence",62,"Male","Surgery+Adjuvant","II",3.1,0,0.000596
+"CM-0247",62.4,0,"Censored",64,"Male","Surgery+Adjuvant","III",3.2,1,7e-04
+"CM-0248",4.3,1,"Recurrence",50,"Female","Surgery Only","III",1.9,0,0.000207
+"CM-0249",10.1,1,"Recurrence",76,"Female","Surgery+Adjuvant","III",3,2,0.001653
+"CM-0250",26.3,1,"Recurrence",56,"Female","Surgery+Adjuvant","II",4.1,2,0.000334

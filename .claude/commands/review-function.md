@@ -1,6 +1,6 @@
 ---
 name: review-function
-description: Detailed code review of a specific jamovi function
+description: Code review a jamovi function: statistical correctness, clinical readiness, code quality, performance, maintainability
 interactive: true
 args:
   function_name:
@@ -8,11 +8,21 @@ args:
     required: true
     autocomplete: functions
 usage: /review-function <function_name>
+examples:
+  /review-function tableone
+  /review-function survival
+  /review-function decision
 ---
 
 _Note: This command intentionally avoids emoji and uses UI toggles to control visibility of natural‑language outputs._
 
 # Detailed Jamovi Function Code Review
+
+**Consult these guides** for correct patterns:
+- `vignettes/jamovi_module_patterns_guide.md` -- comprehensive patterns
+- `vignettes/jamovi_b_R_guide.md` -- backend implementation
+- `vignettes/jamovi_tables_guide.md`, `jamovi_plots_guide.md` -- output patterns
+- `vignettes/jamovi_i18n_guide.md` -- internationalization checklist
 
 You are an expert R package and jamovi developer, and an expert biostatistician working closely with pathologists and clinicians. You are conducting a thorough, critical review of the jamovi function `$ARGUMENTS`, focusing on mathematical and statistical correctness, clinical readiness, code quality, best practices, performance, and maintainability.
 
@@ -301,42 +311,6 @@ children:
             label: "Show Explanations (educational notes)"
 ```
 
-# .u.yaml (labels & tooltips)
-
-```yaml
-children:
-  - type: ComboBox
-    name: test
-    label: "Group comparison test"
-    options:
-      - label: "t‑test (means)"
-        value: ttest
-      - label: "Mann–Whitney U (medians)"
-        value: wilcox
-      - label: "Welch t‑test (unequal variances)"
-        value: welch
-  - type: CheckBox
-    name: assume_equal_var
-    label: "Assume equal variances"
-
-
-  - type: CollapseBox
-    label: Output Options
-    collapsed: true
-    children:
-      - type: Label
-        label: Analysis Output
-        fitToGrid: true
-        children:
-          # When unchecked, Summary/Explanations sections must not be rendered.
-          - type: CheckBox
-            name: showSummary
-            label: "Show Summary (natural‑language)"
-          - type: CheckBox
-            name: showExplanations
-            label: "Show Explanations (educational notes)"
-```
-
 ```yaml
 # .r.yaml (report sentences)
 items:
@@ -388,3 +362,11 @@ if (isTRUE(self$options$showExplanations)) {
   self$results$explanations$setVisible(FALSE)
 }
 ```
+
+---
+
+## Related Commands
+
+- `/check-function` -- Validate and auto-fix function issues with preset profiles
+- `/fix-function` -- Apply targeted fixes for specific issues
+- `/document-function` -- Generate comprehensive documentation suite

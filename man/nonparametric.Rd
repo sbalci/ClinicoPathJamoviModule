@@ -19,6 +19,7 @@ nonparametric(
   post_hoc = TRUE,
   post_hoc_method = "dunn",
   p_adjustment = "holm",
+  globalTestCount = 1,
   robust_method = "standard",
   trim_proportion = 0.1,
   winsorize_proportion = 0.1,
@@ -108,6 +109,11 @@ significant.}
 \item{post_hoc_method}{Method for post hoc pairwise comparisons.}
 
 \item{p_adjustment}{Method for correcting p-values in multiple comparisons.}
+
+\item{globalTestCount}{Total number of independent tests performed across
+the entire study (for global familywise error rate control). When > 1, all
+reported p-values are additionally multiplied by this count (Bonferroni).
+Set to 1 (default) to disable global correction.}
 
 \item{robust_method}{Method for robust rank-based estimation.}
 

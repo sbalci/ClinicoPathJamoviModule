@@ -99,6 +99,10 @@ children:
             name: p_adjustment
             label: P-value Adjustment
             enable: (post_hoc)
+          - type: TextBox
+            name: globalTestCount
+            label: Total Tests in Study (Global Bonferroni)
+            format: number
   - type: CollapseBox
     label: Robust Methods and Advanced Options
     collapsed: true

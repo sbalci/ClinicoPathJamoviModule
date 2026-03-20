@@ -1,6 +1,6 @@
 ---
 name: check-function
-description: Run actionable checks and fixes for a jamovi function with preset profiles
+description: Validate, lint, and auto-fix a jamovi function. Checks schema wiring, variable safety, outputs, UI. Profiles: quick/standard/production/release
 interactive: true
 args:
   function_name:
@@ -78,6 +78,10 @@ examples:
 ---
 
 # Jamovi Function Check & Fixer with Preset Profiles
+
+**When to use this command:** Day-to-day development. Runs checks AND applies fixes based on preset profiles. For comprehensive audit-only analysis (notices audit, external docs comparison, differential runs), use `/check-function-full`.
+
+**Consult these guides** for correct patterns: `vignettes/jamovi_module_patterns_guide.md` (comprehensive), `vignettes/jamovi_a_yaml_guide.md`, `vignettes/jamovi_b_R_guide.md`, `vignettes/jamovi_r_yaml_guide.md`, `vignettes/jamovi_u_yaml_guide.md`.
 
 Perform concrete checks and apply fixes for `$ARGUMENTS` across `.a.yaml`, `.b.R`, `.r.yaml`, `.u.yaml`. Minimize prose; output concise checklists, diffs, and exact edits.
 
@@ -312,3 +316,11 @@ self$results$welcome$setContent("<div class='jmv-welcome'><h3>Start by selecting
 - [ ] Empty dataset handling
 - [ ] prepare()/document() pass cleanly
 
+---
+
+## Related Commands
+
+- `/fix-function` -- Apply targeted fixes for specific issues
+- `/fix-notices` -- Add or fix user-facing warning/error notices
+- `/check-function-full` -- Deep audit with notices, external docs, differential runs
+- `/check-module` -- Batch check all functions in a module

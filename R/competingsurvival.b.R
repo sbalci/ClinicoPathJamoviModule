@@ -8,10 +8,26 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = competingsurvivalBase,
     private = list(
 
+        # TODO: Validation -- Test against Klein & Moeschberger BMT dataset
+        # to verify CIF estimates, Gray's test p-values, and Fine-Gray HRs
+        # match published reference values. Priority: HIGH before moving
+        # from Drafts to production menu.
+
         .escapeVar = function(x) {
             # Escape variable names for safe use (handle spaces, special chars)
             if (is.null(x) || length(x) == 0) return(x)
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+        },
+
+        .init = function() {
+            if (is.null(self$options$overalltime) ||
+                is.null(self$options$outcome)) {
+                # Welcome message handled in .run()
+                return()
+            }
+
+            # Clear welcome message when variables are selected
+            self$results$todo$setContent("")
         },
 
         .getData = function() {
@@ -167,7 +183,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             )
             
             # Create survival object
-            dependent_os <- paste0("Surv(", mytime, ", status_os)")
+            dependent_os <- paste0("Surv(`", mytime, "`, status_os)")
             
             # Perform survival analysis
             tryCatch({
@@ -206,7 +222,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             )
             
             # Create survival object
-            dependent_dss <- paste0("Surv(", mytime, ", status_dss)")
+            dependent_dss <- paste0("Surv(`", mytime, "`, status_dss)")
             
             # Perform survival analysis
             tryCatch({
@@ -260,9 +276,21 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             
             # Parse time points
             timepoints <- as.numeric(unlist(strsplit(timepoints_str, ",")))
-            
+
+            # Validate minimum event counts for reliable estimates
+            n_disease_events <- sum(mydata$status_crr == 1, na.rm = TRUE)
+            n_competing_events <- sum(mydata$status_crr == 2, na.rm = TRUE)
+            if (n_disease_events < 5) {
+                stop("Too few disease events (", n_disease_events,
+                     "). Competing risks analysis requires at least 5 events of each type for reliable estimates.")
+            }
+            if (self$options$analysistype == "compete" && n_competing_events < 5) {
+                stop("Too few competing events (", n_competing_events,
+                     "). Competing risks analysis requires at least 5 events of each type.")
+            }
+
             # Create survival object for competing risks
-            dependent_crr <- paste0("Surv(", mytime, ", status_crr)")
+            dependent_crr <- paste0("Surv(`", mytime, "`, status_crr)")
             
             tryCatch({
                 # Extract variables
@@ -334,7 +362,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 
                 # Calculate cumulative incidence at specific time points
                 cuminc_timepoints <- tryCatch({
-                    private$.calculateCumIncAtTimepoints(cuminc_result, timepoints)
+                    private$.calculateCumIncAtTimepoints(cuminc_result, timepoints, conf_level = conf_level)
                 }, error = function(e) {
                     message("Error calculating cumulative incidence at timepoints: ", e$message)
                     NULL
@@ -346,11 +374,49 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                     subdist_result, cuminc_timepoints, timepoints
                 )
                 
-                # Add notice if showrisksets is enabled but not yet implemented
+                # Risk set display beneath the CIF plot
+                # TODO: Risk Table -- Implement proper risk table beneath CIF plot using
+                # survminer::ggrisktable() or custom ggplot2 annotation layer.
+                # Current implementation shows summary counts only.
+                # Priority: MEDIUM (user-facing feature gap).
                 if (showrisksets) {
-                    notice_text <- "<p><strong>Note:</strong> The 'Show Number at Risk' option is currently in development. Risk tables will be added in a future update.</p>"
+                    n_total <- nrow(mydata)
+                    n_events <- sum(mydata[["status_crr"]] == 1, na.rm = TRUE)
+                    n_competing <- sum(mydata[["status_crr"]] == 2, na.rm = TRUE)
+                    n_censored <- n_total - n_events - n_competing
+                    notice_text <- paste0(
+                        "<p><strong>Number at Risk (Summary):</strong> ",
+                        "Total N = ", n_total,
+                        ", Disease events = ", n_events,
+                        ", Competing events = ", n_competing,
+                        ", Censored = ", n_censored,
+                        ".</p>",
+                        "<p><em>Note:</em> A detailed risk table beneath the CIF plot ",
+                        "is planned for a future release. The cumulative incidence ",
+                        "estimates in the table above already account for the ",
+                        "declining risk set over time.</p>"
+                    )
                     current_summary <- self$results$summary$content
                     self$results$summary$setContent(paste0(current_summary, notice_text))
+                }
+
+                # Serialize cuminc result to plain lists for protobuf safety
+                # (cmprsk::cuminc objects can contain environments/function refs)
+                cuminc_serializable <- list()
+                cuminc_names <- names(cuminc_result)
+                for (.cn in cuminc_names) {
+                    if (.cn == "Tests") {
+                        # Tests is a matrix -- convert to data.frame
+                        cuminc_serializable[["Tests"]] <- as.data.frame(cuminc_result$Tests)
+                    } else {
+                        # Each event-group element has $time, $est, $var vectors
+                        elem <- cuminc_result[[.cn]]
+                        cuminc_serializable[[.cn]] <- list(
+                            time = as.numeric(elem$time),
+                            est  = as.numeric(elem$est),
+                            var  = as.numeric(elem$var)
+                        )
+                    }
                 }
 
                 # Store data for plotting (convert to base data.frame for protobuf safety)
@@ -359,7 +425,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                     "time_var" = mytime,
                     "status_var" = "status_crr",
                     "group_var" = myexplanatory,
-                    "cuminc" = cuminc_result,
+                    "cuminc" = cuminc_serializable,
                     "showrisksets" = showrisksets,
                     "timepoints" = timepoints
                 )
@@ -514,7 +580,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             })
         },
         
-        .calculateCumIncAtTimepoints = function(cuminc_result, timepoints) {
+        .calculateCumIncAtTimepoints = function(cuminc_result, timepoints, conf_level = 0.95) {
             # Calculate cumulative incidence at specific time points
             tryCatch({
                 # Validate input
@@ -575,12 +641,13 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                             idx <- which.min(abs(times - tp))
                             
                             if (length(idx) > 0 && idx <= length(times)) {
+                                z_crit <- qnorm(1 - (1 - conf_level) / 2)
                                 tp_results[[gname]] <- list(
                                     time = tp,
                                     estimate = ests[idx],
                                     se = sqrt(max(vars[idx], 0)),  # Ensure non-negative variance
-                                    ci_lower = ests[idx] - 1.96 * sqrt(max(vars[idx], 0)),
-                                    ci_upper = ests[idx] + 1.96 * sqrt(max(vars[idx], 0))
+                                    ci_lower = ests[idx] - z_crit * sqrt(max(vars[idx], 0)),
+                                    ci_upper = ests[idx] + z_crit * sqrt(max(vars[idx], 0))
                                 )
                             }
                         }
@@ -653,7 +720,47 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                     ))
                 }
             }
-            
+
+            # Populate Fine-Gray coefficient table if subdistribution was requested
+            if (isTRUE(self$options$subdistribution) && !is.null(subdist_result) &&
+                !is.null(subdist_result$model)) {
+                tryCatch({
+                    fg_table <- self$results$fineGrayTable
+                    fg_model <- subdist_result$model
+                    fg_summary <- summary(fg_model)
+                    coefs <- fg_summary$coef
+                    conf_level <- self$options$confidencelevel %||% 0.95
+                    z_crit <- qnorm(1 - (1 - conf_level) / 2)
+
+                    for (i in seq_len(nrow(coefs))) {
+                        hr <- exp(coefs[i, 1])
+                        se <- coefs[i, 3]
+                        hr_lower <- exp(coefs[i, 1] - z_crit * se)
+                        hr_upper <- exp(coefs[i, 1] + z_crit * se)
+
+                        fg_table$addRow(rowKey = i, values = list(
+                            term = rownames(coefs)[i],
+                            coef = round(coefs[i, 1], 4),
+                            hr = round(hr, 3),
+                            hr_lower = round(hr_lower, 3),
+                            hr_upper = round(hr_upper, 3),
+                            se = round(se, 4),
+                            z = round(coefs[i, 4], 3),
+                            p = coefs[i, 5]
+                        ))
+                    }
+
+                    fg_table$setNote("info", paste0(
+                        "Fine-Gray subdistribution hazard model. ",
+                        "HR > 1 indicates higher cumulative incidence. ",
+                        sprintf("%.0f%% CI shown.", conf_level * 100)
+                    ))
+                }, error = function(e) {
+                    self$results$fineGrayTable$setNote("error",
+                        paste("Fine-Gray model details could not be extracted:", e$message))
+                })
+            }
+
             # Build complete summary HTML before setting content once
             summary_text <- glue::glue(
                 "<h3>Competing Risks Analysis Results</h3>
@@ -698,7 +805,8 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             if (!is.null(cuminc_timepoints) && length(cuminc_timepoints) > 0) {
                 timepoint_text <- "<h4>Cumulative Incidence at Key Time Points</h4>"
                 timepoint_text <- paste0(timepoint_text, "<table border='1' style='border-collapse: collapse;'>")
-                timepoint_text <- paste0(timepoint_text, "<tr><th>Time (months)</th><th>Group</th><th>Estimate</th><th>95% CI</th></tr>")
+                ci_label <- sprintf("%.0f%% CI", (self$options$confidencelevel %||% 0.95) * 100)
+                timepoint_text <- paste0(timepoint_text, "<tr><th>Time (months)</th><th>Group</th><th>Estimate</th><th>", ci_label, "</th></tr>")
 
                 for (tp_name in names(cuminc_timepoints)) {
                     tp_data <- cuminc_timepoints[[tp_name]]
@@ -730,37 +838,6 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             private$.generateInterpretation("Competing Risks")
         },
         
-        .formatCumulativeIncidenceTimepoints = function(cuminc_timepoints) {
-            # Create a formatted table of cumulative incidence at specific timepoints
-            if (!is.null(cuminc_timepoints) && length(cuminc_timepoints) > 0) {
-                timepoint_text <- "<h4>Cumulative Incidence at Key Time Points</h4>"
-                timepoint_text <- paste0(timepoint_text, "<table border='1' style='border-collapse: collapse;'>")
-                timepoint_text <- paste0(timepoint_text, "<tr><th>Time (months)</th><th>Group</th><th>Estimate</th><th>95% CI</th></tr>")
-                
-                for (tp_name in names(cuminc_timepoints)) {
-                    tp_data <- cuminc_timepoints[[tp_name]]
-                    
-                    for (group_name in names(tp_data)) {
-                        group_data <- tp_data[[group_name]]
-                        
-                        timepoint_text <- paste0(timepoint_text,
-                            "<tr><td>", group_data$time, "</td>",
-                            "<td>", group_name, "</td>",
-                            "<td>", round(group_data$estimate, 3), "</td>",
-                            "<td>(", round(group_data$ci_lower, 3), ", ", 
-                            round(group_data$ci_upper, 3), ")</td></tr>"
-                        )
-                    }
-                }
-                
-                timepoint_text <- paste0(timepoint_text, "</table>")
-                
-                # Add to summary
-                current_summary <- self$results$summary$content
-                self$results$summary$setContent(paste0(current_summary, timepoint_text))
-            }
-        },
- 
         .formatSurvivalResults = function(result, analysis_type) {
             # Extract coefficients from finalfit result
             if (is.data.frame(result) && nrow(result) > 0) {
@@ -922,50 +999,13 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             summary_text <- glue::glue(
                 "<h3>{analysis_type} Analysis Results</h3>
                 <p>Analysis completed using finalfit package with Cox proportional hazards regression.</p>
-                <p>Results show hazard ratios (HR) with 95% confidence intervals and p-values.</p>"
+                <p>Results show hazard ratios (HR) with {sprintf('%.0f%%', (self$options$confidencelevel %||% 0.95) * 100)} confidence intervals and p-values.</p>"
             )
             
             self$results$summary$setContent(summary_text)
             
             # Generate interpretation
             private$.generateInterpretation(analysis_type)
-        },
-        
-        .formatCompetingRisksResults = function(result_crr, cuminc_result) {
-            # Format competing risks regression results
-            if (is.data.frame(result_crr) && nrow(result_crr) > 0) {
-                hr_col <- grep("HR", names(result_crr), value = TRUE)[1]
-                if (!is.null(hr_col) && !is.na(hr_col)) {
-                    hr_text <- result_crr[[hr_col]][1]
-                    parsed <- private$.parseHRText(hr_text)
-                    
-                    table <- self$results$survivalTable
-                    table$addRow(rowKey = 1, values = list(
-                        term = result_crr[[1]][1],
-                        hr = parsed$hr,
-                        ci_lower = parsed$ci_lower,
-                        ci_upper = parsed$ci_upper,
-                        p_value = parsed$p_value
-                    ))
-                }
-            }
-
-            # Format cumulative incidence results (Note: this function appears to be unused)
-            if (!is.null(cuminc_result)) {
-                # Would need timepoints from caller if this code is ever activated
-                private$.formatCumulativeIncidence(cuminc_result, NULL)
-            }
-
-            # Generate summary for competing risks
-            summary_text <- glue::glue(
-                "<h3>Competing Risks Analysis Results</h3>
-                <p>Analysis using Fine-Gray subdistribution hazard model (cmprsk package).</p>
-                <p>Cumulative incidence functions calculated for disease-specific and competing events.</p>
-                <p>Results account for the competing nature of different death causes.</p>"
-            )
-            
-            self$results$summary$setContent(summary_text)
-            private$.generateInterpretation("Competing Risks")
         },
         
         .formatCumulativeIncidence = function(cuminc_result, timepoints = NULL) {
@@ -979,10 +1019,12 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 est1 <- cuminc_result[[first_group]]$est
                 var1 <- cuminc_result[[first_group]]$var
 
-                # Find estimates for competing risk if available
-                competing_group <- names(cuminc_result)[length(cuminc_result)]
-                est2 <- if(length(cuminc_result) > 1) cuminc_result[[competing_group]]$est else rep(NA, length(times))
-                var2 <- if(length(cuminc_result) > 1) cuminc_result[[competing_group]]$var else rep(NA, length(times))
+                # Find estimates for competing risk if available (exclude "Tests" entry)
+                result_names <- names(cuminc_result)
+                result_names <- result_names[result_names != "Tests"]
+                competing_group <- result_names[length(result_names)]
+                est2 <- if(length(result_names) > 1) cuminc_result[[competing_group]]$est else rep(NA, length(times))
+                var2 <- if(length(result_names) > 1) cuminc_result[[competing_group]]$var else rep(NA, length(times))
 
                 # Use user-specified timepoints or default to 1, 2, 3, 5 years
                 key_times <- if (!is.null(timepoints) && length(timepoints) > 0) {
@@ -1082,126 +1124,36 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 "Competing Risks" = "<p><b>Clinical Interpretation:</b><br>Competing risks analysis accounts for the fact that patients can die from multiple causes. The cumulative incidence function shows the probability of each event type over time, accounting for competition between causes.</p>",
                 "<p>Analysis completed successfully.</p>"
             )
-            
+
             self$results$interpretation$setContent(interpretation)
-        },
-        
-        .performRiskStratification = function(data, time_var, status_var, group_var) {
-            # Risk stratification for competing events using quantile-based approach
-            tryCatch({
-                if (is.null(time_var) || is.null(status_var)) {
-                    return(list(message = "Time and status variables required for risk stratification"))
-                }
-                
-                # Calculate risk scores based on time to event and event type
-                data$risk_score <- ifelse(data[[status_var]] == 1, 
-                                        1 / (data[[time_var]] + 0.1),  # Higher risk for earlier disease death
-                                        ifelse(data[[status_var]] == 2,
-                                               0.5 / (data[[time_var]] + 0.1),  # Moderate risk for competing death
-                                               0))  # No risk for censored
-                
-                # Create risk categories using quantiles
-                risk_quantiles <- quantile(data$risk_score[data$risk_score > 0], 
-                                         probs = c(0, 0.33, 0.67, 1), 
-                                         na.rm = TRUE)
-                
-                data$risk_group <- cut(data$risk_score, 
-                                     breaks = c(-Inf, risk_quantiles[2], risk_quantiles[3], Inf),
-                                     labels = c("Low Risk", "Moderate Risk", "High Risk"),
-                                     include.lowest = TRUE)
-                
-                # Calculate group statistics
-                risk_summary <- data.frame(
-                    Risk_Group = c("Low Risk", "Moderate Risk", "High Risk"),
-                    Count = as.numeric(table(data$risk_group)),
-                    Disease_Death_Rate = c(
-                        mean(data$risk_score[data$risk_group == "Low Risk"], na.rm = TRUE),
-                        mean(data$risk_score[data$risk_group == "Moderate Risk"], na.rm = TRUE),
-                        mean(data$risk_score[data$risk_group == "High Risk"], na.rm = TRUE)
-                    ),
-                    stringsAsFactors = FALSE
-                )
-                
-                return(list(
-                    stratified_data = data,
-                    summary = risk_summary,
-                    method = "Quantile-based risk stratification for competing events"
-                ))
-                
-            }, error = function(e) {
-                return(list(error = paste("Risk stratification error:", e$message)))
-            })
-        },
-        
-        .performTimeDependentCIF = function(data, time_var, status_var, group_var) {
-            # Time-dependent cumulative incidence function analysis
-            tryCatch({
-                if (is.null(time_var) || is.null(status_var)) {
-                    return(list(message = "Time and status variables required for time-dependent CIF"))
-                }
-                
-                # Define time points for analysis (monthly intervals up to median follow-up)
-                max_time <- max(data[[time_var]], na.rm = TRUE)
-                time_points <- seq(0, max_time, by = max(1, max_time / 20))
-                
-                # Calculate time-dependent cumulative incidence
-                time_dependent_results <- list()
-                
-                for (t in time_points) {
-                    # Subset data to those at risk at time t
-                    at_risk <- data[data[[time_var]] >= t, ]
-                    
-                    if (nrow(at_risk) > 0) {
-                        # Calculate events in the next time interval
-                        next_t <- t + max(1, max_time / 20)
-                        events_in_interval <- at_risk[at_risk[[time_var]] < next_t & at_risk[[time_var]] >= t, ]
-                        
-                        # Count different event types
-                        disease_deaths <- sum(events_in_interval[[status_var]] == 1, na.rm = TRUE)
-                        competing_deaths <- sum(events_in_interval[[status_var]] == 2, na.rm = TRUE)
-                        total_at_risk <- nrow(at_risk)
-                        
-                        time_dependent_results[[as.character(t)]] <- list(
-                            time = t,
-                            at_risk = total_at_risk,
-                            disease_deaths = disease_deaths,
-                            competing_deaths = competing_deaths,
-                            disease_rate = if(total_at_risk > 0) disease_deaths / total_at_risk else 0,
-                            competing_rate = if(total_at_risk > 0) competing_deaths / total_at_risk else 0
-                        )
-                    }
-                }
-                
-                # Convert to data frame for easy interpretation
-                time_dep_df <- do.call(rbind, lapply(time_dependent_results, function(x) {
-                    data.frame(
-                        Time = x$time,
-                        At_Risk = x$at_risk,
-                        Disease_Deaths = x$disease_deaths,
-                        Competing_Deaths = x$competing_deaths,
-                        Disease_Rate = round(x$disease_rate, 4),
-                        Competing_Rate = round(x$competing_rate, 4),
-                        stringsAsFactors = FALSE
-                    )
-                }))
-                
-                return(list(
-                    time_dependent_cif = time_dep_df,
-                    time_points = time_points,
-                    max_follow_up = max_time,
-                    method = "Time-dependent cumulative incidence analysis with interval-based event rates"
-                ))
-                
-            }, error = function(e) {
-                return(list(error = paste("Time-dependent CIF error:", e$message)))
-            })
+
+            # Populate assumptions & caveats panel
+            assumptions_html <- paste0(
+                "<h4>Assumptions & Caveats</h4>",
+                "<ul>",
+                "<li><b>Independent censoring:</b> Censoring must be independent of the event process. ",
+                "If patients are censored because they are sicker (or healthier), estimates will be biased.</li>",
+                "<li><b>Event classification:</b> Each patient must be correctly classified as experiencing ",
+                "the event of interest, a competing event, or being censored. Misclassification can bias CIF estimates.</li>",
+                "<li><b>Complete case analysis:</b> Observations with missing values in time, event, or grouping ",
+                "variables are excluded. The proportion of missing data should be reported.</li>",
+                "<li><b>Adequate follow-up:</b> CIF estimates beyond the maximum observed time are unreliable. ",
+                "Interpret late timepoint estimates with caution.</li>",
+                "<li><b>Fine-Gray model:</b> The subdistribution hazard ratio has a different interpretation ",
+                "than cause-specific HR. It reflects both the direct effect on the event and the indirect ",
+                "effect through competing events.</li>",
+                "<li><b>Gray's test:</b> Tests equality of CIF curves across groups. It is the competing-risks ",
+                "analog of the log-rank test, NOT a test of cause-specific hazards.</li>",
+                "</ul>"
+            )
+            self$results$assumptions$setContent(assumptions_html)
         },
         
         .plotCompetingRisks = function(image, ggtheme, theme, ...) {
-            if (!self$options$analysistype == "compete") return()
+            if (self$options$analysistype != "compete") return(FALSE)
 
             plotData <- image$state
-            if (is.null(plotData)) return()
+            if (is.null(plotData)) return(FALSE)
 
             # Get color scheme option
             color_scheme <- self$options$cifColors %||% "default"
@@ -1215,6 +1167,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
 
                     for (i in seq_along(cuminc_data)) {
                         group_name <- names(cuminc_data)[i]
+                        if (group_name == "Tests") next
                         times <- cuminc_data[[i]]$time
                         est <- cuminc_data[[i]]$est
 
@@ -1236,7 +1189,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
 
                     # Create the plot
                     plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = time, y = estimate, color = group)) +
-                        ggplot2::geom_step(size = 1) +
+                        ggplot2::geom_step(linewidth = 1) +
                         ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
                         ggplot2::scale_color_manual(values = color_values) +
                         ggplot2::labs(
@@ -1263,11 +1216,11 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
         },
 
         .stackedPlot = function(image, ggtheme, theme, ...) {
-            if (!self$options$analysistype == "compete") return()
-            if (!self$options$showStackedPlot) return()
+            if (self$options$analysistype != "compete") return(FALSE)
+            if (!self$options$showStackedPlot) return(FALSE)
 
             plotData <- image$state
-            if (is.null(plotData)) return()
+            if (is.null(plotData)) return(FALSE)
 
             # Get color scheme option
             color_scheme <- self$options$cifColors %||% "default"
@@ -1354,11 +1307,11 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
         },
 
         .kmvscifPlot = function(image, ggtheme, theme, ...) {
-            if (!self$options$analysistype == "compete") return()
-            if (!self$options$showKMvsCIF) return()
+            if (self$options$analysistype != "compete") return(FALSE)
+            if (!self$options$showKMvsCIF) return(FALSE)
 
             plotData <- image$state
-            if (is.null(plotData)) return()
+            if (is.null(plotData)) return(FALSE)
 
             # Get color scheme option
             color_scheme <- self$options$cifColors %||% "default"
@@ -1421,7 +1374,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
 
                         # Create comparison plot
                         plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = time, y = estimate, color = method, linetype = method)) +
-                            ggplot2::geom_step(size = 1) +
+                            ggplot2::geom_step(linewidth = 1) +
                             ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
                             ggplot2::scale_color_manual(values = color_values) +
                             ggplot2::scale_linetype_manual(values = c("dashed", "solid")) +

@@ -1,0 +1,636 @@
+---
+title: "Enhanced ROC Analysis for Clinical Biomarker Evaluation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Enhanced ROC Analysis for Clinical Biomarker Evaluation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** The `timeroc()` function is designed for use within **jamovi's GUI**.
+> The code examples below show the R syntax for reference. To run interactively,
+> use `devtools::load_all()` and call the R6 class directly:
+> `timerocClass$new(options = timerocOptions$new(...), data = mydata)`.
+
+# Enhanced ROC Analysis
+
+## 1. Overview
+
+The **Enhanced ROC Analysis** module (`timeroc`) evaluates how well continuous
+biomarkers predict clinical outcomes. It provides a dual-mode architecture:
+
+- **Time-Dependent ROC** (via `timeROC` package): Evaluates marker performance
+  at specific timepoints using cumulative/dynamic ROC curves with Inverse
+  Probability of Censoring Weights (IPCW).
+- **General Binary ROC** (via `pROC` package): Standard diagnostic ROC for
+  binary classification without a time component.
+
+Key capabilities:
+
+- IPCW weighting methods: Kaplan-Meier (marginal), Cox model, Aalen additive
+- Asymptotic confidence intervals via influence functions
+- Optimal cutoff calculation using Youden index
+- Multi-marker comparison with DeLong, Bootstrap, or Venkatraman tests
+- Clinical interpretation with severity-graded notices
+
+### Test Datasets
+
+| Dataset | Description | N | Variables | Primary Use |
+|---------|------------|---|-----------|-------------|
+| `timeroc_test` | Breast cancer recurrence | 200 | PatientID, FollowUpMonths, Recurrence (0/1), RecurrenceFactor, Age, Stage, Ki67, GeneScore, NoiseMarker | Primary testing |
+| `timeroc_cancer_biomarker` | General cancer biomarkers | varies | Multiple continuous markers | Extended testing |
+| `timeroc_multi_biomarker` | Multi-marker scenarios | varies | Multiple markers for comparison | ROC comparison |
+| `timeroc_edge_cases` | Edge case scenarios | varies | Designed extremes | Edge case testing |
+
+---
+
+## 2. Basic Time-Dependent ROC
+
+The default mode evaluates how a marker discriminates events from non-events
+at specific follow-up timepoints. The timeROC package computes
+cumulative/dynamic AUC with IPCW correction for censoring.
+
+```{r basic-timedep}
+data("timeroc_test")
+
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "12, 36, 60",
+  method = "marginal",
+  bootstrapCI = FALSE,
+  plotROC = TRUE,
+  plotAUC = TRUE,
+  showOptimalCutoff = TRUE,
+  showMarkerStats = TRUE,
+  timetypeoutput = "months"
+)
+```
+
+**What this produces:**
+
+- AUC table with values at months 12, 36, and 60
+- ROC curves for each timepoint (one curve per timepoint)
+- AUC-over-time plot showing marker performance trajectory
+- Marker descriptive statistics (N, mean, median, SD, IQR, range, events, event rate)
+- Optimal cutoff table with Youden index for each timepoint
+- Clinical interpretation text
+
+---
+
+## 3. IPCW Weighting Methods
+
+The `method` option controls how censoring is handled via Inverse Probability
+of Censoring Weights. Three approaches are available:
+
+### 3a. Kaplan-Meier (Marginal) Weighting
+
+The default. Assumes censoring is independent of the marker.
+Uses the Kaplan-Meier estimator for censoring distribution.
+
+```{r method-marginal}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  method = "marginal",
+  timepoints = "12, 36, 60",
+  timetypeoutput = "months"
+)
+```
+
+### 3b. Cox Model Weighting
+
+Uses a Cox proportional hazards model for censoring. Appropriate when
+censoring may depend on covariates (informative censoring).
+
+```{r method-cox}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  method = "cox",
+  timepoints = "12, 36, 60",
+  timetypeoutput = "months"
+)
+```
+
+### 3c. Aalen Additive Model Weighting
+
+Uses the Aalen additive hazards model. Provides flexible non-proportional
+adjustment for censoring.
+
+```{r method-aalen}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  method = "aalen",
+  timepoints = "12, 36, 60",
+  timetypeoutput = "months"
+)
+```
+
+---
+
+## 4. Confidence Intervals
+
+Enable asymptotic confidence intervals using influence function-based variance
+estimation (not bootstrap, despite the option name). This computes the
+variance of the AUC estimator analytically and provides 95% CIs.
+
+```{r confidence-intervals}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "12, 36, 60",
+  method = "marginal",
+  bootstrapCI = TRUE,
+  timetypeoutput = "months",
+  plotAUC = TRUE
+)
+```
+
+**With CI enabled:**
+
+- AUC table includes SE, 95% CI Lower, and 95% CI Upper columns
+- AUC-over-time plot shows confidence ribbon
+- Interpretation text includes p-values testing AUC against 0.5
+- Model comparison (`compareBaseline`) becomes fully functional
+
+---
+
+## 5. Binary ROC Analysis
+
+Switch to general binary ROC (no time component needed) for standard
+diagnostic evaluation. Uses the pROC package with `direction = "auto"`
+to auto-detect whether higher or lower marker values indicate cases.
+
+```{r binary-roc}
+timeroc(
+  data = timeroc_test,
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "GeneScore",
+  analysisType = "binary",
+  plotROC = TRUE,
+  youdenIndex = TRUE
+)
+```
+
+**What this produces:**
+
+- Binary ROC table: AUC, SE, 95% CI, optimal cutoff, sensitivity, specificity
+- Binary ROC curve plot with AUC in legend
+- Diagnostic performance summary with clinical interpretation
+- AUC classification: Excellent (>=0.9), Good (0.8-0.9), Fair (0.7-0.8), Poor (0.6-0.7), No discrimination (<0.6)
+
+---
+
+## 6. Factor Outcome with Level Selection
+
+When the outcome is a factor (e.g., "Recurrence" / "No Recurrence"),
+select the event level using `outcomeLevel`. The function converts
+the factor to binary 0/1 internally.
+
+```{r factor-outcome}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "RecurrenceFactor",
+  outcomeLevel = "Recurrence",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "12, 36, 60",
+  timetypeoutput = "months"
+)
+```
+
+This also works in binary mode:
+
+```{r factor-outcome-binary}
+timeroc(
+  data = timeroc_test,
+  outcome = "RecurrenceFactor",
+  outcomeLevel = "Recurrence",
+  marker = "Ki67",
+  analysisType = "binary",
+  youdenIndex = TRUE
+)
+```
+
+---
+
+## 7. ROC Comparison (DeLong Test)
+
+Compare multiple markers against the primary marker using the DeLong test
+(default), bootstrap test, or Venkatraman test. This is available in
+binary ROC mode only.
+
+### 7a. DeLong Test (Default)
+
+```{r roc-comparison-delong}
+timeroc(
+  data = timeroc_test,
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  markers = c("GeneScore", "NoiseMarker"),
+  analysisType = "binary",
+  compareROCs = TRUE,
+  rocComparison = "delong",
+  plotROC = TRUE
+)
+```
+
+**What this produces:**
+
+- ROC comparison table: pairwise comparisons with test statistic, p-value, interpretation
+- Multi-marker ROC plot: all curves overlaid with AUC in legend
+- Individual entries in binary ROC table for the primary marker
+
+### 7b. Bootstrap Test
+
+```{r roc-comparison-bootstrap}
+timeroc(
+  data = timeroc_test,
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  markers = c("GeneScore"),
+  analysisType = "binary",
+  compareROCs = TRUE,
+  rocComparison = "bootstrap"
+)
+```
+
+### 7c. Venkatraman Test
+
+```{r roc-comparison-venkatraman}
+timeroc(
+  data = timeroc_test,
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  markers = c("GeneScore"),
+  analysisType = "binary",
+  compareROCs = TRUE,
+  rocComparison = "venkatraman"
+)
+```
+
+---
+
+## 8. Optimal Cutoffs and Youden Index
+
+### Time-Dependent Mode
+
+Optimal cutoffs are computed at each timepoint by maximizing the Youden
+index (sensitivity + specificity - 1) from the time-dependent ROC curve.
+
+```{r cutoffs-timedep}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "12, 24, 36, 48, 60",
+  showOptimalCutoff = TRUE,
+  timetypeoutput = "months"
+)
+```
+
+The cutoff table shows: timepoint, optimal cutoff value, sensitivity at
+cutoff, specificity at cutoff, and Youden index.
+
+### Binary Mode
+
+In binary mode, the Youden index is calculated from the standard ROC curve.
+Disable with `youdenIndex = FALSE` to suppress the calculation.
+
+```{r cutoffs-binary}
+timeroc(
+  data = timeroc_test,
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "binary",
+  youdenIndex = TRUE
+)
+```
+
+```{r cutoffs-binary-no-youden}
+timeroc(
+  data = timeroc_test,
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "binary",
+  youdenIndex = FALSE
+)
+```
+
+---
+
+## 9. Display Options
+
+### 9a. Marker Statistics
+
+Toggle descriptive statistics for the marker variable (time-dependent mode).
+
+```{r marker-stats-off}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  showMarkerStats = FALSE,
+  timepoints = "12, 36, 60",
+  timetypeoutput = "months"
+)
+```
+
+### 9b. Baseline Model Comparison
+
+Compare marker performance against AUC = 0.5 (random). Requires confidence
+intervals to be enabled for p-value computation.
+
+```{r compare-baseline}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "12, 36, 60",
+  method = "marginal",
+  bootstrapCI = TRUE,
+  compareBaseline = TRUE,
+  timetypeoutput = "months"
+)
+```
+
+### 9c. Smooth AUC Curve
+
+Apply loess smoothing to the AUC-over-time plot. Requires more than
+2 timepoints to function; otherwise falls back to a straight line.
+
+```{r smooth-auc}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "6, 12, 18, 24, 36, 48, 60",
+  plotAUC = TRUE,
+  smoothAUC = TRUE,
+  timetypeoutput = "months"
+)
+```
+
+### 9d. Time Unit Labels
+
+Change the time unit for display in plots and interpretation text.
+Does not transform the numeric values.
+
+```{r time-units-years}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "12, 36, 60",
+  timetypeoutput = "years"
+)
+```
+
+### 9e. Suppress Plots
+
+Turn off ROC curve plot and/or AUC-over-time plot for table-only output.
+
+```{r no-plots}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "12, 36, 60",
+  plotROC = FALSE,
+  plotAUC = FALSE,
+  timetypeoutput = "months"
+)
+```
+
+---
+
+## 10. Edge Cases
+
+### 10a. Timepoints Beyond Follow-Up
+
+When all specified timepoints exceed the maximum follow-up time,
+the function automatically substitutes quartiles of observed follow-up.
+
+```{r edge-beyond-followup}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "120, 240, 360",
+  timetypeoutput = "months"
+)
+```
+
+### 10b. Invalid Timepoints String
+
+Non-parseable timepoint strings fall back to the defaults (12, 36, 60).
+
+```{r edge-invalid-timepoints}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "abc, xyz",
+  timetypeoutput = "months"
+)
+```
+
+### 10c. Noise Marker (AUC Near 0.5)
+
+A random noise marker should produce AUC close to 0.5, triggering
+a "Limited Clinical Utility" warning.
+
+```{r edge-noise-marker}
+timeroc(
+  data = timeroc_test,
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "NoiseMarker",
+  analysisType = "binary",
+  youdenIndex = TRUE
+)
+```
+
+### 10d. Single Timepoint
+
+Analysis with only one evaluation timepoint.
+
+```{r edge-single-timepoint}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "Ki67",
+  analysisType = "timedep",
+  timepoints = "24",
+  timetypeoutput = "months"
+)
+```
+
+### 10e. Many Timepoints with Smoothing
+
+Dense timepoints with loess smoothing for a smooth AUC trajectory.
+
+```{r edge-many-timepoints}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "GeneScore",
+  analysisType = "timedep",
+  timepoints = "3, 6, 9, 12, 18, 24, 30, 36, 42, 48, 54, 60",
+  smoothAUC = TRUE,
+  plotAUC = TRUE,
+  timetypeoutput = "months"
+)
+```
+
+---
+
+## 11. Clinical Interpretation
+
+The module provides automated clinical interpretation at multiple levels:
+
+### Time-Dependent Mode
+
+- **Per-timepoint interpretation:** AUC classification (excellent/good/fair/poor/failed)
+  with significance testing against AUC = 0.5 (when CI enabled)
+- **Overall assessment:** Mean AUC, performance trend (improving/declining/stable),
+  best-performing timepoint
+- **Method context:** Explanation of the IPCW weighting method used
+- **Notices:** Severity-graded feedback (ERROR, STRONG_WARNING, WARNING, INFO)
+  for data quality issues, reversed markers, and limited clinical utility
+
+### Binary Mode
+
+- **AUC classification:** Excellent (>=0.9), Good (0.8-0.9), Fair (0.7-0.8),
+  Poor (0.6-0.7), No discrimination (<0.6)
+- **Diagnostic performance summary:** AUC with 95% CI, interpretation of
+  discriminative ability
+- **Optimal threshold:** Youden index-based cutoff with sensitivity and specificity
+
+```{r clinical-interpretation}
+timeroc(
+  data = timeroc_test,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Recurrence",
+  outcomeLevel = "1",
+  marker = "GeneScore",
+  analysisType = "timedep",
+  timepoints = "12, 36, 60",
+  method = "marginal",
+  bootstrapCI = TRUE,
+  showOptimalCutoff = TRUE,
+  showMarkerStats = TRUE,
+  compareBaseline = TRUE,
+  timetypeoutput = "months"
+)
+```
+
+---
+
+## 12. References
+
+### Statistical Methods
+
+- Blanche P, Dartigues JF, Jacqmin-Gadda H (2013). Estimating and comparing
+  time-dependent areas under receiver operating characteristic curves for
+  censored event times with competing risks. *Statistics in Medicine*, 32(30),
+  5381-5397.
+- Hung H, Chiang CT (2010). Estimation methods for time-dependent AUC models
+  with survival data. *Canadian Journal of Statistics*, 38(1), 8-26.
+- DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under
+  two or more correlated receiver operating characteristic curves: a
+  nonparametric approach. *Biometrics*, 44(3), 837-845.
+- Robin X, Turck N, Hainard A, et al. (2011). pROC: an open-source package
+  for R and S+ to analyze and compare ROC curves. *BMC Bioinformatics*, 12, 77.
+- Youden WJ (1950). Index for rating diagnostic tests. *Cancer*, 3(1), 32-35.
+
+### R Packages
+
+- **timeROC**: Time-dependent ROC curve estimation
+- **pROC**: Binary ROC curve analysis, DeLong test, bootstrap comparison
+- **ggplot2**: AUC-over-time plot visualization
+- **glue**: HTML template rendering
+- **scales**: Axis label formatting
+
+### AUC Interpretation Guidelines
+
+| AUC Range | Interpretation | Clinical Guidance |
+|-----------|---------------|-------------------|
+| 0.90-1.00 | Excellent | Strong discriminative ability; suitable for clinical decision-making |
+| 0.80-0.89 | Good | Useful for clinical purposes with appropriate validation |
+| 0.70-0.79 | Fair | Limited but potentially useful in combination with other markers |
+| 0.60-0.69 | Poor | Insufficient for standalone clinical use |
+| 0.50-0.59 | Fail | No better than random chance |
+| < 0.50 | Reversed | Marker direction likely inverted; consider negating values |

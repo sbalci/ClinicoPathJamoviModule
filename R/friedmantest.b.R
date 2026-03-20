@@ -537,34 +537,403 @@ friedmantestClass <- R6::R6Class(
             self$results$methodExplanation$setContent(content)
         },
         
-        # Placeholder methods for optional analyses
+        # Post-hoc pairwise comparisons
         .populatePairwiseComparisons = function(data_prepared, friedman_result) {
-            # Implementation would perform pairwise post-hoc tests
+
+            table <- self$results$pairwiseComparisons
+            long_data <- data_prepared$long_data
+            conditions <- friedman_result$condition_levels
+            k <- length(conditions)
+            n <- friedman_result$n_subjects
+            rank_sums <- friedman_result$rank_sums
+            method <- self$options$posthoc_method
+            correction <- self$options$correction
+
+            pairs <- combn(conditions, 2, simplify = FALSE)
+            raw_p_values <- numeric(length(pairs))
+            test_stats <- numeric(length(pairs))
+            effect_sizes <- numeric(length(pairs))
+            mean_rank_diffs <- numeric(length(pairs))
+
+            for (idx in seq_along(pairs)) {
+                cond_a <- pairs[[idx]][1]
+                cond_b <- pairs[[idx]][2]
+
+                # Mean rank difference
+                mr_a <- rank_sums$mean_rank[rank_sums$condition == cond_a]
+                mr_b <- rank_sums$mean_rank[rank_sums$condition == cond_b]
+                mean_rank_diffs[idx] <- mr_a - mr_b
+
+                if (method == "nemenyi") {
+                    # Nemenyi test using PMCMRplus
+                    tryCatch({
+                        wide_mat <- as.matrix(data_prepared$wide_data[, -1])
+                        nem_result <- PMCMRplus::frdAllPairsNemenyiTest(wide_mat)
+                        # Extract p-value for this pair
+                        cond_names <- colnames(wide_mat)
+                        # Map condition names to matrix indices
+                        idx_a <- which(gsub("^dependent\\.", "", cond_names) == cond_a)
+                        idx_b <- which(gsub("^dependent\\.", "", cond_names) == cond_b)
+                        if (length(idx_a) > 0 && length(idx_b) > 0) {
+                            r <- max(idx_a, idx_b) - 1
+                            c_idx <- min(idx_a, idx_b)
+                            if (r > 0 && c_idx > 0 && r <= nrow(nem_result$p.value) && c_idx <= ncol(nem_result$p.value)) {
+                                raw_p_values[idx] <- nem_result$p.value[r, c_idx]
+                                test_stats[idx] <- nem_result$statistic[r, c_idx]
+                            } else {
+                                raw_p_values[idx] <- NA
+                                test_stats[idx] <- NA
+                            }
+                        } else {
+                            raw_p_values[idx] <- NA
+                            test_stats[idx] <- NA
+                        }
+                    }, error = function(e) {
+                        raw_p_values[idx] <<- NA
+                        test_stats[idx] <<- NA
+                    })
+
+                } else if (method == "wilcoxon_signed_rank") {
+                    # Pairwise Wilcoxon signed-rank tests
+                    data_a <- long_data$dependent[long_data$within == cond_a]
+                    data_b <- long_data$dependent[long_data$within == cond_b]
+                    wtest <- wilcox.test(data_a, data_b, paired = TRUE, exact = FALSE)
+                    raw_p_values[idx] <- wtest$p.value
+                    test_stats[idx] <- wtest$statistic
+                    # Effect size r = Z / sqrt(N)
+                    z_val <- qnorm(wtest$p.value / 2)
+                    effect_sizes[idx] <- abs(z_val) / sqrt(n)
+
+                } else if (method == "sign_test") {
+                    # Sign test for paired data
+                    data_a <- long_data$dependent[long_data$within == cond_a]
+                    data_b <- long_data$dependent[long_data$within == cond_b]
+                    diffs <- data_a - data_b
+                    diffs <- diffs[diffs != 0]
+                    n_pos <- sum(diffs > 0)
+                    n_total <- length(diffs)
+                    raw_p_values[idx] <- binom.test(n_pos, n_total)$p.value
+                    test_stats[idx] <- n_pos
+                    effect_sizes[idx] <- abs(n_pos / n_total - 0.5) * 2
+                }
+            }
+
+            # Apply p-value correction
+            adj_method <- switch(correction,
+                                 "bonferroni" = "bonferroni",
+                                 "holm" = "holm",
+                                 "fdr" = "BH",
+                                 "none" = "none")
+
+            if (adj_method != "none") {
+                adj_p_values <- p.adjust(raw_p_values, method = adj_method)
+            } else {
+                adj_p_values <- raw_p_values
+            }
+
+            # Nemenyi effect sizes: use mean rank difference normalized
+            if (method == "nemenyi") {
+                for (idx in seq_along(pairs)) {
+                    effect_sizes[idx] <- abs(mean_rank_diffs[idx]) / (k + 1) * 2
+                }
+            }
+
+            # Populate table
+            for (idx in seq_along(pairs)) {
+                sig_label <- if (!is.na(adj_p_values[idx]) && adj_p_values[idx] < self$options$alpha) {
+                    "Significant"
+                } else if (is.na(adj_p_values[idx])) {
+                    "N/A"
+                } else {
+                    "Not significant"
+                }
+
+                table$addRow(rowKey = idx, values = list(
+                    comparison = paste(pairs[[idx]][1], "vs.", pairs[[idx]][2]),
+                    mean_rank_diff = mean_rank_diffs[idx],
+                    test_statistic = test_stats[idx],
+                    p_value_raw = raw_p_values[idx],
+                    p_value_adjusted = adj_p_values[idx],
+                    significance = sig_label,
+                    effect_size = effect_sizes[idx]
+                ))
+            }
         },
-        
+
+        # Assumption assessment
         .populateAssumptionAssessment = function(data_prepared, friedman_result) {
-            # Implementation would assess assumptions
+
+            table <- self$results$assumptionAssessment
+
+            # 1. Repeated measures / balanced design
+            subj_counts <- table(data_prepared$long_data$subject, data_prepared$long_data$within)
+            all_complete <- all(subj_counts > 0)
+            table$addRow(rowKey = 1, values = list(
+                assumption = "Complete repeated measures",
+                status = if (all_complete) "Met" else "Partially met",
+                details = paste0(data_prepared$n_subjects, " subjects with complete data across ",
+                                data_prepared$n_conditions, " conditions"),
+                recommendation = if (all_complete) "Design is balanced" else "Missing data may affect power"
+            ))
+
+            # 2. Ordinal/continuous dependent variable
+            dep_values <- data_prepared$long_data$dependent
+            n_unique <- length(unique(dep_values))
+            table$addRow(rowKey = 2, values = list(
+                assumption = "Measurement scale",
+                status = if (n_unique >= 5) "Met" else "Check",
+                details = paste0(n_unique, " unique values in dependent variable"),
+                recommendation = if (n_unique >= 5) "Sufficient measurement granularity"
+                                else "Few unique values; consider exact test method"
+            ))
+
+            # 3. Independence of subjects
+            table$addRow(rowKey = 3, values = list(
+                assumption = "Independence of subjects",
+                status = "Assumed",
+                details = "Cannot be tested statistically; depends on study design",
+                recommendation = "Verify that subjects are independent (no clustering)"
+            ))
+
+            # 4. Sample size adequacy
+            adequate_n <- data_prepared$n_subjects >= 6
+            table$addRow(rowKey = 4, values = list(
+                assumption = "Sample size",
+                status = if (adequate_n) "Adequate" else "Small",
+                details = paste0("N = ", data_prepared$n_subjects, " subjects, k = ",
+                                data_prepared$n_conditions, " conditions"),
+                recommendation = if (adequate_n)
+                    "Sufficient for asymptotic approximation"
+                else
+                    "Consider exact test or Monte Carlo method"
+            ))
+
+            # 5. Tied observations
+            ranked_data <- friedman_result$ranked_data
+            n_ties <- sum(duplicated(paste(ranked_data$subject, ranked_data$ranks)))
+            table$addRow(rowKey = 5, values = list(
+                assumption = "Tied observations",
+                status = if (n_ties == 0) "None" else "Present",
+                details = paste0(n_ties, " tied ranks detected"),
+                recommendation = if (n_ties == 0) "No correction needed"
+                                else "Average ranks used for ties (standard approach)"
+            ))
         },
-        
+
+        # Clinical interpretation
         .populateClinicalInterpretation = function(friedman_result) {
-            # Implementation would provide clinical interpretation
+
+            table <- self$results$clinicalInterpretation
+
+            # 1. Overall result
+            table$addRow(rowKey = 1, values = list(
+                aspect = "Overall Comparison",
+                finding = sprintf("Chi-square(%.0f) = %.2f, p = %.4f",
+                                 friedman_result$df,
+                                 friedman_result$friedman_statistic,
+                                 friedman_result$p_value),
+                interpretation = if (friedman_result$significant)
+                    "Statistically significant differences exist between conditions"
+                else
+                    "No statistically significant differences between conditions",
+                recommendation = if (friedman_result$significant)
+                    "Examine post-hoc comparisons to identify specific differences"
+                else
+                    "Conditions appear equivalent; consider clinical significance"
+            ))
+
+            # 2. Effect size interpretation
+            w_val <- friedman_result$kendalls_w
+            w_interp <- if (w_val < 0.1) "negligible"
+                        else if (w_val < 0.3) "weak"
+                        else if (w_val < 0.5) "moderate"
+                        else if (w_val < 0.7) "strong"
+                        else "very strong"
+
+            table$addRow(rowKey = 2, values = list(
+                aspect = "Effect Magnitude",
+                finding = sprintf("Kendall's W = %.3f (%s concordance)", w_val, w_interp),
+                interpretation = paste0("The ", w_interp, " effect suggests ",
+                    if (w_val < 0.3) "minimal practical differences between conditions"
+                    else if (w_val < 0.5) "meaningful but modest differences between conditions"
+                    else "substantial practical differences between conditions"),
+                recommendation = if (w_val < 0.3)
+                    "Statistical significance may not translate to clinical importance"
+                else
+                    "Effect size supports clinical relevance of observed differences"
+            ))
+
+            # 3. Ranking pattern
+            rank_sums <- friedman_result$rank_sums
+            best_cond <- rank_sums$condition[which.max(rank_sums$mean_rank)]
+            worst_cond <- rank_sums$condition[which.min(rank_sums$mean_rank)]
+            table$addRow(rowKey = 3, values = list(
+                aspect = "Ranking Pattern",
+                finding = paste0("Highest mean rank: ", best_cond,
+                               " (", round(max(rank_sums$mean_rank), 2), ")",
+                               "; Lowest: ", worst_cond,
+                               " (", round(min(rank_sums$mean_rank), 2), ")"),
+                interpretation = paste0(best_cond, " received consistently higher ratings/values compared to ",
+                                       worst_cond),
+                recommendation = "Consider the clinical relevance of the rank ordering"
+            ))
         },
-        
-        # Plot functions (placeholders)
-        .plotBoxplotByCondition = function(image, ...) {
-            # Implementation for box plot by condition
+
+        # Box plot by condition
+        .plotBoxplotByCondition = function(image, ggtheme, theme, ...) {
+
+            if (is.null(self$options$dependent) || is.null(self$options$within))
+                return(FALSE)
+
+            data_prepared <- private$.prepareData()
+            if (is.null(data_prepared)) return(FALSE)
+
+            long_data <- data_prepared$long_data
+
+            plot <- ggplot2::ggplot(long_data,
+                ggplot2::aes(x = within, y = dependent, fill = within)) +
+                ggplot2::geom_boxplot(alpha = 0.7, outlier.shape = 21) +
+                ggplot2::geom_jitter(width = 0.15, alpha = 0.4, size = 1.5) +
+                ggplot2::labs(
+                    x = data_prepared$within_var_name,
+                    y = data_prepared$dep_var_name,
+                    title = "Distribution by Condition"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(legend.position = "none")
+
+            print(plot)
+            TRUE
         },
-        
-        .plotMeanRanks = function(image, ...) {
-            # Implementation for mean rank plot
+
+        # Mean rank comparison plot
+        .plotMeanRanks = function(image, ggtheme, theme, ...) {
+
+            if (is.null(self$options$dependent) || is.null(self$options$within))
+                return(FALSE)
+
+            data_prepared <- private$.prepareData()
+            if (is.null(data_prepared)) return(FALSE)
+
+            friedman_result <- private$.performFriedmanTest(data_prepared)
+            if (is.null(friedman_result)) return(FALSE)
+
+            rank_data <- friedman_result$rank_sums
+            expected <- friedman_result$expected_rank
+
+            plot <- ggplot2::ggplot(rank_data,
+                ggplot2::aes(x = reorder(condition, mean_rank), y = mean_rank, fill = condition)) +
+                ggplot2::geom_col(alpha = 0.8) +
+                ggplot2::geom_hline(yintercept = expected, linetype = "dashed", color = "red") +
+                ggplot2::geom_text(ggplot2::aes(label = round(mean_rank, 2)),
+                                  vjust = -0.5, size = 3.5) +
+                ggplot2::labs(
+                    x = "Condition",
+                    y = "Mean Rank",
+                    title = "Mean Rank Comparison",
+                    caption = paste("Dashed line = expected rank under H0 (",
+                                   round(expected, 2), ")")
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(legend.position = "none")
+
+            print(plot)
+            TRUE
         },
-        
-        .plotPairwiseComparisons = function(image, ...) {
-            # Implementation for pairwise comparison matrix
+
+        # Post-hoc comparison matrix heatmap
+        .plotPairwiseComparisons = function(image, ggtheme, theme, ...) {
+
+            if (is.null(self$options$dependent) || is.null(self$options$within))
+                return(FALSE)
+
+            data_prepared <- private$.prepareData()
+            if (is.null(data_prepared)) return(FALSE)
+
+            friedman_result <- private$.performFriedmanTest(data_prepared)
+            if (is.null(friedman_result)) return(FALSE)
+
+            if (!friedman_result$significant) return(FALSE)
+
+            conditions <- friedman_result$condition_levels
+            k <- length(conditions)
+
+            # Compute pairwise Wilcoxon p-values
+            long_data <- data_prepared$long_data
+            p_matrix <- matrix(NA, k, k, dimnames = list(conditions, conditions))
+
+            for (i in 1:(k - 1)) {
+                for (j in (i + 1):k) {
+                    data_i <- long_data$dependent[long_data$within == conditions[i]]
+                    data_j <- long_data$dependent[long_data$within == conditions[j]]
+                    wt <- tryCatch(
+                        wilcox.test(data_i, data_j, paired = TRUE, exact = FALSE),
+                        error = function(e) list(p.value = NA)
+                    )
+                    p_matrix[i, j] <- wt$p.value
+                    p_matrix[j, i] <- wt$p.value
+                }
+            }
+
+            # Convert to long format for ggplot
+            p_df <- expand.grid(Condition1 = conditions, Condition2 = conditions)
+            p_df$p_value <- as.vector(p_matrix)
+            p_df$label <- ifelse(is.na(p_df$p_value), "",
+                                sprintf("%.3f", p_df$p_value))
+            p_df$sig <- ifelse(!is.na(p_df$p_value) & p_df$p_value < self$options$alpha,
+                              "Significant", "Not significant")
+
+            plot <- ggplot2::ggplot(p_df,
+                ggplot2::aes(x = Condition1, y = Condition2, fill = p_value)) +
+                ggplot2::geom_tile(color = "white") +
+                ggplot2::geom_text(ggplot2::aes(label = label), size = 3.5) +
+                ggplot2::scale_fill_gradient2(low = "#d73027", mid = "#fee08b",
+                                             high = "#1a9850", midpoint = 0.05,
+                                             na.value = "grey90",
+                                             name = "p-value") +
+                ggplot2::labs(
+                    title = "Pairwise Comparison p-values",
+                    x = "", y = ""
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+            print(plot)
+            TRUE
         },
-        
-        .plotProfiles = function(image, ...) {
-            # Implementation for individual profile plot
+
+        # Individual profile (spaghetti) plot
+        .plotProfiles = function(image, ggtheme, theme, ...) {
+
+            if (is.null(self$options$dependent) || is.null(self$options$within) ||
+                is.null(self$options$subject))
+                return(FALSE)
+
+            data_prepared <- private$.prepareData()
+            if (is.null(data_prepared)) return(FALSE)
+
+            long_data <- data_prepared$long_data
+
+            plot <- ggplot2::ggplot(long_data,
+                ggplot2::aes(x = within, y = dependent, group = subject)) +
+                ggplot2::geom_line(alpha = 0.3, color = "grey50") +
+                ggplot2::geom_point(alpha = 0.4, size = 1.5) +
+                ggplot2::stat_summary(ggplot2::aes(group = 1),
+                                     fun = median, geom = "line",
+                                     color = "red", linewidth = 1.2) +
+                ggplot2::stat_summary(ggplot2::aes(group = 1),
+                                     fun = median, geom = "point",
+                                     color = "red", size = 3) +
+                ggplot2::labs(
+                    x = data_prepared$within_var_name,
+                    y = data_prepared$dep_var_name,
+                    title = "Individual Profiles across Conditions",
+                    caption = "Red line = group median"
+                ) +
+                ggplot2::theme_minimal()
+
+            print(plot)
+            TRUE
         }
     )
 )

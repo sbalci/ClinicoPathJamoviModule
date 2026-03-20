@@ -146,6 +146,12 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             forestBootstrap = FALSE,
             forestBootstrapSamples = 100,
             generateForestSummary = FALSE,
+            rfAnalyzeOldStage = TRUE,
+            rfAnalyzeNewStage = TRUE,
+            rfMtryAuto = TRUE,
+            rfBootstrapType = "by.root",
+            rfSamplingType = "swr",
+            rfMinimalDepth = FALSE,
             performCureModelAnalysis = FALSE,
             cureModelType = "mixture",
             cureDistribution = "weibull",
@@ -203,6 +209,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             winRatioEndpoints = "death_progression_response",
             winRatioDeathVariable = NULL,
             winRatioSecondaryEndpoint = NULL,
+            wrSecondaryDirection = "higher",
             winRatioTertiaryEndpoint = NULL,
             winRatioTimeVariables = NULL,
             winRatioMatchingStrategy = "all_pairs",
@@ -997,6 +1004,36 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "generateForestSummary",
                 generateForestSummary,
                 default=FALSE)
+            private$..rfAnalyzeOldStage <- jmvcore::OptionBool$new(
+                "rfAnalyzeOldStage",
+                rfAnalyzeOldStage,
+                default=TRUE)
+            private$..rfAnalyzeNewStage <- jmvcore::OptionBool$new(
+                "rfAnalyzeNewStage",
+                rfAnalyzeNewStage,
+                default=TRUE)
+            private$..rfMtryAuto <- jmvcore::OptionBool$new(
+                "rfMtryAuto",
+                rfMtryAuto,
+                default=TRUE)
+            private$..rfBootstrapType <- jmvcore::OptionList$new(
+                "rfBootstrapType",
+                rfBootstrapType,
+                options=list(
+                    "by.root",
+                    "by.node"),
+                default="by.root")
+            private$..rfSamplingType <- jmvcore::OptionList$new(
+                "rfSamplingType",
+                rfSamplingType,
+                options=list(
+                    "swr",
+                    "swor"),
+                default="swr")
+            private$..rfMinimalDepth <- jmvcore::OptionBool$new(
+                "rfMinimalDepth",
+                rfMinimalDepth,
+                default=FALSE)
             private$..performCureModelAnalysis <- jmvcore::OptionBool$new(
                 "performCureModelAnalysis",
                 performCureModelAnalysis,
@@ -1353,6 +1390,13 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "numeric",
                     "factor"),
                 default=NULL)
+            private$..wrSecondaryDirection <- jmvcore::OptionList$new(
+                "wrSecondaryDirection",
+                wrSecondaryDirection,
+                options=list(
+                    "higher",
+                    "lower"),
+                default="higher")
             private$..winRatioTertiaryEndpoint <- jmvcore::OptionVariable$new(
                 "winRatioTertiaryEndpoint",
                 winRatioTertiaryEndpoint,
@@ -1677,6 +1721,12 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..forestBootstrap)
             self$.addOption(private$..forestBootstrapSamples)
             self$.addOption(private$..generateForestSummary)
+            self$.addOption(private$..rfAnalyzeOldStage)
+            self$.addOption(private$..rfAnalyzeNewStage)
+            self$.addOption(private$..rfMtryAuto)
+            self$.addOption(private$..rfBootstrapType)
+            self$.addOption(private$..rfSamplingType)
+            self$.addOption(private$..rfMinimalDepth)
             self$.addOption(private$..performCureModelAnalysis)
             self$.addOption(private$..cureModelType)
             self$.addOption(private$..cureDistribution)
@@ -1734,6 +1784,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..winRatioEndpoints)
             self$.addOption(private$..winRatioDeathVariable)
             self$.addOption(private$..winRatioSecondaryEndpoint)
+            self$.addOption(private$..wrSecondaryDirection)
             self$.addOption(private$..winRatioTertiaryEndpoint)
             self$.addOption(private$..winRatioTimeVariables)
             self$.addOption(private$..winRatioMatchingStrategy)
@@ -1909,6 +1960,12 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         forestBootstrap = function() private$..forestBootstrap$value,
         forestBootstrapSamples = function() private$..forestBootstrapSamples$value,
         generateForestSummary = function() private$..generateForestSummary$value,
+        rfAnalyzeOldStage = function() private$..rfAnalyzeOldStage$value,
+        rfAnalyzeNewStage = function() private$..rfAnalyzeNewStage$value,
+        rfMtryAuto = function() private$..rfMtryAuto$value,
+        rfBootstrapType = function() private$..rfBootstrapType$value,
+        rfSamplingType = function() private$..rfSamplingType$value,
+        rfMinimalDepth = function() private$..rfMinimalDepth$value,
         performCureModelAnalysis = function() private$..performCureModelAnalysis$value,
         cureModelType = function() private$..cureModelType$value,
         cureDistribution = function() private$..cureDistribution$value,
@@ -1966,6 +2023,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         winRatioEndpoints = function() private$..winRatioEndpoints$value,
         winRatioDeathVariable = function() private$..winRatioDeathVariable$value,
         winRatioSecondaryEndpoint = function() private$..winRatioSecondaryEndpoint$value,
+        wrSecondaryDirection = function() private$..wrSecondaryDirection$value,
         winRatioTertiaryEndpoint = function() private$..winRatioTertiaryEndpoint$value,
         winRatioTimeVariables = function() private$..winRatioTimeVariables$value,
         winRatioMatchingStrategy = function() private$..winRatioMatchingStrategy$value,
@@ -2140,6 +2198,12 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..forestBootstrap = NA,
         ..forestBootstrapSamples = NA,
         ..generateForestSummary = NA,
+        ..rfAnalyzeOldStage = NA,
+        ..rfAnalyzeNewStage = NA,
+        ..rfMtryAuto = NA,
+        ..rfBootstrapType = NA,
+        ..rfSamplingType = NA,
+        ..rfMinimalDepth = NA,
         ..performCureModelAnalysis = NA,
         ..cureModelType = NA,
         ..cureDistribution = NA,
@@ -2197,6 +2261,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..winRatioEndpoints = NA,
         ..winRatioDeathVariable = NA,
         ..winRatioSecondaryEndpoint = NA,
+        ..wrSecondaryDirection = NA,
         ..winRatioTertiaryEndpoint = NA,
         ..winRatioTimeVariables = NA,
         ..winRatioMatchingStrategy = NA,
@@ -2268,7 +2333,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         stepwiseResultsExplanation = function() private$.items[["stepwiseResultsExplanation"]],
         interactionTests = function() private$.items[["interactionTests"]],
         interactionTestsExplanation = function() private$.items[["interactionTestsExplanation"]],
-        stratifiedAnalysis = function() private$.items[["stratifiedAnalysis"]],
+        stratifiedAnalysisTable = function() private$.items[["stratifiedAnalysisTable"]],
         stratifiedAnalysisExplanation = function() private$.items[["stratifiedAnalysisExplanation"]],
         rocAnalysis = function() private$.items[["rocAnalysis"]],
         integratedAUCAnalysis = function() private$.items[["integratedAUCAnalysis"]],
@@ -2367,11 +2432,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         forestModelPerformance = function() private$.items[["forestModelPerformance"]],
         forestSurvivalPredictions = function() private$.items[["forestSurvivalPredictions"]],
         forestCoxComparison = function() private$.items[["forestCoxComparison"]],
-        forestStagingComparison = function() private$.items[["forestStagingComparison"]],
+        forestStagingComparisonTable = function() private$.items[["forestStagingComparisonTable"]],
         forestAnalysisSummary = function() private$.items[["forestAnalysisSummary"]],
         cureFractionEstimates = function() private$.items[["cureFractionEstimates"]],
         cureModelParameters = function() private$.items[["cureModelParameters"]],
-        cureModelComparison = function() private$.items[["cureModelComparison"]],
+        cureModelComparisonTable = function() private$.items[["cureModelComparisonTable"]],
         stageSpecificCureAnalysis = function() private$.items[["stageSpecificCureAnalysis"]],
         cureModelBootstrap = function() private$.items[["cureModelBootstrap"]],
         cureAnalysisSummary = function() private$.items[["cureAnalysisSummary"]],
@@ -2410,11 +2475,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         frailtyModelsDiagnostics = function() private$.items[["frailtyModelsDiagnostics"]],
         frailtyModelsSummary = function() private$.items[["frailtyModelsSummary"]],
         clinicalUtilityOverview = function() private$.items[["clinicalUtilityOverview"]],
-        clinicalUtilityComparison = function() private$.items[["clinicalUtilityComparison"]],
-        clinicalUtilityNNT = function() private$.items[["clinicalUtilityNNT"]],
+        clinicalUtilityComparisonTable = function() private$.items[["clinicalUtilityComparisonTable"]],
+        clinicalUtilityNNTTable = function() private$.items[["clinicalUtilityNNTTable"]],
         clinicalUtilityNetBenefit = function() private$.items[["clinicalUtilityNetBenefit"]],
-        clinicalUtilityTimeVarying = function() private$.items[["clinicalUtilityTimeVarying"]],
-        clinicalUtilityBootstrap = function() private$.items[["clinicalUtilityBootstrap"]],
+        clinicalUtilityTimeVaryingTable = function() private$.items[["clinicalUtilityTimeVaryingTable"]],
+        clinicalUtilityBootstrapTable = function() private$.items[["clinicalUtilityBootstrapTable"]],
         clinicalUtilitySummary = function() private$.items[["clinicalUtilitySummary"]]),
     private = list(),
     public=list(
@@ -2506,7 +2571,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationOverviewExplanation",
                 title="Understanding the Migration Overview",
-                visible="(showMigrationOverview && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "showMigrationOverview")))
             self$add(jmvcore::Table$new(
@@ -2537,7 +2602,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationMatrixExplanation",
                 title="Understanding the Migration Matrix",
-                visible="(showMigrationMatrix && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "showMigrationMatrix")))
             self$add(jmvcore::Table$new(
@@ -2557,7 +2622,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="stageDistributionExplanation",
                 title="Understanding Stage Distribution Changes",
-                visible="(showStageDistribution && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "showStageDistribution")))
             self$add(jmvcore::Table$new(
@@ -2597,7 +2662,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationSummaryExplanation",
                 title="Understanding Statistical Tests for Migration",
-                visible="(showMigrationSummary && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "showMigrationSummary")))
             self$add(jmvcore::Table$new(
@@ -2624,7 +2689,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="statisticalComparisonExplanation",
                 title="Understanding Statistical Comparison Metrics",
-                visible="(showStatisticalComparison && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "showStatisticalComparison")))
             self$add(jmvcore::Table$new(
@@ -2659,7 +2724,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceComparisonExplanation",
                 title="Understanding Concordance (C-Index) Analysis",
-                visible="(showConcordanceComparison && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "showConcordanceComparison")))
             self$add(jmvcore::Table$new(
@@ -2712,7 +2777,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="nriResultsExplanation",
                 title="Understanding Net Reclassification Improvement (NRI)",
-                visible="(calculateNRI && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "calculateNRI")))
             self$add(jmvcore::Table$new(
@@ -2767,7 +2832,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="idiResultsExplanation",
                 title="Understanding Integrated Discrimination Improvement (IDI)",
-                visible="(calculateIDI && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "calculateIDI")))
             self$add(jmvcore::Table$new(
@@ -3038,7 +3103,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "performInteractionTests")))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="stratifiedAnalysis",
+                name="stratifiedAnalysisTable",
                 title="Stratified Analysis Results",
                 visible="(enableMultifactorialAnalysis && stratifiedAnalysis)",
                 clearWith=list(
@@ -3176,7 +3241,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="dcaResultsExplanation",
                 title="Understanding Decision Curve Analysis (DCA)",
-                visible="(performDCA && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "performDCA")))
             self$add(jmvcore::Table$new(
@@ -3216,7 +3281,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="pseudoR2ResultsExplanation",
                 title="Understanding Pseudo R-squared Measures",
-                visible="(calculatePseudoR2 && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "calculatePseudoR2")))
             self$add(jmvcore::Table$new(
@@ -3486,7 +3551,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="homogeneityTestsExplanation",
                 title="Understanding Stage Homogeneity Tests",
-                visible="(performHomogeneityTests && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "performHomogeneityTests")))
             self$add(jmvcore::Table$new(
@@ -3524,7 +3589,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="trendTestsExplanation",
                 title="Understanding Stage Trend Analysis",
-                visible="(performTrendTests && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "performTrendTests")))
             self$add(jmvcore::Table$new(
@@ -3680,7 +3745,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="effectSizesExplanation",
                 title="Understanding Effect Sizes",
-                visible="(includeEffectSizes && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "includeEffectSizes")))
             self$add(jmvcore::Table$new(
@@ -3889,7 +3954,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="advancedMigrationExplanation",
                 title="Understanding Advanced Migration Analysis",
-                visible="(advancedMigrationAnalysis && showExplanations)",
+                visible=FALSE,
                 clearWith=list(
                     "advancedMigrationAnalysis")))
             self$add(jmvcore::Table$new(
@@ -4044,7 +4109,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `name`="P_Value", 
                         `title`="P-value", 
                         `type`="number", 
-                        `format`="zto.pvalue"),
+                        `format`="zto,pvalue"),
                     list(
                         `name`="Statistical_Test", 
                         `title`="Test", 
@@ -5963,7 +6028,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="forestStagingComparison",
+                name="forestStagingComparisonTable",
                 title="Forest-Based Staging System Comparison",
                 visible="(performRandomForestAnalysis && forestStagingComparison)",
                 clearWith=list(
@@ -6138,7 +6203,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="cureModelComparison",
+                name="cureModelComparisonTable",
                 title="Cure Model Staging System Comparison",
                 visible="(performCureModelAnalysis && cureModelComparison)",
                 clearWith=list(
@@ -6306,10 +6371,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="intervalCensoringOverview",
                 title="Interval Censoring Analysis Overview",
+                visible="(performIntervalCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringLeftTime",
                     "intervalCensoringRightTime",
@@ -6332,10 +6398,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="intervalCensoringNonparametric",
                 title="Non-parametric Survival Estimates (NPMLE)",
+                visible="(performIntervalCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringModel",
                     "intervalCensoringBootstrap",
@@ -6369,10 +6436,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="intervalCensoringParametric",
                 title="Parametric Interval-Censored Regression",
+                visible="(performIntervalCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringModel",
                     "intervalCensoringDistribution",
@@ -6410,10 +6478,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="intervalCensoringComparison",
                 title="Staging System Comparison (Interval-Censored)",
+                visible="(performIntervalCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringCompareStages",
                     "intervalCensoringModel"),
@@ -6450,10 +6519,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="intervalCensoringDiagnosticsTable",
                 title="Interval Censoring Model Diagnostics",
+                visible="(performIntervalCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringDiagnostics",
                     "intervalCensoringModel"),
@@ -6482,10 +6552,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="intervalCensoringSummary",
                 title="Interval Censoring Analysis Summary",
+                visible="(performIntervalCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performIntervalCensoringAnalysis"),
                 columns=list(
                     list(
@@ -6508,10 +6579,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="informativeCensoringOverview",
                 title="Informative Censoring Analysis Overview",
+                visible="(performInformativeCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringTestMethod",
                     "informativeCensoringAdjustmentMethod"),
@@ -6532,10 +6604,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="informativeCensoringTests",
                 title="Informative Censoring Detection Tests",
+                visible="(performInformativeCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringTestMethod",
                     "informativeCensoringAlpha"),
@@ -6568,10 +6641,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="informativeCensoringByStage",
                 title="Censoring Patterns by Stage",
+                visible="(performInformativeCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringCompareStages"),
                 columns=list(
@@ -6611,10 +6685,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="informativeCensoringAdjustment",
                 title="Adjusted Survival Estimates",
+                visible="(performInformativeCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringAdjustmentMethod",
                     "informativeCensoringBootstrap"),
@@ -6651,10 +6726,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="informativeCensoringSensitivity",
                 title="Sensitivity Analysis Results",
+                visible="(performInformativeCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringSensitivityRange",
                     "informativeCensoringAdjustmentMethod"),
@@ -6687,10 +6763,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="informativeCensoringDiagnostics",
                 title="Informative Censoring Diagnostics",
+                visible="(performInformativeCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringTestMethod"),
                 columns=list(
@@ -6714,10 +6791,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="informativeCensoringSummary",
                 title="Informative Censoring Analysis Summary",
+                visible="(performInformativeCensoringAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performInformativeCensoringAnalysis"),
                 columns=list(
                     list(
@@ -6740,10 +6818,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceProbabilityOverview",
                 title="Concordance Probability Analysis Overview",
+                visible="(performConcordanceProbabilityAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityMethods",
                     "concordanceProbabilityWeighting"),
@@ -6764,10 +6843,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceProbabilityEstimates",
                 title="Concordance Probability Estimates",
+                visible="(performConcordanceProbabilityAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityMethods",
                     "concordanceProbabilityBootstrap"),
@@ -6808,10 +6888,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceProbabilityTimeDependentComplex",
                 title="Time-Dependent Concordance Analysis",
+                visible="(performConcordanceProbabilityAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityTimePoints",
                     "concordanceProbabilityMethods"),
@@ -6852,10 +6933,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceProbabilityComparison",
                 title="Staging System Concordance Comparison",
+                visible="(performConcordanceProbabilityAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityCompareStages",
                     "concordanceProbabilityAlpha"),
@@ -6900,10 +6982,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceProbabilityRobustness",
                 title="Robustness Analysis Results",
+                visible="(performConcordanceProbabilityAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityRobustnessAnalysis"),
                 columns=list(
@@ -6935,10 +7018,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceProbabilityDiagnosticsTable",
                 title="Concordance Analysis Diagnostics",
+                visible="(performConcordanceProbabilityAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityDiagnostics"),
                 columns=list(
@@ -6962,10 +7046,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceProbabilitySummary",
                 title="Concordance Probability Analysis Summary",
+                visible="(performConcordanceProbabilityAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performConcordanceProbabilityAnalysis"),
                 columns=list(
                     list(
@@ -6988,10 +7073,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="winRatioOverview",
                 title="Win Ratio Analysis Overview",
+                visible="(performWinRatioAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioEndpoints",
                     "winRatioMatchingStrategy"),
@@ -7012,10 +7098,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="winRatioPrimaryResults",
                 title="Win Ratio Primary Results",
+                visible="(performWinRatioAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioDeathVariable",
                     "winRatioSecondaryEndpoint"),
@@ -7060,10 +7147,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="winRatioEndpointContributions",
                 title="Endpoint-Specific Contributions",
+                visible="(performWinRatioAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioEndpoints"),
                 columns=list(
@@ -7103,10 +7191,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="winRatioStageSpecific",
                 title="Stage-Specific Win Ratios",
+                visible="(performWinRatioAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioMatchingStrategy"),
                 columns=list(
@@ -7142,10 +7231,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="winRatioSensitivityResults",
                 title="Win Ratio Sensitivity Analysis",
+                visible="(performWinRatioAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioSensitivityAnalysis"),
                 columns=list(
@@ -7181,10 +7271,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="winRatioGeneralizedPairwiseResults",
                 title="Generalized Pairwise Comparison Results",
+                visible="(performWinRatioAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioGeneralizedPairwise"),
                 columns=list(
@@ -7216,10 +7307,11 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="winRatioSummary",
                 title="Win Ratio Analysis Summary",
+                visible="(performWinRatioAnalysis)",
                 clearWith=list(
-                    "vars",
-                    "explanatory",
-                    "outcome",
+                    "oldStage",
+                    "event",
+                    "survivalTime",
                     "performWinRatioAnalysis"),
                 columns=list(
                     list(
@@ -7242,9 +7334,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsOverview",
                 title="Frailty Models Analysis Overview",
+                visible="(performFrailtyModelsAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage",
                     "frailtyClusterVariable"),
@@ -7288,9 +7381,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsComparison",
                 title="Frailty Models - Staging System Comparison",
+                visible="(performFrailtyModelsAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage",
                     "frailtyClusterVariable"),
@@ -7340,9 +7434,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsVarianceComponents",
                 title="Frailty Models - Variance Components Analysis",
+                visible="(performFrailtyModelsAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage",
                     "frailtyClusterVariable"),
@@ -7383,9 +7478,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsClusterSpecific",
                 title="Frailty Models - Cluster-Specific Analysis",
+                visible="(performFrailtyModelsAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage",
                     "frailtyClusterVariable"),
@@ -7435,9 +7531,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsBootstrap",
                 title="Frailty Models - Bootstrap Validation Results",
+                visible="(performFrailtyModelsAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage",
                     "frailtyClusterVariable"),
@@ -7489,9 +7586,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsDiagnostics",
                 title="Frailty Models - Model Diagnostics",
+                visible="(performFrailtyModelsAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage",
                     "frailtyClusterVariable"),
@@ -7529,9 +7627,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsSummary",
                 title="Frailty Models - Comprehensive Summary",
+                visible="(performFrailtyModelsAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage",
                     "frailtyClusterVariable"),
@@ -7568,9 +7667,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="clinicalUtilityOverview",
                 title="Clinical Utility Index Analysis Overview",
+                visible="(performClinicalUtilityAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage"),
                 columns=list(
@@ -7610,11 +7710,12 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="clinicalUtilityComparison",
+                name="clinicalUtilityComparisonTable",
                 title="Clinical Utility Index - Staging System Comparison",
+                visible="(performClinicalUtilityAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage"),
                 columns=list(
@@ -7663,11 +7764,12 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="clinicalUtilityNNT",
+                name="clinicalUtilityNNTTable",
                 title="Clinical Utility Index - Number Needed to Treat Analysis",
+                visible="(performClinicalUtilityAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage"),
                 columns=list(
@@ -7721,9 +7823,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="clinicalUtilityNetBenefit",
                 title="Clinical Utility Index - Net Benefit Analysis",
+                visible="(performClinicalUtilityAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage"),
                 columns=list(
@@ -7772,11 +7875,12 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="clinicalUtilityTimeVarying",
+                name="clinicalUtilityTimeVaryingTable",
                 title="Clinical Utility Index - Time-Varying Analysis",
+                visible="(performClinicalUtilityAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage"),
                 columns=list(
@@ -7823,11 +7927,12 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="clinicalUtilityBootstrap",
+                name="clinicalUtilityBootstrapTable",
                 title="Clinical Utility Index - Bootstrap Validation Results",
+                visible="(performClinicalUtilityAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage"),
                 columns=list(
@@ -7877,9 +7982,10 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="clinicalUtilitySummary",
                 title="Clinical Utility Index - Comprehensive Summary",
+                visible="(performClinicalUtilityAnalysis)",
                 clearWith=list(
-                    "timeVar",
-                    "eventVar",
+                    "survivalTime",
+                    "event",
                     "oldStage",
                     "newStage"),
                 columns=list(
@@ -8426,8 +8532,17 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   validation. More samples  provide more stable confidence intervals but
 #'   increase computation time.
 #' @param generateForestSummary Generate comprehensive summary of random
-#'   forest analysis including  model performance, variable importance, staging
-#'   comparison, and  clinical recommendations based on ensemble predictions.
+#'   forest analysis including model performance, variable importance, staging
+#'   comparison, and clinical recommendations based on ensemble predictions.
+#' @param rfAnalyzeOldStage Include old staging system in random forest
+#'   analysis
+#' @param rfAnalyzeNewStage Include new staging system in random forest
+#'   analysis
+#' @param rfMtryAuto Automatically select number of variables to try at each
+#'   split
+#' @param rfBootstrapType Bootstrap sampling strategy for random forest
+#' @param rfSamplingType Sampling method for random forest bootstrap
+#' @param rfMinimalDepth Perform minimal depth variable selection analysis
 #' @param performCureModelAnalysis Perform cure model analysis for populations
 #'   where a fraction of patients  may be effectively cured. Uses mixture models
 #'   to separate susceptible  and cured populations, particularly relevant for
@@ -8637,6 +8752,8 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   disease progression, recurrence). This endpoint is evaluated when the
 #'   primary endpoint comparison is tied. Can be binary (event/no event) or
 #'   continuous (time to event).
+#' @param wrSecondaryDirection Direction of improvement for secondary endpoint
+#'   in win ratio
 #' @param winRatioTertiaryEndpoint Variable for tertiary endpoint (e.g.,
 #'   response, quality of life). This endpoint is evaluated when both primary
 #'   and secondary comparisons are tied. Can be binary or continuous.
@@ -8777,7 +8894,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$stepwiseResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interactionTests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interactionTestsExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$stratifiedAnalysis} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stratifiedAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$integratedAUCAnalysis} \tab \tab \tab \tab \tab a table \cr
@@ -8876,55 +8993,55 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$forestModelPerformance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$forestSurvivalPredictions} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$forestCoxComparison} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$forestStagingComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$forestStagingComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$forestAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cureFractionEstimates} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cureModelParameters} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cureModelComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cureModelComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stageSpecificCureAnalysis} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cureModelBootstrap} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cureAnalysisSummary} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$intervalCensoringOverview} \tab \tab \tab \tab \tab Summary of interval-censored data characteristics and model selection \cr
-#'   \code{results$intervalCensoringNonparametric} \tab \tab \tab \tab \tab Non-parametric maximum likelihood survival estimates for interval-censored data \cr
-#'   \code{results$intervalCensoringParametric} \tab \tab \tab \tab \tab Parametric survival regression results for interval-censored data \cr
-#'   \code{results$intervalCensoringComparison} \tab \tab \tab \tab \tab Model comparison between staging systems accounting for interval censoring \cr
-#'   \code{results$intervalCensoringDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for interval-censored survival models \cr
-#'   \code{results$intervalCensoringSummary} \tab \tab \tab \tab \tab Clinical interpretation and recommendations for interval-censored survival analysis \cr
-#'   \code{results$informativeCensoringOverview} \tab \tab \tab \tab \tab Summary of informative censoring detection analysis and data characteristics \cr
-#'   \code{results$informativeCensoringTests} \tab \tab \tab \tab \tab Statistical tests for detecting informative censoring patterns \cr
-#'   \code{results$informativeCensoringByStage} \tab \tab \tab \tab \tab Comparison of censoring patterns across staging groups \cr
-#'   \code{results$informativeCensoringAdjustment} \tab \tab \tab \tab \tab Survival estimates adjusted for informative censoring effects \cr
-#'   \code{results$informativeCensoringSensitivity} \tab \tab \tab \tab \tab Sensitivity analysis exploring range of potential bias from informative censoring \cr
-#'   \code{results$informativeCensoringDiagnostics} \tab \tab \tab \tab \tab Diagnostic measures for informative censoring assessment \cr
-#'   \code{results$informativeCensoringSummary} \tab \tab \tab \tab \tab Summary of informative censoring findings and recommendations \cr
-#'   \code{results$concordanceProbabilityOverview} \tab \tab \tab \tab \tab Summary of concordance probability analysis for staging system discrimination assessment \cr
-#'   \code{results$concordanceProbabilityEstimates} \tab \tab \tab \tab \tab Concordance probability estimates using multiple methods for robust discrimination assessment \cr
-#'   \code{results$concordanceProbabilityTimeDependentComplex} \tab \tab \tab \tab \tab Time-dependent concordance probability estimates at clinically relevant time points \cr
-#'   \code{results$concordanceProbabilityComparison} \tab \tab \tab \tab \tab Statistical comparison of concordance probabilities between staging systems \cr
-#'   \code{results$concordanceProbabilityRobustness} \tab \tab \tab \tab \tab Robustness analysis for concordance probability estimates under different assumptions \cr
-#'   \code{results$concordanceProbabilityDiagnosticsTable} \tab \tab \tab \tab \tab Diagnostic measures for concordance probability analysis validation \cr
-#'   \code{results$concordanceProbabilitySummary} \tab \tab \tab \tab \tab Summary of concordance probability findings and clinical interpretation \cr
-#'   \code{results$winRatioOverview} \tab \tab \tab \tab \tab Summary of win ratio analysis configuration and data characteristics \cr
-#'   \code{results$winRatioPrimaryResults} \tab \tab \tab \tab \tab Primary win ratio analysis results comparing staging systems \cr
-#'   \code{results$winRatioEndpointContributions} \tab \tab \tab \tab \tab Contribution of each endpoint to the overall win ratio \cr
-#'   \code{results$winRatioStageSpecific} \tab \tab \tab \tab \tab Win ratio analysis stratified by staging categories \cr
-#'   \code{results$winRatioSensitivityResults} \tab \tab \tab \tab \tab Sensitivity analysis results for win ratio estimates \cr
-#'   \code{results$winRatioGeneralizedPairwiseResults} \tab \tab \tab \tab \tab Extended metrics from generalized pairwise comparison framework \cr
-#'   \code{results$winRatioSummary} \tab \tab \tab \tab \tab Summary of win ratio findings and clinical interpretation \cr
-#'   \code{results$frailtyModelsOverview} \tab \tab \tab \tab \tab Overview of frailty models analysis for clustered survival data \cr
-#'   \code{results$frailtyModelsComparison} \tab \tab \tab \tab \tab Comparison of staging systems using frailty models with clustering adjustments \cr
-#'   \code{results$frailtyModelsVarianceComponents} \tab \tab \tab \tab \tab Detailed variance components analysis for frailty models \cr
-#'   \code{results$frailtyModelsClusterSpecific} \tab \tab \tab \tab \tab Cluster-specific survival analysis comparing staging systems within institutions \cr
-#'   \code{results$frailtyModelsBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for frailty model parameters and variance components \cr
-#'   \code{results$frailtyModelsDiagnostics} \tab \tab \tab \tab \tab Comprehensive model diagnostics for frailty models including residual analysis and goodness-of-fit \cr
-#'   \code{results$frailtyModelsSummary} \tab \tab \tab \tab \tab Executive summary of frailty models analysis with evidence-based recommendations \cr
-#'   \code{results$clinicalUtilityOverview} \tab \tab \tab \tab \tab Overview of clinical utility index analysis combining discrimination with clinical decision-making value \cr
-#'   \code{results$clinicalUtilityComparison} \tab \tab \tab \tab \tab Comparison of clinical utility between staging systems across different risk thresholds \cr
-#'   \code{results$clinicalUtilityNNT} \tab \tab \tab \tab \tab Number Needed to Treat (NNT) and Number Needed to Harm (NNH) analysis for staging-guided interventions \cr
-#'   \code{results$clinicalUtilityNetBenefit} \tab \tab \tab \tab \tab Net benefit analysis across risk thresholds with comparative utility assessment \cr
-#'   \code{results$clinicalUtilityTimeVarying} \tab \tab \tab \tab \tab Time-varying clinical utility analysis showing how staging system value changes over time \cr
-#'   \code{results$clinicalUtilityBootstrap} \tab \tab \tab \tab \tab Bootstrap validation results for clinical utility metrics with confidence intervals \cr
-#'   \code{results$clinicalUtilitySummary} \tab \tab \tab \tab \tab Executive summary of clinical utility analysis with evidence-based recommendations \cr
+#'   \code{results$intervalCensoringOverview} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$intervalCensoringNonparametric} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$intervalCensoringParametric} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$intervalCensoringComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$intervalCensoringDiagnosticsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$intervalCensoringSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$informativeCensoringOverview} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$informativeCensoringTests} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$informativeCensoringByStage} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$informativeCensoringAdjustment} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$informativeCensoringSensitivity} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$informativeCensoringDiagnostics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$informativeCensoringSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceProbabilityOverview} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceProbabilityEstimates} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceProbabilityTimeDependentComplex} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceProbabilityComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceProbabilityRobustness} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceProbabilityDiagnosticsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$concordanceProbabilitySummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$winRatioOverview} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$winRatioPrimaryResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$winRatioEndpointContributions} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$winRatioStageSpecific} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$winRatioSensitivityResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$winRatioGeneralizedPairwiseResults} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$winRatioSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frailtyModelsOverview} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frailtyModelsComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frailtyModelsVarianceComponents} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frailtyModelsClusterSpecific} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frailtyModelsBootstrap} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frailtyModelsDiagnostics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$frailtyModelsSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUtilityOverview} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUtilityComparisonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUtilityNNTTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUtilityNetBenefit} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUtilityTimeVaryingTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUtilityBootstrapTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clinicalUtilitySummary} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -9076,6 +9193,12 @@ stagemigration <- function(
     forestBootstrap = FALSE,
     forestBootstrapSamples = 100,
     generateForestSummary = FALSE,
+    rfAnalyzeOldStage = TRUE,
+    rfAnalyzeNewStage = TRUE,
+    rfMtryAuto = TRUE,
+    rfBootstrapType = "by.root",
+    rfSamplingType = "swr",
+    rfMinimalDepth = FALSE,
     performCureModelAnalysis = FALSE,
     cureModelType = "mixture",
     cureDistribution = "weibull",
@@ -9133,6 +9256,7 @@ stagemigration <- function(
     winRatioEndpoints = "death_progression_response",
     winRatioDeathVariable = NULL,
     winRatioSecondaryEndpoint = NULL,
+    wrSecondaryDirection = "higher",
     winRatioTertiaryEndpoint = NULL,
     winRatioTimeVariables = NULL,
     winRatioMatchingStrategy = "all_pairs",
@@ -9373,6 +9497,12 @@ stagemigration <- function(
         forestBootstrap = forestBootstrap,
         forestBootstrapSamples = forestBootstrapSamples,
         generateForestSummary = generateForestSummary,
+        rfAnalyzeOldStage = rfAnalyzeOldStage,
+        rfAnalyzeNewStage = rfAnalyzeNewStage,
+        rfMtryAuto = rfMtryAuto,
+        rfBootstrapType = rfBootstrapType,
+        rfSamplingType = rfSamplingType,
+        rfMinimalDepth = rfMinimalDepth,
         performCureModelAnalysis = performCureModelAnalysis,
         cureModelType = cureModelType,
         cureDistribution = cureDistribution,
@@ -9430,6 +9560,7 @@ stagemigration <- function(
         winRatioEndpoints = winRatioEndpoints,
         winRatioDeathVariable = winRatioDeathVariable,
         winRatioSecondaryEndpoint = winRatioSecondaryEndpoint,
+        wrSecondaryDirection = wrSecondaryDirection,
         winRatioTertiaryEndpoint = winRatioTertiaryEndpoint,
         winRatioTimeVariables = winRatioTimeVariables,
         winRatioMatchingStrategy = winRatioMatchingStrategy,

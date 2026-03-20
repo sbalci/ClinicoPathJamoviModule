@@ -1,6 +1,6 @@
 ---
 name: add-R-code
-description: Add infrastructure for .generateRCode() in jamovi analysis - creates stubs in .b.R and wires UI in .a.yaml/.r.yaml
+description: Add reproducible R code export to a jamovi function. Scaffolds .generateRCode(), wires showRCode option and rCode output
 interactive: true
 args:
   function_name:
@@ -13,6 +13,8 @@ usage: /add-R-code <function_name> [--force]
 ---
 
 # Add Reproducible R Code Infrastructure
+
+**Consult:** `vignettes/jamovi_b_R_guide.md` for backend patterns and `vignettes/jamovi_r_yaml_guide.md` for results output wiring.
 
 This command sets up the infrastructure for `.generateRCode()` in a jamovi analysis, enabling users to export reproducible R code that uses upstream packages instead of jamovi wrappers.
 
@@ -174,3 +176,10 @@ For inspiration, see:
 - `R/variablebiplot.b.R` - Complex multimethod analysis
 - `R/summarydata.b.R` - Descriptive statistics
 - Both show proper parameter passing, code building with `sprintf()`, and HTML wrapping
+
+---
+
+## Related Commands
+
+- `/check-function` -- Validate wiring after adding R code infrastructure
+- `/review-function` -- Review the generated R code implementation

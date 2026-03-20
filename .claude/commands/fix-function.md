@@ -1,6 +1,6 @@
 ---
 name: fix-function
-description: Generate and optionally apply specific fixes for jamovi function issues
+description: Diagnose and repair bugs in a jamovi function. Fixes schema mismatches, integration errors, broken outputs. Dry-run safe by default
 interactive: true
 args:
   function_name:
@@ -33,6 +33,8 @@ examples:
 
 
 # Jamovi Function Issue Resolution with Safe Dry-Run
+
+**Consult these guides** for correct patterns: `vignettes/jamovi_module_patterns_guide.md`, `vignettes/jamovi_a_yaml_guide.md`, `vignettes/jamovi_b_R_guide.md`, `vignettes/jamovi_r_yaml_guide.md`, `vignettes/jamovi_u_yaml_guide.md`.
 
 You are an expert jamovi developer tasked with providing specific, implementable fixes for the jamovi function `$ARGUMENTS`.
 
@@ -207,3 +209,11 @@ result <- $ARGUMENTS(data = histopathology, ...)
 3. [Testing approach to use]
 
 Provide copy-paste ready fixes with clear implementation steps.
+
+---
+
+## Related Commands
+
+- `/check-function` -- Validate and auto-fix with preset profiles
+- `/fix-notices` -- Add or fix user-facing warning/error notices
+- `/review-function` -- Detailed code review

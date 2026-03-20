@@ -77,6 +77,8 @@ A results object containing:
 \code{results$stackedPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$kmvscifPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
+\code{results$fineGrayTable} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

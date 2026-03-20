@@ -849,15 +849,17 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Survival Analysis",
                 refs=list(
-                    "finalfit",
+                    "ClinicoPathJamoviModule",
                     "survival",
                     "survminer",
+                    "finalfit",
+                    "flexsurv",
+                    "cmprsk",
+                    "KMunicate",
                     "survivaltutorial",
                     "survivalrwnahhas",
                     "survivalrviews",
-                    "appliedsurvivalanalysisR",
-                    "ClinicoPathJamoviModule",
-                    "flexsurv"))
+                    "appliedsurvivalanalysisR"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",

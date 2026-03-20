@@ -11,7 +11,7 @@ timeroc(
   outcomeLevel,
   marker = NULL,
   timepoints = "12, 36, 60",
-  method = "incident",
+  method = "marginal",
   bootstrapCI = FALSE,
   nboot = 100,
   plotROC = TRUE,
@@ -41,11 +41,16 @@ timeroc(
 
 \item{timepoints}{.}
 
-\item{method}{.}
+\item{method}{Method for Inverse Probability of Censoring Weights. Marginal
+uses Kaplan-Meier and assumes independent censoring. Cox and Aalen adjust
+for covariates affecting censoring.}
 
-\item{bootstrapCI}{.}
+\item{bootstrapCI}{Compute asymptotic confidence intervals for AUC using
+influence function-based variance estimation.}
 
-\item{nboot}{.}
+\item{nboot}{Deprecated. Kept for backward compatibility with saved
+analyses. The CI computation uses analytic influence functions, not
+bootstrap.}
 
 \item{plotROC}{.}
 
@@ -83,6 +88,7 @@ for optimal threshold selection.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$aucTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
@@ -92,7 +98,7 @@ A results object containing:
 \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$binaryROCTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$rocComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$rocComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$binaryROCPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$diagnosticPerformance} \tab \tab \tab \tab \tab a html \cr
 }

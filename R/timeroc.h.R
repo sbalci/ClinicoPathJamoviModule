@@ -11,7 +11,7 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             outcomeLevel = NULL,
             marker = NULL,
             timepoints = "12, 36, 60",
-            method = "incident",
+            method = "marginal",
             bootstrapCI = FALSE,
             nboot = 100,
             plotROC = TRUE,
@@ -65,10 +65,10 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "method",
                 method,
                 options=list(
-                    "incident",
-                    "cumulative",
-                    "static"),
-                default="incident")
+                    "marginal",
+                    "cox",
+                    "aalen"),
+                default="marginal")
             private$..bootstrapCI <- jmvcore::OptionBool$new(
                 "bootstrapCI",
                 bootstrapCI,
@@ -78,7 +78,8 @@ timerocOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 nboot,
                 default=100,
                 min=10,
-                max=1000)
+                max=1000,
+                hidden=TRUE)
             private$..plotROC <- jmvcore::OptionBool$new(
                 "plotROC",
                 plotROC,
@@ -213,6 +214,7 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "timerocResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         text = function() private$.items[["text"]],
         aucTable = function() private$.items[["aucTable"]],
         rocPlot = function() private$.items[["rocPlot"]],
@@ -222,7 +224,7 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         modelComparison = function() private$.items[["modelComparison"]],
         clinicalInterpretation = function() private$.items[["clinicalInterpretation"]],
         binaryROCTable = function() private$.items[["binaryROCTable"]],
-        rocComparison = function() private$.items[["rocComparison"]],
+        rocComparisonTable = function() private$.items[["rocComparisonTable"]],
         binaryROCPlot = function() private$.items[["binaryROCPlot"]],
         diagnosticPerformance = function() private$.items[["diagnosticPerformance"]]),
     private = list(),
@@ -237,16 +239,51 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "glue",
                     "pROC",
                     "timeROC",
-                    "scales"))
+                    "scales",
+                    "ggplot2"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "method",
+                    "timepoints",
+                    "bootstrapCI",
+                    "analysisType")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
-                title="Time-Dependent ROC Analysis Results"))
+                title="Time-Dependent ROC Analysis Results",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "method",
+                    "timepoints",
+                    "bootstrapCI",
+                    "nboot",
+                    "timetypeoutput",
+                    "analysisType")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="aucTable",
                 title="Area Under ROC Curve (AUC)",
+                visible="(analysisType:timedep)",
                 rows=0,
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "timepoints",
+                    "method",
+                    "bootstrapCI",
+                    "nboot"),
                 columns=list(
                     list(
                         `name`="timepoint", 
@@ -275,7 +312,16 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plotROC",
-                visible="(plotROC)"))
+                requiresData=TRUE,
+                visible="(plotROC && analysisType:timedep)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "timepoints",
+                    "method",
+                    "timetypeoutput")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="aucPlot",
@@ -283,13 +329,29 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plotAUC",
-                visible="(plotAUC)"))
+                requiresData=TRUE,
+                visible="(plotAUC && analysisType:timedep)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "timepoints",
+                    "method",
+                    "bootstrapCI",
+                    "timetypeoutput",
+                    "smoothAUC")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="markerStats",
                 title="Marker Variable Statistics",
-                visible="(showMarkerStats)",
+                visible="(showMarkerStats && analysisType:timedep)",
                 rows=0,
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker"),
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -303,8 +365,15 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="cutoffTable",
                 title="Optimal Cutoff Values",
-                visible="(showOptimalCutoff)",
+                visible="(showOptimalCutoff && analysisType:timedep)",
                 rows=0,
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "timepoints",
+                    "method"),
                 columns=list(
                     list(
                         `name`="timepoint", 
@@ -330,17 +399,39 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="modelComparison",
                 title="Model Performance Comparison",
-                visible="(compareBaseline)"))
+                visible="(compareBaseline && analysisType:timedep)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "timepoints",
+                    "method",
+                    "bootstrapCI")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
-                title="Clinical Interpretation"))
+                title="Clinical Interpretation",
+                visible="(analysisType:timedep)",
+                clearWith=list(
+                    "elapsedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "timepoints",
+                    "method",
+                    "timetypeoutput")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="binaryROCTable",
                 title="Binary ROC Analysis Results",
                 visible="(analysisType:binary)",
                 rows=0,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "youdenIndex"),
                 columns=list(
                     list(
                         `name`="marker", 
@@ -376,10 +467,17 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="rocComparison",
+                name="rocComparisonTable",
                 title="ROC Curve Comparison",
-                visible="(compareROCs)",
+                visible="(compareROCs && analysisType:binary)",
                 rows=0,
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "markers",
+                    "rocComparison",
+                    "compareROCs"),
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -408,12 +506,22 @@ timerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plotBinaryROC",
-                visible="(analysisType:binary && plotROC)"))
+                visible="(analysisType:binary && plotROC)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "marker",
+                    "markers",
+                    "compareROCs")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="diagnosticPerformance",
                 title="Diagnostic Performance Summary",
-                visible="(analysisType:binary)"))}))
+                visible="(analysisType:binary)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "marker")))}))
 
 timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "timerocBase",
@@ -445,9 +553,14 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param outcomeLevel .
 #' @param marker .
 #' @param timepoints .
-#' @param method .
-#' @param bootstrapCI .
-#' @param nboot .
+#' @param method Method for Inverse Probability of Censoring Weights. Marginal
+#'   uses Kaplan-Meier and assumes independent censoring. Cox and Aalen adjust
+#'   for covariates affecting censoring.
+#' @param bootstrapCI Compute asymptotic confidence intervals for AUC using
+#'   influence function-based variance estimation.
+#' @param nboot Deprecated. Kept for backward compatibility with saved
+#'   analyses. The CI computation uses analytic influence functions, not
+#'   bootstrap.
 #' @param plotROC .
 #' @param plotAUC .
 #' @param timetypeoutput Time units for display in plots and results.
@@ -471,6 +584,7 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   for optimal threshold selection.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aucTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rocPlot} \tab \tab \tab \tab \tab an image \cr
@@ -480,7 +594,7 @@ timerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$binaryROCTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$rocComparison} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rocComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$binaryROCPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$diagnosticPerformance} \tab \tab \tab \tab \tab a html \cr
 #' }
@@ -499,7 +613,7 @@ timeroc <- function(
     outcomeLevel,
     marker = NULL,
     timepoints = "12, 36, 60",
-    method = "incident",
+    method = "marginal",
     bootstrapCI = FALSE,
     nboot = 100,
     plotROC = TRUE,

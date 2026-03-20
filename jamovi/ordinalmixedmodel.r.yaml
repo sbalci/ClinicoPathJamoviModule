@@ -1,0 +1,204 @@
+---
+name: ordinalmixedmodel
+title: Ordinal Mixed Models (Cumulative Link)
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: 'Analysis Instructions'
+      type: Html
+      visible: true
+
+    - name: modelFitTable
+      title: 'Model Fit'
+      type: Table
+      visible: (modelFit)
+      rows: 1
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+      columns:
+        - name: stat
+          title: 'Statistic'
+          type: text
+        - name: value
+          title: 'Value'
+          type: number
+          format: zto:3
+
+    - name: fixedEffects
+      title: 'Fixed Effects'
+      type: Table
+      visible: true
+      rows: 1
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+      columns:
+        - name: term
+          title: 'Term'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: z
+          title: 'z'
+          type: number
+          format: zto:3
+        - name: p
+          title: 'p'
+          type: number
+          format: zto,pvalue
+        - name: or
+          title: 'OR'
+          type: number
+          format: zto:3
+          visible: (oddsRatios)
+        - name: ciLower
+          title: 'CI Lower'
+          type: number
+          format: zto:3
+          visible: (confInt)
+        - name: ciUpper
+          title: 'CI Upper'
+          type: number
+          format: zto:3
+          visible: (confInt)
+
+    - name: thresholds
+      title: 'Threshold Coefficients'
+      type: Table
+      visible: (thresholdsTable)
+      rows: 1
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+      columns:
+        - name: threshold
+          title: 'Threshold'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+          format: zto:4
+        - name: se
+          title: 'SE'
+          type: number
+          format: zto:4
+        - name: z
+          title: 'z'
+          type: number
+          format: zto:3
+        - name: p
+          title: 'p'
+          type: number
+          format: zto,pvalue
+
+    - name: randomEffects
+      title: 'Random Effects'
+      type: Table
+      visible: (randomEffectsTable)
+      rows: 1
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+      columns:
+        - name: group
+          title: 'Group'
+          type: text
+        - name: variance
+          title: 'Variance'
+          type: number
+          format: zto:4
+        - name: sd
+          title: 'SD'
+          type: number
+          format: zto:4
+        - name: nLevels
+          title: 'N Levels'
+          type: integer
+
+    - name: propOddsTestTable
+      title: 'Proportional Odds Assumption Test'
+      type: Table
+      visible: (propOddsTest)
+      rows: 1
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+      columns:
+        - name: term
+          title: 'Term'
+          type: text
+        - name: chisq
+          title: 'Chi-Square'
+          type: number
+          format: zto:3
+        - name: df
+          title: 'df'
+          type: integer
+        - name: p
+          title: 'p'
+          type: number
+          format: zto,pvalue
+        - name: conclusion
+          title: 'Conclusion'
+          type: text
+
+    - name: conditionProbs
+      title: 'Predicted Marginal Probabilities'
+      type: Table
+      visible: (conditionMeans)
+      rows: 1
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+      columns:
+        - name: factor
+          title: 'Factor'
+          type: text
+        - name: level
+          title: 'Level'
+          type: text
+        - name: probabilities
+          title: 'P(Y = category)'
+          type: text
+
+    - name: methodExplanation
+      title: 'Method and Clinical Context'
+      type: Html
+      visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+
+...

@@ -1,6 +1,6 @@
 ---
 name: fix-notices
-description: Auto-audit and propose/apply jamovi Notices (jmvcore::Notice) for a given function
+description: Add or fix user-facing warnings and error notices (jmvcore::Notice) in a jamovi function. Covers ERROR, WARNING, INFO
 interactive: true
 args:
   function_name:
@@ -45,6 +45,8 @@ examples:
 ---
 
 # Jamovi Notices Auto-Fixer
+
+**Consult:** `vignettes/jamovi_notices_guide.md` for notice patterns, severity levels, and content rules. Also see `vignettes/jamovi_b_R_guide.md` for backend patterns.
 
 Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **minimal patches** to add or improve `jmvcore::Notice` usage, aligned with the official jamovi API and the ClinicoPath internal guide.
 
@@ -157,4 +159,11 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
 - [ ] INFO summary at bottom
 - [ ] Plain-text, specific, actionable wording
 - [ ] Unique `name=` values; no collisions
-- [ ] Re-run `/check-function-base` to verify coverage
+- [ ] Re-run `/check-function-full` to verify coverage
+
+---
+
+## Related Commands
+
+- `/check-function-full` -- Deep audit including notices coverage matrix
+- `/fix-function` -- Apply broader fixes beyond notices

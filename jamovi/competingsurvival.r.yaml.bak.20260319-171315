@@ -1,0 +1,239 @@
+---
+name:  competingsurvival
+title: Overall, Cause Specific, and Competing Survival
+jrs:   '1.1'
+
+items:
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: true
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - graystest
+          - subdistribution
+          - timepoints
+          - confidencelevel
+
+    - name:  survivalTable
+      title: Survival Analysis Results
+      type:  Table
+      visible: true
+      rows: 0
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - confidencelevel
+          - graystest
+          - subdistribution
+          - timepoints
+      columns:
+          - name: term
+            title: 'Variable'
+            type: text
+          - name: hr
+            title: 'HR'
+            type: number
+          - name: ci_lower
+            title: 'CI Lower'
+            type: number
+          - name: ci_upper
+            title: 'CI Upper'
+            type: number
+          - name: p_value
+            title: 'p-value'
+            type: number
+            format: zto,pvalue
+
+    - name:  cuminc
+      title: Cumulative Incidence Function
+      type:  Table
+      visible: (analysistype:compete)
+      rows: 0
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timepoints
+      columns:
+          - name: time
+            title: 'Time'
+            type: number
+          - name: est_1
+            title: 'CIF Disease Death'
+            type: number
+          - name: est_2
+            title: 'CIF Other Death'
+            type: number
+          - name: var_1
+            title: 'Variance 1'
+            type: number
+          - name: var_2
+            title: 'Variance 2'
+            type: number
+
+    - name:  comprisksPlot
+      title: Competing Risks Plot
+      type:  Image
+      width:  700
+      height: 400
+      renderFun: .plotCompetingRisks
+      visible: (analysistype:compete)
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cifColors
+          - showrisksets
+
+    - name:  stackedPlot
+      title: Stacked Probability Plot
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .stackedPlot
+      visible: (showStackedPlot && analysistype:compete)
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cifColors
+          - showStackedPlot
+
+    - name:  kmvscifPlot
+      title: 1-KM vs CIF Comparison
+      type:  Image
+      width:  700
+      height: 500
+      renderFun: .kmvscifPlot
+      visible: (showKMvsCIF && analysistype:compete)
+      clearWith:
+          - explanatory
+          - outcome
+          - overalltime
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cifColors
+          - showKMvsCIF
+
+    - name:  interpretation
+      title: Clinical Interpretation
+      type:  Html
+      visible: true
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - confidencelevel
+          - graystest
+          - subdistribution
+          - timepoints
+
+    - name: assumptions
+      title: Assumptions & Caveats
+      type: Html
+      visible: true
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+
+    - name: fineGrayTable
+      title: Fine-Gray Subdistribution Hazard Model
+      type: Table
+      visible: (subdistribution)
+      rows: 0
+      clearWith:
+          - overalltime
+          - outcome
+          - explanatory
+          - analysistype
+          - dod
+          - dooc
+          - confidencelevel
+          - subdistribution
+      columns:
+          - name: term
+            title: 'Term'
+            type: text
+          - name: coef
+            title: 'Coefficient'
+            type: number
+          - name: hr
+            title: 'HR'
+            type: number
+          - name: hr_lower
+            title: 'HR CI Lower'
+            type: number
+          - name: hr_upper
+            title: 'HR CI Upper'
+            type: number
+          - name: se
+            title: 'SE'
+            type: number
+          - name: z
+            title: 'z'
+            type: number
+          - name: p
+            title: 'p'
+            type: number
+            format: zto,pvalue
+
+
+refs:
+    - ClinicoPathJamoviModule
+
+    - janitor
+    - labelled
+    - glue
+    - finalfit
+    - survival
+    - cmprsk
+    - scales
+...

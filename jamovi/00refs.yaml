@@ -106,6 +106,14 @@ refs:
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=car'
         url: https://CRAN.R-project.org/package=car
 
+    dplyr:
+        type: 'software'
+        author: Hadley Wickham
+        year: 2023
+        title: "dplyr: A Grammar of Data Manipulation"
+        publisher: '[R package version 1.1.4]. Retrieved from https://CRAN.R-project.org/package=dplyr'
+        url: https://CRAN.R-project.org/package=dplyr
+
     ggplot2:
         type: 'software'
         author: Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., & RStudio
@@ -973,10 +981,10 @@ refs:
 
     scales:
         type: 'software'
-        author: ""
-        year: ""
-        title: "scales: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=scales'
+        author: Hadley Wickham
+        year: 2025
+        title: "scales: Scale Functions for Visualization"
+        publisher: '[R package version 1.4.0]. Retrieved from https://CRAN.R-project.org/package=scales'
         url: https://CRAN.R-project.org/package=scales
 
     patchwork:
@@ -1053,10 +1061,10 @@ refs:
 
     pROC:
         type: 'software'
-        author: ""
-        year: ""
-        title: "pROC: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=pROC'
+        author: Xavier Robin
+        year: 2025
+        title: "pROC: Display and Analyze ROC Curves"
+        publisher: '[R package version 1.19.0.1]. Retrieved from https://CRAN.R-project.org/package=pROC'
         url: https://CRAN.R-project.org/package=pROC
 
     boot:
@@ -1318,10 +1326,10 @@ refs:
 
     condSURV:
         type: 'software'
-        author: ""
-        year: ""
-        title: "condSURV: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=condSURV'
+        author: Luis Meira-Machado and Marta Sestelo
+        year: 2023
+        title: "condSURV: Estimation of the Conditional Survival Function for Ordered Multivariate Failure Time Data"
+        publisher: '[R package version 2.0.4]. Retrieved from https://CRAN.R-project.org/package=condSURV'
         url: https://CRAN.R-project.org/package=condSURV
 
     flexsurv:
@@ -1382,18 +1390,18 @@ refs:
 
     smcure:
         type: 'software'
-        author: ""
-        year: ""
-        title: "smcure: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=smcure'
+        author: Chao Cai
+        year: 2025
+        title: "smcure: Fit Semiparametric Mixture Cure Models"
+        publisher: '[R package version 2.2]. Retrieved from https://CRAN.R-project.org/package=smcure'
         url: https://CRAN.R-project.org/package=smcure
 
     flexsurvcure:
         type: 'software'
-        author: ""
-        year: ""
-        title: "flexsurvcure: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=flexsurvcure'
+        author: Jordan Amdahl
+        year: 2025
+        title: "flexsurvcure: Flexible Parametric Cure Models"
+        publisher: '[R package version 1.3.3]. Retrieved from https://CRAN.R-project.org/package=flexsurvcure'
         url: https://CRAN.R-project.org/package=flexsurvcure
 
     npcure:
@@ -2334,10 +2342,10 @@ refs:
 
     timeROC:
         type: 'software'
-        author: ""
-        year: ""
-        title: "timeROC: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=timeROC'
+        author: Paul Blanche
+        year: 2019
+        title: "timeROC: Time-Dependent ROC Curve and AUC for Censored Survival Data"
+        publisher: '[R package version 0.4]. Retrieved from https://CRAN.R-project.org/package=timeROC'
         url: https://CRAN.R-project.org/package=timeROC
 
     dcurves:
@@ -2563,4 +2571,5 @@ refs:
         title: "kernlab: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=kernlab'
         url: https://CRAN.R-project.org/package=kernlab
+
 ...

@@ -1,6 +1,6 @@
 ---
 name: create-function
-description: Scaffold a new jamovi function with optional interactive wizard
+description: Create a new jamovi function from scratch. Generates .a.yaml, .b.R, .r.yaml, .u.yaml with interactive wizard or templates
 interactive: true
 args:
   function_name:
@@ -29,6 +29,14 @@ examples:
 ---
 
 # New Jamovi Function Scaffolding with Interactive Wizard
+
+**Consult these guides** before generating code:
+- `vignettes/jamovi_module_patterns_guide.md` -- comprehensive patterns (START HERE)
+- `vignettes/jamovi_a_yaml_guide.md` -- options/arguments
+- `vignettes/jamovi_b_R_guide.md` -- backend R6 classes
+- `vignettes/jamovi_r_yaml_guide.md` -- results/outputs
+- `vignettes/jamovi_u_yaml_guide.md` -- UI definitions
+- `vignettes/jamovi_tables_guide.md`, `jamovi_plots_guide.md`, `jamovi_formula_guide.md` -- as needed
 
 You are an expert jamovi developer creating a complete, well-structured jamovi function named `$ARGUMENTS`. Generate all 4 required files following best practices and module conventions.
 
@@ -423,3 +431,11 @@ result <- $ARGUMENTS(data = histopathology, ...)
 4. Test with real data scenarios
 
 Provide a complete, functional template that follows ClinicoPath module patterns and jamovi best practices.
+
+---
+
+## Related Commands
+
+- `/generate-test-data` -- Create test datasets and test files for the new function
+- `/check-function` -- Validate the new function's structure and wiring
+- `/document-function` -- Generate documentation suite

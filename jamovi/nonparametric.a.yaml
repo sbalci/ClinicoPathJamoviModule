@@ -1,7 +1,7 @@
 ---
 name: nonparametric
 title: "Non-Parametric Statistical Methods"
-menuGroup: ExplorationD
+menuGroup: ExplorationT
 menuSubgroup: Advanced Statistical Tests
 menuSubtitle: "Comprehensive non-parametric analysis with effect sizes and robust methods"
 version: '0.0.31'
@@ -242,6 +242,19 @@ options:
       description:
           R: >
             Method for correcting p-values in multiple comparisons.
+
+    - name: globalTestCount
+      title: Total Tests Performed (Global Correction)
+      type: Integer
+      min: 1
+      max: 1000
+      default: 1
+      description:
+          R: >
+            Total number of independent tests performed across the entire study
+            (for global familywise error rate control). When > 1, all reported
+            p-values are additionally multiplied by this count (Bonferroni).
+            Set to 1 (default) to disable global correction.
 
     # Robust Methods - From original nonparametric
     - name: robust_method

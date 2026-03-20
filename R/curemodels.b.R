@@ -19,6 +19,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .cure_ci_lower = NULL,
         .cure_ci_upper = NULL,
         .cure_ci_method = NULL,
+        .interpretation_html = "",  # accumulates interpretation content
 
         # HTML notice system (replaces insert(999, Notice) pattern)
         .noticeList = list(),
@@ -128,8 +129,9 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-            # Reset notice list for each run
+            # Reset state for each run
             private$.noticeList <- list()
+            private$.interpretation_html <- ""
 
             # Check if variables are selected
             if (is.null(self$options$time) || is.null(self$options$status)) {
@@ -223,6 +225,45 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!validation_result) {
                 private$.renderNotices()
                 return()
+            }
+
+            # Clinical data quality checks
+            status_col <- clean_data[[status_var]]
+            n_events <- if (is.factor(status_col)) {
+                sum(as.numeric(status_col) == 2, na.rm = TRUE)
+            } else {
+                sum(status_col == 1, na.rm = TRUE)
+            }
+            event_rate <- n_events / nrow(clean_data)
+
+            # EPV (events per variable) check
+            if (length(predictors) > 0 && n_events / length(predictors) < 10) {
+                private$.addNotice(
+                    type = "STRONG_WARNING",
+                    title = "Low Events Per Variable",
+                    content = sprintf(
+                        "Only %.1f events per predictor (%d events / %d predictors). Recommend >= 10 EPV for stable cure model estimates. Consider reducing the number of predictors.",
+                        n_events / length(predictors), n_events, length(predictors))
+                )
+            }
+
+            # Prevalence extreme check
+            if (event_rate < 0.05) {
+                private$.addNotice(
+                    type = "STRONG_WARNING",
+                    title = "Very Low Event Rate",
+                    content = sprintf(
+                        "Event rate is only %.1f%% (%d/%d). Cure model estimates may be unstable with very few events. Ensure adequate follow-up and consider whether a cure model is appropriate.",
+                        event_rate * 100, n_events, nrow(clean_data))
+                )
+            } else if (event_rate > 0.95) {
+                private$.addNotice(
+                    type = "STRONG_WARNING",
+                    title = "Very High Event Rate",
+                    content = sprintf(
+                        "Event rate is %.1f%% (%d/%d). Nearly all patients experienced the event, suggesting cure may not be plausible. Consider standard survival analysis instead.",
+                        event_rate * 100, n_events, nrow(clean_data))
+                )
             }
 
             # Add informational notices for specialized model types
@@ -608,7 +649,8 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Generate covariate values for estimation
                 covar_range <- range(covar_vec, na.rm = TRUE)
-                n_points <- min(50, length(unique(covar_vec)))
+                n_points_opt <- self$options$npcure_time_points %||% 100
+                n_points <- min(n_points_opt, length(unique(covar_vec)))
                 x0_values <- seq(covar_range[1], covar_range[2], length.out = n_points)
 
                 if (is.null(bandwidth)) {
@@ -1123,25 +1165,23 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.na(cure_fraction) || cure_fraction < 0 || cure_fraction > 1) return(FALSE)
 
             tryCatch({
-                library(ggplot2)
-
                 data_plot <- data.frame(
                     Group = factor(c("Cured", "Not Cured"), levels = c("Cured", "Not Cured")),
                     Fraction = c(cure_fraction, 1 - cure_fraction)
                 )
 
-                p <- ggplot(data_plot, aes(x = Group, y = Fraction, fill = Group)) +
-                    geom_bar(stat = "identity", alpha = 0.8) +
-                    scale_fill_manual(values = c("Cured" = "#2E8B57", "Not Cured" = "#CD5C5C")) +
-                    scale_y_continuous(limits = c(0, 1), labels = scales::percent_format()) +
-                    labs(
+                p <- ggplot2::ggplot(data_plot, ggplot2::aes(x = Group, y = Fraction, fill = Group)) +
+                    ggplot2::geom_bar(stat = "identity", alpha = 0.8) +
+                    ggplot2::scale_fill_manual(values = c("Cured" = "#2563eb", "Not Cured" = "#ea580c")) +
+                    ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent_format()) +
+                    ggplot2::labs(
                         title = "Estimated Cure Fractions",
                         subtitle = paste0("Cure: ", round(cure_fraction * 100, 1), "%"),
                         x = "Population Group",
                         y = "Proportion"
                     ) +
                     ggtheme +
-                    theme(legend.position = "none")
+                    ggplot2::theme(legend.position = "none")
 
                 # Add CI error bars if available
                 ci_lo <- state$ci_lower[1]
@@ -1153,8 +1193,8 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ci_lower = ci_lo,
                         ci_upper = ci_hi
                     )
-                    p <- p + geom_errorbar(data = error_data,
-                        aes(ymin = ci_lower, ymax = ci_upper),
+                    p <- p + ggplot2::geom_errorbar(data = error_data,
+                        ggplot2::aes(ymin = ci_lower, ymax = ci_upper),
                         width = 0.2, linewidth = 0.8)
                 }
 
@@ -1172,17 +1212,14 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(private$cure_data)) return(FALSE)
 
             tryCatch({
-                library(ggplot2)
-                library(survival)
-
                 data <- private$cure_data
                 time_var <- self$options$time
                 status_var <- self$options$status
 
                 escaped_time <- jmvcore::composeTerm(time_var)
                 escaped_status <- jmvcore::composeTerm(status_var)
-                surv_formula <- as.formula(paste0("Surv(", escaped_time, ", ", escaped_status, ") ~ 1"))
-                km_fit <- survfit(surv_formula, data = data)
+                surv_formula <- as.formula(paste0("survival::Surv(", escaped_time, ", ", escaped_status, ") ~ 1"))
+                km_fit <- survival::survfit(surv_formula, data = data)
 
                 surv_data <- data.frame(
                     time = km_fit$time,
@@ -1196,11 +1233,11 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     cure_fraction <- NULL
                 }
 
-                p <- ggplot(surv_data) +
-                    geom_step(aes(x = time, y = survival), color = "black", linewidth = 1, alpha = 0.8) +
-                    geom_ribbon(aes(x = time, ymin = lower, ymax = upper), alpha = 0.2) +
-                    scale_y_continuous(limits = c(0, 1)) +
-                    labs(
+                p <- ggplot2::ggplot(surv_data) +
+                    ggplot2::geom_step(ggplot2::aes(x = time, y = survival), color = "black", linewidth = 1, alpha = 0.8) +
+                    ggplot2::geom_ribbon(ggplot2::aes(x = time, ymin = lower, ymax = upper), alpha = 0.2) +
+                    ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                    ggplot2::labs(
                         title = "Survival Curve with Cure Model Plateau",
                         x = "Time",
                         y = "Survival Probability"
@@ -1210,9 +1247,9 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add cure fraction plateau line if available
                 if (!is.null(cure_fraction) && cure_fraction > 0 && cure_fraction < 1) {
                     p <- p +
-                        geom_hline(yintercept = cure_fraction, color = "red",
+                        ggplot2::geom_hline(yintercept = cure_fraction, color = "red",
                                    linetype = "dashed", linewidth = 1) +
-                        annotate("text", x = max(surv_data$time) * 0.7, y = cure_fraction + 0.04,
+                        ggplot2::annotate("text", x = max(surv_data$time) * 0.7, y = cure_fraction + 0.04,
                                  label = paste0("Cure fraction: ", round(cure_fraction * 100, 1), "%"),
                                  color = "red", size = 3.5)
                 }
@@ -1365,14 +1402,35 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     is_precise <- NA
                 }
 
+                # Use cure_threshold option for context
+                cure_threshold <- self$options$cure_threshold %||% 60
+
+                # Count patients surviving beyond threshold
+                data <- private$cure_data
+                time_var <- self$options$time
+                status_var <- self$options$status
+                n_beyond <- sum(data[[time_var]] >= cure_threshold, na.rm = TRUE)
+                n_events_beyond <- sum(data[[time_var]] >= cure_threshold &
+                    (if (is.factor(data[[status_var]])) as.numeric(data[[status_var]]) == 2
+                     else data[[status_var]] == 1), na.rm = TRUE)
+
                 sens_html <- paste0(
                     "<div style='background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;'>",
-                    "<h4 style='margin-top:0'>Sensitivity Analysis Limitations</h4>",
-                    "<p><strong>IMPORTANT:</strong> This is a simplified assessment. For comprehensive sensitivity analysis, ",
-                    "models should be refitted with different assumptions (cure thresholds, distributions, covariates).</p>",
+                    "<h4 style='margin-top:0'>Sensitivity Analysis</h4>",
+                    "<p><strong>Note:</strong> For comprehensive sensitivity analysis, refit models ",
+                    "with different cure thresholds, distributions, and covariates.</p>",
                     "</div>",
 
-                    "<h4>Cure Fraction Estimate Variability</h4>",
+                    "<h4>Cure Threshold Assessment</h4>",
+                    "<p><strong>Cure threshold time:</strong> ", cure_threshold, " (user-specified)</p>",
+                    "<p><strong>Patients surviving beyond threshold:</strong> ", n_beyond,
+                    " (", round(100 * n_beyond / nrow(data), 1), "% of total)</p>",
+                    "<p><strong>Events beyond threshold:</strong> ", n_events_beyond,
+                    if (n_events_beyond == 0) " (supports cure assumption: no events after threshold)"
+                    else paste0(" (events after threshold suggest cure threshold may be too early)"),
+                    "</p>",
+
+                    "<h4>Cure Fraction Estimate</h4>",
                     "<p><strong>Point estimate:</strong> ", round(cure_fraction * 100, 1), "%</p>",
                     "<p><strong>CI method:</strong> ", ci_method, "</p>"
                 )
@@ -1470,16 +1528,15 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 }
 
-                # Add interpretation noting limitations
-                interp_html <- paste0(
-                    "<h4>Model Comparison</h4>",
+                # Store comparison notes for later combination with clinical interpretation
+                private$.interpretation_html <- paste0(
+                    private$.interpretation_html,
+                    "<h4>Model Comparison Notes</h4>",
                     "<p><strong>Note:</strong> smcure and npcure do not provide information criteria (AIC/BIC). ",
                     "Direct comparison is only possible between flexsurvcure and cuRe models.</p>",
                     "<p>For comparing mixture (smcure) vs non-mixture (flexsurvcure), consider ",
                     "clinical plausibility and visual assessment of survival curves in addition to statistical criteria.</p>"
                 )
-
-                self$results$interpretation$setContent(interp_html)
 
             }, error = function(e) {
                 private$.addNotice(
@@ -1559,13 +1616,26 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</ul>"
                 )
 
-                # Append to interpretation (don't overwrite if model comparison already set content)
-                current_content <- tryCatch(self$results$interpretation$content, error = function(e) "")
-                if (is.null(current_content) || current_content == "") {
-                    self$results$interpretation$setContent(interp_html)
-                } else {
-                    self$results$interpretation$setContent(paste0(current_content, interp_html))
-                }
+                # Build copy-ready report sentence
+                n_total <- nrow(private$cure_data)
+                median_fu <- round(median(private$cure_data[[self$options$time]], na.rm = TRUE), 1)
+
+                report_sentence <- sprintf(
+                    "Using a %s, the estimated cure fraction was %.1f%%%s, based on %d patients with a median follow-up of %.1f time units.",
+                    model_type_text, cure_fraction * 100, ci_note, n_total, median_fu
+                )
+
+                interp_html <- paste0(interp_html,
+                    "<h5>Report Sentence (copy-ready):</h5>",
+                    "<div style='background-color:#f8f9fa; padding:10px; border-left:3px solid #007bff; margin:8px 0; font-style:italic;'>",
+                    report_sentence,
+                    "</div>",
+                    "<p style='font-size:0.85em; color:#666;'>Tip: Copy the text above directly into your manuscript results section.</p>"
+                )
+
+                # Append clinical interpretation and flush all accumulated content
+                private$.interpretation_html <- paste0(private$.interpretation_html, interp_html)
+                self$results$interpretation$setContent(private$.interpretation_html)
 
             }, error = function(e) {
                 # Silently fail - clinical interpretation is supplementary

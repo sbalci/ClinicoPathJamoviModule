@@ -1,0 +1,176 @@
+---
+name: ordinalmixedmodel
+title: Ordinal Mixed Models (Cumulative Link)
+menuGroup: ClinicoPathT
+version: '1.0.0'
+jas: '1.2'
+description:
+    main: >
+        Cumulative link mixed models (CLMM) for ordinal response data with random effects.
+        Appropriate for Likert-scale data, ordered categorical outcomes (e.g., tumor grades,
+        disease severity), and repeated-measures designs with ordinal endpoints. Uses the
+        ordinal package for fitting cumulative link mixed models with logit, probit, or
+        complementary log-log links.
+    R:
+        dontrun: true
+        usage: |
+            data |>
+            ordinalmixedmodel(
+                dep = "rating",
+                fixedFactors = "scanner",
+                randomTerms = "pathologist"
+            )
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dep
+      title: Dependent Variable (Ordinal)
+      type: Variable
+      suggested:
+        - ordinal
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Ordinal dependent variable (e.g., Likert scale, tumor grade, severity level)
+
+    - name: fixedFactors
+      title: Fixed Factors
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      default: null
+      description:
+          R: >
+            Categorical fixed-effect predictors
+
+    - name: fixedCovs
+      title: Fixed Covariates
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default: null
+      description:
+          R: >
+            Continuous fixed-effect predictors
+
+    - name: randomTerms
+      title: Random Effects Grouping
+      type: Variables
+      suggested:
+        - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Random effects grouping variables (e.g., subject ID, rater, site)
+
+    - name: link
+      title: Link Function
+      type: List
+      options:
+        - name: logit
+          title: Logit (proportional odds)
+        - name: probit
+          title: Probit
+        - name: cloglog
+          title: Complementary log-log
+        - name: loglog
+          title: Log-log
+        - name: cauchit
+          title: Cauchit
+      default: logit
+      description:
+          R: >
+            Link function for the cumulative model
+
+    - name: threshold
+      title: Threshold Type
+      type: List
+      options:
+        - name: flexible
+          title: Flexible (default)
+        - name: symmetric
+          title: Symmetric
+        - name: equidistant
+          title: Equidistant
+      default: flexible
+      description:
+          R: >
+            Threshold parameterization
+
+    - name: propOddsTest
+      title: Test Proportional Odds Assumption
+      type: Bool
+      default: true
+      description:
+          R: >
+            Test the proportional odds (parallel lines) assumption using nominal_test
+
+    - name: oddsRatios
+      title: Show Odds Ratios
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display exponentiated coefficients as odds ratios
+
+    - name: confInt
+      title: Confidence Intervals
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show confidence intervals for coefficients
+
+    - name: confLevel
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.99
+      default: 0.95
+      description:
+          R: >
+            Confidence level for intervals
+
+    - name: randomEffectsTable
+      title: Random Effects Variance
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show random effects variance components
+
+    - name: thresholdsTable
+      title: Threshold Coefficients
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show threshold (intercept) coefficients
+
+    - name: modelFit
+      title: Model Fit Statistics
+      type: Bool
+      default: true
+      description:
+          R: >
+            Show AIC, BIC, log-likelihood, and deviance
+
+    - name: conditionMeans
+      title: Condition Marginal Probabilities
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show predicted marginal probabilities for each factor level

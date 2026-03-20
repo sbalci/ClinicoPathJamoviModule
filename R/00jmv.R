@@ -97,6 +97,13 @@
         `title`="car: Companion to Applied Regression", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=car", 
         `url`="https://CRAN.R-project.org/package=car"), 
+    `dplyr`=list(
+        `type`="software", 
+        `author`="Hadley Wickham", 
+        `year`=2023, 
+        `title`="dplyr: A Grammar of Data Manipulation", 
+        `publisher`="[R package version 1.1.4]. Retrieved from https://CRAN.R-project.org/package=dplyr", 
+        `url`="https://CRAN.R-project.org/package=dplyr"), 
     `ggplot2`=list(
         `type`="software", 
         `author`="Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., & RStudio", 
@@ -810,10 +817,10 @@
         `url`="https://CRAN.R-project.org/package=viridis"), 
     `scales`=list(
         `type`="software", 
-        `author`="", 
-        `year`="", 
-        `title`="scales: R package", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=scales", 
+        `author`="Hadley Wickham", 
+        `year`=2025, 
+        `title`="scales: Scale Functions for Visualization", 
+        `publisher`="[R package version 1.4.0]. Retrieved from https://CRAN.R-project.org/package=scales", 
         `url`="https://CRAN.R-project.org/package=scales"), 
     `patchwork`=list(
         `type`="software", 
@@ -880,10 +887,10 @@
         `url`="https://CRAN.R-project.org/package=ggcharts"), 
     `pROC`=list(
         `type`="software", 
-        `author`="", 
-        `year`="", 
-        `title`="pROC: R package", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=pROC", 
+        `author`="Xavier Robin", 
+        `year`=2025, 
+        `title`="pROC: Display and Analyze ROC Curves", 
+        `publisher`="[R package version 1.19.0.1]. Retrieved from https://CRAN.R-project.org/package=pROC", 
         `url`="https://CRAN.R-project.org/package=pROC"), 
     `boot`=list(
         `type`="software", 
@@ -1111,10 +1118,10 @@
         `url`="https://CRAN.R-project.org/package=party"), 
     `condSURV`=list(
         `type`="software", 
-        `author`="", 
-        `year`="", 
-        `title`="condSURV: R package", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=condSURV", 
+        `author`="Luis Meira-Machado and Marta Sestelo", 
+        `year`=2023, 
+        `title`="condSURV: Estimation of the Conditional Survival Function for Ordered Multivariate Failure Time Data", 
+        `publisher`="[R package version 2.0.4]. Retrieved from https://CRAN.R-project.org/package=condSURV", 
         `url`="https://CRAN.R-project.org/package=condSURV"), 
     `flexsurv`=list(
         `type`="software", 
@@ -2000,10 +2007,10 @@
         `url`="https://CRAN.R-project.org/package=spdep"), 
     `timeROC`=list(
         `type`="software", 
-        `author`="", 
-        `year`="", 
-        `title`="timeROC: R package", 
-        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=timeROC", 
+        `author`="Paul Blanche", 
+        `year`=2019, 
+        `title`="timeROC: Time-Dependent ROC Curve and AUC for Censored Survival Data", 
+        `publisher`="[R package version 0.4]. Retrieved from https://CRAN.R-project.org/package=timeROC", 
         `url`="https://CRAN.R-project.org/package=timeROC"), 
     `dcurves`=list(
         `type`="software", 

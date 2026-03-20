@@ -1,0 +1,649 @@
+---
+title: "Conditional Survival Estimation - Comprehensive Guide"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Conditional Survival Estimation - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5
+)
+devtools::load_all(".")
+```
+
+> **Note:** `conditionalsurvival()` is designed primarily for the jamovi GUI. The R
+> syntax shown here is for reference and advanced scripting.
+
+# Conditional Survival Estimation
+
+## Overview
+
+In clinical oncology, a patient's prognosis improves with each additional year of
+disease-free survival. Standard Kaplan-Meier estimates describe the probability of
+surviving beyond time *t* from the moment of diagnosis or treatment. **Conditional
+survival** answers a different and often more useful question: given that a patient
+has already survived to time *s*, what is their probability of surviving to time *t*?
+
+Formally: CS(t | s) = P(T > t | T > s) = S(t) / S(s)
+
+This is implemented via the `conditionalsurvival()` function in the jsurvival module
+(menu: SurvivalD > ClinicoPath Survival). Four estimation methods are available:
+
+| Method | Key | Description |
+|--------|-----|-------------|
+| Kaplan-Meier Weights | `km` | Weighted KM estimation via `condSURV::KMW()` (falls back to S(t)/S(s) ratio when condSURV is not available) |
+| Landmark Approach | `landmark` | Subsets cohort to patients surviving past the conditioning time, then refits KM |
+| Inverse Probability Weighting | `ipw` | IPCW-based estimation (stub; currently falls back to manual KM ratio) |
+| Presmoothed Kaplan-Meier | `pkm` | Kernel-smoothed KM (stub; currently falls back to manual KM ratio) |
+
+## Datasets
+
+This vignette uses the bundled `conditionalsurvival_test` dataset:
+
+| Dataset | N | Scenario | Key Variables |
+|---------|---|----------|---------------|
+| `conditionalsurvival_test` | 150 | Colorectal cancer, Weibull survival, stage-dependent hazard | `OverallTime` (months), `Event` (0/1), `EventFactor` (Alive/Dead), `Treatment`, `Stage`, `Grade`, `Age`, `Sex`, `CEA` |
+| `histopathology` | varies | Built-in ClinicoPath dataset | General clinicopathological variables |
+
+```{r load-data}
+data("conditionalsurvival_test")
+str(conditionalsurvival_test)
+summary(conditionalsurvival_test[, c("OverallTime", "Event", "Treatment", "Stage")])
+```
+
+---
+
+# Basic Usage
+
+## Unstratified Analysis (Overall Cohort)
+
+The simplest use case: estimate conditional survival for the entire cohort with
+default settings. When `conditionTime = 0`, the function automatically uses the
+median follow-up time.
+
+```{r basic-unstratified}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 0,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = TRUE,
+  showExplanations = TRUE
+)
+```
+
+## Unstratified with Fixed Conditioning Time
+
+Set `conditionTime = 12` to ask: "Given a patient survived 12 months, what is their
+probability of surviving to each subsequent time point?"
+
+```{r basic-fixed-condtime}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = TRUE,
+  showExplanations = FALSE
+)
+```
+
+---
+
+# Stratified Analysis
+
+## By Treatment
+
+Compare conditional survival between Surgery and Surgery+Chemo groups. The
+`conditionVar` option activates stratified analysis, producing separate
+conditional survival estimates and curves per group.
+
+```{r stratified-treatment}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = TRUE,
+  showExplanations = TRUE
+)
+```
+
+## By Stage
+
+Stage has 4 levels (I, II, III, IV). Groups with fewer than 3 events are
+silently skipped. Early-stage patients with few events at late conditioning
+times may be excluded automatically.
+
+```{r stratified-stage}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Stage,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = TRUE,
+  showExplanations = FALSE
+)
+```
+
+## By Grade
+
+Three tumor differentiation levels: Well, Moderate, Poor.
+
+```{r stratified-grade}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Grade,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+---
+
+# Estimation Methods
+
+## Kaplan-Meier Weights (Default)
+
+The default method. When the `condSURV` package is installed, uses KMW weights
+for estimation. Otherwise falls back to the manual S(t)/S(s) ratio.
+
+```{r method-km}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = TRUE
+)
+```
+
+## Landmark Approach
+
+The landmark method subsets the data to only patients who survived past the
+conditioning time, then estimates survival from that point forward. This is the
+simplest and most transparent approach but discards information from patients
+censored before the landmark.
+
+```{r method-landmark}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  method       = "landmark",
+  showTable    = TRUE,
+  showPlot     = TRUE,
+  showExplanations = TRUE
+)
+```
+
+## Inverse Probability Weighting
+
+The IPW method is intended to use inverse probability of censoring weights for
+unbiased estimation. Currently implemented as a stub that falls back to the
+manual KM ratio method.
+
+```{r method-ipw}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  method       = "ipw",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = TRUE
+)
+```
+
+## Presmoothed Kaplan-Meier
+
+The PKM method applies kernel smoothing to the KM estimator. Currently a stub
+that falls back to the manual KM ratio. The `bandwidth` option is reserved for
+controlling the smoothing bandwidth when this method is fully implemented.
+
+```{r method-pkm}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  method       = "pkm",
+  bandwidth    = 0,
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = TRUE
+)
+```
+
+---
+
+# Custom Time Points
+
+By default, the function generates ~5 evenly spaced time points from the
+conditioning time to the maximum follow-up. Use the `timePoints` option to
+specify exact time points of clinical interest (comma-separated string).
+
+## Clinically Meaningful Time Points
+
+For example, 1-year, 2-year, 3-year, and 5-year conditional survival given
+survival to 12 months:
+
+```{r custom-timepoints}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 12,
+  timePoints   = "24,36,48,60",
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Time Points Including Values Before Conditioning Time
+
+When a requested time point is at or before the conditioning time, the
+conditional survival is exactly 1.0 (the patient has already survived past
+that point).
+
+```{r custom-timepoints-before}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 24,
+  timePoints   = "12,18,24,36,48,60",
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Sparse Time Points
+
+Only two time points of interest:
+
+```{r custom-timepoints-sparse}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 6,
+  timePoints   = "24,60",
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+---
+
+# Factor Outcome Variable
+
+The `outcomeVar` accepts both numeric (0/1) and factor (2-level) variables.
+Factor variables are converted internally: the first level becomes 0 (censored),
+the second level becomes 1 (event).
+
+## Using EventFactor (Alive/Dead)
+
+```{r factor-outcome}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = EventFactor,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = TRUE,
+  showExplanations = FALSE
+)
+```
+
+---
+
+# Confidence Level Variations
+
+The `confInt` option controls the width of confidence intervals around
+conditional survival estimates. The default is 0.95 (95% CI).
+
+## 90% Confidence Intervals
+
+```{r ci-90}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 12,
+  confInt      = 0.90,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## 99% Confidence Intervals
+
+```{r ci-99}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 12,
+  confInt      = 0.99,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## 80% Confidence Intervals
+
+```{r ci-80}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  confInt      = 0.80,
+  method       = "landmark",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+---
+
+# Edge Cases
+
+## Conditioning Time at Median (Auto-Selection)
+
+When `conditionTime` is 0, NULL, or NA, the function uses the median follow-up
+time. This is the safest default for exploratory analyses.
+
+```{r edge-auto-condtime}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 0,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Late Conditioning Time
+
+A late conditioning time reduces the risk set. Estimates become less stable
+with wider confidence intervals.
+
+```{r edge-late-condtime}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 60,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = TRUE,
+  showExplanations = FALSE
+)
+```
+
+## Conditioning Time Beyond Maximum Follow-Up (Expect Error)
+
+When the conditioning time is at or beyond the maximum observed follow-up,
+the function rejects the analysis with an informative error.
+
+```{r edge-condtime-beyond-max}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 200,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Too Few Events (Expect Error)
+
+A dataset with fewer than 5 events is rejected.
+
+```{r edge-few-events}
+few_events_data <- data.frame(
+  time  = c(5, 10, 15, 20, 25, 30, 35, 40, 45, 50,
+            55, 60, 65, 70, 75, 80, 85, 90, 95, 100),
+  event = c(1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+  group = rep(c("A", "B"), 10)
+)
+
+conditionalsurvival(
+  data         = few_events_data,
+  timeVar      = time,
+  outcomeVar   = event,
+  conditionTime = 10,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Three-Level Factor Outcome (Expect Error)
+
+The outcome variable must have exactly 2 levels. A 3-level factor is rejected.
+
+```{r edge-3level-factor}
+bad_data <- conditionalsurvival_test
+bad_data$BadOutcome <- factor(
+  sample(c("Alive", "Dead", "Unknown"), nrow(bad_data), replace = TRUE)
+)
+
+conditionalsurvival(
+  data         = bad_data,
+  timeVar      = OverallTime,
+  outcomeVar   = BadOutcome,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Single-Level Conditioning Variable (Expect Error)
+
+A grouping variable with only one level cannot be used for stratified analysis.
+
+```{r edge-single-level}
+single_data <- conditionalsurvival_test
+single_data$SingleGroup <- "Everyone"
+
+conditionalsurvival(
+  data         = single_data,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = SingleGroup,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Display Options: All Off
+
+The `showTable`, `showPlot`, and `showExplanations` toggles control visibility
+of their respective panels. The `todo`, `reportSentence`, and `assumptions`
+panels are always visible.
+
+```{r edge-display-all-off}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionVar = Treatment,
+  conditionTime = 12,
+  method       = "km",
+  showTable    = FALSE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+## Plot Type Option (Currently Curves Only)
+
+The `plotType` option accepts `"curves"`, `"probability"`, or `"both"`, but
+the plot rendering currently always draws the curves style regardless of
+the selected value.
+
+```{r edge-plottype}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 12,
+  plotType     = "probability",
+  method       = "km",
+  showTable    = FALSE,
+  showPlot     = TRUE,
+  showExplanations = FALSE
+)
+```
+
+---
+
+# Clinical Interpretation
+
+Conditional survival is most valuable in clinical settings where patients
+return for follow-up visits and want updated prognostic information.
+
+**Key interpretation points:**
+
+1. **CS(t | s) is always >= S(t)**: A patient who has survived to time *s*
+   always has a survival probability at least as high as the original
+   unconditional estimate at time *t*.
+
+2. **The conditioning effect is strongest early**: The biggest prognostic
+   "improvement" from conditional survival typically occurs in the first
+   1--3 years after treatment, when the hazard is highest.
+
+3. **Plateau behavior**: If the hazard decreases over time (as in many
+   cancers after successful treatment), conditional survival probabilities
+   approach 1.0 as the conditioning time increases.
+
+4. **Group comparisons**: Stratified conditional survival can reveal whether
+   prognostic differences between treatment arms or stage groups narrow
+   over time (a common pattern in oncology).
+
+5. **Clinical communication**: The report sentence generated by this function
+   is designed to be copied directly into manuscript results sections.
+
+## Example: Prognostic Update at Different Conditioning Times
+
+```{r clinical-update-6mo}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 6,
+  timePoints   = "12,24,36,60",
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+```{r clinical-update-24mo}
+conditionalsurvival(
+  data         = conditionalsurvival_test,
+  timeVar      = OverallTime,
+  outcomeVar   = Event,
+  conditionTime = 24,
+  timePoints   = "36,48,60,72",
+  method       = "km",
+  showTable    = TRUE,
+  showPlot     = FALSE,
+  showExplanations = FALSE
+)
+```
+
+---
+
+# References
+
+1. Hieke S, Kleber M, Konig C, Engelhardt M, Schumacher M. Conditional
+   survival: a useful concept to provide information on how prognosis
+   evolves over time. *Clin Cancer Res*. 2015;21(7):1530-1536.
+
+2. Zamboni BA, Yothers G, Choi M, et al. Conditional survival and the
+   choice of conditioning set for patients with colon cancer: an analysis
+   of NSABP trials C-03 through C-07. *J Clin Oncol*. 2010;28(15):2544-2548.
+
+3. Skuladottir H, Olsen JH. Conditional survival of patients with the four
+   main types of lung cancer in Denmark, 1978-2001. *Cancer*. 2003;97(8):
+   2014-2019.
+
+4. Beran R. Nonparametric regression with randomly censored survival data.
+   Technical Report, University of California, Berkeley. 1981.
+
+5. Meira-Machado L, de Una-Alvarez J, Cadarso-Suarez C. Nonparametric
+   estimation of transition probabilities in a non-Markov illness-death
+   model. *Lifetime Data Anal*. 2006;12(3):325-344.

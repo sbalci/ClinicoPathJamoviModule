@@ -19,6 +19,7 @@ nonparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             post_hoc = TRUE,
             post_hoc_method = "dunn",
             p_adjustment = "holm",
+            globalTestCount = 1,
             robust_method = "standard",
             trim_proportion = 0.1,
             winsorize_proportion = 0.1,
@@ -178,6 +179,12 @@ nonparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "BH",
                     "BY"),
                 default="holm")
+            private$..globalTestCount <- jmvcore::OptionInteger$new(
+                "globalTestCount",
+                globalTestCount,
+                min=1,
+                max=1000,
+                default=1)
             private$..robust_method <- jmvcore::OptionList$new(
                 "robust_method",
                 robust_method,
@@ -399,6 +406,7 @@ nonparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..post_hoc)
             self$.addOption(private$..post_hoc_method)
             self$.addOption(private$..p_adjustment)
+            self$.addOption(private$..globalTestCount)
             self$.addOption(private$..robust_method)
             self$.addOption(private$..trim_proportion)
             self$.addOption(private$..winsorize_proportion)
@@ -454,6 +462,7 @@ nonparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         post_hoc = function() private$..post_hoc$value,
         post_hoc_method = function() private$..post_hoc_method$value,
         p_adjustment = function() private$..p_adjustment$value,
+        globalTestCount = function() private$..globalTestCount$value,
         robust_method = function() private$..robust_method$value,
         trim_proportion = function() private$..trim_proportion$value,
         winsorize_proportion = function() private$..winsorize_proportion$value,
@@ -508,6 +517,7 @@ nonparametricOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..post_hoc = NA,
         ..post_hoc_method = NA,
         ..p_adjustment = NA,
+        ..globalTestCount = NA,
         ..robust_method = NA,
         ..trim_proportion = NA,
         ..winsorize_proportion = NA,
@@ -1308,6 +1318,10 @@ nonparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   significant.
 #' @param post_hoc_method Method for post hoc pairwise comparisons.
 #' @param p_adjustment Method for correcting p-values in multiple comparisons.
+#' @param globalTestCount Total number of independent tests performed across
+#'   the entire study (for global familywise error rate control). When > 1, all
+#'   reported p-values are additionally multiplied by this count (Bonferroni).
+#'   Set to 1 (default) to disable global correction.
 #' @param robust_method Method for robust rank-based estimation.
 #' @param trim_proportion Proportion of observations to trim from each end for
 #'   robust estimation.
@@ -1426,6 +1440,7 @@ nonparametric <- function(
     post_hoc = TRUE,
     post_hoc_method = "dunn",
     p_adjustment = "holm",
+    globalTestCount = 1,
     robust_method = "standard",
     trim_proportion = 0.1,
     winsorize_proportion = 0.1,
@@ -1502,6 +1517,7 @@ nonparametric <- function(
         post_hoc = post_hoc,
         post_hoc_method = post_hoc_method,
         p_adjustment = p_adjustment,
+        globalTestCount = globalTestCount,
         robust_method = robust_method,
         trim_proportion = trim_proportion,
         winsorize_proportion = winsorize_proportion,

@@ -1,6 +1,6 @@
 ---
 name: prepare-translation
-description: Prepare a jamovi function for internationalization and generate a TR (Turkish) translation plan, including code patches, .po updates, and Weblate setup steps
+description: Internationalize a jamovi function: wrap strings for extraction, generate .po files, create Turkish localization plan
 interactive: true
 args:
   function_name:
@@ -16,6 +16,8 @@ output_file: i18n-plans/$ARGUMENTS-$ARG_target_lang-translation-plan.md
 ---
 
 # Internationalization (i18n) Preparation & Translation Plan
+
+**Consult:** `vignettes/jamovi_i18n_guide.md` for comprehensive i18n patterns and best practices.
 
 You are an **expert jamovi module developer**. Prepare the specified function for translation and produce a concrete plan for Turkish (TR) localization. Follow the steps below and render all code and shell snippets in fenced blocks.
 
@@ -378,3 +380,10 @@ Return a single Markdown plan including:
 - QA checklist outcome
 
 Save to: `i18n-plans/$ARGUMENTS-$ARG_target_lang-translation-plan.md`.
+
+---
+
+## Related Commands
+
+- `/review-function` -- Review function including i18n checklist
+- `/document-function` -- Generate documentation that includes translation status

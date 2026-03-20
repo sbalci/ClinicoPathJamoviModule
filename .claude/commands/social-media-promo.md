@@ -1,6 +1,20 @@
 ---
-description: Generate social media promotion text for a jamovi function (for pathologists and clinicians)
-argument-hint: "[function-name|random|surprise] [platform:twitter|linkedin|general]"
+name: social-media-promo
+description: Generate social media posts promoting a ClinicoPath jamovi function. Twitter, LinkedIn, general variants for pathologists
+interactive: true
+args:
+  function_name:
+    description: Function name, or 'random'/'surprise' for auto-selection
+    required: false
+  platform:
+    description: Target platform (twitter, linkedin, general)
+    required: false
+    default: general
+usage: /social-media-promo [function_name] [platform]
+examples:
+  /social-media-promo survival linkedin
+  /social-media-promo random
+  /social-media-promo agreement twitter
 ---
 
 # Social Media Promotion Generator for ClinicoPath Functions
@@ -46,40 +60,7 @@ Generate **concise, clinician-friendly promotional text** for the jamovi functio
 
 ## Test Data Reference
 
-**Complete Catalog**: See `vignettes/test-data-complete-catalog.Rmd` for all 945+ test datasets
-
-**Key Function Categories** (examples):
-- `timeinterval_*.omv` - Time interval calculations (24 files)
-- `ihc_*.omv` - IHC heterogeneity analysis (21 files)
-- `outcomeorganizer_*.omv` - Survival outcome organization (20 files)
-- `singlearm_*.omv` - Single-arm survival trials (18 files)
-- `psychopdaROC_*.omv` - ROC analysis (17 files)
-- `survivalcont_*.omv` - Continuous survival predictors (17 files)
-- `decision_*.omv` - Decision analysis (16 files)
-- `swimmerplot_*.omv` - Swimmer plots (16 files)
-- `waterfall_*.omv` - Waterfall plots (16 files)
-- `decisioncompare_*.omv` - Decision curve comparison (14 files)
-- `linechart_*.omv` - Longitudinal line charts (13 files)
-- `pathsampling_*.omv` - Pathology sampling adequacy (13 files)
-- `stagemigration_*.omv` - Stage migration analysis (13 files)
-
-**General Clinical Datasets**:
-- `histopathology.omv` - General histopathology data
-- `histopathologySurvival.omv` - Survival analysis examples
-- `histopathologyMedicalDecision.omv` - Decision tree examples
-- `rocdata.omv` - ROC curve examples
-- `colon.omv` - Colon cancer outcomes
-- `melanoma.omv` - Melanoma patient data
-- `BreastCancer.omv` - Breast cancer analysis
-
-**GitHub Base URL**: `https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data-raw/non-rda/`
-
-**Usage in Promotional Content**:
-1. Look up function name in the catalog (e.g., for `swimmerplot` function, find `swimmerplot_*.omv` files)
-2. Select the most clinically relevant example (e.g., `swimmerplot_immuno.omv` for immunotherapy trials)
-3. Include direct download link in promotional text
-4. Phrase as: "Try it yourself: [dataset name] - [clinical scenario]"
-5. Always emphasize "download and test immediately" convenience
+For the full test data catalog (945+ datasets, function categories, GitHub URLs), read `.claude/references/test-data-catalog-summary.md`.
 
 ## Target Audience
 
@@ -330,3 +311,10 @@ Provide all three variants clearly labeled:
 6. **Add dataset section**: Include direct GitHub download links with clinical context
 
 Begin by checking if random selection is needed (Step 0), then analyzing the function files and looking up relevant test datasets.
+
+---
+
+## Related Commands
+
+- `/document-function` -- Generate full documentation for the promoted function
+- `/review-article-stats` -- Review article stats that reference ClinicoPath functions

@@ -30,7 +30,7 @@ children:
             isTarget: true
   - type: CollapseBox
     label: Model Specification
-    collapsed: true
+    collapsed: false
     children:
       - type: LayoutBox
         margin: large
