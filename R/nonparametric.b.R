@@ -955,37 +955,185 @@ nonparametricClass <- R6::R6Class(
             length(outliers)
         },
         
-        # Placeholder methods for specific tests (would need full implementation)
+        # ── Implemented test methods ──────────────────────────────────────
+
         .medianTest = function(outcome, groups) {
-            list(test_name = "Median Test", statistic = NA, df = NA, p_value = NA)
+            # Median test: chi-square test on counts above/below grand median
+            grand_median <- median(outcome, na.rm = TRUE)
+            above <- outcome > grand_median
+            tab <- table(groups, above)
+            if (ncol(tab) < 2) {
+                return(list(test_name = "Median Test", statistic = NA, df = NA, p_value = NA))
+            }
+            res <- suppressWarnings(chisq.test(tab))
+            list(
+                test_name = "Median Test",
+                statistic = res$statistic,
+                df = res$parameter,
+                p_value = res$p.value
+            )
         },
-        
+
         .vanDerWaerdenTest = function(outcome, groups) {
-            list(test_name = "Van der Waerden Test", statistic = NA, df = NA, p_value = NA)
+            # Van der Waerden (normal scores) test
+            n <- length(outcome)
+            ranks <- rank(outcome)
+            scores <- qnorm(ranks / (n + 1))
+            group_levels <- levels(groups)
+            k <- length(group_levels)
+            ns <- table(groups)
+            grand_mean <- mean(scores)
+            ss_between <- sum(ns * (tapply(scores, groups, mean) - grand_mean)^2)
+            ss_total <- sum((scores - grand_mean)^2)
+            if (ss_total == 0) {
+                return(list(test_name = "Van der Waerden Test", statistic = NA, df = NA, p_value = NA))
+            }
+            stat <- ((n - 1) * ss_between) / ss_total
+            df_val <- k - 1
+            p_val <- pchisq(stat, df = df_val, lower.tail = FALSE)
+            list(
+                test_name = "Van der Waerden (Normal Scores) Test",
+                statistic = stat,
+                df = df_val,
+                p_value = p_val
+            )
         },
-        
+
         .moodMedianTest = function(outcome, groups) {
-            list(test_name = "Mood's Median Test", statistic = NA, df = NA, p_value = NA)
+            # Mood's median test (same as median test but with Fisher exact for small samples)
+            grand_median <- median(outcome, na.rm = TRUE)
+            above <- outcome > grand_median
+            tab <- table(groups, above)
+            if (ncol(tab) < 2) {
+                return(list(test_name = "Mood's Median Test", statistic = NA, df = NA, p_value = NA))
+            }
+            min_expected <- min(suppressWarnings(chisq.test(tab)$expected))
+            if (min_expected < 5) {
+                res <- fisher.test(tab, simulate.p.value = (nrow(tab) > 2 || ncol(tab) > 2))
+                list(
+                    test_name = "Mood's Median Test (Fisher's exact)",
+                    statistic = NA,
+                    df = NA,
+                    p_value = res$p.value
+                )
+            } else {
+                res <- suppressWarnings(chisq.test(tab))
+                list(
+                    test_name = "Mood's Median Test",
+                    statistic = res$statistic,
+                    df = res$parameter,
+                    p_value = res$p.value
+                )
+            }
         },
-        
+
         .cochranQTest = function(outcome, groups, data) {
-            list(test_name = "Cochran's Q Test", statistic = NA, df = NA, p_value = NA)
+            # Cochran's Q test for binary outcomes in repeated measures
+            tryCatch({
+                res <- DescTools::CochranQTest(outcome ~ groups | data[[self$options$blocking_variable %||% self$options$paired_variable]])
+                list(
+                    test_name = "Cochran's Q Test",
+                    statistic = res$statistic,
+                    df = res$parameter,
+                    p_value = res$p.value
+                )
+            }, error = function(e) {
+                list(test_name = "Cochran's Q Test", statistic = NA, df = NA,
+                     p_value = NA)
+            })
         },
-        
+
         .pageTrendTest = function(outcome, groups, data) {
-            list(test_name = "Page's Trend Test", statistic = NA, df = NA, p_value = NA)
+            # Page's test for ordered alternatives in repeated measures
+            tryCatch({
+                blocking <- data[[self$options$blocking_variable %||% self$options$paired_variable]]
+                if (is.null(blocking)) {
+                    return(list(test_name = "Page's Trend Test", statistic = NA, df = NA,
+                                p_value = NA))
+                }
+                res <- DescTools::PageTest(outcome ~ groups | blocking)
+                list(
+                    test_name = "Page's Trend Test",
+                    statistic = res$statistic,
+                    df = NA,
+                    p_value = res$p.value
+                )
+            }, error = function(e) {
+                list(test_name = "Page's Trend Test", statistic = NA, df = NA,
+                     p_value = NA)
+            })
         },
-        
+
         .mcnemarTest = function(outcome, groups, data) {
-            list(test_name = "McNemar Test", statistic = NA, df = NA, p_value = NA)
+            # McNemar's test for paired categorical data
+            tryCatch({
+                tab <- table(outcome, groups)
+                if (nrow(tab) != 2 || ncol(tab) != 2) {
+                    return(list(test_name = "McNemar Test", statistic = NA, df = NA,
+                                p_value = NA))
+                }
+                res <- mcnemar.test(tab)
+                list(
+                    test_name = "McNemar Test",
+                    statistic = res$statistic,
+                    df = res$parameter,
+                    p_value = res$p.value
+                )
+            }, error = function(e) {
+                list(test_name = "McNemar Test", statistic = NA, df = NA,
+                     p_value = NA)
+            })
         },
-        
+
         .signTest = function(outcome, groups, data) {
-            list(test_name = "Sign Test", statistic = NA, df = NA, p_value = NA)
+            # Sign test for paired or one-sample data
+            tryCatch({
+                if (nlevels(groups) == 2) {
+                    # Paired sign test: test median of differences = 0
+                    group_levels <- levels(groups)
+                    g1 <- outcome[groups == group_levels[1]]
+                    g2 <- outcome[groups == group_levels[2]]
+                    n_pairs <- min(length(g1), length(g2))
+                    diffs <- g1[seq_len(n_pairs)] - g2[seq_len(n_pairs)]
+                    res <- DescTools::SignTest(diffs)
+                } else {
+                    # One-sample sign test against median = 0
+                    res <- DescTools::SignTest(outcome)
+                }
+                list(
+                    test_name = "Sign Test",
+                    statistic = res$statistic,
+                    df = NA,
+                    p_value = res$p.value
+                )
+            }, error = function(e) {
+                list(test_name = "Sign Test", statistic = NA, df = NA,
+                     p_value = NA)
+            })
         },
-        
+
         .jonckheereTerpstraTest = function(outcome, groups) {
-            list(test_name = "Jonckheere-Terpstra Test", statistic = NA, df = NA, p_value = NA)
+            # Jonckheere-Terpstra test for ordered alternatives
+            # Tests H1: theta_1 <= theta_2 <= ... <= theta_k (at least one strict)
+            tryCatch({
+                # Ensure groups is an ordered factor for the trend direction
+                if (!is.ordered(groups)) {
+                    groups <- factor(groups, levels = levels(groups), ordered = TRUE)
+                }
+                res <- DescTools::JonckheereTerpstraTest(
+                    outcome ~ groups,
+                    alternative = "increasing"
+                )
+                list(
+                    test_name = "Jonckheere-Terpstra Test",
+                    statistic = res$statistic,
+                    df = NA,
+                    p_value = res$p.value
+                )
+            }, error = function(e) {
+                list(test_name = "Jonckheere-Terpstra Test", statistic = NA, df = NA,
+                     p_value = NA)
+            })
         },
         
         # Placeholder methods for other calculations

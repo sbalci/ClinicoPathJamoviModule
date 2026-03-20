@@ -115,6 +115,21 @@ To lower the computation make all default checkboxes to be false in .a.yaml
 
 Rscript _updateModules.R
 
+/check-function FUNC_NAME
+/check-function-full FUNC_NAME
+/review-function FUNC_NAME
+/fix-function FUNC_NAME
+/generate-test-data FUNC_NAME
+/update-refs FUNC_NAME
+/document-function FUNC_NAME
+
+/check-function nonparametric
+/check-function-full nonparametric
+/review-function nonparametric
+/fix-function nonparametric
+/generate-test-data nonparametric
+/update-refs nonparametric
+/document-function nonparametric
 
 
 ---
