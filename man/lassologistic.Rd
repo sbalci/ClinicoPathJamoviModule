@@ -22,7 +22,9 @@ lassologistic(
   coef_plot = TRUE,
   roc_plot = TRUE,
   scoringSystem = FALSE,
+  scoringMethod = "schneeweiss",
   scoringMaxPoints = 10,
+  scoreLookupTable = TRUE,
   showSummary = FALSE,
   showExplanations = FALSE,
   showMethodologyNotes = FALSE,
@@ -79,9 +81,19 @@ score.}
 \item{roc_plot}{Show ROC curve with AUC and confidence interval.}
 
 \item{scoringSystem}{Convert model coefficients to an integer-point scoring
-system. Points are assigned proportional to coefficient magnitude.}
+system. Multiple methods available following published standards.}
 
-\item{scoringMaxPoints}{Maximum points assigned to the strongest predictor.}
+\item{scoringMethod}{Method for converting regression coefficients to
+integer points. Beta10: multiply by 10, round (Zhang et al. 2017).
+Schneeweiss: divide by smallest absolute coefficient (Mehta et al. 2016).
+Sullivan: reference-variable scaling (Sullivan et al. 2004, Framingham
+method). Compare: generate all three and show performance comparison.}
+
+\item{scoringMaxPoints}{Maximum points assigned to the strongest predictor
+(Beta10 method).}
+
+\item{scoreLookupTable}{Generate a lookup table mapping each possible total
+score to predicted probability of the positive class.}
 
 \item{showSummary}{Display a natural-language summary of the main results.}
 
@@ -110,6 +122,8 @@ A results object containing:
 \code{results$performance} \tab \tab \tab \tab \tab a table \cr
 \code{results$scoringTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$scoringPerformance} \tab \tab \tab \tab \tab a table \cr
+\code{results$methodComparison} \tab \tab \tab \tab \tab a table \cr
+\code{results$lookupTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$validationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$cv_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$coef_plot} \tab \tab \tab \tab \tab an image \cr

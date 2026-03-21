@@ -63,8 +63,7 @@ leaveonecenteroutOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"),
-                default=NULL)
+                    "numeric"))
             private$..modelType <- jmvcore::OptionList$new(
                 "modelType",
                 modelType,
@@ -149,6 +148,7 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         designSummary = function() private$.items[["designSummary"]],
         perCenterResults = function() private$.items[["perCenterResults"]],
         pooledPerformance = function() private$.items[["pooledPerformance"]],
@@ -173,7 +173,23 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 clearWith=list(
                     "outcome",
                     "predictors",
-                    "centerVariable")))
+                    "centerVariable",
+                    "elapsedtime",
+                    "modelType")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "predictors",
+                    "centerVariable",
+                    "elapsedtime",
+                    "modelType",
+                    "useLasso",
+                    "lambdaMethod",
+                    "random_seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="designSummary",
@@ -190,9 +206,14 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `type`="text")),
                 clearWith=list(
                     "outcome",
+                    "outcomeLevel",
                     "predictors",
                     "centerVariable",
-                    "modelType")))
+                    "elapsedtime",
+                    "modelType",
+                    "useLasso",
+                    "lambdaMethod",
+                    "random_seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="perCenterResults",
@@ -214,10 +235,11 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     list(
                         `name`="n_events_test", 
                         `title`="Events (Test)", 
-                        `type`="integer"),
+                        `type`="integer", 
+                        `visible`="(modelType:logistic || modelType:cox)"),
                     list(
                         `name`="auc", 
-                        `title`="AUC", 
+                        `title`="Discrimination", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -242,7 +264,8 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `name`="accuracy", 
                         `title`="Accuracy", 
                         `type`="number", 
-                        `format`="zto"),
+                        `format`="zto", 
+                        `visible`="(modelType:logistic)"),
                     list(
                         `name`="assessment", 
                         `title`="Assessment", 
@@ -252,6 +275,7 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "outcomeLevel",
                     "predictors",
                     "centerVariable",
+                    "elapsedtime",
                     "modelType",
                     "useLasso",
                     "lambdaMethod",
@@ -304,6 +328,7 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "outcomeLevel",
                     "predictors",
                     "centerVariable",
+                    "elapsedtime",
                     "modelType",
                     "useLasso",
                     "lambdaMethod",
@@ -322,6 +347,7 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "outcomeLevel",
                     "predictors",
                     "centerVariable",
+                    "elapsedtime",
                     "modelType",
                     "useLasso",
                     "lambdaMethod",
@@ -335,7 +361,11 @@ leaveonecenteroutResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "outcomeLevel",
                     "predictors",
                     "centerVariable",
-                    "modelType")))}))
+                    "elapsedtime",
+                    "modelType",
+                    "useLasso",
+                    "lambdaMethod",
+                    "random_seed")))}))
 
 leaveonecenteroutBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "leaveonecenteroutBase",
@@ -398,6 +428,7 @@ leaveonecenteroutBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$designSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$perCenterResults} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pooledPerformance} \tab \tab \tab \tab \tab a table \cr
@@ -418,7 +449,7 @@ leaveonecenterout <- function(
     outcomeLevel,
     predictors,
     centerVariable,
-    elapsedtime = NULL,
+    elapsedtime,
     modelType = "logistic",
     useLasso = FALSE,
     lambdaMethod = "lambda.1se",

@@ -10,7 +10,7 @@ leaveonecenterout(
   outcomeLevel,
   predictors,
   centerVariable,
-  elapsedtime = NULL,
+  elapsedtime,
   modelType = "logistic",
   useLasso = FALSE,
   lambdaMethod = "lambda.1se",
@@ -61,6 +61,7 @@ pooled.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$designSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$perCenterResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$pooledPerformance} \tab \tab \tab \tab \tab a table \cr

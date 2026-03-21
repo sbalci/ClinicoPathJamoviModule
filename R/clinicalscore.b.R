@@ -17,6 +17,31 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         # Store for plot reuse
         .model_data = NULL,
 
+        # Safe variable name matching: find which original variable
+        # a model term belongs to (handles spaces, special chars)
+        .matchTermToVar = function(term, var_list) {
+            # Try exact match first
+            if (term %in% var_list) return(list(var = term, cat = ""))
+            # Try longest-prefix match (longest var name that is a prefix)
+            candidates <- var_list[vapply(var_list, function(v) {
+                # Use make.names to get the R-safe column name
+                safe_v <- make.names(v)
+                startsWith(term, safe_v) || startsWith(term, v)
+            }, logical(1))]
+            if (length(candidates) > 0) {
+                # Pick the longest match
+                best <- candidates[which.max(nchar(candidates))]
+                safe_best <- make.names(best)
+                if (startsWith(term, safe_best)) {
+                    cat_part <- substring(term, nchar(safe_best) + 1)
+                } else {
+                    cat_part <- substring(term, nchar(best) + 1)
+                }
+                return(list(var = best, cat = cat_part))
+            }
+            list(var = term, cat = "")
+        },
+
         .init = function() {
             if (is.null(self$options$outcome) ||
                 is.null(self$options$explanatory) ||
@@ -55,6 +80,10 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             prepared <- tryCatch(private$.prepareData(), error = function(e) {
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'><h4>", .("Data Error"), "</h4><p>", e$message, "</p></div>"))
+                notice <- jmvcore::Notice$new(options = self$options,
+                    name = 'dataError', type = jmvcore::NoticeType$ERROR)
+                notice$setContent(sprintf(.('Data preparation failed: %s'), e$message))
+                self$results$insert(1, notice)
                 return(NULL)
             })
             if (is.null(prepared)) return()
@@ -72,40 +101,59 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             model <- tryCatch(private$.fitModel(prepared), error = function(e) {
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'><h4>", .("Model Error"), "</h4><p>", e$message, "</p></div>"))
+                notice <- jmvcore::Notice$new(options = self$options,
+                    name = 'modelError', type = jmvcore::NoticeType$ERROR)
+                notice$setContent(sprintf(.('Model fitting failed: %s'), e$message))
+                self$results$insert(1, notice)
                 return(NULL)
             })
             if (is.null(model)) return()
 
             private$.checkpoint()
 
-            # ── 4. Populate model results ──────────────────────────────
+            # ── 4. Save plot data early (needed by scoring system) ─────
+            private$.model_data <- list(prepared = prepared, model = model)
+
+            # ── 5. Populate model results ──────────────────────────────
             private$.populateModelSummary(prepared, model)
             private$.populateCoefficients(model)
 
-            # ── 5. Generate scoring system ─────────────────────────────
+            # ── 6. Generate scoring system ─────────────────────────────
             private$.populateScoringSystem(prepared, model)
 
             private$.checkpoint()
 
-            # ── 6. Discrimination metrics ──────────────────────────────
+            # ── 7. Discrimination metrics ──────────────────────────────
             if (self$options$showDiscrimination) {
                 private$.populateDiscrimination(prepared, model)
             }
 
-            # ── 7. Bootstrap validation ────────────────────────────────
+            # ── 8. Bootstrap validation ────────────────────────────────
             if (self$options$bootstrapValidation) {
                 private$.populateValidation(prepared, model)
             }
 
-            # ── 8. Save plot data ──────────────────────────────────────
-            private$.model_data <- list(prepared = prepared, model = model)
-
             private$.checkpoint()
 
-            # ── 9. TRIPOD checklist ────────────────────────────────────
+            # ── 9. Decision curve analysis ────────────────────────────
+            if (self$options$showDecisionCurve) {
+                private$.populateDecisionCurve(prepared, model)
+            }
+
+            # ── 10. TRIPOD checklist ───────────────────────────────────
             if (self$options$showTRIPOD) private$.populateTRIPOD(prepared, model)
             if (self$options$showSummary) private$.populateSummary(prepared, model)
             if (self$options$showExplanations) private$.populateExplanations()
+
+            # ── 11. Completion notice ─────────────────────────────────
+            notice <- jmvcore::Notice$new(options = self$options,
+                name = 'analysisComplete', type = jmvcore::NoticeType$INFO)
+            notice$setContent(
+                sprintf(.('Scoring system built using %s regression with %d predictors (N=%d, %d events). Method: %s.'),
+                    if (prepared$model_type == "logistic") .("logistic") else .("Cox"),
+                    length(prepared$expl_vars), prepared$n, prepared$n_events,
+                    self$options$scoringMethod))
+            self$results$insert(999, notice)
         },
 
         # ══════════════════════════════════════════════════════════════════
@@ -382,6 +430,31 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 paste(checks, collapse = ""),
                 "</tbody></table>")
             self$results$suitabilityReport$setContent(html)
+
+            # Surface critical issues as Notices
+            if (epv < 5) {
+                notice <- jmvcore::Notice$new(options = self$options,
+                    name = 'epvCritical', type = jmvcore::NoticeType$STRONG_WARNING)
+                notice$setContent(
+                    sprintf(.('EPV = %.1f (<5): high overfitting risk. Reduce to %d or fewer predictors, or collect more data.'),
+                            epv, floor(min(prepared$n_events, prepared$n_nonevents) / 5)))
+                self$results$insert(1, notice)
+            } else if (epv < 10) {
+                notice <- jmvcore::Notice$new(options = self$options,
+                    name = 'epvMarginal', type = jmvcore::NoticeType$WARNING)
+                notice$setContent(
+                    sprintf(.('EPV = %.1f (marginal). Enable bootstrap validation to assess overfitting risk.'), epv))
+                self$results$insert(1, notice)
+            }
+
+            if (prepared$n < ceiling(min_n)) {
+                notice <- jmvcore::Notice$new(options = self$options,
+                    name = 'sampleSizeInsufficient', type = jmvcore::NoticeType$STRONG_WARNING)
+                notice$setContent(
+                    sprintf(.('Sample size N=%d is below the recommended minimum of %d (Riley et al. 2020). Results may not generalize.'),
+                            prepared$n, ceiling(min_n)))
+                self$results$insert(1, notice)
+            }
         },
 
         .populateModelSummary = function(prepared, model) {
@@ -405,22 +478,12 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         .populateCoefficients = function(model) {
             table <- self$results$coefficients
             for (i in seq_along(model$coefs)) {
-                # Parse variable name and category from model term
                 term <- model$var_names[i]
-                # For factor variables, the term is like "gradeG2" — split at factor name boundary
-                var_base <- term
-                category <- ""
-                for (v in self$options$explanatory) {
-                    if (startsWith(term, v) && nchar(term) > nchar(v)) {
-                        var_base <- v
-                        category <- substring(term, nchar(v) + 1)
-                        break
-                    }
-                }
+                parsed <- private$.matchTermToVar(term, self$options$explanatory)
 
                 table$addRow(rowKey = i, values = list(
-                    variable = var_base,
-                    category = category,
+                    variable = parsed$var,
+                    category = parsed$cat,
                     coefficient = model$coefs[i],
                     effectSize = model$or_hr[i],
                     ci_lower = model$ci_lower[i],
@@ -448,17 +511,11 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             # Populate scoring table
             for (i in seq_along(coefs)) {
                 term <- model$var_names[i]
-                var_base <- term; category <- .("Present")
-                for (v in self$options$explanatory) {
-                    if (startsWith(term, v) && nchar(term) > nchar(v)) {
-                        var_base <- v
-                        category <- substring(term, nchar(v) + 1)
-                        break
-                    }
-                }
+                parsed <- private$.matchTermToVar(term, self$options$explanatory)
+                category <- if (nzchar(parsed$cat)) parsed$cat else .("Present")
 
                 table$addRow(rowKey = i, values = list(
-                    variable = var_base,
+                    variable = parsed$var,
                     category = category,
                     effectSize = model$or_hr[i],
                     points = pts[i]
@@ -486,7 +543,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 list(.("Accuracy"), sprintf("%.3f", perf$accuracy)),
                 list(.("Sensitivity"), sprintf("%.3f", perf$sensitivity)),
                 list(.("Specificity"), sprintf("%.3f", perf$specificity)),
-                list(.("Score range"), sprintf("%d to %d", min(total_scores), max(total_scores)))
+                list(.("Score range"), sprintf("%.0f to %.0f", min(total_scores), max(total_scores)))
             )
             for (i in seq_along(perf_rows)) {
                 perf_table$addRow(rowKey = i, values = list(
@@ -555,6 +612,23 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                     table$addRow(rowKey = 1, values = list(
                         metric = metric_label, estimate = auc_val,
                         ci_lower = ci_obj[1], ci_upper = ci_obj[3], interpretation = interp))
+
+                    # Notice for poor discrimination
+                    if (auc_val < 0.7) {
+                        notice <- jmvcore::Notice$new(options = self$options,
+                            name = 'poorDiscrimination', type = jmvcore::NoticeType$WARNING)
+                        notice$setContent(
+                            sprintf(.('%s = %.3f indicates poor discrimination. Consider adding more informative predictors.'),
+                                    metric_label, auc_val))
+                        self$results$insert(1, notice)
+                    } else if (auc_val > 0.95 && prepared$n < 100) {
+                        notice <- jmvcore::Notice$new(options = self$options,
+                            name = 'overfitRisk', type = jmvcore::NoticeType$STRONG_WARNING)
+                        notice$setContent(
+                            sprintf(.('%s = %.3f with N=%d: likely overfitted. Enable bootstrap validation for corrected estimate.'),
+                                    metric_label, auc_val, prepared$n))
+                        self$results$insert(1, notice)
+                    }
                 }
             }, error = function(e) {})
 
@@ -635,13 +709,21 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             pred <- model$predicted
             obs <- prepared$y
 
-            # Create calibration groups
-            groups <- cut(pred, breaks = quantile(pred, probs = seq(0, 1, length.out = n_groups + 1)),
-                          include.lowest = TRUE)
+            # Create calibration groups -- reduce groups if quantile breaks collapse
+            n_unique <- length(unique(pred))
+            eff_groups <- min(n_groups, n_unique)
+            if (eff_groups < 2) return(FALSE)
+
+            breaks <- unique(quantile(pred, probs = seq(0, 1, length.out = eff_groups + 1)))
+            if (length(breaks) < 2) return(FALSE)
+
+            groups <- cut(pred, breaks = breaks, include.lowest = TRUE)
             cal_df <- data.frame(
-                predicted = tapply(pred, groups, mean),
-                observed = tapply(obs, groups, mean)
+                predicted = tapply(pred, groups, mean, na.rm = TRUE),
+                observed = tapply(obs, groups, mean, na.rm = TRUE)
             )
+            cal_df <- cal_df[complete.cases(cal_df), , drop = FALSE]
+            if (nrow(cal_df) < 2) return(FALSE)
 
             p <- ggplot2::ggplot(cal_df, ggplot2::aes(x = predicted, y = observed)) +
                 ggplot2::geom_point(size = 3) +
@@ -711,6 +793,65 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         },
 
         # ══════════════════════════════════════════════════════════════════
+        # Decision curve analysis
+        # ══════════════════════════════════════════════════════════════════
+        .populateDecisionCurve = function(prepared, model) {
+            if (prepared$model_type != "logistic") return()
+
+            pred <- model$predicted
+            obs <- prepared$y
+            n <- length(obs)
+            prevalence <- mean(obs)
+
+            # Fine-grained for plot
+            thresholds_plot <- seq(0.01, 0.99, by = 0.01)
+            # Coarser for table display (every 5%)
+            thresholds_table <- seq(0.05, 0.95, by = 0.05)
+
+            table <- self$results$decisionCurveTable
+
+            .calc_nb <- function(pt) {
+                nb_all <- prevalence - (1 - prevalence) * pt / (1 - pt)
+                tp <- sum(pred >= pt & obs == 1)
+                fp <- sum(pred >= pt & obs == 0)
+                nb_model <- tp / n - fp / n * pt / (1 - pt)
+                list(threshold = pt, net_benefit_model = nb_model, net_benefit_all = nb_all)
+            }
+
+            # Build full data for plot
+            dca_list <- lapply(thresholds_plot, .calc_nb)
+            dca_data <- do.call(rbind, lapply(dca_list, as.data.frame))
+
+            # Populate table with subset
+            for (pt in thresholds_table) {
+                nb <- .calc_nb(pt)
+                table$addRow(rowKey = as.character(pt), values = nb)
+            }
+
+            private$.model_data$dca_data <- dca_data
+        },
+
+        .decisionCurvePlot = function(image, ggtheme, theme, ...) {
+            md <- private$.model_data
+            if (is.null(md) || is.null(md$dca_data)) return(FALSE)
+
+            dca <- md$dca_data
+
+            p <- ggplot2::ggplot(dca, ggplot2::aes(x = threshold)) +
+                ggplot2::geom_line(ggplot2::aes(y = net_benefit_model, color = .("Model")), linewidth = 1) +
+                ggplot2::geom_line(ggplot2::aes(y = net_benefit_all, color = .("Treat All")), linewidth = 0.8, linetype = "dashed") +
+                ggplot2::geom_hline(yintercept = 0, linetype = "solid", color = "grey50") +
+                ggplot2::scale_color_manual(values = c("#2E86C1", "#E74C3C")) +
+                ggplot2::labs(title = .("Decision Curve Analysis"),
+                              x = .("Threshold Probability"), y = .("Net Benefit"),
+                              color = .("Strategy")) +
+                ggplot2::coord_cartesian(ylim = c(-0.1, max(c(dca$net_benefit_model, dca$net_benefit_all), na.rm = TRUE) + 0.05)) +
+                ggtheme
+            print(p)
+            TRUE
+        },
+
+        # ══════════════════════════════════════════════════════════════════
         # TRIPOD checklist
         # ══════════════════════════════════════════════════════════════════
         .populateTRIPOD = function(prepared, model) {
@@ -733,6 +874,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 list(.("Discrimination"), if (self$options$showDiscrimination) .("AUC/C-index reported") else .("NOT reported"), self$options$showDiscrimination),
                 list(.("Calibration"), if (self$options$showCalibration) .("Calibration plot generated") else .("NOT assessed"), self$options$showCalibration),
                 list(.("Internal validation"), if (has_validation) sprintf(.("Bootstrap (B=%d)"), self$options$bootstrapN) else .("NOT performed"), has_validation),
+                list(.("Clinical utility"), if (self$options$showDecisionCurve) .("Decision curve analysis performed") else .("NOT assessed (enable Decision Curve Analysis)"), self$options$showDecisionCurve),
                 list(.("Interpretation"), .("Scoring system with lookup table"), TRUE)
             )
 

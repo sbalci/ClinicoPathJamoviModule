@@ -112,6 +112,9 @@ To lower the computation make all default checkboxes to be false in .a.yaml
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"
 ! Rscript -e "devtools::load_all()"
+! Rscript -e "devtools::check()"
+! Rscript -e "pkgdown::build_site()"
+
 
 Rscript _updateModules.R
 
@@ -126,31 +129,6 @@ Rscript _updateModules.R
 fix issues, implement recommendations and enhancements
 
 
-
-/check-function clinicalscore
-/check-function-full clinicalscore
-/review-function clinicalscore
-/fix-function clinicalscore
-/generate-test-data clinicalscore
-/update-refs clinicalscore
-/document-function clinicalscore
-
-
-/check-function misclassificationbias
-/check-function-full misclassificationbias
-/review-function misclassificationbias
-/fix-function misclassificationbias
-/generate-test-data misclassificationbias
-/update-refs misclassificationbias
-/document-function misclassificationbias
-
-/check-function leaveonecenterout
-/check-function-full leaveonecenterout
-/review-function leaveonecenterout
-/fix-function leaveonecenterout
-/generate-test-data leaveonecenterout
-/update-refs leaveonecenterout
-/document-function leaveonecenterout
 
 
 

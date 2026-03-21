@@ -160,7 +160,7 @@ items:
           title: "Levels"
           type: text
         - name: 'all'
-          title: "all"
+          title: "N"
           type: text
         - name: 'HR_univariable'
           title: "HR (Univariable)"
@@ -1511,4 +1511,5 @@ refs:
     - survivalrwnahhas
     - survivalrviews
     - appliedsurvivalanalysisR
+    - lubridate
 ...

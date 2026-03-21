@@ -1,7 +1,8 @@
 #' @title Find Retracted Papers from DOI
-#' @description This module checks DOIs against retraction databases to identify 
-#' retracted publications. It supports OpenRetractions database and can optionally 
-#' retrieve PubMed IDs for valid DOIs. The function includes robust error handling, 
+#' @name retracted-helpers
+#' @description This module checks DOIs against retraction databases to identify
+#' retracted publications. It supports OpenRetractions database and can optionally
+#' retrieve PubMed IDs for valid DOIs. The function includes robust error handling,
 #' DOI format validation, and rate limiting for API calls.
 #' @return A results object containing retraction status, details, and optional PubMed IDs
 #' @examples 

@@ -1,753 +1,430 @@
-# Survival Analysis - Testing Checklist
+# Testing Checklist: survival
 
-## Test Dataset
-
-**Primary:** `survival_comprehensive` (200 patients, 15 variables)
-- Load: `data("survival_comprehensive", package = "ClinicoPath")`
-- Status levels: "Alive without Disease" (80), "Alive with Disease" (25), "Dead of Disease" (73), "Dead of Other Causes" (22)
-- Continuous vars with NAs: Ki67, TumorSize
-- Date columns: DiagnosisDate, LastFollowUpDate (YYYY-MM-DD strings)
-
-**Additional datasets for edge cases:**
-- `survival_small` -- small sample size
-- `survival_competing` -- competing risks focus
-- `survival_dates` -- date-based time calculation
-- `survival_landmark` -- landmark analysis
-- `survival_person_time` -- person-time focus
-- `survival_rmst` -- RMST focus
-- `survival_stratified` -- stratified Cox
-- `survival_test` -- general testing
+**Function:** `survival()`
+**Module:** ClinicoPath Survival (SurvivalT submenu)
+**Last updated:** 2026-03-22
 
 ---
 
-## Test Scenarios
+## Available Test Datasets
 
-### T01: Basic Kaplan-Meier Analysis (Minimal Required Inputs)
-
-**Inputs:**
-- `elapsedtime` = FollowUpMonths
-- `outcome` = Status
-- `outcomeLevel` = "Dead of Disease"
-- `explanatory` = TumorStage
-
-**Expected Outputs:**
-- [x] `medianTable` populated with 4 rows (Stage I-IV), columns: factor, records, events, rmean, se_rmean, median, x0_95lcl, x0_95ucl
-- [x] `coxTable` populated with HR_univariable for each stage
-- [x] `tCoxtext2` (forest plot HTML) rendered
-- [x] `survTable` populated with survival at months 12, 36, 60
-
-**Verify:**
-- Total records sums to approximately 200 (minus NAs)
-- Events should be < records for each group
-- Median survival is NA for groups where KM curve does not cross 0.5
-- Advanced stages should have lower median survival
+| Dataset | File | n | Key Variables | Purpose |
+|---------|------|---|---------------|---------|
+| `survival_test` | `data/survival_test.rda` | ~200 | `elapsedtime`, `outcome`, `treatment` (3 levels), `stage` (4 levels), `sex` | General-purpose baseline test data with binary outcome |
+| `survival_comprehensive` | `data/survival_comprehensive.rda` | 200 | `FollowUpMonths`, `Status` (4-level), `TumorStage`, `Age`, `Sex`, `TumorGrade`, `Ki67` (~5% NA), `TumorSize` (~5% NA), `LymphovascularInvasion`, `MarginStatus`, `DiagnosisDate`, `LastFollowUpDate`, `HER2Status`, `ERStatus` | Realistic Weibull-simulated clinicopathological dataset; covers competing risks, date-based time, age adjustment, RCS, calibration, and all plot types |
+| `survival_dates` | `data/survival_dates.rda` | ~200 | `dxdate`, `fudate`, `outcome`, `treatment` | Date-based time calculation testing (YMD format) |
+| `survival_competing` | `data/survival_competing.rda` | ~200 | `elapsedtime`, `outcome` (Dead of Disease / Dead of Other / Alive w Disease / Alive w/o Disease), `treatment` | Competing risks and cause-specific analysis |
+| `survival_landmark` | `data/survival_landmark.rda` | ~200 | `elapsedtime`, `outcome`, `treatment`, `response_6mo` | Landmark analysis with 6-month response variable |
+| `survival_stratified` | `data/survival_stratified.rda` | ~200 | `elapsedtime`, `outcome`, `treatment`, `sex` | Stratified Cox regression testing |
+| `survival_person_time` | `data/survival_person_time.rda` | ~200 | `elapsedtime`, `outcome`, `risk_category` | Person-time metrics and incidence rate calculation |
+| `survival_rmst` | `data/survival_rmst.rda` | ~200 | `elapsedtime`, `outcome`, `treatment` | Restricted Mean Survival Time analysis |
+| `survival_rmst_test` | `data/survival_rmst_test.rda` | 80 | `FollowUpMonths`, `Status`, `Treatment` | Short follow-up RMST for tau default behavior testing |
+| `survival_small` | `data/survival_small.rda` | ~20-30 | `elapsedtime`, `outcome`, `treatment` | Small sample edge case testing |
+| `survival_low_epv` | `data/survival_low_epv.rda` | 60 | `FollowUpMonths`, `Status`, `TumorSubtype` (6 levels), `Age` | Low events-per-variable scenario (EPV ~2); triggers EPV warnings |
+| `survival_extreme_hr` | `data/survival_extreme_hr.rda` | 100 | `FollowUpMonths`, `Status`, `RiskGroup` (Common/Rare), `Age` | Extreme hazard ratio detection (HR > 10); rare subgroup convergence |
+| `survival_analysis_data` | `data/survival_analysis_data.rda` | varies | varies | Additional general-purpose survival analysis data |
 
 ---
 
-### T02: Survival Plots (All Types)
+## Existing Test Files
 
-**Inputs:** Same as T01, plus:
-- `sc` = true, `ce` = true, `ch` = true, `kmunicate` = true, `loglog` = true
-- `ci95` = true, `risktable` = true, `censored` = true, `pplot` = true
-- `medianline` = "hv"
-- `endplot` = 80, `byplot` = 12, `ybegin_plot` = 0.0, `yend_plot` = 1.0
-
-**Expected Outputs:**
-- [x] `plot` (Survival Curve) -- 4 colored curves with CI bands, risk table below, censoring marks, p-value, median lines
-- [x] `plot2` (Cumulative Events) -- increasing curves
-- [x] `plot3` (Cumulative Hazard) -- increasing curves
-- [x] `plot6` (KMunicate) -- KMunicate-style with extended risk table
-- [x] `plot7` (Log-Log) -- log(-log(S)) vs log(time), parallel lines = PH holds
-
-**Verify:**
-- All 5 plots render without error
-- Y-axis range matches ybegin_plot to yend_plot for survival plot
-- X-axis ends at endplot (80)
-- Time intervals on x-axis match byplot (12)
-- Risk table shows decreasing numbers at risk
+| Test File | Focus | Key Tests |
+|-----------|-------|-----------|
+| `tests/testthat/test-survival.R` | Original mixed tests | Basic KM, date-based, person-time, RMST, stratified Cox, landmark, pairwise, residual diagnostics, PH test, plots, multi-event, comprehensive combo, performance (n=1000) |
+| `tests/testthat/test-survival-basic.R` | Basic functionality | Function existence, minimal args, explanatory variable types (binary/ordinal/multi-level), output structure, small dataset, no-grouping scenario |
+| `tests/testthat/test-survival-arguments.R` | Option combinations | Date-based time, competing risks, landmark, stratified Cox, person-time, RMST, all plot types (sc/kmunicate/ce/ch/loglog), plot options (ci95/risktable/censored/pplot/medianline), PH test, pairwise with different adjustment methods, residual diagnostics, explanations, summaries, cutpoints, cause-specific, time output types |
+| `tests/testthat/test-survival-edge-cases.R` | Boundary conditions | NA in time/outcome, all censored, all events, zero/negative time, very small/large times, single observation, small sample, single group, unbalanced groups, group with no events, landmark beyond max, invalid dates, duplicates, tied times, invalid outcome levels, missing strata variable, extreme y-axis, short plot time, constant strata, >4 outcome levels, RMST tau=0, person-time with zero-event interval |
+| `tests/testthat/test-survival-integration.R` | Workflows and consistency | Run reproducibility, progressive workflows (basic to plots to diagnostics), date-based workflow, competing risks workflow, landmark workflow, stratified Cox workflow, person-time workflow, RMST workflow, CSV/Excel import, tibble vs data.frame, publication-ready combo, subgroup analysis, sensitivity cutpoints, analysis type comparison (overall/cause/compete) |
+| `tests/testthat/test-survival-comprehensive.R` | Full feature coverage | All 25 feature areas using `survival_comprehensive` dataset; data integrity checks (dimensions, variable names, factor levels, value ranges, missingness) |
+| `tests/testthat/test-survival-safety.R` | Clinical safety checks | Negative time validation, <10 events blocking, RMST default tau, variable names with spaces, weighted log-rank, bootstrap validation, calibration curves, PH assumption, pairwise, plot options, person-time, landmark |
 
 ---
 
-### T03: Cox Regression with PH Assumption Test
+## Test Coverage Matrix
 
-**Inputs:** Same as T01, plus:
-- `ph_cox` = true
-
-**Expected Outputs:**
-- [x] `cox_ph` (Preformatted) -- Schoenfeld residuals test output
-- [x] `phInterpretation` (Html) -- interpretation of PH test
-- [x] `plot8` (PH Schoenfeld plot) -- Schoenfeld residuals over time
-
-**Verify:**
-- PH test p-value reported for each covariate and global test
-- If p < 0.05, interpretation should flag violation
-- Schoenfeld residual plot shows smooth curve with CI band
-
----
-
-### T04: Residual Diagnostics
-
-**Inputs:** Same as T01, plus:
-- `residual_diagnostics` = true
-
-**Expected Outputs:**
-- [x] `residualsTable` -- observation, martingale, deviance, score, schoenfeld columns
-- [x] `residualsPlot` -- residual diagnostic plots
-
-**Verify:**
-- Table has rows for each observation
-- Martingale residuals between -inf and 1
-- Deviance residuals approximately symmetric around 0
-
----
-
-### T05: Stratified Cox Regression
-
-**Inputs:** Same as T01, plus:
-- `stratified_cox` = true
-- `strata_variable` = MarginStatus
-
-**Expected Outputs:**
-- [x] `coxTable` -- HR from stratified Cox model
-- [x] Formula should include strata(MarginStatus)
-
-**Verify:**
-- HR values may differ from unstratified model
-- No error even if strata variable has 3 levels
-
----
-
-### T06: Pairwise Comparisons
-
-**Inputs:** Same as T01, plus:
-- `pw` = true
-- `padjustmethod` = "bonferroni"
-
-**Expected Outputs:**
-- [x] `pairwiseComparisonHeading` visible
-- [x] `pairwiseTable` -- 6 pairwise comparisons for 4 stages (4 choose 2 = 6)
-- [x] `pairwiseSummary` -- interpretation
-
-**Verify:**
-- Adjusted p-values >= unadjusted p-values
-- All pairs compared (Stage I vs II, I vs III, I vs IV, II vs III, II vs IV, III vs IV)
-
-**Test all adjustment methods:**
-- holm, hochberg, hommel, bonferroni, BH, BY, fdr, none
-
----
-
-### T07: Weighted Log-Rank Tests
-
-**Inputs:** Same as T01, plus:
-- `weightedLogRank` = true
-- `survivalTestType` = "fleming_harrington"
-
-**Expected Outputs:**
-- [x] `weightedLogRankTable` -- 4 rows (all test types), columns: test, rho, chisq, df, pvalue, weighting
-
-**Verify:**
-- Standard log-rank (rho=0) result matches base KM p-value
-- Gehan-Breslow (rho=1) emphasizes early differences
-- All 4 test types reported
-
-**Test all survivalTestType values:**
-- logrank, gehan_breslow, tarone_ware, peto_peto, fleming_harrington
+| # | Feature | Option(s) | Recommended Dataset | Test File(s) | Status |
+|---|---------|-----------|---------------------|--------------|--------|
+| 1 | **Basic KM analysis** | `elapsedtime`, `outcome`, `explanatory` | `survival_test`, `survival_comprehensive` | `test-survival-basic.R`, `test-survival-comprehensive.R` | Covered |
+| 2 | **Cox regression** | (automatic with KM when explanatory provided) | `survival_test`, `survival_comprehensive` | `test-survival-basic.R`, `test-survival-safety.R` | Covered |
+| 3a | **Survival plot (KM curve)** | `sc = TRUE` | `survival_test` | `test-survival-arguments.R` | Covered |
+| 3b | **Cumulative events plot** | `ce = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 3c | **Cumulative hazard plot** | `ch = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 3d | **KMunicate-style plot** | `kmunicate = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 3e | **Log-log plot** | `loglog = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 4a | **95% CI on plot** | `sc = TRUE`, `ci95 = TRUE` | `survival_test` | `test-survival-arguments.R` | Covered |
+| 4b | **Risk table** | `sc = TRUE`, `risktable = TRUE` | `survival_test` | `test-survival-arguments.R` | Covered |
+| 4c | **Censored marks** | `sc = TRUE`, `censored = TRUE` | `survival_test` | `test-survival-arguments.R` | Covered |
+| 4d | **P-value on plot** | `sc = TRUE`, `pplot = TRUE` | `survival_test` | `test-survival-arguments.R` | Covered |
+| 4e | **Median survival line** | `sc = TRUE`, `medianline = "hv"` | `survival_test` | `test-survival-arguments.R` | Covered |
+| 5a | **Plot end time** | `endplot = <int>` | `survival_test` | `test-survival-arguments.R`, `test-survival-edge-cases.R` | Covered |
+| 5b | **Plot time interval** | `byplot = <int>` | `survival_test` | `test-survival-arguments.R` | Covered |
+| 5c | **Y-axis range** | `ybegin_plot`, `yend_plot` | `survival_test` | `test-survival-edge-cases.R` | Covered |
+| 6 | **Survival probability tables** | `cutp = "12, 36, 60"` | `survival_test` | `test-survival-arguments.R`, `test-survival-integration.R` | Covered |
+| 7a | **Pairwise comparisons** | `pw = TRUE`, `padjustmethod` | `survival_test` | `test-survival-arguments.R`, `test-survival-safety.R` | Covered |
+| 7b | **All p-value adjustment methods** | `padjustmethod = "holm"/"bonferroni"/"BH"/"fdr"/"none"/...` | `survival_test` | `test-survival-arguments.R` | Partial -- holm, bonferroni, fdr tested; hochberg, hommel, BY not individually tested |
+| 8 | **PH assumption test** | `ph_cox = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R`, `test-survival-safety.R` | Covered |
+| 9 | **Stratified Cox** | `stratified_cox = TRUE`, `strata_variable` | `survival_stratified`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 10a | **Person-time analysis** | `person_time = TRUE` | `survival_person_time`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R`, `test-survival-safety.R` | Covered |
+| 10b | **Custom time intervals** | `time_intervals = "6, 12, 24, 48"` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 10c | **Rate multiplier** | `rate_multiplier = 100/1000` | `survival_person_time`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 11a | **RMST analysis** | `rmst_analysis = TRUE` | `survival_rmst`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 11b | **RMST custom tau** | `rmst_tau = <number>` | `survival_rmst` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 11c | **RMST default tau (tau=0)** | `rmst_tau = 0` | `survival_test`, `survival_comprehensive` | `test-survival-edge-cases.R`, `test-survival-safety.R` | Covered |
+| 12 | **Residual diagnostics** | `residual_diagnostics = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 13a | **Weighted log-rank** | `weightedLogRank = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-safety.R`, `test-survival-comprehensive.R` | Covered |
+| 13b | **All survival test types** | `survivalTestType = "logrank"/"gehan_breslow"/"tarone_ware"/"peto_peto"/"fleming_harrington"` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered (loop over all 5) |
+| 14a | **Bootstrap validation** | `bootstrapValidation = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-safety.R`, `test-survival-comprehensive.R` | Covered |
+| 14b | **Bootstrap N** | `bootstrapValN = 50/200` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 15a | **Calibration curves** | `calibration_curves = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-safety.R`, `test-survival-comprehensive.R` | Covered |
+| 15b | **Calibration timepoint** | `calibration_timepoint = 0/36` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 15c | **Calibration groups** | `calibration_ngroups = 4/5` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 16a | **RCS non-linearity** | `rcs_analysis = TRUE`, `rcs_variable` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 16b | **RCS with different knots** | `rcs_knots = 3/4` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 16c | **RCS with missing data** | `rcs_variable = "Ki67"` (has NAs) | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 17a | **Age adjustment** | `age_adjustment = TRUE`, `age_variable` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 17b | **Age interaction** | `age_interaction = TRUE` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 17c | **Age-stratified Cox** | `age_stratified_cox = TRUE`, `age_group_cutpoints` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 17d | **Age as time scale** | `age_time_scale = TRUE` | `survival_comprehensive` | -- | **NOT TESTED** |
+| 17e | **Age standardization (SMR)** | `age_standardization = TRUE`, `age_standardization_method` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered (indirect only) |
+| 17f | **Direct age standardization** | `age_standardization_method = "direct"` | `survival_comprehensive` | -- | **NOT TESTED** |
+| 17g | **Age-stratified KM plots** | `age_stratified_km = TRUE` | `survival_comprehensive` | -- | **NOT TESTED** |
+| 17h | **Adjusted survival curves** | `adjusted_curves = TRUE` | `survival_comprehensive` | -- | **NOT TESTED** |
+| 18a | **Date-based time** | `tint = TRUE`, `dxdate`, `fudate` | `survival_dates`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 18b | **Time type data formats** | `timetypedata = "ymd"/"mdy"/"dmy"/...` | `survival_dates` | `test-survival-arguments.R` | Partial -- ymd tested; other 6 formats not individually tested |
+| 18c | **Time type output** | `timetypeoutput = "days"/"weeks"/"months"/"years"` | `survival_dates` | `test-survival-arguments.R` | Partial -- days, months, years tested; weeks not tested |
+| 19a | **Multi-event competing risks** | `multievent = TRUE`, `dod`, `dooc`, `awd`, `awod`, `analysistype = "compete"` | `survival_competing`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R`, `test-survival-integration.R` | Covered |
+| 19b | **Cause-specific survival** | `analysistype = "cause"` | `survival_competing`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 19c | **Overall survival (multi-event)** | `analysistype = "overall"` | `survival_competing` | `test-survival-integration.R` | Covered |
+| 20 | **Landmark analysis** | `uselandmark = TRUE`, `landmark = <int>` | `survival_landmark`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R`, `test-survival-safety.R` | Covered |
+| 21 | **Parametric models** | `use_parametric = TRUE`, `parametric_distribution`, `compare_distributions`, `parametric_diagnostics`, `spline_knots`, `spline_scale`, `parametric_extrapolation`, `hazard_plots` | `survival_comprehensive` | `test-survival-comprehensive.R` | Partial -- Weibull + compare tested; splines, extrapolation, hazard plots not individually tested |
+| 22a | **Show explanations** | `showExplanations = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 22b | **Show summaries** | `showSummaries = TRUE` | `survival_test`, `survival_comprehensive` | `test-survival-arguments.R`, `test-survival-comprehensive.R` | Covered |
+| 23 | **REMARK checklist** | `remark_checklist = TRUE` | `survival_comprehensive` | `test-survival-comprehensive.R` | Covered |
+| 24a | **Export survival data** | `export_survival_data` (Output type) | `survival_test` | `test-survival.R` | Minimal -- no explicit assertion on output content |
+| 24b | **Calculated time output** | `calculatedtime` (Output type) | `survival_dates` | -- | **NOT TESTED** |
+| 24c | **Redefined outcome output** | `outcomeredefined` (Output type) | `survival_competing` | -- | **NOT TESTED** |
+| 25a | **Negative time error** | Negative values in `elapsedtime` | `survival_test` (modified) | `test-survival-edge-cases.R`, `test-survival-safety.R` | Covered |
+| 25b | **<10 events blocking** | Very few events in outcome | `survival_test` (modified) | `test-survival-safety.R` | Covered |
+| 25c | **EPV warning** | Low events-per-variable | `survival_low_epv` | -- | **NOT TESTED** (dataset exists but no dedicated assertion) |
+| 25d | **Extreme HR detection** | HR > 10 or HR < 0.1 | `survival_extreme_hr` | -- | **NOT TESTED** (dataset exists but no dedicated assertion) |
+| 25e | **Convergence issues** | Near-separation or rare categories | `survival_extreme_hr` | -- | **NOT TESTED** |
 
 ---
 
-### T08: Restricted Mean Survival Time (RMST)
+## Gaps: Features Without Dedicated Tests
 
-**Inputs:** Same as T01, plus:
-- `rmst_analysis` = true
-- `rmst_tau` = 60
+The following features have `.a.yaml` options defined but lack explicit test coverage:
 
-**Expected Outputs:**
-- [x] `rmstHeading` visible
-- [x] `rmstTable` -- one row per TumorStage level, columns: group, rmst, se, ci_lower, ci_upper, tau
-
-**Verify:**
-- All tau values = 60
-- RMST values are positive and less than tau
-- Higher-stage tumors should have lower RMST
-- SE > 0
-
-**Additional test:**
-- `rmst_tau` = 0 (should auto-select 75th percentile)
-
----
-
-### T09: Person-Time Analysis
-
-**Inputs:** Same as T01, plus:
-- `person_time` = true
-- `time_intervals` = '12, 36, 60'
-- `rate_multiplier` = 1000
-
-**Expected Outputs:**
-- [x] `personTimeHeading` visible
-- [x] `personTimeTable` -- rows for intervals 0-12, 12-36, 36-60, 60+
-- [x] `personTimeSummary` (Html)
-
-**Verify:**
-- Events sum approximately to total events across intervals
-- Rates = (events / person_time) * rate_multiplier
-- CI bounds make sense (lower < rate < upper)
+1. **`age_time_scale = TRUE`** -- Age as the time axis in Cox model (`Surv(age_entry, age_event, event)`)
+2. **`age_standardization_method = "direct"`** -- Direct standardization (only indirect is tested)
+3. **`age_stratified_km = TRUE`** -- KM curves stratified by age groups
+4. **`adjusted_curves = TRUE`** -- Age-adjusted survival curves from Cox model
+5. **`timetypeoutput = "weeks"`** -- Output in weeks
+6. **`timetypedata`** formats other than `"ymd"` -- e.g., `"dmy"`, `"mdy"`, `"ydm"`, `"myd"`, `"dym"`, `"ymdhms"`
+7. **`calculatedtime`** (Output) -- Verify calculated time is added to data
+8. **`outcomeredefined`** (Output) -- Verify redefined outcome is added to data
+9. **Parametric model options** -- `parametric_distribution` (all 8 distributions), `parametric_extrapolation`, `extrapolation_time`, `parametric_survival_plots`, `hazard_plots`, `spline_knots`, `spline_scale`
+10. **EPV warning** -- `survival_low_epv` dataset exists but no test asserts the warning
+11. **Extreme HR detection** -- `survival_extreme_hr` dataset exists but no test asserts the warning
+12. **`padjustmethod`** -- `"hochberg"`, `"hommel"`, `"BY"` not explicitly tested
+13. **`medianline`** -- Only `"hv"` tested; `"h"`, `"v"`, `"none"` not individually tested
+14. **Empty dataset (0 rows)** -- Boundary condition not currently tested
 
 ---
 
-### T10: Multiple Outcome / Competing Risks
+## Edge Case Scenarios
 
-**Inputs:**
-- `elapsedtime` = FollowUpMonths
-- `outcome` = Status
-- `multievent` = true
-- `dod` = "Dead of Disease"
-- `dooc` = "Dead of Other Causes"
-- `awd` = "Alive with Disease"
-- `awod` = "Alive without Disease"
-- `analysistype` = "compete"
-- `explanatory` = TumorStage
-
-**Expected Outputs:**
-- [x] `medianTable` -- cumulative incidence-based medians
-- [x] Cox regression is SKIPPED (no coxTable populated differently)
-- [x] Pairwise comparisons are SKIPPED
-- [x] Person-time, RMST, calibration, RCS, bootstrap are SKIPPED
-
-**Verify:**
-- No errors despite skipping multiple features
-- Median table uses CIF-based estimation
-- outcomeredefined output works if enabled
-
-**Also test:**
-- `analysistype` = "overall" with multievent=true
-- `analysistype` = "cause" with multievent=true
-
----
-
-### T11: Cause-Specific Survival
-
-**Inputs:** Same as T10 but:
-- `analysistype` = "cause"
-
-**Expected Outputs:**
-- [x] Outcome recoded: "Dead of Disease" = event, "Dead of Other" = censored
-- [x] Standard KM/Cox analysis proceeds (not competing risk mode)
-
-**Verify:**
-- Fewer events than overall survival (only disease deaths counted)
-- Cox model runs normally
+| Scenario | Data Setup | Expected Behavior | Test File | Status |
+|----------|-----------|-------------------|-----------|--------|
+| Empty dataset (0 rows) | `survival_test[0, ]` | Error: insufficient data | -- | **NOT TESTED** |
+| All censored (0 events) | Set all `outcome = 0` | Error: no events / all censored | `test-survival-edge-cases.R` | Covered |
+| All events (no censoring) | Set all `outcome = 1` | Completes (may warn) | `test-survival-edge-cases.R` | Covered |
+| Single group (no explanatory) | Omit `explanatory` | Overall KM, no log-rank test | `test-survival-basic.R`, `test-survival-comprehensive.R` | Covered |
+| Single-level explanatory | All same group value | Warning: single level | `test-survival-edge-cases.R` | Covered |
+| Variable names with spaces | Rename columns to have spaces | Completes via jmvcore::composeTerm | `test-survival-safety.R` | Covered |
+| Very small sample (n=5) | `survival_test[1:5, ]` | Completes (may warn about small sample) | `test-survival-edge-cases.R` | Covered |
+| Single observation (n=1) | `survival_test[1, ]` | Error: insufficient data | `test-survival-edge-cases.R` | Covered |
+| Very large sample (n=1000) | Generated in test | Completes within 30s | `test-survival.R` | Covered |
+| Missing values in time | Set some `elapsedtime = NA` | Warning: rows removed | `test-survival-edge-cases.R` | Covered |
+| Missing values in outcome | Set some `outcome = NA` | Warning: rows removed | `test-survival-edge-cases.R` | Covered |
+| Missing values in continuous covariate | `Ki67` in `survival_comprehensive` (~5% NA) | Completes, handles NAs gracefully | `test-survival-comprehensive.R` | Covered |
+| Zero time values | Set some `elapsedtime = 0` | Condition (warning or error) | `test-survival-edge-cases.R` | Covered |
+| Negative time values | Set some `elapsedtime = -5` | Error: negative/invalid time | `test-survival-edge-cases.R`, `test-survival-safety.R` | Covered |
+| Very small time values | Multiply time by 0.01 | Completes | `test-survival-edge-cases.R` | Covered |
+| Very large time values | Multiply time by 100 | Completes | `test-survival-edge-cases.R` | Covered |
+| Tied event times | Round times to nearest 10 | Completes | `test-survival-edge-cases.R` | Covered |
+| Duplicate observations | `rbind(data, data[1:10, ])` | Completes | `test-survival-edge-cases.R` | Covered |
+| Unbalanced groups (195 vs 5) | Overwrite treatment levels | Completes (may warn) | `test-survival-edge-cases.R` | Covered |
+| Group with no events | Set outcome=0 for one group | Completes (may warn) | `test-survival-edge-cases.R` | Covered |
+| Landmark beyond max follow-up | `landmark = 100` with max ~70 | Error: landmark exceeds max | `test-survival-edge-cases.R` | Covered |
+| Invalid outcome level (competing risks) | `outcomeLevel = "Invalid Level"` | Error: level not found | `test-survival-edge-cases.R` | Covered |
+| Missing strata variable | `stratified_cox = TRUE` without `strata_variable` | Error: strata required | `test-survival-edge-cases.R` | Covered |
+| Constant strata variable | All same stratum value | Warning: constant/single level | `test-survival-edge-cases.R` | Covered |
+| Outcome with >4 levels | 5-level outcome variable | Completes (converts/warns) | `test-survival-edge-cases.R` | Covered |
+| Wrong date format | Use `"mdy"` for YMD data | Error | `test-survival-edge-cases.R` | Covered |
+| Narrow y-axis range (0.5--0.6) | `ybegin_plot = 0.5`, `yend_plot = 0.6` | Completes | `test-survival-edge-cases.R` | Covered |
+| Very short plot time (endplot=1) | `endplot = 1` | Completes | `test-survival-edge-cases.R` | Covered |
+| Person-time with zero-event interval | No events before month 12 | Completes | `test-survival-edge-cases.R` | Covered |
+| Data from CSV import | Write/read CSV round-trip | Completes | `test-survival-integration.R` | Covered |
+| Data from Excel import | Write/read XLSX round-trip | Completes | `test-survival-integration.R` | Covered |
+| Tibble input | `as_tibble(data)` | Completes | `test-survival-integration.R` | Covered |
 
 ---
 
-### T12: Date-Based Time Calculation
+## Smoke Test Template
 
-**Inputs:**
-- `tint` = true
-- `dxdate` = DiagnosisDate
-- `fudate` = LastFollowUpDate
-- `timetypedata` = "ymd"
-- `timetypeoutput` = "months"
-- `outcome` = Status
-- `outcomeLevel` = "Dead of Disease"
-- `explanatory` = TumorStage
+Minimal copy-paste R code to verify the `survival` function loads and runs. Uses the bundled test datasets with the fewest possible arguments.
 
-**Expected Outputs:**
-- [x] Time calculated from dates
-- [x] All core analyses run with calculated time
-- [x] `calculatedtime` output available (if enabled)
+```r
+# ── Smoke Test: survival function ──────────────────────────
+# Prerequisites: ClinicoPath package installed or loaded via devtools::load_all()
 
-**Verify:**
-- Calculated time values are positive
-- Results consistent with FollowUpMonths-based analysis (should be similar)
+library(ClinicoPath)
+# OR for development:
+# devtools::load_all(".")
 
-**Also test:**
-- `timetypeoutput` = "days", "weeks", "years"
-- `calculatedtime` = true (export to dataset)
+# Load test data
+data(survival_test, package = "ClinicoPath")
 
----
+# ── 1. Minimal run (no explanatory variable) ──
+result_minimal <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome"
+)
+cat("1. Minimal run: OK\n")
 
-### T13: Landmark Analysis
+# ── 2. Basic KM + Cox (with explanatory) ──
+result_basic <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  explanatory = "treatment"
+)
+cat("2. Basic KM + Cox: OK\n")
 
-**Inputs:** Same as T01, plus:
-- `uselandmark` = true
-- `landmark` = 12
+# ── 3. With survival plot ──
+result_plot <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  explanatory = "treatment",
+  sc = TRUE,
+  ci95 = TRUE,
+  risktable = TRUE
+)
+cat("3. Survival plot: OK\n")
 
-**Expected Outputs:**
-- [x] Patients with events/censoring before 12 months are excluded
-- [x] `medianTable` note about landmark exclusion
-- [x] Survival times shifted (time = original time - 12)
+# ── 4. Comprehensive feature check ──
+data(survival_comprehensive, package = "ClinicoPath")
 
-**Verify:**
-- Fewer rows in analysis than original dataset
-- No negative survival times
-- Median survival values may differ from standard analysis
+result_full <- survival(
+  data = survival_comprehensive,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Status",
+  outcomeLevel = "Dead of Disease",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other Causes",
+  awd = "Alive with Disease",
+  awod = "Alive without Disease",
+  explanatory = "TumorStage",
+  sc = TRUE,
+  ce = TRUE,
+  ch = TRUE,
+  loglog = TRUE,
+  ci95 = TRUE,
+  risktable = TRUE,
+  censored = TRUE,
+  pplot = TRUE,
+  medianline = "hv",
+  endplot = 80,
+  byplot = 12,
+  cutp = "12, 36, 60",
+  pw = TRUE,
+  padjustmethod = "holm",
+  ph_cox = TRUE,
+  person_time = TRUE,
+  time_intervals = "12, 36, 60",
+  rate_multiplier = 100,
+  rmst_analysis = TRUE,
+  rmst_tau = 60,
+  residual_diagnostics = TRUE,
+  showExplanations = TRUE,
+  showSummaries = TRUE,
+  remark_checklist = TRUE
+)
+cat("4. Comprehensive run: OK\n")
 
----
+# ── 5. Competing risks ──
+result_compete <- survival(
+  data = survival_comprehensive,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Status",
+  outcomeLevel = "Dead of Disease",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other Causes",
+  awd = "Alive with Disease",
+  awod = "Alive without Disease",
+  analysistype = "compete",
+  multievent = TRUE,
+  explanatory = "TumorStage"
+)
+cat("5. Competing risks: OK\n")
 
-### T14: Age-Adjusted Cox Regression
+# ── 6. Age adjustment ──
+result_age <- survival(
+  data = survival_comprehensive,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Status",
+  outcomeLevel = "Dead of Disease",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other Causes",
+  awd = "Alive with Disease",
+  awod = "Alive without Disease",
+  explanatory = "TumorStage",
+  age_adjustment = TRUE,
+  age_variable = "Age",
+  age_interaction = TRUE,
+  age_stratified_cox = TRUE,
+  age_group_cutpoints = "50, 65, 75"
+)
+cat("6. Age adjustment: OK\n")
 
-**Inputs:** Same as T01, plus:
-- `age_adjustment` = true
-- `age_variable` = Age
+# ── 7. RCS non-linearity ──
+result_rcs <- survival(
+  data = survival_comprehensive,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Status",
+  outcomeLevel = "Dead of Disease",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other Causes",
+  awd = "Alive with Disease",
+  awod = "Alive without Disease",
+  explanatory = "TumorStage",
+  rcs_analysis = TRUE,
+  rcs_variable = "Age",
+  rcs_knots = 4
+)
+cat("7. RCS non-linearity: OK\n")
 
-**Expected Outputs:**
-- [x] `ageAdjustedCoxHeading` visible
-- [x] `ageAdjustedCoxTable` -- unadjusted vs age-adjusted HR
-- [x] `ageAdjustedInterpretation` (Html)
+# ── 8. Calibration curves ──
+result_cal <- survival(
+  data = survival_comprehensive,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Status",
+  outcomeLevel = "Dead of Disease",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other Causes",
+  awd = "Alive with Disease",
+  awod = "Alive without Disease",
+  explanatory = "TumorStage",
+  calibration_curves = TRUE,
+  calibration_timepoint = 36,
+  calibration_ngroups = 5
+)
+cat("8. Calibration curves: OK\n")
 
-**Verify:**
-- Age-adjusted HR differs from unadjusted HR
-- Interpretation mentions confounding assessment
+# ── 9. Bootstrap validation ──
+result_boot <- survival(
+  data = survival_comprehensive,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Status",
+  outcomeLevel = "Dead of Disease",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other Causes",
+  awd = "Alive with Disease",
+  awod = "Alive without Disease",
+  explanatory = "TumorStage",
+  bootstrapValidation = TRUE,
+  bootstrapValN = 50
+)
+cat("9. Bootstrap validation: OK\n")
 
----
+# ── 10. Weighted log-rank tests ──
+result_wlr <- survival(
+  data = survival_comprehensive,
+  elapsedtime = "FollowUpMonths",
+  outcome = "Status",
+  outcomeLevel = "Dead of Disease",
+  dod = "Dead of Disease",
+  dooc = "Dead of Other Causes",
+  awd = "Alive with Disease",
+  awod = "Alive without Disease",
+  explanatory = "TumorStage",
+  weightedLogRank = TRUE,
+  survivalTestType = "fleming_harrington"
+)
+cat("10. Weighted log-rank: OK\n")
 
-### T15: Age x Group Interaction
-
-**Inputs:** Same as T14, plus:
-- `age_interaction` = true
-
-**Expected Outputs:**
-- [x] `ageInteractionTable` -- interaction term with coef, HR, SE, z, pvalue
-
-**Verify:**
-- Interaction p-value reported
-- If significant, age modifies the group effect
-
----
-
-### T16: Age as Time Scale
-
-**Inputs:** Same as T14, plus:
-- `age_time_scale` = true
-
-**Expected Outputs:**
-- [x] `ageTimeScaleTable` -- Cox model using age as time axis
-- [x] `ageTimeScaleInterpretation`
-
-**Verify:**
-- HRs may differ substantially from standard model
-- Time axis is biological age, not follow-up time
-
----
-
-### T17: Age Standardization (SMR)
-
-**Inputs:** Same as T14, plus:
-- `age_standardization` = true
-- `age_standardization_method` = "indirect"
-- `age_group_cutpoints` = "50, 65, 75"
-
-**Expected Outputs:**
-- [x] `ageStandardizationTable` -- group, observed, expected, SMR, CI, pvalue
-
-**Verify:**
-- SMR = observed / expected
-- CI bounds around SMR
-- SMR > 1 means excess mortality
-
-**Also test:**
-- `age_standardization_method` = "direct"
-
----
-
-### T18: Age-Stratified KM Plots
-
-**Inputs:** Same as T14, plus:
-- `age_stratified_km` = true
-- `age_group_cutpoints` = "50, 65, 75"
-
-**Expected Outputs:**
-- [x] `ageStratifiedKMPlot` (Image 700x500)
-
-**Verify:**
-- Separate KM curves for age groups
-- Curves are distinguishable and labeled
-
----
-
-### T19: Adjusted Survival Curves
-
-**Inputs:** Same as T14, plus:
-- `adjusted_curves` = true
-
-**Expected Outputs:**
-- [x] `adjustedCurvesPlot` (Image 700x500)
-
-**Verify:**
-- Curves adjusted for age effect
-- Different from unadjusted KM curves
-
----
-
-### T20: Calibration Assessment
-
-**Inputs:** Same as T01, plus:
-- `calibration_curves` = true
-- `calibration_timepoint` = 60
-- `calibration_ngroups` = 5
-
-**Expected Outputs:**
-- [x] `calibrationTable` -- slope, intercept, etc.
-- [x] `calibrationGroupTable` -- 5 risk groups with predicted vs observed
-- [x] `calibrationPlot` (Image 600x500)
-
-**Verify:**
-- Calibration slope near 1 = good calibration
-- Points on calibration plot cluster around diagonal
-- Each risk group has reasonable N
-
-**Also test:**
-- `calibration_timepoint` = 0 (auto-select median)
-- `calibration_ngroups` = 3, 10
-
----
-
-### T21: Bootstrap Internal Validation
-
-**Inputs:** Same as T01, plus:
-- `bootstrapValidation` = true
-- `bootstrapValN` = 100
-
-**Expected Outputs:**
-- [x] `bootstrapValidationTable` -- metric (C-index, Dxy, Cal. slope), apparent, optimism, corrected
-
-**Verify:**
-- Corrected < apparent (optimism-correction reduces performance)
-- Optimism is positive
-- C-index between 0.5 and 1.0
-- n_bootstrap matches bootstrapValN
-
-**Performance note:** With 200 patients and 100 bootstraps, should complete in < 30 seconds.
-
----
-
-### T22: Non-Linearity Assessment (RCS)
-
-**Inputs:** Same as T01, plus:
-- `rcs_analysis` = true
-- `rcs_variable` = Age
-- `rcs_knots` = 4
-
-**Expected Outputs:**
-- [x] `rcsTestTable` -- linear vs spline model comparison (AIC, LR test, p-value, conclusion)
-- [x] `rcsPlot` (Image 600x450) -- hazard ratio curve
-
-**Verify:**
-- If p < 0.05, non-linearity detected
-- HR curve shows non-linear relationship with reference point
-- Knot locations at Harrell-recommended percentiles
-
-**Also test:**
-- `rcs_variable` = Ki67 (has NAs -- should handle gracefully)
-- `rcs_variable` = TumorSize (has NAs)
-- `rcs_knots` = 3, 5, 7
+cat("\n=== All smoke tests passed ===\n")
+```
 
 ---
 
-### T23: REMARK Reporting Checklist
+## Recommended Test Priority for Missing Coverage
 
-**Inputs:** Same as T01, plus:
-- `remark_checklist` = true
+If writing new tests, address these gaps in order of clinical impact:
 
-**Expected Outputs:**
-- [x] `remarkChecklist` (Html) -- checklist items with status
-
-**Verify:**
-- Lists REMARK items
-- Shows which are addressed by current analysis
-- Items related to enabled features are checked
-
----
-
-### T24: Explanations and Summaries
-
-**Inputs:** Same as T01, plus:
-- `showExplanations` = true
-- `showSummaries` = true
-
-**Expected Outputs:**
-- [x] `medianSurvivalExplanation`, `coxRegressionExplanation`, `survivalTablesExplanation` all visible
-- [x] `medianSummary`, `coxSummary`, `survTableSummary` all visible
-- [x] `clinicalGlossaryExplanation` visible
-- [x] `clinicalInterpretationExplanation` visible
-- [x] `copyReadySentencesExplanation` visible
-
-**Verify:**
-- Explanations contain methodological content
-- Summaries contain natural language interpretation with actual values
-- Copy-ready sentences are formatted for clinical reports
+| Priority | Feature | Why it matters |
+|----------|---------|----------------|
+| 1 | **EPV warning** (`survival_low_epv`) | Clinicians must see warnings when events-per-variable is dangerously low |
+| 2 | **Extreme HR detection** (`survival_extreme_hr`) | HR > 10 or < 0.1 should be flagged as potentially unreliable |
+| 3 | **Age as time scale** (`age_time_scale`) | Important for cancer epidemiology; `Surv(age_entry, age_event, event)` formulation |
+| 4 | **Adjusted survival curves** (`adjusted_curves`) | Commonly requested for age-adjusted KM curves |
+| 5 | **Direct age standardization** (`age_standardization_method = "direct"`) | Complementary to the tested indirect method |
+| 6 | **Age-stratified KM plots** (`age_stratified_km`) | Visual output for stratified analysis |
+| 7 | **Parametric distributions** (all 8) | Only Weibull is tested; exp, lnorm, llogis, gamma, gengamma, gompertz, survspline untested |
+| 8 | **Parametric extrapolation** | Health economic modeling use case |
+| 9 | **Output columns** (`calculatedtime`, `outcomeredefined`) | Verify data export features work |
+| 10 | **Empty dataset** (0 rows) | Boundary condition not tested |
 
 ---
 
-### T25: Export Survival Data
+## Quick Reference: Required Arguments
 
-**Inputs:** Same as T01, plus:
-- `export_survival_data` = true (Output type)
+The auto-generated wrapper function requires these arguments. Level-type args must be provided even when unused (pass `NULL` or empty string `""`).
 
-**Expected Outputs:**
-- [x] `survivalExport` (Output) -- data frame with survival estimates
-- [x] `survivalExportSummary` (Html) -- summary of export
-
-**Verify:**
-- Exported data contains time points, survival probabilities, CIs
-
----
-
-### T26: Full Feature Combination
-
-**Inputs:** ALL features enabled simultaneously:
-- Basic: elapsedtime, outcome, outcomeLevel, explanatory
-- Plots: sc, ce, ch, kmunicate, loglog (all true)
-- Plot options: ci95, risktable, censored, pplot, medianline="hv"
-- Cox: ph_cox, stratified_cox (with strata_variable), residual_diagnostics
-- Age: age_adjustment, age_variable, age_interaction, age_stratified_cox, age_time_scale, age_standardization, age_stratified_km, adjusted_curves
-- Validation: calibration_curves, bootstrapValidation (N=50), rcs_analysis (rcs_variable=Age)
-- Tests: pw, weightedLogRank
-- Other: rmst_analysis, person_time, remark_checklist
-- Explanations: showExplanations, showSummaries
-
-**Expected Outputs:**
-- [x] All result items populated without errors
-- [x] No serialization errors
-- [x] All plots render
-
-**Verify:**
-- Analysis completes without crash
-- Performance: should complete in < 2 minutes
+```r
+survival(
+  data,                    # data.frame (required)
+  elapsedtime,             # Variable name: time column (required unless tint=TRUE)
+  outcome,                 # Variable name: event/status column (required)
+  outcomeLevel = NULL,     # Level: which level = event
+  dod = NULL,              # Level: dead of disease
+  dooc = NULL,             # Level: dead of other causes
+  awd = NULL,              # Level: alive with disease
+  awod = NULL,             # Level: alive without disease
+  explanatory = NULL       # Variable name: grouping factor (optional)
+)
+```
 
 ---
 
-## Edge Case Tests
+## Regression Test Checklist
 
-### E01: Single Group (No Explanatory)
+These are known pitfalls from development history. Each should be validated when making changes to `survival.b.R`.
 
-This test is not directly possible since `explanatory` is required. However, test with a binary variable where one group has very few patients.
-
-**Inputs:**
-- `explanatory` = LymphovascularInvasion (2 groups: Absent ~120, Present ~80)
-
-**Verify:**
-- Analysis runs normally
-- Only 2 groups in all tables
-
----
-
-### E02: Binary Explanatory Variable
-
-**Inputs:**
-- `explanatory` = Sex
-
-**Verify:**
-- 2-group comparison
-- Only 1 pairwise comparison (if pw=true)
-- Weighted log-rank shows all test types
-
----
-
-### E03: Many Groups
-
-**Inputs:**
-- `explanatory` = TumorStage (4 groups)
-
-**Verify:**
-- All 4 groups in median table
-- 6 pairwise comparisons (4C2)
-- Plots show 4 curves
-
----
-
-### E04: Few Events Per Group
-
-If a specific stage has very few events (< 5), verify:
-- Analysis still runs
-- Warning notes appear on medianTable
-- Median survival is NA for groups without enough events
-
----
-
-### E05: All Censored (Simulated)
-
-Create a scenario where no events occur:
-- This should hit the "< 10 events" check and produce an ERROR stop
-
----
-
-### E06: Special Characters in Variable Names
-
-If column names contain spaces or special characters:
-- `.escapeVariableNames()` should backtick-escape them
-- Formulas should work with escaped names
-
----
-
-### E07: Missing Values in Continuous Variables
-
-**Inputs:**
-- `rcs_variable` = Ki67 (has NAs)
-
-**Verify:**
-- RCS analysis handles NAs gracefully (naOmit)
-- Reduced sample size noted
-
----
-
-### E08: Very Short Follow-up
-
-If all follow-up times are < 1 month:
-- `cutp` = "12, 36, 60" would produce empty survival table rows
-- Should handle gracefully with NAs
-
----
-
-### E09: Very Long Follow-up
-
-If follow-up extends beyond `endplot`:
-- Plots should truncate at endplot
-- Tables should still report full data
-
----
-
-### E10: Large Dataset Performance
-
-Test with `nrow > 5000`:
-- `.getData()` triggers garbage collection
-- Bootstrap validation should still complete
-- Checkpoint calls prevent timeout
-
----
-
-## Complete Option Coverage Checklist
-
-Every option should be exercised in at least one test.
-
-| # | Option | Default | Test(s) |
-|---|--------|---------|---------|
-| 1 | `elapsedtime` | null | T01-T26 |
-| 2 | `tint` | false | T12 |
-| 3 | `dxdate` | null | T12 |
-| 4 | `fudate` | null | T12 |
-| 5 | `calculatedtime` | Output | T12 |
-| 6 | `explanatory` | null | T01-T26 |
-| 7 | `outcome` | null | T01-T26 |
-| 8 | `outcomeLevel` | (none) | T01-T26 |
-| 9 | `dod` | (none) | T10, T11 |
-| 10 | `dooc` | (none) | T10, T11 |
-| 11 | `awd` | (none) | T10, T11 |
-| 12 | `awod` | (none) | T10, T11 |
-| 13 | `analysistype` | overall | T10 (compete), T11 (cause) |
-| 14 | `outcomeredefined` | Output | T10 |
-| 15 | `cutp` | '12, 36, 60' | T01, custom in T26 |
-| 16 | `timetypedata` | ymd | T12 |
-| 17 | `timetypeoutput` | months | T12 (days, weeks, years) |
-| 18 | `uselandmark` | false | T13 |
-| 19 | `landmark` | 3 | T13 (12) |
-| 20 | `pw` | false | T06 |
-| 21 | `padjustmethod` | holm | T06 (all methods) |
-| 22 | `weightedLogRank` | false | T07 |
-| 23 | `survivalTestType` | logrank | T07 (all types) |
-| 24 | `ph_cox` | false | T03 |
-| 25 | `sc` | false | T02 |
-| 26 | `kmunicate` | false | T02 |
-| 27 | `ce` | false | T02 |
-| 28 | `ch` | false | T02 |
-| 29 | `endplot` | 60 | T02 (80) |
-| 30 | `ybegin_plot` | 0.00 | T02 |
-| 31 | `yend_plot` | 1.00 | T02 |
-| 32 | `byplot` | 12 | T02 |
-| 33 | `multievent` | false | T10, T11 |
-| 34 | `ci95` | false | T02 |
-| 35 | `risktable` | false | T02 |
-| 36 | `censored` | false | T02 |
-| 37 | `pplot` | false | T02 |
-| 38 | `medianline` | none | T02 (hv) |
-| 39 | `person_time` | false | T09 |
-| 40 | `time_intervals` | '12, 36, 60' | T09 |
-| 41 | `rate_multiplier` | 100 | T09 (1000) |
-| 42 | `rmst_analysis` | false | T08 |
-| 43 | `rmst_tau` | 0 | T08 (60, 0) |
-| 44 | `stratified_cox` | false | T05 |
-| 45 | `strata_variable` | null | T05 (MarginStatus) |
-| 46 | `age_adjustment` | false | T14-T19 |
-| 47 | `age_variable` | null | T14-T19 (Age) |
-| 48 | `age_interaction` | false | T15 |
-| 49 | `age_stratified_cox` | false | T14 |
-| 50 | `age_group_cutpoints` | '50, 65, 75' | T17, T18 |
-| 51 | `age_time_scale` | false | T16 |
-| 52 | `age_standardization` | false | T17 |
-| 53 | `age_standardization_method` | indirect | T17 (indirect, direct) |
-| 54 | `age_stratified_km` | false | T18 |
-| 55 | `adjusted_curves` | false | T19 |
-| 56 | `remark_checklist` | false | T23 |
-| 57 | `residual_diagnostics` | false | T04 |
-| 58 | `export_survival_data` | Output | T25 |
-| 59 | `loglog` | false | T02 |
-| 60 | `showExplanations` | false | T24 |
-| 61 | `showSummaries` | false | T24 |
-| 62 | `use_parametric` | false | (DISABLED -- skip) |
-| 63 | `parametric_distribution` | weibull | (DISABLED) |
-| 64 | `parametric_covariates` | true | (DISABLED) |
-| 65 | `spline_knots` | 3 | (DISABLED) |
-| 66 | `spline_scale` | hazard | (DISABLED) |
-| 67 | `parametric_extrapolation` | false | (DISABLED) |
-| 68 | `extrapolation_time` | 0 | (DISABLED) |
-| 69 | `parametric_diagnostics` | true | (DISABLED) |
-| 70 | `compare_distributions` | false | (DISABLED) |
-| 71 | `parametric_survival_plots` | false | (DISABLED) |
-| 72 | `hazard_plots` | false | (DISABLED) |
-| 73 | `calibration_curves` | false | T20 |
-| 74 | `calibration_timepoint` | 0 | T20 (60, 0) |
-| 75 | `calibration_ngroups` | 5 | T20 (3, 5, 10) |
-| 76 | `rcs_analysis` | false | T22 |
-| 77 | `rcs_variable` | null | T22 (Age, Ki67) |
-| 78 | `rcs_knots` | 4 | T22 (3, 4, 5, 7) |
-| 79 | `bootstrapValidation` | false | T21 |
-| 80 | `bootstrapValN` | 200 | T21 (100) |
-
----
-
-## Regression Tests
-
-### R01: Serialization Safety
-No `insert(999, notice)` calls should exist. All notices use table notes or Html outputs.
-
-### R02: Competing Risk Skip Pattern
-When `multievent=true && analysistype="compete"`, the following must be skipped without error:
-- `.cox()`, `.ageAdjustedCox()`, `.ageTimeScaleCox()`, `.ageStandardization()`
-- `.pairwise()`, `.personTimeAnalysis()`, `.calculateCalibration()`, `.calculateRCS()`
-- `.calculateWeightedLogRank()`, `.calculateBootstrapValidation()`
-
-### R03: Event Count Safety
-- n_events < 10: analysis stops with informative error
-- n_events 10-19: caution note on medianTable
-- n_events 20-49: moderate note on medianTable
-
-### R04: Data Caching
-`.cachedGetData` is reset at the start of `.run()` to prevent stale data.
-
-### R05: Landmark Filtering
-After landmark filtering, all survival times should be >= 0 and shifted by landmark amount.
-
-### R06: Bootstrap C-index Direction
-`survival::concordance()` must use `reverse = TRUE` for Cox linear predictor (higher LP = worse prognosis).
-
-### R07: Calibration with Categorical Predictors
-Binary factor predictors produce only 2 unique predicted values. Calibration should reduce effective groups or warn.
-
-### R08: RCS Variable from self$data
-RCS variable must be pulled from `self$data` and aligned by rownames (not from `.cleandata()` output which only has time/outcome/explanatory).
+| ID | Regression | What to check |
+|----|-----------|---------------|
+| R01 | **Serialization safety** | No `insert(999, notice)` calls; all notices use table notes or Html outputs |
+| R02 | **Competing risk skip pattern** | When `multievent=TRUE && analysistype="compete"`, Cox, age-adjusted Cox, pairwise, person-time, calibration, RCS, bootstrap, and weighted log-rank must all be skipped without error |
+| R03 | **Event count safety** | n_events < 10: error; 10-19: caution note; 20-49: moderate note |
+| R04 | **Data caching** | `.cachedGetData` is reset at the start of `.run()` to prevent stale data |
+| R05 | **Landmark filtering** | After landmark, all survival times >= 0 and shifted by landmark amount |
+| R06 | **Bootstrap C-index direction** | `survival::concordance()` must use `reverse = TRUE` for Cox LP (higher LP = worse prognosis) |
+| R07 | **Calibration with categorical predictors** | Binary factor produces only 2 unique predicted values; calibration should reduce groups or warn |
+| R08 | **RCS variable from self$data** | RCS variable must be pulled from `self$data` and aligned by rownames (not from `.cleandata()`) |
 
 ---
 
 ## Performance Benchmarks
 
-| Test | Expected Time (200 patients) |
-|---|---|
+| Test | Expected Time (n=200) |
+|------|----------------------|
 | Basic KM + Cox | < 5 seconds |
 | All plots (5 types) | < 10 seconds |
 | Bootstrap validation (100 resamples) | < 30 seconds |
-| Full feature combination (T26) | < 2 minutes |
+| Full feature combination | < 2 minutes |
 | RCS analysis | < 5 seconds |
 | Calibration | < 5 seconds |
 | Person-time | < 3 seconds |
@@ -755,30 +432,20 @@ RCS variable must be pulled from `self$data` and aligned by rownames (not from `
 
 ---
 
-## Quick Smoke Test Command
+## Notes for Test Authors
 
-```r
-# Quick parse check
-parse(file = "R/survival.b.R")
+1. **Level-type arguments**: When calling the wrapper function directly in R (outside jamovi), `outcomeLevel`, `dod`, `dooc`, `awd`, `awod` have no defaults. You must supply them -- use `NULL` or `""` for unused ones.
 
-# Quick instantiation test (without full jamovi)
-devtools::load_all(".")
-data("survival_comprehensive")
+2. **Bootstrap tests are slow**: Use `bootstrapValN = 50` (the minimum) in tests to keep runtime under control.
 
-result <- survival(
-    data = survival_comprehensive,
-    elapsedtime = "FollowUpMonths",
-    outcome = "Status",
-    outcomeLevel = "Dead of Disease",
-    explanatory = "TumorStage",
-    dod = "Dead of Disease",
-    dooc = "Dead of Other Causes",
-    awd = "Alive with Disease",
-    awod = "Alive without Disease",
-    sc = TRUE,
-    pw = TRUE,
-    rmst_analysis = TRUE,
-    person_time = TRUE,
-    showSummaries = TRUE
-)
-```
+3. **Parametric models**: The `use_parametric` option is currently disabled in the UI but the backend code may still run. Tests should verify graceful handling.
+
+4. **Plot tests**: Survival plots are rendered via jamovi's image mechanism. In R wrapper mode, `expect_no_error()` confirms the plot state is set but does not render the image. For visual verification, use jamovi or export to file.
+
+5. **Data integrity**: The `test-survival-comprehensive.R` file includes data integrity checks (dimensions, variable names, factor levels, value ranges, missingness). These serve as a canary for data corruption.
+
+6. **Reproducibility**: The `survival_comprehensive` dataset is generated with `set.seed(2026)` in `data-raw/create_survival_test_data.R`. If regenerated, all hardcoded expectations (exact n, median values) may change.
+
+7. **Known pitfall -- cleanData**: The `.cleandata()` method only includes columns specified as time/outcome/explanatory. Extra variables (e.g., `rcs_variable`, `age_variable`, `strata_variable`) must be pulled from `self$data` separately and aligned by rownames.
+
+8. **Known pitfall -- concordance direction**: `survival::concordance(Surv ~ x)` treats higher x as better prognosis. For Cox linear predictor (higher = worse), use `reverse = TRUE`.

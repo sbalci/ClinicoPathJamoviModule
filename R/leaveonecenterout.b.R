@@ -15,6 +15,31 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         # Store results for plot reuse
         .cv_results = NULL,
+        .noticeList = list(),
+
+        .addNotice = function(type, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, content = content)
+        },
+
+        .renderNotices = function() {
+            notices <- private$.noticeList
+            if (length(notices) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            html_parts <- vapply(notices, function(n) {
+                css_class <- switch(n$type,
+                    "error" = "alert-danger",
+                    "strong_warning" = "alert-warning",
+                    "warning" = "alert-info",
+                    "info" = "alert-success",
+                    "alert-info")
+                sprintf("<div class='alert %s' style='padding:6px 12px;margin:2px 0;font-size:0.9em;'>%s</div>",
+                        css_class, n$content)
+            }, character(1))
+            self$results$notices$setContent(paste(html_parts, collapse = "\n"))
+        },
 
         .init = function() {
             if (is.null(self$options$outcome) ||
@@ -54,6 +79,37 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             if (is.null(prepared)) return()
 
             self$results$todo$setContent("")
+            private$.noticeList <- list()
+
+            # ── Notices: data quality warnings ────────────────────────────
+            if (length(prepared$small_centers) > 0) {
+                private$.addNotice("warning", sprintf(
+                    .('Centers with <5 cases may produce unreliable estimates: %s'),
+                    paste(prepared$small_centers, collapse = ', ')))
+            }
+
+            if (prepared$model_type %in% c("logistic", "cox")) {
+                n_events <- sum(prepared$y == 1, na.rm = TRUE)
+                n_predictors <- length(self$options$predictors)
+                epv <- n_events / max(n_predictors, 1)
+                if (epv < 10) {
+                    private$.addNotice("strong_warning", sprintf(
+                        .('Low events per variable (EPV = %.1f, %d events / %d predictors). Minimum 10 recommended; model may be overfit.'),
+                        epv, n_events, n_predictors))
+                }
+
+                # Inform which level was used as event
+                if (!is.na(prepared$event_level)) {
+                    private$.addNotice("info", sprintf(
+                        .('Event level: "%s" (coded as 1). Reference level: "%s" (coded as 0).'),
+                        prepared$event_level, prepared$ref_level))
+                }
+            }
+
+            if (self$options$useLasso && prepared$model_type == "linear") {
+                private$.addNotice("warning",
+                    .('LASSO regularization is not available for linear regression. Standard OLS is used instead.'))
+            }
 
             # ── 2. Design summary ─────────────────────────────────────────
             private$.populateDesignSummary(prepared)
@@ -76,6 +132,42 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
             # ── 6. Interpretation ──────────────────────────────────────────
             private$.populateInterpretation(prepared, cv_results)
+
+            # ── Notices: post-analysis ────────────────────────────────────
+            auc_vals <- sapply(cv_results, function(r) r$auc)
+            auc_valid <- auc_vals[!is.na(auc_vals)]
+            if (length(auc_valid) > 0) {
+                n_valid <- sapply(cv_results, function(r) r$n_test)[!is.na(auc_vals)]
+                pooled_disc <- mean(auc_valid)
+                sd_disc <- sd(auc_valid)
+
+                if (prepared$model_type != "linear" && pooled_disc < 0.7) {
+                    metric <- if (prepared$model_type == "cox") "C-index" else "AUC"
+                    private$.addNotice("strong_warning", sprintf(
+                        .('Poor external discrimination (pooled %s = %.3f < 0.70). Consider simplifying the model or adding stronger predictors.'),
+                        metric, pooled_disc))
+                }
+
+                if (prepared$model_type == "linear" && pooled_disc < 0) {
+                    private$.addNotice("strong_warning", sprintf(
+                        .('Pooled R-squared is negative (%.3f): the model predicts worse than the mean. The model does not generalize.'),
+                        pooled_disc))
+                }
+
+                if (sd_disc > 0.10) {
+                    private$.addNotice("warning", sprintf(
+                        .('High heterogeneity across centers (SD = %.3f > 0.10). Model performance varies substantially; consider center-level covariates or stratification.'),
+                        sd_disc))
+                }
+            }
+
+            n_skipped <- sum(sapply(cv_results, function(r) grepl("Skipped|Error", r$assessment)))
+            private$.addNotice("info", sprintf(
+                .('LOOCV completed: %d centers, %d observations, %s model%s.'),
+                prepared$n_centers, prepared$n, self$options$modelType,
+                if (n_skipped > 0) sprintf(' (%d center(s) skipped)', n_skipped) else ''))
+
+            private$.renderNotices()
         },
 
         # ══════════════════════════════════════════════════════════════════
@@ -91,6 +183,9 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             outcome_raw <- data[[outcome_var]]
             center_raw <- as.character(data[[center_var]])
             predictors <- data[predictor_vars]
+
+            # Sanitize column names for formula-based fitting (handles spaces/special chars)
+            colnames(predictors) <- make.names(colnames(predictors), unique = TRUE)
 
             # Handle outcome encoding for binary models
             if (model_type %in% c("logistic", "cox")) {
@@ -147,10 +242,9 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             # Check minimum cases per center
             center_counts <- table(center_raw)
             small_centers <- names(center_counts[center_counts < 5])
-            if (length(small_centers) > 0) {
-                warning(sprintf(.("Centers with <5 cases may produce unreliable estimates: %s"),
-                                paste(small_centers, collapse = ", ")))
-            }
+
+            center_sizes <- as.integer(center_counts)
+            names(center_sizes) <- names(center_counts)
 
             list(
                 y = y,
@@ -163,7 +257,8 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 model_type = model_type,
                 event_level = event_level,
                 ref_level = ref_level,
-                center_counts = as.integer(center_counts)
+                center_counts = center_sizes,
+                small_centers = small_centers
             )
         },
 
@@ -185,6 +280,8 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 y_test <- prepared$y[test_idx]
                 X_train <- prepared$predictors[train_idx, , drop = FALSE]
                 X_test <- prepared$predictors[test_idx, , drop = FALSE]
+                time_train <- if (!is.null(prepared$time)) prepared$time[train_idx] else NULL
+                time_test <- if (!is.null(prepared$time)) prepared$time[test_idx] else NULL
 
                 # Skip if test set has no events or all events (for binary)
                 if (prepared$model_type %in% c("logistic", "cox")) {
@@ -203,7 +300,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
                 # Fit model
                 fold_result <- tryCatch(
-                    private$.fitAndEvaluate(y_train, y_test, X_train, X_test, prepared),
+                    private$.fitAndEvaluate(y_train, y_test, X_train, X_test, prepared, time_train, time_test),
                     error = function(e) {
                         list(auc = NA, auc_ci = c(NA, NA), brier = NA, accuracy = NA,
                              assessment = paste0("Error: ", e$message))
@@ -214,7 +311,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     center = test_center,
                     n_train = n_train,
                     n_test = n_test,
-                    n_events_test = if (is.na(n_events_test)) n_test else n_events_test,
+                    n_events_test = if (is.na(n_events_test)) NA_integer_ else n_events_test,
                     auc = fold_result$auc,
                     auc_ci = fold_result$auc_ci,
                     brier = fold_result$brier,
@@ -226,7 +323,8 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             results
         },
 
-        .fitAndEvaluate = function(y_train, y_test, X_train, X_test, prepared) {
+        .fitAndEvaluate = function(y_train, y_test, X_train, X_test, prepared,
+                                    time_train = NULL, time_test = NULL) {
             model_type <- prepared$model_type
 
             if (model_type == "logistic") {
@@ -236,9 +334,17 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     return(private$.fitGLM(y_train, y_test, X_train, X_test))
                 }
             } else if (model_type == "cox") {
-                # Cox would need time variable handling
-                return(list(auc = NA, auc_ci = c(NA, NA), brier = NA, accuracy = NA,
-                            assessment = "Cox LOOCV: use survival-specific validation"))
+                if (is.null(time_train) || is.null(time_test)) {
+                    return(list(auc = NA, auc_ci = c(NA, NA), brier = NA, accuracy = NA,
+                                assessment = "Error: time variable missing"))
+                }
+                if (self$options$useLasso) {
+                    return(private$.fitLassoCox(y_train, y_test, X_train, X_test,
+                                                time_train, time_test))
+                } else {
+                    return(private$.fitCox(y_train, y_test, X_train, X_test,
+                                           time_train, time_test))
+                }
             } else {
                 return(private$.fitLinear(y_train, y_test, X_train, X_test))
             }
@@ -304,6 +410,81 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             private$.evaluateBinary(y_test, prob_test)
         },
 
+        .fitCox = function(y_train, y_test, X_train, X_test, time_train, time_test) {
+            df_train <- data.frame(time = time_train, status = y_train, X_train)
+            df_test <- data.frame(time = time_test, status = y_test, X_test)
+
+            model <- survival::coxph(survival::Surv(time, status) ~ ., data = df_train)
+            lp_test <- predict(model, newdata = df_test, type = "lp")
+
+            conc <- survival::concordance(
+                survival::Surv(time_test, y_test) ~ lp_test,
+                reverse = TRUE)
+            c_index <- conc$concordance
+            se <- sqrt(conc$var)
+
+            ci_lo <- max(0, c_index - 1.96 * se)
+            ci_hi <- min(1, c_index + 1.96 * se)
+            assessment <- if (c_index >= 0.7) "Good" else if (c_index >= 0.6) "Acceptable" else "Poor"
+            list(auc = c_index, auc_ci = c(ci_lo, ci_hi),
+                 brier = NA, accuracy = NA, assessment = assessment)
+        },
+
+        .fitLassoCox = function(y_train, y_test, X_train, X_test, time_train, time_test) {
+            X_train_mm <- tryCatch({
+                model.matrix(~ ., data = X_train)[, -1, drop = FALSE]
+            }, error = function(e) as.matrix(X_train))
+            X_test_mm <- tryCatch({
+                model.matrix(~ ., data = X_test)[, -1, drop = FALSE]
+            }, error = function(e) as.matrix(X_test))
+
+            common_cols <- intersect(colnames(X_train_mm), colnames(X_test_mm))
+            if (length(common_cols) == 0) {
+                return(list(auc = NA, auc_ci = c(NA, NA), brier = NA, accuracy = NA,
+                            assessment = "No common columns between train/test"))
+            }
+            X_train_mm <- X_train_mm[, common_cols, drop = FALSE]
+            X_test_mm <- X_test_mm[, common_cols, drop = FALSE]
+
+            col_vars <- apply(X_train_mm, 2, var, na.rm = TRUE)
+            good_cols <- !is.na(col_vars) & col_vars > 0
+            if (sum(good_cols) < 1) {
+                return(list(auc = NA, auc_ci = c(NA, NA), brier = NA, accuracy = NA,
+                            assessment = "All predictor columns have zero variance"))
+            }
+            X_train_mm <- X_train_mm[, good_cols, drop = FALSE]
+            X_test_mm <- X_test_mm[, good_cols, drop = FALSE]
+
+            y_surv <- survival::Surv(time_train, y_train)
+            nfolds_inner <- min(10, length(y_train) - 1)
+            nfolds_inner <- max(nfolds_inner, 3)
+
+            cv_fit <- glmnet::cv.glmnet(
+                x = X_train_mm, y = y_surv,
+                family = "cox", alpha = 1,
+                nfolds = nfolds_inner)
+
+            lambda_opt <- switch(self$options$lambdaMethod,
+                "lambda.min" = cv_fit$lambda.min,
+                "lambda.1se" = cv_fit$lambda.1se,
+                cv_fit$lambda.1se)
+
+            lp_test <- as.numeric(predict(cv_fit, newx = X_test_mm,
+                                          s = lambda_opt, type = "link"))
+
+            conc <- survival::concordance(
+                survival::Surv(time_test, y_test) ~ lp_test,
+                reverse = TRUE)
+            c_index <- conc$concordance
+            se <- sqrt(conc$var)
+
+            ci_lo <- max(0, c_index - 1.96 * se)
+            ci_hi <- min(1, c_index + 1.96 * se)
+            assessment <- if (c_index >= 0.7) "Good" else if (c_index >= 0.6) "Acceptable" else "Poor"
+            list(auc = c_index, auc_ci = c(ci_lo, ci_hi),
+                 brier = NA, accuracy = NA, assessment = assessment)
+        },
+
         .fitLinear = function(y_train, y_test, X_train, X_test) {
             df_train <- data.frame(y = y_train, X_train)
             df_test <- data.frame(y = y_test, X_test)
@@ -314,7 +495,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             rmse <- sqrt(mean((y_test - pred_test)^2))
             r_squared <- 1 - sum((y_test - pred_test)^2) / sum((y_test - mean(y_test))^2)
 
-            assessment <- if (r_squared > 0.5) "Good" else if (r_squared > 0.2) "Moderate" else "Poor"
+            assessment <- if (r_squared > 0.5) "Good" else if (r_squared > 0.2) "Moderate" else if (r_squared >= 0) "Poor" else "Very Poor"
 
             list(auc = r_squared, auc_ci = c(NA, NA), brier = rmse,
                  accuracy = NA, assessment = assessment)
@@ -335,7 +516,9 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                                        error = function(e) NULL)
                     if (!is.null(ci_obj)) auc_ci <- c(ci_obj[1], ci_obj[3])
                 }
-            }, error = function(e) {})
+            }, error = function(e) {
+                # AUC computation failed; leave auc_val as NA
+            })
 
             assessment <- if (!is.na(auc_val)) {
                 if (auc_val >= 0.8) "Good" else if (auc_val >= 0.7) "Acceptable" else "Poor"
@@ -358,6 +541,9 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 list("Centers", paste(prepared$center_levels, collapse = ", ")),
                 list("Cases per center (range)", sprintf("%d - %d",
                     min(prepared$center_counts), max(prepared$center_counts))),
+                list("Cases per center", paste(
+                    sprintf("%s: %d", names(prepared$center_counts), prepared$center_counts),
+                    collapse = "; ")),
                 list("Model type", self$options$modelType),
                 list("Number of predictors", as.character(length(self$options$predictors))),
                 list("LASSO regularization", if (self$options$useLasso) "Yes" else "No"),
@@ -405,20 +591,19 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             auc_valid <- auc_vals[!is.na(auc_vals)]
             brier_valid <- brier_vals[!is.na(brier_vals)]
             acc_valid <- acc_vals[!is.na(acc_vals)]
-            n_valid <- n_tests[!is.na(auc_vals)]
 
-            # Weighted mean by test set size
+            # Simple mean across centers (consistent with SD and CI)
             if (length(auc_valid) > 0) {
-                w_mean_auc <- weighted.mean(auc_valid, n_valid)
+                mean_auc <- mean(auc_valid)
                 sd_auc <- sd(auc_valid)
                 ci_auc <- if (length(auc_valid) >= 3)
-                    w_mean_auc + c(-1, 1) * qt(0.975, length(auc_valid) - 1) * sd_auc / sqrt(length(auc_valid))
+                    mean_auc + c(-1, 1) * qt(0.975, length(auc_valid) - 1) * sd_auc / sqrt(length(auc_valid))
                 else c(NA, NA)
 
-                metric_label <- if (model_type == "linear") "R-squared" else "AUC"
+                metric_label <- if (model_type == "linear") "R-squared" else if (model_type == "cox") "C-index" else "AUC"
                 table$addRow(rowKey = 1, values = list(
-                    metric = paste0(metric_label, " (weighted mean)"),
-                    mean_value = w_mean_auc, sd_value = sd_auc,
+                    metric = paste0(metric_label, " (mean)"),
+                    mean_value = mean_auc, sd_value = sd_auc,
                     ci_lower = ci_auc[1], ci_upper = ci_auc[2],
                     min_value = min(auc_valid), max_value = max(auc_valid)))
             }
@@ -452,12 +637,12 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 return()
             }
 
-            pooled_auc <- weighted.mean(auc_valid, n_valid)
+            pooled_auc <- mean(auc_valid)
             sd_auc <- sd(auc_valid)
             range_auc <- range(auc_valid)
             heterogeneity <- if (sd_auc > 0.1) "high" else if (sd_auc > 0.05) "moderate" else "low"
 
-            metric_label <- if (self$options$modelType == "linear") "R-squared" else "AUC"
+            metric_label <- if (self$options$modelType == "linear") "R-squared" else if (self$options$modelType == "cox") "C-index" else "AUC"
 
             html <- paste0(
                 "<h4>Internal-External Validation Summary</h4>",
@@ -472,19 +657,37 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 "<h5>Interpretation</h5>"
             )
 
-            if (self$options$modelType != "linear") {
+            if (self$options$modelType == "linear") {
+                if (pooled_auc >= 0.5) {
+                    html <- paste0(html,
+                        "<p>The model explains a <strong>substantial proportion of variance</strong> ",
+                        "(pooled R-squared >= 0.50). ")
+                } else if (pooled_auc >= 0.2) {
+                    html <- paste0(html,
+                        "<p>The model explains a <strong>moderate proportion of variance</strong> ",
+                        "(pooled R-squared 0.20-0.50). ")
+                } else if (pooled_auc >= 0) {
+                    html <- paste0(html,
+                        "<p>The model explains a <strong>small proportion of variance</strong> ",
+                        "(pooled R-squared < 0.20). Consider adding stronger predictors. ")
+                } else {
+                    html <- paste0(html,
+                        "<p>The model predicts <strong>worse than the mean</strong> ",
+                        "(pooled R-squared < 0). The model does not generalize and should be reconsidered. ")
+                }
+            } else {
                 if (pooled_auc >= 0.8) {
                     html <- paste0(html,
                         "<p>The model shows <strong>good external generalizability</strong> ",
-                        "(pooled AUC >= 0.80). ")
+                        "(pooled ", metric_label, " >= 0.80). ")
                 } else if (pooled_auc >= 0.7) {
                     html <- paste0(html,
                         "<p>The model shows <strong>acceptable external generalizability</strong> ",
-                        "(pooled AUC 0.70-0.80). ")
+                        "(pooled ", metric_label, " 0.70-0.80). ")
                 } else {
                     html <- paste0(html,
                         "<p>The model shows <strong>poor external generalizability</strong> ",
-                        "(pooled AUC < 0.70). Consider simplifying the model or collecting more data. ")
+                        "(pooled ", metric_label, " < 0.70). Consider simplifying the model or collecting more data. ")
                 }
             }
 
@@ -519,7 +722,8 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
         .forestPlot = function(image, ggtheme, theme, ...) {
             cv_results <- private$.cv_results
             if (is.null(cv_results)) {
-                # Recompute if needed
+                # Recompute if needed (ensure reproducibility)
+                set.seed(self$options$random_seed)
                 prepared <- tryCatch(private$.prepareData(), error = function(e) NULL)
                 if (is.null(prepared)) return(FALSE)
                 cv_results <- private$.runLOOCV(prepared)
@@ -534,9 +738,9 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             n_tests <- sapply(cv_results, function(r) r$n_test)
 
             valid <- !is.na(auc_vals)
-            pooled <- weighted.mean(auc_vals[valid], n_tests[valid])
+            pooled <- mean(auc_vals[valid])
 
-            metric_label <- if (self$options$modelType == "linear") "R-squared" else "AUC"
+            metric_label <- if (self$options$modelType == "linear") "R-squared" else if (self$options$modelType == "cox") "C-index" else "AUC"
 
             df <- data.frame(
                 center = factor(centers[valid], levels = rev(centers[valid])),
@@ -555,16 +759,19 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                         height = 0.2, color = "#2E86C1", na.rm = TRUE) +
                     ggplot2::geom_vline(xintercept = pooled, linetype = "dashed",
                                         color = "#E74C3C", linewidth = 0.8) +
-                    ggplot2::annotate("text", x = pooled, y = 0.5,
+                    ggplot2::annotate("text", x = pooled, y = nrow(df) + 0.4,
                                      label = sprintf("Pooled = %.3f", pooled),
-                                     color = "#E74C3C", hjust = -0.1, size = 3.5) +
+                                     color = "#E74C3C", hjust = -0.1, vjust = 0, size = 3.5) +
                     ggplot2::scale_size_continuous(name = "N (test)", range = c(2, 6)) +
                     ggplot2::labs(
                         title = paste0("Leave-One-Center-Out: ", metric_label, " per Center"),
                         x = metric_label, y = "Held-Out Center") +
-                    ggplot2::coord_cartesian(xlim = c(
-                        max(0, min(df$ci_lower, na.rm = TRUE) - 0.05),
-                        min(1, max(df$ci_upper, na.rm = TRUE) + 0.05))) +
+                x_lo <- min(c(df$ci_lower, df$auc), na.rm = TRUE) - 0.05
+                if (self$options$modelType != "linear") x_lo <- max(0, x_lo)
+                x_hi <- min(1, max(c(df$ci_upper, df$auc), na.rm = TRUE) + 0.05)
+
+                p <- p +
+                    ggplot2::coord_cartesian(xlim = c(x_lo, x_hi)) +
                     ggtheme
                 print(p)
             } else {

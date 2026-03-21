@@ -180,7 +180,15 @@
       "WebFetch(domain:pubmed.ncbi.nlm.nih.gov)",
       "WebFetch(domain:nliulab.github.io)",
       "WebFetch(domain:scholar.google.com)",
-      "WebFetch(domain:api.github.com)"
+      "WebFetch(domain:api.github.com)",
+      "Bash(Rscript -e 'parse\\(\"R/leaveonecenterout.b.R\"\\)' 2>&1)",
+      "Bash(Rscript -e 'yaml::read_yaml\\(\"\"\"\"jamovi/leaveonecenterout.r.yaml\"\"\"\"\\)')",
+      "Bash(Rscript -e 'yaml::read_yaml\\(\"\"\"\"jamovi/leaveonecenterout.a.yaml\"\"\"\"\\)')",
+      "Bash(Rscript -e 'jmvtools::prepare\\(\"\"\"\".\"\"\"\"\\)')",
+      "Bash(Rscript -e 'devtools::document\\(\".\"\\)' 2>&1)",
+      "Bash(Rscript -e 'parse\\(file=\"R/survival.b.R\"\\)' 2>&1)",
+      "Bash(Rscript -e 'devtools::document\\(\"\"\"\".\"\"\"\"\\)')",
+      "Bash(grep -n \"private$.getData\\(\\)\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survival.b.R)"
     ],
     "deny": [],
     "ask": [],

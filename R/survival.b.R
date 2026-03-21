@@ -248,6 +248,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .parametric_model_name = NULL,
             .parametric_results = NULL,
             .cachedGetData = NULL,
+
+            # Unified survival formula builder — always escapes variable names
+            .buildSurvFormula = function(time_var, outcome_var, group_var = NULL, ns_prefix = TRUE) {
+                esc_time <- .escapeVariableNames(time_var)
+                esc_outcome <- .escapeVariableNames(outcome_var)
+                surv_fn <- if (ns_prefix) "survival::Surv" else "Surv"
+                lhs <- paste0(surv_fn, "(", esc_time, ", ", esc_outcome, ")")
+                if (is.null(group_var)) {
+                    return(lhs)
+                }
+                esc_group <- .escapeVariableNames(group_var)
+                paste(lhs, "~", esc_group)
+            },
+
             .init = function() {
                 # Hide all outputs first - this ensures they're hidden even if we return early
                 # Hide all heading/explanation outputs
@@ -759,6 +773,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     mydata[["mytime"]] <-
                         jmvcore::toNumeric(mydata[[mytime_labelled]])
 
+                    # Validate: no negative survival times
+                    n_negative <- sum(mydata[["mytime"]] < 0, na.rm = TRUE)
+                    if (n_negative > 0) {
+                        stop(sprintf(
+                            .("Invalid data: %d observation(s) have negative survival times. Check that follow-up dates are after diagnosis dates and that time values are correct."),
+                            n_negative
+                        ))
+                    }
 
                 } else if (tint) {
                     # Time Interval ----
@@ -826,6 +848,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     mydata <- mydata %>%
                         dplyr::mutate(mytime = lubridate::time_length(interval, timetypeoutput))
 
+                    # Validate: no negative survival times from date calculation
+                    n_negative <- sum(mydata[["mytime"]] < 0, na.rm = TRUE)
+                    if (n_negative > 0) {
+                        stop(sprintf(
+                            .("Invalid data: %d observation(s) have negative survival times (follow-up date before diagnosis date). Please check your date variables."),
+                            n_negative
+                        ))
+                    }
 
                 }
 
@@ -1245,6 +1275,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         
                         # Add interpretation
                         self$results$rmstSummary$setContent(rmst_results$interpretation)
+
+                        # Add tau selection note
+                        if (is.null(self$options$rmst_tau) || self$options$rmst_tau <= 0) {
+                            actual_tau <- rmst_results$table$Tau[1]
+                            self$results$rmstTable$setNote("tau_default",
+                                sprintf("Time horizon (tau) was automatically set to %.1f (75th percentile of follow-up). Specify a custom tau in the options for a clinically meaningful time horizon.", actual_tau))
+                        }
                     }
                 }
                 private$.checkpoint()  # Add checkpoint here
@@ -1399,19 +1436,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (is.null(tau)) {
                         tau <- quantile(mydata[[mytime]], 0.75, na.rm = TRUE)
                     }
-                    
-                    # Escape variable names for safe formula construction
-                    escaped_mytime <- .escapeVariableNames(mytime)
-                    escaped_myoutcome <- .escapeVariableNames(myoutcome)
-                    escaped_myfactor <- .escapeVariableNames(myfactor)
-                    
-                    formula <- paste('survival::Surv(', escaped_mytime, ',', escaped_myoutcome, ') ~ ', escaped_myfactor)
-                    formula <- as.formula(formula)
-                    
+
+                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+
                     private$.checkpoint()
-                    
+
                     km_fit <- survival::survfit(formula, data = mydata)
-                    
+
                     # Calculate RMST for each group
                     rmst_summary <- summary(km_fit, rmean = tau, extend = TRUE)
                     
@@ -1552,15 +1583,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 } else {
                     # STANDARD SURVIVAL MODE: Use Kaplan-Meier
 
-                    formula <-
-                        paste('survival::Surv(',
-                              mytime,
-                              ',',
-                              myoutcome,
-                              ') ~ ',
-                              myfactor)
-
-                    formula <- as.formula(formula)
+                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                     private$.checkpoint()
 
@@ -1714,9 +1737,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 mydata[[mytime]] <-
                     jmvcore::toNumeric(mydata[[mytime]])
 
-                myformula <-
-                    paste("Surv(", mytime, ",", myoutcome, ")")
-                
+                myformula <- private$.buildSurvFormula(mytime, myoutcome, ns_prefix = FALSE)
+
                 # Add stratified Cox regression if enabled
                 strata_var <- NULL
                 if (self$options$stratified_cox && !is.null(self$options$strata_variable) && self$options$strata_variable != "") {
@@ -1726,31 +1748,87 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         strata_col <- self$data[[strata_var]]
                         mydata[[strata_var]] <- strata_col[as.integer(rownames(mydata))]
                         mydata <- mydata[!is.na(mydata[[strata_var]]), , drop = FALSE]
-                        # Modify explanatory variable to include stratification
-                        myfactor_with_strata <- paste0(myfactor, " + strata(", strata_var, ")")
                     } else {
                         warning(paste(.("Stratification variable"), strata_var, .("not found. Using standard Cox regression.")))
-                        myfactor_with_strata <- myfactor
+                        strata_var <- NULL
                     }
-                } else {
-                    myfactor_with_strata <- myfactor
                 }
 
                 private$.checkpoint()
 
-                # Use appropriate explanatory formula (with or without stratification)
-                explanatory_formula <- if (!is.null(strata_var) && strata_var %in% names(self$data)) {
-                    myfactor_with_strata
-                } else {
-                    myfactor
+                # EPV (events per variable) check
+                n_events_cox <- sum(mydata[[myoutcome]] == 1, na.rm = TRUE)
+                n_levels <- length(unique(mydata[[myfactor]])) - 1  # df for factor
+                if (n_levels > 0) {
+                    epv <- n_events_cox / n_levels
+                    if (epv < 5) {
+                        self$results$coxTable$setNote("epv_critical",
+                            sprintf("Events per variable = %.1f (< 5). Cox model is likely unreliable; consider reducing categories or increasing sample size.", epv))
+                    } else if (epv < 10) {
+                        self$results$coxTable$setNote("epv_warning",
+                            sprintf("Events per variable = %.1f (< 10). Cox model may be unstable; interpret hazard ratios with caution.", epv))
+                    }
                 }
-                
+
+                # Always use unstratified factors for finalfit to prevent 'not found' or C-stack errors
+                explanatory_formula <- myfactor
+
                 finalfit::finalfit(
                     .data = mydata,
                     dependent = myformula,
                     explanatory = explanatory_formula,
                     metrics = TRUE
                 ) -> tCox
+
+                # Cox model convergence check
+                tryCatch({
+                    cox_check_formula <- as.formula(paste(myformula, "~", explanatory_formula))
+                    cox_check_model <- survival::coxph(cox_check_formula, data = mydata)
+                    if (!is.null(cox_check_model$iter) && cox_check_model$iter >= 20) {
+                        self$results$coxTable$setNote("convergence",
+                            sprintf("Cox model used %d iterations (maximum reached). Model may not have converged; results should be interpreted with caution.", cox_check_model$iter))
+                    }
+                }, error = function(e) {
+                    self$results$coxTable$setNote("convergence_skipped",
+                        "Cox convergence check could not be performed. Review model metrics carefully.")
+                })
+
+                # Manually calculate and override stratified HRs if strata requested
+                if (!is.null(strata_var) && strata_var %in% names(mydata)) {
+                    factors_list <- trimws(unlist(strsplit(explanatory_formula, "\\+")))
+                    for (var in factors_list) {
+                        strat_form <- as.formula(paste(myformula, "~", var, "+ strata(", strata_var, ")"))
+                        strat_mod <- try(survival::coxph(strat_form, data = mydata), silent = TRUE)
+                        if (!inherits(strat_mod, "try-error")) {
+                            mod_sum <- summary(strat_mod)
+                            coefs <- mod_sum$coefficients
+                            cis <- mod_sum$conf.int
+                            for (i in seq_len(nrow(coefs))) {
+                                term_name <- rownames(coefs)[i]
+                                hr <- sprintf("%.2f", cis[i, 1])
+                                lower <- sprintf("%.2f", cis[i, 3])
+                                upper <- sprintf("%.2f", cis[i, 4])
+                                pval <- coefs[i, 5]
+                                pval_str <- if (pval < 0.001) "<0.001" else sprintf("%.3f", pval)
+                                formatted_hr <- sprintf("%s (%s-%s, p=%s)", hr, lower, upper, pval_str)
+                                level_name <- sub(paste0("^", var), "", term_name)
+                                # Overwrite univariable HR column
+                                idx <- which(tCox[[1]][, 1] == var & tCox[[1]][, 2] == level_name)
+                                if (length(idx) == 1) {
+                                    tCox[[1]][idx, 4] <- formatted_hr
+                                    tCox[[1]][idx, 5] <- formatted_hr
+                                }
+                            }
+                        }
+                    }
+                    
+                    # Update model metrics for multivariable stratified model
+                    multi_form <- as.formula(paste(myformula, "~", explanatory_formula, "+ strata(", strata_var, ")"))
+                    multi_mod <- try(survival::coxph(multi_form, data = mydata), silent = TRUE)
+                    if (!inherits(multi_mod, "try-error")) {
+                        tCox[[2]][[1]] <- paste("Stratified by", strata_var, "-", tCox[[2]][[1]])
+                    }
+                }
                 
                 # Restore original variable names in Cox regression table
                 if (!is.null(tCox[[1]]) && nrow(tCox[[1]]) > 0) {
@@ -1811,6 +1889,20 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     coxTable$addRow(rowKey = i, values = row_values)
                 }
 
+                # Extreme HR detection
+                tryCatch({
+                    hr_strings <- data_frame$HR_univariable[data_frame$HR_univariable != "-"]
+                    hr_numeric <- as.numeric(gsub("^([0-9.]+).*", "\\1", hr_strings))
+                    hr_numeric <- hr_numeric[!is.na(hr_numeric)]
+                    if (length(hr_numeric) > 0) {
+                        if (any(hr_numeric > 10 | hr_numeric < 0.1)) {
+                            coxTable$setNote("extreme_hr",
+                                "Some hazard ratios are extreme (HR > 10 or < 0.1), which may indicate sparse data, complete separation, or data quality issues. Verify group sizes and event counts.")
+                        }
+                    }
+                }, error = function(e) {
+                    # Silently skip HR check on parse failure
+                })
 
                 ## Cox-Table Explanation ----
 
@@ -1894,15 +1986,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
 
-                    formula <-
-                    paste('survival::Surv(',
-                          mytime,
-                          ',',
-                          myoutcome,
-                          ') ~ ',
-                          myfactor)
-
-                formula <- as.formula(formula)
+                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 private$.checkpoint()  # Add checkpoint here
 
@@ -2105,19 +2189,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     mydata <- results$cleanData
                     
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
-                    
-                    # Escape variable names for safe formula construction
-                    escaped_mytime <- .escapeVariableNames(mytime)
-                    escaped_myoutcome <- .escapeVariableNames(myoutcome)
-                    escaped_myfactor <- .escapeVariableNames(myfactor)
-                    
-                    formula <- paste('survival::Surv(', escaped_mytime, ',', escaped_myoutcome, ') ~ ', escaped_myfactor)
-                    formula <- as.formula(formula)
-                    
+
+                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+
                     private$.checkpoint()
-                    
+
                     km_fit <- survival::survfit(formula, data = mydata)
-                    
+
                     # Generate time points for export (every unit from 0 to max time)
                     max_time <- max(mydata[[mytime]], na.rm = TRUE)
                     export_times <- seq(0, max_time, by = max(1, floor(max_time/100)))
@@ -2180,17 +2258,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Median Survival Table ----
 
-                formula <-
-                    paste('survival::Surv(',
-                          mytime,
-                          ',',
-                          myoutcome,
-                          ') ~ ',
-                          myfactor)
+                formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
-                formula <- as.formula(formula)
-
-                private$.checkpoint()  # Add checkpoint here
+                private$.checkpoint()
 
                 km_fit <- survival::survfit(formula, data = mydata)
 
@@ -2310,15 +2380,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Median Survival Table ----
 
-                formula <-
-                    paste('survival::Surv(',
-                          mytime,
-                          ',',
-                          myoutcome,
-                          ') ~ ',
-                          myfactor)
-
-                formula_p <- as.formula(formula)
+                formula_p <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 padjustmethod <-
                     jmvcore::constructFormula(terms = self$options$padjustmethod)
@@ -2451,8 +2513,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
-                formula_str <- paste0('survival::Surv(', mytime, ', ', myoutcome, ') ~ ', myfactor)
-                formula_obj <- as.formula(formula_str)
+                formula_obj <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 # Define the tests to run
                 tests <- list(
@@ -3101,12 +3162,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
-                # Escape variable names for safe formula construction
-                escaped_mytime <- .escapeVariableNames(mytime)
-                escaped_myoutcome <- .escapeVariableNames(myoutcome)
-                
-                myformula <-
-                    paste("survival::Surv(", escaped_mytime, ",", escaped_myoutcome, ")")
+                myformula <- private$.buildSurvFormula(mytime, myoutcome)
 
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
@@ -3181,12 +3237,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
-                # Escape variable names for safe formula construction
-                escaped_mytime <- .escapeVariableNames(mytime)
-                escaped_myoutcome <- .escapeVariableNames(myoutcome)
-                
-                myformula <-
-                    paste("survival::Surv(", escaped_mytime, ",", escaped_myoutcome, ")")
+                myformula <- private$.buildSurvFormula(mytime, myoutcome)
 
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
@@ -3259,18 +3310,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
-                # Escape variable names for safe formula construction
-                escaped_mytime <- .escapeVariableNames(mytime)
-                escaped_myoutcome <- .escapeVariableNames(myoutcome)
-                
-                myformula <-
-                    paste("survival::Surv(", escaped_mytime, ",", escaped_myoutcome, ")")
+                myformula <- private$.buildSurvFormula(mytime, myoutcome)
 
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
                 title2 <- .getDisplayName(myfactor, original_names_mapping)
-
 
                 plot3 <- plotData %>%
                     finalfit::surv_plot(
@@ -3335,18 +3380,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
-                myformula <-
-                    paste('survival::Surv(',
-                          mytime,
-                          ',',
-                          myoutcome,
-                          ') ~ ',
-                          myfactor)
+                myformula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
-                myformula <- as.formula(myformula)
-
-                km_fit <-
-                    survival::survfit(myformula, data = plotData)
+                km_fit <- survival::survfit(myformula, data = plotData)
 
                 # Get original display name for plot title
                 labelled_data <- private$.getData()
@@ -3355,13 +3391,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Create log-log plot
                 tryCatch({
-                    escaped_mytime <- .escapeVariableNames(mytime)
-                    escaped_myoutcome <- .escapeVariableNames(myoutcome)
-
                     plot7 <- plotData %>%
                         finalfit::surv_plot(
                             .data = .,
-                            dependent = paste("Surv(", escaped_mytime, ",", escaped_myoutcome, ")"),
+                            dependent = private$.buildSurvFormula(mytime, myoutcome, ns_prefix = FALSE),
                             explanatory = myfactor,
                             xlab = paste0('log(Time) (', self$options$timetypeoutput, ')'),
                             ylab = 'log(-log(Survival))',
@@ -3453,21 +3486,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 title2 <- .getDisplayName(myfactor, original_names_mapping)
 
 
-                myformula <-
-                    paste('survival::Surv(',
-                          mytime,
-                          ',',
-                          myoutcome,
-                          ') ~ ',
-                          myfactor)
+                myformula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
-                myformula <- as.formula(myformula)
+                km_fit <- survival::survfit(myformula, data = plotData)
 
-                km_fit <-
-                    survival::survfit(myformula, data = plotData)
-
-                time_scale <-
-                    seq(0, self$options$endplot, by = self$options$byplot)
+                time_scale <- seq(0, self$options$endplot, by = self$options$byplot)
 
 
                 plot6 <-
@@ -4469,8 +4492,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (!is.null(extra_term)) {
                         rhs <- paste0(myfactor, ' + ', extra_term)
                     }
-                    formula_str <- paste0('survival::Surv(', mytime, ', ', myoutcome, ') ~ ', rhs)
-                    formula <- as.formula(formula_str)
+                    esc_rhs <- .escapeVariableNames(rhs)
+                    formula <- as.formula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", esc_rhs))
                     cox_model <- survival::coxph(formula, data = mydata)
 
                     # Determine calibration time point
@@ -4758,7 +4781,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                     # Build formulas
-                    surv_part <- paste0('survival::Surv(', mytime, ', ', myoutcome, ')')
+                    surv_part <- private$.buildSurvFormula(mytime, myoutcome)
 
                     # Linear model
                     rcs_var_safe <- jmvcore::composeTerm(rcs_var)
@@ -5568,7 +5591,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
-                myformula <- paste("Surv(", mytime, ",", myoutcome, ")")
+                myformula <- private$.buildSurvFormula(mytime, myoutcome, ns_prefix = FALSE)
 
                 # Determine age adjustment mode
                 use_age_strata <- self$options$age_stratified_cox
@@ -5617,8 +5640,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             }
                         }
 
-                        formula_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", rhs)
-                        cox_adjusted <- survival::coxph(as.formula(formula_str), data = mydata)
+                        cox_adjusted <- survival::coxph(as.formula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", rhs)), data = mydata)
 
                         heading_text <- paste0(
                             "Age-Stratified Cox Model\n",
@@ -5642,17 +5664,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                     # Fit both unadjusted and adjusted models for comparison table
-                    formula_unadj_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", myfactor)
-                    cox_unadj <- survival::coxph(as.formula(formula_unadj_str), data = mydata)
+                    surv_lhs <- private$.buildSurvFormula(mytime, myoutcome)
+                    cox_unadj <- survival::coxph(as.formula(paste(surv_lhs, "~", myfactor)), data = mydata)
 
                     if (use_age_strata) {
-                        formula_adj_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", rhs)
+                        formula_adj_str <- paste(surv_lhs, "~", rhs)
                     } else {
                         rhs_adj <- paste0(myfactor, " + ", jmvcore::composeTerm(age_col_name))
                         if (!is.null(existing_strata_var)) {
                             rhs_adj <- paste0(rhs_adj, " + strata(", existing_strata_var, ")")
                         }
-                        formula_adj_str <- paste0("survival::Surv(", mytime, ", ", myoutcome, ") ~ ", rhs_adj)
+                        formula_adj_str <- paste(surv_lhs, "~", rhs_adj)
                     }
                     cox_adjusted <- survival::coxph(as.formula(formula_adj_str), data = mydata)
 

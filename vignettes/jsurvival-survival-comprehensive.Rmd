@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Comprehensive Survival Analysis with ClinicoPath}
+  %\VignetteIndexEntry{Comprehensive Survival Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,763 +16,938 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
+  eval = FALSE,
   fig.width = 7,
-  fig.height = 5,
-  warning = FALSE,
-  message = FALSE,
-  eval = TRUE
+  fig.height = 5
 )
 ```
 
-## Introduction
+## 1. Introduction
 
-The `survival` function in ClinicoPath provides a comprehensive suite of survival analysis tools designed for clinicopathological research. This vignette demonstrates all major features using the `survival_comprehensive` dataset, which simulates a cohort of 200 cancer patients with 15 clinical and pathological variables.
+The `survival` function in ClinicoPath provides a comprehensive suite of
+survival analysis tools designed for clinicopathological research. It combines
+Kaplan-Meier estimation, Cox proportional hazards regression, and a wide range
+of advanced methods into a single, unified analysis.
 
-## Setup
+**What it produces by default (no optional flags needed):**
 
-```{r load-package}
-devtools::load_all(".")
-```
+- Median survival time with 95% confidence intervals for each group
+- Cox proportional hazards regression with hazard ratios
+- Survival probability table at user-specified time points (default: 12, 36, 60 months)
 
-## Dataset Overview
+**What you can add with a single checkbox:**
+
+- Kaplan-Meier plots, cumulative events/hazard plots, KMunicate-style plots
+- Pairwise group comparisons with multiple testing correction
+- Proportional hazards assumption testing
+- Restricted Mean Survival Time (RMST)
+- Person-time analysis with incidence rates
+- Weighted log-rank tests (Fleming-Harrington family)
+- Bootstrap internal validation (optimism-corrected C-index)
+- Calibration curves for Cox model assessment
+- Non-linearity assessment via restricted cubic splines
+- Age-adjusted, age-stratified, and age-as-time-scale models
+- Competing risks and cause-specific survival
+- REMARK reporting checklist
+- Natural language summaries and clinical interpretation
+
+**Clinical safety features:**
+
+- Analysis is blocked when fewer than 10 events are detected
+- Warnings are issued for low event counts (10-19, 20-49)
+- Competing risk mode automatically skips analyses that are not valid in that context
+
+## 2. Loading the Data
+
+The `survival_test` dataset bundled with ClinicoPath contains 200 simulated
+patients with survival time, binary outcome, treatment group, stage, grade,
+age, sex, performance status, and a continuous biomarker value. It is designed
+to demonstrate all features of the survival function.
 
 ```{r load-data}
-data("survival_comprehensive")
-
-cat("Dimensions:", nrow(survival_comprehensive), "patients x",
-    ncol(survival_comprehensive), "variables\n\n")
-
-cat("Variables:\n")
-str(survival_comprehensive, max.level = 1)
+library(ClinicoPath)
+data(survival_test, package = "ClinicoPath")
+str(survival_test)
 ```
 
-```{r dataset-summary}
-cat("\nOutcome distribution:\n")
-print(table(survival_comprehensive$Status))
+The key columns are:
 
-cat("\nExplanatory variable (TumorStage):\n")
-print(table(survival_comprehensive$TumorStage))
+| Column | Description | Type |
+|--------|-------------|------|
+| `elapsedtime` | Survival time in months | numeric |
+| `outcome` | Event indicator (1 = event, 0 = censored) | numeric |
+| `treatment` | Treatment group (Control, Treatment A, Treatment B) | factor |
+| `stage` | Cancer stage (I, II, III, IV) | factor |
+| `grade` | Tumor grade (1, 2, 3) | factor |
+| `age` | Patient age at diagnosis | numeric |
+| `sex` | Patient sex (Female, Male) | factor |
+| `biomarker_value` | Continuous biomarker measurement | numeric |
 
-cat("\nFollow-up time summary (months):\n")
-print(summary(survival_comprehensive$FollowUpMonths))
-```
+## 3. Basic Survival Analysis
 
-## 1. Basic Kaplan-Meier Analysis
+A minimal call requires three variables: `elapsedtime`, `outcome`, and
+`explanatory`. The function automatically computes median survival,
+Cox regression, and survival probability tables. Note that `dod`, `dooc`,
+`awd`, and `awod` must be supplied (as empty strings) even when not used.
 
-The simplest use case: compare survival between tumor stage groups using overall survival (event = Dead of Disease).
-
-```{r basic-km}
-result_basic <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease"
+```{r basic-analysis}
+result <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = ""
 )
 ```
 
 This produces:
 
-- Median survival table for each stage group
-- Cox regression hazard ratios (univariable)
-- 1, 3, 5-year survival probability table (at months 12, 36, 60)
+1. **Median Survival Table** -- median survival time, restricted mean, number
+   of events, and 95% CI for each level of the explanatory variable.
+2. **Cox Regression Table** -- hazard ratios (univariable) with 95% CI and
+   p-values for each level compared to the reference.
+3. **Survival Probability Table** -- survival probabilities at 12, 36, and 60
+   months (customizable via `cutp`).
 
-## 2. Survival Plots
+## 4. Survival Plots
 
-### 2.1 Standard Kaplan-Meier Curve
+ClinicoPath provides five distinct plot types. Enable each with a single
+boolean option.
+
+### 4.1 Kaplan-Meier Survival Curve
 
 ```{r km-plot}
 result_plots <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   sc = TRUE,
   ci95 = TRUE,
   risktable = TRUE,
   censored = TRUE,
   pplot = TRUE,
   medianline = "hv",
-  endplot = 80,
+  endplot = 60,
   byplot = 12,
-  ybegin_plot = 0.0,
-  yend_plot = 1.0
+  ybegin_plot = 0,
+  yend_plot = 1
 )
 ```
 
-### 2.2 KMunicate-Style Plot
+**Plot appearance options:**
 
-The KMunicate format provides an extended risk table with cleaner presentation, following the recommendations of Morris et al. (2019).
+- `ci95` -- shaded 95% confidence band around each curve
+- `risktable` -- number-at-risk table below the x-axis
+- `censored` -- tick marks where censoring occurred
+- `pplot` -- log-rank p-value annotation
+- `medianline` -- horizontal ("h"), vertical ("v"), or both ("hv") median line
+- `endplot`, `byplot` -- control x-axis range and tick spacing
+- `ybegin_plot`, `yend_plot` -- control y-axis range
+
+### 4.2 Cumulative Events
+
+Shows the cumulative proportion of events over time (1 minus survival).
+
+```{r ce-plot}
+result_ce <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  ce = TRUE,
+  endplot = 60,
+  byplot = 12
+)
+```
+
+### 4.3 Cumulative Hazard
+
+Displays the Nelson-Aalen cumulative hazard estimate.
+
+```{r ch-plot}
+result_ch <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  ch = TRUE,
+  endplot = 60,
+  byplot = 12
+)
+```
+
+### 4.4 KMunicate-Style Plot
+
+A publication-ready survival plot following the KMunicate recommendations for
+improved readability of Kaplan-Meier curves.
 
 ```{r kmunicate-plot}
 result_kmunicate <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   kmunicate = TRUE,
-  endplot = 80,
+  endplot = 60,
   byplot = 12
 )
 ```
 
-### 2.3 Cumulative Events and Cumulative Hazard
+### 4.5 Log-Log Plot
 
-```{r cumulative-plots}
-result_cumulative <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  ce = TRUE,
-  ch = TRUE,
-  endplot = 80,
-  byplot = 12
-)
-```
-
-### 2.4 Log-Log Plot for Proportional Hazards Assessment
-
-The log-log plot displays log(-log(S(t))) vs log(t). Parallel lines suggest the proportional hazards assumption holds.
+Used for visual assessment of the proportional hazards assumption. If the
+log-log curves are approximately parallel, the proportional hazards assumption
+is reasonable.
 
 ```{r loglog-plot}
 result_loglog <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  loglog = TRUE,
-  endplot = 80
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  loglog = TRUE
 )
 ```
 
-## 3. Cox Regression and Diagnostics
+## 5. Survival Probability Tables
 
-### 3.1 Proportional Hazards Assumption Test
+The survival probability table reports estimates at user-specified time points.
+Use the `cutp` argument to define these cutpoints as a comma-separated string.
 
-```{r cox-ph}
-result_cox <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  ph_cox = TRUE
+```{r surv-table}
+result_table <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  cutp = "6, 12, 24, 36, 48, 60"
 )
 ```
 
-### 3.2 Residual Diagnostics
+The output table includes, for each stratum and time point:
 
-```{r cox-residuals}
-result_residuals <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  residual_diagnostics = TRUE
-)
-```
+- Number at risk
+- Number of events
+- Survival probability (with 95% CI)
 
-### 3.3 Stratified Cox Regression
+## 6. Pairwise Comparisons
 
-When the PH assumption is violated for a covariate, stratified Cox regression allows different baseline hazards for each stratum.
-
-```{r stratified-cox}
-result_stratified <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  stratified_cox = TRUE,
-  strata_variable = "MarginStatus"
-)
-```
-
-## 4. Age Adjustment
-
-Age is one of the most important confounders in cancer research. The survival function provides multiple approaches to handle age.
-
-### 4.1 Age-Adjusted Cox Regression
-
-```{r age-adjusted}
-result_age <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  age_adjustment = TRUE,
-  age_variable = "Age"
-)
-```
-
-### 4.2 Age x Group Interaction Test
-
-Test whether the effect of tumor stage on survival differs by patient age.
-
-```{r age-interaction}
-result_age_int <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  age_adjustment = TRUE,
-  age_variable = "Age",
-  age_interaction = TRUE
-)
-```
-
-### 4.3 Age as Time Scale
-
-In cancer epidemiology, using biological age as the time axis (rather than follow-up time) is often considered more rigorous, as it directly models the age-driven risk.
-
-```{r age-time-scale}
-result_age_time <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  age_adjustment = TRUE,
-  age_variable = "Age",
-  age_time_scale = TRUE
-)
-```
-
-### 4.4 Age Standardization (SMR)
-
-Standardized Mortality Ratio compares observed deaths to expected deaths based on age-specific rates.
-
-```{r age-standardization}
-result_smr <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  age_adjustment = TRUE,
-  age_variable = "Age",
-  age_standardization = TRUE,
-  age_standardization_method = "indirect",
-  age_group_cutpoints = "50, 65, 75"
-)
-```
-
-### 4.5 Age-Stratified KM Plots and Adjusted Curves
-
-```{r age-stratified-km}
-result_age_km <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  age_adjustment = TRUE,
-  age_variable = "Age",
-  age_stratified_km = TRUE,
-  adjusted_curves = TRUE,
-  age_group_cutpoints = "50, 65, 75",
-  sc = TRUE,
-  endplot = 80,
-  byplot = 12
-)
-```
-
-## 5. Competing Risks Analysis
-
-When patients can experience multiple types of events (e.g., death from disease vs death from other causes), competing risks analysis using cumulative incidence functions is more appropriate than standard KM.
-
-```{r competing-risks}
-result_compete <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  multievent = TRUE,
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  analysistype = "compete",
-  explanatory = "TumorStage"
-)
-```
-
-### 5.1 Cause-Specific Survival
-
-Cause-specific survival censors deaths from other causes, focusing only on the event of interest.
-
-```{r cause-specific}
-result_cause <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  multievent = TRUE,
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  analysistype = "cause",
-  explanatory = "TumorStage",
-  sc = TRUE,
-  endplot = 80
-)
-```
-
-## 6. RMST (Restricted Mean Survival Time)
-
-RMST represents the average survival time up to a specified time horizon. It is particularly useful when:
-
-- Survival curves cross (non-proportional hazards)
-- Median survival cannot be estimated (curve does not reach 50%)
-- A clinically meaningful time horizon is of interest
-
-```{r rmst-analysis}
-result_rmst <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  rmst_analysis = TRUE,
-  rmst_tau = 60
-)
-```
-
-### 6.1 RMST with Automatic Tau Selection
-
-When `rmst_tau = 0`, the function automatically selects the 75th percentile of follow-up time.
-
-```{r rmst-auto-tau}
-result_rmst_auto <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  rmst_analysis = TRUE,
-  rmst_tau = 0
-)
-```
-
-## 7. Person-Time Analysis
-
-Person-time analysis calculates incidence rates that account for varying follow-up durations. This is essential for studies with differential loss to follow-up.
-
-```{r person-time}
-result_pt <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  person_time = TRUE,
-  time_intervals = "12, 36, 60",
-  rate_multiplier = 1000
-)
-```
-
-## 8. Statistical Tests
-
-### 8.1 Pairwise Comparisons
-
-Compare survival between all pairs of groups with multiple testing correction.
+When the explanatory variable has more than two levels, pairwise log-rank tests
+identify which specific groups differ significantly. Multiple testing correction
+is applied via the `padjustmethod` option.
 
 ```{r pairwise}
 result_pw <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   pw = TRUE,
   padjustmethod = "bonferroni"
 )
 ```
 
-### 8.2 Weighted Log-Rank Tests
+Available adjustment methods: `holm` (default), `hochberg`, `hommel`,
+`bonferroni`, `BH`, `BY`, `fdr`, `none`.
 
-Different weighting schemes emphasize different parts of the survival curve. The standard log-rank test weights all time points equally, while Gehan-Breslow emphasizes early differences.
+## 7. Proportional Hazards Assumption Testing
+
+The Cox model assumes proportional hazards -- that the hazard ratio between
+groups is constant over time. This can be tested formally using Schoenfeld
+residuals and visually via the Schoenfeld residual plot.
+
+```{r ph-test}
+result_ph <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  ph_cox = TRUE
+)
+```
+
+The output includes:
+
+- **Formal test** -- `cox.zph()` test with chi-square statistic and p-value.
+  A significant p-value (< 0.05) suggests violation.
+- **Interpretation** -- automated plain-language assessment with recommendations
+- **Schoenfeld residual plot** -- scaled residuals vs. time; a flat trend
+  supports proportional hazards
+
+## 8. RMST Analysis
+
+Restricted Mean Survival Time represents the area under the survival curve up
+to a specified time horizon (tau). It is particularly useful when:
+
+- The survival curves cross (non-proportional hazards)
+- Median survival cannot be estimated (too few events)
+- A clinically meaningful time horizon exists (e.g., 5-year RMST)
+
+```{r rmst}
+result_rmst <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  rmst_analysis = TRUE,
+  rmst_tau = 48
+)
+```
+
+If `rmst_tau` is set to 0 (default), the function automatically uses the 75th
+percentile of observed follow-up time. A table note indicates the chosen tau.
+
+The RMST table reports, for each group:
+
+- RMST estimate (average survival time up to tau)
+- Standard error
+- 95% confidence interval
+- The tau value used
+
+## 9. Person-Time Analysis
+
+Person-time analysis calculates incidence rates that properly account for
+varying follow-up durations. This is essential for epidemiological studies
+where participants have unequal observation periods.
+
+```{r person-time}
+result_pt <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  person_time = TRUE,
+  time_intervals = "12, 24, 36, 48, 60",
+  rate_multiplier = 100
+)
+```
+
+The person-time table shows, for each time interval:
+
+- Number of events
+- Total person-time accumulated
+- Incidence rate (events per `rate_multiplier` person-time units)
+- 95% confidence interval for the rate
+
+The `rate_multiplier` controls the denominator: 100 gives rates per 100
+person-months, 1000 gives rates per 1000 person-months.
+
+## 10. Weighted Log-Rank Tests
+
+The standard log-rank test weights all time points equally. Weighted variants
+from the Fleming-Harrington family emphasize different parts of the survival
+curve, which is important when hazards are non-proportional.
 
 ```{r weighted-logrank}
 result_wlr <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   weightedLogRank = TRUE,
   survivalTestType = "fleming_harrington"
 )
 ```
 
-## 9. Model Validation
+When enabled, the function runs all four weighted tests simultaneously:
 
-### 9.1 Calibration Assessment
+| Test | rho | Emphasizes |
+|------|-----|------------|
+| Log-Rank (standard) | 0 | All time points equally |
+| Gehan-Breslow-Wilcoxon | -- | Early differences |
+| Tarone-Ware | -- | Moderate early weighting |
+| Peto-Peto | -- | Early-to-mid differences |
 
-Calibration compares predicted survival probabilities from the Cox model against observed Kaplan-Meier estimates, grouped by predicted risk quintiles.
+The `survivalTestType` option also controls which test is used for pairwise
+comparisons (via `survminer::pairwise_survdiff(rho=...)`).
+
+## 11. Bootstrap Internal Validation
+
+Bootstrap validation provides optimism-corrected estimates of model
+discriminative ability. It resamples the data, fits the Cox model on each
+bootstrap sample, and evaluates on both the bootstrap and original data to
+estimate the optimism bias.
+
+```{r bootstrap}
+result_boot <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  bootstrapValidation = TRUE,
+  bootstrapValN = 200
+)
+```
+
+The validation table reports:
+
+| Metric | Apparent | Optimism | Corrected |
+|--------|----------|----------|-----------|
+| C-index | Training performance | Overfitting bias | Honest estimate |
+| Somers' Dxy | 2 * (C-index - 0.5) | ... | ... |
+| Calibration slope | Should be near 1 | ... | ... |
+
+**Important notes:**
+
+- `survival::concordance()` treats higher linear predictor as *better*
+  prognosis by default. The function uses `reverse = TRUE` because the Cox
+  linear predictor has higher values = *worse* prognosis.
+- Minimum 50 resamples, maximum 1000. Default 200 provides a reasonable
+  bias-variance trade-off.
+- This analysis can be computationally intensive for large datasets.
+
+## 12. Calibration Curves
+
+Calibration assesses whether predicted survival probabilities match observed
+outcomes. The function groups patients into risk quantiles, computes
+Kaplan-Meier survival within each group, and compares it to the model's
+predicted survival.
 
 ```{r calibration}
 result_cal <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   calibration_curves = TRUE,
-  calibration_timepoint = 60,
+  calibration_timepoint = 36,
   calibration_ngroups = 5
 )
 ```
 
-### 9.2 Bootstrap Internal Validation
+The output includes:
 
-Harrell's bootstrap optimism-corrected C-index quantifies how much the apparent model performance is inflated by overfitting.
+1. **Calibration metrics table** -- calibration slope, calibration-in-the-large,
+   with ideal values and interpretation
+2. **Calibration by risk group table** -- predicted vs. observed survival for
+   each risk quantile
+3. **Calibration plot** -- predicted vs. observed with 45-degree perfect
+   calibration reference line
 
-```{r bootstrap-validation}
-result_boot <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  bootstrapValidation = TRUE,
-  bootstrapValN = 100
-)
-```
+If `calibration_timepoint` is 0, the median observed follow-up time is used.
+Each risk group should have at least 20-30 patients for reliable estimates.
 
-### 9.3 Non-Linearity Assessment (RCS)
+## 13. Non-Linearity Assessment (Restricted Cubic Splines)
 
-Restricted cubic splines (RCS) test whether a continuous predictor has a non-linear relationship with the hazard. This is important for variables like age, where the risk may not increase linearly.
+For continuous predictors like age, tumor size, or biomarker levels, the
+relationship with survival may not be linear on the log-hazard scale. RCS
+analysis tests for non-linearity and visualizes the dose-response curve.
 
-```{r rcs-analysis}
+```{r rcs}
 result_rcs <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   rcs_analysis = TRUE,
-  rcs_variable = "Age",
+  rcs_variable = "biomarker_value",
   rcs_knots = 4
 )
 ```
 
-## 10. Landmark Analysis
+The output includes:
 
-Landmark analysis assesses conditional survival for patients who have survived beyond a specified time point. This is useful for updating prognosis after treatment milestones.
+1. **Non-linearity test table** -- likelihood ratio test comparing the spline
+   model (non-linear) against a linear model. A significant p-value indicates
+   the relationship is non-linear.
+2. **Hazard ratio curve plot** -- HR as a function of the continuous predictor,
+   with 95% confidence band. The reference value is typically the median.
+
+Knot recommendations: 3 knots (simplest, 2 df), 4 knots (recommended default,
+3 df), 5 knots (more flexible, 4 df). Knots are placed at Harrell-recommended
+percentiles.
+
+## 14. Age-Adjusted Analysis
+
+Age is the most important confounder in survival studies. ClinicoPath provides
+multiple approaches to handle age.
+
+### 14.1 Age-Adjusted Cox Regression
+
+Includes age as a covariate in the Cox model, producing both unadjusted and
+age-adjusted hazard ratios side by side.
+
+```{r age-adjusted}
+result_age <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  age_adjustment = TRUE,
+  age_variable = "age"
+)
+```
+
+### 14.2 Age x Group Interaction
+
+Tests whether the treatment effect varies by age.
+
+```{r age-interaction}
+result_age_int <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  age_adjustment = TRUE,
+  age_variable = "age",
+  age_interaction = TRUE
+)
+```
+
+### 14.3 Age-Stratified KM Plots
+
+Displays Kaplan-Meier curves within age groups defined by cutpoints.
+
+```{r age-stratified-km}
+result_age_km <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  age_adjustment = TRUE,
+  age_variable = "age",
+  age_stratified_km = TRUE,
+  age_group_cutpoints = "50, 65, 75"
+)
+```
+
+### 14.4 Age as Time Scale
+
+Uses biological age rather than follow-up time as the time axis. This is the
+most rigorous approach for cancer epidemiology where age is the primary driver
+of risk.
+
+```{r age-time-scale}
+result_age_ts <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  age_adjustment = TRUE,
+  age_variable = "age",
+  age_time_scale = TRUE
+)
+```
+
+## 15. Competing Risks Analysis
+
+When multiple causes of death exist, standard survival analysis can
+overestimate the probability of the event of interest. Competing risks
+analysis properly accounts for events that preclude observation of the
+primary outcome.
+
+```{r competing-risks, eval=FALSE}
+# Requires a dataset with multi-level outcome variable
+# Example using histopathology dataset:
+data(histopathology, package = "ClinicoPath")
+
+result_compete <- survival(
+  data = histopathology,
+  elapsedtime = "OverallTime",
+  outcome = "Outcome2",
+  outcomeLevel = "",
+  explanatory = "Grade_Level",
+  multievent = TRUE,
+  dod = "DOD",
+  dooc = "DOOC",
+  awd = "AWD",
+  awod = "AWOD",
+  analysistype = "compete",
+  sc = TRUE
+)
+```
+
+**Analysis types:**
+
+- `overall` -- standard overall survival (death from any cause)
+- `cause` -- cause-specific survival (censors deaths from other causes)
+- `compete` -- competing risks (cumulative incidence functions)
+
+**Important:** When `analysistype = "compete"`, the following analyses are
+automatically skipped because they are not valid for competing risks: Cox
+regression, pairwise comparisons, RMST, calibration, RCS, bootstrap
+validation, and person-time analysis.
+
+## 16. Landmark Analysis
+
+Landmark analysis evaluates survival conditional on surviving past a
+specified time point. This is useful for assessing the effect of a
+time-varying treatment or exposure.
 
 ```{r landmark}
 result_landmark <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   uselandmark = TRUE,
-  landmark = 12,
-  sc = TRUE,
-  endplot = 70,
-  byplot = 12
+  landmark = 12
 )
 ```
 
-## 11. Date-Based Time Calculation
+All patients who experienced an event or were censored before the landmark
+time are excluded. The analysis then proceeds on the remaining cohort.
 
-When survival time is not pre-calculated, you can provide diagnosis and follow-up dates directly.
+## 17. Residual Diagnostics
 
-```{r date-based}
-result_dates <- survival(
-  data = survival_comprehensive,
-  tint = TRUE,
-  dxdate = "DiagnosisDate",
-  fudate = "LastFollowUpDate",
-  timetypedata = "ymd",
-  timetypeoutput = "months",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease"
+Cox model residuals help identify influential observations and assess model
+fit.
+
+```{r residuals}
+result_resid <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  residual_diagnostics = TRUE
 )
 ```
 
-## 12. Explanations and Clinical Reporting
+The output includes:
 
-### 12.1 Analysis Explanations
+- **Residuals table** -- Martingale, deviance, score, and Schoenfeld residuals
+- **Diagnostic plot** -- visual assessment of residual patterns
 
-The `showExplanations` option provides detailed methodological explanations for each analysis component, helpful for learning and for auditing the analysis.
+## 18. Clinical Interpretations and Explanations
+
+Two complementary features help users understand their results.
+
+### 18.1 Analysis Explanations
+
+Provides detailed statistical methodology explanations for each output
+section (median survival, Cox regression, survival tables, plots, etc.).
 
 ```{r explanations}
 result_explain <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   showExplanations = TRUE
 )
 ```
 
-### 12.2 Natural Language Summaries and REMARK Checklist
+### 18.2 Natural Language Summaries
 
-```{r summaries-remark}
+Provides plain-language interpretations of the statistical results, including
+clinical interpretation, a glossary of terms, and copy-ready sentences for
+reports.
+
+```{r summaries}
 result_summary <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  showSummaries = TRUE,
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  showSummaries = TRUE
+)
+```
+
+These features produce:
+
+- **Clinical interpretation** -- context-aware summary of findings
+- **Clinical glossary** -- definitions of survival analysis terminology
+- **Copy-ready sentences** -- publication-ready text for results sections
+
+## 19. REMARK Reporting Checklist
+
+The REMARK (REporting recommendations for tumor MARKer prognostic studies)
+checklist helps ensure comprehensive reporting of biomarker-based survival
+studies.
+
+```{r remark}
+result_remark <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
   remark_checklist = TRUE
 )
 ```
 
-## 13. Comprehensive Example (All Features)
+The checklist shows which REMARK items are addressed by the current analysis
+configuration and which require additional reporting.
 
-This example enables all major features simultaneously to demonstrate the full breadth of the analysis.
+## 20. Data Export
 
-```{r comprehensive, eval=FALSE}
+Survival estimates can be exported for use in external analyses or
+visualization tools.
+
+```{r export}
+result_export <- survival(
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
+  export_survival_data = TRUE
+)
+```
+
+## 21. Complete Analysis Example
+
+Here is a comprehensive example that enables most features simultaneously.
+
+```{r comprehensive}
 result_full <- survival(
-  data = survival_comprehensive,
-  # Core variables
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorStage",
-  # Multi-event levels
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  # Survival table cutpoints
-  cutp = "12, 36, 60",
-  # Plots
+  data = survival_test,
+  elapsedtime = "elapsedtime",
+  outcome = "outcome",
+  outcomeLevel = "1",
+  explanatory = "treatment",
+  dod = "",
+  dooc = "",
+  awd = "",
+  awod = "",
 
+  # Survival probability cutpoints
+
+  cutp = "6, 12, 24, 36, 48, 60",
+
+  # Plots
   sc = TRUE,
-  kmunicate = TRUE,
   ce = TRUE,
   ch = TRUE,
+  kmunicate = TRUE,
   loglog = TRUE,
   ci95 = TRUE,
   risktable = TRUE,
   censored = TRUE,
   pplot = TRUE,
   medianline = "hv",
-  endplot = 80,
+  endplot = 60,
   byplot = 12,
-  ybegin_plot = 0.0,
-  yend_plot = 1.0,
-  # Cox diagnostics
-  ph_cox = TRUE,
-  residual_diagnostics = TRUE,
-  stratified_cox = TRUE,
-  strata_variable = "MarginStatus",
-  # Age adjustment
-  age_adjustment = TRUE,
-  age_variable = "Age",
-  age_interaction = TRUE,
-  age_stratified_cox = TRUE,
-  age_group_cutpoints = "50, 65, 75",
-  age_time_scale = TRUE,
-  age_standardization = TRUE,
-  age_standardization_method = "indirect",
-  age_stratified_km = TRUE,
-  adjusted_curves = TRUE,
-  # Validation
-  calibration_curves = TRUE,
-  calibration_timepoint = 60,
-  calibration_ngroups = 5,
-  bootstrapValidation = TRUE,
-  bootstrapValN = 100,
-  rcs_analysis = TRUE,
-  rcs_variable = "Age",
-  rcs_knots = 4,
+
   # Statistical tests
   pw = TRUE,
-  padjustmethod = "bonferroni",
-  weightedLogRank = TRUE,
-  survivalTestType = "logrank",
-  # RMST
+  padjustmethod = "holm",
+  ph_cox = TRUE,
+
+  # Advanced analysis
   rmst_analysis = TRUE,
-  rmst_tau = 60,
-  # Person-time
+  rmst_tau = 48,
+  weightedLogRank = TRUE,
   person_time = TRUE,
-  time_intervals = "12, 36, 60",
-  rate_multiplier = 1000,
-  # Reporting
+  time_intervals = "12, 24, 36, 48, 60",
+  rate_multiplier = 100,
+
+  # Model validation
+  bootstrapValidation = TRUE,
+  bootstrapValN = 200,
+  calibration_curves = TRUE,
+  calibration_timepoint = 36,
+  calibration_ngroups = 5,
+
+  # Residual diagnostics
+  residual_diagnostics = TRUE,
+
+  # Interpretation aids
   showExplanations = TRUE,
   showSummaries = TRUE,
   remark_checklist = TRUE
 )
 ```
 
-## 14. Using Different Explanatory Variables
+## 22. Summary of All Options
 
-### 14.1 Binary Variable (Sex)
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `elapsedtime` | Variable | -- | Survival time variable |
+| `outcome` | Variable | -- | Event indicator |
+| `outcomeLevel` | Level | -- | Which level = event |
+| `explanatory` | Variable | -- | Grouping variable |
+| `cutp` | String | "12, 36, 60" | Cutpoints for survival table |
+| `tint` | Bool | FALSE | Calculate time from dates |
+| `dxdate` | Variable | -- | Diagnosis date (if tint) |
+| `fudate` | Variable | -- | Follow-up date (if tint) |
+| `timetypedata` | List | ymd | Date format in data |
+| `timetypeoutput` | List | months | Output time unit |
+| `uselandmark` | Bool | FALSE | Landmark analysis |
+| `landmark` | Integer | 3 | Landmark time |
+| `multievent` | Bool | FALSE | Multiple event levels |
+| `dod` | Level | -- | Dead of Disease level |
+| `dooc` | Level | -- | Dead of Other Causes level |
+| `awd` | Level | -- | Alive with Disease level |
+| `awod` | Level | -- | Alive without Disease level |
+| `analysistype` | List | overall | overall/cause/compete |
+| `sc` | Bool | FALSE | Survival curve plot |
+| `kmunicate` | Bool | FALSE | KMunicate-style plot |
+| `ce` | Bool | FALSE | Cumulative events plot |
+| `ch` | Bool | FALSE | Cumulative hazard plot |
+| `loglog` | Bool | FALSE | Log-log plot |
+| `ci95` | Bool | FALSE | 95% CI on plots |
+| `risktable` | Bool | FALSE | Risk table on plots |
+| `censored` | Bool | FALSE | Censoring marks |
+| `pplot` | Bool | FALSE | P-value on plots |
+| `medianline` | List | none | Median line style |
+| `endplot` | Integer | 60 | Plot end time |
+| `byplot` | Integer | 12 | Time interval for axis |
+| `ybegin_plot` | Number | 0.0 | Y-axis start |
+| `yend_plot` | Number | 1.0 | Y-axis end |
+| `pw` | Bool | FALSE | Pairwise comparisons |
+| `padjustmethod` | List | holm | P-value adjustment |
+| `ph_cox` | Bool | FALSE | PH assumption test |
+| `stratified_cox` | Bool | FALSE | Stratified Cox model |
+| `strata_variable` | Variable | -- | Stratification variable |
+| `rmst_analysis` | Bool | FALSE | RMST analysis |
+| `rmst_tau` | Number | 0 | RMST time horizon |
+| `person_time` | Bool | FALSE | Person-time analysis |
+| `time_intervals` | String | "12, 36, 60" | Person-time intervals |
+| `rate_multiplier` | Integer | 100 | Rate per N person-time |
+| `weightedLogRank` | Bool | FALSE | Weighted log-rank tests |
+| `survivalTestType` | List | logrank | Test family selection |
+| `bootstrapValidation` | Bool | FALSE | Bootstrap validation |
+| `bootstrapValN` | Integer | 200 | Number of resamples |
+| `calibration_curves` | Bool | FALSE | Calibration assessment |
+| `calibration_timepoint` | Number | 0 | Timepoint (0=median) |
+| `calibration_ngroups` | Integer | 5 | Risk group count |
+| `rcs_analysis` | Bool | FALSE | Non-linearity test |
+| `rcs_variable` | Variable | -- | Continuous predictor |
+| `rcs_knots` | Integer | 4 | Number of knots |
+| `residual_diagnostics` | Bool | FALSE | Model diagnostics |
+| `age_adjustment` | Bool | FALSE | Age-adjusted Cox |
+| `age_variable` | Variable | -- | Age variable |
+| `age_interaction` | Bool | FALSE | Age x group test |
+| `age_stratified_cox` | Bool | FALSE | Stratify Cox by age |
+| `age_group_cutpoints` | String | "50, 65, 75" | Age group boundaries |
+| `age_time_scale` | Bool | FALSE | Age as time axis |
+| `age_standardization` | Bool | FALSE | SMR computation |
+| `age_standardization_method` | List | indirect | SMR method |
+| `age_stratified_km` | Bool | FALSE | Age-stratified KM |
+| `adjusted_curves` | Bool | FALSE | Age-adjusted curves |
+| `showExplanations` | Bool | FALSE | Method explanations |
+| `showSummaries` | Bool | FALSE | Plain-language summaries |
+| `remark_checklist` | Bool | FALSE | REMARK checklist |
+| `export_survival_data` | Output | -- | Export estimates |
 
-```{r binary-explanatory}
-result_sex <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "Sex",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  sc = TRUE,
-  endplot = 80
-)
-```
+## References
 
-### 14.2 Three-Level Variable (TumorGrade)
-
-```{r grade-explanatory}
-result_grade <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "TumorGrade",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  sc = TRUE,
-  pw = TRUE,
-  padjustmethod = "holm",
-  endplot = 80
-)
-```
-
-### 14.3 Clinical Factor (LymphovascularInvasion)
-
-```{r lvi-explanatory}
-result_lvi <- survival(
-  data = survival_comprehensive,
-  elapsedtime = "FollowUpMonths",
-  outcome = "Status",
-  outcomeLevel = "Dead of Disease",
-  explanatory = "LymphovascularInvasion",
-  dod = "Dead of Disease",
-  dooc = "Dead of Other Causes",
-  awd = "Alive with Disease",
-  awod = "Alive without Disease",
-  sc = TRUE,
-  endplot = 80,
-  rmst_analysis = TRUE,
-  rmst_tau = 60
-)
-```
-
-## Session Info
-
-```{r session-info}
-sessionInfo()
-```
+- Klein JP, Moeschberger ML (2003). *Survival Analysis: Techniques for Censored and Truncated Data.* Springer.
+- Therneau TM, Grambsch PM (2000). *Modeling Survival Data: Extending the Cox Model.* Springer.
+- Royston P, Parmar MK (2013). Restricted mean survival time: an alternative to the hazard ratio. *BMC Medical Research Methodology* 13:152.
+- Morris TP et al. (2019). Proposals on Kaplan-Meier plots in medical research and a survey of stakeholder views: KMunicate. *BMJ Open* 9:e030215.
+- McShane LM et al. (2005). REporting recommendations for tumour MARKer prognostic studies (REMARK). *British Journal of Cancer* 93:387-391.

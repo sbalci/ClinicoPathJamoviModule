@@ -66,7 +66,6 @@ options:
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
-      default: null
       description:
         R: Survival time variable. Only required when modelType is cox.
 

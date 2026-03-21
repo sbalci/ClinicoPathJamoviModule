@@ -14,6 +14,7 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
 
         .init = function() {
             if (is.null(self$options$outcome) || is.null(self$options$exposure)) {
+                self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-info'>",
                     "<h4>Misclassification Bias Sensitivity Analysis</h4>",
@@ -42,6 +43,7 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
             if (is.null(data)) return()
 
             self$results$todo$setContent("")
+            self$results$todo$setVisible(FALSE)
 
             # ── 2. Populate observed table ─────────────────────────────────
             private$.populateObservedTable(data)
@@ -64,6 +66,20 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
 
             # ── 6. Interpretation ──────────────────────────────────────────
             private$.populateInterpretation(data, corrected)
+
+            # ── 7. Completion notice ──────────────────────────────────────
+            measure_label <- switch(self$options$effectMeasure,
+                "or" = .("Odds Ratio"), "rr" = .("Risk Ratio"), "rd" = .("Risk Difference"))
+            notice <- jmvcore::Notice$new(options = self$options,
+                name = 'analysisComplete', type = jmvcore::NoticeType$INFO)
+            notice$setContent(
+                sprintf(.('Misclassification bias analysis completed: %s corrected for %s misclassification (N=%d, Sen=%.2f, Spec=%.2f).'),
+                    measure_label,
+                    if (self$options$misclassType == "nondifferential") .("non-differential") else .("differential"),
+                    data$n,
+                    if (self$options$misclassType == "nondifferential") self$options$senExposure else self$options$senExposureCase,
+                    if (self$options$misclassType == "nondifferential") self$options$specExposure else self$options$specExposureCase))
+            self$results$insert(999, notice)
         },
 
         # ══════════════════════════════════════════════════════════════════
@@ -73,6 +89,14 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
             outcome_raw <- self$data[[self$options$outcome]]
             exposure_raw <- self$data[[self$options$exposure]]
 
+            # Handle haven-labelled vectors
+            if (inherits(outcome_raw, "haven_labelled")) {
+                outcome_raw <- as.factor(outcome_raw)
+            }
+            if (inherits(exposure_raw, "haven_labelled")) {
+                exposure_raw <- as.factor(exposure_raw)
+            }
+
             outcome_chr <- as.character(outcome_raw)
             exposure_chr <- as.character(exposure_raw)
 
@@ -81,8 +105,13 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
             exposure_levels <- sort(unique(exposure_chr[!is.na(exposure_chr)]))
 
             if (length(outcome_levels) < 2 || length(exposure_levels) < 2) {
+                self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
                     "<div class='alert alert-danger'>Both outcome and exposure must have at least 2 levels.</div>")
+                notice <- jmvcore::Notice$new(options = self$options,
+                    name = 'binaryRequired', type = jmvcore::NoticeType$ERROR)
+                notice$setContent(.('Both outcome and exposure must have at least 2 levels. Check your variable selections.'))
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
@@ -110,8 +139,13 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
 
             n <- a + b + c + d
             if (n < 10) {
+                self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
                     "<div class='alert alert-danger'>Too few complete observations for analysis.</div>")
+                notice <- jmvcore::Notice$new(options = self$options,
+                    name = 'tooFewObs', type = jmvcore::NoticeType$ERROR)
+                notice$setContent(sprintf(.('Too few complete observations (%d). Need at least 10.'), n))
+                self$results$insert(1, notice)
                 return(NULL)
             }
 
@@ -129,8 +163,13 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                 spec <- self$options$specExposure
 
                 if (sen + spec <= 1) {
+                    self$results$todo$setVisible(TRUE)
                     self$results$todo$setContent(
                         "<div class='alert alert-danger'>Sensitivity + Specificity must be > 1 for correction to be valid.</div>")
+                    notice <- jmvcore::Notice$new(options = self$options,
+                        name = 'invalidParams', type = jmvcore::NoticeType$ERROR)
+                    notice$setContent(sprintf(.('Sensitivity (%.2f) + Specificity (%.2f) = %.2f must be > 1 for bias correction to be valid.'), sen, spec, sen + spec))
+                    self$results$insert(1, notice)
                     return(NULL)
                 }
 
@@ -152,8 +191,13 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                 spec_ctrl <- self$options$specExposureControl
 
                 if (sen_case + spec_case <= 1 || sen_ctrl + spec_ctrl <= 1) {
+                    self$results$todo$setVisible(TRUE)
                     self$results$todo$setContent(
                         "<div class='alert alert-danger'>Sensitivity + Specificity must be > 1 in both groups.</div>")
+                    notice <- jmvcore::Notice$new(options = self$options,
+                        name = 'invalidDiffParams', type = jmvcore::NoticeType$ERROR)
+                    notice$setContent(.('Sensitivity + Specificity must be > 1 in both cases and controls for bias correction to be valid.'))
+                    self$results$insert(1, notice)
                     return(NULL)
                 }
 

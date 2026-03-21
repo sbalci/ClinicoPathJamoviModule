@@ -286,8 +286,14 @@ misclassificationbiasResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "exposureLevel",
                     "senExposure",
                     "specExposure",
+                    "senExposureCase",
+                    "specExposureCase",
+                    "senExposureControl",
+                    "specExposureControl",
                     "misclassType",
-                    "effectMeasure")))
+                    "effectMeasure",
+                    "nSimulations",
+                    "random_seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="correctedTable",
@@ -315,6 +321,10 @@ misclassificationbiasResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "exposureLevel",
                     "senExposure",
                     "specExposure",
+                    "senExposureCase",
+                    "specExposureCase",
+                    "senExposureControl",
+                    "specExposureControl",
                     "misclassType")))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -381,6 +391,10 @@ misclassificationbiasResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                     "exposureLevel",
                     "senExposure",
                     "specExposure",
+                    "senExposureCase",
+                    "specExposureCase",
+                    "senExposureControl",
+                    "specExposureControl",
                     "misclassType",
                     "effectMeasure")))}))
 

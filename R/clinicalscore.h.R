@@ -257,6 +257,8 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         calibrationPlot = function() private$.items[["calibrationPlot"]],
         nomogramPlot = function() private$.items[["nomogramPlot"]],
         scoreDistPlot = function() private$.items[["scoreDistPlot"]],
+        decisionCurveTable = function() private$.items[["decisionCurveTable"]],
+        decisionCurvePlot = function() private$.items[["decisionCurvePlot"]],
         tripodChecklist = function() private$.items[["tripodChecklist"]],
         summaryText = function() private$.items[["summaryText"]],
         explanations = function() private$.items[["explanations"]]),
@@ -271,8 +273,7 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ClinicoPathJamoviModule",
                     "rms",
                     "pROC",
-                    "survival",
-                    "glmnet"))
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -289,7 +290,8 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcome",
                     "outcomeLevel",
                     "explanatory",
-                    "modelType")))
+                    "modelType",
+                    "elapsedtime")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",
@@ -521,7 +523,8 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcome",
                     "outcomeLevel",
                     "explanatory",
-                    "modelType")))
+                    "modelType",
+                    "elapsedtime")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="validationTable",
@@ -553,6 +556,7 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomeLevel",
                     "explanatory",
                     "modelType",
+                    "elapsedtime",
                     "bootstrapN")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -599,6 +603,47 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "modelType",
                     "scoringMethod",
                     "maxPoints")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="decisionCurveTable",
+                title="Decision Curve Analysis",
+                visible="(showDecisionCurve)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="threshold", 
+                        `title`="Threshold", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="net_benefit_model", 
+                        `title`="Net Benefit (Model)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="net_benefit_all", 
+                        `title`="Net Benefit (Treat All)", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "explanatory",
+                    "modelType")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="decisionCurvePlot",
+                title="Decision Curve",
+                renderFun=".decisionCurvePlot",
+                width=600,
+                height=500,
+                requiresData=TRUE,
+                visible="(showDecisionCurve)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "explanatory",
+                    "modelType")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tripodChecklist",
@@ -704,6 +749,8 @@ clinicalscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$calibrationPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogramPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$scoreDistPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$decisionCurveTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$decisionCurvePlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$tripodChecklist} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr

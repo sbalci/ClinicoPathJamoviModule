@@ -449,6 +449,8 @@ Collate:
     'clinicalnomograms.h.R'
     'clinicalprediction.b.R'
     'clinicalprediction.h.R'
+    'clinicalscore.b.R'
+    'clinicalscore.h.R'
     'clinicaltrialdesign.b.R'
     'clinicaltrialdesign.h.R'
     'clinicalvalidation.b.R'

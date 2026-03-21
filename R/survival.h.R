@@ -859,7 +859,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survivaltutorial",
                     "survivalrwnahhas",
                     "survivalrviews",
-                    "appliedsurvivalanalysisR"))
+                    "appliedsurvivalanalysisR",
+                    "lubridate"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",
@@ -991,7 +992,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="all", 
-                        `title`="all", 
+                        `title`="N", 
                         `type`="text"),
                     list(
                         `name`="HR_univariable", 
