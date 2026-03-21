@@ -94,10 +94,10 @@
 | Decision curve analysis | `decisioncurve` | ✅ | Net benefit at different threshold probabilities |
 | Model comparison (multiple models) | `modelperformance` | ✅ | Supports logistic regression model comparison |
 | NRI / IDI reclassification | `reclassmetrics`, `netreclassification`, `idi` | ✅ | Net reclassification improvement + IDI |
-| LASSO logistic (binary outcome) | — | ❌ | No dedicated LASSO logistic for binary classification; `lassocox` is survival-only |
-| Elastic net logistic | — | ❌ | No elastic net for binary outcomes |
+| LASSO logistic (binary outcome) | `lassologistic` | ✅ | **NEW** — LASSO/Ridge/Elastic Net for binary classification with glmnet |
+| Elastic net logistic | `lassologistic` (penalty=elasticnet) | ✅ | **NEW** — alpha parameter controls L1/L2 mixing |
 | Firth penalized logistic | `firthregression` | 🟡 | Exists but designed for survival context; may need adaptation for binary diagnostic |
-| Scoring system point calculator | — | ❌ | No automated coefficient-to-point conversion tool |
+| Scoring system point calculator | `lassologistic` (scoringSystem=true) | ✅ | **NEW** — Automated coefficient-to-point conversion with performance evaluation |
 
 **Legend**: ✅ covered · 🟡 partial · ❌ not covered
 
@@ -153,23 +153,25 @@
 
 ## 🔎 GAP ANALYSIS (WHAT'S MISSING)
 
-### Gap 1: LASSO Logistic Regression for Binary Outcomes
-- **Method**: Penalized logistic regression with L1 (LASSO) or L1+L2 (elastic net) penalty for binary classification
-- **Impact**: This article and many diagnostic pathology studies build classifiers for binary outcomes (tumor type A vs B). `lassocox` exists for survival but not for logistic regression.
-- **Closest existing function**: `lassocox` (survival-only), `clinicalprediction` (logistic but no LASSO)
-- **Exact missing options**: LASSO/elastic net penalty for binary logistic; lambda tuning via CV; variable inclusion probability plots
+### ~~Gap 1: LASSO Logistic Regression for Binary Outcomes~~ — NOW IMPLEMENTED
+- **Function**: `lassologistic` — NEW function with LASSO, Ridge, and Elastic Net penalties for binary classification
+- **Features**: Cross-validated lambda selection, suitability assessment (EPV check), stratified CV folds, variable importance, model comparison
+- **Status**: COMPLETE
 
-### Gap 2: Scoring System Point Calculator
-- **Method**: Automated conversion of regression coefficients to integer-point scoring system with validation
-- **Impact**: Many clinical/pathology scoring systems (GALAD, APRI, etc.) use point-based systems derived from logistic/Cox models. No tool automates this workflow.
-- **Closest existing function**: `clinicalnomograms` (nomogram but not integer points)
-- **Exact missing options**: Coefficient-to-point conversion formula; cutoff optimization with nested CV; score distribution plots
+### ~~Gap 2: Scoring System Point Calculator~~ — NOW IMPLEMENTED
+- **Function**: `lassologistic` with `scoringSystem=true` option
+- **Features**: Coefficient-to-point conversion (configurable max points), optimal cutoff determination, scoring system AUC/accuracy/sensitivity/specificity, class-specific mean scores
+- **Status**: COMPLETE — integrated into lassologistic as a toggle option
 
-### Gap 3: Leave-One-Center-Out Cross-Validation
-- **Method**: Internal-external validation for multi-institutional prediction models (leave-one-institution-out)
-- **Impact**: Multi-institutional studies are common in pathology; this is the recommended validation strategy (Debray et al., 2015)
-- **Closest existing function**: `clinicalvalidation` (general validation but no multi-center CV)
-- **Exact missing options**: Group-level CV with institution as cluster; pooled vs per-site AUC reporting
+### ~~Gap 2b: Bootstrap Optimism-Corrected Validation~~ — NOW IMPLEMENTED
+- **Function**: `lassologistic` with `bootstrapValidation=true` option
+- **Features**: Harrell's bootstrap method with full pipeline repeated in each iteration, optimism-corrected AUC and Brier score, automatic overfitting warning
+- **Status**: COMPLETE
+
+### ~~Gap 3: Leave-One-Center-Out Cross-Validation~~ — NOW IMPLEMENTED
+- **Function**: `leaveonecenterout` — NEW function for internal-external validation
+- **Features**: Trains on all-but-one center, evaluates on held-out center; supports logistic/Cox/linear; optional LASSO within each fold; per-center AUC with CIs; forest plot; pooled performance with weighted mean; heterogeneity assessment; Debray et al. (2015) methodology
+- **Status**: COMPLETE
 
 ---
 

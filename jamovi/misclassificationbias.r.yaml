@@ -1,0 +1,169 @@
+---
+name: misclassificationbias
+title: Misclassification Bias Sensitivity Analysis
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+
+    - name: observedTable
+      title: Observed 2×2 Table
+      type: Table
+      rows: 0
+      columns:
+        - name: label
+          title: ""
+          type: text
+        - name: exposed
+          title: "Exposed"
+          type: integer
+        - name: unexposed
+          title: "Unexposed"
+          type: integer
+        - name: total
+          title: "Total"
+          type: integer
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+
+    - name: biasAnalysis
+      title: Bias-Adjusted Analysis
+      type: Table
+      rows: 0
+      columns:
+        - name: estimate_type
+          title: "Estimate"
+          type: text
+        - name: observed
+          title: "Observed (Crude)"
+          type: number
+          format: zto
+        - name: adjusted
+          title: "Bias-Adjusted"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          type: number
+          format: zto
+          superTitle: "95% CI (Adjusted)"
+        - name: ci_upper
+          title: "Upper"
+          type: number
+          format: zto
+          superTitle: "95% CI (Adjusted)"
+        - name: bias_pct
+          title: "Bias %"
+          type: number
+          format: zto
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+          - senExposure
+          - specExposure
+          - misclassType
+          - effectMeasure
+
+    - name: correctedTable
+      title: Corrected 2×2 Table
+      type: Table
+      rows: 0
+      columns:
+        - name: label
+          title: ""
+          type: text
+        - name: exposed
+          title: "True Exposed"
+          type: number
+          format: zto
+        - name: unexposed
+          title: "True Unexposed"
+          type: number
+          format: zto
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+          - senExposure
+          - specExposure
+          - misclassType
+
+    - name: rangeTable
+      title: Sensitivity Range Analysis
+      type: Table
+      visible: (rangeAnalysis)
+      rows: 0
+      columns:
+        - name: sensitivity
+          title: "Sensitivity"
+          type: number
+          format: zto
+        - name: specificity
+          title: "Specificity"
+          type: number
+          format: zto
+        - name: adjusted_effect
+          title: "Adjusted Effect"
+          type: number
+          format: zto
+        - name: bias_pct
+          title: "Bias %"
+          type: number
+          format: zto
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+          - senRange
+          - specRange
+          - effectMeasure
+          - misclassType
+
+    - name: rangeplot
+      title: Sensitivity Range Plot
+      type: Image
+      renderFun: .rangePlot
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (rangeAnalysis)
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+          - senRange
+          - specRange
+          - effectMeasure
+          - misclassType
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+          - senExposure
+          - specExposure
+          - misclassType
+          - effectMeasure
+
+refs:
+    - ClinicoPathJamoviModule
+...

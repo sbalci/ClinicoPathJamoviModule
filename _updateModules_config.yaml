@@ -19,8 +19,8 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.37.08"
-new_date: "2026-03-20"
+new_version: "0.0.37.09"
+new_date: "2026-03-21"
 quick: false
 TEST: true
 jjstatsplot: false

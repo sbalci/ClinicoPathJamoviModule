@@ -1,0 +1,331 @@
+---
+name: clinicalscore
+title: Clinical Scoring System Generator
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - outcome
+          - explanatory
+
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      rows: 0
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - elapsedtime
+
+    - name: coefficients
+      title: Model Coefficients
+      type: Table
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: category
+          title: "Category"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+          format: zto
+        - name: effectSize
+          title: "OR / HR"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: ci_upper
+          title: "Upper"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: p_value
+          title: "p"
+          type: number
+          format: zto,pvalue
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - elapsedtime
+          - autoCategorize
+          - categorizeMethod
+          - customBreaks
+
+    - name: scoringTable
+      title: Scoring System
+      type: Table
+      rows: 0
+      columns:
+        - name: variable
+          title: "Predictive Factor"
+          type: text
+        - name: category
+          title: "Category / Condition"
+          type: text
+        - name: effectSize
+          title: "OR / HR"
+          type: number
+          format: zto
+        - name: points
+          title: "Points"
+          type: integer
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - scoringMethod
+          - maxPoints
+          - autoCategorize
+          - categorizeMethod
+          - customBreaks
+
+    - name: methodComparison
+      title: Scoring Method Comparison
+      type: Table
+      visible: (scoringMethod == 'compare')
+      rows: 0
+      columns:
+        - name: method
+          title: "Method"
+          type: text
+        - name: auc
+          title: "AUC / C-index"
+          type: number
+          format: zto
+        - name: accuracy
+          title: "Accuracy"
+          type: number
+          format: zto
+        - name: info_loss
+          title: "Info Loss (%)"
+          type: number
+          format: zto
+        - name: reference
+          title: "Reference"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - maxPoints
+
+    - name: scoringPerformance
+      title: Scoring System Performance
+      type: Table
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - scoringMethod
+          - maxPoints
+
+    - name: lookupTable
+      title: Score-to-Risk Lookup
+      type: Table
+      visible: (scoreLookup)
+      rows: 0
+      columns:
+        - name: score
+          title: "Total Score"
+          type: integer
+        - name: n_cases
+          title: "N"
+          type: integer
+        - name: n_events
+          title: "Events"
+          type: integer
+        - name: probability
+          title: "Predicted Risk"
+          type: number
+          format: zto
+        - name: risk_group
+          title: "Risk Group"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - scoringMethod
+          - maxPoints
+
+    - name: discriminationTable
+      title: Discrimination Metrics
+      type: Table
+      visible: (showDiscrimination)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: estimate
+          title: "Estimate"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: ci_upper
+          title: "Upper"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+
+    - name: validationTable
+      title: Bootstrap Internal Validation
+      type: Table
+      visible: (bootstrapValidation)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: apparent
+          title: "Apparent"
+          type: number
+          format: zto
+        - name: optimism
+          title: "Optimism"
+          type: number
+          format: zto
+        - name: corrected
+          title: "Corrected"
+          type: number
+          format: zto
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - bootstrapN
+
+    - name: calibrationPlot
+      title: Calibration Plot
+      type: Image
+      renderFun: .calibrationPlot
+      width: 600
+      height: 500
+      requiresData: true
+      visible: (showCalibration)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - calibrationGroups
+
+    - name: nomogramPlot
+      title: Nomogram
+      type: Image
+      renderFun: .nomogramPlot
+      width: 800
+      height: 600
+      requiresData: true
+      visible: (showNomogram)
+      refs: rms
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+
+    - name: scoreDistPlot
+      title: Score Distribution
+      type: Image
+      renderFun: .scoreDistPlot
+      width: 600
+      height: 400
+      requiresData: true
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - scoringMethod
+          - maxPoints
+
+    - name: tripodChecklist
+      title: TRIPOD Compliance Checklist
+      type: Html
+      visible: (showTRIPOD)
+      clearWith:
+          - outcome
+          - explanatory
+
+    - name: summaryText
+      title: Results Summary
+      type: Html
+      visible: (showSummary)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - scoringMethod
+
+    - name: explanations
+      title: Method Explanations
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - showExplanations
+
+refs:
+    - ClinicoPathJamoviModule
+    - rms
+    - pROC
+    - survival
+    - glmnet
+...

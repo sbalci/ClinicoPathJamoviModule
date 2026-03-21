@@ -1,0 +1,163 @@
+---
+name: leaveonecenterout
+title: Leave-One-Center-Out Cross-Validation
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - outcome
+          - predictors
+          - centerVariable
+
+    - name: designSummary
+      title: Study Design Summary
+      type: Table
+      rows: 0
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+      clearWith:
+          - outcome
+          - predictors
+          - centerVariable
+          - modelType
+
+    - name: perCenterResults
+      title: Per-Center Results
+      type: Table
+      rows: 0
+      columns:
+        - name: center
+          title: "Center (Test)"
+          type: text
+        - name: n_train
+          title: "N Train"
+          type: integer
+        - name: n_test
+          title: "N Test"
+          type: integer
+        - name: n_events_test
+          title: "Events (Test)"
+          type: integer
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto
+        - name: auc_ci_lower
+          title: "Lower"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: auc_ci_upper
+          title: "Upper"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: brier
+          title: "Brier"
+          type: number
+          format: zto
+          visible: (calibrationCheck)
+        - name: accuracy
+          title: "Accuracy"
+          type: number
+          format: zto
+        - name: assessment
+          title: "Assessment"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - predictors
+          - centerVariable
+          - modelType
+          - useLasso
+          - lambdaMethod
+          - random_seed
+
+    - name: pooledPerformance
+      title: Pooled Performance
+      type: Table
+      visible: (pooledPerformance)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: mean_value
+          title: "Mean"
+          type: number
+          format: zto
+        - name: sd_value
+          title: "SD"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: ci_upper
+          title: "Upper"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: min_value
+          title: "Min"
+          type: number
+          format: zto
+        - name: max_value
+          title: "Max"
+          type: number
+          format: zto
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - predictors
+          - centerVariable
+          - modelType
+          - useLasso
+          - lambdaMethod
+          - random_seed
+
+    - name: forestplot
+      title: Center-Specific Performance
+      type: Image
+      renderFun: .forestPlot
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (forestPlot)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - predictors
+          - centerVariable
+          - modelType
+          - useLasso
+          - lambdaMethod
+          - random_seed
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - predictors
+          - centerVariable
+          - modelType
+
+refs:
+    - ClinicoPathJamoviModule
+    - glmnet
+    - pROC
+    - survival
+...

@@ -2207,4 +2207,11 @@
         `year`=NULL, 
         `title`="kernlab: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=kernlab", 
-        `url`="https://CRAN.R-project.org/package=kernlab"))
+        `url`="https://CRAN.R-project.org/package=kernlab"), 
+    `dunn.test`=list(
+        `type`="software", 
+        `author`="Alexis Dinno", 
+        `year`=2024, 
+        `title`="dunn.test: Dunn's Test of Multiple Comparisons Using Rank Sums", 
+        `publisher`="[R package version 1.3.6]. Retrieved from https://CRAN.R-project.org/package=dunn.test", 
+        `url`="https://CRAN.R-project.org/package=dunn.test"))

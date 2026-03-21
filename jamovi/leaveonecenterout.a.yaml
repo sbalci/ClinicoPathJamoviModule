@@ -1,0 +1,138 @@
+---
+name: leaveonecenterout
+title: Leave-One-Center-Out Cross-Validation
+menuGroup: meddecideT
+menuSubgroup: Prediction Models
+menuTitle: Leave-One-Center-Out CV
+menuSubtitle: Internal-external validation for multi-institutional models
+version: '0.0.37'
+jas: '1.2'
+
+description:
+    main: |
+        Performs leave-one-center-out cross-validation for multi-institutional
+        prediction models. Trains on all-but-one center and evaluates on the
+        held-out center, repeating for each center. Provides internal-external
+        validation recommended by TRIPOD and Debray et al. (2015).
+    R:
+        dontrun: true
+        usage: |
+            leaveonecenterout(data = data, outcome = "diagnosis",
+                outcomeLevel = "PanNEC", predictors = vars(p53, Rb1, SSTR2A),
+                centerVariable = "institution", modelType = "logistic")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: 'Outcome Variable'
+      type: Variable
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+        R: Outcome variable to predict. Binary for logistic, continuous for linear.
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: Level of outcome considered as the event (for binary outcomes).
+
+    - name: predictors
+      title: Predictor Variables
+      type: Variables
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+        R: Variables to include in the prediction model.
+
+    - name: centerVariable
+      title: Center / Institution Variable
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+        R: >
+          Grouping variable identifying center, institution, or study site.
+          Each unique level is used as a held-out test set in turn.
+          Minimum 3 centers required.
+
+    - name: elapsedtime
+      title: Time Variable (for Cox models)
+      type: Variable
+      suggested: [ continuous ]
+      permitted: [ numeric ]
+      default: null
+      description:
+        R: Survival time variable. Only required when modelType is cox.
+
+    - name: modelType
+      title: Model Type
+      type: List
+      options:
+        - title: Logistic Regression (binary)
+          name: logistic
+        - title: Cox Regression (survival)
+          name: cox
+        - title: Linear Regression (continuous)
+          name: linear
+      default: logistic
+      description:
+        R: Type of prediction model to fit in each fold.
+
+    - name: useLasso
+      title: Use LASSO Regularization
+      type: Bool
+      default: false
+      description:
+        R: >
+          Apply LASSO (L1) penalty for automatic variable selection within
+          each CV fold. Recommended when number of predictors is large.
+
+    - name: lambdaMethod
+      title: Lambda Selection
+      type: List
+      options:
+        - title: Minimum CV Error
+          name: lambda.min
+        - title: 1SE Rule
+          name: lambda.1se
+      default: lambda.1se
+      description:
+        R: Lambda selection method for LASSO (inner CV within each training fold).
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+      description:
+        R: Random seed for reproducibility.
+
+    - name: pooledPerformance
+      title: Show Pooled Performance
+      type: Bool
+      default: true
+      description:
+        R: Show pooled (average) performance across all held-out centers.
+
+    - name: forestPlot
+      title: Forest Plot of Center-Specific AUC
+      type: Bool
+      default: true
+      description:
+        R: Show forest plot of AUC/C-index per center with pooled estimate.
+
+    - name: calibrationCheck
+      title: Calibration Assessment
+      type: Bool
+      default: false
+      description:
+        R: Assess calibration (Brier score) per center and pooled.
+
+...

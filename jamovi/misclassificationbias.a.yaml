@@ -1,0 +1,194 @@
+---
+name: misclassificationbias
+title: Misclassification Bias Sensitivity Analysis
+menuGroup: meddecideT
+menuSubgroup: Decision Support
+menuTitle: Misclassification Bias
+menuSubtitle: Assess impact of classification errors on effect estimates
+version: '0.0.37'
+jas: '1.2'
+
+description:
+    main: |
+        Assesses how non-differential or differential misclassification of an
+        exposure or outcome affects observed effect estimates (OR, RR, RD).
+        Essential for studies relying on subjective classification methods
+        (e.g., Ki-67 visual estimation, morphologic grading, IHC scoring).
+    R:
+        dontrun: true
+        usage: |
+            misclassificationbias(data = data, outcome = "survival_status",
+                exposure = "tumor_grade", outcomeLevel = "dead",
+                exposureLevel = "high_grade",
+                senExposure = 0.85, specExposure = 0.90)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: 'Outcome Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+        R: Binary outcome variable (e.g., recurrence, death, disease status).
+
+    - name: outcomeLevel
+      title: Outcome Event Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: Level of the outcome considered as the event.
+
+    - name: exposure
+      title: 'Exposure / Classifier Variable'
+      type: Variable
+      suggested: [ nominal, ordinal ]
+      permitted: [ factor ]
+      description:
+        R: >
+          Binary exposure or classification variable subject to misclassification
+          (e.g., Ki-67 grade, morphologic classification, IHC scoring).
+
+    - name: exposureLevel
+      title: Exposure Positive Level
+      type: Level
+      variable: (exposure)
+      description:
+        R: Level of the exposure considered as positive/exposed.
+
+    - name: misclassType
+      title: Misclassification Type
+      type: List
+      options:
+        - title: "Non-differential (same error rates in both outcome groups)"
+          name: nondifferential
+        - title: "Differential (error rates differ by outcome)"
+          name: differential
+      default: nondifferential
+      description:
+        R: >
+          Non-differential: sensitivity/specificity of the classifier are the same
+          regardless of the true outcome. Differential: error rates may differ
+          between outcome groups.
+
+    - name: senExposure
+      title: Classifier Sensitivity
+      type: Number
+      default: 0.85
+      min: 0.01
+      max: 1.0
+      description:
+        R: >
+          Sensitivity of the classification method (probability of correctly
+          classifying a truly positive case). For Ki-67 visual estimation,
+          typically 0.70-0.90.
+
+    - name: specExposure
+      title: Classifier Specificity
+      type: Number
+      default: 0.90
+      min: 0.01
+      max: 1.0
+      description:
+        R: >
+          Specificity of the classification method (probability of correctly
+          classifying a truly negative case).
+
+    - name: senExposureCase
+      title: Sensitivity in Cases
+      type: Number
+      default: 0.85
+      min: 0.01
+      max: 1.0
+      description:
+        R: Sensitivity of the classifier among cases (outcome positive). Used for differential misclassification.
+
+    - name: specExposureCase
+      title: Specificity in Cases
+      type: Number
+      default: 0.90
+      min: 0.01
+      max: 1.0
+      description:
+        R: Specificity of the classifier among cases. Used for differential misclassification.
+
+    - name: senExposureControl
+      title: Sensitivity in Controls
+      type: Number
+      default: 0.85
+      min: 0.01
+      max: 1.0
+      description:
+        R: Sensitivity of the classifier among controls (outcome negative). Used for differential misclassification.
+
+    - name: specExposureControl
+      title: Specificity in Controls
+      type: Number
+      default: 0.90
+      min: 0.01
+      max: 1.0
+      description:
+        R: Specificity of the classifier among controls. Used for differential misclassification.
+
+    - name: effectMeasure
+      title: Effect Measure
+      type: List
+      options:
+        - title: "Odds Ratio (OR)"
+          name: or
+        - title: "Risk Ratio (RR)"
+          name: rr
+        - title: "Risk Difference (RD)"
+          name: rd
+      default: or
+      description:
+        R: Effect measure to compute and bias-adjust.
+
+    - name: rangeAnalysis
+      title: Sensitivity Range Analysis
+      type: Bool
+      default: true
+      description:
+        R: >
+          Vary sensitivity and specificity across a plausible range to show
+          how the bias-adjusted estimate changes. Produces a contour plot.
+
+    - name: senRange
+      title: Sensitivity Range
+      type: String
+      default: "0.70,0.75,0.80,0.85,0.90,0.95"
+      description:
+        R: Comma-separated sensitivity values for range analysis.
+
+    - name: specRange
+      title: Specificity Range
+      type: String
+      default: "0.70,0.75,0.80,0.85,0.90,0.95"
+      description:
+        R: Comma-separated specificity values for range analysis.
+
+    - name: nSimulations
+      title: Monte Carlo Simulations
+      type: Integer
+      default: 10000
+      min: 1000
+      max: 100000
+      description:
+        R: >
+          Number of Monte Carlo simulations for probabilistic bias analysis.
+          Higher values give more stable estimates but take longer.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+      description:
+        R: Random seed for reproducible simulation results.
+
+...

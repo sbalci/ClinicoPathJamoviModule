@@ -107,8 +107,8 @@
 | Effect sizes (Cohen's d, Cramér's V) | `effectsize`, `jjbetweenstats` | ✅ | Comprehensive effect size calculation |
 | Trend test (ordinal groups) | `nonparametric` (jonckheere_terpstra) | ✅ | Jonckheere-Terpstra test now implemented via `DescTools::JonckheereTerpstraTest` |
 | RMST (restricted mean survival time) | `rmst`, `rmstregression` | ✅ | Standalone RMST functions already exist; `rmst` for tests, `rmstregression` for regression models |
-| DAG-based confounder selection | — | ❌ | No causal diagram or DAG tool |
-| Sensitivity analysis for misclassification | — | ❌ | No probabilistic bias analysis tool for measurement error |
+| DAG-based confounder selection | — | ❌ | No causal diagram or DAG tool (use external DAGitty) |
+| Sensitivity analysis for misclassification | `misclassificationbias` | ✅ | **NEW** — Bias-adjusted OR/RR/RD with Monte Carlo CIs; sensitivity range analysis |
 
 **Legend**: ✅ covered · 🟡 partial · ❌ not covered
 
@@ -185,11 +185,10 @@ The entire study classification relies on visual Ki-67 estimation — the least 
 - **ClinicoPath functions**: `rmst` (RMST tests) and `rmstregression` (RMST regression models) — both already exist as standalone functions
 - **Status**: No implementation needed
 
-### Gap 3: Sensitivity Analysis for Misclassification Bias
-- **Method**: Probabilistic bias analysis for non-differential measurement error (Ki-67 visual estimation)
-- **Impact**: This article's central classification depends on a method with documented inter-observer variability (kappa ~0.5–0.7). Quantifying the impact of misclassification on reported HRs is critical.
-- **Closest existing function**: None
-- **Exact missing options**: Misclassification sensitivity analysis tool with user-specified kappa and reclassification probabilities
+### ~~Gap 3: Sensitivity Analysis for Misclassification Bias~~ — NOW IMPLEMENTED
+- **Function**: `misclassificationbias` — NEW function for probabilistic bias analysis
+- **Features**: Non-differential and differential misclassification correction; OR/RR/RD bias-adjusted estimates with Monte Carlo CIs; sensitivity range analysis with heatmap plot; clinical interpretation
+- **Status**: COMPLETE
 
 ### Gap 4: DAG-Based Confounder Selection
 - **Method**: Visual causal diagram (DAG) for identifying confounders, mediators, and colliders

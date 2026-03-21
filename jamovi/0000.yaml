@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.37.07
+version: 0.0.37.09
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-03-20'
+date: '2026-03-21'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -5810,6 +5810,64 @@ analyses:
       (e.g., tumor grades, disease severity), and repeated-measures designs with
       ordinal endpoints. Uses the ordinal package for fitting cumulative link
       mixed models with logit, probit, or complementary log-log links.
+  - title: LASSO Logistic Regression
+    name: lassologistic
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Prediction Models
+    menuTitle: LASSO Logistic
+    menuSubtitle: Penalized feature selection for binary classification
+    description: >
+      Performs LASSO-penalized logistic regression for variable selection in
+      binary
+
+      classification problems. Ideal for diagnostic pathology studies that build
+
+      classifiers (e.g., tumor type A vs B) with automatic feature selection.
+  - title: Leave-One-Center-Out Cross-Validation
+    name: leaveonecenterout
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Prediction Models
+    menuTitle: Leave-One-Center-Out CV
+    menuSubtitle: Internal-external validation for multi-institutional models
+    description: |
+      Performs leave-one-center-out cross-validation for multi-institutional
+      prediction models. Trains on all-but-one center and evaluates on the
+      held-out center, repeating for each center. Provides internal-external
+      validation recommended by TRIPOD and Debray et al. (2015).
+  - title: Misclassification Bias Sensitivity Analysis
+    name: misclassificationbias
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Decision Support
+    menuTitle: Misclassification Bias
+    menuSubtitle: Assess impact of classification errors on effect estimates
+    description: |
+      Assesses how non-differential or differential misclassification of an
+      exposure or outcome affects observed effect estimates (OR, RR, RD).
+      Essential for studies relying on subjective classification methods
+      (e.g., Ki-67 visual estimation, morphologic grading, IHC scoring).
+  - title: Clinical Scoring System Generator
+    name: clinicalscore
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Prediction Models
+    menuTitle: Clinical Score Builder
+    menuSubtitle: Build, validate, and compare integer-point scoring systems
+    description: >
+      Builds clinical integer-point scoring systems from regression models using
+
+      three published methods (Sullivan/D'Agostino, Schneeweiss, Beta10).
+
+      Supports logistic and Cox regression with automatic variable
+      categorization,
+
+      calibration, discrimination, nomogram generation, and TRIPOD compliance.
 usesNative: true
 minApp: 1.8.0
 

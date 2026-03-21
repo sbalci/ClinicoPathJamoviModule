@@ -1,0 +1,268 @@
+---
+name: lassologistic
+title: LASSO Logistic Regression
+menuGroup: meddecideT
+menuSubgroup: Prediction Models
+menuTitle: LASSO Logistic
+menuSubtitle: Penalized feature selection for binary classification
+version: '0.0.37'
+jas: '1.2'
+
+description:
+    main: |
+        Performs LASSO-penalized logistic regression for variable selection in binary
+        classification problems. Ideal for diagnostic pathology studies that build
+        classifiers (e.g., tumor type A vs B) with automatic feature selection.
+    R:
+        dontrun: true
+        usage: |
+            lassologistic(data = data, outcome = "diagnosis",
+                outcomeLevel = "PanNEC", explanatory = vars(p53, Rb1, Ki67, SSTR2A))
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: outcome
+      title: 'Binary Outcome'
+      type: Variable
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor, numeric ]
+      description:
+        R: >
+          Binary outcome variable to classify. Can be factor or
+          numeric with exactly two observed values.
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+        R: >
+          Level of outcome considered as the positive class (event).
+          For factor outcomes, if left empty the second level is used.
+
+    - name: explanatory
+      title: Explanatory Variables
+      type: Variables
+      suggested: [ nominal, ordinal, continuous ]
+      permitted: [ factor, numeric ]
+      description:
+        R: >
+          Variables to be considered for selection. At least 2 required.
+          Constant variables are removed automatically.
+
+    - name: penalty
+      title: Penalty Type
+      type: List
+      options:
+        - title: LASSO (L1)
+          name: lasso
+        - title: Ridge (L2)
+          name: ridge
+        - title: Elastic Net
+          name: elasticnet
+      default: lasso
+      description:
+        R: >
+          Type of regularization penalty. LASSO (L1) produces sparse models
+          by setting coefficients to zero. Ridge (L2) shrinks but retains all.
+          Elastic Net combines both.
+
+    - name: alpha
+      title: Elastic Net Mixing (0=Ridge, 1=LASSO)
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 0.99
+      description:
+        R: >
+          Mixing parameter for elastic net. Only used when penalty is elasticnet.
+
+    - name: lambda
+      title: Lambda Selection Method
+      type: List
+      options:
+        - title: Minimum CV Error
+          name: lambda.min
+        - title: 1SE Rule (More Parsimonious)
+          name: lambda.1se
+      default: lambda.1se
+      description:
+        R: >
+          Method for selecting the optimal lambda from cross-validation.
+          1SE rule tends to select fewer variables (more conservative).
+
+    - name: nfolds
+      title: Number of CV Folds
+      type: Integer
+      default: 10
+      min: 3
+      description:
+        R: >
+          Number of folds for cross-validation. Automatically reduced
+          when sample size is limited.
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 123456
+      min: 1
+      max: 999999
+      description:
+        R: Random seed for reproducible cross-validation fold assignment.
+
+    - name: standardize
+      title: Standardize Variables
+      type: Bool
+      default: true
+      description:
+        R: Whether to standardize predictor variables before fitting.
+
+    - name: suitabilityCheck
+      title: Data Suitability Assessment
+      type: Bool
+      default: true
+      description:
+        R: >
+          Check sample size, events-per-variable ratio, multicollinearity,
+          and whether regularization is needed.
+
+    - name: bootstrapValidation
+      title: Bootstrap Internal Validation
+      type: Bool
+      default: false
+      description:
+        R: >
+          Perform bootstrap optimism-corrected validation (Harrell method).
+          Reports corrected AUC, calibration slope, and Brier score.
+
+    - name: bootstrapN
+      title: Bootstrap Iterations
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+      description:
+        R: Number of bootstrap iterations for internal validation.
+
+    - name: cv_plot
+      title: Cross-validation Plot
+      type: Bool
+      default: true
+      description:
+        R: Show cross-validation deviance vs lambda plot.
+
+    - name: coef_plot
+      title: Coefficient Plot
+      type: Bool
+      default: true
+      description:
+        R: Show bar plot of selected variable coefficients.
+
+    - name: roc_plot
+      title: ROC Curve
+      type: Bool
+      default: true
+      description:
+        R: Show ROC curve with AUC and confidence interval.
+
+    - name: scoringSystem
+      title: Generate Scoring System
+      type: Bool
+      default: false
+      description:
+        R: >
+          Convert model coefficients to an integer-point scoring system.
+          Multiple methods available following published standards.
+
+    - name: scoringMethod
+      title: Scoring Method
+      type: List
+      options:
+        - title: "Beta10 (coefficient x 10, rounded)"
+          name: beta10
+        - title: "Schneeweiss (divide by smallest coefficient)"
+          name: schneeweiss
+        - title: "Sullivan/D'Agostino (reference-scaled)"
+          name: sullivan
+        - title: "Compare All Methods"
+          name: compare
+      default: schneeweiss
+      description:
+        R: >
+          Method for converting regression coefficients to integer points.
+          Beta10: multiply by 10, round (Zhang et al. 2017).
+          Schneeweiss: divide by smallest absolute coefficient (Mehta et al. 2016).
+          Sullivan: reference-variable scaling (Sullivan et al. 2004, Framingham method).
+          Compare: generate all three and show performance comparison.
+
+    - name: scoringMaxPoints
+      title: Maximum Points per Feature
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+      description:
+        R: Maximum points assigned to the strongest predictor (Beta10 method).
+
+    - name: scoreLookupTable
+      title: Score-to-Probability Lookup Table
+      type: Bool
+      default: true
+      description:
+        R: >
+          Generate a lookup table mapping each possible total score to
+          predicted probability of the positive class.
+
+    - name: predictions
+      title: Add Predicted Probabilities
+      type: Output
+      description:
+        R: Adds predicted probabilities to the dataset.
+
+    - name: showSummary
+      title: Show Results Summary
+      type: Bool
+      default: false
+      description:
+        R: Display a natural-language summary of the main results.
+
+    - name: showExplanations
+      title: Show Method Explanations
+      type: Bool
+      default: false
+      description:
+        R: Display explanations of LASSO logistic regression methodology.
+
+    - name: showMethodologyNotes
+      title: Detailed Methodology Notes
+      type: Bool
+      default: false
+      description:
+        R: Show technical notes about regularization and validation.
+
+    - name: includeClinicalGuidance
+      title: Clinical Interpretation Guidance
+      type: Bool
+      default: false
+      description:
+        R: Include guidance for clinical interpretation of results.
+
+    - name: showVariableImportance
+      title: Variable Importance Analysis
+      type: Bool
+      default: false
+      description:
+        R: Display variable importance rankings across lambda values.
+
+    - name: showModelComparison
+      title: Model Comparison Analysis
+      type: Bool
+      default: false
+      description:
+        R: Compare LASSO vs standard logistic using selected variables.
+
+...

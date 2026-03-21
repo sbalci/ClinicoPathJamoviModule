@@ -1,0 +1,468 @@
+---
+name: lassologistic
+title: LASSO Logistic Regression
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+
+    - name: suitabilityReport
+      title: Data Suitability Assessment
+      type: Html
+      visible: (suitabilityCheck)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - suitabilityCheck
+
+    - name: modelSummary
+      title: Model Summary
+      type: Table
+      rows: 0
+      columns:
+        - name: statistic
+          title: "Statistic"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: coefficients
+      title: Selected Variables
+      type: Table
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: coefficient
+          title: "Coefficient"
+          type: number
+          format: zto
+        - name: oddsRatio
+          title: "Odds Ratio"
+          type: number
+          format: zto
+        - name: ci_lower
+          title: "Lower"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: ci_upper
+          title: "Upper"
+          type: number
+          format: zto
+          superTitle: "95% CI"
+        - name: importance
+          title: "Importance"
+          type: number
+          format: zto
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: performance
+      title: Classification Performance
+      type: Table
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+        - name: interpretation
+          title: "Interpretation"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: scoringTable
+      title: Scoring System
+      type: Table
+      visible: (scoringSystem)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Predictive Factor"
+          type: text
+        - name: oddsRatio
+          title: "Odds Ratio"
+          type: number
+          format: zto
+        - name: direction
+          title: "Direction"
+          type: text
+        - name: points_beta10
+          title: "Beta10"
+          type: integer
+          visible: (scoringMethod == 'beta10' || scoringMethod == 'compare')
+        - name: points_schneeweiss
+          title: "Schneeweiss"
+          type: integer
+          visible: (scoringMethod == 'schneeweiss' || scoringMethod == 'compare')
+        - name: points_sullivan
+          title: "Sullivan"
+          type: integer
+          visible: (scoringMethod == 'sullivan' || scoringMethod == 'compare')
+        - name: points
+          title: "Points (Selected)"
+          type: integer
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+          - scoringMaxPoints
+          - scoringMethod
+
+    - name: scoringPerformance
+      title: Scoring System Performance
+      type: Table
+      visible: (scoringSystem)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: value
+          title: "Value"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+          - scoringMaxPoints
+          - scoringMethod
+
+    - name: methodComparison
+      title: Scoring Method Comparison
+      type: Table
+      visible: (scoringSystem && scoringMethod == 'compare')
+      rows: 0
+      columns:
+        - name: method
+          title: "Method"
+          type: text
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto
+        - name: accuracy
+          title: "Accuracy"
+          type: number
+          format: zto
+        - name: info_loss
+          title: "Info Loss vs Full Model (%)"
+          type: number
+          format: zto
+        - name: reference
+          title: "Reference"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+          - scoringMaxPoints
+
+    - name: lookupTable
+      title: Score-to-Probability Lookup
+      type: Table
+      visible: (scoringSystem && scoreLookupTable)
+      rows: 0
+      columns:
+        - name: score
+          title: "Total Score"
+          type: integer
+        - name: n_cases
+          title: "N"
+          type: integer
+        - name: n_events
+          title: "Events"
+          type: integer
+        - name: probability
+          title: "Predicted Probability"
+          type: number
+          format: zto
+        - name: risk_group
+          title: "Risk Group"
+          type: text
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+          - scoringMaxPoints
+          - scoringMethod
+
+    - name: validationTable
+      title: Bootstrap Internal Validation
+      type: Table
+      visible: (bootstrapValidation)
+      rows: 0
+      columns:
+        - name: metric
+          title: "Metric"
+          type: text
+        - name: apparent
+          title: "Apparent"
+          type: number
+          format: zto
+        - name: optimism
+          title: "Optimism"
+          type: number
+          format: zto
+        - name: corrected
+          title: "Corrected"
+          type: number
+          format: zto
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+          - bootstrapN
+
+    - name: cv_plot
+      title: Cross-validation Plot
+      type: Image
+      renderFun: .cvPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (cv_plot)
+      refs: glmnet
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: coef_plot
+      title: Coefficient Plot
+      type: Image
+      renderFun: .coefPlot
+      width: 600
+      height: 400
+      requiresData: true
+      visible: (coef_plot)
+      refs: glmnet
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: roc_plot
+      title: ROC Curve
+      type: Image
+      renderFun: .rocPlot
+      width: 600
+      height: 500
+      requiresData: true
+      visible: (roc_plot)
+      refs: pROC
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: predictions
+      title: Add Predicted Probabilities
+      type: Output
+      measureType: continuous
+      varTitle: 'Predicted Probability from LASSO Logistic'
+      varDescription: Predicted Probability Based on LASSO Logistic Model
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: summaryText
+      title: Results Summary
+      type: Html
+      visible: (showSummary)
+      clearWith:
+          - showSummary
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - penalty
+          - alpha
+          - lambda
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: lassoExplanation
+      title: Understanding LASSO Logistic Regression
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - showExplanations
+
+    - name: methodologyNotes
+      title: Methodology Notes
+      type: Html
+      visible: (showMethodologyNotes)
+      clearWith:
+          - showMethodologyNotes
+
+    - name: clinicalGuidance
+      title: Clinical Interpretation Guidance
+      type: Html
+      visible: (includeClinicalGuidance)
+      clearWith:
+          - includeClinicalGuidance
+
+    - name: variableImportance
+      title: Variable Importance Analysis
+      type: Table
+      visible: (showVariableImportance)
+      rows: 0
+      columns:
+        - name: variable
+          title: "Variable"
+          type: text
+        - name: importance_score
+          title: "Importance Score"
+          type: number
+          format: zto
+        - name: selection_frequency
+          title: "Path Inclusion Proportion"
+          type: number
+          format: pc
+        - name: stability_rank
+          title: "Importance Rank"
+          type: integer
+      clearWith:
+          - showVariableImportance
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+          - random_seed
+
+    - name: modelComparison
+      title: LASSO vs Standard Logistic
+      type: Table
+      visible: (showModelComparison)
+      rows: 0
+      columns:
+        - name: model_type
+          title: "Model Type"
+          type: text
+        - name: n_variables
+          title: "N Variables"
+          type: integer
+        - name: auc
+          title: "AUC"
+          type: number
+          format: zto
+        - name: aic
+          title: "AIC"
+          type: number
+          format: zto
+        - name: brier
+          title: "Brier Score"
+          type: number
+          format: zto
+      clearWith:
+          - showModelComparison
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - nfolds
+          - standardize
+          - random_seed
+
+refs:
+    - ClinicoPathJamoviModule
+    - glmnet
+    - pROC
+...

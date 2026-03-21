@@ -562,7 +562,6 @@ items:
           - show_recommendations
 
 refs:
-    - ClinicoPathJamoviModule
     - nonparametric
     - enhancednonparametric
     - mannwhitney
@@ -570,10 +569,11 @@ refs:
     - wilcoxon
     - friedman
     - dunn
-    - dunn.test
     - effectsize
     - robustbase
+    - ClinicoPathJamoviModule
+
+
     - nortest
     - car
-    - DescTools
 ...

@@ -596,6 +596,7 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Enhanced Non-Parametric Statistical Methods",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "nonparametric",
                     "enhancednonparametric",
                     "mannwhitney",
@@ -603,11 +604,12 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "wilcoxon",
                     "friedman",
                     "dunn",
+                    "dunn.test",
                     "effectsize",
                     "robustbase",
-                    "ClinicoPathJamoviModule",
                     "nortest",
-                    "car"))
+                    "car",
+                    "DescTools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

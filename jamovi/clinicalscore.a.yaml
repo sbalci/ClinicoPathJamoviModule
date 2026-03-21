@@ -1,0 +1,192 @@
+---
+name: clinicalscore
+title: Clinical Scoring System Generator
+menuGroup: meddecideT
+menuSubgroup: Prediction Models
+menuTitle: Clinical Score Builder
+menuSubtitle: Build, validate, and compare integer-point scoring systems
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: |
+        Builds clinical integer-point scoring systems from regression models using
+        three published methods (Sullivan/D'Agostino, Schneeweiss, Beta10).
+        Supports logistic and Cox regression with automatic variable categorization,
+        calibration, discrimination, nomogram generation, and TRIPOD compliance.
+    R:
+        dontrun: true
+        usage: |
+            clinicalscore(data = data, outcome = "diagnosis",
+                outcomeLevel = "malignant", explanatory = vars(age, grade, ki67),
+                modelType = "logistic", scoringMethod = "compare")
+
+options:
+    - name: data
+      type: Data
+
+    # ── Model specification ──────────────────────────────────────────
+    - name: modelType
+      title: Model Type
+      type: List
+      options:
+        - title: "Logistic Regression (binary outcome)"
+          name: logistic
+        - title: "Cox Regression (time-to-event)"
+          name: cox
+      default: logistic
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [nominal, ordinal, continuous]
+      permitted: [factor, numeric]
+
+    - name: outcomeLevel
+      title: Event Level
+      type: Level
+      variable: (outcome)
+
+    - name: elapsedtime
+      title: Time Variable (Cox only)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: null
+
+    - name: explanatory
+      title: Predictor Variables
+      type: Variables
+      suggested: [nominal, ordinal, continuous]
+      permitted: [factor, numeric]
+
+    # ── Variable categorization ──────────────────────────────────────
+    - name: autoCategorize
+      title: Auto-Categorize Continuous Variables
+      type: Bool
+      default: true
+      description:
+        R: >
+          Automatically convert continuous predictors into categories
+          for integer-point assignment. If disabled, continuous predictors
+          contribute points based on above/below median.
+
+    - name: categorizeMethod
+      title: Categorization Method
+      type: List
+      options:
+        - title: "Median Split (2 groups)"
+          name: median
+        - title: "Tertiles (3 groups)"
+          name: tertiles
+        - title: "Quartiles (4 groups)"
+          name: quartiles
+        - title: "Clinical Cutpoints (manual)"
+          name: manual
+      default: median
+
+    - name: customBreaks
+      title: Custom Cutpoints (comma-separated)
+      type: String
+      default: ""
+      description:
+        R: >
+          Comma-separated cutpoints for manual categorization.
+          Example: "3,10,20" for Ki-67 would create G1/G2a/G2b/G3.
+
+    # ── Scoring method ───────────────────────────────────────────────
+    - name: scoringMethod
+      title: Scoring Method
+      type: List
+      options:
+        - title: "Schneeweiss (divide by smallest coefficient)"
+          name: schneeweiss
+        - title: "Beta10 (coefficient x scale, rounded)"
+          name: beta10
+        - title: "Sullivan/D'Agostino (Framingham method)"
+          name: sullivan
+        - title: "Compare All Methods"
+          name: compare
+      default: schneeweiss
+
+    - name: maxPoints
+      title: Maximum Points per Feature
+      type: Integer
+      default: 10
+      min: 3
+      max: 20
+
+    # ── Validation ───────────────────────────────────────────────────
+    - name: bootstrapValidation
+      title: Bootstrap Internal Validation
+      type: Bool
+      default: false
+
+    - name: bootstrapN
+      title: Bootstrap Iterations
+      type: Integer
+      default: 200
+      min: 50
+      max: 1000
+
+    # ── Output controls ──────────────────────────────────────────────
+    - name: scoreLookup
+      title: Score-to-Probability Lookup Table
+      type: Bool
+      default: true
+
+    - name: showNomogram
+      title: Generate Nomogram
+      type: Bool
+      default: true
+
+    - name: showCalibration
+      title: Calibration Assessment
+      type: Bool
+      default: true
+
+    - name: calibrationGroups
+      title: Calibration Risk Groups
+      type: Integer
+      default: 4
+      min: 2
+      max: 10
+
+    - name: showDiscrimination
+      title: Discrimination Metrics
+      type: Bool
+      default: true
+
+    - name: showDecisionCurve
+      title: Decision Curve Analysis
+      type: Bool
+      default: false
+
+    - name: showTRIPOD
+      title: TRIPOD Compliance Checklist
+      type: Bool
+      default: false
+
+    - name: suitabilityCheck
+      title: Sample Size Suitability Assessment
+      type: Bool
+      default: true
+
+    - name: showSummary
+      title: Show Natural Language Summary
+      type: Bool
+      default: false
+
+    - name: showExplanations
+      title: Show Method Explanations
+      type: Bool
+      default: false
+
+    - name: random_seed
+      title: Random Seed
+      type: Integer
+      default: 42
+      min: 1
+      max: 999999
+
+...

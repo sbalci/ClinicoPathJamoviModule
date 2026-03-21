@@ -123,13 +123,36 @@ Rscript _updateModules.R
 /update-refs FUNC_NAME
 /document-function FUNC_NAME
 
-/check-function nonparametric
-/check-function-full nonparametric
-/review-function nonparametric
-/fix-function nonparametric
-/generate-test-data nonparametric
-/update-refs nonparametric
-/document-function nonparametric
+fix issues, implement recommendations and enhancements
+
+
+
+/check-function clinicalscore
+/check-function-full clinicalscore
+/review-function clinicalscore
+/fix-function clinicalscore
+/generate-test-data clinicalscore
+/update-refs clinicalscore
+/document-function clinicalscore
+
+
+/check-function misclassificationbias
+/check-function-full misclassificationbias
+/review-function misclassificationbias
+/fix-function misclassificationbias
+/generate-test-data misclassificationbias
+/update-refs misclassificationbias
+/document-function misclassificationbias
+
+/check-function leaveonecenterout
+/check-function-full leaveonecenterout
+/review-function leaveonecenterout
+/fix-function leaveonecenterout
+/generate-test-data leaveonecenterout
+/update-refs leaveonecenterout
+/document-function leaveonecenterout
+
+
 
 
 ---

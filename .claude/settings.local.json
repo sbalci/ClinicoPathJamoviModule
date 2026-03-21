@@ -176,7 +176,11 @@
       "Bash(do basename:*)",
       "Bash(done)",
       "Bash(do Rscript -e \":*)",
-      "Skill(scientific-critical-thinking)"
+      "Skill(scientific-critical-thinking)",
+      "WebFetch(domain:pubmed.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:nliulab.github.io)",
+      "WebFetch(domain:scholar.google.com)",
+      "WebFetch(domain:api.github.com)"
     ],
     "deny": [],
     "ask": [],
