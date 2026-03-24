@@ -33,7 +33,8 @@ data(decisioncompare_identical)
 decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
                 goldPositive = "Positive", test1 = "Test1",
                 test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive", statComp = TRUE)
+                test2Positive = "Positive", test3Positive = "",
+                statComp = TRUE)
 
 }
 \keyword{datasets}

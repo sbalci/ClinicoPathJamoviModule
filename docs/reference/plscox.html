@@ -13,7 +13,7 @@ for analysis of genomic, proteomic, and other high-dimensional datasets."></head
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,16 +56,22 @@ for analysis of genomic, proteomic, and other high-dimensional datasets.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plscox</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
 <span>  <span class="va">time</span>,</span>
 <span>  <span class="va">status</span>,</span>
+<span>  <span class="va">outcomeLevel</span>,</span>
+<span>  <span class="va">censorLevel</span>,</span>
 <span>  <span class="va">predictors</span>,</span>
 <span>  pls_components <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  cross_validation <span class="op">=</span> <span class="st">"k10"</span>,</span>
 <span>  component_selection <span class="op">=</span> <span class="st">"cv_loglik"</span>,</span>
 <span>  scaling_method <span class="op">=</span> <span class="st">"standardize"</span>,</span>
-<span>  pls_algorithm <span class="op">=</span> <span class="st">"nipals"</span>,</span>
-<span>  max_iterations <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  tolerance <span class="op">=</span> <span class="fl">1e-06</span>,</span>
+<span>  tie_method <span class="op">=</span> <span class="st">"efron"</span>,</span>
+<span>  sparse_pls <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  limQ2set <span class="op">=</span> <span class="fl">0.0975</span>,</span>
+<span>  pvals_expli <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  alpha_pvals_expli <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  bootstrap_validation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_bootstrap <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  permutation_test <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -78,7 +84,8 @@ for analysis of genomic, proteomic, and other high-dimensional datasets.</p>
 <span>  risk_groups <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  confidence_intervals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  feature_importance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  prediction_accuracy <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  prediction_accuracy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  suitabilityCheck <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,12 +93,30 @@ for analysis of genomic, proteomic, and other high-dimensional datasets.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
+<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dd><p>The data as a data frame.</p></dd>
+
+
+<dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
 <dd><p>.</p></dd>
 
 
 <dt id="arg-status">status<a class="anchor" aria-label="anchor" href="#arg-status"></a></dt>
 <dd><p>.</p></dd>
+
+
+<dt id="arg-outcomelevel">outcomeLevel<a class="anchor" aria-label="anchor" href="#arg-outcomelevel"></a></dt>
+<dd><p>Level of <code>status</code> considered as the event. For
+binary factor outcomes, if left empty the second observed level is used;
+for numeric binary outcomes, the larger observed value is used (or 1 for
+0/1 coding).</p></dd>
+
+
+<dt id="arg-censorlevel">censorLevel<a class="anchor" aria-label="anchor" href="#arg-censorlevel"></a></dt>
+<dd><p>Level of <code>status</code> considered as censored (no
+event). Together with <code>outcomeLevel</code>, this defines a strict two-level
+encoding: rows whose status matches neither level are treated as missing
+and excluded.</p></dd>
 
 
 <dt id="arg-predictors">predictors<a class="anchor" aria-label="anchor" href="#arg-predictors"></a></dt>
@@ -115,16 +140,34 @@ components</p></dd>
 <dd><p>Method for scaling predictor variables</p></dd>
 
 
-<dt id="arg-pls-algorithm">pls_algorithm<a class="anchor" aria-label="anchor" href="#arg-pls-algorithm"></a></dt>
-<dd><p>Algorithm for PLS computation</p></dd>
-
-
-<dt id="arg-max-iterations">max_iterations<a class="anchor" aria-label="anchor" href="#arg-max-iterations"></a></dt>
-<dd><p>Maximum iterations for PLS algorithm convergence</p></dd>
-
-
 <dt id="arg-tolerance">tolerance<a class="anchor" aria-label="anchor" href="#arg-tolerance"></a></dt>
-<dd><p>Tolerance for algorithm convergence</p></dd>
+<dd><p>Tolerance for algorithm convergence (jamovi default:
+1e-06, plsRcox default: 1e-12)</p></dd>
+
+
+<dt id="arg-tie-method">tie_method<a class="anchor" aria-label="anchor" href="#arg-tie-method"></a></dt>
+<dd><p>Method for handling tied event times in Cox model
+(plsRcox default: efron)</p></dd>
+
+
+<dt id="arg-sparse-pls">sparse_pls<a class="anchor" aria-label="anchor" href="#arg-sparse-pls"></a></dt>
+<dd><p>Enable sparse PLS for automatic variable selection
+(plsRcox default: false)</p></dd>
+
+
+<dt id="arg-limq-set">limQ2set<a class="anchor" aria-label="anchor" href="#arg-limq-set"></a></dt>
+<dd><p>Q-squared threshold for PLS component stopping criterion
+(plsRcox default: 0.0975)</p></dd>
+
+
+<dt id="arg-pvals-expli">pvals_expli<a class="anchor" aria-label="anchor" href="#arg-pvals-expli"></a></dt>
+<dd><p>Use p-value based predictor selection during PLS fitting
+(plsRcox default: false)</p></dd>
+
+
+<dt id="arg-alpha-pvals-expli">alpha_pvals_expli<a class="anchor" aria-label="anchor" href="#arg-alpha-pvals-expli"></a></dt>
+<dd><p>Significance level for p-value based variable
+selection (plsRcox default: 0.05)</p></dd>
 
 
 <dt id="arg-bootstrap-validation">bootstrap_validation<a class="anchor" aria-label="anchor" href="#arg-bootstrap-validation"></a></dt>
@@ -182,10 +225,16 @@ ratios</p></dd>
 <dd><p>Assess model prediction accuracy using C-index
 and other metrics</p></dd>
 
+
+<dt id="arg-suitabilitycheck">suitabilityCheck<a class="anchor" aria-label="anchor" href="#arg-suitabilitycheck"></a></dt>
+<dd><p>Run a comprehensive data suitability assessment
+before analysis. Checks sample size, events-per-variable ratio,
+multicollinearity,  and whether regularization is needed.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$componentSelection</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelCoefficients</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$variableLoadings</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelPerformance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskStratification</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$componentPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$loadingsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$scoresPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$validationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$bootstrapResults</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$permutationResults</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalGuidance</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$technicalNotes</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$suitabilityReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$componentSelection</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelCoefficients</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$variableLoadings</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelPerformance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskStratification</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$componentPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$loadingsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$scoresPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$validationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$bootstrapResults</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$permutationResults</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalGuidance</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$technicalNotes</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$componentSelection$asDF</code></p>
 <p><code>as.data.frame(results$componentSelection)</code></p>
     </div>

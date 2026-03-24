@@ -17,7 +17,7 @@ and HER2 scoring validation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -134,8 +134,8 @@ between modalities.</p></dd>
 
 
 <dt id="arg-confidence-intervals">confidence_intervals<a class="anchor" aria-label="anchor" href="#arg-confidence-intervals"></a></dt>
-<dd><p>Calculate and display 95\<!-- % confidence intervals -->
-for agreement statistics.</p></dd>
+<dd><p>Calculate and display 95 percent confidence
+intervals for agreement statistics.</p></dd>
 
 
 <dt id="arg-directional-analysis">directional_analysis<a class="anchor" aria-label="anchor" href="#arg-directional-analysis"></a></dt>
@@ -161,7 +161,8 @@ low expression levels (relevant for HER2-low/null distinction).</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Basic modality comparison</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Basic modality comparison</span></span></span>
 <span class="r-in"><span><span class="va">result1</span> <span class="op">&lt;-</span> <span class="fu">modalitycomparison</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="va">data</span>,</span></span>
 <span class="r-in"><span>  modality1_var <span class="op">=</span> <span class="st">"glass_slides"</span>,</span></span>
@@ -180,7 +181,7 @@ low expression levels (relevant for HER2-low/null distinction).</p></dd>
 <span class="r-in"><span>  show_discordance_analysis <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'her2_data' not found</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

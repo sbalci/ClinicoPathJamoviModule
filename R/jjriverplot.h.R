@@ -239,7 +239,7 @@ jjriverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Load test data
 #' data(jjriverplot_test_data_long)
 #' data(jjriverplot_test_data_wide)

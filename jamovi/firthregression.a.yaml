@@ -108,7 +108,7 @@ options:
       description:
           R: >
             Confidence level for confidence intervals. Default is 0.95 for
-            95% confidence intervals.
+            95 percent confidence intervals.
 
     - name: ciMethod
       title: CI Method

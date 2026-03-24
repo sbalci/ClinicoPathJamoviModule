@@ -13,7 +13,7 @@ research."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,6 +61,7 @@ research.</p>
 <span>  <span class="va">status</span>,</span>
 <span>  <span class="va">predictors</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"mixture"</span>,</span>
+<span>  smcure_model_type <span class="op">=</span> <span class="st">"ph"</span>,</span>
 <span>  cure_link <span class="op">=</span> <span class="st">"logit"</span>,</span>
 <span>  survival_dist <span class="op">=</span> <span class="st">"weibull"</span>,</span>
 <span>  bootstrap_ci <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -101,6 +102,11 @@ research.</p>
 <dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
 <dd><p>Type of cure model: mixture (smcure), non-mixture
 (flexsurvcure), cuRe, npcure, or all</p></dd>
+
+
+<dt id="arg-smcure-model-type">smcure_model_type<a class="anchor" aria-label="anchor" href="#arg-smcure-model-type"></a></dt>
+<dd><p>Survival model type for smcure: 'ph' (proportional
+hazards) or 'aft' (accelerated failure time)</p></dd>
 
 
 <dt id="arg-cure-link">cure_link<a class="anchor" aria-label="anchor" href="#arg-cure-link"></a></dt>

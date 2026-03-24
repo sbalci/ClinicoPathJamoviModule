@@ -188,7 +188,15 @@
       "Bash(Rscript -e 'devtools::document\\(\".\"\\)' 2>&1)",
       "Bash(Rscript -e 'parse\\(file=\"R/survival.b.R\"\\)' 2>&1)",
       "Bash(Rscript -e 'devtools::document\\(\"\"\"\".\"\"\"\"\\)')",
-      "Bash(grep -n \"private$.getData\\(\\)\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survival.b.R)"
+      "Bash(grep -n \"private$.getData\\(\\)\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survival.b.R)",
+      "Bash(Rscript -e \"pkgdown::build_site\\(\\)\")",
+      "Bash(Rscript -e \"data\\(package=''''survival''''\\)\")",
+      "Bash(Rscript -e 'parse\\(file=\"\"R/aalenhazard.b.R\"\"\\)')",
+      "Bash(Rscript -e 'parse\\(file=\"\"R/smoothtimevary.b.R\"\"\\)')",
+      "Bash(Rscript -e 'parse\\(file=\"\"R/flexrstpm2.b.R\"\"\\)')",
+      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/aalenhazard.b.R\"\"\"\"\\)')",
+      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/smoothtimevary.b.R\"\"\"\"\\)')",
+      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/flexrstpm2.b.R\"\"\"\"\\)')"
     ],
     "deny": [],
     "ask": [],

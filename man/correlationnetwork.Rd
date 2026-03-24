@@ -113,19 +113,21 @@ Suitable for understanding complex relationships between variables through
 network topology.
 }
 \examples{
+\dontrun{
 # Basic correlation network analysis
 correlationnetwork(
     data = histopathology,
-    vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "MeasurementC")
+    vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
 )
 
 # With LASSO regularization and community detection
 correlationnetwork(
     data = histopathology,
-    vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "MeasurementC"),
+    vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB"),
     networkMethod = "lasso",
     communityDetection = TRUE,
     centralityMeasures = TRUE
 )
+}
 
 }

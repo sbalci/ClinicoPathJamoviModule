@@ -89,8 +89,6 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           return()
         }
         
-        # Initialize result tables
-        private$.initializeResultTables()
       },
       
       # Main analysis execution
@@ -160,7 +158,7 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             paste0(
               "<h3>Analysis Error</h3>",
               "<p>An error occurred during Aalen's additive hazard analysis:</p>",
-              "<pre>", htmlspecialchars(e$message), "</pre>",
+              "<pre>", gsub("<", "&lt;", gsub("&", "&amp;", e$message)), "</pre>",
               "<p>Please check your data and analysis options.</p>"
             )
           )
@@ -397,20 +395,6 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         test_results
       },
       
-      # Initialize result tables
-      .initializeResultTables = function() {
-        # Initialize tables with empty structure
-        if (self$options$show_coefficients_table) {
-          self$results$coefficientsTable$setKeys(character(0))
-        }
-        
-        if (self$options$test_constant_effects && self$options$show_test_results) {
-          self$results$constantEffectsTest$setKeys(character(0))
-        }
-        
-        self$results$goodnessOfFit$setKeys(c("loglik", "aic", "n_events", "n_obs"))
-        self$results$modelComparison$setKeys(c("model", "loglik", "aic", "n_events", "n_obs"))
-      },
       
       # Populate all result tables and summaries
       .populateResults = function(model_results, test_results, data_prep) {

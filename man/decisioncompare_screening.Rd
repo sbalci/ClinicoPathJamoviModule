@@ -34,7 +34,8 @@ data(decisioncompare_screening)
 decisioncompare(data = decisioncompare_screening, gold = "Biopsy",
                 goldPositive = "Positive", test1 = "ScreeningTest",
                 test1Positive = "Positive", test2 = "DiagnosticTest",
-                test2Positive = "Positive", pp = TRUE, pprob = 0.15)
+                test2Positive = "Positive", test3Positive = "",
+                pp = TRUE, pprob = 0.15)
 
 }
 \keyword{datasets}

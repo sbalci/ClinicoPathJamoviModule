@@ -56,7 +56,7 @@
 #'   \item{baseline_viral_load}{Numeric. Baseline viral load (copies/mL)}
 #'   \item{art_adherence}{Factor. Antiretroviral therapy adherence (Poor, Good)}
 #'   \item{visit_time}{Numeric. Time of CD4 measurement (months from baseline)}
-#'   \item{cd4_count}{Numeric. CD4+ T cell count (cells/μL)}
+#'   \item{cd4_count}{Numeric. CD4+ T cell count (cells/uL)}
 #'   \item{survival_time}{Numeric. Time to AIDS/death or last follow-up (months)}
 #'   \item{aids_death_status}{Numeric. Event indicator (0 = censored, 1 = AIDS/death)}
 #' }
@@ -79,7 +79,7 @@
 #' ggplot(cd4_joint_data, aes(x = visit_time, y = cd4_count, color = art_adherence)) +
 #'   geom_smooth(method = "loess") +
 #'   labs(title = "CD4 Trajectories by ART Adherence", 
-#'        x = "Time (months)", y = "CD4 Count (cells/μL)")
+#'        x = "Time (months)", y = "CD4 Count (cells/uL)")
 #' 
 #' @source Simulated data based on HIV cohort studies
 "cd4_joint_data"

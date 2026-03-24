@@ -95,10 +95,8 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           return()
         }
         
-        # Initialize result tables
-        private$.initializeResultTables()
       },
-      
+
       # Main analysis execution
       .run = function() {
         # Early validation
@@ -172,7 +170,7 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             paste0(
               "<h3>Analysis Error</h3>",
               "<p>An error occurred during smooth time-varying effects analysis:</p>",
-              "<pre>", htmlspecialchars(e$message), "</pre>",
+              "<pre>", gsub("<", "&lt;", gsub("&", "&amp;", e$message)), "</pre>",
               "<p>Please check your data and model specifications.</p>"
             )
           )
@@ -550,21 +548,6 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         comparison_results
       },
       
-      # Initialize result tables
-      .initializeResultTables = function() {
-        # Initialize tables with empty structure
-        if (self$options$show_effects_table) {
-          self$results$effectsTable$setKeys(character(0))
-        }
-        
-        if (self$options$test_constancy && self$options$show_constancy_tests) {
-          self$results$constancyTests$setKeys(character(0))
-        }
-        
-        self$results$modelComparison$setKeys(c("smooth", "constant"))
-        self$results$smoothingParameters$setKeys(c("method", "df", "bandwidth", "confidence"))
-        self$results$goodnessOfFit$setKeys(c("smoothness", "complexity", "fit"))
-      },
       
       # Populate all result tables and summaries
       .populateResults = function(smooth_results, constancy_results, comparison_results, data_prep) {

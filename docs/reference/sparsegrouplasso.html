@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,10 @@
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">time_var</span>,</span>
 <span>  <span class="va">event_var</span>,</span>
+<span>  <span class="va">outcomeLevel</span>,</span>
+<span>  <span class="va">censorLevel</span>,</span>
 <span>  <span class="va">pred_vars</span>,</span>
+<span>  suitabilityCheck <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  group_definition <span class="op">=</span> <span class="st">"factor_based"</span>,</span>
 <span>  custom_groups <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  <span class="va">pathway_info</span>,</span>
@@ -68,11 +71,6 @@
 <span>  weight_power <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  standardize_vars <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  center_vars <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  orthogonalize_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  max_iterations <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  convergence_threshold <span class="op">=</span> <span class="fl">1e-06</span>,</span>
-<span>  warm_start <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  parallel_cv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed_value <span class="op">=</span> <span class="fl">42</span>,</span>
 <span>  show_summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_coefficients <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -111,8 +109,26 @@
 <dd><p>the event indicator variable (0/1 or FALSE/TRUE)</p></dd>
 
 
+<dt id="arg-outcomelevel">outcomeLevel<a class="anchor" aria-label="anchor" href="#arg-outcomelevel"></a></dt>
+<dd><p>Level of <code>event_var</code> that represents the event of
+interest (coded as 1). Rows matching neither this level nor
+<code>censorLevel</code> are excluded as NA.</p></dd>
+
+
+<dt id="arg-censorlevel">censorLevel<a class="anchor" aria-label="anchor" href="#arg-censorlevel"></a></dt>
+<dd><p>Level of <code>event_var</code> that represents censoring
+(coded as 0). Together with <code>outcomeLevel</code>, this defines a strict
+two-level encoding: rows whose event value matches neither level are
+treated as missing and excluded.</p></dd>
+
+
 <dt id="arg-pred-vars">pred_vars<a class="anchor" aria-label="anchor" href="#arg-pred-vars"></a></dt>
 <dd><p>the predictor variables for the model</p></dd>
+
+
+<dt id="arg-suitabilitycheck">suitabilityCheck<a class="anchor" aria-label="anchor" href="#arg-suitabilitycheck"></a></dt>
+<dd><p>assess if data is suitable for the selected
+regularized Cox model</p></dd>
 
 
 <dt id="arg-group-definition">group_definition<a class="anchor" aria-label="anchor" href="#arg-group-definition"></a></dt>
@@ -158,7 +174,10 @@ Example: "0.001,0.01,0.1,1"</p></dd>
 
 
 <dt id="arg-selection-criterion">selection_criterion<a class="anchor" aria-label="anchor" href="#arg-selection-criterion"></a></dt>
-<dd><p>criterion for selecting optimal lambda</p></dd>
+<dd><p>Criterion for selecting optimal lambda. CV
+Deviance uses cross-validated partial likelihood deviance (recommended).
+AIC/BIC/EBIC add model complexity penalties to the deviance for more
+parsimonious selection.</p></dd>
 
 
 <dt id="arg-cv-folds">cv_folds<a class="anchor" aria-label="anchor" href="#arg-cv-folds"></a></dt>
@@ -187,27 +206,6 @@ Example: "0.001,0.01,0.1,1"</p></dd>
 
 <dt id="arg-center-vars">center_vars<a class="anchor" aria-label="anchor" href="#arg-center-vars"></a></dt>
 <dd><p>whether to center predictor variables</p></dd>
-
-
-<dt id="arg-orthogonalize-groups">orthogonalize_groups<a class="anchor" aria-label="anchor" href="#arg-orthogonalize-groups"></a></dt>
-<dd><p>whether to orthogonalize variables within
-groups</p></dd>
-
-
-<dt id="arg-max-iterations">max_iterations<a class="anchor" aria-label="anchor" href="#arg-max-iterations"></a></dt>
-<dd><p>maximum number of iterations for optimization</p></dd>
-
-
-<dt id="arg-convergence-threshold">convergence_threshold<a class="anchor" aria-label="anchor" href="#arg-convergence-threshold"></a></dt>
-<dd><p>convergence threshold for optimization</p></dd>
-
-
-<dt id="arg-warm-start">warm_start<a class="anchor" aria-label="anchor" href="#arg-warm-start"></a></dt>
-<dd><p>whether to use warm start for lambda sequence</p></dd>
-
-
-<dt id="arg-parallel-cv">parallel_cv<a class="anchor" aria-label="anchor" href="#arg-parallel-cv"></a></dt>
-<dd><p>whether to use parallel processing for CV</p></dd>
 
 
 <dt id="arg-seed-value">seed_value<a class="anchor" aria-label="anchor" href="#arg-seed-value"></a></dt>
@@ -290,14 +288,15 @@ intervals</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$coefficients</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$groupStructure</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$solutionPath</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$performance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$validationResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$adaptiveWeights</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stabilityResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$comparisonTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cvErrorPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$coefficientPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$groupSelectionPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$sparsityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stabilityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$explanations</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$suitabilityReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$summary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$coefficients</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$groupStructure</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$solutionPath</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$performance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$validationResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$adaptiveWeights</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stabilityResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$comparisonTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cvErrorPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$coefficientPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$groupSelectionPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$sparsityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stabilityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$explanations</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$summary$asDF</code></p>
 <p><code>as.data.frame(results$summary)</code></p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'histopathology'</span>, package<span class="op">=</span><span class="st">'ClinicoPath'</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'histopathology'</span>, package<span class="op">=</span><span class="st">'ClinicoPath'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">sparsegrouplasso</span><span class="op">(</span>data <span class="op">=</span> <span class="va">histopathology</span>,</span></span>
 <span class="r-in"><span>               time_var <span class="op">=</span> <span class="st">'OverallSurvival'</span>,</span></span>
@@ -307,7 +306,7 @@ intervals</p></dd>
 <span class="r-in"><span>               alpha_sgl <span class="op">=</span> <span class="fl">0.95</span>,</span></span>
 <span class="r-in"><span>               lambda_sequence <span class="op">=</span> <span class="st">'auto'</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in sparsegrouplasso(data = histopathology, time_var = "OverallSurvival",     event_var = "Death", pred_vars = c("Age", "Grade", "LVI",         "PNI"), group_definition = "factor_based", alpha_sgl = 0.95,     lambda_sequence = "auto"):</span> argument "pathway_info" is missing, with no default</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

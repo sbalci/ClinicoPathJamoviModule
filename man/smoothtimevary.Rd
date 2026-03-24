@@ -112,9 +112,10 @@ and complementing Aalen's additive hazard methodology.
 # Example 1: Spline-based time-varying effects
 library(timereg)
 library(survival)
+veteran <- survival::veteran
 
 smoothtimevary(
-    data = veteran_data,
+    data = veteran,
     elapsedtime = "time",
     outcome = "status",
     outcomeLevel = "1",

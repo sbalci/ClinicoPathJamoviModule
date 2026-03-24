@@ -63,9 +63,34 @@ articles:
   contents:
   - clinicopath-descriptives-checkdata-guide
 
+- title: "jsurvival Module"
+  desc: "Comprehensive guides for survival analysis functions"
+  contents:
+  - jsurvival-adaptivelasso-comprehensive
+  - jsurvival-competingsurvival-comprehensive
+  - jsurvival-conditionalsurvival-comprehensive
+  - jsurvival-firthregression-comprehensive
+  - jsurvival-grouplasso-comprehensive
+  - jsurvival-highdimcox-comprehensive
+  - jsurvival-lassocox-comprehensive
+  - jsurvival-ncvregcox-comprehensive
+  - jsurvival-pcacox-comprehensive
+  - jsurvival-plscox-comprehensive
+  - jsurvival-relativesurvival-comprehensive
+  - jsurvival-sparsegrouplasso-comprehensive
+  - jsurvival-survival-comprehensive
+  - jsurvival-timeroc-comprehensive
+
+- title: "meddecide Module"
+  desc: "Guides for medical decision analysis"
+  contents:
+  - meddecide-leaveonecenterout-comprehensive
+
 - title: "OncoPath Module"
   desc: "Guides for IHC clustering and oncology analysis"
   contents:
   - ihccluster-marker-distance-pathologist-guide
   - ihccluster-quick-reference-card
+  - oncopath-curemodels-comprehensive
+  - oncopath-stagemigration-comprehensive
 

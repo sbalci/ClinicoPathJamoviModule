@@ -359,7 +359,6 @@ mixedmodelanovaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param model_type model structure
 #' @param interaction_terms include interaction terms
 #' @param estimation_method REML or ML
-#' @param ... additional arguments
 #' @return A results object containing tables and plots
 #' @export
 mixedmodelanova <- function(

@@ -34,7 +34,7 @@ data(decisioncompare_missing)
 decisioncompare(data = decisioncompare_missing, gold = "GoldStandard",
                 goldPositive = "Positive", test1 = "Test1",
                 test1Positive = "Positive", test2 = "Test2",
-                test2Positive = "Positive")
+                test2Positive = "Positive", test3Positive = "")
 
 }
 \keyword{datasets}

@@ -9,8 +9,8 @@ stability selection for robust variable identification, and comprehensive
 model diagnostics. Particularly effective for high-dimensional survival
 data where traditional methods fail, genomic studies with many biomarkers,
 and clinical prediction models requiring sparse, interpretable solutions.
-The method automatically handles tied survival times, stratified analysis,
-and provides uncertainty quantification through bootstrap procedures."><meta property="og:description" content="Adaptive LASSO for Cox proportional hazards models with data-driven penalty
+The method supports tie handling in refitted Cox models, optional
+stratification for Cox modeling, and bootstrap-based stability selection."><meta property="og:description" content="Adaptive LASSO for Cox proportional hazards models with data-driven penalty
 selection and improved variable selection properties. Unlike standard
 LASSO, the adaptive LASSO uses weights based on initial parameter estimates
 to provide consistent variable selection (oracle property) and reduced bias
@@ -20,8 +20,8 @@ stability selection for robust variable identification, and comprehensive
 model diagnostics. Particularly effective for high-dimensional survival
 data where traditional methods fail, genomic studies with many biomarkers,
 and clinical prediction models requiring sparse, interpretable solutions.
-The method automatically handles tied survival times, stratified analysis,
-and provides uncertainty quantification through bootstrap procedures."></head><body>
+The method supports tie handling in refitted Cox models, optional
+stratification for Cox modeling, and bootstrap-based stability selection."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -29,7 +29,7 @@ and provides uncertainty quantification through bootstrap procedures."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,8 +73,8 @@ stability selection for robust variable identification, and comprehensive
 model diagnostics. Particularly effective for high-dimensional survival
 data where traditional methods fail, genomic studies with many biomarkers,
 and clinical prediction models requiring sparse, interpretable solutions.
-The method automatically handles tied survival times, stratified analysis,
-and provides uncertainty quantification through bootstrap procedures.</p>
+The method supports tie handling in refitted Cox models, optional
+stratification for Cox modeling, and bootstrap-based stability selection.</p>
     </div>
 
     <div class="section level2">
@@ -83,14 +83,20 @@ and provides uncertainty quantification through bootstrap procedures.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">time</span>,</span>
 <span>  <span class="va">event</span>,</span>
+<span>  <span class="va">event_level</span>,</span>
+<span>  <span class="va">censor_level</span>,</span>
 <span>  <span class="va">predictors</span>,</span>
 <span>  <span class="va">strata</span>,</span>
+<span>  suitabilityCheck <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  weight_method <span class="op">=</span> <span class="st">"ridge"</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  gamma <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  cv_measure <span class="op">=</span> <span class="st">"deviance"</span>,</span>
 <span>  lambda_sequence <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  lambda_custom_max <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  lambda_custom_min <span class="op">=</span> <span class="fl">0.001</span>,</span>
+<span>  lambda_single <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  lambda_min_ratio <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  n_lambda <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  stability_selection <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -115,7 +121,6 @@ and provides uncertainty quantification through bootstrap procedures.</p>
 <span>  plot_diagnostics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  tie_method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
 <span>  standardize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  intercept <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  parallel_computing <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  convergence_threshold <span class="op">=</span> <span class="fl">1e-07</span>,</span>
@@ -138,8 +143,22 @@ is the  time from study entry to event or censoring.</p></dd>
 
 
 <dt id="arg-event">event<a class="anchor" aria-label="anchor" href="#arg-event"></a></dt>
-<dd><p>Event indicator variable. For survival analysis: 0 = censored,
-1 = event. For competing risks: 0 = censored, 1+ = different event types.</p></dd>
+<dd><p>Event indicator variable. For binary outcomes use 0 =
+censored, 1 = event. For multi-level variables, choose the event level of
+interest.</p></dd>
+
+
+<dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
+<dd><p>Level of the event variable to be treated as the event
+of interest. For binary factors this can be left empty and the second level
+is used.</p></dd>
+
+
+<dt id="arg-censor-level">censor_level<a class="anchor" aria-label="anchor" href="#arg-censor-level"></a></dt>
+<dd><p>Level of the event variable to be treated as censored
+(no event). When specified together with Event Level, rows matching neither
+level are excluded from analysis. For binary factors this can be left empty
+and the first level is used.</p></dd>
 
 
 <dt id="arg-predictors">predictors<a class="anchor" aria-label="anchor" href="#arg-predictors"></a></dt>
@@ -149,8 +168,13 @@ standardization is applied for optimal penalty performance.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
-<dd><p>Optional stratification variable for stratified Cox
-regression. Creates separate baseline hazards for each stratum.</p></dd>
+<dd><p>Optional stratification variable. When provided, stratified
+Cox structures are used for penalized fitting and refitted Cox summaries.</p></dd>
+
+
+<dt id="arg-suitabilitycheck">suitabilityCheck<a class="anchor" aria-label="anchor" href="#arg-suitabilitycheck"></a></dt>
+<dd><p>assess if data is suitable for the selected
+Adaptive LASSO model</p></dd>
 
 
 <dt id="arg-weight-method">weight_method<a class="anchor" aria-label="anchor" href="#arg-weight-method"></a></dt>
@@ -179,15 +203,30 @@ computation time.</p></dd>
 
 
 <dt id="arg-cv-measure">cv_measure<a class="anchor" aria-label="anchor" href="#arg-cv-measure"></a></dt>
-<dd><p>Performance measure for cross-validation. Deviance is
-computationally efficient, C-index focuses on discrimination, Brier score
-accounts for calibration, AUC provides time-specific performance.</p></dd>
+<dd><p>Performance measure for cross-validation. Deviance
+(partial likelihood) is computationally efficient and is the default.
+C-index (Harrell's concordance) focuses on discrimination ability.</p></dd>
 
 
 <dt id="arg-lambda-sequence">lambda_sequence<a class="anchor" aria-label="anchor" href="#arg-lambda-sequence"></a></dt>
 <dd><p>How to specify the penalty parameter sequence.
-Automatic uses data-driven range, custom allows user specification, single
-tests only one value.</p></dd>
+Automatic uses a data-driven range, custom uses user-defined max/min, and
+single fits only one lambda value.</p></dd>
+
+
+<dt id="arg-lambda-custom-max">lambda_custom_max<a class="anchor" aria-label="anchor" href="#arg-lambda-custom-max"></a></dt>
+<dd><p>Maximum lambda value for custom lambda sequence
+mode. Must be greater than Custom Lambda Minimum.</p></dd>
+
+
+<dt id="arg-lambda-custom-min">lambda_custom_min<a class="anchor" aria-label="anchor" href="#arg-lambda-custom-min"></a></dt>
+<dd><p>Minimum lambda value for custom lambda sequence
+mode. Must be smaller than Custom Lambda Maximum.</p></dd>
+
+
+<dt id="arg-lambda-single">lambda_single<a class="anchor" aria-label="anchor" href="#arg-lambda-single"></a></dt>
+<dd><p>Lambda value used when Lambda Sequence is set to
+Single Value.</p></dd>
 
 
 <dt id="arg-lambda-min-ratio">lambda_min_ratio<a class="anchor" aria-label="anchor" href="#arg-lambda-min-ratio"></a></dt>
@@ -247,7 +286,7 @@ predictor. Used for Kaplan-Meier curves and risk group analysis.</p></dd>
 
 <dt id="arg-time-points">time_points<a class="anchor" aria-label="anchor" href="#arg-time-points"></a></dt>
 <dd><p>Comma-separated list of time points for survival
-probability predictions. Empty string uses data-driven quantiles.</p></dd>
+probability predictions. Leave empty to suppress the predictions table.</p></dd>
 
 
 <dt id="arg-baseline-survival">baseline_survival<a class="anchor" aria-label="anchor" href="#arg-baseline-survival"></a></dt>
@@ -315,14 +354,9 @@ better approximation but is computationally more intensive.</p></dd>
 optimal penalty performance with mixed-scale variables.</p></dd>
 
 
-<dt id="arg-intercept">intercept<a class="anchor" aria-label="anchor" href="#arg-intercept"></a></dt>
-<dd><p>Include intercept term in Cox model. Generally not needed
-for survival analysis but may be useful in special cases.</p></dd>
-
-
 <dt id="arg-parallel-computing">parallel_computing<a class="anchor" aria-label="anchor" href="#arg-parallel-computing"></a></dt>
 <dd><p>Use parallel computing for cross-validation and
-bootstrap procedures to reduce computation time.</p></dd>
+stability-selection resampling to reduce computation time.</p></dd>
 
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
@@ -348,14 +382,15 @@ sampling. Ensures reproducible results across analyses.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coefficients</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$selectionPath</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cvResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stabilityResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelDiagnostics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$performanceMetrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskGroups</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$predictions</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pathPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cvPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stabilityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$baselineHazardPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$diagnosticsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$notices</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$suitabilityReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coefficients</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$selectionPath</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cvResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stabilityResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelDiagnostics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$performanceMetrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$riskGroups</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$predictions</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pathPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cvPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stabilityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$baselineHazardPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$diagnosticsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$coefficients$asDF</code></p>
 <p><code>as.data.frame(results$coefficients)</code></p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">adaptivelasso</span><span class="op">(</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">adaptivelasso</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">mydata</span>,</span></span>
 <span class="r-in"><span>    time <span class="op">=</span> <span class="st">"time_to_event"</span>,</span></span>
 <span class="r-in"><span>    event <span class="op">=</span> <span class="st">"event_indicator"</span>,</span></span>
@@ -365,8 +400,8 @@ sampling. Ensures reproducible results across analyses.</p></dd>
 <span class="r-in"><span>    stability_selection <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>    alpha <span class="op">=</span> <span class="fl">1.0</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in adaptivelasso(data = mydata, time = "time_to_event", event = "event_indicator",     predictors = c("age", "stage", "biomarker1", "biomarker2"),     weight_method = "ridge", cv_folds = 10, stability_selection = TRUE,     alpha = 1):</span> argument "strata" is missing, with no default</span>
-<span class="r-in"><span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in adaptivelasso(data = mydata, time = "time_to_event", event = "event_indicator",     predictors = c("age", "stage", "biomarker1", "biomarker2"),     weight_method = "ridge", cv_folds = 10, stability_selection = TRUE,     alpha = 1):</span> argument "event_level" is missing, with no default</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

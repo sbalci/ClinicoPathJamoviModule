@@ -6,24 +6,24 @@ vastly outnumbers the positive class, PR curves focus on the performance in
 the minority (positive) class. The area under the PR curve (PR-AUC or
 Average Precision) provides a single-number summary of model performance.
 PR analysis is essential for evaluating rare event detection (mitotic
-figures &amp;lt;1\
-positives are rare, quality control in digital pathology where defects are
-uncommon, and AI triage systems where abnormal cases are infrequent. This
-module provides comprehensive PR analysis with optimal threshold selection,
-comparison to baseline (random classifier), and F-score optimization for
-different precision-recall trade-offs."><meta property="og:description" content="Precision-Recall (PR) analysis is superior to ROC analysis for highly
+figures &amp;lt;1 percent, rare tumor cells, micrometastases), cancer screening
+where positives are rare, quality control in digital pathology where
+defects are uncommon, and AI triage systems where abnormal cases are
+infrequent. This module provides comprehensive PR analysis with optimal
+threshold selection, comparison to baseline (random classifier), and
+F-score optimization for different precision-recall trade-offs."><meta property="og:description" content="Precision-Recall (PR) analysis is superior to ROC analysis for highly
 imbalanced datasets, which are common in digital pathology and AI
 applications. While ROC curves can be misleading when the negative class
 vastly outnumbers the positive class, PR curves focus on the performance in
 the minority (positive) class. The area under the PR curve (PR-AUC or
 Average Precision) provides a single-number summary of model performance.
 PR analysis is essential for evaluating rare event detection (mitotic
-figures &amp;lt;1\
-positives are rare, quality control in digital pathology where defects are
-uncommon, and AI triage systems where abnormal cases are infrequent. This
-module provides comprehensive PR analysis with optimal threshold selection,
-comparison to baseline (random classifier), and F-score optimization for
-different precision-recall trade-offs."></head><body>
+figures &amp;lt;1 percent, rare tumor cells, micrometastases), cancer screening
+where positives are rare, quality control in digital pathology where
+defects are uncommon, and AI triage systems where abnormal cases are
+infrequent. This module provides comprehensive PR analysis with optimal
+threshold selection, comparison to baseline (random classifier), and
+F-score optimization for different precision-recall trade-offs."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -31,7 +31,7 @@ different precision-recall trade-offs."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,12 +72,12 @@ vastly outnumbers the positive class, PR curves focus on the performance in
 the minority (positive) class. The area under the PR curve (PR-AUC or
 Average Precision) provides a single-number summary of model performance.
 PR analysis is essential for evaluating rare event detection (mitotic
-figures &lt;1\<!-- %, rare tumor cells, micrometastases), cancer screening where -->
-positives are rare, quality control in digital pathology where defects are
-uncommon, and AI triage systems where abnormal cases are infrequent. This
-module provides comprehensive PR analysis with optimal threshold selection,
-comparison to baseline (random classifier), and F-score optimization for
-different precision-recall trade-offs.</p>
+figures &lt;1 percent, rare tumor cells, micrometastases), cancer screening
+where positives are rare, quality control in digital pathology where
+defects are uncommon, and AI triage systems where abnormal cases are
+infrequent. This module provides comprehensive PR analysis with optimal
+threshold selection, comparison to baseline (random classifier), and
+F-score optimization for different precision-recall trade-offs.</p>
     </div>
 
     <div class="section level2">
@@ -236,14 +236,15 @@ reproducibility.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">prauc</span><span class="op">(</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">prauc</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">pathology_data</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"cancer"</span>,</span></span>
 <span class="r-in"><span>    predictor <span class="op">=</span> <span class="st">"ai_score"</span>,</span></span>
 <span class="r-in"><span>    positive_level <span class="op">=</span> <span class="st">"positive"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'pathology_data' not found</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

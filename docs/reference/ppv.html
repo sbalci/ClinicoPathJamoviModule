@@ -15,7 +15,7 @@ power, and research biases."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@ power, and research biases.</p>
 
 <dl><dt id="arg-perctrue">percTrue<a class="anchor" aria-label="anchor" href="#arg-perctrue"></a></dt>
 <dd><p>The pre-study probability that the tested relationships are
-true. In exploratory research fields, this may be 10\<!-- % or lower. In -->
+true. In exploratory research fields, this may be 10 percent or lower. In
 confirmatory research with strong theoretical basis, it may be higher.</p></dd>
 
 
@@ -79,8 +79,8 @@ situations.</p></dd>
 
 <dt id="arg-power">power<a class="anchor" aria-label="anchor" href="#arg-power"></a></dt>
 <dd><p>Statistical power of the studies to detect true effects.
-Well-designed studies typically have 80\<!-- % power or higher. Many published -->
-studies have much lower actual power.</p></dd>
+Well-designed studies typically have 80 percent power or higher. Many
+published studies have much lower actual power.</p></dd>
 
 
 <dt id="arg-perchack">percHack<a class="anchor" aria-label="anchor" href="#arg-perchack"></a></dt>
@@ -98,12 +98,13 @@ the research process that increases false positive rates.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Calculate PPV for a typical medical research scenario</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Calculate PPV for a typical medical research scenario</span></span></span>
 <span class="r-in"><span><span class="fu">ppv</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    percTrue <span class="op">=</span> <span class="fl">10</span>,    <span class="co"># 10\% of tested hypotheses are true</span></span></span>
-<span class="r-in"><span>    alpha <span class="op">=</span> <span class="fl">0.05</span>,     <span class="co"># 5\% significance level</span></span></span>
-<span class="r-in"><span>    power <span class="op">=</span> <span class="fl">0.80</span>,     <span class="co"># 80\% power</span></span></span>
-<span class="r-in"><span>    percHack <span class="op">=</span> <span class="fl">30</span>     <span class="co"># 30\% of studies have some bias</span></span></span>
+<span class="r-in"><span>    percTrue <span class="op">=</span> <span class="fl">10</span>,    <span class="co"># 10 percent of tested hypotheses are true</span></span></span>
+<span class="r-in"><span>    alpha <span class="op">=</span> <span class="fl">0.05</span>,     <span class="co"># 5 percent significance level</span></span></span>
+<span class="r-in"><span>    power <span class="op">=</span> <span class="fl">0.80</span>,     <span class="co"># 80 percent power</span></span></span>
+<span class="r-in"><span>    percHack <span class="op">=</span> <span class="fl">30</span>     <span class="co"># 30 percent of studies have some bias</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  POSITIVE PREDICTIVE VALUE</span>
@@ -119,8 +120,7 @@ the research process that increases false positive rates.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background-color: #f8f9fa; padding: 15px; border-radius:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5px; margin-bottom: 15px;'&gt;&lt;h4 style='margin-top: 0;'&gt;📊 Results</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Summary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5px; margin-bottom: 15px;'&gt;&lt;h4 style='margin-top: 0;'&gt; Results Summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Positive Predictive Value (PPV): 22.19%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -133,18 +133,18 @@ the research process that increases false positive rates.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  positive findings, 30.1 are expected to be false discoveries.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background-color: #e8f4f8; padding: 15px; border-radius:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5px; margin-bottom: 15px;'&gt;&lt;h4 style='margin-top: 0;'&gt;🎯 Research</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5px; margin-bottom: 15px;'&gt;&lt;h4 style='margin-top: 0;'&gt; Research</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Interpretation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Most claimed findings are likely to be false positives.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;p style='color: #d73027; font-weight: bold;'&gt;⚠️ Warning: Under these</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;p style='color: #d73027; font-weight: bold;'&gt; Warning: Under these</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  conditions, most research claims are likely false. Consider improving</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  study design, increasing sample sizes, or adjusting significance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  thresholds.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background-color: #f0f8ff; padding: 15px; border-radius:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5px; margin-bottom: 15px;'&gt;&lt;h4 style='margin-top: 0;'&gt;🔬 Methodology</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5px; margin-bottom: 15px;'&gt;&lt;h4 style='margin-top: 0;'&gt; Methodology</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Notes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Confusion Matrix Context:</span>
@@ -158,7 +158,7 @@ the research process that increases false positive rates.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  findings.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background-color: #fff3cd; padding: 15px; border-radius:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5px;'&gt;&lt;h4 style='margin-top: 0;'&gt;📋 Study Parameters Used</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5px;'&gt;&lt;h4 style='margin-top: 0;'&gt; Study Parameters Used</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;ul style='margin: 5px 0;'&gt;Prior probability of true hypotheses:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  10%Significance level (α): 0.05Statistical power: 0.8Percentage of</span>
@@ -170,7 +170,7 @@ the research process that increases false positive rates.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  u × β × R)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  where R = prior odds, u = bias factor, β = Type II error rate</span>
 <span class="r-plt img"><img src="ppv-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

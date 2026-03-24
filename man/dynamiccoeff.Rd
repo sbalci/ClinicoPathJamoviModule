@@ -129,9 +129,10 @@ analysis.
 # Example 1: Dynamic coefficient model with Bayesian updating
 library(survival)
 library(dlm)
+veteran <- survival::veteran
 
 dynamiccoeff(
-    data = veteran_data,
+    data = veteran,
     elapsedtime = "time",
     outcome = "status",
     outcomeLevel = "1",

@@ -11,7 +11,7 @@ for multi-center studies, family studies, and recurrent events."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -171,7 +171,8 @@ for multi-center studies, family studies, and recurrent events.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example: Multi-center survival with shared frailty</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Example: Multi-center survival with shared frailty</span></span></span>
 <span class="r-in"><span><span class="fu">frailtysurvival</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">multicenter_data</span>,</span></span>
 <span class="r-in"><span>    time_var <span class="op">=</span> <span class="va">followup_time</span>,</span></span>
@@ -181,7 +182,7 @@ for multi-center studies, family studies, and recurrent events.</p>
 <span class="r-in"><span>    frailty_type <span class="op">=</span> <span class="st">"shared"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in frailtysurvival(data = multicenter_data, time_var = followup_time,     status_var = death_event, cluster_var = center_id, covariates = c("age",         "stage", "treatment"), frailty_type = "shared"):</span> unused argument (data = multicenter_data)</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -27,10 +27,14 @@
 #'   database = "rw"
 #' )
 #' }
+NULL
+#' @title Retracted Helpers Imports
+#' @name retracted_imports
 #' @importFrom utils URLencode
 #' @importFrom httr GET status_code content timeout
 #' @importFrom rcrossref id_converter
-NULL
+#' @keywords internal
+.retracted_imports <- function() NULL
 
 #' @noRd
 .validate_doi <- function(doi) {

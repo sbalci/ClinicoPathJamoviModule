@@ -245,6 +245,7 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficients = function() private$.items[["coefficients"]],
@@ -281,6 +282,18 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "outcome",
                     "explanatory")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "explanatory",
+                    "modelType",
+                    "elapsedtime",
+                    "scoringMethod",
+                    "maxPoints")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="suitabilityReport",
@@ -679,7 +692,7 @@ clinicalscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "clinicalscore",
-                version = c(0,0,1),
+                version = c(0,0,37),
                 options = options,
                 results = clinicalscoreResults$new(options=options),
                 data = data,
@@ -737,6 +750,7 @@ clinicalscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr

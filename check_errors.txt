@@ -1,0 +1,51 @@
+[36m── R CMD build ─────────────────────────────────────────────────────────────────[39m
+     checking for file ‘.../DESCRIPTION’ ...     checking for file ‘.../DESCRIPTION’ ...  [32m✔[39m  [90mchecking for file ‘.../DESCRIPTION’[39m[36m[39m
+       cp: ClinicoPathJamoviModule/development-documentations-dev.jamovi.org-master/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/man/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/.Rhistory: Operation not permitted
+       cp: ClinicoPathJamoviModule/vignettes/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/vignettes/jsurvival-highdimcox-comprehensive.html: Operation not permitted
+       cp: ClinicoPathJamoviModule/vignettes/jsurvival-plscox-comprehensive.html: Operation not permitted
+       cp: ClinicoPathJamoviModule/vignettes/jsurvival-adaptivelasso-comprehensive.html: Operation not permitted
+       cp: ClinicoPathJamoviModule/vignettes/jsurvival-lassocox-comprehensive.html: Operation not permitted
+       cp: ClinicoPathJamoviModule/vignettes/jsurvival-ncvregcox-comprehensive.html: Operation not permitted
+       cp: ClinicoPathJamoviModule/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/literature/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/development-ideas/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/PATCHES/rpasurvival_escape_vars.patch: Operation not permitted
+   cp: ClinicoPathJamoviModule/PATCHES/rpasurvival_splitcriterion.patch: Operation not permitted
+       cp: ClinicoPathJamoviModule/..Rcheck/00check.log: Operation not permitted
+       cp: ClinicoPathJamoviModule/tests/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/tests/testthat/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/tests/testthat/_snaps/advancedraincloud.md: Operation not permitted
+   cp: ClinicoPathJamoviModule/tests/testthat/_snaps/agepyramid.md: Operation not permitted
+   cp: ClinicoPathJamoviModule/tests/testthat/_snaps/summary_table_statistics: Operation not permitted
+       cp: ClinicoPathJamoviModule/R/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/.claude/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/.claude/templates: Operation not permitted
+       cp: ClinicoPathJamoviModule/temp-books: Operation not permitted
+       cp: ClinicoPathJamoviModule/jamovi/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/jamovi/js/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/development-diagrams/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/.venv/bin: Operation not permitted
+   cp: ClinicoPathJamoviModule/.venv/include: Operation not permitted
+   cp: ClinicoPathJamoviModule/.venv/pyvenv.cfg: Operation not permitted
+       cp: ClinicoPathJamoviModule/.venv/.gitignore: Operation not permitted
+   cp: ClinicoPathJamoviModule/.venv/lib: Operation not permitted
+   cp: ClinicoPathJamoviModule/.venv/share: Operation not permitted
+       cp: ClinicoPathJamoviModule/_updateModules_config.yaml: Operation not permitted
+       cp: ClinicoPathJamoviModule/.tmp/R_libs: Operation not permitted
+       cp: ClinicoPathJamoviModule/build: Operation not permitted
+       cp: ClinicoPathJamoviModule/data-raw/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/data-raw/non-rda/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/data-raw/TEMPLATE_data_generation.R: Operation not permitted
+       cp: ClinicoPathJamoviModule/i18n/tr/LC_MESSAGES: Operation not permitted
+       cp: ClinicoPathJamoviModule/inst/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/data/.DS_Store: Operation not permitted
+       cp: ClinicoPathJamoviModule/.Rproj.user: Operation not permitted
+       cp: ClinicoPathJamoviModule/tr/R: Operation not permitted
+   cp: ClinicoPathJamoviModule/tr/jamovi: Operation not permitted
+       cp: ClinicoPathJamoviModule/jamovi_modules: Operation not permitted
+        ERROR
+       copying to build directory failed
+      

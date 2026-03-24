@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
 <dd><p>Numeric. Time of CD4 measurement (months from baseline)</p></dd>
 
 <dt>cd4_count</dt>
-<dd><p>Numeric. CD4+ T cell count (cells/μL)</p></dd>
+<dd><p>Numeric. CD4+ T cell count (cells/uL)</p></dd>
 
 <dt>survival_time</dt>
 <dd><p>Numeric. Time to AIDS/death or last follow-up (months)</p></dd>
@@ -99,7 +99,7 @@
 <span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cd4_joint_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">visit_time</span>, y <span class="op">=</span> <span class="va">cd4_count</span>, color <span class="op">=</span> <span class="va">art_adherence</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"CD4 Trajectories by ART Adherence"</span>, </span></span>
-<span class="r-in"><span>       x <span class="op">=</span> <span class="st">"Time (months)"</span>, y <span class="op">=</span> <span class="st">"CD4 Count (cells/μL)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>       x <span class="op">=</span> <span class="st">"Time (months)"</span>, y <span class="op">=</span> <span class="st">"CD4 Count (cells/uL)"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `geom_smooth()` using formula = 'y ~ x'</span>
 <span class="r-plt img"><img src="cd4_joint_data-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

@@ -11,6 +11,18 @@ items:
           - outcome
           - explanatory
 
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - modelType
+          - elapsedtime
+          - scoringMethod
+          - maxPoints
+
     - name: suitabilityReport
       title: Data Suitability Assessment
       type: Html

@@ -17,7 +17,7 @@ proteomic, or other high-dimensional clinical datasets."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,22 +66,24 @@ proteomic, or other high-dimensional clinical datasets.</p>
 <span>  <span class="va">elapsedtime</span>,</span>
 <span>  <span class="va">outcome</span>,</span>
 <span>  <span class="va">predictors</span>,</span>
-<span>  outcomeLevel <span class="op">=</span> <span class="st">"1"</span>,</span>
+<span>  <span class="va">outcomeLevel</span>,</span>
+<span>  <span class="va">censorLevel</span>,</span>
 <span>  regularization_method <span class="op">=</span> <span class="st">"elastic_net"</span>,</span>
 <span>  alpha_value <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  cv_method <span class="op">=</span> <span class="st">"cv_1se"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  variable_selection <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  stability_selection <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  bootstrap_iterations <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  subsampling_iterations <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  subsampling_ratio <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  stability_threshold <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>  show_regularization_path <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  show_cv_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_regularization_path <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  show_cv_plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  show_variable_importance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_coefficients_table <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  show_model_diagnostics <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_model_diagnostics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showSummaries <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  suitabilityCheck <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -106,7 +108,11 @@ proteomic, or other high-dimensional clinical datasets.</p>
 
 
 <dt id="arg-outcomelevel">outcomeLevel<a class="anchor" aria-label="anchor" href="#arg-outcomelevel"></a></dt>
-<dd><p>Level of outcome variable indicating event</p></dd>
+<dd><p>Level of outcome variable indicating event occurred</p></dd>
+
+
+<dt id="arg-censorlevel">censorLevel<a class="anchor" aria-label="anchor" href="#arg-censorlevel"></a></dt>
+<dd><p>Level of outcome variable indicating censored (no event)</p></dd>
 
 
 <dt id="arg-regularization-method">regularization_method<a class="anchor" aria-label="anchor" href="#arg-regularization-method"></a></dt>
@@ -126,19 +132,19 @@ regression</p></dd>
 <dd><p>Number of cross-validation folds</p></dd>
 
 
-<dt id="arg-variable-selection">variable_selection<a class="anchor" aria-label="anchor" href="#arg-variable-selection"></a></dt>
-<dd><p>Additional variable selection method after
-regularization</p></dd>
-
-
 <dt id="arg-stability-selection">stability_selection<a class="anchor" aria-label="anchor" href="#arg-stability-selection"></a></dt>
 <dd><p>Perform stability selection for variable
 importance</p></dd>
 
 
-<dt id="arg-bootstrap-iterations">bootstrap_iterations<a class="anchor" aria-label="anchor" href="#arg-bootstrap-iterations"></a></dt>
-<dd><p>Number of bootstrap iterations for stability
-selection</p></dd>
+<dt id="arg-subsampling-iterations">subsampling_iterations<a class="anchor" aria-label="anchor" href="#arg-subsampling-iterations"></a></dt>
+<dd><p>Number of subsampling iterations for
+stability selection</p></dd>
+
+
+<dt id="arg-subsampling-ratio">subsampling_ratio<a class="anchor" aria-label="anchor" href="#arg-subsampling-ratio"></a></dt>
+<dd><p>Proportion of observations to sample in each
+stability selection iteration</p></dd>
 
 
 <dt id="arg-stability-threshold">stability_threshold<a class="anchor" aria-label="anchor" href="#arg-stability-threshold"></a></dt>
@@ -172,17 +178,24 @@ selection</p></dd>
 <dt id="arg-showexplanations">showExplanations<a class="anchor" aria-label="anchor" href="#arg-showexplanations"></a></dt>
 <dd><p>Show methodology explanations</p></dd>
 
+
+<dt id="arg-suitabilitycheck">suitabilityCheck<a class="anchor" aria-label="anchor" href="#arg-suitabilitycheck"></a></dt>
+<dd><p>Run a comprehensive data suitability assessment
+before analysis. Checks sample size, events-per-variable ratio,
+multicollinearity,  and whether regularization is needed.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$selectedVariables</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regularizationMetrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stabilityResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$dimensionalityReduction</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regularizationPath</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cvPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$variableImportance</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$modelDiagnostics</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stabilityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$analysisSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$methodExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$suitabilityReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$selectedVariables</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regularizationMetrics</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$stabilityResults</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regularizationPath</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cvPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$variableImportance</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$modelDiagnostics</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$stabilityPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$analysisSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$methodExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$selectedVariables$asDF</code></p>
 <p><code>as.data.frame(results$selectedVariables)</code></p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: LASSO regularization for gene expression data</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Example 1: LASSO regularization for gene expression data</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu" class="external-link">glmnet</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: Matrix</span>
@@ -197,7 +210,7 @@ selection</p></dd>
 <span class="r-in"><span>    regularization_method <span class="op">=</span> <span class="st">"lasso"</span>,</span></span>
 <span class="r-in"><span>    cv_folds <span class="op">=</span> <span class="fl">10</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'genomic_survival_data' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in highdimcox(data = genomic_survival_data, elapsedtime = "time",     outcome = "status", outcomeLevel = "1", predictors = c("gene1",         "gene2", "gene3", "...gene1000"), regularization_method = "lasso",     cv_folds = 10):</span> argument "censorLevel" is missing, with no default</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Elastic Net with stability selection</span></span></span>
 <span class="r-in"><span><span class="fu">highdimcox</span><span class="op">(</span></span></span>
@@ -209,10 +222,10 @@ selection</p></dd>
 <span class="r-in"><span>    regularization_method <span class="op">=</span> <span class="st">"elastic_net"</span>,</span></span>
 <span class="r-in"><span>    alpha_value <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
 <span class="r-in"><span>    stability_selection <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    bootstrap_iterations <span class="op">=</span> <span class="fl">500</span></span></span>
+<span class="r-in"><span>    subsampling_iterations <span class="op">=</span> <span class="fl">500</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'protein_data' not found</span>
-<span class="r-in"><span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in highdimcox(data = protein_data, elapsedtime = "survival_time",     outcome = "event", outcomeLevel = "1", predictors = c("protein1",         "protein2", "...protein500"), regularization_method = "elastic_net",     alpha_value = 0.5, stability_selection = TRUE, subsampling_iterations = 500):</span> argument "censorLevel" is missing, with no default</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

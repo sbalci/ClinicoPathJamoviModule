@@ -11,7 +11,7 @@ statistical annotations for scientific publications."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -243,7 +243,8 @@ hierarchical testing).</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Box plot with statistical comparison</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Box plot with statistical comparison</span></span></span>
 <span class="r-in"><span><span class="fu">jjpubr</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">mtcars</span>,</span></span>
 <span class="r-in"><span>    plotType <span class="op">=</span> <span class="st">"boxplot"</span>,</span></span>
@@ -254,9 +255,9 @@ hierarchical testing).</p></dd>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in doTryCatch(return(expr), name, parentenv, handler):</span> X variable 'cyl' is numeric (3 unique values) but boxplot requires a categorical variable.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> ⚠️ WARNING: Using numeric IDs (e.g., patient IDs) as categorical groups produces meaningless statistical comparisons.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>  WARNING: Using numeric IDs (e.g., patient IDs) as categorical groups produces meaningless statistical comparisons.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 💡 Solution: Convert numeric codes to factors or select a proper grouping variable (e.g., treatment group, disease stage).</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>  Solution: Convert numeric codes to factors or select a proper grouping variable (e.g., treatment group, disease stage).</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Scatter plot with correlation</span></span></span>
 <span class="r-in"><span><span class="fu">jjpubr</span><span class="op">(</span></span></span>
@@ -300,7 +301,7 @@ hierarchical testing).</p></dd>
 <span class="r-in"><span>    fillColor <span class="op">=</span> <span class="st">"#0073C2FF"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in jjpubr(data = mtcars, plotType = "histogram", xvar = "mpg", addDensity = TRUE,     fillColor = "#0073C2FF"):</span> argument "yvar" is missing, with no default</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

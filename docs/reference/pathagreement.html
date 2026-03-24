@@ -13,7 +13,7 @@ interpretation for categorical rating data."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -174,8 +174,8 @@ analysis or use automatic selection.</p></dd>
 
 
 <dt id="arg-fleissci">fleissCI<a class="anchor" aria-label="anchor" href="#arg-fleissci"></a></dt>
-<dd><p>Calculate 95\<!-- % confidence intervals for Fleiss' kappa using -->
-asymptotic standard errors.</p></dd>
+<dd><p>Calculate 95 percent confidence intervals for Fleiss' kappa
+using asymptotic standard errors.</p></dd>
 
 
 <dt id="arg-kripp">kripp<a class="anchor" aria-label="anchor" href="#arg-kripp"></a></dt>
@@ -397,8 +397,8 @@ training and quality assurance discussions.</p></dd>
 
 <dt id="arg-discordantthreshold">discordantThreshold<a class="anchor" aria-label="anchor" href="#arg-discordantthreshold"></a></dt>
 <dd><p>Minimum disagreement proportion for flagging
-discordant cases. 0.5 means at least 50\<!-- % of raters disagreed with majority -->
-diagnosis.</p></dd>
+discordant cases. 0.5 means at least 50 percent of raters disagreed with
+majority diagnosis.</p></dd>
 
 
 <dt id="arg-raterexperience">raterExperience<a class="anchor" aria-label="anchor" href="#arg-raterexperience"></a></dt>
@@ -467,7 +467,8 @@ computationally intensive operations like bootstrap calculations.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load example data</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Load example data</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'pathology_ratings'</span>, package <span class="op">=</span> <span class="st">'ClinicoPath'</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data set ‘pathology_ratings’ not found</span>
 <span class="r-in"><span></span></span>
@@ -502,7 +503,7 @@ computationally intensive operations like bootstrap calculations.</p></dd>
 <span class="r-in"><span>          tie_breaking <span class="op">=</span> <span class="st">'arbitration'</span>,</span></span>
 <span class="r-in"><span>          show_consensus_table <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in agreement(pathology_ratings, vars = c("rater1", "rater2", "rater3"),     consensus = TRUE, consensus_method = "majority", tie_breaking = "arbitration",     show_consensus_table = TRUE):</span> argument 3 matches multiple formal arguments</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

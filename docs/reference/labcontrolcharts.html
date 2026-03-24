@@ -15,7 +15,7 @@ and quality assurance programs."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -198,7 +198,17 @@ data)</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu">labcontrolcharts</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    measurement <span class="op">=</span> <span class="st">"glucose_value"</span>,</span></span>
+<span class="r-in"><span>    run_number <span class="op">=</span> <span class="st">"run_id"</span>,</span></span>
+<span class="r-in"><span>    chart_type <span class="op">=</span> <span class="st">"shewhart"</span>,</span></span>
+<span class="r-in"><span>    control_limits <span class="op">=</span> <span class="st">"3sigma"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in labcontrolcharts(data, measurement = "glucose_value", run_number = "run_id",     chart_type = "shewhart", control_limits = "3sigma"):</span> argument "batch_id" is missing, with no default</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

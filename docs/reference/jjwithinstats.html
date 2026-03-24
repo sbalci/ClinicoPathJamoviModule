@@ -13,7 +13,7 @@ statistical annotations and significance testing."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -258,7 +258,8 @@ plot.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Basic within-subjects analysis with iris dataset (simulated repeated measures)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Basic within-subjects analysis with iris dataset (simulated repeated measures)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">iris_wide</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    Subject <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">50</span>,</span></span>
@@ -276,11 +277,11 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  VIOLIN PLOTS TO COMPARE WITHIN GROUPS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✅ Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Processing 3 measurements for within-subjects analysis...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ℹ️ Data Processing: All 50 subjects retained (complete data).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Data Processing: All 50 subjects retained (complete data).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -295,7 +296,7 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test Used: Repeated measures ANOVA tests whether means differ</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  significantly across time points, assuming normal distribution.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  🔍 What to look for:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  What to look for:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Statistical significance (p &lt; 0.05) indicates real changes over time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Effect sizes show practical importance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Individual trajectories reveal response patterns</span>
@@ -351,11 +352,11 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  VIOLIN PLOTS TO COMPARE WITHIN GROUPS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✅ Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Processing 3 measurements for within-subjects analysis...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ℹ️ Data Processing: All 50 subjects retained (complete data).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Data Processing: All 50 subjects retained (complete data).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -370,7 +371,7 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test Used: Friedman test compares medians across time points without</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  assuming normal distribution (robust for skewed biomarker data).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  🔍 What to look for:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  What to look for:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Statistical significance (p &lt; 0.05) indicates real changes over time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Effect sizes show practical importance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Individual trajectories reveal response patterns</span>
@@ -405,9 +406,9 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;div style='background-color:#f0f8f0;padding:10px;border:1px solid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  #28a745;'&gt;Analysis: Friedman test with 3 measurements per subject</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Configuration:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✓ Pairwise comparisons enabled</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✓ Central tendency displayed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✓ Individual trajectories shown</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Pairwise comparisons enabled</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Central tendency displayed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Individual trajectories shown</span>
 <span class="r-plt img"><img src="jjwithinstats-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Robust analysis with mtcars dataset (horsepower measurements)</span></span></span>
@@ -433,11 +434,11 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  VIOLIN PLOTS TO COMPARE WITHIN GROUPS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✅ Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Processing 3 measurements for within-subjects analysis...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ℹ️ Data Processing: All 20 subjects retained (complete data).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Data Processing: All 20 subjects retained (complete data).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -452,7 +453,7 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test Used: Robust test uses trimmed means, reducing influence of</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  outliers common in clinical measurements.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  🔍 What to look for:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  What to look for:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Statistical significance (p &lt; 0.05) indicates real changes over time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Effect sizes show practical importance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Individual trajectories reveal response patterns</span>
@@ -488,7 +489,7 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  #28a745;'&gt;Analysis: Robust repeated measures test with 3 measurements</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  per subject</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Configuration:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✓ Central tendency displayed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Central tendency displayed</span>
 <span class="r-plt img"><img src="jjwithinstats-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Bayesian analysis with ToothGrowth dataset (growth measurements)</span></span></span>
@@ -512,11 +513,11 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  VIOLIN PLOTS TO COMPARE WITHIN GROUPS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✅ Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Ready for analysis: Violin Plot comparing 3 repeated measurements.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Processing 3 measurements for within-subjects analysis...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ℹ️ Data Processing: All 20 subjects retained (complete data).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Data Processing: All 20 subjects retained (complete data).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -531,7 +532,7 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Test Used: Bayesian analysis provides evidence for/against</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  differences, useful when traditional p-values are inconclusive.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  🔍 What to look for:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  What to look for:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Statistical significance (p &lt; 0.05) indicates real changes over time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Effect sizes show practical importance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  • Individual trajectories reveal response patterns</span>
@@ -567,9 +568,9 @@ plot.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  #28a745;'&gt;Analysis: Bayesian repeated measures analysis with 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  measurements per subject</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Configuration:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ✓ Central tendency displayed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Central tendency displayed</span>
 <span class="r-plt img"><img src="jjwithinstats-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

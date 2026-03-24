@@ -90,8 +90,6 @@ mixedmodelanova(
 \item{show_methodology}{.}
 
 \item{show_references}{.}
-
-\item{...}{additional arguments}
 }
 \value{
 A results object containing tables and plots

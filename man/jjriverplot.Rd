@@ -110,7 +110,7 @@ A results object containing:
 flows and transitions over time or between categories.'
 }
 \examples{
-\donttest{
+\dontrun{
 # Load test data
 data(jjriverplot_test_data_long)
 data(jjriverplot_test_data_wide)

@@ -384,19 +384,22 @@ aalenhazardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # Example 1: Basic Aalen additive hazard model
 #' library(timereg)
 #' library(survival)
+#' veteran <- survival::veteran
 #'
 #' aalenhazard(
-#'     data = veteran_data,
+#'     data = veteran,
 #'     elapsedtime = "time",
 #'     outcome = "status",
 #'     outcomeLevel = "1",
 #'     covariates = c("age", "karno", "diagtime"),
-#'     model_type = "additive"
+#'     model_type = "additive",
+#'     constant_effects = c("age")
 #' )
 #'
 #' # Example 2: Semi-parametric Aalen model with constant effects
+#' lung <- survival::lung
 #' aalenhazard(
-#'     data = lung_data,
+#'     data = lung,
 #'     elapsedtime = "time",
 #'     outcome = "status",
 #'     outcomeLevel = "2",

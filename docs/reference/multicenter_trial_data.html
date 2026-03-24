@@ -11,7 +11,7 @@ variability in the consortdiagram function."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,14 +96,14 @@ variability in the <code>consortdiagram</code> function.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This dataset simulates a realistic multi-center trial with:</p><ul><li><p>600 participants assessed across 4 sites</p></li>
-<li><p>25\<!-- % screening failure rate (higher than single-center for realism) --></p></li>
-<li><p>5\<!-- % enrollment exclusion rate --></p></li>
+<li><p>25 percent screening failure rate (higher than single-center for realism)</p></li>
+<li><p>5 percent enrollment exclusion rate</p></li>
 <li><p>1:1 randomization to Experimental vs Control</p></li>
-<li><p>3\<!-- % allocation exclusion rate --></p></li>
-<li><p>15\<!-- % follow-up loss rate (varies by site) --></p></li>
-<li><p>2\<!-- % analysis exclusion rate --></p></li>
-<li><p>Final retention: 57.7\<!-- % (346 participants analyzed) --></p></li>
-<li><p>Site-specific retention rates: 52.5\<!-- % to 60.1\\% --></p></li>
+<li><p>3 percent allocation exclusion rate</p></li>
+<li><p>15 percent follow-up loss rate (varies by site)</p></li>
+<li><p>2 percent analysis exclusion rate</p></li>
+<li><p>Final retention: 57.7 percent (346 participants analyzed)</p></li>
+<li><p>Site-specific retention rates: 52.5 percent to 60.1 percent</p></li>
 </ul><p>The dataset demonstrates realistic site variability in retention rates, which is
 common in multi-center trials due to differences in site infrastructure, patient
 populations, and study management.</p>
@@ -130,8 +130,8 @@ populations, and study management.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Site-specific retention</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">multicenter_trial_data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">site</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span><span class="va">multicenter_trial_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">site</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    total <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    analyzed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">screening_failure</span><span class="op">)</span> <span class="op">&amp;</span></span></span>

@@ -13,7 +13,7 @@ management."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -196,8 +196,8 @@ reference interval estimation</p></dd>
 
 
 <dt id="arg-pt-acceptable-range">pt_acceptable_range<a class="anchor" aria-label="anchor" href="#arg-pt-acceptable-range"></a></dt>
-<dd><p>Acceptable range for proficiency testing (±\<!-- % or -->
-± absolute units)</p></dd>
+<dd><p>Acceptable range for proficiency testing (±
+percent or ± absolute units)</p></dd>
 
 
 <dt id="arg-validation-components">validation_components<a class="anchor" aria-label="anchor" href="#arg-validation-components"></a></dt>
@@ -253,7 +253,16 @@ plots</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu">qualitycontrol</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    measurement_var <span class="op">=</span> <span class="st">"measurement"</span>,</span></span>
+<span class="r-in"><span>    analysis_type <span class="op">=</span> <span class="st">"control_charts"</span>,</span></span>
+<span class="r-in"><span>    control_chart_type <span class="op">=</span> <span class="st">"all_charts"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in qualitycontrol(data, measurement_var = "measurement", analysis_type = "control_charts",     control_chart_type = "all_charts"):</span> argument "control_level" is missing, with no default</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

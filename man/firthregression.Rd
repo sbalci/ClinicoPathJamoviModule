@@ -48,7 +48,7 @@ continuous, ordinal, and nominal variables.}
 regression model.}
 
 \item{ciLevel}{Confidence level for confidence intervals. Default is 0.95
-for 95\\% confidence intervals.}
+for 95 percent confidence intervals.}
 
 \item{ciMethod}{Method for computing confidence intervals. Profile
 likelihood CIs are recommended as they are more accurate, especially with

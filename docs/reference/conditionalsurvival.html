@@ -17,7 +17,7 @@ approaches, and inverse probability weighting."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,9 +66,9 @@ approaches, and inverse probability weighting.</p>
 <span>  <span class="va">timeVar</span>,</span>
 <span>  <span class="va">outcomeVar</span>,</span>
 <span>  <span class="va">conditionVar</span>,</span>
-<span>  <span class="va">conditionTime</span>,</span>
+<span>  conditionTime <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"km"</span>,</span>
-<span>  <span class="va">bandwidth</span>,</span>
+<span>  bandwidth <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  confInt <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  timePoints <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  plotType <span class="op">=</span> <span class="st">"curves"</span>,</span>
@@ -99,7 +99,7 @@ approaches, and inverse probability weighting.</p>
 
 
 <dt id="arg-conditiontime">conditionTime<a class="anchor" aria-label="anchor" href="#arg-conditiontime"></a></dt>
-<dd><p>Time point at which to condition survival (defaults to
+<dd><p>Time point at which to condition survival (0 = use
 median follow-up)</p></dd>
 
 
@@ -108,8 +108,7 @@ median follow-up)</p></dd>
 
 
 <dt id="arg-bandwidth">bandwidth<a class="anchor" aria-label="anchor" href="#arg-bandwidth"></a></dt>
-<dd><p>Bandwidth for kernel smoothing (auto-selected if not
-specified)</p></dd>
+<dd><p>Bandwidth for kernel smoothing (0 = auto-select)</p></dd>
 
 
 <dt id="arg-confint">confInt<a class="anchor" aria-label="anchor" href="#arg-confint"></a></dt>
@@ -139,15 +138,16 @@ specified)</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$condsurvTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survplot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$methodExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$condsurvTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survplot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$methodExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$reportSentence</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$assumptions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$condsurvTable$asDF</code></p>
 <p><code>as.data.frame(results$condsurvTable)</code></p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example will be added</span></span></span>
-<span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># example will be added</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

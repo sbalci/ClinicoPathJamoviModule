@@ -19,7 +19,7 @@ and biomarker diagnostic accuracy synthesis."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -213,7 +213,8 @@ including interpretation guidance</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'diagnostic_studies'</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'diagnostic_studies'</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data set ‘diagnostic_studies’ not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">diagnosticmeta</span><span class="op">(</span>data <span class="op">=</span> <span class="va">diagnostic_studies</span>,</span></span>
@@ -223,7 +224,7 @@ including interpretation guidance</p></dd>
 <span class="r-in"><span>              false_negatives <span class="op">=</span> <span class="va">fn</span>,</span></span>
 <span class="r-in"><span>              true_negatives <span class="op">=</span> <span class="va">tn</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in diagnosticmeta(data = diagnostic_studies, study = study_name,     true_positives = tp, false_positives = fp, false_negatives = fn,     true_negatives = tn):</span> argument "covariate" is missing, with no default</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

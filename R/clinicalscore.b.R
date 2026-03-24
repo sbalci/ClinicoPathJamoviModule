@@ -17,6 +17,54 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         # Store for plot reuse
         .model_data = NULL,
 
+        # Initialize notice collection list
+        .noticeList = list(),
+
+        # Add a notice to the collection
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+        },
+
+        # Render collected notices as HTML
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                return()
+            }
+
+            # Map notice types to colors
+            typeStyles <- list(
+                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047"),
+                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd")
+            )
+
+            html <- "<div style='margin: 10px 0;'>"
+
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]]
+                if (is.null(style)) style <- typeStyles$INFO
+
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    htmltools::htmlEscape(notice$title), "</strong><br>",
+                    "<span style='color: #374151;'>", htmltools::htmlEscape(notice$content), "</span>",
+                    "</div>"
+                )
+            }
+
+            html <- paste0(html, "</div>")
+
+            self$results$notices$setContent(html)
+        },
+
         # Safe variable name matching: find which original variable
         # a model term belongs to (handles spaces, special chars)
         .matchTermToVar = function(term, var_list) {
@@ -74,16 +122,18 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 is.null(self$options$explanatory) ||
                 length(self$options$explanatory) < 2) return()
 
+            # Reset notice collection for fresh run
+            private$.noticeList <- list()
+
             set.seed(self$options$random_seed)
 
             # ── 1. Clean and prepare data ──────────────────────────────
             prepared <- tryCatch(private$.prepareData(), error = function(e) {
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'><h4>", .("Data Error"), "</h4><p>", e$message, "</p></div>"))
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'dataError', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(sprintf(.('Data preparation failed: %s'), e$message))
-                self$results$insert(1, notice)
+                private$.addNotice("ERROR", .("Data Error"),
+                    sprintf(.('Data preparation failed: %s'), e$message))
+                private$.renderNotices()
                 return(NULL)
             })
             if (is.null(prepared)) return()
@@ -101,10 +151,9 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             model <- tryCatch(private$.fitModel(prepared), error = function(e) {
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'><h4>", .("Model Error"), "</h4><p>", e$message, "</p></div>"))
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'modelError', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(sprintf(.('Model fitting failed: %s'), e$message))
-                self$results$insert(1, notice)
+                private$.addNotice("ERROR", .("Model Error"),
+                    sprintf(.('Model fitting failed: %s'), e$message))
+                private$.renderNotices()
                 return(NULL)
             })
             if (is.null(model)) return()
@@ -146,14 +195,14 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             if (self$options$showExplanations) private$.populateExplanations()
 
             # ── 11. Completion notice ─────────────────────────────────
-            notice <- jmvcore::Notice$new(options = self$options,
-                name = 'analysisComplete', type = jmvcore::NoticeType$INFO)
-            notice$setContent(
+            private$.addNotice("INFO", .("Analysis Complete"),
                 sprintf(.('Scoring system built using %s regression with %d predictors (N=%d, %d events). Method: %s.'),
                     if (prepared$model_type == "logistic") .("logistic") else .("Cox"),
                     length(prepared$expl_vars), prepared$n, prepared$n_events,
                     self$options$scoringMethod))
-            self$results$insert(999, notice)
+
+            # ── 12. Render all collected notices as HTML ─────────────
+            private$.renderNotices()
         },
 
         # ══════════════════════════════════════════════════════════════════
@@ -165,25 +214,20 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             expl_vars <- self$options$explanatory
             model_type <- self$options$modelType
 
-            # Extract outcome
+            # Extract outcome -- convert to 0/1 binary for both model types
             outcome_raw <- data[[outcome_var]]
-            if (model_type == "logistic") {
-                if (is.factor(outcome_raw) || is.character(outcome_raw)) {
-                    outcome_chr <- as.character(outcome_raw)
-                    levels_obs <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
-                    event_level <- as.character(self$options$outcomeLevel)
-                    if (is.null(event_level) || !nzchar(event_level)) event_level <- levels_obs[2]
-                    ref_level <- setdiff(levels_obs, event_level)[1]
-                    y <- rep(NA_real_, length(outcome_chr))
-                    y[outcome_chr == event_level] <- 1
-                    y[outcome_chr == ref_level] <- 0
-                } else {
-                    y <- jmvcore::toNumeric(outcome_raw)
-                    event_level <- "1"; ref_level <- "0"
-                }
+            if (is.factor(outcome_raw) || is.character(outcome_raw)) {
+                outcome_chr <- as.character(outcome_raw)
+                levels_obs <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
+                event_level <- as.character(self$options$outcomeLevel)
+                if (is.null(event_level) || !nzchar(event_level)) event_level <- levels_obs[2]
+                ref_level <- setdiff(levels_obs, event_level)[1]
+                y <- rep(NA_real_, length(outcome_chr))
+                y[outcome_chr == event_level] <- 1
+                y[outcome_chr == ref_level] <- 0
             } else {
                 y <- jmvcore::toNumeric(outcome_raw)
-                event_level <- as.character(self$options$outcomeLevel)
+                event_level <- if (model_type == "logistic") "1" else as.character(self$options$outcomeLevel)
                 if (is.null(event_level) || !nzchar(event_level)) event_level <- "1"
                 ref_level <- "0"
             }
@@ -418,10 +462,13 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 icons[status], .("Event count"), prepared$n_events, prepared$n_nonevents))
 
             # Minimum recommended N (Riley et al. 2020)
-            min_n <- max(10 * p / min(prepared$n_events/prepared$n, 1 - prepared$n_events/prepared$n), 100)
+            event_frac <- prepared$n_events / prepared$n
+            min_denom <- min(event_frac, 1 - event_frac)
+            min_n <- if (min_denom > 0) max(10 * p / min_denom, 100) else prepared$n + 1
             status <- if (prepared$n >= min_n) "green" else "red"
+            min_n_display <- if (is.finite(min_n)) as.integer(ceiling(min_n)) else as.integer(prepared$n + 1L)
             checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>N = %d vs recommended minimum %d (Riley et al. 2020)</td></tr>",
-                icons[status], .("Minimum sample size"), prepared$n, ceiling(min_n)))
+                icons[status], .("Minimum sample size"), as.integer(prepared$n), min_n_display))
 
             html <- paste0(
                 "<h4>", .("Data Suitability Assessment"), "</h4>",
@@ -431,29 +478,20 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 "</tbody></table>")
             self$results$suitabilityReport$setContent(html)
 
-            # Surface critical issues as Notices
+            # Surface critical issues as notices (collected for HTML rendering)
             if (epv < 5) {
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'epvCritical', type = jmvcore::NoticeType$STRONG_WARNING)
-                notice$setContent(
+                private$.addNotice("STRONG_WARNING", .("Low Events Per Variable"),
                     sprintf(.('EPV = %.1f (<5): high overfitting risk. Reduce to %d or fewer predictors, or collect more data.'),
-                            epv, floor(min(prepared$n_events, prepared$n_nonevents) / 5)))
-                self$results$insert(1, notice)
+                            epv, as.integer(floor(min(prepared$n_events, prepared$n_nonevents) / 5))))
             } else if (epv < 10) {
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'epvMarginal', type = jmvcore::NoticeType$WARNING)
-                notice$setContent(
+                private$.addNotice("WARNING", .("Marginal Events Per Variable"),
                     sprintf(.('EPV = %.1f (marginal). Enable bootstrap validation to assess overfitting risk.'), epv))
-                self$results$insert(1, notice)
             }
 
-            if (prepared$n < ceiling(min_n)) {
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'sampleSizeInsufficient', type = jmvcore::NoticeType$STRONG_WARNING)
-                notice$setContent(
+            if (prepared$n < min_n) {
+                private$.addNotice("STRONG_WARNING", .("Insufficient Sample Size"),
                     sprintf(.('Sample size N=%d is below the recommended minimum of %d (Riley et al. 2020). Results may not generalize.'),
-                            prepared$n, ceiling(min_n)))
-                self$results$insert(1, notice)
+                            as.integer(prepared$n), min_n_display))
             }
         },
 
@@ -613,21 +651,15 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                         metric = metric_label, estimate = auc_val,
                         ci_lower = ci_obj[1], ci_upper = ci_obj[3], interpretation = interp))
 
-                    # Notice for poor discrimination
+                    # Notices for discrimination concerns
                     if (auc_val < 0.7) {
-                        notice <- jmvcore::Notice$new(options = self$options,
-                            name = 'poorDiscrimination', type = jmvcore::NoticeType$WARNING)
-                        notice$setContent(
+                        private$.addNotice("WARNING", .("Poor Discrimination"),
                             sprintf(.('%s = %.3f indicates poor discrimination. Consider adding more informative predictors.'),
                                     metric_label, auc_val))
-                        self$results$insert(1, notice)
                     } else if (auc_val > 0.95 && prepared$n < 100) {
-                        notice <- jmvcore::Notice$new(options = self$options,
-                            name = 'overfitRisk', type = jmvcore::NoticeType$STRONG_WARNING)
-                        notice$setContent(
+                        private$.addNotice("STRONG_WARNING", .("Possible Overfitting"),
                             sprintf(.('%s = %.3f with N=%d: likely overfitted. Enable bootstrap validation for corrected estimate.'),
                                     metric_label, auc_val, prepared$n))
-                        self$results$insert(1, notice)
                     }
                 }
             }, error = function(e) {})
@@ -783,7 +815,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 ggplot2::geom_histogram(bins = 20, alpha = 0.7, position = "identity") +
                 ggplot2::geom_vline(xintercept = md$cutoff, linetype = "dashed", color = "red", linewidth = 1) +
                 ggplot2::annotate("text", x = md$cutoff, y = Inf, vjust = 2,
-                                  label = sprintf(.("Cutoff = %d"), md$cutoff), color = "red", size = 3.5) +
+                                  label = sprintf(.("Cutoff = %.0f"), md$cutoff), color = "red", size = 3.5) +
                 ggplot2::scale_fill_manual(values = c("#2E86C1", "#E74C3C")) +
                 ggplot2::labs(title = .("Score Distribution by Outcome"),
                               x = .("Total Score"), y = .("Count"), fill = .("Outcome")) +

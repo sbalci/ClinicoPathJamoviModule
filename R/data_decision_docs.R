@@ -28,14 +28,18 @@
 #' data(decision_test)
 #' head(decision_test)
 #'
+#' \dontrun{
 #' # Evaluate diagnostic test
 #' decision(
 #'   data = decision_test,
 #'   gold = "GoldStandard",
 #'   goldPositive = "Positive",
+#'   goldNegative = "Negative",
 #'   newtest = "NewTest",
-#'   testPositive = "Positive"
+#'   testPositive = "Positive",
+#'   testNegative = "Negative"
 #' )
+#' }
 NULL
 
 #' @rdname decision_test_datasets

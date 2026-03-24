@@ -21,7 +21,7 @@ variable selection is crucial."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,6 +71,8 @@ variable selection is crucial.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">time</span>,</span>
 <span>  <span class="va">event</span>,</span>
+<span>  <span class="va">outcomeLevel</span>,</span>
+<span>  <span class="va">censorLevel</span>,</span>
 <span>  <span class="va">covariates</span>,</span>
 <span>  penalty <span class="op">=</span> <span class="st">"SCAD"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -80,7 +82,8 @@ variable selection is crucial.</p>
 <span>  standardize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  plot_path <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  plot_cv <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  variable_importance <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  variable_importance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  suitabilityCheck <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -100,6 +103,20 @@ variable selection is crucial.</p>
 <dd><p>event indicator (1=event, 0=censored)</p></dd>
 
 
+<dt id="arg-outcomelevel">outcomeLevel<a class="anchor" aria-label="anchor" href="#arg-outcomelevel"></a></dt>
+<dd><p>Level of <code>event</code> considered as the event (e.g.,
+death, recurrence). For binary factor outcomes, if left empty the second
+observed level is used; for numeric binary outcomes, the larger observed
+value is used (or 1 for 0/1 coding).</p></dd>
+
+
+<dt id="arg-censorlevel">censorLevel<a class="anchor" aria-label="anchor" href="#arg-censorlevel"></a></dt>
+<dd><p>Level of <code>event</code> considered as censored (no event).
+Together with <code>outcomeLevel</code>, this defines a strict two-level
+encoding: rows whose event value matches neither level are treated as
+missing and excluded.</p></dd>
+
+
 <dt id="arg-covariates">covariates<a class="anchor" aria-label="anchor" href="#arg-covariates"></a></dt>
 <dd><p>predictor variables for high-dimensional analysis</p></dd>
 
@@ -117,11 +134,16 @@ variable selection is crucial.</p>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Mixing parameter for elastic net (1=lasso, 0=ridge)</p></dd>
+<dd><p>Mixing parameter for elastic net (1=pure penalty, values near
+0=ridge-like). ncvreg requires alpha &gt; 0; pure ridge (alpha=0) is not
+supported.</p></dd>
 
 
 <dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
-<dd><p>SCAD gamma parameter or MCP gamma parameter</p></dd>
+<dd><p>Tuning parameter controlling concavity of the penalty. SCAD
+recommended default is 3.7 (Fan &amp; Li 2001). MCP recommended default is 3.0
+(Zhang 2010). When MCP is selected and gamma is left at 3.7, the
+MCP-recommended default of 3.0 is used automatically.</p></dd>
 
 
 <dt id="arg-standardize">standardize<a class="anchor" aria-label="anchor" href="#arg-standardize"></a></dt>
@@ -140,17 +162,24 @@ variable selection is crucial.</p>
 <dd><p>Calculate and display variable importance
 metrics</p></dd>
 
+
+<dt id="arg-suitabilitycheck">suitabilityCheck<a class="anchor" aria-label="anchor" href="#arg-suitabilitycheck"></a></dt>
+<dd><p>Run a comprehensive data suitability assessment
+before analysis. Checks sample size, events-per-variable ratio,
+multicollinearity,  and whether regularization is needed.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$model_summary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$selected_variables</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$variable_importance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cross_validation_results</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$model_comparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$convergence_info</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regularization_path</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cv_error_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$variable_selection_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$coefficient_comparison</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$model_interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$instructions</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$suitabilityReport</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$model_summary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$selected_variables</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$variable_importance</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$cross_validation_results</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$model_comparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$convergence_info</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$regularization_path</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$cv_error_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$variable_selection_plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$model_interpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$model_summary$asDF</code></p>
 <p><code>as.data.frame(results$model_summary)</code></p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">ncvregcox</span><span class="op">(</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu">ncvregcox</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">data</span>,</span></span>
 <span class="r-in"><span>    time <span class="op">=</span> <span class="st">"time"</span>,</span></span>
 <span class="r-in"><span>    event <span class="op">=</span> <span class="st">"event"</span>,</span></span>
@@ -159,107 +188,8 @@ metrics</p></dd>
 <span class="r-in"><span>    cv_folds <span class="op">=</span> <span class="fl">10</span>,</span></span>
 <span class="r-in"><span>    lambda_type <span class="op">=</span> <span class="st">"min"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in initialize(...):</span> unused arguments (options = &lt;environment&gt;, data = function (..., list = character(), package = NULL, lib.loc = NULL, verbose = getOption("verbose"), envir = .GlobalEnv, overwrite = TRUE) </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     fileExt &lt;- function(x) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         db &lt;- grepl("\\.[^.]+\\.(gz|bz2|xz)$", x)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         ans &lt;- sub(".*\\.", "", x)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         ans[db] &lt;- sub(".*\\.([^.]+\\.)(gz|bz2|xz)$", "\\1\\2", x[db])</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         ans</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     my_read_table &lt;- function(...) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         lcc &lt;- Sys.getlocale("LC_COLLATE")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         on.exit(Sys.setlocale("LC_COLLATE", lcc))</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         Sys.setlocale("LC_COLLATE", "C")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         read.table(...)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     stopifnot(is.character(list))</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     names &lt;- c(as.character(substitute(list(...))[-1]), list)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     if (!is.null(package)) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         if (!is.character(package)) stop("'package' must be a character vector or NULL")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     paths &lt;- find.package(package, lib.loc, verbose = verbose)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     if (is.null(lib.loc)) paths &lt;- c(path.package(package, TRUE), if (!length(package)) getwd(), paths)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     paths &lt;- unique(normalizePath(paths[file.exists(paths)]))</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     paths &lt;- paths[dir.exists(file.path(paths, "data"))]</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     dataExts &lt;- tools:::.make_file_exts("data")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     if (length(names) == 0) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         db &lt;- matrix(character(), nrow = 0, ncol = 4)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         for (path in paths) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             entries &lt;- NULL</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             packageName &lt;- if (file_test("-f", file.path(path, "DESCRIPTION"))) basename(path) else "."</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             if (file_test("-f", INDEX &lt;- file.path(path, "Meta", "data.rds"))) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 entries &lt;- readRDS(INDEX)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             } else {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 dataDir &lt;- file.path(path, "data")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 entries &lt;- tools::list_files_with_type(dataDir, "data")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 if (length(entries)) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   entries &lt;- unique(tools::file_path_sans_ext(basename(entries)))</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   entries &lt;- cbind(entries, "")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             if (NROW(entries)) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 if (is.matrix(entries) &amp;&amp; ncol(entries) == 2) db &lt;- rbind(db, cbind(packageName, dirname(path), entries)) else warning(gettextf("data index for package %s is invalid and will be ignored", sQuote(packageName)), domain = NA, call. = FALSE)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         colnames(db) &lt;- c("Package", "LibPath", "Item", "Title")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         footer &lt;- if (missing(package)) paste0("Use ", sQuote(paste("data(package =", ".packages(all.available = TRUE))")), "\n", "to list the data sets in all *available* packages.") else NULL</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         y &lt;- list(title = "Data sets", header = NULL, results = db, footer = footer)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         class(y) &lt;- "packageIQR"</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         return(y)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     paths &lt;- file.path(paths, "data")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     for (name in names) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         found &lt;- FALSE</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         for (p in paths) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             tmp_env &lt;- if (overwrite) envir else new.env()</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             if (file_test("-f", file.path(p, "Rdata.rds"))) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 rds &lt;- readRDS(file.path(p, "Rdata.rds"))</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 if (name %in% names(rds)) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   found &lt;- TRUE</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   if (verbose) message(sprintf("name=%s:\t found in Rdata.rds", name), domain = NA)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   objs &lt;- rds[[name]]</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   lazyLoad(file.path(p, "Rdata"), envir = tmp_env, filter = function(x) x %in% objs)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   break</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 } else if (verbose) message(sprintf("name=%s:\t NOT found in names() of Rdata.rds, i.e.,\n\t%s\n", name, paste(names(rds), collapse = ",")), domain = NA)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             files &lt;- list.files(p, full.names = TRUE)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             files &lt;- files[grep(name, files, fixed = TRUE)]</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             if (length(files) &gt; 1) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 o &lt;- match(fileExt(files), dataExts, nomatch = 100)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 paths0 &lt;- dirname(files)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 paths0 &lt;- factor(paths0, levels = unique(paths0))</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 files &lt;- files[order(paths0, o)]</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             if (length(files)) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 for (file in files) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   if (verbose) message("name=", name, ":\t file= ...", .Platform$file.sep, basename(file), "::\t", appendLF = FALSE, domain = NA)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   ext &lt;- fileExt(file)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   if (basename(file) != paste0(name, ".", ext)) found &lt;- FALSE else {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                     found &lt;- TRUE</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                     switch(ext, R = , r = {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                       library("utils")</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                       sys.source(file, chdir = TRUE, envir = tmp_env)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                     }, RData = , rdata = , rda = load(file, envir = tmp_env), TXT = , txt = , tab = , tab.gz = , tab.bz2 = , tab.xz = , txt.gz = , txt.bz2 = , txt.xz = assign(name, my_read_table(file, header = TRUE, as.is = FALSE), envir = tmp_env), CSV = , csv = , csv.gz = , csv.bz2 = , csv.xz = assign(name, my_read_table(file, header = TRUE, sep = ";", as.is = FALSE), envir = tmp_env), found &lt;- FALSE)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                   if (found) break</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 if (verbose) message(if (!found) "*NOT* ", "found", domain = NA)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             if (found) break</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         if (!found) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             warning(gettextf("data set %s not found", sQuote(name)), domain = NA)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         } else if (!overwrite) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             for (o in ls(envir = tmp_env, all.names = TRUE)) {</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>                 if (exists(o, envir = envir, inherits = FALSE)) warning(gettextf("an object named %s already exists and will not be overwritten", sQuote(o))) else assign(o, get(o, envir = tmp_env, inherits = FALSE), envir = envir)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>             rm(tmp_env)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>         }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>     invisible(names)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> })</span>
-<span class="r-in"><span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in ncvregcox(data = data, time = "time", event = "event", covariates = c("x1",     "x2", "x3"), penalty = "SCAD", cv_folds = 10, lambda_type = "min"):</span> argument "outcomeLevel" is missing, with no default</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

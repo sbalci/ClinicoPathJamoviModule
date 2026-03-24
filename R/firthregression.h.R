@@ -479,7 +479,7 @@ firthregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param suitabilityCheck Assess if data is suitable for the selected Firth
 #'   regression model.
 #' @param ciLevel Confidence level for confidence intervals. Default is 0.95
-#'   for 95\% confidence intervals.
+#'   for 95 percent confidence intervals.
 #' @param ciMethod Method for computing confidence intervals. Profile
 #'   likelihood CIs are recommended as they are more accurate, especially with
 #'   small samples and near separation. Wald CIs are faster but can be

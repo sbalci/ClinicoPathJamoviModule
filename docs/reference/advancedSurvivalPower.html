@@ -13,7 +13,7 @@ meaningful differences in survival between groups."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -163,14 +163,14 @@ consider other specialized power functions.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Example 1: Calculate required sample size for a cancer treatment study</span></span></span>
-<span class="r-in"><span><span class="co"># Detect 30\% reduction in hazard (HR=0.7) with 80\% power</span></span></span>
+<span class="r-in"><span><span class="co"># Detect 30 percent reduction in hazard (HR=0.7) with 80 percent power</span></span></span>
 <span class="r-in"><span><span class="co"># advancedSurvivalPower(</span></span></span>
 <span class="r-in"><span><span class="co">#   data = data.frame(),</span></span></span>
 <span class="r-in"><span><span class="co">#   calc_type = "sample_size",</span></span></span>
 <span class="r-in"><span><span class="co">#   hazard_ratio = 0.7,</span></span></span>
 <span class="r-in"><span><span class="co">#   power = 0.8,</span></span></span>
 <span class="r-in"><span><span class="co">#   alpha = 0.05,</span></span></span>
-<span class="r-in"><span><span class="co">#   prob_event = 0.6,          # 60\% event rate over study period</span></span></span>
+<span class="r-in"><span><span class="co">#   prob_event = 0.6,          # 60 percent event rate over study period</span></span></span>
 <span class="r-in"><span><span class="co">#   allocation_ratio = 1       # Equal allocation</span></span></span>
 <span class="r-in"><span><span class="co"># )</span></span></span>
 <span class="r-in"><span></span></span>
@@ -181,7 +181,7 @@ consider other specialized power functions.</p>
 <span class="r-in"><span><span class="co">#   hazard_ratio = 0.75,       # Modest treatment effect</span></span></span>
 <span class="r-in"><span><span class="co">#   sample_size = 300,         # Available sample size</span></span></span>
 <span class="r-in"><span><span class="co">#   alpha = 0.05,</span></span></span>
-<span class="r-in"><span><span class="co">#   prob_event = 0.4,          # 40\% event rate</span></span></span>
+<span class="r-in"><span><span class="co">#   prob_event = 0.4,          # 40 percent event rate</span></span></span>
 <span class="r-in"><span><span class="co">#   allocation_ratio = 2       # 2:1 control:treatment ratio</span></span></span>
 <span class="r-in"><span><span class="co"># )</span></span></span>
 <span class="r-in"><span></span></span>
@@ -206,7 +206,7 @@ consider other specialized power functions.</p>
 <span class="r-in"><span><span class="co">#   accrual_time = 3,          # 3 years to recruit patients</span></span></span>
 <span class="r-in"><span><span class="co">#   follow_up_time = 2,        # 2 additional years follow-up</span></span></span>
 <span class="r-in"><span><span class="co">#   median_survival = 5,       # 5 years median survival in control</span></span></span>
-<span class="r-in"><span><span class="co">#   loss_followup = 0.05       # 5\% annual loss to follow-up</span></span></span>
+<span class="r-in"><span><span class="co">#   loss_followup = 0.05       # 5 percent annual loss to follow-up</span></span></span>
 <span class="r-in"><span><span class="co"># )</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

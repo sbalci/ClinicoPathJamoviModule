@@ -90,10 +90,8 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           return()
         }
         
-        # Initialize result tables
-        private$.initializeResultTables()
       },
-      
+
       # Main analysis execution
       .run = function() {
         # Early validation
@@ -207,7 +205,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
             paste0(
               "<h3>Analysis Error</h3>",
               "<p>An error occurred during flexible parametric analysis:</p>",
-              "<pre>", htmlspecialchars(e$message), "</pre>",
+              "<pre>", gsub("<", "&lt;", gsub("&", "&amp;", e$message)), "</pre>",
               "<p>Please check your data and model specifications.</p>"
             )
           )
@@ -594,22 +592,6 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
         tvc_results
       },
       
-      # Initialize result tables
-      .initializeResultTables = function() {
-        # Initialize tables with empty structure
-        if (self$options$show_coefficients_table) {
-          self$results$coefficientsTable$setKeys(character(0))
-        }
-        
-        if (!is.null(self$options$time_varying_covariates) && 
-            length(self$options$time_varying_covariates) > 0 && 
-            self$options$show_coefficients_table) {
-          self$results$timeVaryingTable$setKeys(character(0))
-        }
-        
-        self$results$modelFit$setKeys(c("loglik", "aic", "bic", "df"))
-        self$results$splineInfo$setKeys(c("baseline", "tvc"))
-      },
       
       # Populate all result tables and summaries
       .populateResults = function(model_results, time_varying_results, data_prep) {

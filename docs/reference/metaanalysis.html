@@ -11,7 +11,7 @@ accuracy meta-analysis, and network meta-analysis."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -247,7 +247,17 @@ models</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu">metaanalysis</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    effect_size <span class="op">=</span> <span class="st">"effect"</span>,</span></span>
+<span class="r-in"><span>    variance <span class="op">=</span> <span class="st">"variance"</span>,</span></span>
+<span class="r-in"><span>    analysis_type <span class="op">=</span> <span class="st">"generic"</span>,</span></span>
+<span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"random_effects"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in metaanalysis(data, effect_size = "effect", variance = "variance",     analysis_type = "generic", model_type = "random_effects"):</span> argument "study_id" is missing, with no default</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

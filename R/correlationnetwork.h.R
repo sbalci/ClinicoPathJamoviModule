@@ -394,9 +394,6 @@ correlationnetworkResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 options=options,
                 name="interactiveNetworkPlot",
                 title="Interactive Network",
-                width=900,
-                height=700,
-                renderFun=".interactiveNetworkPlot",
                 visible="(plots && interactive)"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -463,20 +460,22 @@ correlationnetworkBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
+#' \dontrun{
 #' # Basic correlation network analysis
 #' correlationnetwork(
 #'     data = histopathology,
-#'     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "MeasurementC")
+#'     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
 #' )
 #'
 #' # With LASSO regularization and community detection
 #' correlationnetwork(
 #'     data = histopathology,
-#'     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB", "MeasurementC"),
+#'     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB"),
 #'     networkMethod = "lasso",
 #'     communityDetection = TRUE,
 #'     centralityMeasures = TRUE
 #' )
+#' }
 #'
 #' @param data The data as a data frame.
 #' @param vars A vector of strings naming the variables to include in the

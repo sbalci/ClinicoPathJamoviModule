@@ -30,7 +30,8 @@
 #' decisioncompare(data = decisioncompare_test, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "Test1",
 #'                 test1Positive = "Positive", test2 = "Test2",
-#'                 test2Positive = "Positive", ci = TRUE, statComp = TRUE)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 ci = TRUE, statComp = TRUE)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_test"
@@ -123,7 +124,8 @@
 #' decisioncompare(data = decisioncompare_screening, gold = "Biopsy",
 #'                 goldPositive = "Positive", test1 = "ScreeningTest",
 #'                 test1Positive = "Positive", test2 = "DiagnosticTest",
-#'                 test2Positive = "Positive", pp = TRUE, pprob = 0.15)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 pp = TRUE, pprob = 0.15)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_screening"
@@ -184,7 +186,8 @@
 #' decisioncompare(data = decisioncompare_indeterminate, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "Test1",
 #'                 test1Positive = "Positive", test2 = "Test2",
-#'                 test2Positive = "Positive", excludeIndeterminate = TRUE)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 excludeIndeterminate = TRUE)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_indeterminate"
@@ -213,7 +216,8 @@
 #' decisioncompare(data = decisioncompare_perfect, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "PerfectTest",
 #'                 test1Positive = "Positive", test2 = "ImperfectTest",
-#'                 test2Positive = "Positive", statComp = TRUE)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 statComp = TRUE)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_perfect"
@@ -242,7 +246,8 @@
 #' decisioncompare(data = decisioncompare_poor, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "PoorTest1",
 #'                 test1Positive = "Positive", test2 = "PoorTest2",
-#'                 test2Positive = "Positive", ci = TRUE)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 ci = TRUE)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_poor"
@@ -271,7 +276,8 @@
 #' decisioncompare(data = decisioncompare_rare, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "Test1",
 #'                 test1Positive = "Positive", test2 = "Test2",
-#'                 test2Positive = "Positive", pp = TRUE, pprob = 0.05)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 pp = TRUE, pprob = 0.05)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_rare"
@@ -300,7 +306,8 @@
 #' decisioncompare(data = decisioncompare_common, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "Test1",
 #'                 test1Positive = "Positive", test2 = "Test2",
-#'                 test2Positive = "Positive", ci = TRUE)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 ci = TRUE)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_common"
@@ -329,7 +336,8 @@
 #' decisioncompare(data = decisioncompare_identical, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "Test1",
 #'                 test1Positive = "Positive", test2 = "Test2",
-#'                 test2Positive = "Positive", statComp = TRUE)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 statComp = TRUE)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_identical"
@@ -359,7 +367,7 @@
 #' decisioncompare(data = decisioncompare_missing, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "Test1",
 #'                 test1Positive = "Positive", test2 = "Test2",
-#'                 test2Positive = "Positive")
+#'                 test2Positive = "Positive", test3Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_missing"
@@ -388,7 +396,8 @@
 #' decisioncompare(data = decisioncompare_small, gold = "GoldStandard",
 #'                 goldPositive = "Positive", test1 = "Test1",
 #'                 test1Positive = "Positive", test2 = "Test2",
-#'                 test2Positive = "Positive", ci = TRUE)
+#'                 test2Positive = "Positive", test3Positive = "",
+#'                 ci = TRUE)
 #'
 #' @source Generated test data for ClinicoPath package
 "decisioncompare_small"

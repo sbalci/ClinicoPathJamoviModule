@@ -13,7 +13,7 @@ annotations."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -182,9 +182,9 @@ correction when analyzing multiple dependent variables. IMPORTANT: This
 option does NOT automatically adjust p-values. It provides instructions for
 manual correction. When testing multiple endpoints (e.g., cholesterol,
 glucose, triglycerides), the family-wise error rate increases. For example,
-testing 3 variables at alpha=0.05 gives actual error rate of ~14\<!-- %. Select -->
-a correction method to see step-by-step instructions for manually applying
-that correction to the p-values shown in the plots.</p></dd>
+testing 3 variables at alpha=0.05 gives actual error rate of ~14 percent.
+Select a correction method to see step-by-step instructions for manually
+applying that correction to the p-values shown in the plots.</p></dd>
 
 
 <dt id="arg-plotwidth">plotwidth<a class="anchor" aria-label="anchor" href="#arg-plotwidth"></a></dt>
@@ -234,7 +234,8 @@ enabled.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Basic comparison between groups</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Basic comparison between groups</span></span></span>
 <span class="r-in"><span><span class="fu">jjbetweenstats</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">iris</span>,</span></span>
 <span class="r-in"><span>    dep <span class="op">=</span> <span class="st">"Sepal.Length"</span>,</span></span>
@@ -301,7 +302,7 @@ enabled.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Violin plot analysis comparing len by supp, grouped by dose.</span>
 <span class="r-plt img"><img src="jjbetweenstats-4.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="jjbetweenstats-5.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

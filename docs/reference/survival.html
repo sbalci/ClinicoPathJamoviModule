@@ -19,7 +19,7 @@ person-time."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,6 +109,17 @@ person-time.</p>
 <span>  rmst_tau <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  stratified_cox <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  strata_variable <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  age_adjustment <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  age_variable <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  age_interaction <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  age_stratified_cox <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  age_group_cutpoints <span class="op">=</span> <span class="st">"50, 65, 75"</span>,</span>
+<span>  age_time_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  age_standardization <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  age_standardization_method <span class="op">=</span> <span class="st">"indirect"</span>,</span>
+<span>  age_stratified_km <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  adjusted_curves <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  remark_checklist <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  residual_diagnostics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  loglog <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -351,6 +362,73 @@ regression. This variable should represent groups with different baseline
 hazards.</p></dd>
 
 
+<dt id="arg-age-adjustment">age_adjustment<a class="anchor" aria-label="anchor" href="#arg-age-adjustment"></a></dt>
+<dd><p>Enable age adjustment in Cox regression. When
+enabled, age is included as a covariate in the Cox model, providing
+age-adjusted hazard ratios. Recommended when comparing groups that may
+differ in age distribution.</p></dd>
+
+
+<dt id="arg-age-variable">age_variable<a class="anchor" aria-label="anchor" href="#arg-age-variable"></a></dt>
+<dd><p>Continuous variable representing patient age at
+diagnosis or study entry. Used as a covariate in Cox regression for age
+adjustment. Must be numeric.</p></dd>
+
+
+<dt id="arg-age-interaction">age_interaction<a class="anchor" aria-label="anchor" href="#arg-age-interaction"></a></dt>
+<dd><p>Test whether age modifies the effect of the
+explanatory variable on survival (age-group interaction). Reports the
+interaction term p-value.</p></dd>
+
+
+<dt id="arg-age-stratified-cox">age_stratified_cox<a class="anchor" aria-label="anchor" href="#arg-age-stratified-cox"></a></dt>
+<dd><p>Stratify the Cox model by age groups instead of
+adjusting as a covariate. Allows different baseline hazards for each age
+group without assuming a linear age effect.</p></dd>
+
+
+<dt id="arg-age-group-cutpoints">age_group_cutpoints<a class="anchor" aria-label="anchor" href="#arg-age-group-cutpoints"></a></dt>
+<dd><p>Comma-separated age cutpoints for creating age
+groups. For example, 50, 65, 75 creates groups less than 50, 50-64, 65-74,
+75 and above.</p></dd>
+
+
+<dt id="arg-age-time-scale">age_time_scale<a class="anchor" aria-label="anchor" href="#arg-age-time-scale"></a></dt>
+<dd><p>Use biological age as the time axis instead of
+follow-up time. The Cox model becomes Surv(age_at_entry, age_at_event,
+event). Most rigorous for cancer epidemiology where age drives risk.</p></dd>
+
+
+<dt id="arg-age-standardization">age_standardization<a class="anchor" aria-label="anchor" href="#arg-age-standardization"></a></dt>
+<dd><p>Compute age-standardized mortality using direct
+or indirect standardization. Reports Standardized Mortality Ratio comparing
+observed vs expected deaths by age group.</p></dd>
+
+
+<dt id="arg-age-standardization-method">age_standardization_method<a class="anchor" aria-label="anchor" href="#arg-age-standardization-method"></a></dt>
+<dd><p>Indirect standardization computes SMR
+(observed/expected). Direct standardization applies age-specific rates to a
+standard population.</p></dd>
+
+
+<dt id="arg-age-stratified-km">age_stratified_km<a class="anchor" aria-label="anchor" href="#arg-age-stratified-km"></a></dt>
+<dd><p>Show Kaplan-Meier survival curves stratified by
+age groups. Displays separate curves for each age group within the
+explanatory variable.</p></dd>
+
+
+<dt id="arg-adjusted-curves">adjusted_curves<a class="anchor" aria-label="anchor" href="#arg-adjusted-curves"></a></dt>
+<dd><p>Show Kaplan-Meier-style survival curves adjusted for
+age using the Cox model. Displays what the survival curves would look like
+after removing the effect of age differences between groups.</p></dd>
+
+
+<dt id="arg-remark-checklist">remark_checklist<a class="anchor" aria-label="anchor" href="#arg-remark-checklist"></a></dt>
+<dd><p>Display a REMARK (REporting recommendations for
+tumor MARKer prognostic studies) checklist showing which reporting items
+are addressed by the current analysis configuration.</p></dd>
+
+
 <dt id="arg-residual-diagnostics">residual_diagnostics<a class="anchor" aria-label="anchor" href="#arg-residual-diagnostics"></a></dt>
 <dd><p>Calculate and display Cox model residuals for
 diagnostic purposes, including Martingale, deviance, score, and Schoenfeld
@@ -496,15 +574,16 @@ samples.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$subtitle</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$medianSurvivalHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$medianSurvivalHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxRegressionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$phInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalTablesHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalTablesHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalTablesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rmstHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualDiagnosticsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalExport</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$survivalExportSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$pairwiseComparisonHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$pairwiseTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pairwiseSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$weightedLogRankTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$weightedLogRankExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot7</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$residualsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$calibrationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$calibrationGroupTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$calibrationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calibrationInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rcsTestTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rcsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$rcsInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$bootstrapValidationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$bootstrapValidationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$parametricModelComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricModelSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricDiagnostics</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$parametricSurvivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$hazardFunctionPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$extrapolationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$extrapolationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricModelsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalGlossaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalInterpretationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$copyReadySentencesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$subtitle</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$medianSurvivalHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$medianSurvivalHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$medianSurvivalExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$tCoxtext2</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$coxRegressionHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$coxRegressionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$ageAdjustedCoxHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$ageAdjustedCoxTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ageInteractionTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ageAdjustedInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$ageAdjustedExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$ageTimeScaleTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ageTimeScaleInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$ageStandardizationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ageStandardizationInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$ageStratifiedKMPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$adjustedCurvesPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$remarkChecklist</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$cox_ph</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$phInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot8</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalTablesHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTableSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalTablesHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalTablesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$personTimeTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$personTimeSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$personTimeExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rmstHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rmstSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$rmstExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualDiagnosticsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$residualsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$survivalExport</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$survivalExportSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$pairwiseComparisonHeading</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$pairwiseTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$pairwiseSummary</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$weightedLogRankTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$weightedLogRankExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot2</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot3</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plot6</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$survivalPlotsHeading3</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$survivalPlotsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$plot7</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$residualsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$outcomeredefined</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$calibrationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$calibrationGroupTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$calibrationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$calibrationInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$rcsTestTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$rcsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$rcsInterpretation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$bootstrapValidationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$bootstrapValidationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$parametricModelComparison</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricModelSummary</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricDiagnostics</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$parametricSurvivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$hazardFunctionPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$extrapolationPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$extrapolationTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$parametricModelsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalGlossaryExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clinicalInterpretationExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$copyReadySentencesExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$medianTable$asDF</code></p>
 <p><code>as.data.frame(results$medianTable)</code></p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example will be added</span></span></span>
-<span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># example will be added</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -21,7 +21,7 @@ influence event rates relative to the person-time at risk in each subgroup."></h
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -265,8 +265,8 @@ which time points or labels are shown on plots.</p></dd>
 
 
 <dt id="arg-ci-">ci95<a class="anchor" aria-label="anchor" href="#arg-ci-"></a></dt>
-<dd><p>If true, displays 95\<!-- % confidence intervals around the survival -->
-estimates on plots.</p></dd>
+<dd><p>If true, displays 95 percent confidence intervals around the
+survival estimates on plots.</p></dd>
 
 
 <dt id="arg-risktable">risktable<a class="anchor" aria-label="anchor" href="#arg-risktable"></a></dt>
@@ -404,7 +404,8 @@ visual clutter when summaries are not needed.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example 1: Basic multivariable Cox regression</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Example 1: Basic multivariable Cox regression</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">colon</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -494,7 +495,7 @@ visual clutter when summaries are not needed.</p></dd>
 <span class="r-in"><span>    rate_multiplier <span class="op">=</span> <span class="fl">1000</span>  <span class="co"># Rate per 1000 person-days</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in multisurvival(data = colon, elapsedtime = "time", outcome = "status",     outcomeLevel = "1", explanatory = "sex", contexpl = "age",     person_time = TRUE, time_intervals = "180, 365, 730", rate_multiplier = 1000):</span> argument "dod" is missing, with no default</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

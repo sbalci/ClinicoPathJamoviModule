@@ -15,7 +15,7 @@ dependencies in tissue architecture and cellular distributions."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -211,7 +211,17 @@ patterns</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu">spatialautocorrelation</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    measurement <span class="op">=</span> <span class="st">"biomarker_intensity"</span>,</span></span>
+<span class="r-in"><span>    x_coordinate <span class="op">=</span> <span class="st">"cell_x"</span>,</span></span>
+<span class="r-in"><span>    y_coordinate <span class="op">=</span> <span class="st">"cell_y"</span>,</span></span>
+<span class="r-in"><span>    autocorr_method <span class="op">=</span> <span class="st">"morans_i"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in spatialautocorrelation(data, measurement = "biomarker_intensity",     x_coordinate = "cell_x", y_coordinate = "cell_y", autocorr_method = "morans_i"):</span> argument "region_id" is missing, with no default</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

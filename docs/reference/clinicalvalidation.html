@@ -13,7 +13,7 @@ diagnostic test evaluation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.35.03</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -274,7 +274,8 @@ Rehmsmeier, 2015).</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Clinical model validation with bootstrap</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Clinical model validation with bootstrap</span></span></span>
 <span class="r-in"><span><span class="fu">clinical_validation</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">clinical_data</span>,</span></span>
 <span class="r-in"><span>    outcome <span class="op">=</span> <span class="st">"diagnosis"</span>,</span></span>
@@ -285,7 +286,7 @@ Rehmsmeier, 2015).</p></dd>
 <span class="r-in"><span>    clinical_context <span class="op">=</span> <span class="st">"diagnosis"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in clinical_validation(data = clinical_data, outcome = "diagnosis",     predictors = c("biomarker1", "biomarker2", "age", "gender"),     model_type = "logistic", validation_method = "bootstrap",     bootstrap_samples = 1000, clinical_context = "diagnosis"):</span> could not find function "clinical_validation"</span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
