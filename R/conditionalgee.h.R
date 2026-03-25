@@ -602,7 +602,7 @@ conditionalgeeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' population-average estimates of covariate effects on inter-event times.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('histopathology', package='ClinicoPath')
 #'}
 #' @param data .

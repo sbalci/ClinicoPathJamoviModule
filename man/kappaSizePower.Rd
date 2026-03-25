@@ -41,7 +41,7 @@ A results object containing:
 Power Analysis for Interobserver Agreement Analysis.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

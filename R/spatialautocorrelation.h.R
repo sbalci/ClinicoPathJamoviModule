@@ -694,7 +694,7 @@ spatialautocorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' spatialautocorrelation(
 #'     measurement = "biomarker_intensity",

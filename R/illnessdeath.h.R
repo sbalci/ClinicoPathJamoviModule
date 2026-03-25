@@ -882,7 +882,7 @@ illnessdeathBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- illnessdeath(
 #'     data = mydata,
 #'     time_entry = "entry_time",

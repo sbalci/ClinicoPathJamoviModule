@@ -102,7 +102,7 @@ Essential for studies relying on subjective classification methods
 (e.g., Ki-67 visual estimation, morphologic grading, IHC scoring).
 }
 \examples{
-\donttest{
+\dontrun{
 misclassificationbias(data = data, outcome = "survival_status",
     exposure = "tumor_grade", outcomeLevel = "dead",
     exposureLevel = "high_grade",

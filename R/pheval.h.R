@@ -498,7 +498,7 @@ phevalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' assessment and assumption verification.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Basic proportional hazards testing
 #' library(survival)
 #'

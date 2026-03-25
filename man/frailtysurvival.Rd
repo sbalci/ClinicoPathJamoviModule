@@ -97,7 +97,7 @@ Includes gamma frailty, shared frailty, and correlated frailty models
 for multi-center studies, family studies, and recurrent events.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Multi-center survival with shared frailty
 frailtysurvival(
     data = multicenter_data,

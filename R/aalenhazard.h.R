@@ -322,22 +322,26 @@ aalenhazardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="cumulativePlots",
                 title="Cumulative Regression Functions",
-                visible="(show_cumulative_plots)"))
+                visible="(show_cumulative_plots)",
+                renderFun=".renderCumulativePlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="hazardPlots",
                 title="Estimated Hazard Functions",
-                visible="(show_hazard_plots)"))
+                visible="(show_hazard_plots)",
+                renderFun=".renderHazardPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticPlots",
                 title="Model Diagnostics",
-                visible="(show_diagnostics)"))
+                visible="(show_diagnostics)",
+                renderFun=".renderDiagnosticPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="residualPlots",
                 title="Residual Analysis",
-                visible="(show_diagnostics)"))
+                visible="(show_diagnostics)",
+                renderFun=".renderResidualPlots"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -380,7 +384,7 @@ aalenhazardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' reveal how covariate effects change over time.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Basic Aalen additive hazard model
 #' library(timereg)
 #' library(survival)

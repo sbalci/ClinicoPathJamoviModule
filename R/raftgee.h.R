@@ -506,7 +506,7 @@ raftgeeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' effects in clinical research applications.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Basic rank-based AFT with GEE
 #' library(aftgee)
 #' library(survival)

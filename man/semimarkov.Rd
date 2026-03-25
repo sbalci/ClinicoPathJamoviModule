@@ -137,7 +137,7 @@ last transition rather than absolute time. Suitable for processes where the
 'clock' resets at each transition using SemiMarkov package.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

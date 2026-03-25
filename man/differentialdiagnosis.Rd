@@ -137,7 +137,7 @@ evidence-based
 clinical decision support and diagnostic accuracy optimization.
 }
 \examples{
-\donttest{
+\dontrun{
 data('histopathology', package='ClinicoPath')
 
 # Basic differential diagnosis analysis

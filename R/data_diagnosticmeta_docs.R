@@ -70,7 +70,8 @@ NULL
 #'   true_positives = "true_positives",
 #'   false_positives = "false_positives",
 #'   false_negatives = "false_negatives",
-#'   true_negatives = "true_negatives"
+#'   true_negatives = "true_negatives",
+#'   covariate = NULL
 #' )
 #'
 #' # Meta-regression with year as covariate
@@ -122,7 +123,8 @@ NULL
 #'   true_positives = "true_positives",
 #'   false_positives = "false_positives",
 #'   false_negatives = "false_negatives",
-#'   true_negatives = "true_negatives"
+#'   true_negatives = "true_negatives",
+#'   covariate = NULL
 #' )
 "diagnosticmeta_test_small"
 
@@ -211,6 +213,7 @@ NULL
 #'   false_positives = "false_positives",
 #'   false_negatives = "false_negatives",
 #'   true_negatives = "true_negatives",
+#'   covariate = NULL,
 #'   zero_cell_correction = "none"
 #' )
 #'
@@ -222,6 +225,7 @@ NULL
 #'   false_positives = "false_positives",
 #'   false_negatives = "false_negatives",
 #'   true_negatives = "true_negatives",
+#'   covariate = NULL,
 #'   zero_cell_correction = "constant"
 #' )
 "diagnosticmeta_test_zeros"
@@ -259,6 +263,10 @@ NULL
 #' # Load the data
 #' data(diagnosticmeta_test_large)
 #'
+#' # View structure
+#' str(diagnosticmeta_test_large)
+#'
+#' \dontrun{
 #' # Test performance with large dataset
 #' system.time({
 #'   result_large <- diagnosticmeta(
@@ -268,8 +276,10 @@ NULL
 #'     false_positives = "false_positives",
 #'     false_negatives = "false_negatives",
 #'     true_negatives = "true_negatives",
+#'     covariate = NULL,
 #'     bivariate_analysis = TRUE,
 #'     heterogeneity_analysis = TRUE
 #'   )
 #' })
+#' }
 "diagnosticmeta_test_large"

@@ -569,7 +569,7 @@ multistatesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: Cancer progression model
 #' # States: Diagnosis -> Remission -> Relapse -> Death
 #' #                   -> Death (direct)

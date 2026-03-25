@@ -72,7 +72,7 @@ plus molecular markers, and any scenario with two continuous diagnostic
 measurements.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- roc2d(
     data = dual_marker_data,
     marker1 = "biomarker_A",

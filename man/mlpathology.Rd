@@ -97,7 +97,7 @@ segmentation quality assessment, and statistical model comparison for AI
 validation and algorithm comparison studies.
 }
 \examples{
-\donttest{
+\dontrun{
 data('classification_results')
 
 mlpathology(data = classification_results,

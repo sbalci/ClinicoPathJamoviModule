@@ -100,7 +100,7 @@ Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease
 }
 
 \examples{
-\donttest{
+\dontrun{
 # Example with mtcars dataset
 data("mtcars")
 

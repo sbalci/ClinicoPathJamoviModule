@@ -625,7 +625,7 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage for segmented total bar charts:
 #' # Shows proportional composition within categories
 #' # Each bar totals to 100 percent with segments showing relative proportions

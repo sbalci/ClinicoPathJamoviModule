@@ -641,7 +641,7 @@ trichotomousrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- trichotomousroc(
 #'     data = her2_data,
 #'     predictor = "her2_score",

@@ -135,7 +135,7 @@ styling options. Essential  for presenting regression results in clinical
 research and epidemiological studies.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

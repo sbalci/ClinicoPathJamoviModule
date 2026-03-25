@@ -121,8 +121,12 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Linear mixed effects models with repeated measures
 }
 \examples{
-data('sleep', package='lme4')
-mixedmodelanova(data = sleep, dependent = Reaction,
+\dontrun{
+data('sleepstudy', package='lme4')
+sleepstudy$DaysFactor <- factor(ifelse(sleepstudy$Days < 5, "early", "late"))
+mixedmodelanova(data = sleepstudy, dependent = Reaction,
+                fixed_factors = DaysFactor,
                 random_factors = Subject)
+}
 
 }

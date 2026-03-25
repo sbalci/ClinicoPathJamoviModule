@@ -204,7 +204,7 @@ performance
 assessment for medical research and clinical decision support.
 }
 \examples{
-\donttest{
+\dontrun{
 # Advanced analysis with hyperparameter tuning
 tree_advanced(
     data = clinical_data,

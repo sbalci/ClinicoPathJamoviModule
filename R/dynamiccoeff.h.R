@@ -417,27 +417,32 @@ dynamiccoeffResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="dynamicPlots",
                 title="Dynamic Coefficient Evolution",
-                visible="(show_dynamic_plots)"))
+                visible="(show_dynamic_plots)",
+                renderFun=".renderDynamicPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="statePlots",
                 title="State Space Visualization",
-                visible="(show_state_plots)"))
+                visible="(show_state_plots)",
+                renderFun=".renderStatePlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticPlots",
                 title="Model Diagnostics",
-                visible="(show_diagnostic_plots)"))
+                visible="(show_diagnostic_plots)",
+                renderFun=".renderDiagnosticPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparisonPlots",
                 title="Model Comparison Plots",
-                visible="(show_comparison_plots)"))
+                visible="(show_comparison_plots)",
+                renderFun=".renderComparisonPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="adaptationPlots",
                 title="Adaptation Process",
-                visible="(show_adaptation_metrics)"))
+                visible="(show_adaptation_metrics)",
+                renderFun=".renderAdaptationPlots"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -480,7 +485,7 @@ dynamiccoeffBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' analysis.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Dynamic coefficient model with Bayesian updating
 #' library(survival)
 #' library(dlm)

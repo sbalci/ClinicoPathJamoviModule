@@ -95,7 +95,7 @@ binary and survival outcomes. Essential for demonstrating incremental value
 of new biomarkers or predictors.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage - Binary outcome:
 # ClinicoPath::reclassmetrics(
 #   data = data,

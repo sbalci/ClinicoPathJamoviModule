@@ -117,26 +117,31 @@ items:
       title: Dynamic Coefficient Evolution
       type: Image
       visible: (show_dynamic_plots)
+      renderFun: .renderDynamicPlots
 
     - name: statePlots
       title: State Space Visualization
       type: Image
       visible: (show_state_plots)
+      renderFun: .renderStatePlots
 
     - name: diagnosticPlots
       title: Model Diagnostics
       type: Image
       visible: (show_diagnostic_plots)
+      renderFun: .renderDiagnosticPlots
 
     - name: comparisonPlots
       title: Model Comparison Plots
       type: Image
       visible: (show_comparison_plots)
+      renderFun: .renderComparisonPlots
 
     - name: adaptationPlots
       title: Adaptation Process
       type: Image
       visible: (show_adaptation_metrics)
+      renderFun: .renderAdaptationPlots
 
     - name: analysisSummary
       title: Analysis Summary

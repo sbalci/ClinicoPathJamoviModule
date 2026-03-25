@@ -441,7 +441,7 @@ entropyanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example with AI prediction probabilities
 #' data <- data.frame(
 #'   true_class = factor(sample(c("A", "B", "C"), 100, replace=TRUE)),

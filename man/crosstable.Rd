@@ -70,7 +70,7 @@ analysis,
 correspondence analysis) are planned but not yet available.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage:
 # dat <- as.data.frame(your_data)
 # ClinicoPathDescriptives::crosstable(

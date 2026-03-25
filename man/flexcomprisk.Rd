@@ -108,7 +108,7 @@ techniques including spline-based hazards, time-varying effects, and
 robust prediction models with comprehensive model validation.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

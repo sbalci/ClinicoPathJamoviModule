@@ -18,7 +18,7 @@ description:
                 KRAS = c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0),
                 PIK3CA = c(1, 1, 0, 0, 1, 0, 1, 1, 0, 0)
             )
-            jjoncoplot(
+            result <- jjoncoplot(
                 data = data,
                 sampleVar = "SampleID",
                 geneVars = c("TP53", "KRAS", "PIK3CA")

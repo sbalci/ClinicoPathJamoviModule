@@ -512,7 +512,7 @@ hierarchicalpathologyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('histopathology')
 #'
 #' hierarchicalpathology(data = histopathology,

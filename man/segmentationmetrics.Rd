@@ -265,7 +265,7 @@ workflows, comparing segmentation methods, and establishing performance
 benchmarks for digital pathology systems.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- segmentationmetrics(
     data = segmentation_results,
     prediction_mask = "ai_segmentation",

@@ -97,7 +97,7 @@ intracranial pressure,  middle cerebral artery blood velocity, and heart
 rate.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

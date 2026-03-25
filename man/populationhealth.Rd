@@ -174,7 +174,7 @@ healthcare
 system optimization through evidence-based population health insights.
 }
 \examples{
-\donttest{
+\dontrun{
 data('population_health', package='ClinicoPath')
 
 # Basic population health analytics

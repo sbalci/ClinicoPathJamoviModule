@@ -680,7 +680,7 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- brierscore(
 #'     data = validation_data,
 #'     time = "follow_up_time",

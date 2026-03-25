@@ -33,7 +33,8 @@ data(nogoldstandard_imbalanced)
 nogoldstandard(data = nogoldstandard_imbalanced,
                test1 = "Sensitive_Test", test1Positive = "Positive",
                test2 = "Specific_Test", test2Positive = "Positive",
-               method = "latent_class")
+               test3Positive = "", test4Positive = "",
+               test5Positive = "", method = "composite")
 
 }
 \keyword{datasets}

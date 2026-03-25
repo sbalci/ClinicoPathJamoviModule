@@ -462,7 +462,7 @@ jiwillsurviveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' visualization options.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage:
 #' library(iwillsurvive)
 #' # Derive follow-up columns

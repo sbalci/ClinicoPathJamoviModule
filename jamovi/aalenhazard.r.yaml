@@ -99,21 +99,25 @@ items:
       title: Cumulative Regression Functions
       type: Image
       visible: (show_cumulative_plots)
+      renderFun: .renderCumulativePlots
 
     - name: hazardPlots
       title: Estimated Hazard Functions
       type: Image
       visible: (show_hazard_plots)
+      renderFun: .renderHazardPlots
 
     - name: diagnosticPlots
       title: Model Diagnostics
       type: Image
       visible: (show_diagnostics)
+      renderFun: .renderDiagnosticPlots
 
     - name: residualPlots
       title: Residual Analysis
       type: Image
       visible: (show_diagnostics)
+      renderFun: .renderResidualPlots
 
     - name: analysisSummary
       title: Analysis Summary

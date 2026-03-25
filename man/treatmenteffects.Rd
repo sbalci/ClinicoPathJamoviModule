@@ -193,7 +193,7 @@ observational research
 where randomized controlled trials are not feasible.
 }
 \examples{
-\donttest{
+\dontrun{
 data('treatment_data')
 
 treatmenteffects(

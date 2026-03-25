@@ -605,7 +605,7 @@ clinicaltrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('your_data')
 #'
 #' clinicaltrialdesign(

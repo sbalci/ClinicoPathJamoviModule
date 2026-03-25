@@ -32,7 +32,9 @@ degenerate cases.
 data(nogoldstandard_perfect)
 nogoldstandard(data = nogoldstandard_perfect,
                test1 = "Test1", test1Positive = "Positive",
-               test2 = "Test2", test2Positive = "Positive")
+               test2 = "Test2", test2Positive = "Positive",
+               test3Positive = "", test4Positive = "",
+               test5Positive = "")
 
 }
 \keyword{datasets}

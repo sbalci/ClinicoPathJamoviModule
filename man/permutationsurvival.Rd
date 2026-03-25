@@ -95,7 +95,7 @@ assumptions are violated. Includes various permutation strategies and
 multiple comparison corrections for robust survival analysis.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage will be added
 }
 }

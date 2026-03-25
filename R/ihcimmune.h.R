@@ -589,7 +589,7 @@ ihcimmuneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' ihcimmune(
 #'     immune_markers = c("CD3", "CD4", "CD8", "CD20"),

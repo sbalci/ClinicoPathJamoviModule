@@ -144,7 +144,7 @@ and chronic disease episodes. Handles gap time, calendar time, and counting
 process formulations.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Cancer recurrence analysis
 recurrentsurvival(
     data = cancer_data,

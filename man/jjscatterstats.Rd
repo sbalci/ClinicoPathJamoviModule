@@ -162,7 +162,7 @@ ggstatsplot::grouped_ggscatterstats to generate scatter plots
 with correlation analysis and optional marginal distributions.
 }
 \examples{
-\donttest{
+\dontrun{
 # Load test data
 data("mtcars")
 

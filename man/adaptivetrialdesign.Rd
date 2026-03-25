@@ -199,7 +199,7 @@ stopping rules, and group sequential designs. Designed for efficient
 clinical trial conduct with ethical early stopping capabilities.
 }
 \examples{
-\donttest{
+\dontrun{
 # Adaptive trial design with interim analysis
 adaptivetrialdesign(
     data = trial_data,

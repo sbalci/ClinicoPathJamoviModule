@@ -586,7 +586,7 @@ rpasurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' prognostic staging systems by integrating multiple predictors.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: Develop RPA staging system for survival data
 #' # Generate example survival data with multiple predictors
 #' set.seed(12345)

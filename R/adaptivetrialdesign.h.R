@@ -929,7 +929,7 @@ adaptivetrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Adaptive trial design with interim analysis
 #' adaptivetrialdesign(
 #'     data = trial_data,

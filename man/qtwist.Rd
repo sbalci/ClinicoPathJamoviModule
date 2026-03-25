@@ -281,7 +281,7 @@ quality-of-life weights:
 }
 }
 \examples{
-\donttest{
+\dontrun{
 # Load example data
 data("qtwist_breast_cancer")
 

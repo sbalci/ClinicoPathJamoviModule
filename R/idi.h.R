@@ -877,7 +877,7 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- idi(
 #'     data = mydata,
 #'     outcome = "event_indicator",

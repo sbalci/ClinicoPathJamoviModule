@@ -34,7 +34,9 @@ analysis and composite reference standard methods.
 data(nogoldstandard_test)
 nogoldstandard(data = nogoldstandard_test, test1 = "Test1",
                test1Positive = "Positive", test2 = "Test2",
-               test2Positive = "Positive", method = "latent_class")
+               test2Positive = "Positive",
+               test3Positive = "", test4Positive = "",
+               test5Positive = "", method = "composite")
 
 }
 \keyword{datasets}

@@ -451,7 +451,7 @@ firthregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Firth logistic regression
 #' firthregression(data = mydata, analysisType = "logistic",
 #'     outcome = "mortality",

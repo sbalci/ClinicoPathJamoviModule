@@ -347,9 +347,13 @@ mixedmodelanovaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Linear mixed effects models with repeated measures
 #'
 #' @examples
-#' data('sleep', package='lme4')
-#' mixedmodelanova(data = sleep, dependent = Reaction,
+#' \dontrun{
+#' data('sleepstudy', package='lme4')
+#' sleepstudy$DaysFactor <- factor(ifelse(sleepstudy$Days < 5, "early", "late"))
+#' mixedmodelanova(data = sleepstudy, dependent = Reaction,
+#'                 fixed_factors = DaysFactor,
 #'                 random_factors = Subject)
+#' }
 #'
 #' @param data the data as a data frame
 #' @param dependent the dependent variable

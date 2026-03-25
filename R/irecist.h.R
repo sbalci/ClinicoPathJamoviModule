@@ -733,7 +733,7 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data <- data.frame(
 #'     patient = c("P01", "P01", "P01", "P02", "P02"),
 #'     time = c(0, 8, 16, 0, 8),

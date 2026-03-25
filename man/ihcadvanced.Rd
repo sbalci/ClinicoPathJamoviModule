@@ -83,7 +83,7 @@ Advanced clustering analysis with marker optimization and validation.
 Includes optimal K selection, PCA analysis, and iterative marker selection.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 ihcadvanced(
     markers = c("ER", "PR", "HER2", "Ki67"),

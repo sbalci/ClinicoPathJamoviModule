@@ -98,7 +98,7 @@ Cox proportional hazards model diagnostic plots using ggcoxdiagnostics from
 survminer package for comprehensive model validation.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage:
 library(survival)
 library(survminer)

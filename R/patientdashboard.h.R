@@ -733,7 +733,7 @@ patientdashboardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('patient_monitoring', package='ClinicoPath')
 #'
 #' # Basic patient monitoring dashboard

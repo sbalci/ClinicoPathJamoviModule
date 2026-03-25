@@ -106,7 +106,7 @@ priority-based
 warnings for evidence-based clinical decision support.
 }
 \examples{
-\donttest{
+\dontrun{
 data('histopathology', package='ClinicoPath')
 
 # Basic clinical alert monitoring

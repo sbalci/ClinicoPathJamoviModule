@@ -292,7 +292,7 @@ mediansurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' median survival with handling of censored data and group comparisons.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage will be added
 #'}
 #' @param data The data as a data frame.

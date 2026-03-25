@@ -31,7 +31,8 @@ moderate but imperfect discrimination (AUC ~0.60-0.65).
 \examples{
 data(psychopdaROC_overlap)
 psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
-             classVar = "diagnosis", positiveClass = "Diseased")
+             classVar = "diagnosis", positiveClass = "Diseased",
+             refVar = "test_value")
 
 }
 \keyword{datasets}

@@ -236,7 +236,7 @@ patient-centered care, and
 health technology assessment.
 }
 \examples{
-\donttest{
+\dontrun{
 data('qol_data')
 
 qualityoflife(

@@ -167,7 +167,7 @@ treatment responses across hospitals, survey responses across demographics,
 or any metric that varies by categorical groupings.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Compare lab values across disease groups
 groupedbar(
     data = clinicalData,

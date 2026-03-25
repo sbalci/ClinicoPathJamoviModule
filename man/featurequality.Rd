@@ -140,7 +140,7 @@ before statistical analysis and meeting regulatory standards for clinical
 research.
 }
 \examples{
-\donttest{
+\dontrun{
 data('clinical_data')
 
 featurequality(

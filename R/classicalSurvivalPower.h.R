@@ -450,7 +450,7 @@ classicalSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage:
 #' library(gsDesign)
 #' # Sample size for survival study

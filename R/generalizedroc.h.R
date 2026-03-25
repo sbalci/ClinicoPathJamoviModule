@@ -520,7 +520,7 @@ generalizedrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example with continuous Ki67 percentage
 #' data <- data.frame(
 #'   outcome = factor(sample(c("Low", "High"), 100, replace=TRUE)),

@@ -430,7 +430,7 @@ conditionalinferenceBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- conditionalinference(
 #'     data = mydata,
 #'     time = "time_to_event",

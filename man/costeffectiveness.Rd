@@ -267,7 +267,7 @@ valuable for demonstrating value proposition of advanced diagnostics to
 hospital administrators, payers, and policy makers.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- costeffectiveness(
     data = diagnostic_study,
     strategy = "test_strategy",

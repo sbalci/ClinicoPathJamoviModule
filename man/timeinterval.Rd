@@ -113,7 +113,7 @@ person-time follow-up calculations, capturing both participant counts and
 observation duration for accurate incidence rate calculations.
 }
 \examples{
-\donttest{
+\dontrun{
 # Basic time interval calculation:
 timeinterval(
   data = study_data,

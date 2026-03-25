@@ -486,7 +486,7 @@ advancedimputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('clinical_trial_data')
 #'
 #' advancedimputation(

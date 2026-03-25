@@ -2371,7 +2371,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' person-time.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # example will be added
 #'}
 #' @param data The data as a data frame.

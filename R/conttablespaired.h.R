@@ -237,7 +237,7 @@ contTablesPairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' McNemar test
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' dat <- data.frame(
 #'     `1st survey` = c('Approve', 'Approve', 'Disapprove', 'Disapprove'),
 #'     `2nd survey` = c('Approve', 'Disapprove', 'Approve', 'Disapprove'),

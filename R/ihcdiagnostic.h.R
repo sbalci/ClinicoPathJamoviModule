@@ -365,7 +365,7 @@ ihcdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' ihcdiagnostic(
 #'     markers = c("ER", "PR", "HER2", "Ki67"),

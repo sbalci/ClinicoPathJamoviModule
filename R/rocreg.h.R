@@ -555,7 +555,7 @@ rocregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- rocreg(
 #'     data = multi_center_data,
 #'     predictor = "biomarker_level",

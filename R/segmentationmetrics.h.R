@@ -886,7 +886,7 @@ segmentationmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- segmentationmetrics(
 #'     data = segmentation_results,
 #'     prediction_mask = "ai_segmentation",

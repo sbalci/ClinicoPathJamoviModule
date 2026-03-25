@@ -720,7 +720,7 @@ clinicalvalidationinteractiveBase <- if (requireNamespace("jmvcore", quietly=TRU
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Interactive clinical validation with presets
 #' clinical_validation_interactive(
 #'     data = clinical_data,

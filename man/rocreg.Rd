@@ -171,7 +171,7 @@ curves. Provides both population-averaged and covariate-specific diagnostic
 accuracy estimates.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- rocreg(
     data = multi_center_data,
     predictor = "biomarker_level",

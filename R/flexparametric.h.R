@@ -492,7 +492,7 @@ flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' report templates
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage will be added
 #'}
 #' @param data The data as a data frame.

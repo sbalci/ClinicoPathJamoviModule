@@ -479,7 +479,7 @@ gradientboostingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- gradientboosting(
 #'     data = mydata,
 #'     time = "time_to_event",

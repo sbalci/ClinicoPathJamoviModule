@@ -521,7 +521,7 @@ tidydensityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example:
 #' # 1. Select distribution type (Normal, Gamma, Beta, etc.)
 #' # 2. Configure distribution parameters (mean, sd, etc.)

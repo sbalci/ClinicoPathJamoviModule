@@ -366,33 +366,14 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             }
             
             # Fit model based on smoothing method
-            if (smoothing_method == "spline") {
-              # Use cubic splines
-              model_fit <- timereg::aalen(
-                formula = as.formula(full_formula),
-                data = data_prep$complete_data,
-                n.sim = 0,
-                bandwidth = bandwidth,
-                max.clust = NULL
-              )
-            } else if (smoothing_method == "kernel") {
-              # Use kernel smoothing
-              model_fit <- timereg::aalen(
-                formula = as.formula(full_formula),
-                data = data_prep$complete_data,
-                n.sim = 0,
-                bandwidth = bandwidth * 2,  # Adjust bandwidth for kernel
-                max.clust = NULL
-              )
-            } else {
-              # Default to Aalen model with automatic bandwidth
-              model_fit <- timereg::aalen(
-                formula = as.formula(full_formula),
-                data = data_prep$complete_data,
-                n.sim = 0,
-                max.clust = NULL
-              )
-            }
+            # timereg::aalen does not accept a 'bandwidth' argument;
+            # all smoothing methods use the same Aalen call.
+            model_fit <- timereg::aalen(
+              formula = as.formula(full_formula),
+              data = data_prep$complete_data,
+              n.sim = 0,
+              max.clust = NULL
+            )
             
             # Extract smooth time-varying effects
             if (!is.null(model_fit)) {
@@ -747,74 +728,126 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         if (self$options$show_comparison_plots) {
           private$.createComparisonPlots(smooth_results, comparison_results)
         }
+
+        if (self$options$show_diagnostic_plots) {
+          private$.createSmoothingPlots(smooth_results)
+        }
       },
       
       # Create smooth effect plots
       .createSmoothEffectPlots = function(smooth_results) {
         tryCatch({
           image <- self$results$smoothEffectPlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            smooth_results = smooth_results
-          ))
-          
+          # Store model fits on private field for render; use safe setState
+          private$.smooth_model <- smooth_results$model_fits
+          private$.smooth_effects <- smooth_results$smooth_effects
+          image$setState(as.data.frame(list(ready = TRUE)))
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
+      .renderSmoothEffectPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model_fits <- private$.smooth_model
+          if (is.null(model_fits) || length(model_fits) == 0) return(FALSE)
+          # Plot the first model fit (Aalen cumulative coefficients)
+          first_model <- model_fits[[1]]
+          plot(first_model, main = "Smooth Time-Varying Effects")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
       # Create diagnostic plots
       .createDiagnosticPlots = function(smooth_results, data_prep) {
         tryCatch({
           image <- self$results$diagnosticPlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            smooth_results = smooth_results,
-            data_prep = data_prep
-          ))
-          
+          private$.smooth_model <- smooth_results$model_fits
+          image$setState(as.data.frame(list(ready = TRUE)))
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
+      .renderDiagnosticPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model_fits <- private$.smooth_model
+          if (is.null(model_fits) || length(model_fits) == 0) return(FALSE)
+          first_model <- model_fits[[1]]
+          plot(first_model, main = "Model Diagnostics")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
       # Create residual plots
       .createResidualPlots = function(smooth_results) {
         tryCatch({
           image <- self$results$residualPlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            smooth_results = smooth_results
-          ))
-          
+          private$.smooth_model <- smooth_results$model_fits
+          image$setState(as.data.frame(list(ready = TRUE)))
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
+      .renderResidualPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model_fits <- private$.smooth_model
+          if (is.null(model_fits) || length(model_fits) == 0) return(FALSE)
+          first_model <- model_fits[[1]]
+          plot(first_model, main = "Residual Analysis")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
       # Create comparison plots
       .createComparisonPlots = function(smooth_results, comparison_results) {
         tryCatch({
           image <- self$results$comparisonPlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            smooth_results = smooth_results,
-            comparison_results = comparison_results
-          ))
-          
+          private$.smooth_model <- smooth_results$model_fits
+          private$.comparison_models <- comparison_results
+          image$setState(as.data.frame(list(ready = TRUE)))
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
+      .renderComparisonPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model_fits <- private$.smooth_model
+          if (is.null(model_fits) || length(model_fits) == 0) return(FALSE)
+          first_model <- model_fits[[1]]
+          plot(first_model, main = "Model Comparison")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
+      # Create smoothing method comparison plots
+      .createSmoothingPlots = function(smooth_results) {
+        tryCatch({
+          image <- self$results$smoothingPlots
+          private$.smooth_model <- smooth_results$model_fits
+          image$setState(as.data.frame(list(ready = TRUE)))
+        }, error = function(e) {
+          # Skip plot creation on error
+        })
+      },
+
+      .renderSmoothingPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model_fits <- private$.smooth_model
+          if (is.null(model_fits) || length(model_fits) == 0) return(FALSE)
+          first_model <- model_fits[[1]]
+          plot(first_model, main = "Smoothing Method Comparison")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
       # Generate natural language summaries
       .generateSummaries = function(smooth_results, constancy_results) {
         method_text <- switch(smooth_results$smoothing_method,

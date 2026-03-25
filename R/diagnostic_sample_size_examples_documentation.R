@@ -89,9 +89,9 @@
 #' # Scenario 1: Colorectal cancer screening
 #' colorectal <- diagnostic_sample_size_examples[1, ]
 #' cat("Scenario:", colorectal$scenario, "\n")
-#' cat("Prevalence:", colorectal$prevalence * 100, "%\n")
+#' cat("Prevalence:", colorectal$prevalence * 100, "percent\n")
 #' cat("Required N:", colorectal$final_n, "\n")
-#' cat("Adjusted N (20% non-response):", colorectal$final_n_adjusted, "\n")
+#' cat("Adjusted N (20 percent non-response):", colorectal$final_n_adjusted, "\n")
 #'
 #' # Demonstrate impact of prevalence on sample size
 #' prevalence_impact <- diagnostic_sample_size_examples[, c("scenario", "prevalence", "final_n")]
@@ -157,9 +157,9 @@
 #' # View all test cases
 #' print(bujang_table2_validation)
 #'
-#' # Test case: Low prevalence (5%), high targets (95%), narrow CI (0.10)
+#' # Test case: Low prevalence (5 percent), high targets (95 percent), narrow CI (0.10)
 #' test1 <- bujang_table2_validation[1, ]
-#' cat("Prevalence:", test1$prevalence * 100, "%\n")
+#' cat("Prevalence:", test1$prevalence * 100, "percent\n")
 #' cat("Targets: Sens =", test1$sensitivity, ", Spec =", test1$specificity, "\n")
 #' cat("Expected total N:", test1$n_total_expected, "\n")
 #'
@@ -167,10 +167,10 @@
 #' low_prev <- bujang_table2_validation[bujang_table2_validation$prevalence == 0.05, ]
 #' high_prev <- bujang_table2_validation[bujang_table2_validation$prevalence == 0.90, ]
 #'
-#' cat("\nLow prevalence (5%) scenarios:\n")
+#' cat("\nLow prevalence (5 percent) scenarios:\n")
 #' print(low_prev[, c("sensitivity", "specificity", "ci_width", "n_total_expected")])
 #'
-#' cat("\nHigh prevalence (90%) scenarios:\n")
+#' cat("\nHigh prevalence (90 percent) scenarios:\n")
 #' print(high_prev[, c("sensitivity", "specificity", "ci_width", "n_total_expected")])
 #'
 #' @keywords datasets

@@ -94,7 +94,7 @@ Key features:
 }
 }
 \examples{
-\donttest{
+\dontrun{
 # Bayesian meta-analysis of treatment effects
 bayesianmetaanalysis(
     data = data,

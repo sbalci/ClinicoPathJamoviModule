@@ -64,9 +64,9 @@ data(bujang_table2_validation)
 # View all test cases
 print(bujang_table2_validation)
 
-# Test case: Low prevalence (5\%), high targets (95\%), narrow CI (0.10)
+# Test case: Low prevalence (5 percent), high targets (95 percent), narrow CI (0.10)
 test1 <- bujang_table2_validation[1, ]
-cat("Prevalence:", test1$prevalence * 100, "\%\n")
+cat("Prevalence:", test1$prevalence * 100, "percent\n")
 cat("Targets: Sens =", test1$sensitivity, ", Spec =", test1$specificity, "\n")
 cat("Expected total N:", test1$n_total_expected, "\n")
 
@@ -74,10 +74,10 @@ cat("Expected total N:", test1$n_total_expected, "\n")
 low_prev <- bujang_table2_validation[bujang_table2_validation$prevalence == 0.05, ]
 high_prev <- bujang_table2_validation[bujang_table2_validation$prevalence == 0.90, ]
 
-cat("\nLow prevalence (5\%) scenarios:\n")
+cat("\nLow prevalence (5 percent) scenarios:\n")
 print(low_prev[, c("sensitivity", "specificity", "ci_width", "n_total_expected")])
 
-cat("\nHigh prevalence (90\%) scenarios:\n")
+cat("\nHigh prevalence (90 percent) scenarios:\n")
 print(high_prev[, c("sensitivity", "specificity", "ci_width", "n_total_expected")])
 
 }

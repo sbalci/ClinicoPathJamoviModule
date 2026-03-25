@@ -390,7 +390,7 @@ screeningcalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # COVID-19 rapid test in community screening (low prevalence)
 #' # Sensitivity: 85 percent, Specificity: 95 percent, Prevalence: 2 percent
 #' data(screening_examples)

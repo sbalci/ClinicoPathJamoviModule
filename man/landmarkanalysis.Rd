@@ -81,7 +81,7 @@ Provides unbiased estimates by analyzing survival from fixed landmark
 times.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage
 landmarkanalysis(
     data = survival_data,

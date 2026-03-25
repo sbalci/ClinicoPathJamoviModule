@@ -30,7 +30,8 @@ Tests ability to handle perfect discrimination scenarios.
 \examples{
 data(psychopdaROC_perfect)
 psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
-             classVar = "condition", positiveClass = "Positive")
+             classVar = "condition", positiveClass = "Positive",
+             refVar = "perfect_test")
 
 }
 \keyword{datasets}

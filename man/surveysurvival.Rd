@@ -173,7 +173,7 @@ standard errors and confidence intervals, enabling proper population-level
 survival estimates from survey data.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example 1: Basic survey-weighted Kaplan-Meier
 library(survival)
 library(survey)

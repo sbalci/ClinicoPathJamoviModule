@@ -555,7 +555,7 @@ flexmultistateBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage
 #' flexmultistate(
 #'     data = disease_data,

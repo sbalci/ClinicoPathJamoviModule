@@ -99,7 +99,7 @@ survival probability at specific time points and RMST with standard
 statistical methods.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: RMST regression with covariates
 pseudosurvival(
     data = cancer_data,

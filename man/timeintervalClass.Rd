@@ -29,6 +29,7 @@ follow-up times (NA values) are implicitly excluded from the "at-risk" cohort be
 eligibility for landmark criteria cannot be determined.
 }
 \examples{
+\dontrun{
 # Basic time interval calculation:
 timeinterval(
   data = study_data,
@@ -47,6 +48,7 @@ timeinterval(
   landmark_time = 6,
   output_unit = "months"
 )
+}
 
 }
 \section{Super classes}{

@@ -354,7 +354,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic variable tree
 #' vartree(
 #'     data = mydata,

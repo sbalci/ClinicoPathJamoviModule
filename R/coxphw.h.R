@@ -541,7 +541,7 @@ coxphwBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' intervals in challenging clinical research scenarios.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: Weighted Cox regression for rare events
 #' library(survival)
 #' library(coxphw)

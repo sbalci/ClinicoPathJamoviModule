@@ -302,7 +302,7 @@ jvisrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' with sensible defaults based on graphical principles.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage:
 #' library(visR)
 #' # Kaplan-Meier estimation

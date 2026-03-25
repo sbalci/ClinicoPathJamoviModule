@@ -130,7 +130,7 @@ Performs Lasso-penalized Cox regression for variable selection in survival
 analysis.
 }
 \examples{
-\donttest{
+\dontrun{
 lassocox(data = data, elapsedtime = "Time", outcome = "Status",
     outcomeLevel = "1", explanatory = vars(age, stage, grade))
 }

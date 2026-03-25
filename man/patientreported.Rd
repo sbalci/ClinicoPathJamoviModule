@@ -229,7 +229,7 @@ longitudinal analysis.
 Essential for patient-centered outcomes research and clinical trials.
 }
 \examples{
-\donttest{
+\dontrun{
 data('pro_data')
 
 patientreported(

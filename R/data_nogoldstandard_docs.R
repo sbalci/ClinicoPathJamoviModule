@@ -29,7 +29,9 @@
 #' data(nogoldstandard_test)
 #' nogoldstandard(data = nogoldstandard_test, test1 = "Test1",
 #'                test1Positive = "Positive", test2 = "Test2",
-#'                test2Positive = "Positive", method = "latent_class")
+#'                test2Positive = "Positive",
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "", method = "composite")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_test"
@@ -62,6 +64,7 @@
 #'                test1 = "Pathologist1", test1Positive = "Malignant",
 #'                test2 = "Pathologist2", test2Positive = "Malignant",
 #'                test3 = "Pathologist3", test3Positive = "Malignant",
+#'                test4Positive = "", test5Positive = "",
 #'                clinicalPreset = "pathology_agreement")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -96,6 +99,7 @@
 #'                test2 = "HE4", test2Positive = "Elevated",
 #'                test3 = "CEA", test3Positive = "Elevated",
 #'                test4 = "AFP", test4Positive = "Elevated",
+#'                test5Positive = "",
 #'                clinicalPreset = "tumor_markers")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -161,7 +165,8 @@
 #' nogoldstandard(data = nogoldstandard_highagreement,
 #'                test1 = "Test1", test1Positive = "Positive",
 #'                test2 = "Test2", test2Positive = "Positive",
-#'                method = "latent_class")
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "", method = "composite")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_highagreement"
@@ -188,7 +193,9 @@
 #' data(nogoldstandard_lowagreement)
 #' nogoldstandard(data = nogoldstandard_lowagreement,
 #'                test1 = "Test1", test1Positive = "Positive",
-#'                test2 = "Test2", test2Positive = "Positive")
+#'                test2 = "Test2", test2Positive = "Positive",
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_lowagreement"
@@ -216,7 +223,9 @@
 #' data(nogoldstandard_perfect)
 #' nogoldstandard(data = nogoldstandard_perfect,
 #'                test1 = "Test1", test1Positive = "Positive",
-#'                test2 = "Test2", test2Positive = "Positive")
+#'                test2 = "Test2", test2Positive = "Positive",
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_perfect"
@@ -245,7 +254,8 @@
 #' nogoldstandard(data = nogoldstandard_rare,
 #'                test1 = "Test1", test1Positive = "Positive",
 #'                test2 = "Test2", test2Positive = "Positive",
-#'                test3 = "Test3", test3Positive = "Positive")
+#'                test3 = "Test3", test3Positive = "Positive",
+#'                test4Positive = "", test5Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_rare"
@@ -272,7 +282,9 @@
 #' data(nogoldstandard_common)
 #' nogoldstandard(data = nogoldstandard_common,
 #'                test1 = "Test1", test1Positive = "Positive",
-#'                test2 = "Test2", test2Positive = "Positive")
+#'                test2 = "Test2", test2Positive = "Positive",
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_common"
@@ -301,7 +313,9 @@
 #' \dontrun{
 #' nogoldstandard(data = nogoldstandard_allpositive,
 #'                test1 = "Test1", test1Positive = "Positive",
-#'                test2 = "Test2", test2Positive = "Positive")
+#'                test2 = "Test2", test2Positive = "Positive",
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "")
 #' }
 #'
 #' @source Generated test data for ClinicoPath package
@@ -331,7 +345,9 @@
 #' \dontrun{
 #' nogoldstandard(data = nogoldstandard_allnegative,
 #'                test1 = "Test1", test1Positive = "Positive",
-#'                test2 = "Test2", test2Positive = "Positive")
+#'                test2 = "Test2", test2Positive = "Positive",
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "")
 #' }
 #'
 #' @source Generated test data for ClinicoPath package
@@ -361,7 +377,8 @@
 #' nogoldstandard(data = nogoldstandard_imbalanced,
 #'                test1 = "Sensitive_Test", test1Positive = "Positive",
 #'                test2 = "Specific_Test", test2Positive = "Positive",
-#'                method = "latent_class")
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "", method = "composite")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_imbalanced"
@@ -392,6 +409,7 @@
 #'                test1 = "New_Test", test1Positive = "Positive",
 #'                test2 = "Reference1", test2Positive = "Positive",
 #'                test3 = "Reference2", test3Positive = "Positive",
+#'                test4Positive = "", test5Positive = "",
 #'                clinicalPreset = "diagnostic_validation")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -421,7 +439,8 @@
 #' nogoldstandard(data = nogoldstandard_missing,
 #'                test1 = "Test1", test1Positive = "Positive",
 #'                test2 = "Test2", test2Positive = "Positive",
-#'                test3 = "Test3", test3Positive = "Positive")
+#'                test3 = "Test3", test3Positive = "Positive",
+#'                test4Positive = "", test5Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_missing"
@@ -448,7 +467,9 @@
 #' data(nogoldstandard_small)
 #' nogoldstandard(data = nogoldstandard_small,
 #'                test1 = "Test1", test1Positive = "Positive",
-#'                test2 = "Test2", test2Positive = "Positive")
+#'                test2 = "Test2", test2Positive = "Positive",
+#'                test3Positive = "", test4Positive = "",
+#'                test5Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_small"
@@ -480,7 +501,8 @@
 #' nogoldstandard(data = nogoldstandard_large,
 #'                test1 = "Test1", test1Positive = "Positive",
 #'                test2 = "Test2", test2Positive = "Positive",
-#'                test3 = "Test3", test3Positive = "Positive")
+#'                test3 = "Test3", test3Positive = "Positive",
+#'                test4Positive = "", test5Positive = "")
 #'
 #' @source Generated test data for ClinicoPath package
 "nogoldstandard_large"

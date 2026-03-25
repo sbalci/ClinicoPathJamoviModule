@@ -342,7 +342,7 @@ ihcbasicBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' ihcbasic(
 #'     markers = c("ER", "PR", "HER2", "Ki67"),

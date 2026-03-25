@@ -891,7 +891,7 @@ bayesianmaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Bayesian Model Averaging for survival analysis
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' bayesianma(data = histopathology,

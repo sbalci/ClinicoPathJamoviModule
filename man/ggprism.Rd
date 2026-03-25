@@ -145,7 +145,7 @@ curves
 with seamless ggplot2 integration and Prism-style aesthetics.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Load your data frame with continuous and categorical variables.
 # 2. Select variables for X and Y axes.

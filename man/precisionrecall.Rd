@@ -84,7 +84,7 @@ Informative than the ROC Plot When Evaluating Binary Classifiers on
 Imbalanced Datasets." PLoS ONE 10(3): e0118432.
 }
 \examples{
-\donttest{
+\dontrun{
 # Basic PRC curve
 precisionrecall(data = mydata, outcome = 'disease', score = 'biomarker')
 

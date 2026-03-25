@@ -80,7 +80,7 @@ studies to test for  changes in treatment response or diagnostic agreement
 across multiple time points.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 cochranq(
     variables = c("baseline", "month1", "month3", "month6"),

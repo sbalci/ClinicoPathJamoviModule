@@ -470,7 +470,7 @@ missingdataexplorerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('clinical_data')
 #'
 #' missingdataexplorer(

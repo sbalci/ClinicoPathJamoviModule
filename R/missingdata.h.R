@@ -357,7 +357,7 @@ missingdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example:
 #' # 1. Select variables for missing data analysis
 #' # 2. Explore missing data patterns and correlations

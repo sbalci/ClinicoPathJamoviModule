@@ -530,7 +530,7 @@ condsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' condsurvival(
 #'     time = "time_variable",

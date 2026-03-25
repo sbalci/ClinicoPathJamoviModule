@@ -146,7 +146,7 @@ validation frameworks.
 Essential for developing reliable prognostic models.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Cox model validation
 survivalmodelvalidation(
     data = clinical_data,

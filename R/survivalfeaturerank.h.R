@@ -506,7 +506,7 @@ survivalfeaturerankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' building multivariable models.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Basic feature ranking
 #' library(survival)
 #' data(colon)

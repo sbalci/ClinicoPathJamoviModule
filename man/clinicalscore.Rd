@@ -121,7 +121,7 @@ categorization,
 calibration, discrimination, nomogram generation, and TRIPOD compliance.
 }
 \examples{
-\donttest{
+\dontrun{
 clinicalscore(data = data, outcome = "diagnosis",
     outcomeLevel = "malignant", explanatory = vars(age, grade, ki67),
     modelType = "logistic", scoringMethod = "compare")

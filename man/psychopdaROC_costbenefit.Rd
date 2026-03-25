@@ -33,6 +33,7 @@ Enables cost-ratio optimal cutpoint method.
 data(psychopdaROC_costbenefit)
 psychopdaROC(data = psychopdaROC_costbenefit, dependentVars = "risk_score",
              classVar = "outcome", positiveClass = "Event",
+             refVar = "risk_score",
              method = "oc_cost_ratio")
 
 }

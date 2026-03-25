@@ -150,7 +150,7 @@ analysis,
 distribution comparison, and statistical education in clinical research.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Select distribution type (Normal, Gamma, Beta, etc.)
 # 2. Configure distribution parameters (mean, sd, etc.)

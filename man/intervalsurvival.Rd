@@ -105,7 +105,7 @@ is unknown but falls within an interval. Common in periodic follow-up
 studies, screening programs, and clinical trials with scheduled visits.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Tumor progression between visits
 intervalsurvival(
     data = oncology_data,

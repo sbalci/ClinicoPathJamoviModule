@@ -196,7 +196,13 @@
       "Bash(Rscript -e 'parse\\(file=\"\"R/flexrstpm2.b.R\"\"\\)')",
       "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/aalenhazard.b.R\"\"\"\"\\)')",
       "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/smoothtimevary.b.R\"\"\"\"\\)')",
-      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/flexrstpm2.b.R\"\"\"\"\\)')"
+      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/flexrstpm2.b.R\"\"\"\"\\)')",
+      "Bash(grep -l \"data\\(.*package\\\\s*=\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/*.a.yaml)",
+      "Bash(grep \"data\\(.*package\\\\s*=\" /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/*.a.yaml)",
+      "Bash(Rscript -e 'roxygen2::roxygenise\\(\\)')",
+      "Bash(do echo:*)",
+      "Bash(Rscript -e \"tryCatch\\(parse\\(''''$f''''\\), error = function\\(e\\) cat\\(''''PARSE ERROR:'''', e$message, ''''\\\\n''''\\)\\); cat\\(''''OK\\\\n''''\\)\")",
+      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/dynamiccoeff.b.R\"\"\"\"\\)')"
     ],
     "deny": [],
     "ask": [],

@@ -179,7 +179,7 @@ distribution plots,
 before-after comparisons, and factorial designs with professional styling.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Scientific scatter plot with error bars
 data(clinical_data)
 grafify(

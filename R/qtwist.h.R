@@ -1048,7 +1048,7 @@ qtwistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Load example data
 #' data("qtwist_breast_cancer")
 #'

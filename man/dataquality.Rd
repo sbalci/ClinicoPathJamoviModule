@@ -74,7 +74,7 @@ missing value analysis, and data completeness summary (similar to sumvar's
 dup() function).
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Load your data frame.
 # 2. Select variables to check for data quality issues.

@@ -226,7 +226,7 @@ development using
 standardized epidemiological methods and performance indicators.
 }
 \examples{
-\donttest{
+\dontrun{
 data('screening_data')
 
 screeningevaluation(

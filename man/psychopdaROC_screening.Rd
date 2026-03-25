@@ -37,6 +37,7 @@ data(psychopdaROC_screening)
 psychopdaROC(data = psychopdaROC_screening,
              dependentVars = c("psa_level", "ca125"),
              classVar = "cancer", positiveClass = "Cancer",
+             refVar = "psa_level",
              clinicalPreset = "screening")
 
 }

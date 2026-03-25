@@ -272,7 +272,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' overlays.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic line chart
 #' linechart(
 #'     data = clinical_data,

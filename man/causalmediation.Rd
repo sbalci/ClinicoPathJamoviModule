@@ -134,7 +134,7 @@ Applications: Understanding pathways in cancer biology, clinical trials,
 epidemiology, and precision medicine research.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Basic mediation
 causalmediation(
     data = mydata,

@@ -236,7 +236,7 @@ cardiovascular, oncology, and other clinical domains where risk
 stratification drives treatment decisions.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- netreclassification(
     data = mydata,
     outcome = "event_indicator",

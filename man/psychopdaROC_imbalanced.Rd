@@ -30,7 +30,8 @@ values over sensitivity/specificity.
 \examples{
 data(psychopdaROC_imbalanced)
 psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
-             classVar = "rare_outcome", positiveClass = "Event")
+             classVar = "rare_outcome", positiveClass = "Event",
+             refVar = "predictor")
 
 }
 \keyword{datasets}

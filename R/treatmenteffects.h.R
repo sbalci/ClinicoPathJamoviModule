@@ -903,7 +903,7 @@ treatmenteffectsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('treatment_data')
 #'
 #' treatmenteffects(

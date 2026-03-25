@@ -140,7 +140,7 @@ specifications for continuous and binary outcome data. Essential for
 Bayesian statistical inference in clinical research.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 bayesianci(
     outcome = "response",

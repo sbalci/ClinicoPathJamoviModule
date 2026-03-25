@@ -392,7 +392,7 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="tmbTable",
                 title="Per-sample Mutation Burden",
                 rows=0,
-                visible="(showTMB && showTMBTable)",
+                visible="(showTMBTable)",
                 clearWith=list(
                     "geneVars",
                     "sampleVar",
@@ -540,14 +540,14 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' across genes and samples with optional clinical annotations.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data <- data.frame(
 #'     SampleID = paste0("S", 1:10),
 #'     TP53 = c(1, 0, 1, 0, 1, 0, 0, 1, 0, 1),
 #'     KRAS = c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0),
 #'     PIK3CA = c(1, 1, 0, 0, 1, 0, 1, 1, 0, 0)
 #' )
-#' jjoncoplot(
+#' result <- jjoncoplot(
 #'     data = data,
 #'     sampleVar = "SampleID",
 #'     geneVars = c("TP53", "KRAS", "PIK3CA")

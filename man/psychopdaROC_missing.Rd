@@ -33,7 +33,8 @@ with appropriate warnings or exclusions.
 data(psychopdaROC_missing)
 psychopdaROC(data = psychopdaROC_missing,
              dependentVars = c("test_a", "test_b"),
-             classVar = "diagnosis")
+             classVar = "diagnosis", positiveClass = "Disease",
+             refVar = "test_a")
 
 }
 \keyword{datasets}

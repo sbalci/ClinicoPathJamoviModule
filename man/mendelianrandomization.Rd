@@ -150,7 +150,7 @@ Applications: Genetic epidemiology, drug target validation, causal
 inference in observational studies.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Analyze effect of BMI on coronary disease
 mendelianrandomization(
     exposure_data = bmi_gwas,

@@ -341,7 +341,7 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example with pcaloadingtest_data (simulated dataset with known structure)
 #' data("pcaloadingtest_data")
 #'

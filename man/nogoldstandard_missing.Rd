@@ -33,7 +33,8 @@ data(nogoldstandard_missing)
 nogoldstandard(data = nogoldstandard_missing,
                test1 = "Test1", test1Positive = "Positive",
                test2 = "Test2", test2Positive = "Positive",
-               test3 = "Test3", test3Positive = "Positive")
+               test3 = "Test3", test3Positive = "Positive",
+               test4Positive = "", test5Positive = "")
 
 }
 \keyword{datasets}

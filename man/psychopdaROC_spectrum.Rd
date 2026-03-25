@@ -31,7 +31,8 @@ treats Mild as Negative, Moderate/Severe as Positive.
 \examples{
 data(psychopdaROC_spectrum)
 psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
-             classVar = "binary_status", positiveClass = "Positive")
+             classVar = "binary_status", positiveClass = "Positive",
+             refVar = "continuous_marker")
 
 }
 \keyword{datasets}

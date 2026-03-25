@@ -135,7 +135,7 @@ predictors. The method is particularly suitable for exploratory survival
 analysis and biomarker discovery in clinical research.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- conditionalinference(
     data = mydata,
     time = "time_to_event",

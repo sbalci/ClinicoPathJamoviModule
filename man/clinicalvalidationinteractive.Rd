@@ -155,7 +155,7 @@ parameter correction, clinical scenario presets, and dynamic threshold
 optimization for medical research and diagnostic applications.
 }
 \examples{
-\donttest{
+\dontrun{
 # Interactive clinical validation with presets
 clinical_validation_interactive(
     data = clinical_data,

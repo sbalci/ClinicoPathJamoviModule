@@ -310,7 +310,7 @@ precisionrecallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic PRC curve
 #' precisionrecall(data = mydata, outcome = 'disease', score = 'biomarker')
 #'

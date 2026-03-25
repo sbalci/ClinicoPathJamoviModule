@@ -414,7 +414,7 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Load example dataset
 #' data(histopathology)
 #'

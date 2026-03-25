@@ -606,7 +606,7 @@ grafifyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: Scientific scatter plot with error bars
 #' data(clinical_data)
 #' grafify(

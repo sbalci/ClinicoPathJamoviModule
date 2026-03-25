@@ -825,7 +825,7 @@ comprehensiveSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE))
 #' regulatory submissions.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Standard log-rank test power calculation
 #' comprehensiveSurvivalPower(
 #'     method_category = "standard",

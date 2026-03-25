@@ -137,7 +137,7 @@ interpretation of parameters • Comprehensive diagnostic plots • Copy-ready
 report templates
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage will be added
 }
 }

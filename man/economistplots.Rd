@@ -139,7 +139,7 @@ comparing distributions across categories, showing price variations, or
 visualizing any statistical distribution data in clinical research.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage:
 # 1. Select continuous variable for distribution analysis
 # 2. Choose grouping variable for comparison

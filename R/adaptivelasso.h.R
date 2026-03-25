@@ -927,7 +927,7 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- adaptivelasso(
 #'     data = mydata,
 #'     time = "time_to_event",

@@ -365,7 +365,7 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic social network visualization
 #' data(jjarcdiagram_social_network, package = "ClinicoPath")
 #' jjarcdiagram(

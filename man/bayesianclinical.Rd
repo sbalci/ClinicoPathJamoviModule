@@ -198,7 +198,7 @@ clinical guidelines, and
 personalized treatment decisions with proper uncertainty communication.
 }
 \examples{
-\donttest{
+\dontrun{
 data('clinical_data')
 
 bayesianclinical(

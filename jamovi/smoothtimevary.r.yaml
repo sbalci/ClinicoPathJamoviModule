@@ -114,26 +114,31 @@ items:
       title: Smooth Time-Varying Effects
       type: Image
       visible: (show_smooth_plots)
+      renderFun: .renderSmoothEffectPlots
 
     - name: diagnosticPlots
       title: Model Diagnostics
       type: Image
       visible: (show_diagnostic_plots)
+      renderFun: .renderDiagnosticPlots
 
     - name: residualPlots
       title: Residual Analysis
       type: Image
       visible: (residual_analysis && show_diagnostic_plots)
+      renderFun: .renderResidualPlots
 
     - name: comparisonPlots
       title: Model Comparison Plots
       type: Image
       visible: (show_comparison_plots)
+      renderFun: .renderComparisonPlots
 
     - name: smoothingPlots
       title: Smoothing Method Comparison
       type: Image
       visible: (show_diagnostic_plots)
+      renderFun: .renderSmoothingPlots
 
     - name: analysisSummary
       title: Analysis Summary

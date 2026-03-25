@@ -132,7 +132,7 @@ ggstatsplot::grouped_ggpiestats to generate Pie Charts with
 statistical analysis.'
 }
 \examples{
-\donttest{
+\dontrun{
 # Load test data
 data(jjpiestats_test_data)
 

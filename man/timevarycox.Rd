@@ -73,7 +73,7 @@ follow-up,  which is essential for modeling dynamic clinical variables such
 as treatment  changes, biomarker levels, or disease progression markers.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

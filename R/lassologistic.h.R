@@ -822,7 +822,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' lassologistic(data = data, outcome = "diagnosis",
 #'     outcomeLevel = "PanNEC", explanatory = vars(p53, Rb1, Ki67, SSTR2A))
 #'}

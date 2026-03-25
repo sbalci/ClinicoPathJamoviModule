@@ -107,7 +107,7 @@ standard to identify optimal testing strategies. Calculates sensitivity,
 specificity, PPV, NPV, and accuracy for each pattern combination.
 }
 \examples{
-\donttest{
+\dontrun{
 # Two-test combination analysis
 result <- decisioncombine(
   data = histopathology,

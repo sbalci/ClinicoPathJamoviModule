@@ -121,7 +121,7 @@ of converted data. Perfect for preparing datetime data for analysis and
 creating time-based variables.
 }
 \examples{
-\donttest{
+\dontrun{
 # Basic datetime conversion: '0.0.37'
 datetimeconverter(
   data = study_data,

@@ -174,7 +174,7 @@ excellent scalability. Ideal for exploratory analysis, baseline modeling,
 and ensemble methods in survival prediction tasks.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- extratrees(
     data = mydata,
     time = "time_to_event",

@@ -95,7 +95,7 @@ Includes Gehan-Wilcoxon, Tarone-Ware, Peto-Peto, and custom weight function
 approaches for comprehensive survival comparison.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

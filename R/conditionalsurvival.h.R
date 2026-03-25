@@ -299,7 +299,7 @@ conditionalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' approaches, and inverse probability weighting.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # example will be added
 #'}
 #' @param data The data as a data frame.

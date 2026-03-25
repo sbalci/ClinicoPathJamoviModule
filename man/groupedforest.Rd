@@ -104,7 +104,7 @@ effects
 across patient variants, genetic subtypes, or clinical subgroups.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Load survival data with time, event, treatment, and subgroup variables.
 # 2. Select time variable (follow-up duration).

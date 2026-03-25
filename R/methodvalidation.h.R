@@ -438,7 +438,7 @@ methodvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' methodvalidation(
 #'     measurement = "glucose_result",

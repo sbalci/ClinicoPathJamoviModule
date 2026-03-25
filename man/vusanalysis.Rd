@@ -151,7 +151,7 @@ multi-class clinicopathological applications where binary classification is
 insufficient.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- vusanalysis(
     data = tumor_data,
     predictor = "biomarker_score",

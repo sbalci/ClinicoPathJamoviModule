@@ -85,7 +85,7 @@ additive models,  Cox-Aalen hybrid models, and dynamic regression with
 time-updated coefficients.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

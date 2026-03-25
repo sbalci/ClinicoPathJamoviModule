@@ -824,7 +824,7 @@ survivalbartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- survivalbart(
 #'     data = mydata,
 #'     time = "time_to_event",

@@ -297,7 +297,7 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example:
 #' # 1. Select variables for outlier detection analysis.
 #' # 2. Choose detection methods (univariate, multivariate, or composite).

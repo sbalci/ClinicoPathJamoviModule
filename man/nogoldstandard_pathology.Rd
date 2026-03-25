@@ -37,6 +37,7 @@ nogoldstandard(data = nogoldstandard_pathology,
                test1 = "Pathologist1", test1Positive = "Malignant",
                test2 = "Pathologist2", test2Positive = "Malignant",
                test3 = "Pathologist3", test3Positive = "Malignant",
+               test4Positive = "", test5Positive = "",
                clinicalPreset = "pathology_agreement")
 
 }

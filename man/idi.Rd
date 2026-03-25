@@ -247,7 +247,7 @@ valuable when numeric risk improvement is more relevant than categorical
 reclassification, such as in precision medicine applications.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- idi(
     data = mydata,
     outcome = "event_indicator",

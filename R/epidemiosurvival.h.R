@@ -960,7 +960,7 @@ epidemiosurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('population_cohort')
 #'
 #' epidemiosurvival(

@@ -127,7 +127,7 @@ automatic model fitting from raw data. Uses ggstatsplot's ggcoefstats() for
 professional visualization.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage:
 # For pre-computed coefficients:
 # ClinicoPath::jjcoefstats(

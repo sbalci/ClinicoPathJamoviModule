@@ -1025,64 +1025,205 @@ dynamiccoeffClass <- R6::R6Class(
         },
 
         .populateDynamicPlots = function(results) {
-            
+
             if (!self$options$show_dynamic_plots || is.null(results$coefficients)) return()
-            
-            # Create dynamic coefficient evolution plots
+
             image <- self$results$dynamicPlots
-            image$setState("Creating dynamic coefficient evolution plots...")
-            
-            # Implementation would create ggplot2 visualization of coefficient paths over time
-            # For now, set placeholder
-            image$setState("Dynamic coefficient plots would be generated here")
+
+            # Build a serialisable data.frame for the render function
+            coeffs <- results$coefficients
+            times  <- results$data$time
+            if (nrow(coeffs) == 0 || ncol(coeffs) == 0) return()
+
+            plotData <- data.frame(
+                time = rep(times, ncol(coeffs)),
+                coefficient = as.vector(coeffs),
+                se = as.vector(results$coefficient_se),
+                covariate = rep(results$covariate_cols, each = nrow(coeffs)),
+                stringsAsFactors = FALSE
+            )
+            plotData$lower <- plotData$coefficient - qnorm(0.975) * plotData$se
+            plotData$upper <- plotData$coefficient + qnorm(0.975) * plotData$se
+
+            image$setState(as.data.frame(plotData))
+        },
+
+        .renderDynamicPlots = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                plotData <- image$state
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(x = time, y = coefficient, colour = covariate)) +
+                    ggplot2::geom_line(linewidth = 0.8) +
+                    ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper, fill = covariate),
+                                         alpha = 0.2, colour = NA) +
+                    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
+                    ggplot2::labs(title = "Dynamic Coefficient Evolution",
+                                 x = "Time", y = expression(beta(t)),
+                                 colour = "Covariate", fill = "Covariate") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
         },
 
         .populateStatePlots = function(results) {
-            
+
             if (!self$options$show_state_plots || results$filter_type != "kalman") return()
-            
-            # Create state space visualization plots
+            if (is.null(results$state_evolution)) return()
+
             image <- self$results$statePlots
-            image$setState("Creating state space visualization...")
-            
-            # Implementation would create state evolution plots
-            image$setState("State space plots would be generated here")
+
+            state_data <- results$state_evolution
+            n_times <- min(nrow(results$data), ncol(state_data$updated) - 1)
+            n_states <- nrow(state_data$updated)
+
+            plotData <- data.frame(
+                time       = rep(results$data$time[1:n_times], n_states),
+                state      = rep(paste("State", seq_len(n_states)), each = n_times),
+                updated    = as.vector(t(state_data$updated[, 2:(n_times + 1)])),
+                predicted  = as.vector(t(state_data$predicted[, 2:(n_times + 1)])),
+                stringsAsFactors = FALSE
+            )
+
+            image$setState(as.data.frame(plotData))
+        },
+
+        .renderStatePlots = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                plotData <- image$state
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(x = time)) +
+                    ggplot2::geom_line(ggplot2::aes(y = updated, colour = "Updated"), linewidth = 0.8) +
+                    ggplot2::geom_line(ggplot2::aes(y = predicted, colour = "Predicted"),
+                                       linetype = "dashed", linewidth = 0.6) +
+                    ggplot2::facet_wrap(~ state, scales = "free_y") +
+                    ggplot2::labs(title = "State Space Evolution",
+                                 x = "Time", y = "State Value", colour = "Estimate") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
         },
 
         .populateDiagnosticPlots = function(results) {
-            
+
             if (!self$options$show_diagnostic_plots) return()
-            
-            # Create diagnostic plots
+            if (is.null(results$coefficients) || nrow(results$coefficients) == 0) return()
+
             image <- self$results$diagnosticPlots
-            image$setState("Creating diagnostic plots...")
-            
-            # Implementation would create residual plots, innovation plots, etc.
-            image$setState("Diagnostic plots would be generated here")
+
+            # Residuals: difference between dynamic and static coefficients
+            coeffs <- results$coefficients
+            static <- results$static_coefs[seq_len(min(length(results$static_coefs), ncol(coeffs)))]
+            residuals_mat <- sweep(coeffs, 2, static, "-")
+
+            plotData <- data.frame(
+                time     = rep(results$data$time, ncol(residuals_mat)),
+                residual = as.vector(residuals_mat),
+                covariate = rep(results$covariate_cols[seq_len(ncol(residuals_mat))], each = nrow(residuals_mat)),
+                stringsAsFactors = FALSE
+            )
+
+            image$setState(as.data.frame(plotData))
+        },
+
+        .renderDiagnosticPlots = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                plotData <- image$state
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(x = time, y = residual, colour = covariate)) +
+                    ggplot2::geom_point(alpha = 0.5, size = 1) +
+                    ggplot2::geom_smooth(method = "loess", se = TRUE, linewidth = 0.8, span = 0.75) +
+                    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
+                    ggplot2::labs(title = "Model Diagnostics: Residuals Over Time",
+                                 x = "Time", y = "Residual (Dynamic - Static)",
+                                 colour = "Covariate") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
         },
 
         .populateComparisonPlots = function(results) {
-            
+
             if (!self$options$show_comparison_plots) return()
-            
-            # Create model comparison plots
+            if (is.null(results$coefficients) || nrow(results$coefficients) == 0) return()
+
             image <- self$results$comparisonPlots
-            image$setState("Creating model comparison plots...")
-            
-            # Implementation would compare static vs dynamic models
-            image$setState("Comparison plots would be generated here")
+
+            coeffs <- results$coefficients
+            n_coefs <- min(length(results$static_coefs), ncol(coeffs))
+            if (n_coefs == 0) return()
+
+            static_vals <- results$static_coefs[seq_len(n_coefs)]
+
+            plotData <- data.frame(
+                time       = rep(results$data$time, n_coefs),
+                dynamic    = as.vector(coeffs[, seq_len(n_coefs), drop = FALSE]),
+                static     = rep(static_vals, each = nrow(coeffs)),
+                covariate  = rep(results$covariate_cols[seq_len(n_coefs)], each = nrow(coeffs)),
+                stringsAsFactors = FALSE
+            )
+
+            image$setState(as.data.frame(plotData))
+        },
+
+        .renderComparisonPlots = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                plotData <- image$state
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(x = time)) +
+                    ggplot2::geom_line(ggplot2::aes(y = dynamic, colour = "Dynamic"), linewidth = 0.8) +
+                    ggplot2::geom_line(ggplot2::aes(y = static, colour = "Static"),
+                                       linetype = "dashed", linewidth = 0.6) +
+                    ggplot2::facet_wrap(~ covariate, scales = "free_y") +
+                    ggplot2::labs(title = "Dynamic vs Static Coefficients",
+                                 x = "Time", y = expression(beta),
+                                 colour = "Model") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
         },
 
         .populateAdaptationPlots = function(results) {
-            
+
             if (!self$options$show_adaptation_metrics) return()
-            
-            # Create adaptation process plots
+            if (is.null(results$coefficients) || nrow(results$coefficients) == 0) return()
+
             image <- self$results$adaptationPlots
-            image$setState("Creating adaptation process plots...")
-            
-            # Implementation would show adaptation metrics over time
-            image$setState("Adaptation plots would be generated here")
+
+            coeffs <- results$coefficients
+            n <- nrow(coeffs)
+            p <- ncol(coeffs)
+            if (n < 2 || p == 0) return()
+
+            # Compute rolling change rate
+            abs_diffs <- abs(diff(as.matrix(coeffs)))
+            plotData <- data.frame(
+                time        = rep(results$data$time[-1], p),
+                change_rate = as.vector(abs_diffs),
+                covariate   = rep(results$covariate_cols, each = n - 1),
+                stringsAsFactors = FALSE
+            )
+
+            image$setState(as.data.frame(plotData))
+        },
+
+        .renderAdaptationPlots = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                plotData <- image$state
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(x = time, y = change_rate, colour = covariate)) +
+                    ggplot2::geom_line(alpha = 0.4, linewidth = 0.5) +
+                    ggplot2::geom_smooth(method = "loess", se = FALSE, linewidth = 0.8, span = 0.5) +
+                    ggplot2::labs(title = "Adaptation Process: Coefficient Change Rate",
+                                 x = "Time", y = "|Change Rate|",
+                                 colour = "Covariate") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
         },
 
         .populateAnalysisSummary = function(results) {

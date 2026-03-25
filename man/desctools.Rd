@@ -117,7 +117,7 @@ Breslow-Day), and trend tests (Cochran-Armitage). Essential for clinical
 research, epidemiological studies, and advanced statistical analysis.
 }
 \examples{
-\donttest{
+\dontrun{
 # Load example data
 data("histopathology")
 data("dca_test_data")

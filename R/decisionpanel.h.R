@@ -1457,7 +1457,7 @@ decisionpanelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Load COVID-19 screening data
 #' data("covid_screening_data", package = "ClinicoPath")
 #'

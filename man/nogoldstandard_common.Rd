@@ -31,7 +31,9 @@ with rare disease scenarios for prevalence impact assessment.
 data(nogoldstandard_common)
 nogoldstandard(data = nogoldstandard_common,
                test1 = "Test1", test1Positive = "Positive",
-               test2 = "Test2", test2Positive = "Positive")
+               test2 = "Test2", test2Positive = "Positive",
+               test3Positive = "", test4Positive = "",
+               test5Positive = "")
 
 }
 \keyword{datasets}

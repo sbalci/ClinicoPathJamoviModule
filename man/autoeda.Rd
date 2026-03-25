@@ -83,7 +83,7 @@ automated reporting.
 Based on autoEDA research from R Journal 2019 (Staniak & Biecek).
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Load your data frame.
 # 2. Select variables for analysis.

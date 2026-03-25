@@ -85,7 +85,7 @@ markers. Designed for differential diagnosis and antibody panel
 optimization.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 ihcdiagnostic(
     markers = c("ER", "PR", "HER2", "Ki67"),

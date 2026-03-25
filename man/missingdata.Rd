@@ -107,7 +107,7 @@ handling is critical
 for valid statistical inference.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Select variables for missing data analysis
 # 2. Explore missing data patterns and correlations

@@ -209,7 +209,7 @@ censoring through appropriate pair weighting and can be decomposed to
 identify which risk groups contribute most to discrimination.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- concordanceindex(
     data = validation_data,
     time = "follow_up_months",

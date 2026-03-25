@@ -576,7 +576,7 @@ jointmodelingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: PSA trajectory and prostate cancer survival
 #' jointmodeling(
 #'     data = psa_data,

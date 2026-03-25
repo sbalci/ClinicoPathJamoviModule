@@ -271,7 +271,7 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic co-testing analysis with independent tests
 #' cotest(
 #'     test1_sens = 0.80,

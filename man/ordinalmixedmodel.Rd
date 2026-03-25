@@ -84,7 +84,7 @@ ordinal endpoints. Uses the ordinal package for fitting cumulative link
 mixed models with logit, probit, or complementary log-log links.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 ordinalmixedmodel(
     dep = "rating",

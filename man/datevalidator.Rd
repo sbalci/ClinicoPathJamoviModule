@@ -100,7 +100,7 @@ For datetime conversion with component extraction (year, month, day, hour,
 minute, second), see the DateTime Converter module.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Select variables containing date/datetime information that need validation.
 # 2. Choose validation method (automatic detection or specific format).

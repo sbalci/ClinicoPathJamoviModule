@@ -31,7 +31,9 @@ tests measuring different aspects of disease.
 data(nogoldstandard_lowagreement)
 nogoldstandard(data = nogoldstandard_lowagreement,
                test1 = "Test1", test1Positive = "Positive",
-               test2 = "Test2", test2Positive = "Positive")
+               test2 = "Test2", test2Positive = "Positive",
+               test3Positive = "", test4Positive = "",
+               test5Positive = "")
 
 }
 \keyword{datasets}

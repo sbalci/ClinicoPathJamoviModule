@@ -140,7 +140,7 @@ clinical validation, performance metrics, and medical interpretation
 guidelines.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example for cancer diagnosis
 data(cancer_data)
 treemedical(

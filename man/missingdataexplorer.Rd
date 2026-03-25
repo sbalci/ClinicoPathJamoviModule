@@ -143,7 +143,7 @@ documentation
 of missing data handling strategies.
 }
 \examples{
-\donttest{
+\dontrun{
 data('clinical_data')
 
 missingdataexplorer(

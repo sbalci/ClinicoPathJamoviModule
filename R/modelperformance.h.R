@@ -458,7 +458,7 @@ modelperformanceBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' adapted for clinical research with comprehensive model diagnostics.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: Compare Cox models
 #' modelperformance(
 #'     data = cancer_data,

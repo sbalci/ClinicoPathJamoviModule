@@ -865,7 +865,7 @@ nonparametricregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Kernel regression with automatic bandwidth selection
 #' nonparametricregression(
 #'     data = clinical_data,

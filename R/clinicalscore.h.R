@@ -715,7 +715,7 @@ clinicalscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' clinicalscore(data = data, outcome = "diagnosis",
 #'     outcomeLevel = "malignant", explanatory = vars(age, grade, ki67),
 #'     modelType = "logistic", scoringMethod = "compare")

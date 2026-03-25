@@ -1479,7 +1479,7 @@ decision curve analysis, bootstrap validation,  and comprehensive clinical
 interpretation guidance.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example analyzing TNM staging system migration:
 # stagemigration(
 #   data = cancer_cohort,

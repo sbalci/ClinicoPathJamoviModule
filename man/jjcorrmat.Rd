@@ -111,7 +111,7 @@ ggstatsplot::grouped_ggcorrmat to generate correlation matrix
 visualizations with significance testing.
 }
 \examples{
-\donttest{
+\dontrun{
 # Load test data
 data("mtcars")
 

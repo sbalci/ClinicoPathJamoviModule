@@ -33,7 +33,8 @@ data(nogoldstandard_highagreement)
 nogoldstandard(data = nogoldstandard_highagreement,
                test1 = "Test1", test1Positive = "Positive",
                test2 = "Test2", test2Positive = "Positive",
-               method = "latent_class")
+               test3Positive = "", test4Positive = "",
+               test5Positive = "", method = "composite")
 
 }
 \keyword{datasets}

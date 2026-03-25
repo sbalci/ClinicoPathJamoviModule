@@ -81,7 +81,7 @@ flexible formatting, and clean aesthetics. Perfect for enhancing data
 presentation in clinical research publications and reports.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example:
 # 1. Select variables for table display.
 # 2. Choose grouping variables for organized presentation.

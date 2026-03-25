@@ -345,7 +345,7 @@ analysis. Provides agreement statistics, visualization, and clinical
 interpretation for categorical rating data.
 }
 \examples{
-\donttest{
+\dontrun{
 # Load example data
 data('pathology_ratings', package = 'ClinicoPath')
 

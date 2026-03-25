@@ -561,7 +561,7 @@ ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example:
 #' # 1. Load your data frame with continuous and categorical variables.
 #' # 2. Select variables for X and Y axes.

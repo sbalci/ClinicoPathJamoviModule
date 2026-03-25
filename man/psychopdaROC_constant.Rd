@@ -29,7 +29,8 @@ for zero-variance predictors that cannot produce ROC curves.
 \examples{
 data(psychopdaROC_constant)
 psychopdaROC(data = psychopdaROC_constant, dependentVars = "constant_marker",
-             classVar = "outcome")
+             classVar = "outcome", positiveClass = "Positive",
+             refVar = "constant_marker")
 
 }
 \keyword{datasets}

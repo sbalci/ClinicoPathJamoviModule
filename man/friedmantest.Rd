@@ -92,7 +92,7 @@ whether the median values  differ significantly across multiple related
 measurements or time points.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 friedmantest(
     dependent = "measurement_value",

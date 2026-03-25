@@ -135,7 +135,7 @@ for comparing continuous variables between groups with statistical
 annotations.
 }
 \examples{
-\donttest{
+\dontrun{
 # Basic comparison between groups
 jjbetweenstats(
     data = iris,

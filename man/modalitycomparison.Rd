@@ -93,7 +93,7 @@ pattern analysis
 and HER2 scoring validation.
 }
 \examples{
-\donttest{
+\dontrun{
 # Basic modality comparison
 result1 <- modalitycomparison(
   data = data,

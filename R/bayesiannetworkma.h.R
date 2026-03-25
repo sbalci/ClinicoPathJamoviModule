@@ -1042,7 +1042,7 @@ bayesiannetworkmaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Bayesian network meta-analysis
 #' bayesiannetworkma(
 #'     data = network_data,

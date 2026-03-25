@@ -87,7 +87,7 @@ Calculates AUC, sensitivity, and specificity for predictor variables and
 performs statistical comparison using DeLong test.
 }
 \examples{
-\donttest{
+\dontrun{
 data('medical_ai_data', package='ClinicoPath')
 
 aivalidation(data = medical_ai_data,

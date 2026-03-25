@@ -352,7 +352,7 @@ categoricaladvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('histopathology')
 #'
 #' categoricaladvanced(data = histopathology,

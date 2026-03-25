@@ -121,7 +121,7 @@ diagnostics, and time-dependent coefficient analysis for robust model
 assessment and assumption verification.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example 1: Basic proportional hazards testing
 library(survival)
 

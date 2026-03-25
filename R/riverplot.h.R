@@ -712,7 +712,7 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic temporal flow - Track treatment response changes over time
 #' riverplot(
 #'   data = patient_data,

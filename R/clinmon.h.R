@@ -287,7 +287,7 @@ clinmonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' rate.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # example will be added
 #'}
 #' @param data The data as a data frame with continuous monitoring data.

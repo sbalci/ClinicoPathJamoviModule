@@ -567,7 +567,7 @@ pagetrendtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' pagetrendtest(
 #'     dependent = "measurement_value",

@@ -387,7 +387,7 @@ bayesianmetaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Bayesian meta-analysis of treatment effects
 #' bayesianmetaanalysis(
 #'     data = data,

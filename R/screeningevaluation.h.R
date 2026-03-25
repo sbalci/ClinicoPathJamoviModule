@@ -1062,7 +1062,7 @@ screeningevaluationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('screening_data')
 #'
 #' screeningevaluation(

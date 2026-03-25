@@ -363,27 +363,32 @@ smoothtimevaryResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="smoothEffectPlots",
                 title="Smooth Time-Varying Effects",
-                visible="(show_smooth_plots)"))
+                visible="(show_smooth_plots)",
+                renderFun=".renderSmoothEffectPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticPlots",
                 title="Model Diagnostics",
-                visible="(show_diagnostic_plots)"))
+                visible="(show_diagnostic_plots)",
+                renderFun=".renderDiagnosticPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="residualPlots",
                 title="Residual Analysis",
-                visible="(residual_analysis && show_diagnostic_plots)"))
+                visible="(residual_analysis && show_diagnostic_plots)",
+                renderFun=".renderResidualPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparisonPlots",
                 title="Model Comparison Plots",
-                visible="(show_comparison_plots)"))
+                visible="(show_comparison_plots)",
+                renderFun=".renderComparisonPlots"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="smoothingPlots",
                 title="Smoothing Method Comparison",
-                visible="(show_diagnostic_plots)"))
+                visible="(show_diagnostic_plots)",
+                renderFun=".renderSmoothingPlots"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",
@@ -425,7 +430,7 @@ smoothtimevaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' and complementing Aalen's additive hazard methodology.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Spline-based time-varying effects
 #' library(timereg)
 #' library(survival)

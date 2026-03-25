@@ -35,6 +35,7 @@ data(psychopdaROC_cardiac)
 psychopdaROC(data = psychopdaROC_cardiac,
              dependentVars = c("troponin", "creatinine", "bnp"),
              classVar = "mi_status", positiveClass = "MI",
+             refVar = "troponin",
              method = "maximize_metric", metric = "youden")
 
 }

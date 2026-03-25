@@ -90,7 +90,7 @@ Slide > ROI > Cell hierarchies, and prevents Type I errors from ignoring
 clustering effects.
 }
 \examples{
-\donttest{
+\dontrun{
 data('histopathology')
 
 hierarchicalpathology(data = histopathology,

@@ -267,7 +267,7 @@ jcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic correlation analysis
 #' jcorrelation(
 #'     data = histopathology,

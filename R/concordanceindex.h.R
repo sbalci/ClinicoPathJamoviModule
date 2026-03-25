@@ -711,7 +711,7 @@ concordanceindexBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- concordanceindex(
 #'     data = validation_data,
 #'     time = "follow_up_months",

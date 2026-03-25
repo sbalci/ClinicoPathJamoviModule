@@ -125,7 +125,7 @@ reportcat2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Basic categorical summary
 #' data <- data.frame(
 #'   treatment = factor(c("A", "B", "A", "C", "B", "A")),

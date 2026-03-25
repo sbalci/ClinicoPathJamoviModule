@@ -108,7 +108,7 @@ selection, test ordering optimization, multi-class uncertainty
 quantification.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example with AI prediction probabilities
 data <- data.frame(
   true_class = factor(sample(c("A", "B", "C"), 100, replace=TRUE)),

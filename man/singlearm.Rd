@@ -275,7 +275,7 @@ study population - for example, to determine median  survival time or
 1/3/5-year survival rates for all patients collectively.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example analyzing overall survival for a patient cohort:
 # singlearm(
 #   data = patient_data,

@@ -122,7 +122,7 @@ unified analysis across all survival
 study types, also consider 'Comprehensive Survival Power Analysis'.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

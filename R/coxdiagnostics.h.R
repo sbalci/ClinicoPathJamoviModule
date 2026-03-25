@@ -412,7 +412,7 @@ coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' survminer package for comprehensive model validation.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage:
 #' library(survival)
 #' library(survminer)

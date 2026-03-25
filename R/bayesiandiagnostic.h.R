@@ -1248,7 +1248,7 @@ bayesiandiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Bayesian diagnostic test evaluation
 #' bayesiandiagnostic(
 #'     data = diagnostic_data,

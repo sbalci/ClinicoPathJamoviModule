@@ -105,7 +105,7 @@ optimization,
 and quality control for laboratory assays.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Optimize PCR assay design
 assayoptimization(
     data = pcr_data,

@@ -198,7 +198,7 @@ repeated tests. Creates decision trees to minimize cost while maximizing
 accuracy.
 }
 \examples{
-\donttest{
+\dontrun{
 # Load COVID-19 screening data
 data("covid_screening_data", package = "ClinicoPath")
 

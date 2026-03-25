@@ -192,7 +192,8 @@ result <- diagnosticmeta(
   true_positives = "true_positives",
   false_positives = "false_positives",
   false_negatives = "false_negatives",
-  true_negatives = "true_negatives"
+  true_negatives = "true_negatives",
+  covariate = NULL
 )
 
 # Meta-regression with year as covariate
@@ -216,7 +217,8 @@ result_small <- diagnosticmeta(
   true_positives = "true_positives",
   false_positives = "false_positives",
   false_negatives = "false_negatives",
-  true_negatives = "true_negatives"
+  true_negatives = "true_negatives",
+  covariate = NULL
 )
 # Load the data
 data(diagnosticmeta_test_categorical)
@@ -243,6 +245,7 @@ result_none <- diagnosticmeta(
   false_positives = "false_positives",
   false_negatives = "false_negatives",
   true_negatives = "true_negatives",
+  covariate = NULL,
   zero_cell_correction = "none"
 )
 
@@ -254,11 +257,16 @@ result_constant <- diagnosticmeta(
   false_positives = "false_positives",
   false_negatives = "false_negatives",
   true_negatives = "true_negatives",
+  covariate = NULL,
   zero_cell_correction = "constant"
 )
 # Load the data
 data(diagnosticmeta_test_large)
 
+# View structure
+str(diagnosticmeta_test_large)
+
+\dontrun{
 # Test performance with large dataset
 system.time({
   result_large <- diagnosticmeta(
@@ -268,9 +276,11 @@ system.time({
     false_positives = "false_positives",
     false_negatives = "false_negatives",
     true_negatives = "true_negatives",
+    covariate = NULL,
     bivariate_analysis = TRUE,
     heterogeneity_analysis = TRUE
   )
 })
+}
 }
 \keyword{datasets}

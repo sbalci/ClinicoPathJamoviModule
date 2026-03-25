@@ -599,7 +599,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic diagnostic test evaluation with known counts
 #' result1 <- decisioncalculator(
 #'   TP = 90,  # True positives

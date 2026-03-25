@@ -234,7 +234,7 @@ data analysis with regulatory compliance features for biomarker development
 and clinical translation.
 }
 \examples{
-\donttest{
+\dontrun{
 data('biomarker_data')
 
 biomarkerdiscovery(

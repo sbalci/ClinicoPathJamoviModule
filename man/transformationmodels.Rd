@@ -137,7 +137,7 @@ transformations, enabling flexible modeling of survival data with automatic
 transformation selection and validation.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Transformation model with Box-Cox transformation
 library(survival)
 library(tram)

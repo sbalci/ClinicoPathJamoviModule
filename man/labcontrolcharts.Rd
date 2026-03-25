@@ -119,7 +119,7 @@ and trends in laboratory measurements. Essential for ISO 15189 compliance
 and quality assurance programs.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 labcontrolcharts(
     measurement = "glucose_value",

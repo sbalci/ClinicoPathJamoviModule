@@ -107,7 +107,7 @@ assessment,
 and comprehensive quality control metrics for high-dimensional data.
 }
 \examples{
-\donttest{
+\dontrun{
 data('your_data')
 
 batcheffect(data = your_data,

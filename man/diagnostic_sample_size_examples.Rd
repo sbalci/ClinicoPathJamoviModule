@@ -98,9 +98,9 @@ print(diagnostic_sample_size_examples[, c("scenario", "prevalence",
 # Scenario 1: Colorectal cancer screening
 colorectal <- diagnostic_sample_size_examples[1, ]
 cat("Scenario:", colorectal$scenario, "\n")
-cat("Prevalence:", colorectal$prevalence * 100, "\%\n")
+cat("Prevalence:", colorectal$prevalence * 100, "percent\n")
 cat("Required N:", colorectal$final_n, "\n")
-cat("Adjusted N (20\% non-response):", colorectal$final_n_adjusted, "\n")
+cat("Adjusted N (20 percent non-response):", colorectal$final_n_adjusted, "\n")
 
 # Demonstrate impact of prevalence on sample size
 prevalence_impact <- diagnostic_sample_size_examples[, c("scenario", "prevalence", "final_n")]

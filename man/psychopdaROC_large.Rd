@@ -36,7 +36,8 @@ sample sizes. Includes multi-site and risk stratification for subgroup analysis.
 data(psychopdaROC_large)
 psychopdaROC(data = psychopdaROC_large,
              dependentVars = c("biomarker1", "biomarker2"),
-             classVar = "disease_status", positiveClass = "Disease")
+             classVar = "disease_status", positiveClass = "Disease",
+             refVar = "biomarker1")
 
 }
 \keyword{datasets}

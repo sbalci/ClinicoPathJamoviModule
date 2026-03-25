@@ -113,7 +113,7 @@ extremely customizable data visualization solutions using pure base R
 graphics.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage:
 # Scatter plot
 plot(x, y, main="Scatter Plot", xlab="X Variable", ylab="Y Variable")

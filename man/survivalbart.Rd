@@ -236,7 +236,7 @@ formulations
 with comprehensive posterior inference and model diagnostics.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- survivalbart(
     data = mydata,
     time = "time_to_event",

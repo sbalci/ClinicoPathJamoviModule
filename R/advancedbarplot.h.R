@@ -576,7 +576,7 @@ advancedbarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage - 5 different bar chart approaches:
 #' # 1. Basic ggplot2 approach
 #' # 2. Polished presentation style

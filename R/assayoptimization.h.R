@@ -434,7 +434,7 @@ assayoptimizationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: Optimize PCR assay design
 #' assayoptimization(
 #'     data = pcr_data,

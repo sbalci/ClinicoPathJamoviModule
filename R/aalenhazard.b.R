@@ -340,7 +340,6 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           formula = model_formula,
           data = complete_data,
           robust = if (robust_se) 1 else 0,
-          bandwidth = bandwidth,
           n.sim = 0  # Disable simulation for faster computation
         )
         
@@ -571,65 +570,82 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       .createCumulativePlots = function(model_results) {
         tryCatch({
           image <- self$results$cumulativePlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            model_results = model_results
-          ))
-          
+          image$setState(as.data.frame(list(ready = TRUE)))
+          private$.aalen_model <- model_results$model
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
+      .renderCumulativePlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model <- private$.aalen_model
+          if (is.null(model)) return(FALSE)
+          plot(model, main = "Cumulative Regression Functions")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
       # Create hazard function plots
       .createHazardPlots = function(model_results, data_prep) {
         tryCatch({
           image <- self$results$hazardPlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            model_results = model_results,
-            data_prep = data_prep
-          ))
-          
+          image$setState(as.data.frame(list(ready = TRUE)))
+          private$.aalen_model <- model_results$model
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
+      .renderHazardPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model <- private$.aalen_model
+          if (is.null(model)) return(FALSE)
+          plot(model, main = "Estimated Hazard Functions")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
       # Create diagnostic plots
       .createDiagnosticPlots = function(model_results) {
         tryCatch({
           image <- self$results$diagnosticPlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            model_results = model_results
-          ))
-          
+          image$setState(as.data.frame(list(ready = TRUE)))
         }, error = function(e) {
           # Skip plot creation on error
         })
       },
-      
+
+      .renderDiagnosticPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model <- private$.aalen_model
+          if (is.null(model)) return(FALSE)
+          plot(model, main = "Model Diagnostics")
+          TRUE
+        }, error = function(e) FALSE)
+      },
+
       # Create residual plots
       .createResidualPlots = function(model_results) {
         tryCatch({
           image <- self$results$residualPlots
-          
-          image$setState(list(
-            width = 800,
-            height = 600,
-            model_results = model_results
-          ))
-          
+          image$setState(as.data.frame(list(ready = TRUE)))
         }, error = function(e) {
           # Skip plot creation on error
         })
+      },
+
+      .renderResidualPlots = function(image, ggtheme, theme, ...) {
+        if (is.null(image$state)) return(FALSE)
+        tryCatch({
+          model <- private$.aalen_model
+          if (is.null(model)) return(FALSE)
+          plot(model, main = "Residual Analysis")
+          TRUE
+        }, error = function(e) FALSE)
       },
       
       # Generate natural language summaries

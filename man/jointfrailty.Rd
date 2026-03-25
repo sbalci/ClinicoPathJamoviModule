@@ -121,7 +121,7 @@ frailty terms and providing  comprehensive risk assessment for subjects
 experiencing multiple types of events.
 }
 \examples{
-\donttest{
+\dontrun{
 data('histopathology', package='ClinicoPath')
 }
 }

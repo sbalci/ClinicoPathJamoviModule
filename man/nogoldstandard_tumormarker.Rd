@@ -38,6 +38,7 @@ nogoldstandard(data = nogoldstandard_tumormarker,
                test2 = "HE4", test2Positive = "Elevated",
                test3 = "CEA", test3Positive = "Elevated",
                test4 = "AFP", test4Positive = "Elevated",
+               test5Positive = "",
                clinicalPreset = "tumor_markers")
 
 }

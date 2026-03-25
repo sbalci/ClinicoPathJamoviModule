@@ -201,7 +201,7 @@ disease mapping capabilities, and hierarchical Bayesian modeling for
 clinical research with geographic components.
 }
 \examples{
-\donttest{
+\dontrun{
 # Spatial Bayesian survival analysis
 spatialbayesiansurvival(
     data = clinical_data,

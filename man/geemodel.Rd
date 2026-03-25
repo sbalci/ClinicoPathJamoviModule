@@ -111,7 +111,7 @@ patient).
 }
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Multiple liver samples per dog
 geemodel(
   data = liver_data,

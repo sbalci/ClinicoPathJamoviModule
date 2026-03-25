@@ -140,7 +140,7 @@ designs. Each approach optimized for different use cases in clinical
 research.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage - 5 different bar chart approaches:
 # 1. Basic ggplot2 approach
 # 2. Polished presentation style

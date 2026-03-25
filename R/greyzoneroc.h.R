@@ -725,7 +725,7 @@ greyzonerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' result <- greyzoneroc(
 #'     data = ai_predictions,
 #'     predictor = "ai_probability",

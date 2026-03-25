@@ -415,7 +415,7 @@ directregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' directregression(
 #'     elapsedtime = "time_to_event",

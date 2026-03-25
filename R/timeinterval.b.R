@@ -38,6 +38,7 @@
 #'   eligibility for landmark criteria cannot be determined.
 #'
 #' @examples
+#' \dontrun{
 #' # Basic time interval calculation:
 #' timeinterval(
 #'   data = study_data,
@@ -56,6 +57,7 @@
 #'   landmark_time = 6,
 #'   output_unit = "months"
 #' )
+#' }
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore

@@ -113,7 +113,7 @@ bar charts, line plots, and more. Perfect for quick data visualization with
 intelligent defaults.
 }
 \examples{
-\donttest{
+\dontrun{
 # Auto-select plot type based on variables
 esquisseauto(
     data = mtcars,

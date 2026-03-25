@@ -428,7 +428,7 @@ misclassificationbiasBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' misclassificationbias(data = data, outcome = "survival_status",
 #'     exposure = "tumor_grade", outcomeLevel = "dead",
 #'     exposureLevel = "high_grade",

@@ -428,7 +428,7 @@ modalitycomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic modality comparison
 #' result1 <- modalitycomparison(
 #'   data = data,

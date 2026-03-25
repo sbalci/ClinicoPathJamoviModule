@@ -120,7 +120,7 @@ Models the cumulative incidence function (CIF) while accounting for
 competing events. Provides sub-hazard ratios (sHR) for covariate effects.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

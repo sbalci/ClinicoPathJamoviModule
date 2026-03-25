@@ -468,7 +468,7 @@ multiclassrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example with tumor subtype classification
 #' data <- data.frame(
 #'   true_class = factor(sample(c("TypeA", "TypeB", "TypeC"), 100, replace=TRUE)),

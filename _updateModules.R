@@ -1721,8 +1721,28 @@ if (!WIP & webpage) {
 # --- Prepare, document, and install modules ----
 if (!extended) {
   jmvtools::prepare(main_repo_dir)
+  # Post-process: jmvtools generates \donttest{} from dontrun:true in YAML,
+
+  # but R CMD check --run-donttest still runs these. Convert to \dontrun{}.
+  h_files <- list.files(file.path(main_repo_dir, "R"), pattern = "\\.h\\.R$", full.names = TRUE)
+  for (hf in h_files) {
+    txt <- readLines(hf, warn = FALSE)
+    if (any(grepl("donttest", txt))) {
+      txt <- gsub("\\\\donttest\\{", "\\\\dontrun{", txt)
+      writeLines(txt, hf)
+    }
+  }
+  cat(sprintf("  Post-processed %d .h.R files (donttest -> dontrun)\n", length(h_files)))
   devtools::document(main_repo_dir)
   jmvtools::prepare(main_repo_dir)
+  # Post-process again after second prepare
+  for (hf in h_files) {
+    txt <- readLines(hf, warn = FALSE)
+    if (any(grepl("donttest", txt))) {
+      txt <- gsub("\\\\donttest\\{", "\\\\dontrun{", txt)
+      writeLines(txt, hf)
+    }
+  }
   devtools::document(main_repo_dir)
   # jmvtools::install(main_repo_dir)
 }

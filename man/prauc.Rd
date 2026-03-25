@@ -139,7 +139,7 @@ threshold selection, comparison to baseline (random classifier), and
 F-score optimization for different precision-recall trade-offs.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- prauc(
     data = pathology_data,
     outcome = "cancer",

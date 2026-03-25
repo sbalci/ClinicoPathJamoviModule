@@ -33,7 +33,9 @@ data(nogoldstandard_allpositive)
 \dontrun{
 nogoldstandard(data = nogoldstandard_allpositive,
                test1 = "Test1", test1Positive = "Positive",
-               test2 = "Test2", test2Positive = "Positive")
+               test2 = "Test2", test2Positive = "Positive",
+               test3Positive = "", test4Positive = "",
+               test5Positive = "")
 }
 
 }

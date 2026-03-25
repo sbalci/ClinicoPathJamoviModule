@@ -132,7 +132,7 @@ A results object containing:
 ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

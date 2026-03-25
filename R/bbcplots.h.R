@@ -456,7 +456,7 @@ bbcplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic BBC-style visualization
 #' library(bbplot)
 #' library(ggplot2)

@@ -845,7 +845,7 @@ qualitycontrolBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' qualitycontrol(
 #'     measurement_var = "measurement",

@@ -109,7 +109,7 @@ components to model unobserved heterogeneity between clusters or
 individuals.
 }
 \examples{
-\donttest{
+\dontrun{
 data('lung', package='survival')
 
 parametricfrailty(data = lung,

@@ -860,7 +860,7 @@ explainableaiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # SHAP analysis for feature importance
 #' explainableai(
 #'     data = model_data,

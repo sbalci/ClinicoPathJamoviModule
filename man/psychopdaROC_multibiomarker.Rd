@@ -35,6 +35,7 @@ data(psychopdaROC_multibiomarker)
 psychopdaROC(data = psychopdaROC_multibiomarker,
              dependentVars = c("marker1", "marker2", "marker3", "combined_score"),
              classVar = "diagnosis", positiveClass = "Positive",
+             refVar = "marker1",
              clinicalMode = "comprehensive")
 
 }

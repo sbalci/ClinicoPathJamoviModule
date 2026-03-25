@@ -346,7 +346,7 @@ desctoolsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' research, epidemiological studies, and advanced statistical analysis.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Load example data
 #' data("histopathology")
 #' data("dca_test_data")

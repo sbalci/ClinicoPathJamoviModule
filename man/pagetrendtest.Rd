@@ -93,7 +93,7 @@ Friedman test when the alternative hypothesis specifies a trend or ordered
 pattern.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 pagetrendtest(
     dependent = "measurement_value",

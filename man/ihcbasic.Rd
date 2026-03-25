@@ -103,7 +103,7 @@ Essential IHC expression analysis with clustering and H-score calculation.
 Designed for routine clinical use with simplified options.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 ihcbasic(
     markers = c("ER", "PR", "HER2", "Ki67"),

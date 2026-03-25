@@ -35,6 +35,7 @@ nogoldstandard(data = nogoldstandard_validation,
                test1 = "New_Test", test1Positive = "Positive",
                test2 = "Reference1", test2Positive = "Positive",
                test3 = "Reference2", test3Positive = "Positive",
+               test4Positive = "", test5Positive = "",
                clinicalPreset = "diagnostic_validation")
 
 }

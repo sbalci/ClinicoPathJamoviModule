@@ -354,7 +354,7 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example with mtcars dataset
 #' data("mtcars")
 #'

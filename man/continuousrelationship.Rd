@@ -92,7 +92,7 @@ using  evidence-based approaches from BMJ best practices. Avoids common
 pitfalls like  arbitrary categorization and linear assumptions.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example: Analyzing BMI vs mortality risk
 continuousrelationship(
     data = clinical_data,

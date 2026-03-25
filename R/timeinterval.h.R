@@ -293,7 +293,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' observation duration for accurate incidence rate calculations.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Basic time interval calculation:
 #' timeinterval(
 #'   data = study_data,

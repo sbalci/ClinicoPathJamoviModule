@@ -376,7 +376,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Load test data
 #' data(jjpiestats_test_data)
 #'

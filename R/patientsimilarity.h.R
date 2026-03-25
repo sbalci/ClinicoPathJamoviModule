@@ -572,7 +572,7 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' with comprehensive cluster analysis and statistical validation.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Basic t-SNE visualization
 #' library(Rtsne)
 #' data(iris)

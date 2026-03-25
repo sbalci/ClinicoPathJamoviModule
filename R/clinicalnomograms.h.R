@@ -849,7 +849,7 @@ clinicalnomogramsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: Cox model nomogram
 #' clinicalnomograms(
 #'     data = clinical_data,

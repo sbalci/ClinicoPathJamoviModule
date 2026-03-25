@@ -93,7 +93,7 @@ continuous measurements to clinically actionable thresholds and
 preventing arbitrary cutpoint selection in pathology studies.
 }
 \examples{
-\donttest{
+\dontrun{
 data('histopathology')
 
 optimalcutpoint(data = histopathology,

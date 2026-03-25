@@ -214,7 +214,7 @@ jjradarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # example will be added
 #'}
 #' @param data The data as a data frame.

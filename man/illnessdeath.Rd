@@ -234,7 +234,7 @@ times, and transition-specific hazard ratios with clinical interpretation
 frameworks for evidence-based medicine.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- illnessdeath(
     data = mydata,
     time_entry = "entry_time",

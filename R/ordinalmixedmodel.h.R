@@ -433,7 +433,7 @@ ordinalmixedmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data |>
 #' ordinalmixedmodel(
 #'     dep = "rating",

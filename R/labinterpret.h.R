@@ -668,7 +668,7 @@ labinterpretBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data('clinicaldata', package='ClinicoPath')
 #'
 #' # Basic laboratory interpretation

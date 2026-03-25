@@ -139,7 +139,7 @@ Reduces dimensionality while preserving survival-relevant information using
 supervised PCA.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage
 pcacox(
     data = highdim_data,

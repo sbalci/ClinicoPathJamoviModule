@@ -1240,7 +1240,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' influence event rates relative to the person-time at risk in each subgroup.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example 1: Basic multivariable Cox regression
 #' library(survival)
 #' data(colon)

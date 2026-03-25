@@ -91,7 +91,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Overall, Cause Specific, and Competing Survival.
 }
 \examples{
-\donttest{
+\dontrun{
 # example will be added
 }
 }

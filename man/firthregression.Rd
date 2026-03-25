@@ -110,7 +110,7 @@ counts, unbalanced predictors, or when standard maximum likelihood
 estimates become infinite due to separation.
 }
 \examples{
-\donttest{
+\dontrun{
 # Firth logistic regression
 firthregression(data = mydata, analysisType = "logistic",
     outcome = "mortality",

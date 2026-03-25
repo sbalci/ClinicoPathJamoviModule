@@ -1051,7 +1051,7 @@ simonmakuchBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' statistical comparisons.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Load example data
 #' data("simon_makuch_simple")
 #'

@@ -223,7 +223,7 @@ riskRegression::Score() or pec::pec(). This implementation has NOT been
 validated against those standards.
 }
 \examples{
-\donttest{
+\dontrun{
 result <- brierscore(
     data = validation_data,
     time = "follow_up_time",

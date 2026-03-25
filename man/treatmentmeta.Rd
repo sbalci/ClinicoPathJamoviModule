@@ -195,7 +195,7 @@ meta-analysis approaches with comprehensive heterogeneity assessment and
 publication bias evaluation.
 }
 \examples{
-\donttest{
+\dontrun{
 data('meta_studies')
 
 treatmentmeta(

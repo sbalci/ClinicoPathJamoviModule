@@ -413,7 +413,7 @@ pseudosurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example: RMST regression with covariates
 #' pseudosurvival(
 #'     data = cancer_data,

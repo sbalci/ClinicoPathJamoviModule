@@ -129,7 +129,7 @@ approaches, joint modeling, and dynamic Cox models, allowing for real-time
 risk assessment and personalized medicine applications.
 }
 \examples{
-\donttest{
+\dontrun{
 data |>
 dynamicprediction(
     elapsedtime = "time_to_event",

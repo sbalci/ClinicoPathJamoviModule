@@ -272,7 +272,7 @@ identified in 30 percent
 of pathology studies that use these methods.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example 1: Enhanced Mann-Whitney U test for biomarker expression
 nonparametric(
     data = clinical_data,

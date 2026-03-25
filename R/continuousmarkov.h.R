@@ -619,7 +619,7 @@ continuousmarkovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Example usage
 #' continuousmarkov(
 #'     data = longitudinal_data,

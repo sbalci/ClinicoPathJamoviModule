@@ -118,7 +118,7 @@ summaries, and interpretation features. Consolidates functionality from
 legacy versions with modern vtree capabilities.
 }
 \examples{
-\donttest{
+\dontrun{
 # Basic variable tree
 vartree(
     data = mydata,

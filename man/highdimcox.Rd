@@ -113,7 +113,7 @@ enabling variable selection and preventing overfitting in genomic,
 proteomic, or other high-dimensional clinical datasets.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example 1: LASSO regularization for gene expression data
 library(survival)
 library(glmnet)

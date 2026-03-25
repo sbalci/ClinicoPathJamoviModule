@@ -81,7 +81,7 @@ Provides confidence intervals, hypothesis tests, and robust estimators for
 median survival with handling of censored data and group comparisons.
 }
 \examples{
-\donttest{
+\dontrun{
 # Example usage will be added
 }
 }
