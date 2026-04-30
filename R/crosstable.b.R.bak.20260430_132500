@@ -236,33 +236,25 @@ NULL
 }
 
 # Helper function to validate sample size and data quality
-# name_mapping: optional named character vector mapping cleaned -> original variable
-# names so user-facing warnings use the labels users actually selected.
-.validateAnalysisAssumptions <- function(mydata, myvars, mygroup, name_mapping = NULL) {
+.validateAnalysisAssumptions <- function(mydata, myvars, mygroup) {
     issues <- list()
     warnings <- list()
-
-    .display <- function(name) {
-        if (!is.null(name_mapping) && !is.null(name_mapping[[name]]))
-            return(name_mapping[[name]])
-        name
-    }
-
+    
     # Check overall sample size
     n_total <- nrow(mydata)
     if (n_total < 20) {
         issues <- append(issues, sprintf(.("Very small sample size (n = %d). Results may be unreliable."), n_total))
     }
-
+    
     # Check group sizes
     if (!is.null(mygroup) && mygroup %in% names(mydata)) {
         group_sizes <- table(mydata[[mygroup]])
         min_group_size <- min(group_sizes)
-
+        
         if (min_group_size < 5) {
             warnings <- append(warnings, paste0("Small group detected (n = ", min_group_size, "). Consider combining categories or using exact tests."))
         }
-
+        
         # Check for empty cells in cross-tabulations (categorical variables only)
         for (var in myvars) {
             if (var %in% names(mydata)) {
@@ -275,23 +267,23 @@ NULL
                 if (is_categorical) {
                     cont_table <- table(mydata[[var]], mydata[[mygroup]])
                     if (any(cont_table == 0)) {
-                        warnings <- append(warnings, paste0("Empty cells detected in ", .display(var), " × ", .display(mygroup), " table. Results may be unstable."))
+                        warnings <- append(warnings, paste0("Empty cells detected in ", var, " × ", mygroup, " table. Results may be unstable."))
                     }
                 }
             }
         }
     }
-
+    
     # Check for excessive missing data
     for (var in c(myvars, mygroup)) {
         if (var %in% names(mydata)) {
             missing_pct <- mean(is.na(mydata[[var]])) * 100
             if (missing_pct > 20) {
-                warnings <- append(warnings, paste0("High missing data in ", .display(var), " (", round(missing_pct, 1), "%). Consider imputation or sensitivity analysis."))
+                warnings <- append(warnings, paste0("High missing data in ", var, " (", round(missing_pct, 1), "%). Consider imputation or sensitivity analysis."))
             }
         }
     }
-
+    
     return(list(
         critical_issues = issues,
         warnings = warnings,
@@ -353,8 +345,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Report any critical issues
                 if (length(validation_results$issues) > 0) {
-                    jmvcore::reject("Variable name issues detected: {}",
-                                    paste(validation_results$issues, collapse = "; "))
+                    stop(paste("Variable name issues detected:",
+                              paste(validation_results$issues, collapse = "; ")))
                 }
 
                 # Create bidirectional mappings for robust variable handling
@@ -401,7 +393,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     }
 
                 }, error = function(e) {
-                    jmvcore::reject("Variable matching failed: {}", e$message)
+                    stop(paste("Variable matching failed:", e$message))
                 })
 
                 # Report warnings about variable names if any
@@ -418,7 +410,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # If any user-specified variable could not be matched, block analysis
                 if (length(myvars) == 0 || length(mygroup) == 0) {
-                    jmvcore::reject("Selected variables could not be matched to the dataset after cleaning labels. Please reselect variables.")
+                    stop("Selected variables could not be matched to the dataset after cleaning labels. Please reselect variables.")
                 }
 
                 return(list(
@@ -605,15 +597,14 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 escaped_myvars <- .escapeVariableNames(myvars)
                 escaped_mygroup <- .escapeVariableNames(mygroup)
                 formula <- jmvcore::constructFormula(terms = escaped_myvars, dep = escaped_mygroup)
-                formula <- jmvcore::asFormula(formula)
+                formula <- as.formula(formula)
 
                 # Exclude missing data if requested.
                 if (self$options$excl)
                     mydata <- jmvcore::naOmit(mydata)
                 
                 # Validate analysis assumptions and data quality
-                validation_results <- .validateAnalysisAssumptions(mydata, myvars, mygroup,
-                                                                   name_mapping = original_names_mapping)
+                validation_results <- .validateAnalysisAssumptions(mydata, myvars, mygroup)
                 if (length(validation_results$warnings) > 0) {
                     # Accumulate all warnings into HTML (avoid serialization errors from dynamic Notice inserts)
                     warning_html_parts <- character(length(validation_results$warnings))
@@ -1936,17 +1927,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Build group argument
                 group_arg <- paste0('group = "', group_escaped, '"')
 
-                # Get other arguments using base helper (if available).
-                # .asArgs re-emits every option, so strip vars/group to avoid
-                # duplicating the manually-built (correctly backtick-quoted) versions.
+                # Get other arguments using base helper (if available)
                 args <- ''
                 if (!is.null(private$.asArgs)) {
                     args <- private$.asArgs(incData = FALSE)
-                }
-                if (args != '') {
-                    args_lines <- strsplit(args, ",\\s*\\n\\s*")[[1]]
-                    args_lines <- args_lines[!grepl("^\\s*(vars|group)\\s*=", args_lines)]
-                    args <- if (length(args_lines) > 0) paste(args_lines, collapse = ',\n    ') else ''
                 }
                 if (args != '')
                     args <- paste0(',\n    ', args)

@@ -4,7 +4,7 @@ title: Treatment Response Analysis
 menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
-version: '0.0.37'
+version: '0.0.38'
 jas: '1.2'
 
 description:

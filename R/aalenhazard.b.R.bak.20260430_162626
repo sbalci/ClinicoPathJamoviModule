@@ -310,39 +310,30 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         # Build formula based on model type and constant effects
         covar_names <- data_prep$covariate_names
         const_names <- data_prep$constant_names
-
-        # Backtick-quote names so non-syntactic identifiers (e.g., "Tumor Size") survive formula parsing.
-        covar_terms <- vapply(covar_names, jmvcore::composeTerm, character(1))
-        const_terms <- if (!is.null(const_names) && length(const_names) > 0)
-            vapply(const_names, jmvcore::composeTerm, character(1)) else character(0)
-
+        
         if (model_type == "additive") {
           # Pure additive model - all effects time-varying
-          formula_str <- paste0("survival ~ ", paste(covar_terms, collapse = " + "))
-
+          formula_str <- paste0("survival ~ ", paste(covar_names, collapse = " + "))
+          
         } else if (model_type == "semiparametric" && !is.null(const_names)) {
           # Semi-parametric - some constant, some time-varying
           varying_names <- setdiff(covar_names, const_names)
-          varying_terms <- vapply(varying_names, jmvcore::composeTerm, character(1))
-
+          
           if (length(const_names) > 0 && length(varying_names) > 0) {
-            formula_str <- paste0("survival ~ const(", paste(const_terms, collapse = ", "), ") + ",
-                                paste(varying_terms, collapse = " + "))
+            formula_str <- paste0("survival ~ const(", paste(const_names, collapse = ", "), ") + ", 
+                                paste(varying_names, collapse = " + "))
           } else if (length(const_names) > 0) {
-            formula_str <- paste0("survival ~ const(", paste(const_terms, collapse = ", "), ")")
+            formula_str <- paste0("survival ~ const(", paste(const_names, collapse = ", "), ")")
           } else {
-            formula_str <- paste0("survival ~ ", paste(covar_terms, collapse = " + "))
+            formula_str <- paste0("survival ~ ", paste(covar_names, collapse = " + "))
           }
-
+          
         } else {
           # Non-parametric or fallback to additive
-          formula_str <- paste0("survival ~ ", paste(covar_terms, collapse = " + "))
+          formula_str <- paste0("survival ~ ", paste(covar_names, collapse = " + "))
         }
         
-        # Create formula and fit model.
-        # Note: jmvcore::asFormula() rejects timereg's const() wrapper as an "unsafe function".
-        # The formula_str here is built deterministically from a fixed template, so the safety
-        # gain from allowlist validation is moot — keep base R as.formula().
+        # Create formula and fit model
         model_formula <- as.formula(formula_str)
         
         aalen_fit <- timereg::aalen(

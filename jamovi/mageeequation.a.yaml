@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Prediction Models
 menuTitle: Magee Equation (Oncotype DX)
 menuSubtitle: Estimate Oncotype DX Recurrence Score from pathology variables
-version: '0.0.37'
+version: '0.0.38'
 jas: '1.2'
 
 description:

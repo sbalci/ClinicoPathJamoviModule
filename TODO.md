@@ -125,6 +125,9 @@ Rscript _updateModules.R
 /generate-test-data FUNC_NAME
 /update-refs FUNC_NAME
 /document-function FUNC_NAME
+/jamovify-function FUNC_NAME --apply 
+/security-audit-function FUNC_NAME
+
 
 fix issues, implement recommendations and enhancements
 

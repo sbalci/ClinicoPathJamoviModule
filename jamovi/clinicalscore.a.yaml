@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Prediction Models
 menuTitle: Clinical Score Builder
 menuSubtitle: Build, validate, and compare integer-point scoring systems
-version: '0.0.37'
+version: '0.0.38'
 jas: '1.2'
 
 description:
