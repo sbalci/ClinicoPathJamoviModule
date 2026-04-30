@@ -358,13 +358,27 @@ options:
           R: >
             Automatically determine optimal number of clusters using elbow method and silhouette analysis.
 
-    - name: kRange
-      title: 'Range for K Search'
-      type: String
-      default: '2:8'
+    - name: kMin
+      title: 'Minimum K'
+      type: Integer
+      min: 2
+      max: 20
+      default: 2
       description:
           R: >
-            Range of K values to test (format: "min:max", e.g., "2:10").
+            Minimum number of clusters to evaluate when searching for the
+            optimal K. Must be at least 2 and no greater than `kMax`.
+
+    - name: kMax
+      title: 'Maximum K'
+      type: Integer
+      min: 2
+      max: 20
+      default: 8
+      description:
+          R: >
+            Maximum number of clusters to evaluate when searching for the
+            optimal K. Must be at least `kMin` and no greater than 20.
 
     - name: exportRowClusters
       title: 'Export Row Cluster Assignments'

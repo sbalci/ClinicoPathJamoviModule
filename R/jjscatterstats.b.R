@@ -332,7 +332,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            # Evaluate the call
+            # Safety note: `plot_call` is built with `rlang::expr()` and
+            # `!!` quasiquotation. The function name
+            # (`ggstatsplot::grouped_ggscatterstats`) is hardcoded. User
+            # inputs flow only into argument-VALUE positions: column-name
+            # strings via `rlang::sym()` (which become symbols bound at
+            # evaluation time to columns of `plotData`, not function
+            # calls), numeric/bool options, and free-text titles passed
+            # as character literals. No user string lands in a
+            # function-name position.
             plot <- eval(plot_call)
 
             if (self$options$showRugPlot) {

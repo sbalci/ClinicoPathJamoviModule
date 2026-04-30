@@ -32,7 +32,8 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             splitRows = 1,
             splitCols = 1,
             findOptimalK = FALSE,
-            kRange = "2:8",
+            kMin = 2,
+            kMax = 8,
             exportRowClusters = FALSE,
             exportColClusters = FALSE,
             rowClusterPrefix = "RowCluster",
@@ -230,10 +231,18 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "findOptimalK",
                 findOptimalK,
                 default=FALSE)
-            private$..kRange <- jmvcore::OptionString$new(
-                "kRange",
-                kRange,
-                default="2:8")
+            private$..kMin <- jmvcore::OptionInteger$new(
+                "kMin",
+                kMin,
+                min=2,
+                max=20,
+                default=2)
+            private$..kMax <- jmvcore::OptionInteger$new(
+                "kMax",
+                kMax,
+                min=2,
+                max=20,
+                default=8)
             private$..exportRowClusters <- jmvcore::OptionBool$new(
                 "exportRowClusters",
                 exportRowClusters,
@@ -317,7 +326,8 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..splitRows)
             self$.addOption(private$..splitCols)
             self$.addOption(private$..findOptimalK)
-            self$.addOption(private$..kRange)
+            self$.addOption(private$..kMin)
+            self$.addOption(private$..kMax)
             self$.addOption(private$..exportRowClusters)
             self$.addOption(private$..exportColClusters)
             self$.addOption(private$..rowClusterPrefix)
@@ -356,7 +366,8 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         splitRows = function() private$..splitRows$value,
         splitCols = function() private$..splitCols$value,
         findOptimalK = function() private$..findOptimalK$value,
-        kRange = function() private$..kRange$value,
+        kMin = function() private$..kMin$value,
+        kMax = function() private$..kMax$value,
         exportRowClusters = function() private$..exportRowClusters$value,
         exportColClusters = function() private$..exportColClusters$value,
         rowClusterPrefix = function() private$..rowClusterPrefix$value,
@@ -394,7 +405,8 @@ clinicalheatmapOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..splitRows = NA,
         ..splitCols = NA,
         ..findOptimalK = NA,
-        ..kRange = NA,
+        ..kMin = NA,
+        ..kMax = NA,
         ..exportRowClusters = NA,
         ..exportColClusters = NA,
         ..rowClusterPrefix = NA,
@@ -860,7 +872,10 @@ clinicalheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   branches.
 #' @param findOptimalK Automatically determine optimal number of clusters
 #'   using elbow method and silhouette analysis.
-#' @param kRange Range of K values to test (format: "min:max", e.g., "2:10").
+#' @param kMin Minimum number of clusters to evaluate when searching for the
+#'   optimal K. Must be at least 2 and no greater than \code{kMax}.
+#' @param kMax Maximum number of clusters to evaluate when searching for the
+#'   optimal K. Must be at least \code{kMin} and no greater than 20.
 #' @param exportRowClusters Add row cluster assignments as a new column in the
 #'   dataset.
 #' @param exportColClusters Add column cluster assignments as a new column in
@@ -934,7 +949,8 @@ clinicalheatmap <- function(
     splitRows = 1,
     splitCols = 1,
     findOptimalK = FALSE,
-    kRange = "2:8",
+    kMin = 2,
+    kMax = 8,
     exportRowClusters = FALSE,
     exportColClusters = FALSE,
     rowClusterPrefix = "RowCluster",
@@ -999,7 +1015,8 @@ clinicalheatmap <- function(
         splitRows = splitRows,
         splitCols = splitCols,
         findOptimalK = findOptimalK,
-        kRange = kRange,
+        kMin = kMin,
+        kMax = kMax,
         exportRowClusters = exportRowClusters,
         exportColClusters = exportColClusters,
         rowClusterPrefix = rowClusterPrefix,

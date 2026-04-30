@@ -402,7 +402,11 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             var_count <- length(self$options$vars)
             by_var_name <- self$options$by_var
-            interp_html <- paste0(interp_html, "<p><strong>Current Analysis:</strong> Examining associations between ", var_count, " variable(s) and '", by_var_name, "'.</p>")
+            # by_var_name holds a column name selected from the user's
+            # dataset — the name itself can contain HTML. Escape before
+            # interpolating into the rendered HTML.
+            safe_by_var <- htmltools::htmlEscape(by_var_name)
+            interp_html <- paste0(interp_html, "<p><strong>Current Analysis:</strong> Examining associations between ", var_count, " variable(s) and '", safe_by_var, "'.</p>")
             interp_html <- paste0(interp_html, "</div>")
             
             self$results$interpretation$setContent(interp_html)

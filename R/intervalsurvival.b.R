@@ -519,8 +519,11 @@ intervalsurvivalClass <- R6::R6Class(
                             ci_upper <- round(exp(coef + 1.96 * se), 4)
                             ci_text <- paste0("(", ci_lower, ", ", ci_upper, ")")
 
+                            # Coefficient row names trace back to formula
+                            # variable names → user-supplied column names.
+                            safe_var <- htmltools::htmlEscape(var_name)
                             html <- paste0(html, "<tr>")
-                            html <- paste0(html, "<td>", var_name, "</td>")
+                            html <- paste0(html, "<td>", safe_var, "</td>")
                             html <- paste0(html, "<td>", coef, "</td>")
                             html <- paste0(html, "<td>", exp_coef, "</td>")
                             html <- paste0(html, "<td>", se, "</td>")
@@ -547,8 +550,10 @@ intervalsurvivalClass <- R6::R6Class(
 
                             accel_factor <- if (var_name != "(Intercept)") round(exp(estimate), 4) else "-"
 
+                            # Same lineage as the Cox table above; escape.
+                            safe_var <- htmltools::htmlEscape(var_name)
                             html <- paste0(html, "<tr>")
-                            html <- paste0(html, "<td>", var_name, "</td>")
+                            html <- paste0(html, "<td>", safe_var, "</td>")
                             html <- paste0(html, "<td>", estimate, "</td>")
                             html <- paste0(html, "<td>", se, "</td>")
                             html <- paste0(html, "<td>", z_val, "</td>")

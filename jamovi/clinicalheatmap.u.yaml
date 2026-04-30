@@ -118,8 +118,11 @@ children:
             margin: large
             children:
               - type: TextBox
-                name: kRange
-                format: string
+                name: kMin
+                format: number
+              - type: TextBox
+                name: kMax
+                format: number
       - type: Label
         label: Export Cluster Assignments
         children:

@@ -68,3 +68,5 @@ temp2/
 _snaps/
 tr/
 PATCHES/
+.claude/skills/
+docs/SECURITY/

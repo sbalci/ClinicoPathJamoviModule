@@ -2010,7 +2010,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$showSummary) {
                 summary_html <- "<div style='font-family: Georgia, serif; line-height: 1.8; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2c5aa0;'>"
                 summary_html <- paste0(summary_html, "<h3 style='color: #2c5aa0; margin-top: 0;'>Data Quality Summary</h3>")
-                summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", var_name, "</p>")
+                summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", htmltools::htmlEscape(var_name), "</p>")
                 summary_html <- paste0(summary_html, "<p><strong>Overall Quality Grade:</strong> ", quality_grade, " (", quality_score, "/100 by heuristic scoring)</p>")
 
                 # Sample characteristics

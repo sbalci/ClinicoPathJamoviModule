@@ -60,7 +60,7 @@ enhanced_ttest <- function(data, dependent, group = NULL, test_value = 0,
             
             # Prepare data with error handling
             analysis_result <- safe_execute(
-                expr = {
+                fn = function() {
                     if (is.null(group)) {
                         # One-sample t-test
                         values <- data[[dependent]]

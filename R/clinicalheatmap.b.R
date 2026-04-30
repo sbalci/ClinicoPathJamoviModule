@@ -1268,10 +1268,14 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             tryCatch({
                 if (is.null(mat_data) || nrow(mat_data) < 3 || ncol(mat_data) < 2) return()
 
-                # Parse K range
-                k_range_str <- self$options$kRange
-                k_range <- eval(parse(text = k_range_str))
-                if (length(k_range) < 2) k_range <- 2:8
+                # Build K range from bounded integer options. The previous
+                # implementation evaluated a free-text string at runtime, which
+                # let any caller smuggle arbitrary R code through the option.
+                k_min <- as.integer(self$options$kMin)
+                k_max <- as.integer(self$options$kMax)
+                if (is.na(k_min) || k_min < 2L) k_min <- 2L
+                if (is.na(k_max) || k_max < k_min) k_max <- max(k_min + 1L, 8L)
+                k_range <- seq.int(k_min, k_max)
 
                 # Store data for plotting
                 self$results$optimalKAnalysis$elbowPlot$setState(list(

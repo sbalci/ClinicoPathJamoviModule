@@ -32,7 +32,8 @@ clinicalheatmap(
   splitRows = 1,
   splitCols = 1,
   findOptimalK = FALSE,
-  kRange = "2:8",
+  kMin = 2,
+  kMax = 8,
   exportRowClusters = FALSE,
   exportColClusters = FALSE,
   rowClusterPrefix = "RowCluster",
@@ -112,7 +113,11 @@ branches.}
 \item{findOptimalK}{Automatically determine optimal number of clusters
 using elbow method and silhouette analysis.}
 
-\item{kRange}{Range of K values to test (format: "min:max", e.g., "2:10").}
+\item{kMin}{Minimum number of clusters to evaluate when searching for the
+optimal K. Must be at least 2 and no greater than \code{kMax}.}
+
+\item{kMax}{Maximum number of clusters to evaluate when searching for the
+optimal K. Must be at least \code{kMin} and no greater than 20.}
 
 \item{exportRowClusters}{Add row cluster assignments as a new column in the
 dataset.}

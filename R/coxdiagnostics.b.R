@@ -324,12 +324,16 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     chisq <- round(zph$table[i, "chisq"], 3)
                     df <- zph$table[i, "df"]
                     p_val <- format.pval(zph$table[i, "p"], digits = 3)
-                    
+
                     # Color code p-values
                     p_color <- if (zph$table[i, "p"] < 0.05) "color: red; font-weight: bold;" else "color: green;"
-                    
+
+                    # var_name comes from rownames(zph$table), which derive
+                    # from the formula's variable names — ultimately from
+                    # user-supplied column names. Escape before HTML insert.
+                    safe_var <- htmltools::htmlEscape(var_name)
                     ph_html <- paste0(ph_html, "<tr>")
-                    ph_html <- paste0(ph_html, "<td><strong>", var_name, "</strong></td>")
+                    ph_html <- paste0(ph_html, "<td><strong>", safe_var, "</strong></td>")
                     ph_html <- paste0(ph_html, "<td>", chisq, "</td>")
                     ph_html <- paste0(ph_html, "<td>", df, "</td>")
                     ph_html <- paste0(ph_html, "<td style='", p_color, "'>", p_val, "</td>")
@@ -432,8 +436,10 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         color <- "color: green;"
                     }
                     
+                    # Same lineage as the cox.zph table above; escape.
+                    safe_var <- htmltools::htmlEscape(var_name)
                     vif_html <- paste0(vif_html, "<tr>")
-                    vif_html <- paste0(vif_html, "<td><strong>", var_name, "</strong></td>")
+                    vif_html <- paste0(vif_html, "<td><strong>", safe_var, "</strong></td>")
                     vif_html <- paste0(vif_html, "<td>", vif_val, "</td>")
                     vif_html <- paste0(vif_html, "<td style='", color, "'>", status, "</td>")
                     vif_html <- paste0(vif_html, "</tr>")

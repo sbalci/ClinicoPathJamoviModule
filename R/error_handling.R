@@ -139,41 +139,48 @@ clinicopath_warning_handler <- function(warning, function_name = "unknown", clin
 }
 
 #' Safe Execution Wrapper
-#' 
-#' @description Safely execute code with enhanced error handling
-#' @param expr Expression to execute
-#' @param function_name Name of the calling function
-#' @param clinical_context Clinical context for the operation
-#' @param default_value Default value to return on error
+#'
+#' @description Safely execute code with enhanced error/warning capture.
+#'   The argument is a zero-argument function (a "thunk"), not an unevaluated
+#'   expression. Earlier versions accepted an unevaluated expression and ran
+#'   the runtime evaluator on it; that contract made the helper a string-to-code
+#'   pathway whenever a caller was tempted to feed it a parsed user string.
+#'   The current contract removes that risk by requiring callers to commit
+#'   to a function value at the call site.
+#'
+#' @param fn A zero-argument function whose body is the code to run safely.
+#'   Pass `function() { ... your code ... }`.
+#' @param function_name Name of the calling function (for log messages).
+#' @param clinical_context Clinical context for the operation (for log messages).
+#' @param default_value Value to place in the `result` slot on error.
+#' @return A list with `success`, `result`, and either `warnings`/`errors`
+#'   counters (on success) or `error_info` (on failure).
 #' @export
-safe_execute <- function(expr, function_name = "unknown", clinical_context = "", default_value = NULL) {
-    
-    result <- tryCatch(
-        withCallingHandlers(
-            {
-                eval(expr)
-            },
+safe_execute <- function(fn, function_name = "unknown", clinical_context = "", default_value = NULL) {
+    stopifnot(is.function(fn))
+
+    tryCatch({
+        result <- withCallingHandlers(
+            fn(),
             warning = function(w) {
-                warning_result <- clinicopath_warning_handler(w, function_name, clinical_context)
+                clinicopath_warning_handler(w, function_name, clinical_context)
                 invokeRestart("muffleWarning")
             }
-        ),
-        error = function(e) {
-            error_result <- clinicopath_error_handler(e, function_name, clinical_context)
-            return(list(
-                success = FALSE,
-                result = default_value,
-                error_info = error_result
-            ))
-        }
-    )
-    
-    return(list(
-        success = TRUE,
-        result = result,
-        warnings = .clinicopath_errors$warning_count,
-        errors = .clinicopath_errors$error_count
-    ))
+        )
+        list(
+            success = TRUE,
+            result = result,
+            warnings = .clinicopath_errors$warning_count,
+            errors = .clinicopath_errors$error_count
+        )
+    }, error = function(e) {
+        error_result <- clinicopath_error_handler(e, function_name, clinical_context)
+        list(
+            success = FALSE,
+            result = default_value,
+            error_info = error_result
+        )
+    })
 }
 
 #' Validate Data with Clinical Context

@@ -128,10 +128,20 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                     theme = paste0("theme_", self$options$plotTheme)
                 )
 
-                # Evaluate the call to create plot with error handling
-                p <- tryCatch({
-                    eval(plot_call)
-                }, error = function(e) {
+                # Evaluate the call to create plot with error handling.
+                # Safety: `plot_call` is the language object produced by
+                # `esquisse::ggcall(...)` above. Every input that varies at
+                # runtime flows into VALUE positions (mappings, geom args,
+                # labs, theme name). The `theme` argument is the string
+                # `paste0("theme_", self$options$plotTheme)` where
+                # `plotTheme` is a closed `List` enum in
+                # `jamovi/esquisseauto.a.yaml` — its values are restricted
+                # to {minimal, classic, gray, bw, light, dark, void}, all
+                # of which resolve to real ggplot2 functions. No
+                # user-supplied string reaches a function-name position.
+                p <- tryCatch(
+                    eval(plot_call),
+                    error = function(e) {
                     # Provide user-friendly error messages
                     error_msg <- conditionMessage(e)
 
