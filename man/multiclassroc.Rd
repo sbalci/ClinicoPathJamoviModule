@@ -104,7 +104,7 @@ with
 multiple levels, and AI model validation for multi-class predictions.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example with tumor subtype classification
 data <- data.frame(
   true_class = factor(sample(c("TypeA", "TypeB", "TypeC"), 100, replace=TRUE)),

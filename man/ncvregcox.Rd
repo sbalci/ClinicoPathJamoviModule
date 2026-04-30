@@ -104,7 +104,7 @@ for genomics and high-dimensional clinical data where interpretable
 variable selection is crucial.
 }
 \examples{
-\dontrun{
+\donttest{
 ncvregcox(
     data = data,
     time = "time",

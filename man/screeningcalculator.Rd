@@ -84,7 +84,7 @@ This calculator is particularly useful for:
 • Evaluating diagnostic test chains in clinical workflows
 }
 \examples{
-\dontrun{
+\donttest{
 # COVID-19 rapid test in community screening (low prevalence)
 # Sensitivity: 85 percent, Specificity: 95 percent, Prevalence: 2 percent
 data(screening_examples)

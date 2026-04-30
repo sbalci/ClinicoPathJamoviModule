@@ -1705,7 +1705,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load example data
 #' data('pathology_ratings', package = 'ClinicoPath')
 #'

@@ -887,7 +887,7 @@ treeadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Advanced analysis with hyperparameter tuning
 #' tree_advanced(
 #'     data = clinical_data,

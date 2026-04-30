@@ -169,7 +169,7 @@ A results object containing:
 ggstatsplot::grouped_gghistostats to generate Histogram.'
 }
 \examples{
-\dontrun{
+\donttest{
 # Load test data
 data(jjhistostats_test_data)
 

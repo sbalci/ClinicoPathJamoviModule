@@ -1,10 +1,12 @@
 #' @title Clinical Scoring System Generator
 #' @description
-#' Builds clinical integer-point scoring systems from logistic or Cox regression
-#' models using three published methods: Sullivan/D'Agostino (2004), Schneeweiss
-#' (Mehta et al. 2016), and Beta10 (Zhang et al. 2017). Includes automatic variable
-#' categorization, calibration/discrimination assessment, nomogram generation,
-#' score-to-probability lookup, bootstrap validation, and TRIPOD compliance.
+#' Builds clinical integer-point scoring systems from regression models using
+#' three published methods: Sullivan/D'Agostino (2004), Schneeweiss (Mehta et al.
+#' 2016), and Beta10 (Zhang et al. 2017). Supports logistic (binary), Cox
+#' (time-to-event), linear (continuous), and ordinal (ordered categories)
+#' regression. Includes automatic variable categorization, calibration/
+#' discrimination assessment, nomogram generation, score-to-outcome lookup,
+#' bootstrap validation, and TRIPOD compliance.
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -93,7 +95,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         .init = function() {
             if (is.null(self$options$outcome) ||
                 is.null(self$options$explanatory) ||
-                length(self$options$explanatory) == 0) {
+                length(self$options$explanatory) < 2) {
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-info'>",
                     "<h4>", .("Clinical Scoring System Generator"), "</h4>",
@@ -195,10 +197,17 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             if (self$options$showExplanations) private$.populateExplanations()
 
             # ── 11. Completion notice ─────────────────────────────────
+            model_label <- switch(prepared$model_type,
+                "logistic" = .("logistic"), "cox" = .("Cox"),
+                "linear" = .("linear"), "ordinal" = .("ordinal"))
+            event_info <- if (prepared$model_type == "linear") {
+                sprintf(.("N=%d"), prepared$n)
+            } else {
+                sprintf(.("N=%d, %d events"), prepared$n, prepared$n_events)
+            }
             private$.addNotice("INFO", .("Analysis Complete"),
-                sprintf(.('Scoring system built using %s regression with %d predictors (N=%d, %d events). Method: %s.'),
-                    if (prepared$model_type == "logistic") .("logistic") else .("Cox"),
-                    length(prepared$expl_vars), prepared$n, prepared$n_events,
+                sprintf(.('Scoring system built using %s regression with %d predictors (%s). Method: %s.'),
+                    model_label, length(prepared$expl_vars), event_info,
                     self$options$scoringMethod))
 
             # ── 12. Render all collected notices as HTML ─────────────
@@ -214,22 +223,54 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             expl_vars <- self$options$explanatory
             model_type <- self$options$modelType
 
-            # Extract outcome -- convert to 0/1 binary for both model types
+            # Extract outcome based on model type
             outcome_raw <- data[[outcome_var]]
-            if (is.factor(outcome_raw) || is.character(outcome_raw)) {
-                outcome_chr <- as.character(outcome_raw)
-                levels_obs <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
-                event_level <- as.character(self$options$outcomeLevel)
-                if (is.null(event_level) || !nzchar(event_level)) event_level <- levels_obs[2]
-                ref_level <- setdiff(levels_obs, event_level)[1]
-                y <- rep(NA_real_, length(outcome_chr))
-                y[outcome_chr == event_level] <- 1
-                y[outcome_chr == ref_level] <- 0
-            } else {
+            event_level <- NULL
+            ref_level <- NULL
+            y <- NULL
+            y_ordered <- NULL  # for ordinal models
+
+            if (model_type == "linear") {
+                # Continuous outcome — no binary conversion
                 y <- jmvcore::toNumeric(outcome_raw)
-                event_level <- if (model_type == "logistic") "1" else as.character(self$options$outcomeLevel)
-                if (is.null(event_level) || !nzchar(event_level)) event_level <- "1"
-                ref_level <- "0"
+                if (all(is.na(y))) stop(.("Outcome variable must be numeric for linear regression."))
+                event_level <- "continuous"
+                ref_level <- "continuous"
+
+            } else if (model_type == "ordinal") {
+                # Ordinal outcome — ensure ordered factor
+                if (is.factor(outcome_raw)) {
+                    if (!is.ordered(outcome_raw)) {
+                        y_ordered <- factor(outcome_raw, levels = levels(outcome_raw), ordered = TRUE)
+                    } else {
+                        y_ordered <- outcome_raw
+                    }
+                } else {
+                    vals <- sort(unique(as.character(outcome_raw[!is.na(outcome_raw)])))
+                    y_ordered <- factor(as.character(outcome_raw), levels = vals, ordered = TRUE)
+                }
+                # Also create numeric for scoring evaluation
+                y <- as.numeric(y_ordered) - 1  # 0-based
+                event_level <- paste(levels(y_ordered), collapse = " < ")
+                ref_level <- levels(y_ordered)[1]
+
+            } else {
+                # Logistic or Cox — convert to 0/1 binary
+                if (is.factor(outcome_raw) || is.character(outcome_raw)) {
+                    outcome_chr <- as.character(outcome_raw)
+                    levels_obs <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
+                    event_level <- as.character(self$options$outcomeLevel)
+                    if (is.null(event_level) || !nzchar(event_level)) event_level <- levels_obs[2]
+                    ref_level <- setdiff(levels_obs, event_level)[1]
+                    y <- rep(NA_real_, length(outcome_chr))
+                    y[outcome_chr == event_level] <- 1
+                    y[outcome_chr == ref_level] <- 0
+                } else {
+                    y <- jmvcore::toNumeric(outcome_raw)
+                    event_level <- if (model_type == "logistic") "1" else as.character(self$options$outcomeLevel)
+                    if (is.null(event_level) || !nzchar(event_level)) event_level <- "1"
+                    ref_level <- "0"
+                }
             }
 
             # Time variable for Cox
@@ -273,13 +314,25 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             y <- y[complete]
             predictors <- predictors[complete, , drop = FALSE]
             if (!is.null(time_val)) time_val <- time_val[complete]
+            if (!is.null(y_ordered)) y_ordered <- y_ordered[complete]
 
-            n_events <- if (model_type == "logistic") sum(y == 1, na.rm = TRUE) else sum(y == 1, na.rm = TRUE)
+            # n_events: for linear = NA (continuous), for ordinal = count in highest category
+            if (model_type == "linear") {
+                n_events <- NA
+                n_nonevents <- NA
+            } else if (model_type == "ordinal") {
+                n_events <- sum(y == max(y, na.rm = TRUE), na.rm = TRUE)
+                n_nonevents <- n_complete - n_events
+            } else {
+                n_events <- sum(y == 1, na.rm = TRUE)
+                n_nonevents <- n_complete - n_events
+            }
 
             list(
-                y = y, predictors = predictors, time = time_val,
+                y = y, y_ordered = y_ordered,
+                predictors = predictors, time = time_val,
                 n = n_complete, n_events = n_events,
-                n_nonevents = n_complete - n_events,
+                n_nonevents = n_nonevents,
                 event_level = event_level, ref_level = ref_level,
                 model_type = model_type, cat_info = cat_info,
                 expl_vars = expl_vars
@@ -307,13 +360,13 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         .makeLabels = function(varname, breaks) {
             n_groups <- length(breaks) + 1
             labs <- character(n_groups)
-            labs[1] <- sprintf("%s <= %.1f", varname, breaks[1])
+            labs[1] <- sprintf("<= %.1f", breaks[1])
             if (n_groups > 2) {
                 for (i in 2:(n_groups - 1)) {
-                    labs[i] <- sprintf("%.1f < %s <= %.1f", breaks[i-1], varname, breaks[i])
+                    labs[i] <- sprintf("%.1f - %.1f", breaks[i-1], breaks[i])
                 }
             }
-            labs[n_groups] <- sprintf("%s > %.1f", varname, breaks[length(breaks)])
+            labs[n_groups] <- sprintf("> %.1f", breaks[length(breaks)])
             labs
         },
 
@@ -333,6 +386,38 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 ci_upper <- exp(coefs + 1.96 * se)
                 predicted <- predict(model, type = "response")
                 intercept <- coef(model)[1]
+
+            } else if (prepared$model_type == "linear") {
+                model <- lm(y ~ ., data = df)
+                sm <- summary(model)
+                coefs <- coef(model)[-1]  # drop intercept
+                se <- sm$coefficients[-1, 2]
+                p_vals <- sm$coefficients[-1, 4]
+                # For linear: effect size = standardized coefficient
+                or_hr <- coefs  # raw coefficients (no exponentiation)
+                ci_lower <- coefs - 1.96 * se
+                ci_upper <- coefs + 1.96 * se
+                predicted <- predict(model)
+                intercept <- coef(model)[1]
+
+            } else if (prepared$model_type == "ordinal") {
+                if (!requireNamespace("MASS", quietly = TRUE))
+                    stop(.("Package 'MASS' is required for ordinal regression."))
+                df$y_ord <- prepared$y_ordered
+                model <- MASS::polr(y_ord ~ . - y, data = df, Hess = TRUE)
+                sm <- summary(model)
+                # polr coefficients (not intercepts)
+                coefs <- coef(model)
+                se <- sm$coefficients[seq_along(coefs), 2]
+                # p-values from t-distribution (polr doesn't provide them)
+                t_vals <- coefs / se
+                p_vals <- 2 * pt(abs(t_vals), df = prepared$n - length(coefs), lower.tail = FALSE)
+                or_hr <- exp(coefs)  # proportional odds ratios
+                ci_lower <- exp(coefs - 1.96 * se)
+                ci_upper <- exp(coefs + 1.96 * se)
+                # Predicted class probabilities → linear predictor
+                predicted <- as.numeric(predict(model, type = "lp"))
+                intercept <- NA
 
             } else {
                 surv_obj <- survival::Surv(prepared$time, prepared$y)
@@ -394,39 +479,63 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         .evaluateScore = function(y, scores, model_type = "logistic") {
             if (length(unique(scores)) < 2) {
                 return(list(auc = NA, cutoff = NA, accuracy = NA,
-                            sensitivity = NA, specificity = NA))
+                            sensitivity = NA, specificity = NA,
+                            r_squared = NA, rmse = NA, correlation = NA))
+            }
+
+            if (model_type == "linear") {
+                # For continuous outcomes: R², RMSE, correlation
+                r2 <- cor(y, scores, use = "complete.obs")^2
+                rmse <- sqrt(mean((y - scores)^2, na.rm = TRUE))
+                corr <- cor(y, scores, use = "complete.obs")
+                return(list(auc = NA, cutoff = NA, accuracy = NA,
+                            sensitivity = NA, specificity = NA,
+                            r_squared = r2, rmse = rmse, correlation = corr))
             }
 
             auc_val <- NA
             tryCatch({
                 if (requireNamespace("pROC", quietly = TRUE)) {
-                    roc_obj <- pROC::roc(y, scores, quiet = TRUE)
-                    auc_val <- as.numeric(pROC::auc(roc_obj))
+                    if (model_type == "ordinal") {
+                        # Multi-class AUC
+                        roc_obj <- pROC::multiclass.roc(y, scores, quiet = TRUE)
+                        auc_val <- as.numeric(roc_obj$auc)
+                    } else {
+                        roc_obj <- pROC::roc(y, scores, quiet = TRUE)
+                        auc_val <- as.numeric(pROC::auc(roc_obj))
+                    }
                 }
             }, error = function(e) {})
 
-            # Youden-optimal cutoff
+            # Youden-optimal cutoff (for binary/cox)
             score_vals <- sort(unique(scores))
             best_youden <- -Inf; best_cutoff <- score_vals[1]
-            for (cutoff in score_vals) {
-                pred <- as.integer(scores >= cutoff)
-                sens <- sum(pred == 1 & y == 1) / max(sum(y == 1), 1)
-                spec <- sum(pred == 0 & y == 0) / max(sum(y == 0), 1)
-                youden <- sens + spec - 1
-                if (youden > best_youden) {
-                    best_youden <- youden; best_cutoff <- cutoff
+            if (model_type %in% c("logistic", "cox")) {
+                for (cutoff in score_vals) {
+                    pred <- as.integer(scores >= cutoff)
+                    sens <- sum(pred == 1 & y == 1) / max(sum(y == 1), 1)
+                    spec <- sum(pred == 0 & y == 0) / max(sum(y == 0), 1)
+                    youden <- sens + spec - 1
+                    if (youden > best_youden) {
+                        best_youden <- youden; best_cutoff <- cutoff
+                    }
                 }
+            } else {
+                # Ordinal: use median score as cutoff
+                best_cutoff <- median(scores, na.rm = TRUE)
             }
 
             pred <- as.integer(scores >= best_cutoff)
-            tp <- sum(pred == 1 & y == 1); fp <- sum(pred == 1 & y == 0)
-            fn <- sum(pred == 0 & y == 1)
+            y_bin <- if (model_type == "ordinal") as.integer(y >= max(y) / 2) else y
+            tp <- sum(pred == 1 & y_bin == 1); fp <- sum(pred == 1 & y_bin == 0)
+            fn <- sum(pred == 0 & y_bin == 1)
             sens <- tp / max(tp + fn, 1)
-            spec <- sum(pred == 0 & y == 0) / max(sum(y == 0), 1)
-            acc <- mean(pred == y)
+            spec <- sum(pred == 0 & y_bin == 0) / max(sum(y_bin == 0), 1)
+            acc <- mean(pred == y_bin)
 
             list(auc = auc_val, cutoff = best_cutoff, accuracy = acc,
-                 sensitivity = sens, specificity = spec)
+                 sensitivity = sens, specificity = spec,
+                 r_squared = NA, rmse = NA, correlation = NA)
         },
 
         # ══════════════════════════════════════════════════════════════════
@@ -434,21 +543,34 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         # ══════════════════════════════════════════════════════════════════
         .assessSuitability = function(prepared) {
             p <- length(prepared$expl_vars)
-            epv <- min(prepared$n_events, prepared$n_nonevents) / p
-
             checks <- c()
             icons <- c(green = "&#x2705;", yellow = "&#x26A0;&#xFE0F;", red = "&#x274C;")
 
-            # EPV
-            if (epv >= 10) {
-                checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (&ge;10: adequate)</td></tr>",
-                    icons["green"], .("Events per variable"), epv))
-            } else if (epv >= 5) {
-                checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (5-10: marginal, consider fewer predictors)</td></tr>",
-                    icons["yellow"], .("Events per variable"), epv))
+            if (prepared$model_type == "linear") {
+                # Linear: observations per variable (OPV), not EPV
+                opv <- prepared$n / p
+                if (opv >= 15) {
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>OPV = %.1f (&ge;15: adequate)</td></tr>",
+                        icons["green"], .("Observations per variable"), opv))
+                } else if (opv >= 10) {
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>OPV = %.1f (10-15: marginal)</td></tr>",
+                        icons["yellow"], .("Observations per variable"), opv))
+                } else {
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>OPV = %.1f (&lt;10: overfitting risk)</td></tr>",
+                        icons["red"], .("Observations per variable"), opv))
+                }
             } else {
-                checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (&lt;5: high overfitting risk, reduce predictors)</td></tr>",
-                    icons["red"], .("Events per variable"), epv))
+                epv <- min(prepared$n_events, prepared$n_nonevents) / p
+                if (epv >= 10) {
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (&ge;10: adequate)</td></tr>",
+                        icons["green"], .("Events per variable"), epv))
+                } else if (epv >= 5) {
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (5-10: marginal, consider fewer predictors)</td></tr>",
+                        icons["yellow"], .("Events per variable"), epv))
+                } else {
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (&lt;5: high overfitting risk, reduce predictors)</td></tr>",
+                        icons["red"], .("Events per variable"), epv))
+                }
             }
 
             # Sample size
@@ -456,15 +578,22 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>N = %d</td></tr>",
                 icons[status], .("Sample size"), prepared$n))
 
-            # Events
-            status <- if (prepared$n_events >= 50) "green" else if (prepared$n_events >= 20) "yellow" else "red"
-            checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>%d events, %d non-events</td></tr>",
-                icons[status], .("Event count"), prepared$n_events, prepared$n_nonevents))
+            if (prepared$model_type != "linear") {
+                # Events
+                status <- if (prepared$n_events >= 50) "green" else if (prepared$n_events >= 20) "yellow" else "red"
+                checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>%d events, %d non-events</td></tr>",
+                    icons[status], .("Event count"), prepared$n_events, prepared$n_nonevents))
+            }
 
-            # Minimum recommended N (Riley et al. 2020)
-            event_frac <- prepared$n_events / prepared$n
-            min_denom <- min(event_frac, 1 - event_frac)
-            min_n <- if (min_denom > 0) max(10 * p / min_denom, 100) else prepared$n + 1
+            # Minimum recommended N
+            if (prepared$model_type == "linear") {
+                # Rule of thumb: N >= 10*p + 50
+                min_n <- max(10 * p + 50, 100)
+            } else {
+                event_frac <- prepared$n_events / prepared$n
+                min_denom <- min(event_frac, 1 - event_frac)
+                min_n <- if (min_denom > 0) max(10 * p / min_denom, 100) else prepared$n + 1
+            }
             status <- if (prepared$n >= min_n) "green" else "red"
             min_n_display <- if (is.finite(min_n)) as.integer(ceiling(min_n)) else as.integer(prepared$n + 1L)
             checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>N = %d vs recommended minimum %d (Riley et al. 2020)</td></tr>",
@@ -479,13 +608,25 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             self$results$suitabilityReport$setContent(html)
 
             # Surface critical issues as notices (collected for HTML rendering)
-            if (epv < 5) {
-                private$.addNotice("STRONG_WARNING", .("Low Events Per Variable"),
-                    sprintf(.('EPV = %.1f (<5): high overfitting risk. Reduce to %d or fewer predictors, or collect more data.'),
-                            epv, as.integer(floor(min(prepared$n_events, prepared$n_nonevents) / 5))))
-            } else if (epv < 10) {
-                private$.addNotice("WARNING", .("Marginal Events Per Variable"),
-                    sprintf(.('EPV = %.1f (marginal). Enable bootstrap validation to assess overfitting risk.'), epv))
+            if (prepared$model_type == "linear") {
+                opv <- prepared$n / p
+                if (opv < 10) {
+                    private$.addNotice("STRONG_WARNING", .("Low Observations Per Variable"),
+                        sprintf(.('OPV = %.1f (<10): high overfitting risk. Reduce predictors or collect more data.'), opv))
+                } else if (opv < 15) {
+                    private$.addNotice("WARNING", .("Marginal Observations Per Variable"),
+                        sprintf(.('OPV = %.1f (marginal). Enable bootstrap validation to assess overfitting risk.'), opv))
+                }
+            } else {
+                epv <- min(prepared$n_events, prepared$n_nonevents) / p
+                if (epv < 5) {
+                    private$.addNotice("STRONG_WARNING", .("Low Events Per Variable"),
+                        sprintf(.('EPV = %.1f (<5): high overfitting risk. Reduce to %d or fewer predictors, or collect more data.'),
+                                epv, as.integer(floor(min(prepared$n_events, prepared$n_nonevents) / 5))))
+                } else if (epv < 10) {
+                    private$.addNotice("WARNING", .("Marginal Events Per Variable"),
+                        sprintf(.('EPV = %.1f (marginal). Enable bootstrap validation to assess overfitting risk.'), epv))
+                }
             }
 
             if (prepared$n < min_n) {
@@ -497,17 +638,57 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
         .populateModelSummary = function(prepared, model) {
             table <- self$results$modelSummary
-            effect_label <- if (prepared$model_type == "logistic") .("Odds Ratio") else .("Hazard Ratio")
+            mt <- prepared$model_type
+            effect_label <- switch(mt,
+                "logistic" = .("Odds Ratio"),
+                "cox" = .("Hazard Ratio"),
+                "linear" = .("Regression Coefficient"),
+                "ordinal" = .("Proportional Odds Ratio"))
+            model_label <- switch(mt,
+                "logistic" = .("Logistic Regression"),
+                "cox" = .("Cox Regression"),
+                "linear" = .("Linear Regression"),
+                "ordinal" = .("Ordinal (Proportional Odds) Regression"))
+
             rows <- list(
-                list(.("Model type"), if (prepared$model_type == "logistic") .("Logistic Regression") else .("Cox Regression")),
-                list(.("Total observations"), as.character(prepared$n)),
-                list(.("Events"), sprintf("%d (%s)", prepared$n_events, prepared$event_level)),
-                list(.("Non-events"), sprintf("%d (%s)", prepared$n_nonevents, prepared$ref_level)),
-                list(.("Predictors"), as.character(length(prepared$expl_vars))),
-                list(.("Model coefficients"), as.character(length(model$coefs))),
-                list(.("Effect measure"), effect_label),
-                list(.("EPV"), sprintf("%.1f", min(prepared$n_events, prepared$n_nonevents) / length(prepared$expl_vars)))
+                list(.("Model type"), model_label),
+                list(.("Total observations"), as.character(prepared$n))
             )
+
+            if (mt == "linear") {
+                sm <- summary(model$model)
+                rows <- c(rows, list(
+                    list(.("Outcome"), sprintf(.("Continuous (%s)"), self$options$outcome)),
+                    list(.("R-squared"), sprintf("%.3f", sm$r.squared)),
+                    list(.("Adjusted R-squared"), sprintf("%.3f", sm$adj.r.squared)),
+                    list(.("RMSE"), sprintf("%.3f", sqrt(mean(sm$residuals^2))))
+                ))
+            } else if (mt == "ordinal") {
+                rows <- c(rows, list(
+                    list(.("Outcome levels"), prepared$event_level),
+                    list(.("Number of categories"), as.character(length(levels(prepared$y_ordered))))
+                ))
+            } else {
+                rows <- c(rows, list(
+                    list(.("Events"), sprintf("%d (%s)", prepared$n_events, prepared$event_level)),
+                    list(.("Non-events"), sprintf("%d (%s)", prepared$n_nonevents, prepared$ref_level))
+                ))
+            }
+
+            p <- length(prepared$expl_vars)
+            rows <- c(rows, list(
+                list(.("Predictors"), as.character(p)),
+                list(.("Model coefficients"), as.character(length(model$coefs))),
+                list(.("Effect measure"), effect_label)
+            ))
+
+            if (mt == "linear") {
+                rows <- c(rows, list(list(.("OPV"), sprintf("%.1f", prepared$n / p))))
+            } else {
+                epv_val <- min(prepared$n_events, prepared$n_nonevents) / p
+                rows <- c(rows, list(list(.("EPV"), sprintf("%.1f", epv_val))))
+            }
+
             for (i in seq_along(rows)) {
                 table$addRow(rowKey = i, values = list(statistic = rows[[i]][[1]], value = rows[[i]][[2]]))
             }
@@ -575,14 +756,26 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             perf_rows <- list(
                 list(.("Scoring method"), switch(method, "beta10"="Beta10", "schneeweiss"="Schneeweiss",
-                    "sullivan"="Sullivan/D'Agostino", "compare"="Schneeweiss (primary)")),
-                list(.("Score AUC / C-index"), sprintf("%.3f", perf$auc)),
-                list(.("Optimal cutoff"), as.character(perf$cutoff)),
-                list(.("Accuracy"), sprintf("%.3f", perf$accuracy)),
-                list(.("Sensitivity"), sprintf("%.3f", perf$sensitivity)),
-                list(.("Specificity"), sprintf("%.3f", perf$specificity)),
-                list(.("Score range"), sprintf("%.0f to %.0f", min(total_scores), max(total_scores)))
+                    "sullivan"="Sullivan/D'Agostino", "compare"="Schneeweiss (primary)"))
             )
+
+            if (prepared$model_type == "linear") {
+                perf_rows <- c(perf_rows, list(
+                    list(.("Score-Outcome R-squared"), sprintf("%.3f", perf$r_squared)),
+                    list(.("Score-Outcome Correlation"), sprintf("%.3f", perf$correlation)),
+                    list(.("RMSE"), sprintf("%.3f", perf$rmse)),
+                    list(.("Score range"), sprintf("%.0f to %.0f", min(total_scores), max(total_scores)))
+                ))
+            } else {
+                perf_rows <- c(perf_rows, list(
+                    list(.("Score AUC / C-index"), sprintf("%.3f", perf$auc)),
+                    list(.("Optimal cutoff"), as.character(perf$cutoff)),
+                    list(.("Accuracy"), sprintf("%.3f", perf$accuracy)),
+                    list(.("Sensitivity"), sprintf("%.3f", perf$sensitivity)),
+                    list(.("Specificity"), sprintf("%.3f", perf$specificity)),
+                    list(.("Score range"), sprintf("%.0f to %.0f", min(total_scores), max(total_scores)))
+                ))
+            }
             for (i in seq_along(perf_rows)) {
                 perf_table$addRow(rowKey = i, values = list(
                     metric = perf_rows[[i]][[1]], value = perf_rows[[i]][[2]]))
@@ -604,7 +797,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                     m_ref <- c("Zhang et al. 2017", "Mehta et al. 2016", "Sullivan et al. 2004")[j]
                     pts_j <- private$.computePoints(coefs, m_name, max_pts)
                     scores_j <- private$.computeTotalScores(mm, pts_j)
-                    perf_j <- private$.evaluateScore(prepared$y, scores_j)
+                    perf_j <- private$.evaluateScore(prepared$y, scores_j, prepared$model_type)
                     info_loss <- if (!is.na(full_auc) && !is.na(perf_j$auc) && full_auc > 0)
                         (1 - perf_j$auc / full_auc) * 100 else NA
                     comp_table$addRow(rowKey = j, values = list(
@@ -622,12 +815,23 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 score_vals <- sort(unique(total_scores))
                 for (s in score_vals) {
                     idx <- total_scores == s
-                    n_c <- sum(idx); n_e <- sum(prepared$y[idx] == 1)
-                    prob <- n_e / n_c
-                    risk <- if (s >= perf$cutoff) .("High risk") else .("Low risk")
-                    lookup$addRow(rowKey = as.character(s), values = list(
-                        score = as.integer(s), n_cases = n_c, n_events = n_e,
-                        probability = prob, risk_group = risk))
+                    n_c <- sum(idx)
+                    if (prepared$model_type == "linear") {
+                        # For linear: show mean predicted value
+                        n_e <- NA
+                        mean_outcome <- mean(prepared$y[idx], na.rm = TRUE)
+                        risk <- if (s >= median(total_scores)) .("Above median") else .("Below median")
+                        lookup$addRow(rowKey = as.character(s), values = list(
+                            score = as.integer(s), n_cases = n_c, n_events = as.integer(NA),
+                            probability = mean_outcome, risk_group = risk))
+                    } else {
+                        n_e <- sum(prepared$y[idx] == 1)
+                        prob <- n_e / n_c
+                        risk <- if (s >= perf$cutoff) .("High risk") else .("Low risk")
+                        lookup$addRow(rowKey = as.character(s), values = list(
+                            score = as.integer(s), n_cases = n_c, n_events = n_e,
+                            probability = prob, risk_group = risk))
+                    }
                 }
             }
 
@@ -638,18 +842,66 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
         .populateDiscrimination = function(prepared, model) {
             table <- self$results$discriminationTable
-            metric_label <- if (prepared$model_type == "logistic") "AUC" else "C-index"
+
+            if (prepared$model_type == "linear") {
+                # Linear: R², adjusted R², Pearson/Spearman correlation
+                sm <- summary(model$model)
+                r2 <- sm$r.squared
+                adj_r2 <- sm$adj.r.squared
+                corr_p <- cor(prepared$y, model$predicted, use = "complete.obs", method = "pearson")
+                corr_s <- cor(prepared$y, model$predicted, use = "complete.obs", method = "spearman")
+                rmse <- sqrt(mean((prepared$y - model$predicted)^2, na.rm = TRUE))
+
+                interp_r2 <- if (r2 >= 0.7) .("Excellent") else if (r2 >= 0.5) .("Good")
+                             else if (r2 >= 0.3) .("Moderate") else .("Poor")
+                table$addRow(rowKey = 1, values = list(
+                    metric = .("R-squared"), estimate = r2,
+                    ci_lower = NA, ci_upper = NA, interpretation = interp_r2))
+                table$addRow(rowKey = 2, values = list(
+                    metric = .("Adjusted R-squared"), estimate = adj_r2,
+                    ci_lower = NA, ci_upper = NA, interpretation = ""))
+                table$addRow(rowKey = 3, values = list(
+                    metric = .("Pearson Correlation"), estimate = corr_p,
+                    ci_lower = NA, ci_upper = NA, interpretation = ""))
+                table$addRow(rowKey = 4, values = list(
+                    metric = .("Spearman Correlation"), estimate = corr_s,
+                    ci_lower = NA, ci_upper = NA, interpretation = ""))
+                table$addRow(rowKey = 5, values = list(
+                    metric = .("RMSE"), estimate = rmse,
+                    ci_lower = NA, ci_upper = NA, interpretation = ""))
+
+                if (r2 < 0.3) {
+                    private$.addNotice("WARNING", .("Poor Model Fit"),
+                        sprintf(.('R-squared = %.3f indicates the model explains little outcome variance. Consider additional predictors.'), r2))
+                }
+                return()
+            }
+
+            metric_label <- switch(prepared$model_type,
+                "logistic" = "AUC",
+                "ordinal" = .("Generalized AUC"),
+                "C-index")
 
             tryCatch({
                 if (requireNamespace("pROC", quietly = TRUE)) {
-                    roc_obj <- pROC::roc(prepared$y, model$predicted, quiet = TRUE)
-                    auc_val <- as.numeric(pROC::auc(roc_obj))
-                    ci_obj <- pROC::ci.auc(roc_obj, method = "delong")
-                    interp <- if (auc_val >= 0.9) .("Excellent") else if (auc_val >= 0.8) .("Good")
-                              else if (auc_val >= 0.7) .("Acceptable") else .("Poor")
-                    table$addRow(rowKey = 1, values = list(
-                        metric = metric_label, estimate = auc_val,
-                        ci_lower = ci_obj[1], ci_upper = ci_obj[3], interpretation = interp))
+                    if (prepared$model_type == "ordinal") {
+                        roc_obj <- pROC::multiclass.roc(prepared$y, model$predicted, quiet = TRUE)
+                        auc_val <- as.numeric(roc_obj$auc)
+                        interp <- if (auc_val >= 0.9) .("Excellent") else if (auc_val >= 0.8) .("Good")
+                                  else if (auc_val >= 0.7) .("Acceptable") else .("Poor")
+                        table$addRow(rowKey = 1, values = list(
+                            metric = metric_label, estimate = auc_val,
+                            ci_lower = NA, ci_upper = NA, interpretation = interp))
+                    } else {
+                        roc_obj <- pROC::roc(prepared$y, model$predicted, quiet = TRUE)
+                        auc_val <- as.numeric(pROC::auc(roc_obj))
+                        ci_obj <- pROC::ci.auc(roc_obj, method = "delong")
+                        interp <- if (auc_val >= 0.9) .("Excellent") else if (auc_val >= 0.8) .("Good")
+                                  else if (auc_val >= 0.7) .("Acceptable") else .("Poor")
+                        table$addRow(rowKey = 1, values = list(
+                            metric = metric_label, estimate = auc_val,
+                            ci_lower = ci_obj[1], ci_upper = ci_obj[3], interpretation = interp))
+                    }
 
                     # Notices for discrimination concerns
                     if (auc_val < 0.7) {
@@ -664,7 +916,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 }
             }, error = function(e) {})
 
-            # Brier score
+            # Brier score (logistic only)
             if (prepared$model_type == "logistic") {
                 brier <- mean((model$predicted - prepared$y)^2)
                 interp <- if (brier < 0.1) .("Excellent") else if (brier < 0.2) .("Good") else .("Poor")
@@ -679,10 +931,43 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             B <- self$options$bootstrapN
             model_type <- prepared$model_type
 
+            if (model_type == "linear") {
+                # Bootstrap optimism-corrected R²
+                apparent_r2 <- summary(model$model)$r.squared
+                optimism_vals <- rep(NA_real_, B)
+                for (b in seq_len(B)) {
+                    tryCatch({
+                        idx <- sample(prepared$n, replace = TRUE)
+                        df_boot <- data.frame(y = prepared$y[idx], prepared$predictors[idx, , drop = FALSE])
+                        m_boot <- lm(y ~ ., data = df_boot)
+                        pred_boot <- predict(m_boot)
+                        pred_orig <- predict(m_boot, newdata = data.frame(y = prepared$y, prepared$predictors))
+                        r2_boot <- 1 - sum((df_boot$y - pred_boot)^2) / sum((df_boot$y - mean(df_boot$y))^2)
+                        r2_orig <- cor(prepared$y, pred_orig, use = "complete.obs")^2
+                        optimism_vals[b] <- r2_boot - r2_orig
+                    }, error = function(e) {})
+                }
+                mean_opt <- mean(optimism_vals, na.rm = TRUE)
+                corrected <- apparent_r2 - mean_opt
+                table$addRow(rowKey = 1, values = list(
+                    metric = .("R-squared"), apparent = apparent_r2,
+                    optimism = mean_opt, corrected = corrected))
+                if (!is.na(mean_opt) && mean_opt > 0.05) {
+                    table$setNote("warning",
+                        sprintf(.("Optimism = %.3f indicates overfitting. Corrected R-squared (%.3f) is more realistic."),
+                                mean_opt, corrected))
+                }
+                return()
+            }
+
             apparent_auc <- NA
             tryCatch({
                 if (requireNamespace("pROC", quietly = TRUE)) {
-                    apparent_auc <- as.numeric(pROC::auc(pROC::roc(prepared$y, model$predicted, quiet = TRUE)))
+                    if (model_type == "ordinal") {
+                        apparent_auc <- as.numeric(pROC::multiclass.roc(prepared$y, model$predicted, quiet = TRUE)$auc)
+                    } else {
+                        apparent_auc <- as.numeric(pROC::auc(pROC::roc(prepared$y, model$predicted, quiet = TRUE)))
+                    }
                 }
             }, error = function(e) {})
 
@@ -697,6 +982,12 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                         m_boot <- glm(y ~ ., data = df_boot, family = binomial)
                         pred_boot <- predict(m_boot, type = "response")
                         pred_orig <- predict(m_boot, newdata = data.frame(y = prepared$y, prepared$predictors), type = "response")
+                    } else if (model_type == "ordinal") {
+                        df_boot$y_ord <- prepared$y_ordered[idx]
+                        m_boot <- MASS::polr(y_ord ~ . - y, data = df_boot, Hess = TRUE)
+                        pred_boot <- as.numeric(predict(m_boot, type = "lp"))
+                        pred_orig <- as.numeric(predict(m_boot, newdata = data.frame(y = prepared$y, prepared$predictors,
+                            y_ord = prepared$y_ordered), type = "lp"))
                     } else {
                         df_boot$surv <- survival::Surv(prepared$time[idx], prepared$y[idx])
                         m_boot <- survival::coxph(surv ~ . - y, data = df_boot)
@@ -706,8 +997,13 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                     }
 
                     if (requireNamespace("pROC", quietly = TRUE)) {
-                        auc_boot <- as.numeric(pROC::auc(pROC::roc(df_boot$y, pred_boot, quiet = TRUE)))
-                        auc_orig <- as.numeric(pROC::auc(pROC::roc(prepared$y, pred_orig, quiet = TRUE)))
+                        if (model_type == "ordinal") {
+                            auc_boot <- as.numeric(pROC::multiclass.roc(df_boot$y, pred_boot, quiet = TRUE)$auc)
+                            auc_orig <- as.numeric(pROC::multiclass.roc(prepared$y, pred_orig, quiet = TRUE)$auc)
+                        } else {
+                            auc_boot <- as.numeric(pROC::auc(pROC::roc(df_boot$y, pred_boot, quiet = TRUE)))
+                            auc_orig <- as.numeric(pROC::auc(pROC::roc(prepared$y, pred_orig, quiet = TRUE)))
+                        }
                         optimism_vals[b] <- auc_boot - auc_orig
                     }
                 }, error = function(e) {})
@@ -716,8 +1012,12 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             mean_opt <- mean(optimism_vals, na.rm = TRUE)
             corrected <- apparent_auc - mean_opt
 
+            metric_label <- switch(model_type,
+                "logistic" = "AUC",
+                "ordinal" = .("Generalized AUC"),
+                "C-index")
             table$addRow(rowKey = 1, values = list(
-                metric = if (model_type == "logistic") "AUC" else "C-index",
+                metric = metric_label,
                 apparent = apparent_auc, optimism = mean_opt, corrected = corrected))
 
             if (!is.na(mean_opt) && mean_opt > 0.05) {
@@ -735,6 +1035,24 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             if (is.null(md)) return(FALSE)
 
             prepared <- md$prepared; model <- md$model
+
+            # Linear regression: predicted vs observed scatter plot
+            if (prepared$model_type == "linear") {
+                cal_df <- data.frame(predicted = model$predicted, observed = prepared$y)
+                p <- ggplot2::ggplot(cal_df, ggplot2::aes(x = predicted, y = observed)) +
+                    ggplot2::geom_point(alpha = 0.5, size = 2) +
+                    ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey50") +
+                    ggplot2::geom_smooth(method = "loess", se = TRUE, color = "#2E86C1", fill = "#D6EAF8") +
+                    ggplot2::labs(title = .("Calibration: Predicted vs Observed"),
+                                  x = .("Predicted Value"), y = .("Observed Value")) +
+                    ggtheme
+                print(p)
+                return(TRUE)
+            }
+
+            # Ordinal: skip calibration (not straightforward)
+            if (prepared$model_type == "ordinal") return(FALSE)
+
             if (prepared$model_type != "logistic") return(FALSE)
 
             n_groups <- self$options$calibrationGroups
@@ -784,14 +1102,24 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 if (prepared$model_type == "logistic") {
                     df_rms <- data.frame(y = prepared$y, prepared$predictors)
                     fit <- rms::lrm(y ~ ., data = df_rms)
+                } else if (prepared$model_type == "linear") {
+                    df_rms <- data.frame(y = prepared$y, prepared$predictors)
+                    fit <- rms::ols(y ~ ., data = df_rms)
+                } else if (prepared$model_type == "ordinal") {
+                    df_rms <- data.frame(y = prepared$y_ordered, prepared$predictors)
+                    fit <- rms::lrm(y ~ ., data = df_rms)
                 } else {
                     df_rms <- data.frame(y = prepared$y, time = prepared$time, prepared$predictors)
                     surv_obj <- survival::Surv(df_rms$time, df_rms$y)
                     fit <- rms::cph(surv_obj ~ . - y - time, data = df_rms)
                 }
 
-                nom <- rms::nomogram(fit, fun = if (prepared$model_type == "logistic") plogis else NULL,
-                                     funlabel = if (prepared$model_type == "logistic") .("Risk") else .("Log Relative Hazard"))
+                fun_arg <- switch(prepared$model_type,
+                    "logistic" = plogis, "linear" = NULL, "ordinal" = plogis, NULL)
+                funlabel_arg <- switch(prepared$model_type,
+                    "logistic" = .("Risk"), "linear" = .("Predicted Value"),
+                    "ordinal" = .("Cumulative Probability"), .("Log Relative Hazard"))
+                nom <- rms::nomogram(fit, fun = fun_arg, funlabel = funlabel_arg)
                 plot(nom, main = .("Clinical Nomogram"))
                 TRUE
             }, error = function(e) {
@@ -806,17 +1134,43 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             md <- private$.model_data
             if (is.null(md) || is.null(md$total_scores)) return(FALSE)
 
-            df <- data.frame(
-                score = md$total_scores,
-                outcome = factor(ifelse(md$prepared$y == 1, md$prepared$event_level, md$prepared$ref_level))
-            )
+            model_type <- md$prepared$model_type
+
+            if (model_type == "linear") {
+                # Continuous outcome: histogram colored by median split
+                median_y <- median(md$prepared$y, na.rm = TRUE)
+                df <- data.frame(
+                    score = md$total_scores,
+                    outcome = factor(ifelse(md$prepared$y >= median_y,
+                        .("Above median"), .("Below median")))
+                )
+            } else if (model_type == "ordinal") {
+                # Multi-class outcome: use original ordered levels
+                df <- data.frame(
+                    score = md$total_scores,
+                    outcome = factor(md$prepared$y_ordered)
+                )
+            } else {
+                # Binary (logistic/cox)
+                df <- data.frame(
+                    score = md$total_scores,
+                    outcome = factor(ifelse(md$prepared$y == 1,
+                        md$prepared$event_level, md$prepared$ref_level))
+                )
+            }
 
             p <- ggplot2::ggplot(df, ggplot2::aes(x = score, fill = outcome)) +
-                ggplot2::geom_histogram(bins = 20, alpha = 0.7, position = "identity") +
-                ggplot2::geom_vline(xintercept = md$cutoff, linetype = "dashed", color = "red", linewidth = 1) +
-                ggplot2::annotate("text", x = md$cutoff, y = Inf, vjust = 2,
-                                  label = sprintf(.("Cutoff = %.0f"), md$cutoff), color = "red", size = 3.5) +
-                ggplot2::scale_fill_manual(values = c("#2E86C1", "#E74C3C")) +
+                ggplot2::geom_histogram(bins = 20, alpha = 0.7, position = "identity")
+
+            # Add cutoff line only for binary models with a valid cutoff
+            if (model_type %in% c("logistic", "cox") && !is.null(md$cutoff) && !is.na(md$cutoff)) {
+                p <- p +
+                    ggplot2::geom_vline(xintercept = md$cutoff, linetype = "dashed", color = "red", linewidth = 1) +
+                    ggplot2::annotate("text", x = md$cutoff, y = Inf, vjust = 2,
+                                      label = sprintf(.("Cutoff = %.0f"), md$cutoff), color = "red", size = 3.5)
+            }
+
+            p <- p +
                 ggplot2::labs(title = .("Score Distribution by Outcome"),
                               x = .("Total Score"), y = .("Count"), fill = .("Outcome")) +
                 ggtheme
@@ -828,7 +1182,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         # Decision curve analysis
         # ══════════════════════════════════════════════════════════════════
         .populateDecisionCurve = function(prepared, model) {
-            if (prepared$model_type != "logistic") return()
+            if (!prepared$model_type %in% c("logistic")) return()
 
             pred <- model$predicted
             obs <- prepared$y
@@ -888,20 +1242,42 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         # ══════════════════════════════════════════════════════════════════
         .populateTRIPOD = function(prepared, model) {
             n_vars <- length(model$coefs)
-            epv <- min(prepared$n_events, prepared$n_nonevents) / length(prepared$expl_vars)
+            p <- length(prepared$expl_vars)
             has_validation <- self$options$bootstrapValidation
+
+            if (prepared$model_type == "linear") {
+                opv <- prepared$n / p
+                size_adequate <- opv >= 15
+                size_label <- sprintf(.("OPV = %.1f %s"), opv, if (size_adequate) .("(adequate)") else .("(INSUFFICIENT)"))
+                participants_label <- sprintf(.("N=%d observations"), prepared$n)
+                outcome_label <- sprintf(.("%s (continuous)"), self$options$outcome)
+            } else {
+                epv <- min(prepared$n_events, prepared$n_nonevents) / p
+                size_adequate <- epv >= 10
+                size_label <- sprintf(.("EPV = %.1f %s"), epv, if (size_adequate) .("(adequate)") else .("(INSUFFICIENT)"))
+                participants_label <- sprintf(.("%d events, %d non-events"), prepared$n_events, prepared$n_nonevents)
+                if (prepared$model_type == "ordinal") {
+                    outcome_label <- sprintf(.("%s (ordinal: %s)"), self$options$outcome, prepared$event_level)
+                } else {
+                    outcome_label <- sprintf(.("%s (binary: %s vs %s)"), self$options$outcome, prepared$event_level, prepared$ref_level)
+                }
+            }
+
+            model_label <- switch(prepared$model_type,
+                "logistic" = .("Logistic"), "cox" = .("Cox"),
+                "linear" = .("Linear"), "ordinal" = .("Ordinal"))
 
             items <- list(
                 list(.("Title/Abstract"), .("Study design identified"), TRUE),
                 list(.("Background"), .("Context and rationale"), TRUE),
                 list(.("Objectives"), .("Prediction model development"), TRUE),
                 list(.("Source of data"), sprintf(.("Multi-source, N=%d"), prepared$n), TRUE),
-                list(.("Participants"), sprintf(.("%d events, %d non-events"), prepared$n_events, prepared$n_nonevents), TRUE),
-                list(.("Outcome"), sprintf(.("%s (binary: %s vs %s)"), self$options$outcome, prepared$event_level, prepared$ref_level), TRUE),
-                list(.("Predictors"), sprintf(.("%d variables, %d model terms"), length(prepared$expl_vars), n_vars), TRUE),
-                list(.("Sample size"), sprintf(.("EPV = %.1f %s"), epv, if (epv >= 10) .("(adequate)") else .("(INSUFFICIENT)")), epv >= 10),
+                list(.("Participants"), participants_label, TRUE),
+                list(.("Outcome"), outcome_label, TRUE),
+                list(.("Predictors"), sprintf(.("%d variables, %d model terms"), p, n_vars), TRUE),
+                list(.("Sample size"), size_label, size_adequate),
                 list(.("Missing data"), .("Complete case analysis"), TRUE),
-                list(.("Model development"), sprintf(.("%s regression"), if (prepared$model_type == "logistic") .("Logistic") else .("Cox")), TRUE),
+                list(.("Model development"), sprintf(.("%s regression"), model_label), TRUE),
                 list(.("Model specification"), sprintf(.("%d predictors in final model"), n_vars), TRUE),
                 list(.("Discrimination"), if (self$options$showDiscrimination) .("AUC/C-index reported") else .("NOT reported"), self$options$showDiscrimination),
                 list(.("Calibration"), if (self$options$showCalibration) .("Calibration plot generated") else .("NOT assessed"), self$options$showCalibration),
@@ -932,15 +1308,29 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 "beta10" = "Beta10", "schneeweiss" = "Schneeweiss",
                 "sullivan" = "Sullivan/D'Agostino", "compare" = "comparison of all three methods")
 
+            model_label <- switch(prepared$model_type,
+                "logistic" = .("logistic"), "cox" = .("Cox"),
+                "linear" = .("linear"), "ordinal" = .("ordinal"))
+            event_info <- if (prepared$model_type == "linear") {
+                sprintf(.("%d observations"), prepared$n)
+            } else {
+                sprintf(.("%d observations (%d events)"), prepared$n, prepared$n_events)
+            }
+            outcome_desc <- if (prepared$model_type == "linear") {
+                .("Each predictor was assigned points based on regression coefficient magnitude. The lookup table maps each total score to the mean predicted outcome value.")
+            } else {
+                paste0(
+                    .("Each predictor was assigned positive points (increasing risk) or negative points (decreasing risk) based on the regression coefficient magnitude."),
+                    " ", .("The score-to-risk lookup table maps each possible total score to the observed event rate in the development cohort."))
+            }
+
             html <- paste0(
                 "<h4>", .("Results Summary"), "</h4>",
-                "<p>", sprintf(.("A clinical scoring system was developed using %s regression with %d predictors and %d observations (%d events). The %s scoring method was applied to convert model coefficients to integer points. "),
-                    if (prepared$model_type == "logistic") .("logistic") else .("Cox"),
-                    length(prepared$expl_vars), prepared$n, prepared$n_events, method_label),
-                .("Each predictor was assigned positive points (increasing risk) or negative points (decreasing risk) based on the regression coefficient magnitude."),
+                "<p>", sprintf(.("A clinical scoring system was developed using %s regression with %d predictors and %s. The %s scoring method was applied to convert model coefficients to integer points. "),
+                    model_label, length(prepared$expl_vars), event_info, method_label),
+                outcome_desc,
                 "</p>",
-                "<p>", .("The score-to-risk lookup table maps each possible total score to the observed event rate in the development cohort. "),
-                .("This scoring system should be validated on an independent cohort before clinical adoption."),
+                "<p>", .("This scoring system should be validated on an independent cohort before clinical adoption."),
                 "</p>")
             self$results$summaryText$setContent(html)
         },

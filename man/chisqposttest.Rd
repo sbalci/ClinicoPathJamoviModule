@@ -124,7 +124,7 @@ testing). No automated validation against established packages exists. Use
 with caution for clinical decision-making.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

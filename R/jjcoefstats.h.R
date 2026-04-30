@@ -493,7 +493,7 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' # For pre-computed coefficients:
 #' # ClinicoPath::jjcoefstats(

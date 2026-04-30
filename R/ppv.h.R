@@ -190,7 +190,7 @@ ppvBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' power, and research biases.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Calculate PPV for a typical medical research scenario
 #' ppv(
 #'     percTrue = 10,    # 10 percent of tested hypotheses are true

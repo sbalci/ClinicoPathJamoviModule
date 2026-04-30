@@ -595,7 +595,7 @@ recurrentsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Cancer recurrence analysis
 #' recurrentsurvival(
 #'     data = cancer_data,

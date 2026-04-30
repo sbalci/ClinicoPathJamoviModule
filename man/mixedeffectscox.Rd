@@ -140,7 +140,7 @@ measurements, and unobserved heterogeneity using the coxme framework for
 multi-level survival analysis in clinical research.
 }
 \examples{
-\dontrun{
+\donttest{
 # Mixed-effects Cox model with random intercept
 mixedeffectscox(
     data = hierarchical_data,

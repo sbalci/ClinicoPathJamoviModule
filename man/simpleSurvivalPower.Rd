@@ -161,7 +161,7 @@ consider the other power analysis functions: Classical, Competing Risks,
 Advanced, or Comprehensive.
 }
 \examples{
-\dontrun{
+\donttest{
 simpleSurvivalPower(
     test_type = "log_rank",
     effect_size = 0.75,

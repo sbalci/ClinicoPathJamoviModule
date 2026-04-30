@@ -229,7 +229,7 @@ groupsummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Group data by categorical variables and calculate summary statistics
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Group by one or more categorical variables and sum numeric variables
 #' groupsummary(
 #'     data = mydata,

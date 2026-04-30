@@ -149,7 +149,7 @@ accuracy assessment through time-dependent AUC and optimal cutpoint
 selection.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Time-varying biomarker effects
 timedependent(
     data = biomarker_data,

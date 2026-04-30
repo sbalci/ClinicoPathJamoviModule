@@ -101,7 +101,7 @@ outcomes with comprehensive statistical validation and heterogeneity
 testing.
 }
 \examples{
-\dontrun{
+\donttest{
 # Survival outcome subgroup analysis
 subgroupforest(
     data = clinical_trial,

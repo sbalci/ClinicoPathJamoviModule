@@ -144,7 +144,7 @@ by Orange Data Mining's interactive projection widgets, adapted for jamovi
 with comprehensive cluster analysis and statistical validation.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Basic t-SNE visualization
 library(Rtsne)
 data(iris)

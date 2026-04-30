@@ -137,7 +137,7 @@ for clinical laboratory measurements. Essential for laboratory
 accreditation and quality assurance.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 measurementuncertainty(
     measurement = "glucose_result",

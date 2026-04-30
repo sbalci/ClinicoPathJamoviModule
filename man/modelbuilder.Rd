@@ -209,7 +209,7 @@ multiple logistic regression models with predicted probabilities that can
 be directly used in Decision Curve Analysis.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

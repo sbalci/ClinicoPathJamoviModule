@@ -614,7 +614,7 @@ robustaftBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' estimates in challenging clinical datasets.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Robust AFT model with Weibull distribution
 #' library(survival)
 #' library(RobustAFT)

@@ -85,7 +85,7 @@ Enhanced cross-tabulation analysis using the danchaltiel/crosstable package
 for advanced clinical research functionality.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 library(crosstable)
 # Enhanced crosstable with tidyselect

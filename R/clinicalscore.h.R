@@ -41,7 +41,9 @@ clinicalscoreOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 modelType,
                 options=list(
                     "logistic",
-                    "cox"),
+                    "cox",
+                    "linear",
+                    "ordinal"),
                 default="logistic")
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
@@ -709,13 +711,13 @@ clinicalscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Builds clinical integer-point scoring systems from regression models using
 #' three published methods (Sullivan/D'Agostino, Schneeweiss, Beta10).
-#' Supports logistic and Cox regression with automatic variable 
-#' categorization,
-#' calibration, discrimination, nomogram generation, and TRIPOD compliance.
+#' Supports logistic, Cox, linear, and ordinal regression with automatic
+#' variable categorization, calibration, discrimination, nomogram generation,
+#' and TRIPOD compliance.
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' clinicalscore(data = data, outcome = "diagnosis",
 #'     outcomeLevel = "malignant", explanatory = vars(age, grade, ki67),
 #'     modelType = "logistic", scoringMethod = "compare")

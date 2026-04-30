@@ -252,7 +252,7 @@ The method supports tie handling in refitted Cox models, optional
 stratification for Cox modeling, and bootstrap-based stability selection.
 }
 \examples{
-\dontrun{
+\donttest{
 result <- adaptivelasso(
     data = mydata,
     time = "time_to_event",

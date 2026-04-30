@@ -75,7 +75,7 @@ language  reporting. Suitable for exploring relationships between
 continuous variables.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic correlation analysis
 jcorrelation(
     data = histopathology,

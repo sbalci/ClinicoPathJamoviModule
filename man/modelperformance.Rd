@@ -118,7 +118,7 @@ other metrics. Inspired by Orange Data Mining's Test & Score widget,
 adapted for clinical research with comprehensive model diagnostics.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Compare Cox models
 modelperformance(
     data = cancer_data,

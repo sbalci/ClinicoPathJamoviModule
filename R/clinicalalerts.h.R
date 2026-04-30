@@ -435,7 +435,7 @@ clinicalalertsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' # Basic clinical alert monitoring

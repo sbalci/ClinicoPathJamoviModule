@@ -152,7 +152,7 @@ Note: This analysis can be computationally intensive. Expected runtime:
 depending on data size and model complexity.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: PSA trajectory and prostate cancer survival
 jointmodeling(
     data = psa_data,

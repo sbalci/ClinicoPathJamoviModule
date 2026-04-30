@@ -45,7 +45,7 @@ actually true, considering factors like prior probability, statistical
 power, and research biases.
 }
 \examples{
-\dontrun{
+\donttest{
 # Calculate PPV for a typical medical research scenario
 ppv(
     percTrue = 10,    # 10 percent of tested hypotheses are true

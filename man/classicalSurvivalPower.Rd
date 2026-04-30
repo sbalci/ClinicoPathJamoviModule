@@ -119,7 +119,7 @@ competing risks, RMST analysis, and additional methods, also consider
 'Comprehensive Survival Power Analysis'.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 library(gsDesign)
 # Sample size for survival study

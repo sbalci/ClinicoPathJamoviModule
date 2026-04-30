@@ -87,7 +87,7 @@ method provides direct modeling of cumulative incidence without
 proportional subdistribution hazards assumptions.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

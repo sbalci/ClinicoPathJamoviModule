@@ -162,7 +162,7 @@ performance with noisy data. Especially suitable for biomarker discovery,
 prognostic modeling, and complex survival prediction tasks.
 }
 \examples{
-\dontrun{
+\donttest{
 result <- gradientboosting(
     data = mydata,
     time = "time_to_event",

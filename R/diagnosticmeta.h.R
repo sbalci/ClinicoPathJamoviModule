@@ -657,7 +657,7 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('diagnostic_studies')
 #'
 #' diagnosticmeta(data = diagnostic_studies,

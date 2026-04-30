@@ -46,7 +46,7 @@ A results object containing:
 Function for making Cross Tables.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 # dat <- as.data.frame(your_data)
 # ClinicoPath::crosstable(

@@ -102,6 +102,7 @@ modules:
       - "menuGroup: SurvivalT$"
       - "menuGroup: ExplorationT$"
       - "menuGroup: OncoPathT$"
+      - "menuGroup: PowerT"
     data_files:
       - "histopathology.rda"
     r_files:

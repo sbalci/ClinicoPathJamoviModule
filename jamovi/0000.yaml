@@ -1440,7 +1440,7 @@ analyses:
   - title: Confidence Interval Approach for the Number of Subjects Required
     name: kappaSizeCI
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: Power
     menuSubgroup: Power Analysis
     menuTitle: Confidence Interval Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on Kappa confidence
@@ -1451,7 +1451,7 @@ analyses:
   - title: Lowest Expected Value for a fixed sample size
     name: kappaSizeFixedN
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: Power
     menuSubgroup: Power Analysis
     menuTitle: Lowest Expected Value for a fixed sample size
     menuSubtitle: Find lower Kappa based on sample size
@@ -1462,7 +1462,7 @@ analyses:
   - title: Power Approach for the Number of Subjects Required
     name: kappaSizePower
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: Power
     menuSubgroup: Power Analysis
     menuTitle: Power Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on power
@@ -5859,15 +5859,25 @@ analyses:
     menuSubgroup: Prediction Models
     menuTitle: Clinical Score Builder
     menuSubtitle: Build, validate, and compare integer-point scoring systems
-    description: >
+    description: |
       Builds clinical integer-point scoring systems from regression models using
-
       three published methods (Sullivan/D'Agostino, Schneeweiss, Beta10).
-
-      Supports logistic and Cox regression with automatic variable
-      categorization,
-
-      calibration, discrimination, nomogram generation, and TRIPOD compliance.
+      Supports logistic, Cox, linear, and ordinal regression with automatic
+      variable categorization, calibration, discrimination, nomogram generation,
+      and TRIPOD compliance.
+  - title: Magee Equation - Oncotype DX Estimator
+    name: mageeequation
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Prediction Models
+    menuTitle: Magee Equation (Oncotype DX)
+    menuSubtitle: Estimate Oncotype DX Recurrence Score from pathology variables
+    description: |
+      Implements the Magee Equations (Klein et al. 2013, PMID: 23503643) for
+      estimating Oncotype DX Recurrence Score from standard pathology variables.
+      Provides all four published equations (Original + 3 new) with risk
+      category classification and concordance analysis.
 usesNative: true
 minApp: 1.8.0
 

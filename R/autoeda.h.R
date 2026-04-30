@@ -270,7 +270,7 @@ autoedaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example:
 #' # 1. Load your data frame.
 #' # 2. Select variables for analysis.

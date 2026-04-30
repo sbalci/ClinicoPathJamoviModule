@@ -89,7 +89,7 @@ Particularly effective for genomics data where many features are
 correlated.
 }
 \examples{
-\dontrun{
+\donttest{
 superpc(
     data = data,
     time = "time",

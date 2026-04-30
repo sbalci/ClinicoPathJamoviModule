@@ -396,7 +396,7 @@ geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Multiple liver samples per dog
 #' geemodel(
 #'   data = liver_data,

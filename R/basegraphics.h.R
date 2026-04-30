@@ -423,7 +423,7 @@ basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' graphics.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' # Scatter plot
 #' plot(x, y, main="Scatter Plot", xlab="X Variable", ylab="Y Variable")

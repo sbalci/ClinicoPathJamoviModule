@@ -200,7 +200,7 @@ crosstable2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for making Cross Tables.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' # dat <- as.data.frame(your_data)
 #' # ClinicoPath::crosstable(

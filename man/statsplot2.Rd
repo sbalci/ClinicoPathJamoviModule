@@ -60,7 +60,7 @@ measures designs with various plot types including violin plots, scatter
 plots, bar charts, and alluvial diagrams.
 }
 \examples{
-\dontrun{
+\donttest{
 # Automatic plot selection for factor vs continuous variables
 statsplot2(
     data = mtcars,

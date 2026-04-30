@@ -446,7 +446,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' progression-free survival, and multistate models.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Overall survival analysis
 #' data('lung', package = 'survival')
 #' outcomeorganizer(

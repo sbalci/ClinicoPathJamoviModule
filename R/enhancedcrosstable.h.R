@@ -324,7 +324,7 @@ enhancedcrosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' for advanced clinical research functionality.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' library(crosstable)
 #' # Enhanced crosstable with tidyselect

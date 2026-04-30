@@ -162,7 +162,7 @@ protocols, and reference interval establishment for clinical laboratory
 management.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 qualitycontrol(
     measurement_var = "measurement",

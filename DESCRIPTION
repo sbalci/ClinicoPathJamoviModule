@@ -809,6 +809,8 @@ Collate:
     'linechart.h.R'
     'lollipop.b.R'
     'lollipop.h.R'
+    'mageeequation.b.R'
+    'mageeequation.h.R'
     'mantelhaenszel.b.R'
     'mantelhaenszel.h.R'
     'marginalrecurrent.b.R'

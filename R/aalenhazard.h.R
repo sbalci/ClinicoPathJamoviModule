@@ -384,7 +384,7 @@ aalenhazardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' reveal how covariate effects change over time.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Basic Aalen additive hazard model
 #' library(timereg)
 #' library(survival)

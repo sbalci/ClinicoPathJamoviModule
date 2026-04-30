@@ -107,7 +107,7 @@ including hazard ratios, cumulative incidence functions, and model
 comparisons across different causes of failure.
 }
 \examples{
-\dontrun{
+\donttest{
 data('mgus2', package='survival')
 
 causespecifichazards(data = mgus2,

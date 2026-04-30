@@ -422,7 +422,7 @@ frailtysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Multi-center survival with shared frailty
 #' frailtysurvival(
 #'     data = multicenter_data,

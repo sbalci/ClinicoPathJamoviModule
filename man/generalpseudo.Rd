@@ -123,7 +123,7 @@ functionals including survival probabilities, cumulative incidence
 functions, and restricted mean survival times.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 generalpseudo(
     elapsedtime = "time_to_event",

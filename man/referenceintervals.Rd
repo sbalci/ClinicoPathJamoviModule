@@ -114,7 +114,7 @@ for demographic factors. Essential for laboratory standardization and
 clinical interpretation of test results.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 referenceintervals(
     measurement = "laboratory_value",

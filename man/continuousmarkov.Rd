@@ -114,7 +114,7 @@ Handles irregularly observed data and estimates transition intensities
 between states.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage
 continuousmarkov(
     data = longitudinal_data,

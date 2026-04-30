@@ -430,7 +430,7 @@ reclassmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage - Binary outcome:
 #' # ClinicoPath::reclassmetrics(
 #' #   data = data,

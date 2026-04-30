@@ -160,7 +160,7 @@ heterogeneity testing, publication bias assessment, diagnostic test
 accuracy meta-analysis, and network meta-analysis.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 metaanalysis(
     effect_size = "effect",

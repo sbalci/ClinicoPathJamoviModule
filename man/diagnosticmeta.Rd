@@ -130,7 +130,7 @@ validation
 and biomarker diagnostic accuracy synthesis.
 }
 \examples{
-\dontrun{
+\donttest{
 data('diagnostic_studies')
 
 diagnosticmeta(data = diagnostic_studies,

@@ -517,7 +517,7 @@ robustcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load test data
 #' data("mtcars")
 #'

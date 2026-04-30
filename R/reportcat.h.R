@@ -125,7 +125,7 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' # 1. Load your data into a data frame.
 #' # 2. Select the categorical variables to summarize.

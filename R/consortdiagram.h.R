@@ -460,7 +460,7 @@ consortdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Prepare data with exclusion columns
 #' # Each row = one participant
 #' # Non-NA values in exclusion columns indicate exclusion at that stage

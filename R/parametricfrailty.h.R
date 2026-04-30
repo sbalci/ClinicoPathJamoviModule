@@ -544,7 +544,7 @@ parametricfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('lung', package='survival')
 #'
 #' parametricfrailty(data = lung,

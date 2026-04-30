@@ -235,7 +235,7 @@ timevarycoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' as treatment  changes, biomarker levels, or disease progression markers.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # example will be added
 #'}
 #' @param data The data as a data frame.

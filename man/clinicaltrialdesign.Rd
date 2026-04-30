@@ -141,7 +141,7 @@ trials, superiority trials, and observational studies with proper power
 calculations.
 }
 \examples{
-\dontrun{
+\donttest{
 data('your_data')
 
 clinicaltrialdesign(

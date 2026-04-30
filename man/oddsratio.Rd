@@ -65,7 +65,7 @@ A results object containing:
 Function for Odds Ratio Table and Plot.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic odds ratio analysis with binary outcome
 library(ClinicoPath)
 data('histopathology')

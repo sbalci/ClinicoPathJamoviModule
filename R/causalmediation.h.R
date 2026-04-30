@@ -539,7 +539,7 @@ causalmediationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Basic mediation
 #' causalmediation(
 #'     data = mydata,

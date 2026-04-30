@@ -1394,7 +1394,7 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' survivalPower(
 #'     test_type = "log_rank",
 #'     effect_size = 0.75,

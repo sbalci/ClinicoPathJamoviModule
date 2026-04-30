@@ -666,7 +666,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Two-test combination analysis
 #' result <- decisioncombine(
 #'   data = histopathology,

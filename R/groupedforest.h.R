@@ -297,7 +297,7 @@ groupedforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example:
 #' # 1. Load survival data with time, event, treatment, and subgroup variables.
 #' # 2. Select time variable (follow-up duration).

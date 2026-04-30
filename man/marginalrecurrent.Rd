@@ -109,7 +109,7 @@ models, accelerated rate  models, and gamma frailty models to handle
 within-subject correlation.
 }
 \examples{
-\dontrun{
+\donttest{
 data('histopathology', package='ClinicoPath')
 }
 }

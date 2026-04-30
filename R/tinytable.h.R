@@ -253,7 +253,7 @@ tinytableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example:
 #' # 1. Select variables for table display.
 #' # 2. Choose grouping variables for organized presentation.

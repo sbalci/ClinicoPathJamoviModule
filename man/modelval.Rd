@@ -85,7 +85,7 @@ probabilities from existing models. Supports external validation, temporal
 validation, and subgroup analysis.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 # data <- your_data
 # ClinicoPath::modelval(

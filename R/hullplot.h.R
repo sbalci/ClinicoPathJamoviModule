@@ -325,7 +325,7 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example:
 #' # 1. Load your data frame with continuous variables for x and y axes.
 #' # 2. Select x and y variables for the scatter plot.

@@ -312,7 +312,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' geom_segment() and geom_point() for optimal visual presentation.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load clinical lab data
 #' clinical_lab_data <- read.csv("clinical_lab_data.csv")
 #' # Or load from package: data("clinical_lab_data", package = "ClinicoPath")

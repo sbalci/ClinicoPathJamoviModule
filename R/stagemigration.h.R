@@ -8051,7 +8051,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' interpretation guidance.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example analyzing TNM staging system migration:
 #' # stagemigration(
 #' #   data = cancer_cohort,

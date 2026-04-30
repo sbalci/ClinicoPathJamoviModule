@@ -101,7 +101,7 @@ outlier detection capabilities.
 Perfect for clinical research data quality control and preprocessing.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example:
 # 1. Select variables for outlier detection analysis.
 # 2. Choose detection methods (univariate, multivariate, or composite).

@@ -400,7 +400,7 @@ coefplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' research and epidemiological studies.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # example will be added
 #'}
 #' @param data The data as a data frame for regression analysis.

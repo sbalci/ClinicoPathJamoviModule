@@ -73,7 +73,7 @@ Calculates post-test probabilities based on various scenarios (either test
 positive, both positive, both negative).
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic co-testing analysis with independent tests
 cotest(
     test1_sens = 0.80,

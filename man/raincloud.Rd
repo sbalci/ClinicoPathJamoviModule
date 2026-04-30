@@ -138,7 +138,7 @@ multimodality
 and distribution shape. Based on the ggdist R-Bloggers tutorial.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load example dataset
 data(histopathology)
 

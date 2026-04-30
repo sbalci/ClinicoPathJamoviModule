@@ -121,7 +121,7 @@ Implements transition probabilities, state occupation probabilities, and
 competing transitions for complex disease pathways in clinical research.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Cancer progression model
 # States: Diagnosis -> Remission -> Relapse -> Death
 #                   -> Death (direct)

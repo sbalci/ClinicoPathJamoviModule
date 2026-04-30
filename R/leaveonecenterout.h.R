@@ -397,7 +397,7 @@ leaveonecenteroutBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' leaveonecenterout(data = data, outcome = "diagnosis",
 #'     outcomeLevel = "PanNEC", predictors = vars(p53, Rb1, SSTR2A),
 #'     centerVariable = "institution", modelType = "logistic")

@@ -125,7 +125,7 @@ sophisticated alternatives to static coefficient approaches in survival
 analysis.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Dynamic coefficient model with Bayesian updating
 library(survival)
 library(dlm)

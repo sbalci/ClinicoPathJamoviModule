@@ -75,7 +75,7 @@ estimation methods are supported including Kaplan-Meier weights, landmark
 approaches, and inverse probability weighting.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

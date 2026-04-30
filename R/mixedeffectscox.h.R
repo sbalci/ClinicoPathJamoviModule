@@ -834,7 +834,7 @@ mixedeffectscoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Mixed-effects Cox model with random intercept
 #' mixedeffectscox(
 #'     data = hierarchical_data,

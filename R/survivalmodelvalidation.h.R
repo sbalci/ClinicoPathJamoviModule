@@ -748,7 +748,7 @@ survivalmodelvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Cox model validation
 #' survivalmodelvalidation(
 #'     data = clinical_data,

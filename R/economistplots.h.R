@@ -476,7 +476,7 @@ economistplotsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' # 1. Select continuous variable for distribution analysis
 #' # 2. Choose grouping variable for comparison

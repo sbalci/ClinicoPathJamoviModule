@@ -619,7 +619,7 @@ dynamicpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data |>
 #' dynamicprediction(
 #'     elapsedtime = "time_to_event",

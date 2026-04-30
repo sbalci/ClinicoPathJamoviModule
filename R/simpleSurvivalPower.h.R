@@ -1266,7 +1266,7 @@ simpleSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' simpleSurvivalPower(
 #'     test_type = "log_rank",
 #'     effect_size = 0.75,

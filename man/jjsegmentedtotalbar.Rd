@@ -152,7 +152,7 @@ breakdowns within categories. Perfect for displaying composition data where
 each bar represents 100 percent and segments show relative proportions.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage for segmented total bar charts:
 # Shows proportional composition within categories
 # Each bar totals to 100 percent with segments showing relative proportions

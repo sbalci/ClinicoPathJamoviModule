@@ -33,7 +33,7 @@ textual and visual formats, making it easy to interpret the distribution of
 your data.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 # 1. Load your data into a data frame.
 # 2. Select the categorical variables to summarize.

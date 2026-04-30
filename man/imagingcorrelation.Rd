@@ -161,7 +161,7 @@ accuracy and clinical decision support through evidence-based pattern
 recognition and cross-modality validation.
 }
 \examples{
-\dontrun{
+\donttest{
 data('clinicaldata', package='ClinicoPath')
 
 # Basic imaging correlation analysis

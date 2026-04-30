@@ -341,7 +341,7 @@ subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Survival outcome subgroup analysis
 #' subgroupforest(
 #'     data = clinical_trial,

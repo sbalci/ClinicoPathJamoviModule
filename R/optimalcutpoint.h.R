@@ -369,7 +369,7 @@ optimalcutpointBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('histopathology')
 #'
 #' optimalcutpoint(data = histopathology,

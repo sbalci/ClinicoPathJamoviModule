@@ -17,7 +17,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: outcomeLevel
-            enable: (outcome)
+            enable: (outcome && (modelType == 'logistic' || modelType == 'cox' || modelType == 'ordinal'))
       - type: TargetLayoutBox
         label: Predictor Variables
         children:
@@ -31,6 +31,7 @@ children:
             name: elapsedtime
             maxItemCount: 1
             isTarget: true
+            enable: (modelType == 'cox')
   - type: CollapseBox
     label: Model & Scoring
     collapsed: false

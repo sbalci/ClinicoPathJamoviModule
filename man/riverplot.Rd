@@ -259,7 +259,7 @@ journeys, treatment progressions, categorical changes over time, and flow
 analysis.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic temporal flow - Track treatment response changes over time
 riverplot(
   data = patient_data,

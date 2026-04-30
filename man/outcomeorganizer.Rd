@@ -124,7 +124,7 @@ analysis including overall survival, cause-specific, competing risks,
 progression-free survival, and multistate models.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Overall survival analysis
 data('lung', package = 'survival')
 outcomeorganizer(

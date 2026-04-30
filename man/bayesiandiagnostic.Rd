@@ -235,7 +235,7 @@ diagnostic odds ratios with full uncertainty quantification. Supports
 meta-analysis, hierarchical modeling, and comparative test evaluation.
 }
 \examples{
-\dontrun{
+\donttest{
 # Bayesian diagnostic test evaluation
 bayesiandiagnostic(
     data = diagnostic_data,

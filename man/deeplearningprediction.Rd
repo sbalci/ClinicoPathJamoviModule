@@ -129,7 +129,7 @@ for
 biomarker prediction from H&E-stained tissue images.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic Vision Transformer prediction
 deeplearningprediction(
     data = image_data,

@@ -58,7 +58,7 @@ frequently used in  clinicopathological research manuscripts. It supports
 multiple output styles for flexible formatting.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 # data('histopathology')
 # dat <- as.data.frame(histopathology)

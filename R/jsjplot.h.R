@@ -371,7 +371,7 @@ jsjplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' regression tables, model plots, and interaction visualizations.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' library(sjPlot)
 #' # Regression table

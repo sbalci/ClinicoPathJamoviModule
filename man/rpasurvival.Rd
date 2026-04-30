@@ -125,7 +125,7 @@ Creates new variable with risk group assignments. Useful for developing
 prognostic staging systems by integrating multiple predictors.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Develop RPA staging system for survival data
 # Generate example survival data with multiple predictors
 set.seed(12345)

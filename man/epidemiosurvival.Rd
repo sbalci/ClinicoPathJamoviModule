@@ -169,7 +169,7 @@ research including cancer registry studies, cohort studies, and population
 surveillance.
 }
 \examples{
-\dontrun{
+\donttest{
 data('population_cohort')
 
 epidemiosurvival(

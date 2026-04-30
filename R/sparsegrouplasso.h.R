@@ -946,7 +946,7 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' Sparse Group LASSO regularization for survival analysis
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' sparsegrouplasso(data = histopathology,

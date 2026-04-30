@@ -139,7 +139,7 @@ gridlines, and standardized chart dimensions optimized for digital
 publication.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic BBC-style visualization
 library(bbplot)
 library(ggplot2)

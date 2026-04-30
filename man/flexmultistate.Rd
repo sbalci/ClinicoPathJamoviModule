@@ -107,7 +107,7 @@ Models transition hazards using splines and handles competing risks and
 intermediate states.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage
 flexmultistate(
     data = disease_data,

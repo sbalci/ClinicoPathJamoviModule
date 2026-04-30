@@ -125,7 +125,7 @@ and patterns in histopathological data. Essential for analyzing spatial
 dependencies in tissue architecture and cellular distributions.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 spatialautocorrelation(
     measurement = "biomarker_intensity",

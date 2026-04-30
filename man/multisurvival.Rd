@@ -299,7 +299,7 @@ or examining multiple predictors, the model accounts for how these factors
 influence event rates relative to the person-time at risk in each subgroup.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Basic multivariable Cox regression
 library(survival)
 data(colon)

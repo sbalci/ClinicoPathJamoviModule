@@ -271,7 +271,7 @@ This module provides comprehensive decision tree visualization capabilities incl
 }
 
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

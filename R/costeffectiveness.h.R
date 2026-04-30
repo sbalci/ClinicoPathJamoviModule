@@ -901,7 +901,7 @@ costeffectivenessBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' result <- costeffectiveness(
 #'     data = diagnostic_study,
 #'     strategy = "test_strategy",

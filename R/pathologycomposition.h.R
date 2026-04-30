@@ -282,7 +282,7 @@ pathologycompositionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('pathology_data')
 #'
 #' pathologycomposition(data = pathology_data,

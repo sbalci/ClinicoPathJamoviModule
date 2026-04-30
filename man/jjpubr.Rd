@@ -150,7 +150,7 @@ Each plot type supports:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Box plot with statistical comparison
 jjpubr(
     data = mtcars,

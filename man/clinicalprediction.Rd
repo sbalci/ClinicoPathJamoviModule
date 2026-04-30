@@ -208,7 +208,7 @@ features
 for model validation and documentation.
 }
 \examples{
-\dontrun{
+\donttest{
 data('clinical_data')
 
 clinicalprediction(

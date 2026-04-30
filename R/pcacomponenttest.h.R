@@ -376,7 +376,7 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example with mtcars dataset
 #' data("mtcars")
 #'

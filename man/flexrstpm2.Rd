@@ -184,7 +184,7 @@ concordance) • Time-varying effect plots • Copy-ready clinical report
 sentences
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Basic flexible parametric model
 library(rstpm2)
 library(survival)

@@ -143,7 +143,7 @@ measurements and applies RECIST 1.1 criteria (Eisenhauer et al., 2009) for
 response classification.
 }
 \examples{
-\dontrun{
+\donttest{
 data <- data.frame(
     patient = rep(c("P01", "P02"), each = 6),
     time = rep(c(0, 8, 16), 4),

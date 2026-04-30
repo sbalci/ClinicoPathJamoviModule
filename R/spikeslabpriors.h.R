@@ -925,7 +925,7 @@ spikeslabpriorsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Spike-and-slab variable selection
 #' spikeslabpriors(
 #'     data = biomarker_data,

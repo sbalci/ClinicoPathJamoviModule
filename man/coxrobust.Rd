@@ -127,7 +127,7 @@ functions, and weighted partial likelihood approaches for reliable survival
 analysis in the presence of data anomalies.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Robust Cox regression
 library(survival)
 library(coxrobust)

@@ -122,7 +122,7 @@ accreditation. Essential for establishing method performance
 characteristics.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 methodvalidation(
     measurement = "glucose_result",

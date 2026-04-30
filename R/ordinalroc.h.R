@@ -780,7 +780,7 @@ ordinalrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' result <- ordinalroc(
 #'     data = grading_data,
 #'     predictor = "biomarker_score",

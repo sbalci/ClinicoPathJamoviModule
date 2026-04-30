@@ -163,7 +163,7 @@ and clinical performance evaluation designed for medical research and
 diagnostic test evaluation.
 }
 \examples{
-\dontrun{
+\donttest{
 # Clinical model validation with bootstrap
 clinical_validation(
     data = clinical_data,

@@ -184,7 +184,7 @@ heterogeneity. Supports multiple frailty distributions and convergence
 diagnostics.
 }
 \examples{
-\dontrun{
+\donttest{
 data('lung', package='survival')
 
 emfrailty(data = lung,

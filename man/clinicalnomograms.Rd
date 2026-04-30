@@ -146,7 +146,7 @@ clinical
 instruments for personalized risk assessment and treatment planning.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Cox model nomogram
 clinicalnomograms(
     data = clinical_data,

@@ -787,7 +787,7 @@ clinicalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Clinical model validation with bootstrap
 #' clinical_validation(
 #'     data = clinical_data,

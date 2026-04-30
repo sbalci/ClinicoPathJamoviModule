@@ -126,7 +126,7 @@ centers using beta-binomial distributions with flexible correlation
 structures.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Beta-binomial diagnostic accuracy analysis
 betabinomialdiagnostic(
     data = diagnostic_data,

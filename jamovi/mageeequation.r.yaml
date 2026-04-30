@@ -1,0 +1,244 @@
+---
+name: mageeequation
+title: Magee Equation - Oncotype DX Estimator
+jrs: '1.1'
+
+items:
+    - name: todo
+      title: To Do
+      type: Html
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+          - erFormat
+          - prFormat
+
+    - name: equationInfo
+      title: Magee Equations Reference
+      type: Html
+      clearWith:
+          - equations
+
+    - name: summaryTable
+      title: Summary Statistics
+      type: Table
+      rows: 0
+      columns:
+        - name: equation
+          title: "Equation"
+          type: text
+        - name: n
+          title: "N"
+          type: integer
+        - name: mean_rs
+          title: "Mean RS"
+          type: number
+          format: zto
+        - name: median_rs
+          title: "Median RS"
+          type: number
+          format: zto
+        - name: sd_rs
+          title: "SD"
+          type: number
+          format: zto
+        - name: min_rs
+          title: "Min"
+          type: number
+          format: zto
+        - name: max_rs
+          title: "Max"
+          type: number
+          format: zto
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+          - nottinghamScore
+          - tumorSize
+          - ki67
+          - erFormat
+          - prFormat
+
+    - name: riskTable
+      title: Risk Category Distribution
+      type: Table
+      rows: 0
+      columns:
+        - name: equation
+          title: "Equation"
+          type: text
+        - name: low_n
+          title: "N"
+          type: integer
+          superTitle: "Low Risk"
+        - name: low_pct
+          title: "%"
+          type: number
+          format: zto
+          superTitle: "Low Risk"
+        - name: int_n
+          title: "N"
+          type: integer
+          superTitle: "Intermediate"
+        - name: int_pct
+          title: "%"
+          type: number
+          format: zto
+          superTitle: "Intermediate"
+        - name: high_n
+          title: "N"
+          type: integer
+          superTitle: "High Risk"
+        - name: high_pct
+          title: "%"
+          type: number
+          format: zto
+          superTitle: "High Risk"
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+          - nottinghamScore
+          - tumorSize
+          - ki67
+          - lowCutoff
+          - highCutoff
+
+    - name: concordanceTable
+      title: Concordance with Actual Oncotype DX RS
+      type: Table
+      visible: (showConcordance && actualRS)
+      rows: 0
+      columns:
+        - name: equation
+          title: "Equation"
+          type: text
+        - name: correlation
+          title: "Pearson r"
+          type: number
+          format: zto
+        - name: spearman
+          title: "Spearman rho"
+          type: number
+          format: zto
+        - name: rmse
+          title: "RMSE"
+          type: number
+          format: zto
+        - name: mae
+          title: "MAE"
+          type: number
+          format: zto
+        - name: risk_concordance
+          title: "Risk Category Agreement"
+          type: number
+          format: zto
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+          - actualRS
+          - lowCutoff
+          - highCutoff
+
+    - name: individualTable
+      title: Individual Patient Scores
+      type: Table
+      visible: (showIndividual)
+      rows: 0
+      columns:
+        - name: row_id
+          title: "Row"
+          type: integer
+        - name: rs_original
+          title: "Original"
+          type: number
+          format: zto
+          superTitle: "Estimated RS"
+        - name: rs_new1
+          title: "Eq. 1"
+          type: number
+          format: zto
+          superTitle: "Estimated RS"
+        - name: rs_new2
+          title: "Eq. 2"
+          type: number
+          format: zto
+          superTitle: "Estimated RS"
+        - name: rs_new3
+          title: "Eq. 3"
+          type: number
+          format: zto
+          superTitle: "Estimated RS"
+        - name: risk_original
+          title: "Risk Category"
+          type: text
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+          - nottinghamScore
+          - tumorSize
+          - ki67
+
+    - name: distributionPlot
+      title: Estimated RS Distribution
+      type: Image
+      renderFun: .distributionPlot
+      width: 700
+      height: 500
+      requiresData: true
+      visible: (showDistribution)
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+          - nottinghamScore
+          - tumorSize
+          - ki67
+          - lowCutoff
+          - highCutoff
+
+    - name: concordancePlot
+      title: Concordance Plot
+      type: Image
+      renderFun: .concordancePlot
+      width: 600
+      height: 500
+      requiresData: true
+      visible: (showConcordance && actualRS)
+      clearWith:
+          - nuclearGrade
+          - mitosis
+          - erHscore
+          - prHscore
+          - her2Status
+          - actualRS
+
+refs:
+    - ClinicoPathJamoviModule
+...

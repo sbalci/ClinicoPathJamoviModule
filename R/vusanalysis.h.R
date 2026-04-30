@@ -553,7 +553,7 @@ vusanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' result <- vusanalysis(
 #'     data = tumor_data,
 #'     predictor = "biomarker_score",

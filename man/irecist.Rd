@@ -162,7 +162,7 @@ Seymour et al. (2017) guidelines including pseudoprogression detection and
 confirmation requirements.
 }
 \examples{
-\dontrun{
+\donttest{
 data <- data.frame(
     patient = c("P01", "P01", "P01", "P02", "P02"),
     time = c(0, 8, 16, 0, 8),

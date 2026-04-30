@@ -237,7 +237,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for Odds Ratio Table and Plot.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic odds ratio analysis with binary outcome
 #' library(ClinicoPath)
 #' data('histopathology')

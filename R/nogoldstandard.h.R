@@ -398,7 +398,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic example with simulated diagnostic test data
 #' set.seed(123)
 #' n <- 200

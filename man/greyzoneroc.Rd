@@ -224,7 +224,7 @@ diagnostic tests where "I don't know" is a valid and often safer response
 than forcing a potentially incorrect binary classification.
 }
 \examples{
-\dontrun{
+\donttest{
 result <- greyzoneroc(
     data = ai_predictions,
     predictor = "ai_probability",

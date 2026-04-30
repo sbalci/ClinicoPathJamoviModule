@@ -95,7 +95,7 @@ High-performance scatter plots using the scattermore package for plotting
 millions of points efficiently with advanced customization options.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 library(scattermore)
 # Fast scatter plot

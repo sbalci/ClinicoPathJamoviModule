@@ -434,7 +434,7 @@ variablebiplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' comprehensive variable importance metrics.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: PCA biplot for tumor staging
 #' variablebiplot(
 #'     data = clinical_data,

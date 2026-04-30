@@ -107,7 +107,7 @@ characterization using IHC markers. Specialized for immuno-oncology
 applications.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 ihcimmune(
     immune_markers = c("CD3", "CD4", "CD8", "CD20"),

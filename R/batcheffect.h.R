@@ -439,7 +439,7 @@ batcheffectBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('your_data')
 #'
 #' batcheffect(data = your_data,

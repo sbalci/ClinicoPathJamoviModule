@@ -180,7 +180,7 @@ robust statistical methods
 for public health decision-making and intervention planning.
 }
 \examples{
-\dontrun{
+\donttest{
 data('outbreak_data')
 
 outbreakanalysis(

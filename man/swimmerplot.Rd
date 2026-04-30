@@ -203,7 +203,7 @@ Features enhanced data validation  and complete ggswim integration for
 professional clinical visualization.
 }
 \examples{
-\dontrun{
+\donttest{
 # Clinical trial swimmer plot example
 data <- data.frame(
     PatientID = paste0("PT", formatC(1:20, width = 3, flag = "0")),

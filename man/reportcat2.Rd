@@ -51,7 +51,7 @@ enhanced data exploration. Automatically handles  edge cases like missing
 values, single categories, and variable conversion.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Basic categorical summary
 data <- data.frame(
   treatment = factor(c("A", "B", "A", "C", "B", "A")),

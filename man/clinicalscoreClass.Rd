@@ -4,11 +4,13 @@
 \alias{clinicalscoreClass}
 \title{Clinical Scoring System Generator}
 \description{
-Builds clinical integer-point scoring systems from logistic or Cox regression
-models using three published methods: Sullivan/D'Agostino (2004), Schneeweiss
-(Mehta et al. 2016), and Beta10 (Zhang et al. 2017). Includes automatic variable
-categorization, calibration/discrimination assessment, nomogram generation,
-score-to-probability lookup, bootstrap validation, and TRIPOD compliance.
+Builds clinical integer-point scoring systems from regression models using
+three published methods: Sullivan/D'Agostino (2004), Schneeweiss (Mehta et al.
+2016), and Beta10 (Zhang et al. 2017). Supports logistic (binary), Cox
+(time-to-event), linear (continuous), and ordinal (ordered categories)
+regression. Includes automatic variable categorization, calibration/
+discrimination assessment, nomogram generation, score-to-outcome lookup,
+bootstrap validation, and TRIPOD compliance.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{ClinicoPath::clinicalscoreBase} -> \code{clinicalscoreClass}

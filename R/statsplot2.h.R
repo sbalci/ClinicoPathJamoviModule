@@ -186,7 +186,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' plots, bar charts, and alluvial diagrams.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Automatic plot selection for factor vs continuous variables
 #' statsplot2(
 #'     data = mtcars,

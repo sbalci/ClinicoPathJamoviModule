@@ -103,7 +103,7 @@ Social science statistical visualization using the sjPlot package for
 regression tables, model plots, and interaction visualizations.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 library(sjPlot)
 # Regression table

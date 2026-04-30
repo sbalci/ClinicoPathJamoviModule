@@ -103,7 +103,7 @@ prediction,
 time-varying treatment decisions.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example with survival outcome
 library(survival)
 data <- lung

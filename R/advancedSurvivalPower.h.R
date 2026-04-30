@@ -225,7 +225,7 @@ advancedSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Calculate required sample size for a cancer treatment study
 #' # Detect 30 percent reduction in hazard (HR=0.7) with 80 percent power
 #' # advancedSurvivalPower(

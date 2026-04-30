@@ -190,7 +190,7 @@ package
 for enhanced customization and connectivity features.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example:
 # 1. Select continuous variable for distribution analysis.
 # 2. Choose grouping variable for comparisons.

@@ -778,7 +778,7 @@ imagingcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('clinicaldata', package='ClinicoPath')
 #'
 #' # Basic imaging correlation analysis

@@ -215,7 +215,7 @@ uncertainty
 quantification for clinical decision making.
 }
 \examples{
-\dontrun{
+\donttest{
 # Bayesian network meta-analysis
 bayesiannetworkma(
     data = network_data,

@@ -116,7 +116,7 @@ response confirmation requirements. REGULATORY-READY: Suitable for clinical
 trial endpoints and regulatory submissions.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Lesion-level data for RECIST v1.1
 data_recist <- data.frame(
     PatientID = rep(paste0("PT", 1:3), each = 6),

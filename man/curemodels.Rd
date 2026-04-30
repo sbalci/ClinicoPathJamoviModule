@@ -102,7 +102,7 @@ Implements mixture cure models and non-mixture cure models for oncology
 research.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage
 curemodels(
     data = cancer_data,

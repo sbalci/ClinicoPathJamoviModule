@@ -87,7 +87,7 @@ support for multiple groups, confidence intervals, and statistical
 overlays.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic line chart
 linechart(
     data = clinical_data,

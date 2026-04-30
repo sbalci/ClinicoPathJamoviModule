@@ -173,7 +173,7 @@ specific
 to cancer clinical trials and observational studies.
 }
 \examples{
-\dontrun{
+\donttest{
 data('cancer_trial')
 
 progressionsurvival(

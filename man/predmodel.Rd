@@ -75,7 +75,7 @@ stepwise/LASSO selection, ROC analysis, calibration plots, and bootstrap
 validation.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 # data <- your_data
 # ClinicoPath::predmodel(

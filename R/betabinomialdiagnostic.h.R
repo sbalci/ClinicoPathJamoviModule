@@ -842,7 +842,7 @@ betabinomialdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Beta-binomial diagnostic accuracy analysis
 #' betabinomialdiagnostic(
 #'     data = diagnostic_data,

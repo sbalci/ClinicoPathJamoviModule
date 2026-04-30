@@ -685,7 +685,7 @@ recistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data <- data.frame(
 #'     patient = rep(c("P01", "P02"), each = 6),
 #'     time = rep(c(0, 8, 16), 4),

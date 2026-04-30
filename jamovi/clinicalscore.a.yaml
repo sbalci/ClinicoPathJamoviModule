@@ -12,8 +12,9 @@ description:
     main: |
         Builds clinical integer-point scoring systems from regression models using
         three published methods (Sullivan/D'Agostino, Schneeweiss, Beta10).
-        Supports logistic and Cox regression with automatic variable categorization,
-        calibration, discrimination, nomogram generation, and TRIPOD compliance.
+        Supports logistic, Cox, linear, and ordinal regression with automatic
+        variable categorization, calibration, discrimination, nomogram generation,
+        and TRIPOD compliance.
     R:
         dontrun: true
         usage: |
@@ -34,6 +35,10 @@ options:
           name: logistic
         - title: "Cox Regression (time-to-event)"
           name: cox
+        - title: "Linear Regression (continuous outcome)"
+          name: linear
+        - title: "Ordinal Regression (ordered categories)"
+          name: ordinal
       default: logistic
 
     - name: outcome

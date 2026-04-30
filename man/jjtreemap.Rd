@@ -91,7 +91,7 @@ A results object containing:
 'Creates treemap visualizations for categorical data'
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

@@ -115,7 +115,7 @@ registry
 studies and population-based research.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Cancer relative survival
 relativesurvival(
     data = cancer_registry,

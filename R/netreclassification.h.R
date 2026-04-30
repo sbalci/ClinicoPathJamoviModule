@@ -768,7 +768,7 @@ netreclassificationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' result <- netreclassification(
 #'     data = mydata,
 #'     outcome = "event_indicator",

@@ -894,7 +894,7 @@ hierarchicalbayesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Hierarchical Bayesian diagnostic meta-analysis
 #' hierarchicalbayes(
 #'     data = multicenter_data,

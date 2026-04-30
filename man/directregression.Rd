@@ -98,7 +98,7 @@ to hazard-based models. Particularly useful when interest lies in survival
 probabilities rather than hazard ratios.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 directregression(
     elapsedtime = "time_to_event",

@@ -721,7 +721,7 @@ deeplearningpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic Vision Transformer prediction
 #' deeplearningprediction(
 #'     data = image_data,

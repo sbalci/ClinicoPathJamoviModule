@@ -147,7 +147,7 @@ for repeated measurements and within-subjects analysis with
 statistical annotations and significance testing.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic within-subjects analysis with iris dataset (simulated repeated measures)
 data(iris)
 iris_wide <- data.frame(

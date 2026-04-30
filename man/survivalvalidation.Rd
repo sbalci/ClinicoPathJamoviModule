@@ -134,7 +134,7 @@ plots,
 and decision curve analysis for clinical decision making.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Validate Cox regression model
 survivalvalidation(
     data = cancer_data,

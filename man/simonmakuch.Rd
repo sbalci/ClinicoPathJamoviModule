@@ -259,7 +259,7 @@ timing of exposure changes, providing unbiased survival estimates and valid
 statistical comparisons.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load example data
 data("simon_makuch_simple")
 

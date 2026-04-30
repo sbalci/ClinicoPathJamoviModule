@@ -185,7 +185,7 @@ molecular pathology where grey-zone results trigger reflex testing (e.g.,
 HER2 2+ requires FISH confirmation).
 }
 \examples{
-\dontrun{
+\donttest{
 result <- trichotomousroc(
     data = her2_data,
     predictor = "her2_score",

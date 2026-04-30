@@ -592,7 +592,7 @@ timeupdatesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data |>
 #' timeupdatesurvival(
 #'     time = "time_variable",

@@ -99,7 +99,7 @@ hazards. The model estimates cumulative regression functions that can
 reveal how covariate effects change over time.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Basic Aalen additive hazard model
 library(timereg)
 library(survival)

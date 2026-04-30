@@ -641,7 +641,7 @@ relativesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Cancer relative survival
 #' relativesurvival(
 #'     data = cancer_registry,

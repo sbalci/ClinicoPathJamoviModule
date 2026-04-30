@@ -203,7 +203,7 @@ probabilities to determine if using a model provides more benefit than
 default strategies.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

@@ -91,7 +91,7 @@ effect sizes, and assumption checking. Addresses the critical issue
 where 68 percent of pathology studies fail proper multiple comparisons.
 }
 \examples{
-\dontrun{
+\donttest{
 data('ToothGrowth')
 
 advancedanova(data = ToothGrowth,

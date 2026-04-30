@@ -118,7 +118,7 @@ Data Mining's contribution analysis, adapted for clinical research with
 comprehensive variable importance metrics.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: PCA biplot for tumor staging
 variablebiplot(
     data = clinical_data,

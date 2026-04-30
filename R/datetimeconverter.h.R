@@ -512,7 +512,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' creating time-based variables.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic datetime conversion: '0.0.37'
 #' datetimeconverter(
 #'   data = study_data,

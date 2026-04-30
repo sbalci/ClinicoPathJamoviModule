@@ -191,7 +191,7 @@ techniques designed for clinical research where parametric assumptions are
 violated.
 }
 \examples{
-\dontrun{
+\donttest{
 # Kernel regression with automatic bandwidth selection
 nonparametricregression(
     data = clinical_data,

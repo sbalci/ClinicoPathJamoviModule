@@ -51,7 +51,7 @@ Optionally, you can enable distribution diagnostics to examine normality,
 skewness, and kurtosis.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example:
 # 1. Load your data frame.
 # 2. Select one or more continuous variables.

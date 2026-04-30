@@ -96,7 +96,7 @@ certain time. Essential for  long-term prognosis and dynamic patient
 counseling in clinical practice.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 condsurvival(
     time = "time_variable",

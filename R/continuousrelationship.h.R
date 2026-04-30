@@ -372,7 +372,7 @@ continuousrelationshipBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Analyzing BMI vs mortality risk
 #' continuousrelationship(
 #'     data = clinical_data,

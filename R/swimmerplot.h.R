@@ -854,7 +854,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Clinical trial swimmer plot example
 #' data <- data.frame(
 #'     PatientID = paste0("PT", formatC(1:20, width = 3, flag = "0")),

@@ -129,7 +129,7 @@ health states over time. Supports homogeneous and non-homogeneous models
 with covariate effects using mstate and msm packages.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

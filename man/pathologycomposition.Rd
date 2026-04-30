@@ -87,7 +87,7 @@ composition
 pattern analysis, and optimal threshold identification.
 }
 \examples{
-\dontrun{
+\donttest{
 data('pathology_data')
 
 pathologycomposition(data = pathology_data,

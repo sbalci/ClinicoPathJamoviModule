@@ -189,7 +189,7 @@ state-of-the-art
 methodology and regulatory compliance.
 }
 \examples{
-\dontrun{
+\donttest{
 data('clinical_trial')
 
 advancedtrials(

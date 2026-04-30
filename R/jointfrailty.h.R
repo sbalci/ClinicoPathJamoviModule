@@ -724,7 +724,7 @@ jointfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' experiencing multiple types of events.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'}
 #' @param data .

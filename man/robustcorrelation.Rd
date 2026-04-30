@@ -113,7 +113,7 @@ Minimum Volume Ellipsoid (MVE), and Minimum Covariance Determinant (MCD)
 correlation methods.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load test data
 data("mtcars")
 

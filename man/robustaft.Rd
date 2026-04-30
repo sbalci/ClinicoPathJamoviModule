@@ -131,7 +131,7 @@ extreme observations or model misspecification, ensuring reliable parameter
 estimates in challenging clinical datasets.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example: Robust AFT model with Weibull distribution
 library(survival)
 library(RobustAFT)

@@ -108,7 +108,7 @@ alternative to step-function approaches in standard time-varying Cox models
 and complementing Aalen's additive hazard methodology.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Spline-based time-varying effects
 library(timereg)
 library(survival)

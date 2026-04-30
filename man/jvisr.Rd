@@ -87,7 +87,7 @@ Clinical and medical research focused visualizations using the visR package
 with sensible defaults based on graphical principles.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 library(visR)
 # Kaplan-Meier estimation

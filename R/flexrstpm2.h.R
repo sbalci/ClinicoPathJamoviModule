@@ -954,7 +954,7 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' sentences
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Basic flexible parametric model
 #' library(rstpm2)
 #' library(survival)

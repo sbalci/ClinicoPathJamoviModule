@@ -115,7 +115,7 @@ Creates oncoplots (mutation landscapes) to visualize genomic alterations
 across genes and samples with optional clinical annotations.
 }
 \examples{
-\dontrun{
+\donttest{
 data <- data.frame(
     SampleID = paste0("S", 1:10),
     TP53 = c(1, 0, 1, 0, 1, 0, 0, 1, 0, 1),

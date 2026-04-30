@@ -915,7 +915,7 @@ bayesianclinicalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('clinical_data')
 #'
 #' bayesianclinical(

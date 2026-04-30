@@ -535,7 +535,7 @@ differentialdiagnosisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('histopathology', package='ClinicoPath')
 #'
 #' # Basic differential diagnosis analysis

@@ -527,7 +527,7 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage
 #' curemodels(
 #'     data = cancer_data,

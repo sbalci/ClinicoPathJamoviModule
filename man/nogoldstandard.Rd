@@ -89,7 +89,7 @@ reference standards for estimating test performance when no perfect
 reference test exists.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic example with simulated diagnostic test data
 set.seed(123)
 n <- 200

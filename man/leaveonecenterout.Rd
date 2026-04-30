@@ -82,7 +82,7 @@ held-out center, repeating for each center. Provides internal-external
 validation recommended by TRIPOD and Debray et al. (2015).
 }
 \examples{
-\dontrun{
+\donttest{
 leaveonecenterout(data = data, outcome = "diagnosis",
     outcomeLevel = "PanNEC", predictors = vars(p53, Rb1, SSTR2A),
     centerVariable = "institution", modelType = "logistic")

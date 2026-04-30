@@ -610,7 +610,7 @@ advancedanovaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('ToothGrowth')
 #'
 #' advancedanova(data = ToothGrowth,

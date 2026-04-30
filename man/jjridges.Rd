@@ -216,7 +216,7 @@ complex ridge plots with inside plots, double ridgelines, and color
 gradients.'
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic ridgeline plot
 jjridges(
   data = iris,

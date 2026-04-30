@@ -123,7 +123,7 @@ importance,
 SHAP values, and other interpretability methods.
 }
 \examples{
-\dontrun{
+\donttest{
 # SHAP analysis for feature importance
 explainableai(
     data = model_data,

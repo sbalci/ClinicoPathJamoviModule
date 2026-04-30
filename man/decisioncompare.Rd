@@ -144,7 +144,7 @@ standard. Includes statistical comparison using McNemar's test and
 confidence intervals for differences.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic comparison of two diagnostic tests
 library(ClinicoPath)
 data('histopathology')

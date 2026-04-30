@@ -38,7 +38,7 @@ A results object containing:
 Lowest Expected Value for a fixed sample size.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

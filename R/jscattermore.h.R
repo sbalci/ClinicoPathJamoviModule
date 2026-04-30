@@ -319,7 +319,7 @@ jscattermoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' millions of points efficiently with advanced customization options.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage:
 #' library(scattermore)
 #' # Fast scatter plot

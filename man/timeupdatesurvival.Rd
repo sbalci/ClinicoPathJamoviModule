@@ -103,7 +103,7 @@ and  dynamic hazard functions. Incorporates real-time patient information
 updates  for precision medicine and personalized survival prediction.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 timeupdatesurvival(
     time = "time_variable",

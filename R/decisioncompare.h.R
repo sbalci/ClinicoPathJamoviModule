@@ -785,7 +785,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic comparison of two diagnostic tests
 #' library(ClinicoPath)
 #' data('histopathology')

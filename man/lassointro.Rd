@@ -43,7 +43,7 @@ choose the right analysis for their data and research question. No data or
 variables required.
 }
 \examples{
-\dontrun{
+\donttest{
 # Simply open the guide - no data needed
 lassointro()
 }

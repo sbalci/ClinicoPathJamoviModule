@@ -132,7 +132,7 @@ comparisons of continuous variables between groups with
 statistical annotations and significance testing.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic dot plot with iris dataset
 jjdotplotstats(
     data = iris,

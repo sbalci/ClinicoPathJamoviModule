@@ -130,7 +130,7 @@ transition intensities, state prevalences,  and predictions with
 uncertainty quantification.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

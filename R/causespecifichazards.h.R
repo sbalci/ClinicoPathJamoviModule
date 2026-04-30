@@ -550,7 +550,7 @@ causespecifichazardsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('mgus2', package='survival')
 #'
 #' causespecifichazards(data = mgus2,

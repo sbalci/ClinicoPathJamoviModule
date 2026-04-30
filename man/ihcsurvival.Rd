@@ -93,7 +93,7 @@ Survival analysis and prognostic clustering using IHC markers. Designed for
 prognostic biomarker discovery and risk stratification.
 }
 \examples{
-\dontrun{
+\donttest{
 data |>
 ihcsurvival(
     markers = c("ER", "PR", "HER2", "Ki67"),

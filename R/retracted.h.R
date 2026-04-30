@@ -130,7 +130,7 @@ retractedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Basic retraction check
 #' data <- data.frame(
 #'   doi = c("10.1126/science.aac4716", "10.1038/nature12373", "10.1016/j.cell.2014.09.045")

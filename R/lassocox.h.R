@@ -599,7 +599,7 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' analysis.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' lassocox(data = data, elapsedtime = "Time", outcome = "Status",
 #'     outcomeLevel = "1", explanatory = vars(age, stage, grade))
 #'}

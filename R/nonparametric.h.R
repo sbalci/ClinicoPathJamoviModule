@@ -1267,7 +1267,7 @@ nonparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Enhanced Mann-Whitney U test for biomarker expression
 #' nonparametric(
 #'     data = clinical_data,

@@ -138,7 +138,7 @@ for
 optimal therapeutic decision-making.
 }
 \examples{
-\dontrun{
+\donttest{
 data('histopathology', package='ClinicoPath')
 
 # Basic treatment optimization analysis

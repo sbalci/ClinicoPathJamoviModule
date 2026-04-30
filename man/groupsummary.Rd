@@ -58,7 +58,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Group data by categorical variables and calculate summary statistics
 }
 \examples{
-\dontrun{
+\donttest{
 # Group by one or more categorical variables and sum numeric variables
 groupsummary(
     data = mydata,

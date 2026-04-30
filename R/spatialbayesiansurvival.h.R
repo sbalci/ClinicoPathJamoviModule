@@ -886,7 +886,7 @@ spatialbayesiansurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Spatial Bayesian survival analysis
 #' spatialbayesiansurvival(
 #'     data = clinical_data,

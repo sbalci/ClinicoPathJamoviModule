@@ -135,7 +135,7 @@ biomarker screening, exploratory analysis, and feature selection before
 building multivariable models.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Basic feature ranking
 library(survival)
 data(colon)

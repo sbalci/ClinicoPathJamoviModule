@@ -114,7 +114,7 @@ Follows the approach described by Riinu Ots
 (https://www.riinu.me/2024/02/consort/).
 }
 \examples{
-\dontrun{
+\donttest{
 # Prepare data with exclusion columns
 # Each row = one participant
 # Non-NA values in exclusion columns indicate exclusion at that stage

@@ -172,7 +172,7 @@ A results object containing:
 package.'
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic social network visualization
 data(jjarcdiagram_social_network, package = "ClinicoPath")
 jjarcdiagram(

@@ -1064,7 +1064,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 1/3/5-year survival rates for all patients collectively.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example analyzing overall survival for a patient cohort:
 #' # singlearm(
 #' #   data = patient_data,

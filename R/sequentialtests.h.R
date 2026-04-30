@@ -469,7 +469,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # COVID-19 testing: Rapid antigen followed by RT-PCR confirmation
 #' # Shows how serial positive strategy improves specificity
 #' data(sequential_testing_examples)

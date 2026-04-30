@@ -538,7 +538,7 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Lesion-level data for RECIST v1.1
 #' data_recist <- data.frame(
 #'     PatientID = rep(paste0("PT", 1:3), each = 6),

@@ -535,7 +535,7 @@ highdimcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' proteomic, or other high-dimensional clinical datasets.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: LASSO regularization for gene expression data
 #' library(survival)
 #' library(glmnet)

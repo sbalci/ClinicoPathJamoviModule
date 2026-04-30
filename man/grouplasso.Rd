@@ -230,7 +230,7 @@ group-wise feature selection with preserved biological or clinical
 structure.
 }
 \examples{
-\dontrun{
+\donttest{
 result <- grouplasso(
     data = mydata,
     time = "time_to_event",

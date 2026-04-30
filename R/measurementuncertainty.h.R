@@ -440,7 +440,7 @@ measurementuncertaintyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data |>
 #' measurementuncertainty(
 #'     measurement = "glucose_result",

@@ -116,12 +116,12 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Builds clinical integer-point scoring systems from regression models using
 three published methods (Sullivan/D'Agostino, Schneeweiss, Beta10).
-Supports logistic and Cox regression with automatic variable
-categorization,
-calibration, discrimination, nomogram generation, and TRIPOD compliance.
+Supports logistic, Cox, linear, and ordinal regression with automatic
+variable categorization, calibration, discrimination, nomogram generation,
+and TRIPOD compliance.
 }
 \examples{
-\dontrun{
+\donttest{
 clinicalscore(data = data, outcome = "diagnosis",
     outcomeLevel = "malignant", explanatory = vars(age, grade, ki67),
     modelType = "logistic", scoringMethod = "compare")

@@ -356,7 +356,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic dot plot with iris dataset
 #' jjdotplotstats(
 #'     data = iris,

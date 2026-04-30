@@ -153,7 +153,7 @@ evidence-based
 diagnostic decision-making and clinical assessment optimization.
 }
 \examples{
-\dontrun{
+\donttest{
 data('clinicaldata', package='ClinicoPath')
 
 # Basic laboratory interpretation

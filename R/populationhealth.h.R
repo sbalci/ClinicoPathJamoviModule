@@ -955,7 +955,7 @@ populationhealthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data('population_health', package='ClinicoPath')
 #'
 #' # Basic population health analytics

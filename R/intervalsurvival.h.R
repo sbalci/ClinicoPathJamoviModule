@@ -441,7 +441,7 @@ intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example: Tumor progression between visits
 #' intervalsurvival(
 #'     data = oncology_data,

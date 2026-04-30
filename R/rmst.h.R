@@ -360,7 +360,7 @@ rmstBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example usage will be added
 #'}
 #' @param data The data as a data frame.

@@ -430,7 +430,7 @@ smoothtimevaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' and complementing Aalen's additive hazard methodology.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Spline-based time-varying effects
 #' library(timereg)
 #' library(survival)

@@ -884,7 +884,7 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' effects.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example 1: Patients clustered within hospitals
 #' library(survival)
 #' library(coxme)

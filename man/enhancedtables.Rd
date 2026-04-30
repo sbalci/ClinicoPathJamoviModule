@@ -115,7 +115,7 @@ reports, and presentations. Features include conditional formatting,
 custom themes, statistical summaries, and multi-level grouping.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example:
 # 1. Select variables for analysis
 # 2. Choose grouping and summary options

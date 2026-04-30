@@ -118,7 +118,7 @@ times with emphasis on median survival relationships and time acceleration
 effects in clinical research applications.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example 1: Basic rank-based AFT with GEE
 library(aftgee)
 library(survival)

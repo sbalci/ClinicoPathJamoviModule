@@ -91,7 +91,7 @@ effect sizes, and association measures. Addresses the critical issue where
 25 percent of pathology studies use categorical analysis incorrectly.
 }
 \examples{
-\dontrun{
+\donttest{
 data('histopathology')
 
 categoricaladvanced(data = histopathology,

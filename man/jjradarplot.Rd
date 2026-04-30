@@ -67,7 +67,7 @@ This function allows comparison of multiple variables across different
 categories.'
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }

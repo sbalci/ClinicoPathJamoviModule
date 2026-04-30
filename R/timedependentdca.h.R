@@ -474,7 +474,7 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example with survival outcome
 #' library(survival)
 #' data <- lung

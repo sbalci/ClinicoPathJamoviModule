@@ -121,7 +121,7 @@ user-friendly interface, automatic data preparation, and comprehensive
 visualization options.
 }
 \examples{
-\dontrun{
+\donttest{
 # Example usage:
 library(iwillsurvive)
 # Derive follow-up columns

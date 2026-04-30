@@ -175,7 +175,7 @@ Compares CART, Random Forest, and Gradient Boosting with cross-validation,
 statistical testing, and clinical performance assessment.
 }
 \examples{
-\dontrun{
+\donttest{
 # Compare multiple tree algorithms
 treecomparison(
     data = clinical_data,

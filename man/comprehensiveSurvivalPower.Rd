@@ -234,7 +234,7 @@ considerations. Essential for study planning, grant applications, and
 regulatory submissions.
 }
 \examples{
-\dontrun{
+\donttest{
 # Standard log-rank test power calculation
 comprehensiveSurvivalPower(
     method_category = "standard",

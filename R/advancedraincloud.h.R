@@ -603,7 +603,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Example:
 #' # 1. Select continuous variable for distribution analysis.
 #' # 2. Choose grouping variable for comparisons.

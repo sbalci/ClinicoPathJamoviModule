@@ -119,7 +119,7 @@ Function for Medical Decision Analysis. Sensitivity, Specificity, Positive
 Predictive Value, Negative Predictive Value.
 }
 \examples{
-\dontrun{
+\donttest{
 # example will be added
 }
 }
