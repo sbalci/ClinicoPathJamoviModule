@@ -75,17 +75,32 @@ advancedimputationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # 5. Execute MICE if requested and not too heavy
             # In a real jamovi module, we might want to do this asynchronously or limit iterations
             # For this 'Improving' task, I'll implement the basic call.
-            
+            #
+            # TODO (stub): the entire MICE pipeline below is commented out — the function
+            # only renders the missing-data summary and the method-assignment table. End
+            # users who toggle "Pool Results" see a placeholder note rather than actual
+            # pooled imputation results, which is misleading.
+            # To complete:
+            #   (a) uncomment and wire up mice::mice(...) using self$options$random_seed,
+            #       n_imputations, n_iterations, methods. Wrap in tryCatch and surface
+            #       failures via jmvcore::reject or private$.addNotice("ERROR", ...).
+            #   (b) compute pooled estimates (mice::pool, mice::complete) and populate
+            #       self$results$pooledResults rather than just setNote().
+            #   (c) until (a) and (b) are done, either:
+            #       - hide the `pool_results` option in the .u.yaml so the UI doesn't
+            #         offer functionality that doesn't exist, or
+            #       - emit an INFO/WARNING notice ("Pool Results: not yet implemented")
+            #         when the user enables it, so they aren't quietly misled.
             if (self$options$pool_results) {
                 # This part is complex because jamovi's environment might be sensitive to long runs
                 # But let's show we can do it.
-                
+
                 # set.seed(self$options$random_seed)
-                # imp <- mice::mice(mydata, m = self$options$n_imputations, 
-                #                  maxit = self$options$n_iterations, 
+                # imp <- mice::mice(mydata, m = self$options$n_imputations,
+                #                  maxit = self$options$n_iterations,
                 #                  method = unlist(methods),
                 #                  printFlag = FALSE)
-                
+
                 # For now, let's just populate the table with placeholders to show structure
                 tablePooled <- self$results$pooledResults
                 tablePooled$setNote("note", "Complete pooling results will be displayed here after full MICE execution.")

@@ -204,7 +204,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                jmvcore::reject(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
+                stop(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
             }
 
             # Safely require ggrain
@@ -250,18 +250,10 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             analysis_vars <- unique(analysis_vars[!(is.na(analysis_vars) | analysis_vars == "")])
             
             analysis_data <- as.data.frame(dataset[analysis_vars], stringsAsFactors = FALSE)
-            # TODO (jamovify): df[complete.cases(df), ] is functionally close to na.omit(df)
-            # but doesn't go through jmvcore::naOmit, which is the project's helper for
-            # explicitly preserving jamovi column attributes (measureType, values, labels).
-            # If you want consistent attribute handling across the codebase, replace with:
-            #   analysis_data <- jmvcore::naOmit(analysis_data)
-            # Note: as.data.frame(stringsAsFactors = FALSE) above already strips some attrs,
-            # so attribute preservation may not matter much here — revisit if downstream
-            # code starts depending on labelled-factor handling.
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
             if (nrow(analysis_data) == 0) {
-                jmvcore::reject(.("Error: No complete cases found for the selected variables."))
+                stop(.("Error: No complete cases found for the selected variables."))
             }
 
             # Convert variables to appropriate types
@@ -426,12 +418,12 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             private$.checkpoint(flush = FALSE)  # Before plot creation
             tryCatch({
                 p <- ggplot2::ggplot(analysis_data, ggplot2::aes(
-                    x = .data[[x_var]],
-                    y = .data[[y_var]],
+                    x = .data[[x_var]], 
+                    y = .data[[y_var]], 
                     fill = .data[[fill_mapping]]
                 ))
             }, error = function(e) {
-                stop(.("Failed to create base plot: "), htmltools::htmlEscape(e$message), .("Please check your variable selections."))
+                stop(.("Failed to create base plot: "), e$message, .("Please check your variable selections."))
             })
             
             # Add covariate mapping if specified
@@ -643,8 +635,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     data_info <- paste0("Data: ", nrow(analysis_data), " rows, ", 
                                       ncol(analysis_data), " cols, ",
                                       length(unique(analysis_data[[x_var]])), " groups")
-                    stop("Both ggrain and fallback plotting failed. ",
-                         "Fallback error: ", htmltools::htmlEscape(e2$message), ". ",
+                    stop("Both ggrain and fallback plotting failed. ", 
+                         "Fallback error: ", e2$message, ". ",
                          data_info, ". ",
                          "Please check your data structure and variable types.")
                 })
@@ -968,9 +960,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             
             # Prepare data for table generation
             table_data <- data.frame(
-                Group = paste0("<strong>",
-                               htmltools::htmlEscape(stats_summary[[group_var]]),
-                               "</strong>"),
+                Group = paste0("<strong>", stats_summary[[group_var]], "</strong>"),
                 N = stats_summary$n,
                 Mean = stats_summary$mean,
                 Median = stats_summary$median,
@@ -1024,8 +1014,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 
             } else {
                 # Multiple groups - use Kruskal-Wallis
-                formula_str <- jmvcore::constructFormula(terms = group_var, dep = y_var)
-                kw_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
+                formula_str <- paste(y_var, "~", group_var)
+                kw_result <- kruskal.test(as.formula(formula_str), data = data)
 
                 test_name <- "Kruskal-Wallis test (omnibus only)"
                 test_stat <- round(kw_result$statistic, 4)
@@ -1093,10 +1083,10 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 
                 "<h4 style='color: #2e7d32;'>Current Configuration:</h4>",
                 "<ul>",
-                "<li><strong>Variable:</strong> ", htmltools::htmlEscape(y_var), " distributed across ", n_groups, " groups</li>",
+                "<li><strong>Variable:</strong> ", y_var, " distributed across ", n_groups, " groups</li>",
                 "<li><strong>Observations:</strong> ", n_total, " data points</li>",
                 "<li><strong>Raincloud Position:</strong> ", switch(rain_side, "l" = "Left side", "r" = "Right side", "f" = "Flanking (both sides)"), "</li>",
-                if (has_longitudinal) paste0("<li><strong>Longitudinal Connections:</strong> Connected by ", htmltools::htmlEscape(id_var), "</li>") else "",
+                if (has_longitudinal) paste0("<li><strong>Longitudinal Connections:</strong> Connected by ", id_var, "</li>") else "",
                 if (has_likert) "<li><strong>Likert Mode:</strong> Y-axis jittering enabled for ordinal data</li>" else "",
                 "</ul>",
                 
@@ -1229,7 +1219,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                         html <- paste0(html,
                             "<tr style='background-color: #fff3cd;'>",
                             "<td style='padding: 8px; border: 1px solid #ddd;'>",
-                            htmltools::htmlEscape(groups[i]), " vs ", htmltools::htmlEscape(groups[j]), "</td>",
+                            groups[i], " vs ", groups[j], "</td>",
                             "<td colspan='3' style='padding: 8px; border: 1px solid #ddd; text-align: center;'>",
                             " ", error_msg, "</td>",
                             "</tr>"
@@ -1248,7 +1238,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                         html <- paste0(html,
                             "<tr>",
                             "<td style='padding: 8px; border: 1px solid #ddd;'>",
-                            htmltools::htmlEscape(groups[i]), " vs ", htmltools::htmlEscape(groups[j]), "</td>",
+                            groups[i], " vs ", groups[j], "</td>",
                             "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>",
                             round(effect_result$effect_size, 3), "</td>",
                             "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>",
@@ -1399,13 +1389,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
             }
 
             if (!baseline_group %in% unique(complete_data[[x_var]])) {
-                available_groups <- paste(htmltools::htmlEscape(unique(complete_data[[x_var]])), collapse = ", ")
+                available_groups <- paste(unique(complete_data[[x_var]]), collapse = ", ")
                 return(list(
                     html = paste0(
                         cleaning_report,
                         "<div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
                         "<h3 style='color: #856404; margin-top: 0;'> Change Score Analysis</h3>",
-                        "<p>", .("Baseline group '"), htmltools::htmlEscape(baseline_group), .("' not found in complete data. Available groups: "), available_groups, "</p>",
+                        "<p>", .("Baseline group '"), baseline_group, .("' not found in complete data. Available groups: "), available_groups, "</p>",
                         "</div>"
                     ),
                     summary = NULL
@@ -1519,7 +1509,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 "<h4>", .("Analysis Parameters"), "</h4>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Baseline group:"), "</strong></td>",
-                "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(baseline_group), "</td></tr>",
+                "<td style='padding: 8px; border: 1px solid #ddd;'>", baseline_group, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Response threshold:"), "</strong></td>",
                 "<td style='padding: 8px; border: 1px solid #ddd;'>", threshold_label, "%</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Paired subjects:"), "</strong></td>",
@@ -1581,7 +1571,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                 "<p>Total N: <strong>", nrow(data), "</strong></p>",
                 
                 "<h4>Primary Outcome</h4>",
-                "<p>Variable: <strong>", htmltools::htmlEscape(y_var), "</strong></p>",
+                "<p>Variable: <strong>", y_var, "</strong></p>",
                 "<p>Measurement type: Continuous</p>",
                 
                 "<h4>Statistical Summary</h4>",
@@ -1716,7 +1706,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("advanced
                     info <- missing_info[[var_name]]
                     html <- paste0(html,
                         "<tr>",
-                        "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(var_name), "</td>",
+                        "<td style='padding: 8px; border: 1px solid #ddd;'>", var_name, "</td>",
                         "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", info$n_missing, "</td>",
                         "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", info$pct_missing, "%</td>",
                         "</tr>"

@@ -142,7 +142,7 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
 
             if (length(errors) > 0) {
-                jmvcore::reject(paste(errors, collapse = "; "))
+                stop(paste(errors, collapse = "; "))
             }
         },
 
@@ -165,20 +165,16 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             tryCatch({
                 private$.validate_inputs()
             }, error = function(e) {
-                # Note: this tryCatch catches the jmvcore::reject() condition raised in
-                # .validate_inputs and re-routes it to setContent, which means the user
-                # never sees jamovi's native error UI. If you want reject to surface
-                # natively, drop this tryCatch entirely.
                 self$results$approach_description$setContent(
                     paste0("<div style='color: red; background-color: #fee; padding: 10px; border-radius: 5px;'>",
-                           "<strong>Validation Error:</strong> ", htmltools::htmlEscape(e$message), "</div>")
+                           "<strong>Validation Error:</strong> ", e$message, "</div>")
                 )
                 return()
             })
 
             # Data validation
             if (nrow(self$data) == 0) {
-                jmvcore::reject("Data contains no (complete) rows")
+                stop("Data contains no (complete) rows")
             }
 
             # Process data with caching
@@ -237,15 +233,6 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             mydata <- mydata[vars_to_select]
 
             # Remove missing values with progress indication for large datasets
-            #
-            # TODO (jamovify): df[complete.cases(df), ] is functionally close to na.omit(df)
-            # but doesn't go through jmvcore::naOmit, which is the project's helper for
-            # explicitly preserving jamovi column attributes (measureType, values, labels).
-            # If you want consistent attribute handling across the codebase, replace with:
-            #   mydata <- jmvcore::naOmit(mydata)
-            # The same pattern recurs at L531 (.add_statistical_overlay path).
-            # Skipping the migration today only because the catalog targets literal na.omit
-            # calls; revisit if downstream code starts depending on preserved attributes.
             initial_rows <- nrow(mydata)
             mydata <- mydata[complete.cases(mydata), ]
             final_rows <- nrow(mydata)
@@ -459,7 +446,7 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             summary_html <- paste0(summary_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 600px;'>")
             summary_html <- paste0(summary_html, "<thead><tr>")
-            summary_html <- paste0(summary_html, "<th>", htmltools::htmlEscape(x_var), "</th>")
+            summary_html <- paste0(summary_html, "<th>", x_var, "</th>")
 
             if (stat_type == "count") {
                 summary_html <- paste0(summary_html, "<th>Count</th><th>Percentage</th>")
@@ -483,7 +470,7 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     percentage <- round(count / total_n * 100, 1)
 
                     summary_html <- paste0(summary_html, "<tr>")
-                    summary_html <- paste0(summary_html, "<td><strong>", htmltools::htmlEscape(category), "</strong></td>")
+                    summary_html <- paste0(summary_html, "<td><strong>", category, "</strong></td>")
                     summary_html <- paste0(summary_html, "<td>", count, "</td>")
                     summary_html <- paste0(summary_html, "<td>", percentage, "%</td>")
                     summary_html <- paste0(summary_html, "</tr>")
@@ -495,7 +482,7 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     value <- round(data$value[i], 3)
 
                     summary_html <- paste0(summary_html, "<tr>")
-                    summary_html <- paste0(summary_html, "<td><strong>", htmltools::htmlEscape(category), "</strong></td>")
+                    summary_html <- paste0(summary_html, "<td><strong>", category, "</strong></td>")
                     summary_html <- paste0(summary_html, "<td>", value, "</td>")
 
                     if ("se" %in% names(data)) {
@@ -536,8 +523,8 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
                 if (stat_method == "anova") {
                     # One-way ANOVA
-                    formula_str <- jmvcore::constructFormula(terms = x_var, dep = y_var)
-                    aov_result <- aov(jmvcore::asFormula(formula_str), data = selected_data)
+                    formula_str <- paste(y_var, "~", x_var)
+                    aov_result <- aov(as.formula(formula_str), data = selected_data)
                     aov_summary <- summary(aov_result)
 
                     f_stat <- round(aov_summary[[1]]$`F value`[1], 3)
@@ -581,8 +568,8 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
                 } else if (stat_method == "kruskal") {
                     # Kruskal-Wallis test
-                    formula_str <- jmvcore::constructFormula(terms = x_var, dep = y_var)
-                    k_result <- kruskal.test(jmvcore::asFormula(formula_str), data = selected_data)
+                    formula_str <- paste(y_var, "~", x_var)
+                    k_result <- kruskal.test(as.formula(formula_str), data = selected_data)
 
                     stat_html <- paste0(stat_html, "<p><strong>Kruskal-Wallis Test Results:</strong></p>")
                     stat_html <- paste0(stat_html, "<p>χ² = ", round(k_result$statistic, 3), ", df = ", k_result$parameter, ", p = ", format.pval(k_result$p.value, digits = 3), "</p>")
@@ -612,7 +599,7 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 self$results$statistical_results$setContent(stat_html)
 
             }, error = function(e) {
-                error_msg <- paste("Error in statistical analysis:", htmltools::htmlEscape(e$message))
+                error_msg <- paste("Error in statistical analysis:", e$message)
                 self$results$statistical_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
@@ -639,8 +626,6 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             code_template <- code_examples[[approach]]
             actual_code <- gsub("\\{x_var\\}", x_var %||% "x_variable", code_template)
             actual_code <- gsub("\\{y_var\\}", y_var %||% "y_variable", actual_code)
-            # Escape user-controlled column names before embedding in <code> block.
-            actual_code <- htmltools::htmlEscape(actual_code)
 
             code_html <- paste(
                 "<h4>R Code Example</h4>",
@@ -920,9 +905,9 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # Enhanced interactivity
                     interactive_plot <- interactive_plot %>%
                         plotly::layout(
-                            title = list(text = paste("Interactive:", htmltools::htmlEscape(self$options$plot_title))),
-                            xaxis = list(title = htmltools::htmlEscape(self$options$x_title %||% x_var)),
-                            yaxis = list(title = htmltools::htmlEscape(self$options$y_title %||% y_column))
+                            title = list(text = paste("Interactive:", self$options$plot_title)),
+                            xaxis = list(title = self$options$x_title %||% x_var),
+                            yaxis = list(title = self$options$y_title %||% y_column)
                         )
 
                     # Convert plotly object to HTML with error handling
@@ -935,7 +920,7 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     }, error = function(e) {
                         paste(
                             "<div style='color: orange; padding: 15px; background-color: #fff3e0; border-radius: 5px;'>",
-                            "<strong>Interactive Plot Error:</strong> ", htmltools::htmlEscape(e$message),
+                            "<strong>Interactive Plot Error:</strong> ", e$message,
                             "<br>Displaying static version instead.",
                             "</div>"
                         )
@@ -956,7 +941,7 @@ advancedbarplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }, error = function(e) {
                 error_html <- paste(
                     "<div style='color: red; padding: 15px; background-color: #fee; border-radius: 5px;'>",
-                    "<strong>Interactive Plot Error:</strong> ", htmltools::htmlEscape(e$message),
+                    "<strong>Interactive Plot Error:</strong> ", e$message,
                     "</div>"
                 )
                 self$results$interactive_plot$setContent(error_html)
