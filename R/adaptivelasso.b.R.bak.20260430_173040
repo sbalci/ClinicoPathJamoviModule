@@ -80,10 +80,18 @@ adaptivelassoClass <- R6::R6Class(
             }, error = function(e) {
                 private$.showMessage(
                     paste0("<html><body><h3>Analysis Error</h3><p>",
-                           "Error in adaptive LASSO fitting: ", htmltools::htmlEscape(e$message),
+                           "Error in adaptive LASSO fitting: ", private$.escapeHtml(e$message),
                            "</p><p>Try reducing the number of predictors or adjusting penalty settings.</p></body></html>")
                 )
             })
+        },
+
+        .escapeHtml = function(x) {
+            x <- gsub("&", "&amp;", as.character(x))
+            x <- gsub("<", "&lt;", x)
+            x <- gsub(">", "&gt;", x)
+            x <- gsub("\"", "&quot;", x)
+            x
         },
 
         .showMessage = function(message_html) {
@@ -125,8 +133,8 @@ adaptivelassoClass <- R6::R6Class(
                 style <- typeStyles[[notice$type]]
                 if (is.null(style)) style <- typeStyles$INFO
 
-                safe_title   <- htmltools::htmlEscape(notice$title)
-                safe_content <- htmltools::htmlEscape(notice$content)
+                safe_title <- gsub("<", "&lt;", gsub("&", "&amp;", notice$title))
+                safe_content <- gsub("<", "&lt;", gsub("&", "&amp;", notice$content))
 
                 html <- paste0(html,
                     "<div style='background-color: ", style$bgcolor, "; ",
@@ -272,7 +280,7 @@ adaptivelassoClass <- R6::R6Class(
                             ok = FALSE,
                             message = paste0(
                                 "<html><body><h3>Invalid Event Level</h3><p>Selected event level ('",
-                                htmltools::htmlEscape(event_level),
+                                private$.escapeHtml(event_level),
                                 "') is not present in the event variable.</p></body></html>"
                             )
                         ))
@@ -282,7 +290,7 @@ adaptivelassoClass <- R6::R6Class(
                             ok = FALSE,
                             message = paste0(
                                 "<html><body><h3>Invalid Censored Level</h3><p>Selected censored level ('",
-                                htmltools::htmlEscape(censor_level),
+                                private$.escapeHtml(censor_level),
                                 "') is not present in the event variable.</p></body></html>"
                             )
                         ))
@@ -405,7 +413,7 @@ adaptivelassoClass <- R6::R6Class(
                 ok = FALSE,
                 message = paste0(
                     "<html><body><h3>Event Level Required</h3><p>Numeric event variable has non-binary values (",
-                    htmltools::htmlEscape(paste(unique_vals, collapse = ", ")),
+                    private$.escapeHtml(paste(unique_vals, collapse = ", ")),
                     "). Please set Event Level to define the event of interest.</p></body></html>"
                 )
             ))
@@ -421,7 +429,7 @@ adaptivelassoClass <- R6::R6Class(
             if (mode == "single") {
                 lambda_single <- as.numeric(self$options$lambda_single)
                 if (is.na(lambda_single) || lambda_single <= 0) {
-                    jmvcore::reject("Single lambda value must be > 0.")
+                    stop("Single lambda value must be > 0.")
                 }
                 return(lambda_single)
             }
@@ -432,7 +440,7 @@ adaptivelassoClass <- R6::R6Class(
                 n_lambda <- as.integer(self$options$n_lambda)
 
                 if (is.na(lambda_max) || is.na(lambda_min) || lambda_max <= lambda_min || lambda_min <= 0) {
-                    jmvcore::reject("For custom lambda, require: lambda_max > lambda_min > 0.")
+                    stop("For custom lambda, require: lambda_max > lambda_min > 0.")
                 }
                 return(exp(seq(log(lambda_max), log(lambda_min), length.out = n_lambda)))
             }
@@ -486,7 +494,7 @@ adaptivelassoClass <- R6::R6Class(
             }
 
             analysis_data <- data[, vars_needed, drop = FALSE]
-            analysis_data <- jmvcore::naOmit(analysis_data)
+            analysis_data <- na.omit(analysis_data)
 
             # Prepare survival object
             time_values <- jmvcore::toNumeric(analysis_data[[time_var]])

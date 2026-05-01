@@ -158,7 +158,7 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             paste0(
               "<h3>Analysis Error</h3>",
               "<p>An error occurred during Aalen's additive hazard analysis:</p>",
-              "<pre>", gsub("<", "&lt;", gsub("&", "&amp;", e$message)), "</pre>",
+              "<pre>", htmltools::htmlEscape(e$message), "</pre>",
               "<p>Please check your data and analysis options.</p>"
             )
           )
@@ -340,10 +340,10 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         }
         
         # Create formula and fit model.
-        # Note: jmvcore::asFormula() rejects timereg's const() wrapper as an "unsafe function".
-        # The formula_str here is built deterministically from a fixed template, so the safety
-        # gain from allowlist validation is moot — keep base R as.formula().
-        model_formula <- as.formula(formula_str)
+        # timereg::aalen uses const() to mark constant-effect terms; whitelist it via
+        # additional_allowed_functions so jmvcore::asFormula's allowlist accepts the formula.
+        model_formula <- jmvcore::asFormula(formula_str,
+                                            additional_allowed_functions = c("const"))
         
         aalen_fit <- timereg::aalen(
           formula = model_formula,
@@ -443,8 +443,9 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           " (", data_prep$n_events, " events)</p>",
           "<p><strong>Covariates:</strong> ", length(data_prep$covariate_names), " variables</p>",
           if (!is.null(data_prep$constant_names) && length(data_prep$constant_names) > 0) {
-            paste0("<p><strong>Constant Effects:</strong> ", 
-                   paste(data_prep$constant_names, collapse = ", "), "</p>")
+            paste0("<p><strong>Constant Effects:</strong> ",
+                   paste(vapply(data_prep$constant_names, htmltools::htmlEscape, character(1)),
+                         collapse = ", "), "</p>")
           } else "",
           "<p><strong>Bandwidth:</strong> ", model_results$bandwidth, "</p>",
           "<p><strong>Robust SE:</strong> ", ifelse(model_results$robust_se, "Yes", "No"), "</p>"
