@@ -98,8 +98,19 @@ advancedSurvivalPowerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             loss_to_followup <- self$options$loss_followup
 
             # Input validation
+            #
+            # TODO (UX): hard errors and soft warnings are currently mixed into the same
+            # `validation_errors` vector and rendered as one yellow box. The block then
+            # decides whether to halt by re-grepping for `"^Warning:"` (L149-151), which
+            # couples the rendering text to control flow. Cleaner split:
+            #   - hard errors  -> `jmvcore::reject("Accrual time must be positive ...")`
+            #     (halts immediately, surfaces in jamovi's native error UI)
+            #   - soft warnings -> `private$.addNotice("WARNING", "Title", "Body")`
+            #     using the .addNotice / .renderNotices pattern from R/waterfall.b.R.
+            # This removes the string-prefix-based control flow and gives errors vs
+            # warnings distinct visual treatments.
             validation_errors <- character(0)
-            
+
             # Check for logical consistency
             if (study_design == "complex") {
                 if (accrual_time <= 0) {

@@ -52,6 +52,19 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         },
 
         .run = function() {
+            # TODO (UX): the validation block below (and group-count / numeric-type checks
+            # at L85-106) reports hard errors by writing red `<p>...</p>` strings to
+            # `self$results$instructions$setContent(...)` and then `return()`-ing. This
+            # mixes "in-progress instructions" output with "fatal error" output in the
+            # same panel, and bypasses jamovi's native error UI.
+            # Cleaner split:
+            #   - hard validation failures -> jmvcore::reject("Both dependent and grouping ...")
+            #     (halts immediately, surfaces in jamovi's structured error UI)
+            #   - non-fatal warnings -> private$.addNotice("WARNING", title, body) using the
+            #     pattern from R/waterfall.b.R (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
+            # Apply to all early-return setContent("<p style='color: red;'>...") sites in this
+            # function: L60-65, L74-78, L86-90, L92-97, L101-106.
+
             # Get data and variables
             data <- self$data
             dependent <- self$options$dependent
@@ -136,6 +149,17 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     }
                     
                     # Dunnett's test (if control group specified)
+                    # TODO (dead-UI + future-proof): self$options$control_group is OptionString
+                    # (free text). It is currently only used as a non-empty guard here — the
+                    # downstream call .performDunnettTest never reads it; multcomp::glht uses
+                    # the factor's default reference level instead (see L604). Either:
+                    #   (a) wire the value through: validate `control_group %in% levels(group_clean)`
+                    #       (jmvcore::reject if not), then pass it as the reference level via
+                    #       relevel(group_clean, ref = control_group) before calling glht — and
+                    #       htmltools::htmlEscape any echo of it into HTML, or
+                    #   (b) remove the option from the .a.yaml until it does something.
+                    # Until one of these lands, the field is a UI lie that misleads users into
+                    # thinking they chose the control level.
                     if ((posthoc_method == "dunnett" || posthoc_method == "all") && !is.null(self$options$control_group) && self$options$control_group != "") {
                         private$.performDunnettTest(y_clean, group_clean)
                     }
@@ -155,11 +179,12 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 private$.generateClinicalInterpretation(y_clean, group_clean, n_groups, anova_p)
                 
             }, error = function(e) {
-                error_msg <- paste0("<p style='color: red;'><b>Error in analysis:</b> ", e$message, "</p>")
+                error_msg <- paste0("<p style='color: red;'><b>Error in analysis:</b> ",
+                                    htmltools::htmlEscape(e$message), "</p>")
                 self$results$instructions$setContent(error_msg)
             })
         },
-        
+
         .populateDescriptives = function(y_data, group_data, dependent, grouping) {
             desc_table <- self$results$descriptives
             
@@ -463,9 +488,18 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 }
                 
             }, error = function(e) {
+                # TODO (data hygiene): the error message is stuffed into the `mean_diff`
+                # field, which is declared numeric in the .r.yaml. The XSS surface has
+                # been closed (htmltools::htmlEscape applied at L491, 576, 650, 720),
+                # but the column-type lie remains and the pattern recurs in three other
+                # post-hoc tables (Games-Howell, Dunnett, Bonferroni). Cleaner fix:
+                #   - add a dedicated `error` column to each post-hoc table in .r.yaml
+                #     and put the (escaped) e$message there, or
+                #   - drop the addRow entirely and surface the error via a notice
+                #     (`private$.addNotice("WARNING", "Tukey HSD failed", e$message)`).
                 tukey_table$addRow(rowKey="error", values=list(
                     comparison="Error in Tukey HSD",
-                    mean_diff=paste("Error:", e$message),
+                    mean_diff=paste("Error:", htmltools::htmlEscape(e$message)),
                     ci_lower="",
                     ci_upper="",
                     p_adjusted="",
@@ -550,7 +584,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             }, error = function(e) {
                 games_table$addRow(rowKey="error", values=list(
                     comparison="Error in Games-Howell test",
-                    mean_diff=paste("Error:", e$message),
+                    mean_diff=paste("Error:", htmltools::htmlEscape(e$message)),
                     se_diff="",
                     t_statistic="",
                     p_adjusted="",
@@ -624,7 +658,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             }, error = function(e) {
                 dunnett_table$addRow(rowKey="error", values=list(
                     comparison="Error in Dunnett's test",
-                    estimate=paste("Error:", e$message),
+                    estimate=paste("Error:", htmltools::htmlEscape(e$message)),
                     std_error="",
                     t_statistic="",
                     p_adjusted="",
@@ -694,7 +728,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             }, error = function(e) {
                 bonf_table$addRow(rowKey="error", values=list(
                     comparison="Error in Bonferroni test",
-                    mean_diff=paste("Error:", e$message),
+                    mean_diff=paste("Error:", htmltools::htmlEscape(e$message)),
                     pooled_se="",
                     t_statistic="",
                     p_adjusted="",
