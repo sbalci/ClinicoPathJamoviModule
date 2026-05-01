@@ -68,7 +68,21 @@ advancedtrialsClass <- R6::R6Class(
         },
         
         .run = function() {
-            
+
+            # TODO (stub): the .a.yaml/.h.R declare 5 Variable-typed selectors that are
+            # never read by .b.R: `event_var`, `treatment_var`, `biomarker_var`,
+            # `interim_time_var`, `stratification_vars`. Only `time_var` is consumed
+            # (and only as a non-null guard at L94). End users select these variables
+            # but the analysis ignores them, which is a UI lie.
+            # Resolve by either:
+            #   (a) wiring each variable through to the relevant design helper
+            #       (e.g., feed `event_var` into `.calculateSampleSize` for log-rank
+            #       event counting based on observed events; pass `biomarker_var` into
+            #       `.performBiomarkerDrivenDesign`), or
+            #   (b) hide these options in the .u.yaml until the implementation reads them.
+            # Until one of these lands, anyone selecting columns expects them to influence
+            # the results. They don't.
+
             # Store design parameters
             private$.storeDesignParameters()
             
@@ -168,9 +182,24 @@ advancedtrialsClass <- R6::R6Class(
         },
         
         .performGroupSequentialDesign = function() {
-            
+
+            # TODO (UX): every analysis branch in this file (.performGroupSequentialDesign at L172,
+            # .performAdaptiveDesign at L318, .performPlatformTrialDesign at L392,
+            # .performBiomarkerDrivenDesign at L441, .calculateSampleSize at L573,
+            # .generateOperatingCharacteristics at L704) wraps its work in a tryCatch whose
+            # error handler is just `message("...failed: ", e$message)`. message() writes to
+            # the R console — which the jamovi end user never sees. End result: when an
+            # analysis errors out, the corresponding result table stays empty with no
+            # indication anything went wrong, the user assumes "no result available".
+            # Replace each handler with one of:
+            #   (a) private$.addNotice("WARNING", "Group sequential design failed",
+            #                          htmltools::htmlEscape(e$message))
+            #       — preferred for non-fatal failures, lets the rest of the analysis run.
+            #   (b) jmvcore::reject("...failed: {}", e$message)
+            #       — for fatal failures that should halt the whole .run().
+            # Apply consistently across all 6 handlers.
             tryCatch({
-                
+
                 # Use gsDesign package for group sequential design
                 design_params <- private$.design_parameters
                 

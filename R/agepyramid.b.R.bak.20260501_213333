@@ -47,7 +47,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (nrow(self$data) == 0)
-                jmvcore::reject("Data contains no (complete) rows")
+                stop("Data contains no (complete) rows")
 
             # Read and prepare data ----
             mydata <- self$data
@@ -59,11 +59,9 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- jmvcore::select(mydata, c(age, gender))
             mydata <- jmvcore::naOmit(mydata)
 
-            # Convert age to numeric and gender to factor.
-            # jmvcore::toNumeric honors the `values` attribute on jamovi-encoded factors;
-            # for plain numerics or factors without that attribute it falls back to the
-            # same as.numeric(as.character(...)) path used previously.
-            mydata[["Age"]] <- jmvcore::toNumeric(mydata[[age]])
+            # Convert age to numeric and gender to factor
+            # Use as.character before as.numeric to handle factors correctly
+            mydata[["Age"]] <- as.numeric(as.character(mydata[[age]]))
             mydata[["Gender"]] <- as.factor(mydata[[gender]])
             
             # Filter out invalid ages (created by conversion)
@@ -104,7 +102,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<div style='background-color: #ffebee; padding: 20px; border-radius: 8px; border-left: 4px solid #f44336;'>",
                     "<h3 style='color: #c62828; margin-top: 0;'> Configuration Error</h3>",
                     "<p style='font-size: 15px;'><strong>Female and Male gender levels cannot be the same.</strong></p>",
-                    "<p style='font-size: 14px;'>You have selected '<strong>", htmltools::htmlEscape(female_level), "</strong>' for both Female and Male.</p>",
+                    "<p style='font-size: 14px;'>You have selected '<strong>", female_level, "</strong>' for both Female and Male.</p>",
                     "<h4 style='color: #c62828; margin-bottom: 8px;'>To fix this:</h4>",
                     "<ol style='font-size: 14px; line-height: 1.6;'>",
                     "    <li>Select different levels for Female and Male, OR</li>",
@@ -299,14 +297,6 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$age) || is.null(self$options$gender))
                 return()
 
-            # TODO (cleanup): this nrow == 0 check duplicates validation already done by
-            # .run() at L50 (which now uses jmvcore::reject). When .run() rejects, .plot()
-            # never gets meaningful plotData (image$state is NULL — caught by the L309
-            # `is.null(plotData)` guard below). The stop() here is therefore unreachable
-            # in normal use; if it does fire it bypasses jamovi's structured error UI.
-            # Either drop these two lines entirely (rely on the plotData NULL check at L309)
-            # or, if defensive-by-design is preferred, replace stop() with `return(FALSE)`
-            # to match the rest of .plot's failure handling.
             if (nrow(self$data) == 0)
                 stop("Data contains no (complete) rows")
 
@@ -548,10 +538,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (is_single_gender) {
                 html <- paste0(html, "<tr><td><strong>Cohort type:</strong></td><td style='color: #f57c00;'>",
-                    "Single-gender (", htmltools::htmlEscape(single_gender_label), ")</td></tr>")
+                    "Single-gender (", single_gender_label, ")</td></tr>")
             } else {
-                html <- paste0(html, "<tr><td><strong>Female level:</strong></td><td>", htmltools::htmlEscape(female_level), "</td></tr>")
-                html <- paste0(html, "<tr><td><strong>Male level:</strong></td><td>", htmltools::htmlEscape(male_level), "</td></tr>")
+                html <- paste0(html, "<tr><td><strong>Female level:</strong></td><td>", female_level, "</td></tr>")
+                html <- paste0(html, "<tr><td><strong>Male level:</strong></td><td>", male_level, "</td></tr>")
             }
 
             html <- paste0(html, "</table></div>")
