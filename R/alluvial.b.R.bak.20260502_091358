@@ -55,7 +55,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 error_notice$setContent(sprintf(
                     "Invalid Weight Variable: '%s' must be numeric (current type: %s). Please select a numeric variable containing counts, frequencies, or sampling weights.",
-                    htmltools::htmlEscape(weight_var), htmltools::htmlEscape(class(weight_col)[1])
+                    weight_var, class(weight_col)[1]
                 ))
                 self$results$insert(999, error_notice)
                 return(FALSE)
@@ -72,13 +72,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 error_notice$setContent(sprintf(
                     "Negative Weights Detected: Weight variable '%s' contains %d negative value%s. Weights must be non-negative (>= 0).",
-                    htmltools::htmlEscape(weight_var), n_negative, if(n_negative > 1) "s" else ""
+                    weight_var, n_negative, if(n_negative > 1) "s" else ""
                 ))
                 self$results$insert(999, error_notice)
                 return(FALSE)
             }
 
-            # TODO (UX): File-wide — convert all `# REMOVED Notice:` blocks to HTML output items per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R is the reference). Affected sites in this file: 85, 260, 474, 492, 549, 643, 695, 754, 787. Currently these conditions fail silently, leaving the user with no feedback (e.g. NA weights skipped, plot generation errors swallowed in tryCatch).
             # Check for NA weights
             n_na <- sum(is.na(weight_col))
             if (n_na > 0) {
@@ -108,11 +107,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Remove rows with NA weights
             data <- data[!is.na(data[[weight_var]]), ]
 
-            # Aggregate weights by unique combinations of categorical variables.
-            # constructFormula backtick-quotes names with spaces; asFormula allowlist-validates.
-            agg_formula <- jmvcore::asFormula(
-                jmvcore::constructFormula(terms = vars, dep = weight_var)
-            )
+            # Aggregate weights by unique combinations of categorical variables
+            agg_formula <- as.formula(paste(weight_var, "~", paste(vars, collapse = " + ")))
 
             # Use aggregate to sum weights by category combinations
             data_agg <- stats::aggregate(
@@ -149,7 +145,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Build details of which variables have missingness
                 vars_with_missing <- names(missing_counts[missing_counts > 0])
                 missing_details <- paste(sapply(vars_with_missing,
-                    function(v) sprintf("%s: %d", htmltools::htmlEscape(v), missing_counts[v])),
+                    function(v) sprintf("%s: %d", v, missing_counts[v])),
                     collapse = ", ")
 
                 info_notice$setContent(paste0(
@@ -243,14 +239,13 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             options = self$options,
                             name = "continuousVariableNotAllowed",
                             type = jmvcore::NoticeType$ERROR)
-                        error_notice$setContent(sprintf("Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.", var_safe, unique_values))
+                        error_notice$setContent(sprintf("Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.", var, unique_values))
                         self$results$insert(999, error_notice)
                         return(FALSE)
                     }
 
                     # STRONG WARNING for 11-20 unique values
                     if (unique_values > 10) {
-                        # TODO (cleanup): `warning_messages` is dead code — collected but never rendered (the Notice that consumed it at lines 261-272 is commented out). Either wire it into dataWarning HTML, or drop the collection entirely. See file-wide TODO at line 81.
                         var_safe <- htmltools::htmlEscape(var)
 
                         # Collect warning messages for the notice banner
@@ -490,7 +485,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     length(self$options$condensationvar) > 0 &&
                     !(self$options$condensationvar %in% names(self$data))) {
 
-                    # TODO (UX): Silent failure — `condvar_safe` is escaped but the notice that would render it is commented out, so the user gets no feedback about why nothing rendered. Route via condensationWarning HTML output (see lines 815-822 for the pattern). See file-wide TODO at line 81.
                     condvar_safe <- htmltools::htmlEscape(self$options$condensationvar)
                 # REMOVED Notice: error_notice <- jmvcore::Notice$new(
                 # options = self$options,
@@ -663,7 +657,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Generate plot based on selected engine ----
                 if (engine == "ggalluvial") {
                     # Use ggalluvial engine for manual control
-                    # TODO (correctness): `fillGgalluvial` is only checked for is.null — if the user picks a column that is NOT in `vars`, it won't be selected into `mydata`, and `rlang::sym(fill_var)` will resolve to a missing column at aes-evaluation time, producing an opaque ggplot error. Either include fillGgalluvial in `vars_to_select` (line ~540) or fall back to `varsName[1]` when fill_var is not present in mydata.
                     fill_var <- if (!is.null(self$options$fillGgalluvial)) {
                         self$options$fillGgalluvial
                     } else {

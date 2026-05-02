@@ -957,7 +957,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$lightKappaTable$setNote(
                     "error",
-                    sprintf("Error calculating Light's kappa: %s", e$message)
+                    sprintf("Error calculating Light's kappa: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -1244,7 +1244,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 self$results$finnTable$setNote(
                     "error",
                     sprintf("Error calculating Finn coefficient: %s. Ensure data are categorical and properly coded (1 to %d).",
-                            e$message, n_levels)
+                            htmltools::htmlEscape(e$message), n_levels)
                 )
             })
         },
@@ -1477,7 +1477,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$kendallWTable$setNote(
                     "error",
-                    sprintf("Error calculating Kendall's W: %s", e$message)
+                    sprintf("Error calculating Kendall's W: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -1759,7 +1759,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$robinsonATable$setNote(
                     "error",
-                    sprintf("Error calculating Robinson's A: %s", e$message)
+                    sprintf("Error calculating Robinson's A: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -2097,7 +2097,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$meanSpearmanTable$setNote(
                     "error",
-                    sprintf("Error calculating Mean Spearman Rho: %s", e$message)
+                    sprintf("Error calculating Mean Spearman Rho: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -2385,7 +2385,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$meanPearsonTable$setNote(
                     "error",
-                    sprintf("Error calculating Mean Pearson Correlation: %s", e$message)
+                    sprintf("Error calculating Mean Pearson Correlation: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -2819,7 +2819,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$linCCCTable$setNote(
                     "error",
-                    sprintf("Error calculating Lin's CCC: %s", e$message)
+                    sprintf("Error calculating Lin's CCC: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -3093,7 +3093,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$tdiTable$setNote(
                     "error",
-                    sprintf("Error calculating TDI: %s", e$message)
+                    sprintf("Error calculating TDI: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -3255,6 +3255,14 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             tryCatch({
                 # Get user options
+                # TODO (security, forward-looking): `specificPositiveCategory` and
+                # `interIntraSeparator` (used at L5335) are free-text OptionString
+                # values. Today they only flow into data filtering / string-split
+                # paths — not into HTML setContent or setNote. If future changes
+                # interpolate either value into HTML output (e.g., a "Filtered to
+                # category: <X>" panel), wrap with htmltools::htmlEscape() at the
+                # rendering boundary. Pattern is identical to L7737/L7747/L7755
+                # (consensusName / loaVariableName) which already escape on render.
                 positive_category <- self$options$specificPositiveCategory
                 all_categories <- self$options$specificAllCategories
                 include_ci <- self$options$specificConfidenceIntervals
@@ -3415,7 +3423,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$specificAgreementTable$setNote(
                     "error",
-                    sprintf("Error calculating specific agreement: %s", e$message)
+                    sprintf("Error calculating specific agreement: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -3631,7 +3639,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 ))
 
             }, error = function(e) {
-                self$results$agreementHeatmapPlot$setError(sprintf("Error generating heatmap: %s", e$message))
+                self$results$agreementHeatmapPlot$setError(sprintf("Error generating heatmap: %s", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -3953,7 +3961,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 ))
 
             }, error = function(e) {
-                self$results$raterProfilePlot$setError(sprintf("Error generating rater profile plot: %s", e$message))
+                self$results$raterProfilePlot$setError(sprintf("Error generating rater profile plot: %s", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -4144,7 +4152,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
 
             }, error = function(e) {
-                self$results$subgroupAgreementTable$setNote("error", sprintf("Error in subgroup analysis: %s", e$message))
+                self$results$subgroupAgreementTable$setNote("error", sprintf("Error in subgroup analysis: %s", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -4372,7 +4380,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
 
             }, error = function(e) {
-                self$results$raterClusterTable$setNote("error", sprintf("Error in rater clustering: %s", e$message))
+                self$results$raterClusterTable$setNote("error", sprintf("Error in rater clustering: %s", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -4656,7 +4664,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }
 
             }, error = function(e) {
-                self$results$caseClusterTable$setNote("error", sprintf("Error in case clustering: %s", e$message))
+                self$results$caseClusterTable$setNote("error", sprintf("Error in case clustering: %s", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -5066,7 +5074,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$maxwellRETable$setNote(
                     "error",
-                    sprintf("Error calculating Maxwell's RE: %s", e$message)
+                    sprintf("Error calculating Maxwell's RE: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -5685,7 +5693,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$interIntraRaterIntraTable$setNote(
                     "error",
-                    sprintf("Error calculating Inter/Intra-Rater Reliability: %s", e$message)
+                    sprintf("Error calculating Inter/Intra-Rater Reliability: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -5888,7 +5896,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$raterBiasTable$setNote(
                     "error",
-                    sprintf("Error calculating Rater Bias Test: %s", e$message)
+                    sprintf("Error calculating Rater Bias Test: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -6176,7 +6184,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$bhapkarTable$setNote(
                     "error",
-                    sprintf("Error calculating Bhapkar test: %s", e$message)
+                    sprintf("Error calculating Bhapkar test: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -6470,7 +6478,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$stuartMaxwellTable$setNote(
                     "error",
-                    sprintf("Error calculating Stuart-Maxwell test: %s", e$message)
+                    sprintf("Error calculating Stuart-Maxwell test: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -6735,7 +6743,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 # Add interpretation or error note
                 if (!is.null(result$error)) {
                     pairwise_table$addFootnote(rowKey = result$rater, col = "kappa",
-                                               sprintf("Error: %s", result$error))
+                                               sprintf("Error: %s", htmltools::htmlEscape(result$error)))
                 } else if (!is.na(result$kappa)) {
                     # Add interpretation
                     kappa_val <- result$kappa
@@ -7047,7 +7055,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$iccTable$setNote(
                     "error",
-                    sprintf("Error calculating ICC: %s", e$message)
+                    sprintf("Error calculating ICC: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -7152,7 +7160,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$iotaTable$setNote(
                     "error",
-                    sprintf("Error calculating Iota: %s", e$message)
+                    sprintf("Error calculating Iota: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -7318,7 +7326,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$pabakTable$setNote(
                     "error",
-                    paste("Error calculating PABAK:", e$message)
+                    paste("Error calculating PABAK:", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -7419,7 +7427,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }, error = function(e) {
                 self$results$gwetTable$setNote(
                     "error",
-                    sprintf("Error calculating Gwet's AC: %s", e$message)
+                    sprintf("Error calculating Gwet's AC: %s", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -7734,7 +7742,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     "unanimous" = "Unanimous (100%)"
                 )
                 info_html <- paste0(info_html,
-                    "<li><strong>", var_name, "</strong>: Consensus rating (", rule_text, ")</li>")
+                    "<li><strong>", htmltools::htmlEscape(var_name), "</strong>: Consensus rating (", rule_text, ")</li>")
             }
 
             if (self$options$loaVariable) {
@@ -7744,7 +7752,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 if (detail_mode == "simple") {
                     threshold <- self$options$simpleThreshold
                     info_html <- paste0(info_html,
-                        "<li><strong>", var_name, "</strong>: Case Agreement (Simple mode - threshold: ", threshold, "%)</li>")
+                        "<li><strong>", htmltools::htmlEscape(var_name), "</strong>: Case Agreement (Simple mode - threshold: ", threshold, "%)</li>")
                 } else {
                     method_text <- switch(self$options$loaThresholds,
                         "custom" = paste0("Custom (High: ", self$options$loaHighThreshold, "%, Low: ", self$options$loaLowThreshold, "%)"),
@@ -7752,7 +7760,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         "tertiles" = "Tertile-based (data-driven)"
                     )
                     info_html <- paste0(info_html,
-                        "<li><strong>", var_name, "</strong>: Case Agreement (Detailed mode - ", method_text, ")</li>")
+                        "<li><strong>", htmltools::htmlEscape(var_name), "</strong>: Case Agreement (Detailed mode - ", method_text, ")</li>")
                 }
             }
 
@@ -8041,7 +8049,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }, error = function(e2) {
                     self$results$hierarchicalOverallTable$setNote(
                         "error",
-                        paste0("Mixed model fitting failed: ", e2$message,
+                        paste0("Mixed model fitting failed: ", htmltools::htmlEscape(e2$message),
                                ". Data may have insufficient variability.")
                     )
                 })
@@ -8341,7 +8349,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         statistic = NA,
                         df = NA,
                         p_value = NA,
-                        conclusion = paste0("Test could not be computed: ", e$message)
+                        conclusion = paste0("Test could not be computed: ", htmltools::htmlEscape(e$message))
                     ))
                 })
             }
@@ -8478,7 +8486,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 }, error = function(e2) {
                     self$results$mixedEffectsTable$setNote(
                         "error",
-                        paste0("Model fitting failed: ", e2$message)
+                        paste0("Model fitting failed: ", htmltools::htmlEscape(e2$message))
                     )
                 })
             })
@@ -8724,7 +8732,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     interpretation = paste0("Overall accuracy: ", round(sum(diag(cm))/sum(cm)*100, 1), "%")
                 ))
             }, error = function(e) {
-                self$results$confusionMatrixTable$setNote("error", paste("Confusion matrix error:", e$message))
+                self$results$confusionMatrixTable$setNote("error", paste("Confusion matrix error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -8883,7 +8891,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 table$setNote("boot", paste0("Based on ", n_boot, " bootstrap resamples (case resampling). Seed: 42 for reproducibility."))
             }, error = function(e) {
-                self$results$bootstrapCITable$setNote("error", paste("Bootstrap CI error:", e$message))
+                self$results$bootstrapCITable$setNote("error", paste("Bootstrap CI error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -9035,7 +9043,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 table$setNote("method", paste0("Prediction column: ", rater_names[pred_col],
                     ". Reference annotators: ", paste(rater_names[ref_cols], collapse = ", "), "."))
             }, error = function(e) {
-                self$results$concordanceF1Table$setNote("error", paste("Concordance F1 error:", e$message))
+                self$results$concordanceF1Table$setNote("error", paste("Concordance F1 error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -9143,7 +9151,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
                 table$setNote("info", paste0("Bootstrap test with ", n_boot, " replications (seed = 42). N = ", n_cases, " cases."))
             }, error = function(e) {
-                self$results$pairedAgreementTable$setNote("error", paste("Paired agreement error:", e$message))
+                self$results$pairedAgreementTable$setNote("error", paste("Paired agreement error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -9269,7 +9277,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     "Two-sided test."
                 ))
             }, error = function(e) {
-                self$results$agreementSampleSizeTable$setNote("error", paste("Sample size error:", e$message))
+                self$results$agreementSampleSizeTable$setNote("error", paste("Sample size error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -9582,6 +9590,26 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
         },
 
         .run = function() {
+
+        # TODO (UX, file-wide): error reporting in this function uses
+        # `self$results$<table>$setNote("error", "...")` + `return()` rather than
+        # `jmvcore::reject(...)`. Confirmed at 20 sites including L4016, L4147,
+        # L4264, L4328, L4375, L4508, L4569, L4588, L4659, L8727 (grep
+        # `setNote\("error"` for the full list). The current pattern attaches an
+        # "error" note to a Table cell while letting the analysis continue with
+        # NA-filled placeholders — users see results that look fine until they
+        # spot the small cell-note. jmvcore::reject would halt and surface
+        # jamovi's structured error UI instead.
+        # Decision is methodological:
+        #   - Keep current pattern if the design intent is "best-effort, partial
+        #     results when one analysis fails" (e.g., subgroup analyses where
+        #     one subgroup's failure shouldn't cancel the rest).
+        #   - Switch to jmvcore::reject (or private$.addNotice("ERROR", ...))
+        #     for hard validation failures where continuing produces meaningless
+        #     output (e.g., L9587 missing-vars guard, L9766 weighted-kappa
+        #     pre-conditions, L9770 exact-kappa rater-count requirement).
+        # Hybrid is also fine: reject for input validation, setNote for
+        # per-subgroup/per-cluster failures inside loops.
 
         # Validate input ----
         if (is.null(self$options$vars) || length(self$options$vars) < 2) {
@@ -10105,7 +10133,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
 
             }, error = function(e) {
                 # Handle any errors that occur during calculation
-                errorMessage <- paste("Error calculating Krippendorff's alpha:", e$message)
+                errorMessage <- paste("Error calculating Krippendorff's alpha:", htmltools::htmlEscape(e$message))
                 warning(errorMessage)
 
                 # Initialize values list for error case
@@ -10127,7 +10155,7 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 krippTable$setRow(rowNo = 1, values = values_list)
 
                 # Add error message as footnote
-                krippTable$addFootnote(rowNo = 1, col = "alpha", paste0("Error calculating Krippendorff's alpha: ", e$message))
+                krippTable$addFootnote(rowNo = 1, col = "alpha", paste0("Error calculating Krippendorff's alpha: ", htmltools::htmlEscape(e$message)))
             })
         }
 

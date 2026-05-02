@@ -190,6 +190,17 @@ If anything was applied:
 
 If verification fails, **do not** auto-revert — instead, point to the `.bak` files and stop. The user decides.
 
+### 7. File "Out of scope" observations as inline TODOs (when asked)
+
+If the report's "Out of scope" / "Other observations" section listed anything actionable, the user may follow up with "add other observations as TODO items" (or similar). When that happens:
+
+- **Tag each TODO with a category prefix** so future readers can scan: `# TODO (security):`, `# TODO (UX):`, `# TODO (stub):`, `# TODO (jamovify):`, `# TODO (data hygiene):`, `# TODO (cleanup):`, `# TODO (correctness):`, `# TODO (forward-looking):`.
+- **Consolidate file-wide patterns into one TODO** with cross-references to all sites it covers. Don't paste 20 near-identical TODOs at 20 sites; pick the most representative location and list the line numbers in the TODO body.
+- **Skip positive observations.** Notes like "this code path is fine" or "this pattern is correct as-is" should NOT become TODOs — they create noise without helping future readers. Only file actionable items.
+- **Skip already-filed TODOs.** If a TODO already exists for the same concern, don't duplicate it.
+- **Place each TODO at the most relevant in-code location**, not at the top of `.run()`. A `.plot()` error TODO goes at the first `.plot` error site; a stub-options TODO goes near the option read; a security-future-proofing TODO goes near the line that would need escaping.
+- After inserting, re-run the parse check to confirm the file still parses.
+
 ---
 
 ## Guardrails

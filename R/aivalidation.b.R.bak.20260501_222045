@@ -223,7 +223,7 @@ aivalidationClass <- R6::R6Class(
         # Enhanced error reporting with traceback
         error_msg <- paste0(
           "<h3>Error</h3>",
-          "<p><strong>Message:</strong> ", htmltools::htmlEscape(e$message), "</p>",
+          "<p><strong>Message:</strong> ", e$message, "</p>",
           "<p><strong>Location:</strong> Check if pROC package is properly loaded.</p>",
           "<p><em>If this error persists, try restarting jamovi.</em></p>"
         )
@@ -249,7 +249,7 @@ aivalidationClass <- R6::R6Class(
       data <- data[complete.cases(data), ]
 
       if (nrow(data) < 10) {
-        jmvcore::reject("Insufficient data (need at least 10 complete cases)")
+        stop("Insufficient data (need at least 10 complete cases)")
       }
 
       # Convert outcome to binary 0/1
@@ -257,7 +257,7 @@ aivalidationClass <- R6::R6Class(
       positive <- self$options$positiveLevel
 
       if (is.null(positive) || !positive %in% unique(outcome_vals)) {
-        jmvcore::reject("Invalid positive level specified")
+        stop("Invalid positive level specified")
       }
 
       data$outcome_binary <- ifelse(outcome_vals == positive, 1, 0)
@@ -620,7 +620,7 @@ aivalidationClass <- R6::R6Class(
       <h3>Interpretation Summary</h3>
 
       <h4>Overall Performance</h4>
-      <p>The best performing predictor is <strong>", htmltools::htmlEscape(best_pred), "</strong> with an AUC of ",
+      <p>The best performing predictor is <strong>", best_pred, "</strong> with an AUC of ",
       sprintf("%.3f", best_auc), " (", auc_interpret, " discrimination).</p>
 
       <h4>AUC Interpretation Guidelines</h4>

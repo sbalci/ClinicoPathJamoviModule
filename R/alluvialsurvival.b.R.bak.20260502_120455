@@ -46,7 +46,7 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 return()
 
             if (is.null(self$data) || nrow(self$data) == 0)
-                jmvcore::reject('Data contains no complete rows')
+                stop('Data contains no complete rows')
 
             # Validate data structure
             private$.validateData()
@@ -123,37 +123,36 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Check if required columns exist
             if (!timeVar %in% names(data))
-                jmvcore::reject("Time variable {} not found in data", code = NULL, timeVar)
+                stop(paste("Time variable", timeVar, "not found in data"))
             if (!stageVar %in% names(data))
-                jmvcore::reject("Stage variable {} not found in data", code = NULL, stageVar)
+                stop(paste("Stage variable", stageVar, "not found in data"))
             if (!treatmentVar %in% names(data))
-                jmvcore::reject("Treatment variable {} not found in data", code = NULL, treatmentVar)
+                stop(paste("Treatment variable", treatmentVar, "not found in data"))
             if (!patientId %in% names(data))
-                jmvcore::reject("Patient ID variable {} not found in data", code = NULL, patientId)
+                stop(paste("Patient ID variable", patientId, "not found in data"))
 
             # Check for longitudinal structure
             timePoints <- length(unique(data[[timeVar]]))
             if (timePoints < 2)
-                jmvcore::reject("Data must contain at least 2 time points for pathway analysis")
+                stop("Data must contain at least 2 time points for pathway analysis")
 
             patients <- length(unique(data[[patientId]]))
             if (patients < 5)
-                jmvcore::reject("Data must contain at least 5 patients for meaningful analysis")
+                stop("Data must contain at least 5 patients for meaningful analysis")
 
             # Check for missing values in key variables
             if (any(is.na(data[[timeVar]])))
-                jmvcore::reject("Time variable cannot contain missing values")
+                stop("Time variable cannot contain missing values")
             if (any(is.na(data[[patientId]])))
-                jmvcore::reject("Patient ID variable cannot contain missing values")
+                stop("Patient ID variable cannot contain missing values")
 
             # Validate survival variable if provided
             if (!is.null(survivalVar)) {
                 if (!survivalVar %in% names(data))
-                    jmvcore::reject("Survival variable {} not found in data", code = NULL, survivalVar)
-
-                # TODO (correctness): factor-vs-numeric comparison hazard. `survivalVar` is declared `permitted: [factor]` in the .a.yaml — when its levels are character "0"/"1", the `%in% c(0, 1, NA)` check coerces the factor via as.character then compares to numerics, which can return FALSE on otherwise-valid 0/1 data. Use `jmvcore::toNumeric(data[[survivalVar]])` (honors the `values` attribute) and check the result. Same hazard reappears in `.calculateSurvivalStats` at lines ~189-194 (`sum(x == 1)`, `mean(x == 0)`).
+                    stop(paste("Survival variable", survivalVar, "not found in data"))
+                
                 if (!all(data[[survivalVar]] %in% c(0, 1, NA)))
-                    jmvcore::reject("Survival variable must be binary (0/1) or missing")
+                    stop("Survival variable must be binary (0/1) or missing")
             }
 
             return(TRUE)
@@ -283,7 +282,6 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             treatmentVar <- self$options$treatmentVar
             patientId <- self$options$patientId
 
-            # TODO (correctness): `dplyr::arrange()` on a grouped frame does NOT order rows within each group by default — it orders the result globally. `first()`/`last()` then read whatever row dplyr happened to put first/last in each group, which can be nondeterministic across dplyr versions. Either arrange BEFORE group_by, or use `.by_group = TRUE` on arrange (>= 1.0.0): `dplyr::arrange(!!sym(timeVar), .by_group = TRUE)`. Otherwise initialStage / finalTreatment can be wrong.
             # Create survival data by stage and treatment
             survData <- data %>%
                 dplyr::group_by(!!sym(patientId)) %>%
@@ -432,7 +430,6 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 legend.labs = levels(as.factor(survData$finalTreatment))
             )
 
-            # TODO (correctness): `p2` (survival by final treatment, lines ~415-432) is built but never rendered — only `p1` is printed. Either drop the p2 construction (dead code) or wrap both via `survminer::arrange_ggsurvplots(list(p1, p2), ncol = 1)` and print that. The comment "Print both plots" indicates the second behavior was intended.
             # Print both plots
             print(p1)
             return(TRUE)
