@@ -2,6 +2,24 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../JamoviTest"
+		},
+		{
+			"path": "../OncoPath"
+		},
+		{
+			"path": "../ClinicoPathDescriptives"
+		},
+		{
+			"path": "../jsurvival"
+		},
+		{
+			"path": "../meddecide"
+		},
+		{
+			"path": "../jjstatsplot"
 		}
 	],
 	"settings": {}

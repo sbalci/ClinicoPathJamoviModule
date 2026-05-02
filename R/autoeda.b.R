@@ -63,7 +63,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
+                jmvcore::reject("The provided dataset contains no complete rows. Please check your data and try again.")
             }
 
             # Get data and variables
@@ -74,6 +74,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             # Create subset of data with selected variables
             if (length(selected_vars) > 0) {
+                # TODO (cleanup): The constructFormula → decomposeFormula round-trip just to get the column-name list back is unnecessary. `selected_vars` is already a character vector of column names; replace with `analysis_data <- dataset[selected_vars]` (or `jmvcore::select(dataset, selected_vars)` if attribute preservation matters across the subset).
                 var_formula <- jmvcore::constructFormula(terms = selected_vars)
                 var_list <- unlist(jmvcore::decomposeFormula(formula = var_formula))
                 analysis_data <- dataset[var_list]
@@ -81,6 +82,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 analysis_data <- dataset
             }
 
+            # TODO (jamovify): File-wide — the missing-package error at lines 86-94 (DataExplorer) and 96-104 (ggEDA) display errors via `self$results$overview$setContent("...")` instead of `jmvcore::reject()`. The reject form surfaces a banner at the top of the analysis instead of in-section message. Skipped as a UX behavior change; needs explicit decision.
             # Check package requirements based on engine
             if (eda_engine %in% c("dataexplorer", "hybrid") && !requireNamespace("DataExplorer", quietly = TRUE)) {
                 error_msg <- "
@@ -153,7 +155,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 error_html <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
                     "<h4>AutoEDA Analysis Error</h4>",
-                    "<p>Error during automated analysis: ", e$message, "</p>",
+                    "<p>Error during automated analysis: ", htmltools::htmlEscape(e$message), "</p>",
                     "<p><em>Please check your data and analysis settings.</em></p>",
                     "</div>"
                 )
@@ -265,7 +267,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     
                     analysis_html <- paste0(analysis_html,
                         "<tr>",
-                        "<td style='padding: 8px; border: 1px solid #ddd;'>", row_data$feature, "</td>",
+                        "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(row_data$feature), "</td>",
                         "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", row_data$num_missing, "</td>",
                         "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", pct_missing, "%</td>",
                         "<td style='padding: 8px; border: 1px solid #ddd; text-align: center; color: ", status_color, ";'><strong>", status_text, "</strong></td>",
@@ -420,7 +422,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                         cor_value <- round(cor_matrix[row_idx, col_idx], 3)
                         
                         analysis_html <- paste0(analysis_html,
-                            "<li><strong>", var1, "</strong>  <strong>", var2, "</strong>: r = ", cor_value, "</li>"
+                            "<li><strong>", htmltools::htmlEscape(var1), "</strong>  <strong>", htmltools::htmlEscape(var2), "</strong>: r = ", cor_value, "</li>"
                         )
                     }
                     
@@ -559,7 +561,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 analysis_html <- paste0(header_html,
                     "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
                     "<h4 style='color: #333; margin-top: 0;'>Target Variable Summary</h4>",
-                    "<p><strong>Variable:</strong> ", target_var, "</p>",
+                    "<p><strong>Variable:</strong> ", htmltools::htmlEscape(target_var), "</p>",
                     "<p><strong>Type:</strong> ", if (is_numeric_target) "Continuous (Regression Problem)" else "Categorical (Classification Problem)", "</p>",
                     "<p><strong>Complete Values:</strong> ", sum(!is.na(target_data)), " / ", length(target_data), "</p>",
                     "</div>"
@@ -598,7 +600,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                         
                         analysis_html <- paste0(analysis_html,
                             "<tr>",
-                            "<td style='padding: 8px; border: 1px solid #ddd;'>", level_name, "</td>",
+                            "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(level_name), "</td>",
                             "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", count, "</td>",
                             "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", pct, "%</td>",
                             "</tr>"
@@ -801,7 +803,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (length(age_vars) > 0) {
                 patterns[[length(patterns) + 1]] <- list(
                     type = "Age Variables",
-                    variables = paste(age_vars, collapse = ", "),
+                    variables = paste(vapply(age_vars, htmltools::htmlEscape, character(1)), collapse = ", "),
                     recommendation = "Verify age distributions and consider age groups for analysis"
                 )
             }
@@ -822,7 +824,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     )
                     patterns[[length(patterns) + 1]] <- list(
                         type = pattern_name,
-                        variables = paste(matched_vars, collapse = ", "),
+                        variables = paste(vapply(matched_vars, htmltools::htmlEscape, character(1)), collapse = ", "),
                         recommendation = "Check for physiologically plausible ranges"
                     )
                 }
@@ -833,7 +835,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (length(diagnostic_vars) > 0) {
                 patterns[[length(patterns) + 1]] <- list(
                     type = "Diagnostic Variables",
-                    variables = paste(diagnostic_vars, collapse = ", "),
+                    variables = paste(vapply(diagnostic_vars, htmltools::htmlEscape, character(1)), collapse = ", "),
                     recommendation = "Consider staging systems and diagnostic hierarchies"
                 )
             }
@@ -843,7 +845,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (length(treatment_vars) > 0) {
                 patterns[[length(patterns) + 1]] <- list(
                     type = "Treatment Variables",
-                    variables = paste(treatment_vars, collapse = ", "),
+                    variables = paste(vapply(treatment_vars, htmltools::htmlEscape, character(1)), collapse = ", "),
                     recommendation = "Consider treatment sequences and combinations"
                 )
             }
@@ -853,7 +855,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             if (length(outcome_vars) > 0) {
                 patterns[[length(patterns) + 1]] <- list(
                     type = "Outcome Variables",
-                    variables = paste(outcome_vars, collapse = ", "),
+                    variables = paste(vapply(outcome_vars, htmltools::htmlEscape, character(1)), collapse = ", "),
                     recommendation = "Consider time-to-event analysis for survival outcomes"
                 )
             }
@@ -930,7 +932,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 violation <- range_violations[[var]]
                 range_html <- paste0(range_html,
                     "<tr>",
-                    "<td style='padding: 8px; border: 1px solid #ddd;'>", var, "</td>",
+                    "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(var), "</td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", stringr::str_to_title(violation$type), "</td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", violation$range, "</td>",
                     "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", violation$outliers, " (", violation$percentage, "%)</td>",
@@ -1206,8 +1208,9 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             for (pattern_name in names(clinical_patterns)) {
                 vars <- clinical_patterns[[pattern_name]]
                 if (length(vars) > 0) {
-                    detected_html <- paste0(detected_html, 
-                        "<p><strong>", pattern_name, ":</strong> ", paste(vars, collapse = ", "), "</p>")
+                    detected_html <- paste0(detected_html,
+                        "<p><strong>", pattern_name, ":</strong> ",
+                        paste(vapply(vars, htmltools::htmlEscape, character(1)), collapse = ", "), "</p>")
                 }
             }
             

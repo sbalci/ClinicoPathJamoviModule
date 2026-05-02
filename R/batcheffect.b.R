@@ -70,11 +70,12 @@ batcheffectClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
             
+            # TODO (jamovify): File-wide — error display via `self$results$instructions$setContent("<p style='color: red;'>...")` is non-idiomatic. Affected sites: 73-81 (this), 93-97, 100-104, 142-145, 165-168, 173-178, 180-184. The jamovi-idiomatic form is `jmvcore::reject("...")`, which surfaces a banner at the top of the analysis. Skipped during jamovify because it's a UX behavior change (banner vs in-section message) — needs explicit decision.
             if (length(missing_packages) > 0) {
                 error_msg <- paste0(
-                    "<p style='color: red;'><b>Error:</b> Required packages not installed: ", 
-                    paste(missing_packages, collapse = ", "), 
-                    "<br>Please install with: install.packages(c('", 
+                    "<p style='color: red;'><b>Error:</b> Required packages not installed: ",
+                    paste(missing_packages, collapse = ", "),
+                    "<br>Please install with: install.packages(c('",
                     paste(missing_packages, collapse = "', '"), "'))</p>"
                 )
                 self$results$instructions$setContent(error_msg)
@@ -140,7 +141,7 @@ batcheffectClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.generateInterpretation(analysisData)
                 
             }, error = function(e) {
-                error_msg <- paste0("<p style='color: red;'><b>Analysis Error:</b> ", e$message, "</p>")
+                error_msg <- paste0("<p style='color: red;'><b>Analysis Error:</b> ", htmltools::htmlEscape(e$message), "</p>")
                 self$results$instructions$setContent(error_msg)
             })
         },
@@ -183,6 +184,7 @@ batcheffectClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
             
+            # TODO (data hygiene): `as.factor()` strips jamovi's `values` attribute used for level-code → label mapping. For variables that came in as already-labelled factors with the values attribute set, this loses the user's label coding. Consider a pass-through guard: only call as.factor when the column is NOT already a factor. Same applies to line ~191 (biological_var).
             # Ensure batch variable is factor
             analysis_data[[batch_var]] <- as.factor(analysis_data[[batch_var]])
             if (!is.null(biological_var)) {

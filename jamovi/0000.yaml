@@ -5879,6 +5879,6 @@ analyses:
       Provides all four published equations (Original + 3 new) with risk
       category classification and concordance analysis.
 usesNative: true
-minApp: 1.8.0
+minApp: 2.7.27
 
 ...

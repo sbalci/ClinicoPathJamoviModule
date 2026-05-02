@@ -70,3 +70,4 @@ tr/
 PATCHES/
 .claude/skills/
 docs/SECURITY/
+*.bak.*

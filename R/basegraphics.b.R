@@ -114,6 +114,8 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             original_names <- colnames(original_data)
             cleaned_names <- janitor::make_clean_names(original_names)
 
+            # TODO (cleanup): File-wide — `jmvcore::Notice$new(...)` objects are constructed at 17 sites but `self$results$insert(999, notice)` is commented out everywhere with "Causes serialization error". Lines: 120-129, 134-140, 170-179, 186-195, 203-212, 223-232, 241-250, 266-275, 280-289, 290-299, 301-310, 321-330, 338-347, 359-368, 376-385, 386-395, 396-405. The Notice objects are dead code (constructed and discarded). Convert to HTML output items per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R is the reference). Currently the user gets no feedback for any of these conditions.
+            # TODO (security): When converting Notice setContent calls to HTML output items per the file-wide cleanup TODO above, the existing sprintf interpolations at lines ~177-180, ~193-196, ~210-213, ~230-233 ALREADY embed user-supplied column names (x_var, y_var, group_var) — they're dormant only because the corresponding `self$results$insert(...)` lines are commented out. Wrap each user-derived value with `htmltools::htmlEscape()` at the construction site before re-enabling. Reference: R/tableone.b.R:235.
             # Check for duplicates in original names
             if (any(duplicated(original_names))) {
                 dup_names <- original_names[duplicated(original_names)]
@@ -313,6 +315,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Validate statistics before adding overlays
         .validateStatistics = function(x, y = NULL) {
+            # TODO (cleanup): `length(na.omit(cbind(x, y))[,1])` is a roundabout way of counting complete pairs; replace with `sum(complete.cases(x, y))`.
             n <- if (is.null(y)) length(x) else length(na.omit(cbind(x, y))[,1])
 
             # Check sample size for correlation/regression
@@ -419,7 +422,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Data validation
             if (nrow(self$data) == 0) {
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows")
             }
 
             # Store initial data for comparison
@@ -577,32 +580,32 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .generate_description = function() {
             plot_type <- self$options$plot_type
-            x_var <- self$options$x_var
-            y_var <- self$options$y_var
-            group_var <- self$options$group_var
-            
+            safe_x <- if (!is.null(self$options$x_var)) htmltools::htmlEscape(self$options$x_var) else NULL
+            safe_y <- if (!is.null(self$options$y_var)) htmltools::htmlEscape(self$options$y_var) else NULL
+            safe_group <- if (!is.null(self$options$group_var)) htmltools::htmlEscape(self$options$group_var) else NULL
+
             # Create description based on plot type
             desc_html <- "<h4>Base R Graphics Plot Description</h4>"
             desc_html <- paste0(desc_html, "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
-            
+
             if (plot_type == "scatter") {
-                desc_html <- paste0(desc_html, "<p><strong>Scatter Plot:</strong> Shows the relationship between ", x_var)
-                if (!is.null(y_var)) {
-                    desc_html <- paste0(desc_html, " and ", y_var)
+                desc_html <- paste0(desc_html, "<p><strong>Scatter Plot:</strong> Shows the relationship between ", safe_x)
+                if (!is.null(safe_y)) {
+                    desc_html <- paste0(desc_html, " and ", safe_y)
                 }
                 desc_html <- paste0(desc_html, ".</p>")
             } else if (plot_type == "histogram") {
-                desc_html <- paste0(desc_html, "<p><strong>Histogram:</strong> Shows the distribution of ", x_var, ".</p>")
+                desc_html <- paste0(desc_html, "<p><strong>Histogram:</strong> Shows the distribution of ", safe_x, ".</p>")
             } else if (plot_type == "boxplot") {
-                desc_html <- paste0(desc_html, "<p><strong>Box Plot:</strong> Shows the distribution of ", x_var)
-                if (!is.null(group_var)) {
-                    desc_html <- paste0(desc_html, " grouped by ", group_var)
+                desc_html <- paste0(desc_html, "<p><strong>Box Plot:</strong> Shows the distribution of ", safe_x)
+                if (!is.null(safe_group)) {
+                    desc_html <- paste0(desc_html, " grouped by ", safe_group)
                 }
                 desc_html <- paste0(desc_html, ".</p>")
             } else if (plot_type == "barplot") {
-                desc_html <- paste0(desc_html, "<p><strong>Bar Plot:</strong> Shows frequencies/counts for ", x_var, ".</p>")
+                desc_html <- paste0(desc_html, "<p><strong>Bar Plot:</strong> Shows frequencies/counts for ", safe_x, ".</p>")
             } else if (plot_type == "density") {
-                desc_html <- paste0(desc_html, "<p><strong>Density Plot:</strong> Shows smooth density estimation for ", x_var, ".</p>")
+                desc_html <- paste0(desc_html, "<p><strong>Density Plot:</strong> Shows smooth density estimation for ", safe_x, ".</p>")
             } else if (plot_type == "line") {
                 desc_html <- paste0(desc_html, "<p><strong>Line Plot:</strong> Shows trend lines for the data.</p>")
             } else if (plot_type == "pairs") {
@@ -610,9 +613,9 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else if (plot_type == "matplot") {
                 desc_html <- paste0(desc_html, "<p><strong>Matrix Plot:</strong> Shows multiple data series on the same plot.</p>")
             }
-            
-            if (!is.null(group_var)) {
-                desc_html <- paste0(desc_html, "<p><strong>Grouping:</strong> Data is grouped by ", group_var, " with different colors/symbols.</p>")
+
+            if (!is.null(safe_group)) {
+                desc_html <- paste0(desc_html, "<p><strong>Grouping:</strong> Data is grouped by ", safe_group, " with different colors/symbols.</p>")
             }
             
             desc_html <- paste0(desc_html, "<p><strong>Graphics Engine:</strong> Pure base R graphics (no external dependencies)</p>")
@@ -717,23 +720,23 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             summary_html <- paste0(summary_html, "<div style='background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
 
             # Main interpretation
-            x_var <- self$options$x_var
-            y_var <- self$options$y_var
+            safe_x <- htmltools::htmlEscape(self$options$x_var)
+            safe_y <- htmltools::htmlEscape(self$options$y_var)
             summary_html <- paste0(summary_html, "<p><strong>Relationship Interpretation:</strong></p>")
-            summary_html <- paste0(summary_html, "<p>There is a <strong>", strength, " ", direction, " relationship</strong> between ", x_var, " and ", y_var, ". ")
+            summary_html <- paste0(summary_html, "<p>There is a <strong>", strength, " ", direction, " relationship</strong> between ", safe_x, " and ", safe_y, ". ")
 
             # Explain what this means
             if (direction == "positive") {
-                summary_html <- paste0(summary_html, "This means that as ", x_var, " increases, ", y_var, " tends to increase as well. ")
+                summary_html <- paste0(summary_html, "This means that as ", safe_x, " increases, ", safe_y, " tends to increase as well. ")
             } else {
-                summary_html <- paste0(summary_html, "This means that as ", x_var, " increases, ", y_var, " tends to decrease. ")
+                summary_html <- paste0(summary_html, "This means that as ", safe_x, " increases, ", safe_y, " tends to decrease. ")
             }
 
             # Quantify the strength
             if (cor_method == "pearson") {
                 r_squared <- cor_value^2
                 pct_explained <- round(r_squared * 100, 1)
-                summary_html <- paste0(summary_html, "About ", pct_explained, "% of the variation in ", y_var, " can be explained by ", x_var, ".")
+                summary_html <- paste0(summary_html, "About ", pct_explained, "% of the variation in ", safe_y, " can be explained by ", safe_x, ".")
             } else {
                 summary_html <- paste0(summary_html, "The relationship is ", strength, " when considering the ranked values (not necessarily linear).")
             }
@@ -742,11 +745,11 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Provide context on strength
             summary_html <- paste0(summary_html, "<p><strong>Context:</strong></p><ul style='margin-top: 5px;'>")
             if (strength == "weak") {
-                summary_html <- paste0(summary_html, "<li>", x_var, " and ", y_var, " show little association. Other factors likely play larger roles.</li>")
+                summary_html <- paste0(summary_html, "<li>", safe_x, " and ", safe_y, " show little association. Other factors likely play larger roles.</li>")
             } else if (strength == "moderate") {
-                summary_html <- paste0(summary_html, "<li>", x_var, " and ", y_var, " show a meaningful association, but other factors also contribute.</li>")
+                summary_html <- paste0(summary_html, "<li>", safe_x, " and ", safe_y, " show a meaningful association, but other factors also contribute.</li>")
             } else {
-                summary_html <- paste0(summary_html, "<li>", x_var, " and ", y_var, " are closely related. Changes in one strongly predict changes in the other.</li>")
+                summary_html <- paste0(summary_html, "<li>", safe_x, " and ", safe_y, " are closely related. Changes in one strongly predict changes in the other.</li>")
             }
 
             # Method-specific notes
@@ -865,6 +868,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             tryCatch({
+                # TODO (data hygiene): `x_min`/`x_max`/`y_min`/`y_max` are declared `type: String` (free-text) in jamovi/basegraphics.a.yaml but only ever parsed via `as.numeric()` here and at line ~876. A non-numeric entry produces silent NA → broken xlim/ylim with no user feedback. Either (a) change the .a.yaml options to `type: Number` (UI-visible behavior change — the field becomes a numeric input), or (b) guard with `jmvcore::canBeNumeric()` and surface a Notice when conversion fails.
                 # Prepare custom axis limits
                 xlim <- NULL
                 if (options$custom_limits && options$x_min != "" && options$x_max != "") {
