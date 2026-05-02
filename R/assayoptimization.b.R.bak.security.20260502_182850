@@ -53,12 +53,10 @@ assayoptimizationClass <- R6::R6Class(
                 return()
             }
             
-            safe_response <- htmltools::htmlEscape(response_var)
-            safe_factors <- paste(vapply(factors, htmltools::htmlEscape, character(1)), collapse = ", ")
             self$results$instructions$setContent(
                 paste0("<h3>Assay Optimization Analysis Ready</h3>
-                <p><b>Response Variable:</b> ", safe_response, "</p>
-                <p><b>Experimental Factors (", n_factors, "):</b> ", safe_factors, "</p>
+                <p><b>Response Variable:</b> ", response_var, "</p>
+                <p><b>Experimental Factors (", n_factors, "):</b> ", paste(factors, collapse = ", "), "</p>
                 <p><b>Design Type:</b> ", gsub("_", " ", stringr::str_to_title(self$options$design_type)), "</p>
                 <p><b>Optimization Goal:</b> ", gsub("_", " ", stringr::str_to_title(self$options$optimization_goal)), "</p>
                 <p>Click <b>Results</b> below to view the analysis results.</p>")
@@ -82,6 +80,7 @@ assayoptimizationClass <- R6::R6Class(
             data <- self$data
             
             # TODO (jamovify): File-wide — error display via `self$results$<table>$setContent("Error: ...")` is non-standard. Affected sites: 84 (this), 91-94, 107, 151, plus the per-handler tryCatch error setContent calls at 292, 366, 468, 557, 632, 734. The jamovi-idiomatic form is `jmvcore::reject("Error: ...")`, which surfaces a banner at the top of the analysis. Skipped during jamovify because it's a UX behavior change — needs explicit decision.
+            # TODO (security): File-wide — column names and other user-supplied strings are interpolated raw into HTML via paste0/setContent. XSS-exploitable sites: 92-93 (missing_factors), 230 (factor_name), 358 (factor_name), 420 (source from rownames(anova_result)), 450 (factor_name), 460 (factor_name), 548-549 (factors[1]/factors[2]), 679 (cont_factor_name), 719 (significant_factors). Wrap user-derived values with `htmltools::htmlEscape()` before concatenation. See R/tableone.b.R:235 or R/alluvial.b.R for the in-repo idiom. Out of scope for jamovify; flag for /security-audit-function.
             # Check for missing response variable
             if (!(response_var %in% names(data))) {
                 self$results$design_summary$setContent("Error: Response variable not found in data.")
@@ -91,9 +90,9 @@ assayoptimizationClass <- R6::R6Class(
             # Check for missing factors
             missing_factors <- factors[!(factors %in% names(data))]
             if (length(missing_factors) > 0) {
-                safe_missing <- paste(vapply(missing_factors, htmltools::htmlEscape, character(1)), collapse = ", ")
                 self$results$design_summary$setContent(
-                    paste("Error: The following factors were not found in data:", safe_missing)
+                    paste("Error: The following factors were not found in data:", 
+                          paste(missing_factors, collapse = ", "))
                 )
                 return()
             }
@@ -151,7 +150,7 @@ assayoptimizationClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                self$results$design_summary$setContent(paste("Analysis error:", htmltools::htmlEscape(e$message)))
+                self$results$design_summary$setContent(paste("Analysis error:", e$message))
             })
         },
         
@@ -217,21 +216,20 @@ assayoptimizationClass <- R6::R6Class(
             for (i in seq_along(factors)) {
                 factor_name <- factors[i]
                 factor_values <- factor_data[[i]]
-                safe_name <- htmltools::htmlEscape(factor_name)
-
+                
                 if (is.factor(factor_values)) {
                     factor_type <- "Categorical"
-                    levels_info <- paste(vapply(levels(factor_values), htmltools::htmlEscape, character(1)), collapse = ", ")
+                    levels_info <- paste(levels(factor_values), collapse = ", ")
                 } else {
                     factor_type <- "Continuous"
-                    levels_info <- paste0(round(min(factor_values, na.rm = TRUE), 3), " to ",
+                    levels_info <- paste0(round(min(factor_values, na.rm = TRUE), 3), " to ", 
                                         round(max(factor_values, na.rm = TRUE), 3))
                 }
-
+                
                 missing_count <- sum(is.na(factor_values))
-
+                
                 html <- paste0(html, "<tr>")
-                html <- paste0(html, "<td>", safe_name, "</td>")
+                html <- paste0(html, "<td>", factor_name, "</td>")
                 html <- paste0(html, "<td>", factor_type, "</td>")
                 html <- paste0(html, "<td>", levels_info, "</td>")
                 html <- paste0(html, "<td>", missing_count, "</td>")
@@ -293,7 +291,7 @@ assayoptimizationClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                html <- paste0(html, "<p>Power analysis error: ", htmltools::htmlEscape(e$message), "</p>")
+                html <- paste0(html, "<p>Power analysis error: ", e$message, "</p>")
             })
             
             self$results$power_analysis$setContent(html)
@@ -360,8 +358,7 @@ assayoptimizationClass <- R6::R6Class(
                     html <- paste0(html, "<p><b>Optimal Conditions:</b></p>")
                     html <- paste0(html, "<table class='jamovi-table'>")
                     for (factor_name in factors) {
-                        safe_name <- htmltools::htmlEscape(factor_name)
-                        html <- paste0(html, "<tr><td><b>", safe_name, ":</b></td><td>",
+                        html <- paste0(html, "<tr><td><b>", factor_name, ":</b></td><td>",
                                      round(jmvcore::toNumeric(optimal_conditions[[factor_name]]), 4), "</td></tr>")
                     }
                     html <- paste0(html, "<tr><td><b>Predicted Response:</b></td><td>", round(optimal_response, 4), "</td></tr>")
@@ -369,7 +366,7 @@ assayoptimizationClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                html <- paste0(html, "<p>Optimization error: ", htmltools::htmlEscape(e$message), "</p>")
+                html <- paste0(html, "<p>Optimization error: ", e$message, "</p>")
             })
             
             self$results$optimization_results$setContent(html)
@@ -423,7 +420,7 @@ assayoptimizationClass <- R6::R6Class(
                     }
                     
                     html <- paste0(html, "<tr>")
-                    html <- paste0(html, "<td>", htmltools::htmlEscape(source), "</td>")
+                    html <- paste0(html, "<td>", source, "</td>")
                     html <- paste0(html, "<td>", df, "</td>")
                     html <- paste0(html, "<td>", sum_sq, "</td>")
                     html <- paste0(html, "<td>", mean_sq, "</td>")
@@ -455,15 +452,15 @@ assayoptimizationClass <- R6::R6Class(
                 for (i in 1:(nrow(anova_result) - 1)) {
                     factor_name <- rownames(anova_result)[i]
                     eta_sq <- anova_result[i, "Sum Sq"] / total_ss
-
+                    
                     interpretation <- ""
                     if (eta_sq < 0.01) interpretation <- "Very small"
                     else if (eta_sq < 0.06) interpretation <- "Small"
                     else if (eta_sq < 0.14) interpretation <- "Medium"
                     else interpretation <- "Large"
-
+                    
                     html <- paste0(html, "<tr>")
-                    html <- paste0(html, "<td>", htmltools::htmlEscape(factor_name), "</td>")
+                    html <- paste0(html, "<td>", factor_name, "</td>")
                     html <- paste0(html, "<td>", round(eta_sq, 4), "</td>")
                     html <- paste0(html, "<td>", interpretation, "</td>")
                     html <- paste0(html, "</tr>")
@@ -471,7 +468,7 @@ assayoptimizationClass <- R6::R6Class(
                 html <- paste0(html, "</table>")
                 
             }, error = function(e) {
-                html <- paste0(html, "<p>Factor effects analysis error: ", htmltools::htmlEscape(e$message), "</p>")
+                html <- paste0(html, "<p>Factor effects analysis error: ", e$message, "</p>")
             })
             
             self$results$factor_effects$setContent(html)
@@ -550,12 +547,10 @@ assayoptimizationClass <- R6::R6Class(
                                 point_type <- "Ridge system"
                             }
                             
-                            safe_f1 <- htmltools::htmlEscape(factors[1])
-                            safe_f2 <- htmltools::htmlEscape(factors[2])
                             html <- paste0(html, "<h4>Stationary Point Analysis</h4>")
                             html <- paste0(html, "<table class='jamovi-table'>")
-                            html <- paste0(html, "<tr><td><b>", safe_f1, " (stationary):</b></td><td>", round(x1_stat, 4), "</td></tr>")
-                            html <- paste0(html, "<tr><td><b>", safe_f2, " (stationary):</b></td><td>", round(x2_stat, 4), "</td></tr>")
+                            html <- paste0(html, "<tr><td><b>", factors[1], " (stationary):</b></td><td>", round(x1_stat, 4), "</td></tr>")
+                            html <- paste0(html, "<tr><td><b>", factors[2], " (stationary):</b></td><td>", round(x2_stat, 4), "</td></tr>")
                             html <- paste0(html, "<tr><td><b>Point Type:</b></td><td>", point_type, "</td></tr>")
                             html <- paste0(html, "</table>")
                         }
@@ -563,7 +558,7 @@ assayoptimizationClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                html <- paste0(html, "<p>Response surface analysis error: ", htmltools::htmlEscape(e$message), "</p>")
+                html <- paste0(html, "<p>Response surface analysis error: ", e$message, "</p>")
             })
             
             self$results$response_surface_summary$setContent(html)
@@ -638,7 +633,7 @@ assayoptimizationClass <- R6::R6Class(
                 html <- paste0(html, "</table>")
                 
             }, error = function(e) {
-                html <- paste0(html, "<p>Quality control analysis error: ", htmltools::htmlEscape(e$message), "</p>")
+                html <- paste0(html, "<p>Quality control analysis error: ", e$message, "</p>")
             })
             
             self$results$quality_control_summary$setContent(html)
@@ -685,7 +680,7 @@ assayoptimizationClass <- R6::R6Class(
                     linear_model <- lm(response ~ cont_factor)
                     linear_summary <- summary(linear_model)
                     
-                    html <- paste0(html, "<h4>Linearity Assessment (", htmltools::htmlEscape(cont_factor_name), ")</h4>")
+                    html <- paste0(html, "<h4>Linearity Assessment (", cont_factor_name, ")</h4>")
                     html <- paste0(html, "<table class='jamovi-table'>")
                     html <- paste0(html, "<tr><td><b>Correlation coefficient (r):</b></td><td>", round(sqrt(linear_summary$r.squared), 4), "</td></tr>")
                     html <- paste0(html, "<tr><td><b>R-squared:</b></td><td>", round(linear_summary$r.squared, 4), "</td></tr>")
@@ -725,8 +720,7 @@ assayoptimizationClass <- R6::R6Class(
                     html <- paste0(html, "<tr><td><b>Significant Factors (p&lt;0.05):</b></td><td>", length(significant_factors), "</td></tr>")
                     
                     if (length(significant_factors) > 0) {
-                        safe_sig <- paste(vapply(significant_factors, htmltools::htmlEscape, character(1)), collapse = ", ")
-                        html <- paste0(html, "<tr><td><b>Critical Factors:</b></td><td>", safe_sig, "</td></tr>")
+                        html <- paste0(html, "<tr><td><b>Critical Factors:</b></td><td>", paste(significant_factors, collapse = ", "), "</td></tr>")
                     }
                     
                     html <- paste0(html, "</table>")
@@ -740,7 +734,7 @@ assayoptimizationClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                html <- paste0(html, "<p>Method validation error: ", htmltools::htmlEscape(e$message), "</p>")
+                html <- paste0(html, "<p>Method validation error: ", e$message, "</p>")
             })
             
             self$results$validation_metrics$setContent(html)
