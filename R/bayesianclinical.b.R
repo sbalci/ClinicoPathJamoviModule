@@ -50,13 +50,14 @@ bayesianclinicalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # 4. Perform Analysis
             if (self$options$outcome_type == "continuous") {
                 
+                # TODO (data hygiene): `as.factor()` strips jamovi's `values` attribute used for level-code → label mapping. If treatmentVar comes in as an already-labelled factor with the values attribute set, this loses the user's label coding. Consider a guard: only call as.factor when the column is NOT already a factor (`if (!is.factor(mydata[[treatmentVar]])) mydata[[treatmentVar]] <- as.factor(...)`).
                 # Check if treatment is factor
                 mydata[[treatmentVar]] <- as.factor(mydata[[treatmentVar]])
                 
                 # Using BayesFactor package
                 if (requireNamespace('BayesFactor', quietly=TRUE)) {
                     
-                    formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~", jmvcore::composeTerm(treatmentVar)))
+                    formula <- jmvcore::asFormula(paste(jmvcore::composeTerm(outcomeVar), "~", jmvcore::composeTerm(treatmentVar)))
                     
                     # Compute Bayes Factor for treatment effect
                     bf <- try(BayesFactor::ttestBF(formula = formula, data = mydata), silent = TRUE)
@@ -116,12 +117,13 @@ bayesianclinicalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             }
                         }
                     } else {
-                        self$results$comprehensive_report$setContent(paste("BayesFactor Error:", attr(bf, "condition")$message))
+                        self$results$comprehensive_report$setContent(paste("BayesFactor Error:", htmltools::htmlEscape(attr(bf, "condition")$message)))
                     }
                 } else {
                     self$results$comprehensive_report$setContent("Package 'BayesFactor' is required but not installed.")
                 }
             } else {
+                # TODO (stub): Only the `continuous` outcome path is implemented. Binary/count/ordinal options exist in the .a.yaml (lines 66-77) but route here and display "not yet implemented in this preview". Either implement them, hide them from the .a.yaml until ready, or surface this as a `jmvcore::reject(...)` with a clearer message.
                 self$results$comprehensive_report$setContent(paste("Outcome type", self$options$outcome_type, "is not yet implemented in this preview."))
             }
 

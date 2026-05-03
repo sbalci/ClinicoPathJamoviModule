@@ -64,18 +64,19 @@ bayesianciClass <- R6::R6Class(
         },
         
         .run = function() {
+            # TODO (UX): File-wide — silent `return()` validation paths at lines 68 (outcome unset), 76 (outcome not in data), 81 (all-NA outcome), and 141 (n < 2 after NA removal) leave the user with no feedback about why nothing rendered. Surface via `jmvcore::reject(...)` or an HTML notice per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md so users understand which precondition failed.
             if (is.null(self$options$outcome)) {
                 return()
             }
-            
+
             # Get data and validate
             data <- self$data
             outcome_var <- self$options$outcome
-            
+
             if (!(outcome_var %in% names(data))) {
                 return()
             }
-            
+
             outcome_data <- data[[outcome_var]]
             if (all(is.na(outcome_data))) {
                 return()
@@ -114,6 +115,7 @@ bayesianciClass <- R6::R6Class(
                            ifelse(outcome_type == "binary",
                                   sprintf("%d unique values", length(unique(outcome_data[!is.na(outcome_data)]))),
                                   "Count data")),
+                    # TODO (correctness): `mean(as.numeric(outcome_data))` in the binary branch returns mean of factor LEVEL INDICES (1, 2, ...), not the binary 0/1 proportion. For a 2-level factor it always shows ~1.5 instead of the actual proportion. Use `jmvcore::toNumeric(outcome_data)` which honors the values attribute and returns the original 0/1 codes. ⚠ Behavior risk: changes the displayed Mean/Proportion value; verify with both jamovi-coded and base-R factor inputs before applying.
                     ifelse(outcome_type == "continuous",
                            sprintf("%.4f", mean(outcome_data, na.rm = TRUE)),
                            ifelse(outcome_type == "binary",
@@ -402,7 +404,8 @@ bayesianciClass <- R6::R6Class(
         .calculateCredibleIntervals = function(param_name, shape_param, scale_param, distribution) {
             credible_level <- self$options$credible_level
             additional_levels <- self$options$additional_levels
-            
+
+            # TODO (UX): File-wide — `additional_levels` is a free-text String option ("0.50,0.80,0.90"). `as.numeric(unlist(strsplit(...)))` produces NA for non-numeric tokens, then the next line silently filters them out. A user typing "0.5; 0.8" or "fifty percent" gets no feedback that their input was discarded. Same parsing logic at the start of `.calculateCredibleIntervalsNormal` below. Detect parse failures and surface a Notice (or use `jmvcore::canBeNumeric()` to validate before parse).
             # Parse additional levels
             levels <- c(credible_level)
             if (!is.null(additional_levels) && additional_levels != "") {

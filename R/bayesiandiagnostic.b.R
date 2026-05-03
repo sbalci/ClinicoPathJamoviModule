@@ -71,12 +71,14 @@ bayesiandiagnosticClass <- R6::R6Class(
             # Get Positive Levels (should be provided, but if not we guess 2nd level)
              # Use explicit levels if provided in options, otherwise use levels of factor
             
+             # TODO (UX): Silent fallback — when `test_positive_level` (and `disease_positive_level` at line ~92) is unset, the code guesses `levels[2]` as the positive level. This may silently disagree with the user's expectation (e.g. if levels are alphabetically reversed). Surface a Notice indicating which level was chosen as positive, or `jmvcore::reject(...)` requiring an explicit choice.
+             # TODO (correctness): The `# If 1/2, map 2 to 1` comment at line ~84 marks an unhandled case — jamovi numeric binary columns coded as 1/2 produce `as.numeric(test_col) == c(1,2)`, but the downstream `tbl[1,1]` indexing assumes 0/1 codes (rownames "0"/"1"). For 1/2-coded data, the 2x2 table populates the wrong cells silently, producing wrong sensitivity/specificity. Use `jmvcore::toNumeric()` (which honors the values attribute) or explicitly `(test_col >= median) -> 0/1` with a documented threshold.
              # Convert to 0/1 (0=Neg, 1=Pos)
              if (is.factor(test_col)) {
                  levels_test <- levels(test_col)
                  pos_level_test <- self$options$test_positive_level
                  if (is.null(pos_level_test) && length(levels_test) >= 2) pos_level_test <- levels_test[2]
-                 
+
                  test_vec <- ifelse(test_col == pos_level_test, 1, 0)
              } else {
                  # Numeric: assume > 0 or 1 is pos
@@ -132,8 +134,9 @@ bayesiandiagnosticClass <- R6::R6Class(
              LR_neg <- (1 - Sens) / Spec
              DOR <- LR_pos / LR_neg
              
+             # TODO (correctness, stub): Bayesian framing in `.init()` HTML and result column names ("posterior_mean"/"posterior_median"/"posterior_mode"/"credible_interval_lower"/"credible_interval_upper") does NOT match the actual computation. (a) Sens/Spec posterior columns at lines ~143-145, ~150-152 are populated with the same point estimate (Sens, Sens, Sens) — no mean/median/mode distinction. (b) "credible_interval" bounds at ~146/153 are frequentist Wald CIs (`±1.96·sqrt(p(1-p)/n)`), not credible intervals. (c) PPV/NPV "Simplified CI" at ~165-170 is a literal placeholder (`PPV ± 0.1`), not any kind of interval — clinically misleading. Implement Beta-binomial posterior CIs with Jeffreys/uniform priors per the Bayes' theorem text in `.init`, or rename columns to honest frequentist labels and clearly mark this as a non-Bayesian preview.
              # Populate tables
-             
+
              # Sensitivity Specificity
              sens_table <- self$results$sensitivitySpecificity
              sens_table$addRow(rowKey = "sens", values = list(

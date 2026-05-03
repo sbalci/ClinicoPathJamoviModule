@@ -3,6 +3,7 @@ bayesianmaClass <- R6::R6Class(
     inherit = bayesianmaBase,
     private = list(
         .init = function() {
+            # TODO (jamovify): File-wide — error/welcome display via `self$results$instructions$setContent("<html>...")` is non-idiomatic. Affected sites: 7 (this), 47, 79, 121, 145, 159. The jamovi-idiomatic form for validation errors is `jmvcore::reject(...)` (lines 121, 145, 159 are validation errors); welcome/instructions messages (lines 7, 47, 79) are appropriate as setContent. Skipped during jamovify because the validation→reject conversion is a UX behavior change (banner vs in-section).
             if (is.null(self$options$time_var) || is.null(self$options$event_var)) {
                 self$results$instructions$setContent(
                     "<html>
@@ -120,7 +121,7 @@ bayesianmaClass <- R6::R6Class(
             }, error = function(e) {
                 self$results$instructions$setContent(
                     paste0("<html><body><div style='color: red;'>",
-                           "<b>Analysis Error:</b> ", e$message, "</div></body></html>")
+                           "<b>Analysis Error:</b> ", htmltools::htmlEscape(e$message), "</div></body></html>")
                 )
             })
         },
@@ -142,9 +143,10 @@ bayesianmaClass <- R6::R6Class(
             }
 
             if (length(missingVars) > 0) {
+                safe_missing <- paste(vapply(missingVars, htmltools::htmlEscape, character(1)), collapse = ", ")
                 self$results$instructions$setContent(
                     paste0("<html><body><div style='color: red;'>",
-                           "<b>Missing variables:</b> ", paste(missingVars, collapse = ", "),
+                           "<b>Missing variables:</b> ", safe_missing,
                            "</div></body></html>")
                 )
                 return(NULL)
@@ -162,6 +164,10 @@ bayesianmaClass <- R6::R6Class(
                 return(NULL)
             }
 
+            # TODO (numeric, ⚠ behavior risk): Two factor-coercion sites that should likely use `jmvcore::toNumeric()`:
+            #   (1) line 168 — `as.numeric(as.logical(...))` returns NA for factors whose labels aren't "TRUE"/"FALSE", silently corrupting binary outcomes.
+            #   (2) line 173 — `as.numeric(as.factor(x))` returns level indices (1, 2, 3, ...), losing meaningful coding before BMA's `scale(X)` and downstream sampling.
+            # `jmvcore::toNumeric()` honors the jamovi `values` attribute (returns original 0/1 codes). Behavior risk: for columns WITHOUT the values attribute (raw R factors), toNumeric returns level indices while line 168's current path returns NA — different shape of silent corruption. Verify with both jamovi-coded and base-R factor inputs before applying.
             # Convert event variable to numeric if needed
             data[[eventVar]] <- as.numeric(as.logical(data[[eventVar]]))
 
@@ -292,6 +298,7 @@ bayesianmaClass <- R6::R6Class(
             burn_in <- self$options$burn_in
             thinning <- self$options$thinning
             
+            # TODO (UX): `temperature_ladder` is a free-text String option ("1.0,1.5,2.0,3.0"). `as.numeric(strsplit(...))` produces NA for non-numeric tokens and the next line silently filters them out. A user typing "1.0; 1.5" or with stray spaces gets no feedback that tokens were discarded. Detect parse failures and surface a Notice (or use `jmvcore::canBeNumeric()` to validate before parse).
             # Parse temperature ladder for MC³
             temp_ladder <- c(1.0)
             if (method == "mc3" && self$options$temperature_ladder != "") {

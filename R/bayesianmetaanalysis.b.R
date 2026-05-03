@@ -73,9 +73,11 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             # Get covariates if specified
             covariates <- NULL
             if (length(self$options$covariates) > 0) {
+                # TODO (cleanup): `data[self$options$covariates]` is base subset and may strip jamovi column attributes (`measureType`, `values`, labels). Use `jmvcore::select(data, self$options$covariates)` to preserve them, especially for downstream factor handling in the meta-regression model formula.
                 covariates <- data[self$options$covariates]
             }
-            
+
+            # TODO (cleanup): File-wide — leftover debug `print()` calls spam the R console during normal use. Affected sites: 81, 82, 84 (this block), 250-251 (`print("Posterior names:") / print(names(posterior))`), 323 (`print(paste("Metafor input lengths..."))`). Remove or guard with a debug flag.
             # Perform the Bayesian meta-analysis based on model type
             tryCatch({
                 print(paste("EffectSize len:", length(effectSize)))
@@ -125,7 +127,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 }
                 
             }, error = function(e) {
-                jmvcore::reject(paste("Analysis failed:", e$message))
+                jmvcore::reject("Analysis failed: {}", code = NULL, htmltools::htmlEscape(e$message))
             })
         },
         
@@ -221,19 +223,18 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             # Build formula
             if (type == "hierarchical" && !is.null(covariates)) {
-                formula_str <- paste0("yi | se(sei) ~ 1 + ", 
-                                    paste(names(covariates), collapse = " + "),
-                                    " + (1 | study)")
+                cov_terms <- paste(vapply(names(covariates), jmvcore::composeTerm, character(1)), collapse = " + ")
+                formula_str <- paste0("yi | se(sei) ~ 1 + ", cov_terms, " + (1 | study)")
             } else if (!is.null(covariates)) {
-                formula_str <- paste0("yi | se(sei) ~ 1 + ", 
-                                    paste(names(covariates), collapse = " + "))
+                cov_terms <- paste(vapply(names(covariates), jmvcore::composeTerm, character(1)), collapse = " + ")
+                formula_str <- paste0("yi | se(sei) ~ 1 + ", cov_terms)
             } else {
                 formula_str <- "yi | se(sei) ~ 1"
             }
-            
+
             # Run the model
             model <- brms::brm(
-                formula = as.formula(formula_str),
+                formula = jmvcore::asFormula(formula_str, additional_allowed_functions = c("se", "|")),
                 data = meta_data,
                 prior = priors,
                 chains = self$options$mcmcChains,
