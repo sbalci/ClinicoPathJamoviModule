@@ -1231,7 +1231,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Use HTML message in todo element instead of Notice object
                 self$results$todo$setContent(
                     paste0("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;'>",
-                          "<strong>Error:</strong> The counts variable '", counts, "' does not exist in the data. Please select a valid numeric variable for counts.",
+                          "<strong>Error:</strong> The counts variable '", htmltools::htmlEscape(counts), "' does not exist in the data. Please select a valid numeric variable for counts.",
                           "</div>"))
                 return(NULL)
             }
@@ -1259,9 +1259,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Ensure counts variable is numeric (jamovi may convert it to factor)
                     data[[counts]] <- as.numeric(as.character(data[[counts]]))
                     
-                    # Build formula with backticks to handle special variable names
-                    formula_str <- paste0("`", counts, "` ~ `", rows, "` + `", cols, "`")
-                    xtabs(as.formula(formula_str), data = data)
+                    # Build formula with composeTerm-escaped variable names
+                    formula_str <- jmvcore::constructFormula(counts, c(rows, cols))
+                    xtabs(jmvcore::asFormula(formula_str), data = data)
                 } else {
                     # Regular individual observation data
                     table(data[[rows]], data[[cols]], useNA = if(excl) "no" else "ifany")
@@ -2095,6 +2095,19 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(rows) || is.null(cols))
                 return('')
 
+            # TODO (correctness): asSource() emits broken R for column names
+            # with special characters. The hand-rolled escaping at lines ~2099
+            # and ~2106 wraps `name with spaces` in backticks, then ~2114-2115
+            # embeds the result inside DOUBLE QUOTES (e.g. `rows = "`name`"`),
+            # producing invalid R syntax (backticks have no meaning inside
+            # double-quoted strings). For string-arg contexts you don't need
+            # backticks at all — only proper string quoting. Replacement:
+            #   rows_arg <- jmvcore::format('rows = {}', rows, context = "R")
+            #   cols_arg <- jmvcore::format('cols = {}', cols, context = "R")
+            # That removes the manual escaping helpers and produces correctly
+            # quoted R for any name. NOT auto-applied because output for
+            # special-char names changes (broken→correct). Same pattern flagged
+            # at R/biomarkerresponse.b.R:1535.
             # Escape rows variable
             rows_escaped <- if (!is.null(rows) && !identical(make.names(rows), rows)) {
                 paste0('`', rows, '`')

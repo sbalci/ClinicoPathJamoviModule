@@ -1182,7 +1182,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'validationError',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent(paste("Data Validation Error:", paste(validation_results$error_messages, collapse = "; ")))
+                notice$setContent(paste("Data Validation Error:",
+                    htmltools::htmlEscape(paste(validation_results$error_messages, collapse = "; "))))
                 self$results$insert(999, notice)
                 return()
             }
