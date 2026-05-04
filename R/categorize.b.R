@@ -326,13 +326,20 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get data ----
             varname <- self$options$var
 
+            # TODO (forward-looking): the Notice + self$results$insert(999, notice)
+            # pattern used throughout this function (10 sites: ~330-680) is the
+            # documented serialization-error-prone pattern (see
+            # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md and the canonical fix in
+            # R/waterfall.b.R: replace dynamic Notice objects with a static Html
+            # output and a .addNotice() helper). Large refactor — out of
+            # jamovify scope.
             if (!(varname %in% names(self$data))) {
                 notice <- jmvcore::Notice$new(
                     options = self$options,
                     name = 'variableNotFound',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent(sprintf("Variable '%s' not found in dataset. Please select a valid variable from the data.", varname))
+                notice$setContent(jmvcore::format("Variable '{}' not found in dataset. Please select a valid variable from the data.", htmltools::htmlEscape(varname)))
                 self$results$insert(999, notice)
                 return()
             }
@@ -346,7 +353,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'nonNumericVariable',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent(sprintf("Variable '%s' is not numeric. Categorization requires a continuous numeric variable.", varname))
+                notice$setContent(jmvcore::format("Variable '{}' is not numeric. Categorization requires a continuous numeric variable.", htmltools::htmlEscape(varname)))
                 self$results$insert(999, notice)
                 return()
             }
@@ -365,7 +372,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'noVariability',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent(sprintf("Variable '%s' has zero variability (constant value). Cannot create categories from a constant variable.", varname))
+                notice$setContent(jmvcore::format("Variable '{}' has zero variability (constant value). Cannot create categories from a constant variable.", htmltools::htmlEscape(varname)))
                 self$results$insert(999, notice)
                 return()
             }
@@ -411,7 +418,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'breakValidationError',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent(sprintf("Break point validation failed: %s", validation$message))
+                notice$setContent(jmvcore::format("Break point validation failed: {}", htmltools::htmlEscape(validation$message)))
                 self$results$insert(999, notice)
                 return()
             }
@@ -457,7 +464,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = 'labelMismatch',
                         type = jmvcore::NoticeType$WARNING
                     )
-                    notice$setContent(sprintf("Custom labels mismatch: provided %d labels but have %d categories. Using numbered labels instead.", length(custom_labels), n_categories))
+                    notice$setContent(jmvcore::format("Custom labels mismatch: provided {} labels but have {} categories. Using numbered labels instead.", length(custom_labels), n_categories))
                     notices$labelMismatch <- notice
                 }
             }
@@ -469,7 +476,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     name = 'binCollapse',
                     type = jmvcore::NoticeType$WARNING
                 )
-                notice$setContent(sprintf("Bin collapse: requested %d categories but only %d distinct bins could be created due to tied values or limited range. Interpretations based on '%d-tiles' (e.g., quartiles, tertiles) may be misleading; verify bin boundaries before use.", nbins, n_categories, nbins))
+                notice$setContent(jmvcore::format("Bin collapse: requested {} categories but only {} distinct bins could be created due to tied values or limited range. Interpretations based on '{}-tiles' (e.g., quartiles, tertiles) may be misleading; verify bin boundaries before use.", nbins, n_categories, nbins))
                 notices$binCollapse <- notice
             }
 
@@ -507,7 +514,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = 'smallBins',
                         type = jmvcore::NoticeType$STRONG_WARNING
                     )
-                    notice$setContent(sprintf("Small bins detected: %d bin(s) have fewer than 5 observations. Statistical analyses may be unreliable with such small group sizes; consider reducing the number of categories or using a different binning method.", small_bins))
+                    notice$setContent(jmvcore::format("Small bins detected: {} bin(s) have fewer than 5 observations. Statistical analyses may be unreliable with such small group sizes; consider reducing the number of categories or using a different binning method.", small_bins))
                     notices$smallBins <- notice
                 }
 
@@ -519,6 +526,12 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = 'binImbalance',
                         type = jmvcore::NoticeType$STRONG_WARNING
                     )
+                    # TODO (forward-looking): only remaining sprintf with a
+                    # precision spec (%.1f%%). Migration to jmvcore::format
+                    # would need formatC(max_prop * 100, digits = 1, format = "f")
+                    # to preserve the trailing-zero behavior (sprintf("%.1f", 50)
+                    # gives "50.0", round(50, 1) gives "50"). Address in the
+                    # /prepare-translation pass for this function.
                     notice$setContent(sprintf("Severe bin imbalance: one bin contains %.1f%% of observations. This may reduce statistical power and affect clinical interpretations; consider using quantile-based binning for balanced groups.", max_prop * 100))
                     notices$binImbalance <- notice
                 }
@@ -539,7 +552,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = 'outlierSensitivity',
                         type = jmvcore::NoticeType$WARNING
                     )
-                    notice$setContent(sprintf("Outlier sensitivity: detected %d extreme outlier(s). Mean±SD binning is sensitive to outliers, which can create poorly distributed categories. Consider using quantile or natural breaks methods.", outliers))
+                    notice$setContent(jmvcore::format("Outlier sensitivity: detected {} extreme outlier(s). Mean±SD binning is sensitive to outliers, which can create poorly distributed categories. Consider using quantile or natural breaks methods.", outliers))
                     notices$outlierSensitivity <- notice
                 }
             }
@@ -663,7 +676,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 name = 'analysisComplete',
                 type = jmvcore::NoticeType$INFO
             )
-            notice_info$setContent(sprintf("Categorization completed: %d valid observations divided into %d groups using %s method. Note: Categorization reduces statistical power and may obscure dose-response relationships (Altman & Royston, BMJ 2006;332:1080). Continuous analyses are generally preferred unless there is strong clinical justification.", n_valid, n_categories, self$options$method))
+            notice_info$setContent(jmvcore::format("Categorization completed: {} valid observations divided into {} groups using {} method. Note: Categorization reduces statistical power and may obscure dose-response relationships (Altman & Royston, BMJ 2006;332:1080). Continuous analyses are generally preferred unless there is strong clinical justification.", n_valid, n_categories, self$options$method))
             notices$analysisComplete <- notice_info
 
             # Insert notices in priority order: STRONG_WARNING → WARNING → INFO

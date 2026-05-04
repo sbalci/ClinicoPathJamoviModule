@@ -119,7 +119,8 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }
 
             }, error = function(e) {
-                error_msg <- paste0("<h3>Mediation Analysis Error</h3><p>", e$message, "</p>")
+                error_msg <- paste0("<h3>Mediation Analysis Error</h3><p>",
+                                    htmltools::htmlEscape(conditionMessage(e)), "</p>")
                 self$results$modelInfo$setContent(error_msg)
             })
         },
@@ -187,11 +188,15 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # Build formulas
             if (!is.null(covariates) && length(covariates) > 0) {
-                mediator_formula <- reformulate(c(treatment_var, covariates), response = mediator_var)
-                outcome_formula <- reformulate(c(treatment_var, mediator_var, covariates), response = outcome_var)
+                mediator_formula <- jmvcore::asFormula(
+                    jmvcore::constructFormula(mediator_var, c(treatment_var, covariates)))
+                outcome_formula <- jmvcore::asFormula(
+                    jmvcore::constructFormula(outcome_var, c(treatment_var, mediator_var, covariates)))
             } else {
-                mediator_formula <- reformulate(treatment_var, response = mediator_var)
-                outcome_formula <- reformulate(c(treatment_var, mediator_var), response = outcome_var)
+                mediator_formula <- jmvcore::asFormula(
+                    jmvcore::constructFormula(mediator_var, treatment_var))
+                outcome_formula <- jmvcore::asFormula(
+                    jmvcore::constructFormula(outcome_var, c(treatment_var, mediator_var)))
             }
 
             # Fit mediator model
@@ -211,7 +216,7 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             } else if (outcome_model_type == "glm_logit") {
                 model_y <- glm(outcome_formula, data = data, family = binomial(link = "logit"))
             } else if (outcome_model_type == "survival") {
-                stop("Survival models not yet implemented for mediation")
+                jmvcore::reject("Survival models not yet implemented for mediation")
             }
 
             # Perform mediation analysis
@@ -323,9 +328,17 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         #---------------------------------------------
         .runHDMediation = function() {
 
+            # TODO (forward-looking): hdmax2 is an optional dependency for the
+            # high-dimensional tier. Standard jamovi-module convention is to
+            # declare it in DESCRIPTION under `Suggests:` so jamovi's package
+            # manager pulls it in at module install time. Same pattern would
+            # apply to mediation, MASS, etc. that this analysis depends on.
+            # The current "Install using: install.packages('hdmax2')" message
+            # is OK as a runtime fallback, but module-level declaration is the
+            # right place. Same convention noted for biomarkerdiscovery.
             # Check for hdmax2 package
             if (!requireNamespace('hdmax2', quietly = TRUE)) {
-                stop("hdmax2 package is required. Install using: install.packages('hdmax2')")
+                jmvcore::reject("hdmax2 package is required. Install using: install.packages('hdmax2')")
             }
 
             # Get variables
@@ -335,7 +348,7 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             covariates <- self$options$covariates
 
             if (is.null(mediators) || length(mediators) == 0) {
-                stop("Please select Multiple Mediators for high-dimensional analysis")
+                jmvcore::reject("Please select Multiple Mediators for high-dimensional analysis")
             }
 
             # Get data
@@ -382,7 +395,10 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 private$.formatHDMediationResults(hd_result, mediators)
 
             }, error = function(e) {
-                error_msg <- e$message
+                # Escape at source so all downstream HTML interpolations are safe.
+                # grepl on the escaped string still matches plain-text keywords
+                # ("not installed", "namespace", "dimension", "matrix").
+                error_msg <- htmltools::htmlEscape(conditionMessage(e))
 
                 if (grepl("not installed|namespace", error_msg, ignore.case = TRUE)) {
                     detailed_msg <- paste(

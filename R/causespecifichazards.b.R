@@ -188,13 +188,14 @@ causespecifichazardsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 
                 # Build formula
                 if (!is.null(self$options$covariates) && length(self$options$covariates) > 0) {
-                    cov_formula <- paste(self$options$covariates, collapse = " + ")
+                    cov_formula <- paste(sapply(self$options$covariates, jmvcore::composeTerm),
+                                         collapse = " + ")
                     formula_str <- paste("surv ~", cov_formula)
                 } else {
                     formula_str <- "surv ~ 1"
                 }
-                
-                formula_obj <- as.formula(formula_str)
+
+                formula_obj <- jmvcore::asFormula(formula_str)
                 
                 # Fit model based on type
                 model <- private$.fitSingleCauseModel(formula_obj, cause_data, self$options$model_type)

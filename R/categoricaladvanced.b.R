@@ -128,13 +128,21 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             
             # Create analysis dataset
             analysisData <- data[, vars_to_check, drop = FALSE]
-            analysisData <- na.omit(analysisData)
+            analysisData <- jmvcore::naOmit(analysisData)
             
             if (nrow(analysisData) < 5) {
                 self$results$instructions$setContent("Insufficient data for categorical analysis. Need at least 5 complete observations.")
                 return(NULL)
             }
             
+            # TODO (forward-looking): as.factor() at lines below (and ~143 for
+            # strata_var) drops jamovi column attributes (measureType, values,
+            # labels) that the prior jmvcore::naOmit() preserved. xtabs only
+            # needs factor levels so this is fine today, but if this analysis is
+            # later extended to display labelled levels (e.g., showing "Stage I"
+            # instead of "1" in tables/plots), use jmvcore::toNumeric semantics
+            # via jmvcore::naOmit + factor() with explicit levels= to retain
+            # labels. Not a current bug.
             # Ensure variables are factors
             analysisData[[row_var]] <- as.factor(analysisData[[row_var]])
             analysisData[[col_var]] <- as.factor(analysisData[[col_var]])
@@ -156,18 +164,25 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 
                 if (!is.null(strata_var) && length(strata_var) > 0) {
                     # Create stratified table
-                    cont_table <- xtabs(as.formula(paste("~", row_var, "+", col_var, "+", strata_var)), 
-                                       data = data)
+                    formula_str <- paste("~",
+                                         paste(jmvcore::composeTerm(row_var),
+                                               jmvcore::composeTerm(col_var),
+                                               jmvcore::composeTerm(strata_var),
+                                               sep = " + "))
+                    cont_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
                 } else {
                     # Create simple contingency table
-                    cont_table <- xtabs(as.formula(paste("~", row_var, "+", col_var)), 
-                                       data = data)
+                    formula_str <- paste("~",
+                                         paste(jmvcore::composeTerm(row_var),
+                                               jmvcore::composeTerm(col_var),
+                                               sep = " + "))
+                    cont_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
                 }
                 
                 return(cont_table)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Failed to create contingency table:", e$message))
+                self$results$instructions$setContent(paste("Failed to create contingency table:", htmltools::htmlEscape(conditionMessage(e))))
                 return(NULL)
             })
         },
@@ -288,7 +303,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 private$.chi_result <- chi_result
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Chi-square test failed:", e$message))
+                self$results$instructions$setContent(paste("Chi-square test failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
         
@@ -340,7 +355,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 }
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Fisher's exact test failed:", e$message))
+                self$results$instructions$setContent(paste("Fisher's exact test failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
         
@@ -423,7 +438,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 table$addRow(rowKey = "cont_coef", values = row)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Effect size calculation failed:", e$message))
+                self$results$instructions$setContent(paste("Effect size calculation failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
         
@@ -479,7 +494,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 }
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Residual calculation failed:", e$message))
+                self$results$instructions$setContent(paste("Residual calculation failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
         
@@ -544,7 +559,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 }
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Post hoc tests failed:", e$message))
+                self$results$instructions$setContent(paste("Post hoc tests failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
         
@@ -625,7 +640,7 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 table$addRow(rowKey = "uc", values = row)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Association measure calculation failed:", e$message))
+                self$results$instructions$setContent(paste("Association measure calculation failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
         
@@ -725,8 +740,10 @@ categoricaladvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             html <- paste0(html, "<h3>Categorical Analysis Interpretation</h3>")
             
             html <- paste0(html, "<h4>Analysis Overview</h4>")
-            html <- paste0(html, "<p>This analysis examines the association between <strong>", row_var, 
-                          "</strong> and <strong>", col_var, "</strong>.</p>")
+            html <- paste0(html, "<p>This analysis examines the association between <strong>",
+                          htmltools::htmlEscape(row_var),
+                          "</strong> and <strong>",
+                          htmltools::htmlEscape(col_var), "</strong>.</p>")
             
             html <- paste0(html, "<h4>Test Selection Guide</h4>")
             html <- paste0(html, "<ul>")
