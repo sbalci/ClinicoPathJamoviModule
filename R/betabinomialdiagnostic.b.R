@@ -151,11 +151,8 @@ betabinomialdiagnosticClass <- R6::R6Class(
             }
             
             # Run analysis based on overdispersion model
-            print(paste("Running overdispersion model:", overdispersion_model))
             study_data <- as.data.frame(study_data)
-            print(paste("Study data dims:", paste(dim(study_data), collapse="x")))
-            print(head(study_data))
-            
+
             if (overdispersion_model == "beta_binomial") {
                 private$.runBetaBinomialModel(study_data)
             } else if (overdispersion_model == "logit_normal") {
@@ -170,7 +167,16 @@ betabinomialdiagnosticClass <- R6::R6Class(
             
             # Populate study-level results table
             private$.populateStudyLevelResults(study_data)
-            
+
+            # TODO (forward-looking): no private$.checkpoint() calls anywhere in
+            # this file. The optional analyses below — heterogeneity tests
+            # (line ~175), subgroup analysis (line ~180), influence diagnostics
+            # (line ~184), publication bias (line ~188) — and the upstream
+            # beta-binomial fitting can be slow on large meta-analysis datasets.
+            # Add private$.checkpoint() before each optional branch (and inside
+            # any per-study loops) so jamovi can interrupt long-running runs and
+            # the UI stays responsive.
+
             # Heterogeneity tests
             if (self$options$heterogeneity_test) {
                 private$.performHeterogeneityTests(study_data)
@@ -197,6 +203,18 @@ betabinomialdiagnosticClass <- R6::R6Class(
                     # Take the last level as "positive"
                     return(as.numeric(variable == levels_var[length(levels_var)]))
                 } else {
+                    # TODO (correctness): `as.numeric(variable) - 1` assumes the
+                    # factor's internal codes are 1,2 (level indices) and shifts
+                    # to 0,1. This breaks for jamovi-labelled factors that carry
+                    # a `values=c(0,1)` attribute — those return 0,1 from level
+                    # coercion via jmvcore::toNumeric, and `- 1` would yield
+                    # -1,0. Decide intended semantics: if the goal is "positive
+                    # class = second level", use `as.numeric(variable ==
+                    # levels_var[2])` (matches the >2-level branch above and is
+                    # robust to label coding). If the goal is "honor the data's
+                    # 0/1 coding", use `jmvcore::toNumeric(variable)` without
+                    # `- 1`. Current code is correct only by accident on
+                    # unlabelled factors.
                     return(as.numeric(variable) - 1)
                 }
             } else if (is.numeric(variable)) {
@@ -285,8 +303,6 @@ betabinomialdiagnosticClass <- R6::R6Class(
         },
         
         .runBetaBinomialModel = function(study_data) {
-            print(paste("Class of study_data:", class(study_data)))
-            print(str(study_data))
             # Simplified beta-binomial model implementation
             # In practice, would use specialized packages like metafor, meta, or mada
             

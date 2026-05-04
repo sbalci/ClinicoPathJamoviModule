@@ -92,7 +92,10 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             # Comprehensive validation
             validation_result <- private$.validate_inputs()
             if (!validation_result$valid) {
-                private$.show_error_message(validation_result$message)
+                private$.show_error_message(
+                    validation_result$message$title,
+                    validation_result$message$details
+                )
                 return()
             }
             
@@ -121,8 +124,8 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 private$.show_error_message(
                     "Data processing error",
-                    paste("Error details:", e$message, "<br/><br/>",
-                          "Please check your data format and variable selections.")
+                    paste0("Error details: ", htmltools::htmlEscape(conditionMessage(e)), "<br/><br/>",
+                           "Please check your data format and variable selections.")
                 )
                 return()
             })
@@ -182,16 +185,20 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             if (!self$options$y_var %in% all_vars) {
                 return(list(valid = FALSE, message = list(
                     title = "Y-variable not found",
-                    details = paste("Variable '", self$options$y_var, "' not found in dataset.", 
-                                   "Available variables:", paste(all_vars, collapse = ", "))
+                    details = paste0("Variable '", htmltools::htmlEscape(self$options$y_var),
+                                     "' not found in dataset. ",
+                                     "Available variables: ",
+                                     paste(htmltools::htmlEscape(all_vars), collapse = ", "))
                 )))
             }
-            
+
             if (!self$options$x_var %in% all_vars) {
                 return(list(valid = FALSE, message = list(
-                    title = "X-variable not found", 
-                    details = paste("Variable '", self$options$x_var, "' not found in dataset.",
-                                   "Available variables:", paste(all_vars, collapse = ", "))
+                    title = "X-variable not found",
+                    details = paste0("Variable '", htmltools::htmlEscape(self$options$x_var),
+                                     "' not found in dataset. ",
+                                     "Available variables: ",
+                                     paste(htmltools::htmlEscape(all_vars), collapse = ", "))
                 )))
             }
             
@@ -199,14 +206,16 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             if (!is.null(self$options$group_var) && !self$options$group_var %in% all_vars) {
                 return(list(valid = FALSE, message = list(
                     title = "Grouping variable not found",
-                    details = paste("Variable '", self$options$group_var, "' not found in dataset.")
+                    details = paste0("Variable '", htmltools::htmlEscape(self$options$group_var),
+                                     "' not found in dataset.")
                 )))
             }
-            
+
             if (!is.null(self$options$facet_var) && !self$options$facet_var %in% all_vars) {
                 return(list(valid = FALSE, message = list(
                     title = "Faceting variable not found",
-                    details = paste("Variable '", self$options$facet_var, "' not found in dataset.")
+                    details = paste0("Variable '", htmltools::htmlEscape(self$options$facet_var),
+                                     "' not found in dataset.")
                 )))
             }
             
@@ -267,7 +276,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 10px 0;'>",
                 "<div style='display: flex; align-items: center; margin-bottom: 10px;'>",
                 "<span style='font-size: 24px; margin-right: 10px;'></span>",
-                "<h4 style='color: #856404; margin: 0;'>", title, "</h4>",
+                "<h4 style='color: #856404; margin: 0;'>", htmltools::htmlEscape(as.character(title)), "</h4>",
                 "</div>"
             )
             
@@ -699,14 +708,14 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 error_html <- paste0(
                     "<div style='color: orange; padding: 10px;'>",
-                    "Statistical analysis could not be completed: ", e$message,
-                    "<br/><strong>Technical details:</strong> ", class(e)[1],
+                    "Statistical analysis could not be completed: ", htmltools::htmlEscape(conditionMessage(e)),
+                    "<br/><strong>Technical details:</strong> ", htmltools::htmlEscape(class(e)[1]),
                     "</div>"
                 )
                 self$results$statistical_results$setContent(error_html)
             })
         },
-        
+
         .auto_select_statistical_test = function(data, y_var, x_var, group_var) {
             # Enhanced automatic test selection logic
             x_is_factor <- is.factor(data[[x_var]]) || is.character(data[[x_var]])
@@ -750,8 +759,8 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         },
         
         .perform_anova_analysis = function(data, y_var, x_var) {
-            formula_str <- paste(y_var, "~", x_var)
-            aov_result <- aov(as.formula(formula_str), data = data)
+            formula_str <- jmvcore::constructFormula(y_var, x_var)
+            aov_result <- aov(jmvcore::asFormula(formula_str), data = data)
             aov_summary <- summary(aov_result)
             
             f_stat <- round(aov_summary[[1]]$`F value`[1], 3)
@@ -968,8 +977,8 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 return("<p style='color: orange;'>Kruskal-Wallis test requires numeric dependent variable</p>")
             }
             
-            formula_str <- paste(y_var, "~", x_var)
-            kruskal_result <- kruskal.test(as.formula(formula_str), data = data)
+            formula_str <- jmvcore::constructFormula(y_var, x_var)
+            kruskal_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
             
             # Calculate effect size (eta-squared equivalent for Kruskal-Wallis)
             # Using the formula: eta² = (H - k + 1) / (n - k)
@@ -1003,8 +1012,8 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             # Determine regression type based on x_var
             if (is.numeric(data[[x_var]])) {
                 # Simple linear regression
-                formula_str <- paste(y_var, "~", x_var)
-                lm_result <- lm(as.formula(formula_str), data = data)
+                formula_str <- jmvcore::constructFormula(y_var, x_var)
+                lm_result <- lm(jmvcore::asFormula(formula_str), data = data)
                 lm_summary <- summary(lm_result)
                 
                 # Extract key statistics
@@ -1043,8 +1052,8 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 
             } else {
                 # Categorical predictor - treat as ANOVA with regression output
-                formula_str <- paste(y_var, "~", x_var)
-                lm_result <- lm(as.formula(formula_str), data = data)
+                formula_str <- jmvcore::constructFormula(y_var, x_var)
+                lm_result <- lm(jmvcore::asFormula(formula_str), data = data)
                 lm_summary <- summary(lm_result)
                 
                 result_html <- paste0(
@@ -1066,7 +1075,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             y_var <- self$options$y_var
             x_var <- self$options$x_var
             group_var <- self$options$group_var
-            
+
             summary_html <- "<h4 style='color: #1380A1;'> Chart Summary Statistics</h4>"
             summary_html <- paste0(summary_html, "<div style='background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
             
@@ -1079,7 +1088,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 median_val <- round(median(data[[y_var]], na.rm = TRUE), 2)
                 sd_val <- round(sd(data[[y_var]], na.rm = TRUE), 2)
                 
-                summary_html <- paste0(summary_html, "<p><strong>", y_var, " Statistics:</strong></p>")
+                summary_html <- paste0(summary_html, "<p><strong>", htmltools::htmlEscape(y_var), " Statistics:</strong></p>")
                 summary_html <- paste0(summary_html, "<ul>")
                 summary_html <- paste0(summary_html, "<li>Mean: ", mean_val, "</li>")
                 summary_html <- paste0(summary_html, "<li>Median: ", median_val, "</li>")
@@ -1096,10 +1105,10 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         .groups = 'drop'
                     )
                 
-                summary_html <- paste0(summary_html, "<p><strong>Sample Sizes by ", x_var, ":</strong></p>")
+                summary_html <- paste0(summary_html, "<p><strong>Sample Sizes by ", htmltools::htmlEscape(x_var), ":</strong></p>")
                 summary_html <- paste0(summary_html, "<ul>")
                 for (i in 1:nrow(group_summary)) {
-                    summary_html <- paste0(summary_html, "<li>", group_summary[[x_var]][i], ": n = ", group_summary$n[i], "</li>")
+                    summary_html <- paste0(summary_html, "<li>", htmltools::htmlEscape(as.character(group_summary[[x_var]][i])), ": n = ", group_summary$n[i], "</li>")
                 }
                 summary_html <- paste0(summary_html, "</ul>")
             }
@@ -1193,20 +1202,20 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 lollipop = "point"
             )
             
-            actual_code <- gsub("\\{x_var\\}", x_var, code_template)
-            actual_code <- gsub("\\{y_var\\}", y_var, actual_code)
-            actual_code <- gsub("\\{geom_type\\}", geom_mapping[[chart_type]], actual_code)
-            actual_code <- gsub("\\{color_code\\}", color_code, actual_code)
-            actual_code <- gsub("\\{title\\}", self$options$title_text, actual_code)
-            actual_code <- gsub("\\{subtitle\\}", self$options$subtitle_text, actual_code)
-            actual_code <- gsub("\\{source\\}", self$options$source_text, actual_code)
+            actual_code <- gsub("{x_var}",     x_var,                       code_template, fixed = TRUE)
+            actual_code <- gsub("{y_var}",     y_var,                       actual_code,   fixed = TRUE)
+            actual_code <- gsub("{geom_type}", geom_mapping[[chart_type]],  actual_code,   fixed = TRUE)
+            actual_code <- gsub("{color_code}", color_code,                 actual_code,   fixed = TRUE)
+            actual_code <- gsub("{title}",     self$options$title_text,     actual_code,   fixed = TRUE)
+            actual_code <- gsub("{subtitle}",  self$options$subtitle_text,  actual_code,   fixed = TRUE)
+            actual_code <- gsub("{source}",    self$options$source_text,    actual_code,   fixed = TRUE)
             
             code_html <- paste(
                 "<h4 style='color: #1380A1;'> Reproducible R Code</h4>",
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                 "<p><strong>Complete R code for BBC-style visualization:</strong></p>",
                 "<pre style='background-color: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px;'>",
-                "<code>", actual_code, "</code>",
+                "<code>", htmltools::htmlEscape(actual_code), "</code>",
                 "</pre>",
                 "<p style='color: #666; font-size: 0.9em; margin-top: 10px;'>",
                 "Copy this code to reproduce the BBC-style visualization in your R environment.",
@@ -1835,7 +1844,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 
                 # Add faceting if specified
                 if (!is.null(facet_var)) {
-                    plot <- plot + ggplot2::facet_wrap(as.formula(paste("~", facet_var)))
+                    plot <- plot + ggplot2::facet_wrap(jmvcore::asFormula(paste("~", jmvcore::composeTerm(facet_var))))
                 }
                 
                 print(plot)

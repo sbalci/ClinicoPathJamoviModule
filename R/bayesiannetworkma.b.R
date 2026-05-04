@@ -6,6 +6,19 @@ bayesiannetworkmaClass <- R6::R6Class(
     inherit = bayesiannetworkmaBase,
     private = list(
         .init = function() {
+              # TODO (security): when any Html sink in this analysis is populated
+              # with interpolated user data (variable names, factor labels, treatment
+              # IDs from the dataset), wrap each interpolated value in
+              # htmltools::htmlEscape() before paste0/sprintf. Sinks to watch:
+              #   - methodsExplanation$setContent (lines ~14 and ~25 below) if it
+              #     ever stops being a hardcoded literal
+              #   - clinicalInterpretation (declared `type: Html` in
+              #     jamovi/bayesiannetworkma.r.yaml, not yet populated)
+              #   - render methods once implemented (cross-ref the stub TODO near
+              #     the end of this private list re: .plotNetwork etc. — plot text
+              #     labels built from user labels need composeTerm/escape)
+              # Reference safe pattern: R/tableone.b.R:235, R/reportcat.b.R:278,
+              # R/alluvial.b.R:214.
               if (is.null(self$data) || is.null(self$options$treatment) || is.null(self$options$outcome)) {
                 self$results$methodsExplanation$setContent(
                     "<html><body>
@@ -39,15 +52,26 @@ bayesiannetworkmaClass <- R6::R6Class(
         },
         
         .run = function() {
+            # TODO (jamovify): ~40 options declared in jamovi/bayesiannetworkma.a.yaml are
+            # not consumed here (priors, MCMC, coherence_method, ranking_measure,
+            # model_selection, sensitivity, meta_regression_covariates, treatment_classes,
+            # confidence_level, set_seed/seed_value, parallel_processing/n_cores, etc.).
+            # Either wire them into the real implementation or trim the .a.yaml.
             # Get options
             treat_var <- self$options$treatment
             outcome_var <- self$options$outcome
             study_var <- self$options$study_id
-            
+
             if (is.null(treat_var) || is.null(outcome_var) || is.null(study_var)) return()
-            
+
+            # TODO (correctness): outcome_var is read but never used. sample_size is
+            # accessed unconditionally below at `data[[self$options$sample_size]]`
+            # (line ~65) and will throw if the user hasn't selected one. Add an
+            # is.null(self$options$sample_size) guard or use jmvcore::reject() with
+            # a clear message before the loop.
+
             data <- self$data
-            
+
             if (nrow(data) == 0) return()
             
             # Basic data summary for demonstration
@@ -86,6 +110,20 @@ bayesiannetworkmaClass <- R6::R6Class(
                 description = "Total interventions compared"
             ))
             
+            # TODO (stub): hardcoded dummy values throughout this .run() — there is no
+            # real Bayesian network meta-analysis here. Sites:
+            #   - treatmentEffects loop below (posterior_mean=0.5, sd=0.1,
+            #     CrI=0.3-0.7, prob_superiority=0.8, evidence_type="Mixed")
+            #   - networkCharacteristics: direct_comparisons=max(1, n_s-1),
+            #     indirect_evidence="Yes" (line ~73)
+            #   - treatmentRankings: mean_rank=i, sucra=1-(i-1)/n_treat,
+            #     prob_best/prob_worst hardcoded (lines ~110-117)
+            # Tables declared in .r.yaml but never populated:
+            #   heterogeneityAnalysis, coherenceAssessment, pairwiseComparisons,
+            #   leagueTable, modelComparison, convergenceDiagnostics,
+            #   metaRegressionResults, sensitivityAnalysis, clinicalInterpretation
+            # When wiring real MCMC (rjags/multinma/gemtc/BUGSnet), call
+            # private$.checkpoint() inside chain loops to keep jamovi responsive.
             # Dummy Treatment Effects (Calculated pairwise roughly)
             eff_table <- self$results$treatmentEffects
             if (n_treat >= 2) {
@@ -119,5 +157,14 @@ bayesiannetworkmaClass <- R6::R6Class(
             }
 
         }
+
+        # TODO (stub): jamovi/bayesiannetworkma.r.yaml declares 8 image outputs with
+        # renderFun: but none are implemented in this class:
+        #   .plotNetwork, .plotForestPlots, .plotRankings, .plotHeterogeneity,
+        #   .plotCoherence, .plotPosteriorDistributions, .plotConvergence,
+        #   .plotComparisonMatrix
+        # These will fail at render time once the user toggles plots on. Either
+        # implement them as private methods (each takes (image, ggtheme, theme, ...)
+        # and returns TRUE/FALSE) or remove the image entries from .r.yaml.
     )
 )

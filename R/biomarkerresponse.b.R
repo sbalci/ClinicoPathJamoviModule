@@ -30,7 +30,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
                     "<h4 style='margin-top: 0; color: #856404;'> Non-Binary Response Data</h4>",
                     "<p style='color: #856404;'>Binary response type selected but found ", length(current_levels), " levels.</p>",
-                    "<p><strong>Current levels:</strong> ", paste(current_levels, collapse = ", "), "</p>",
+                    "<p><strong>Current levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
                     "<p><strong>Solutions:</strong></p>",
                     "<ol style='margin-left: 20px;'>",
                     "<li>Select 'Categorical' response type instead</li>",
@@ -50,8 +50,8 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     html <- paste0(
                         "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
                         "<h4 style='margin-top: 0; color: #856404;'> Specified Positive Level Not Found</h4>",
-                        "<p style='color: #856404;'>Positive level '<strong>", positive_level, "</strong>' not found in response data.</p>",
-                        "<p><strong>Available levels:</strong> ", paste(current_levels, collapse = ", "), "</p>",
+                        "<p style='color: #856404;'>Positive level '<strong>", htmltools::htmlEscape(positive_level), "</strong>' not found in response data.</p>",
+                        "<p><strong>Available levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
                         "<p><strong>Solutions:</strong></p>",
                         "<ol style='margin-left: 20px;'>",
                         "<li>Correct the spelling of the positive level</li>",
@@ -78,10 +78,10 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 error_notice$setContent(paste0(
                     " <b>Positive Level Required:</b> For binary response analysis, you must specify ",
                     "which level represents positive response (e.g., 'Responder', 'Yes', '1').<br/><br/>",
-                    "<b>Available levels:</b> ", paste(current_levels, collapse = ", "), "<br/><br/>",
+                    "<b>Available levels:</b> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "<br/><br/>",
                     "<b>Current alphabetical ordering:</b><br/>",
-                    "• Negative class (0): ", current_levels[1], "<br/>",
-                    "• Positive class (1): ", current_levels[2], "<br/><br/>",
+                    "• Negative class (0): ", htmltools::htmlEscape(current_levels[1]), "<br/>",
+                    "• Positive class (1): ", htmltools::htmlEscape(current_levels[2]), "<br/><br/>",
                     "<b>Why required?</b> Alphabetical ordering can invert sensitivity/specificity if, for example, ",
                     "'Non-responder' comes before 'Responder'. This leads to incorrect clinical interpretation.<br/><br/>",
                     "<b>Required Action:</b> Enter the positive response level (exactly as it appears above) ",
@@ -452,6 +452,11 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             response_type <- self$options$responseType
             
             # Robust confidence level handling
+            # TODO (cleanup): self$options$confidenceLevel is OptionNumber
+            # (already numeric); the as.numeric() coerce here and the parallel
+            # one at line ~1265 are no-ops. Drop both for clarity. The
+            # length-0/NA guard below remains useful only if the option ever
+            # changes type — currently dead code.
             conf_level <- as.numeric(self$options$confidenceLevel)
             if (length(conf_level) == 0 || is.na(conf_level)) conf_level <- 0.95
             
@@ -466,7 +471,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
-                    "<p style='color: #721c24;'>Biomarker variable '<strong>", biomarker_var, "</strong>' could not be found in the dataset.</p>",
+                    "<p style='color: #721c24;'>Biomarker variable '<strong>", htmltools::htmlEscape(biomarker_var), "</strong>' could not be found in the dataset.</p>",
                     "<p>Please check that the variable name is correct and exists in your data.</p>",
                     "</div>"
                 )
@@ -478,7 +483,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 html <- paste0(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
-                    "<p style='color: #721c24;'>Response variable '<strong>", response_var, "</strong>' could not be found in the dataset.</p>",
+                    "<p style='color: #721c24;'>Response variable '<strong>", htmltools::htmlEscape(response_var), "</strong>' could not be found in the dataset.</p>",
                     "<p>Please check that the variable name is correct and exists in your data.</p>",
                     "</div>"
                 )
@@ -529,7 +534,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> Invalid Biomarker Data Type</h4>",
                         "<p style='color: #721c24;'>Biomarker variable must be numeric or convertible to numeric.</p>",
-                        "<p><strong>Current variable type:</strong> ", class(raw_biomarker_values)[1], "</p>",
+                        "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_biomarker_values)[1]), "</p>",
                         "<p><strong>Solutions:</strong></p>",
                         "<ol style='margin-left: 20px;'>",
                         "<li>Select a different variable with numeric values</li>",
@@ -566,7 +571,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                             "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
                             "<h4 style='margin-top: 0; color: #721c24;'> Invalid Response Data Type</h4>",
                             "<p style='color: #721c24;'>Continuous response variable must be numeric or convertible to numeric.</p>",
-                            "<p><strong>Current variable type:</strong> ", class(raw_response_values)[1], "</p>",
+                            "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_response_values)[1]), "</p>",
                             "<p><strong>Solutions:</strong></p>",
                             "<ol style='margin-left: 20px;'>",
                             "<li>Change Response Type to 'Binary' or 'Categorical' for non-numeric responses</li>",
@@ -611,6 +616,19 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             # Notice 2: Low Event Count Validation (Binary Response Only)
             if (response_type == "binary") {
                 # Count events per group
+                # TODO (correctness): four sites in this file convert a binary
+                # factor to 0/1 via `as.numeric(response_values) - 1`:
+                #   - line ~614 (this site, event count notice)
+                #   - line ~800 (binary threshold analysis)
+                #   - line ~808 (alternate threshold path)
+                #   - line ~960 (subgroup binary coding)
+                # All assume the factor's internal codes are 1,2 (level indices).
+                # For jamovi-labelled factors carrying values=c(0,1),
+                # jmvcore::toNumeric returns 0,1 directly and `- 1` yields -1,0.
+                # Decide intended semantics before migrating to toNumeric.
+                # Same pattern already flagged at:
+                #   R/betabinomialdiagnostic.b.R:200
+                #   R/biomarkerdiscovery.b.R:391
                 response_numeric <- as.numeric(response_values) - 1  # Convert to 0/1
                 n_events <- sum(response_numeric == 1, na.rm = TRUE)
                 n_non_events <- sum(response_numeric == 0, na.rm = TRUE)
@@ -764,7 +782,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
                     "<h4 style='margin-top: 0; color: #721c24;'> Constant Biomarker Values</h4>",
                     "<p style='color: #721c24;'>All biomarker values are identical. Cannot perform analysis.</p>",
-                    "<p><strong>Current value:</strong> ", unique(biomarker_values)[1], "</p>",
+                    "<p><strong>Current value:</strong> ", htmltools::htmlEscape(as.character(unique(biomarker_values)[1])), "</p>",
                     "<p><strong>Solutions:</strong></p>",
                     "<ol style='margin-left: 20px;'>",
                     "<li>Select a biomarker variable with varying values</li>",
@@ -1532,6 +1550,21 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             if (is.null(biomarker) || is.null(response))
                 return('')
 
+            # TODO (correctness): asSource() emits broken R for column names
+            # with special characters. The hand-rolled escaping below wraps
+            # `name with spaces` in backticks, then line ~1551 embeds the
+            # result inside DOUBLE QUOTES (e.g. `biomarker = "`gene 1`"`),
+            # producing invalid R syntax (backticks have no meaning inside
+            # double-quoted strings). For string-arg contexts you don't need
+            # backticks at all — only proper string quoting. Replacement:
+            #   biomarker_arg <- jmvcore::format('biomarker = {}', biomarker, context = "R")
+            #   response_arg  <- jmvcore::format('response = {}',  response,  context = "R")
+            #   groupVariable_arg <- jmvcore::format(',\n    groupVariable = {}',
+            #                                       groupVariable, context = "R")
+            # That removes the manual escaping helpers (lines ~1535-1547,
+            # ~1555-1561) and produces correctly quoted R for any name. NOT
+            # auto-applied because output for special-char names changes
+            # (broken→correct). See jamovify report for full diff.
             # Escape biomarker variable
             biomarker_escaped <- if (!is.null(biomarker) && !identical(make.names(biomarker), biomarker)) {
                 paste0('`', biomarker, '`')

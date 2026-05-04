@@ -105,21 +105,23 @@ biomarkerdiscoveryClass <- R6::R6Class(
                 required_packages <- c(required_packages, "clusterProfiler", "org.Hs.eg.db")
             }
             
-            for (pkg in required_packages) {
-                if (!requireNamespace(pkg, quietly = TRUE)) {
-                    tryCatch({
-                        if (pkg %in% c("clusterProfiler", "org.Hs.eg.db")) {
-                            if (!requireNamespace("BiocManager", quietly = TRUE)) {
-                                install.packages("BiocManager", repos = "https://cran.rstudio.com/")
-                            }
-                            BiocManager::install(pkg)
-                        } else {
-                            install.packages(pkg, repos = "https://cran.rstudio.com/")
-                        }
-                    }, error = function(e) {
-                        self$results$discovery_overview$setNote("error", paste("Failed to install package:", pkg))
-                    })
-                }
+            missing <- required_packages[!vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)]
+            if (length(missing) > 0) {
+                bioc_pkgs <- intersect(missing, c("clusterProfiler", "org.Hs.eg.db"))
+                cran_pkgs <- setdiff(missing, bioc_pkgs)
+                msg_parts <- character()
+                if (length(cran_pkgs) > 0)
+                    msg_parts <- c(msg_parts,
+                        paste0("install.packages(c(\"", paste(cran_pkgs, collapse = "\", \""), "\"))"))
+                if (length(bioc_pkgs) > 0)
+                    msg_parts <- c(msg_parts,
+                        paste0("BiocManager::install(c(\"", paste(bioc_pkgs, collapse = "\", \""), "\"))"))
+                jmvcore::reject(
+                    "Required package(s) missing: {missing}. Install with: {cmd}",
+                    code = "missing_package",
+                    missing = paste(missing, collapse = ", "),
+                    cmd = paste(msg_parts, collapse = " ; ")
+                )
             }
         },
         
@@ -388,6 +390,18 @@ biomarkerdiscoveryClass <- R6::R6Class(
                 y <- data[[outcome_var]]
                 
                 # Convert factor outcome to numeric if needed
+                # TODO (correctness): three sites in this file convert a factor
+                # to numeric for glmnet coding:
+                #   - line ~393: binary case `as.numeric(y) - 1` (this block)
+                #   - line ~396: multinomial case `as.numeric(y)` (just below)
+                #   - line ~488: binary case `as.numeric(y) - 1` (.shapAnalysis)
+                # All assume the factor's internal codes are 1..K (level indices).
+                # For jamovi-labelled factors carrying a `values` attribute (e.g.
+                # values=c(0,1)), `jmvcore::toNumeric` would return the *labels*,
+                # so the binary branches' `- 1` would yield -1,0 and the
+                # multinomial branch would lose 1..K coding glmnet expects.
+                # Decide intended semantics before migrating to jmvcore::toNumeric.
+                # Same pattern is already flagged at R/betabinomialdiagnostic.b.R:200.
                 if (is.factor(y)) {
                     if (length(levels(y)) == 2) {
                         y <- as.numeric(y) - 1  # Convert to 0/1
@@ -417,8 +431,8 @@ biomarkerdiscoveryClass <- R6::R6Class(
                 
             } else if (method == "random_forest" && requireNamespace("randomForest", quietly = TRUE)) {
                 # Random Forest
-                formula_str <- paste(outcome_var, "~", paste(predictor_vars, collapse = " + "))
-                model_formula <- as.formula(formula_str)
+                formula_str <- jmvcore::constructFormula(outcome_var, predictor_vars)
+                model_formula <- jmvcore::asFormula(formula_str)
                 
                 rf_model <- randomForest::randomForest(
                     model_formula, 
@@ -527,7 +541,13 @@ biomarkerdiscoveryClass <- R6::R6Class(
             folds <- caret::createFolds(data[[outcome_var]], k = n_folds)
             
             cv_results <- list()
-            
+
+            # TODO (forward-looking): no private$.checkpoint() calls anywhere in
+            # this file. The hottest loops are this 10-fold CV (each iteration
+            # fits a glm via .trainAndEvaluateFold) and the random-forest call
+            # at line ~423 (ntree=500). Add private$.checkpoint() inside this
+            # loop and before the rf_model fit so jamovi can interrupt long runs
+            # and the UI stays responsive on large biomarker panels.
             for (i in 1:n_folds) {
                 train_idx <- unlist(folds[-i])
                 test_idx <- folds[[i]]
@@ -556,8 +576,8 @@ biomarkerdiscoveryClass <- R6::R6Class(
         .trainAndEvaluateFold = function(train_data, test_data, outcome_var, predictor_vars) {
             # Simple logistic regression for fold evaluation
             tryCatch({
-                formula_str <- paste(outcome_var, "~", paste(predictor_vars, collapse = " + "))
-                model_formula <- as.formula(formula_str)
+                formula_str <- jmvcore::constructFormula(outcome_var, predictor_vars)
+                model_formula <- jmvcore::asFormula(formula_str)
                 
                 fold_model <- glm(model_formula, data = train_data, family = binomial())
                 

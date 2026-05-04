@@ -17,8 +17,8 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Get data with escaped variable names
             data <- self$data
-            time_var <- data[[private$.escapeVar(self$options$time)]]
-            event_var_raw <- data[[private$.escapeVar(self$options$event)]]
+            time_var <- data[[self$options$time]]
+            event_var_raw <- data[[self$options$event]]
 
             # Handle event_code for factor events
             if (!is.null(self$options$event_code) && self$options$event_code != "") {
@@ -38,7 +38,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     warning(paste0("event_code not specified. Using '", event_code, "' as event indicator."))
                     event_var <- as.numeric(event_var_raw == event_code)
                 } else {
-                    stop("Event variable must have at least 2 levels")
+                    jmvcore::reject("Event variable must have at least 2 levels")
                 }
             } else {
                 event_var <- as.numeric(event_var_raw)
@@ -47,45 +47,61 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Validate binary event
             unique_events <- unique(event_var[!is.na(event_var)])
             if (!all(unique_events %in% c(0, 1))) {
-                stop("Event indicator must be binary (0/1) after recoding")
+                jmvcore::reject("Event indicator must be binary (0/1) after recoding")
             }
 
             # SAFETY CHECKS: Disable features that are not statistically valid
             if (self$options$multiple_time_points) {
-                stop("Multiple time points is NOT SUPPORTED. This feature incorrectly reuses ",
-                     "a single prediction vector for all time points. Each time point requires ",
-                     "its own prediction variable. Please disable 'Evaluate at Multiple Time Points'.")
+                jmvcore::reject(paste0(
+                    "Multiple time points is NOT SUPPORTED. This feature incorrectly reuses ",
+                    "a single prediction vector for all time points. Each time point requires ",
+                    "its own prediction variable. Please disable 'Evaluate at Multiple Time Points'."))
             }
 
             if (self$options$calculate_ibs) {
-                stop("Integrated Brier Score is NOT SUPPORTED. IBS requires time-varying predictions, ",
-                     "but this implementation only accepts static predictions for a single time point. ",
-                     "Please disable 'Calculate Integrated Brier Score (IBS)'.")
+                jmvcore::reject(paste0(
+                    "Integrated Brier Score is NOT SUPPORTED. IBS requires time-varying predictions, ",
+                    "but this implementation only accepts static predictions for a single time point. ",
+                    "Please disable 'Calculate Integrated Brier Score (IBS)'."))
             }
 
             if (self$options$competing_risks) {
-                stop("Competing risks is NOT IMPLEMENTED despite being in the UI. ",
-                     "Please disable 'Handle Competing Risks'.")
+                jmvcore::reject(paste0(
+                    "Competing risks is NOT IMPLEMENTED despite being in the UI. ",
+                    "Please disable 'Handle Competing Risks'."))
             }
 
             # Get pre-computed predictions - REQUIRED
             pred_surv <- NULL
             if (!is.null(self$options$predicted_survival)) {
-                pred_surv <- data[[private$.escapeVar(self$options$predicted_survival)]]
+                pred_surv <- data[[self$options$predicted_survival]]
             }
 
+            # TODO (cleanup): linear_predictor and prediction_formula options are
+            # declared in jamovi/brierscore.a.yaml and exposed in the UI but the
+            # backend always rejects them via the jmvcore::reject() below. The
+            # implementation that consumed them (.computePredictions) was dead
+            # code and was deleted. Either remove these two options from the
+            # .a.yaml + .u.yaml so they don't appear in the UI, or restore a
+            # safe implementation. multiple_time_points / calculate_ibs /
+            # competing_risks fall in the same bucket — they're rejected at
+            # lines ~54, ~60, ~66 with explicit "NOT SUPPORTED / NOT
+            # IMPLEMENTED" messages. Same decision applies: trim the UI or
+            # implement them.
             # Check for dangerous alternative inputs
             if (!is.null(self$options$linear_predictor) ||
                 (!is.null(self$options$prediction_formula) && self$options$prediction_formula != "")) {
-                stop("Linear predictor and formula inputs are NOT SUPPORTED. ",
-                     "These use oversimplified statistical conversions that produce biased results. ",
-                     "Please provide pre-computed survival probabilities in 'Predicted Survival Probabilities'.")
+                jmvcore::reject(paste0(
+                    "Linear predictor and formula inputs are NOT SUPPORTED. ",
+                    "These use oversimplified statistical conversions that produce biased results. ",
+                    "Please provide pre-computed survival probabilities in 'Predicted Survival Probabilities'."))
             }
 
             # Require predictions
             if (is.null(pred_surv) || all(is.na(pred_surv))) {
-                stop("Predicted Survival Probabilities are REQUIRED. ",
-                     "This variable must contain survival probabilities at the specified Prediction Time.")
+                jmvcore::reject(paste0(
+                    "Predicted Survival Probabilities are REQUIRED. ",
+                    "This variable must contain survival probabilities at the specified Prediction Time."))
             }
 
             # Validate predictions are probabilities
@@ -123,81 +139,6 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             private$.populateInterpretation()
         },
 
-        .escapeVar = function(x) {
-            # Return variable name directly - toB64 encoding is only for jamovi internal use
-            # When called from R, data columns have regular names
-            if (is.null(x) || x == "") return(x)
-            return(x)
-        },
-
-        .computePredictions = function(data, time_var, event_var) {
-            # Compute predictions from alternative inputs (linear_predictor or formula)
-            pred_surv <- NULL
-
-            # Check for linear predictor
-            if (!is.null(self$options$linear_predictor)) {
-                linear_pred <- data[[private$.escapeVar(self$options$linear_predictor)]]
-
-                # Convert linear predictor to survival probabilities
-                # using baseline hazard approximation
-                warning("linear_predictor support is experimental. Using median survival baseline hazard.")
-
-                # Baseline hazard approximation (median survival time)
-                median_time <- median(time_var[event_var == 1], na.rm = TRUE)
-                if (is.na(median_time) || median_time <= 0) {
-                    warning("Cannot estimate baseline hazard from data")
-                    return(NULL)
-                }
-                baseline_hazard <- log(2) / median_time
-
-                # S(t|LP) = exp(-H0(t) * exp(LP))
-                cumulative_hazard <- baseline_hazard * self$options$prediction_time
-                pred_surv <- exp(-cumulative_hazard * exp(linear_pred))
-
-            } else if (self$options$prediction_formula != "" &&
-                       !is.null(self$options$prediction_formula)) {
-                # Fit Cox model internally
-                tryCatch({
-                    # Build full formula
-                    formula_str <- self$options$prediction_formula
-                    time_name <- self$options$time
-                    event_name <- self$options$event
-
-                    # Create formula: Surv(time, event) ~ predictors
-                    full_formula <- as.formula(paste0("survival::Surv(",
-                                                      time_name, ", ",
-                                                      event_name, ") ",
-                                                      formula_str))
-
-                    # Fit Cox model
-                    cox_fit <- survival::coxph(full_formula, data = data)
-
-                    # Generate predictions at prediction_time
-                    newdata <- data
-                    pred_obj <- survival::survfit(cox_fit, newdata = newdata)
-
-                    # Extract survival probability at prediction_time
-                    time_idx <- findInterval(self$options$prediction_time, pred_obj$time)
-                    if (time_idx == 0) {
-                        pred_surv <- rep(1.0, nrow(data))  # Before any events
-                    } else {
-                        # For each individual, extract their survival at prediction_time
-                        if (is.matrix(pred_obj$surv)) {
-                            pred_surv <- pred_obj$surv[time_idx, ]
-                        } else {
-                            pred_surv <- rep(pred_obj$surv[time_idx], nrow(data))
-                        }
-                    }
-
-                }, error = function(e) {
-                    warning(paste0("Failed to fit Cox model from formula: ", e$message))
-                    return(NULL)
-                })
-            }
-
-            return(pred_surv)
-        },
-
         .validateInputs = function(time_var, event_var, pred_surv) {
             # Additional input validations
             n <- length(time_var)
@@ -210,8 +151,8 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check time point beyond data range
             max_follow_up <- max(time_var, na.rm = TRUE)
             if (self$options$prediction_time > max_follow_up) {
-                stop(paste0("Prediction time (", self$options$prediction_time,
-                           ") exceeds maximum follow-up (", round(max_follow_up, 2), ")"))
+                jmvcore::reject("Prediction time ({}) exceeds maximum follow-up ({})",
+                                self$options$prediction_time, round(max_follow_up, 2))
             }
 
             # Check sufficient events
@@ -766,14 +707,14 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Main model
             if (!is.null(self$options$predicted_survival)) {
-                models[[1]] <- data[[private$.escapeVar(self$options$predicted_survival)]]
+                models[[1]] <- data[[self$options$predicted_survival]]
                 model_names <- c(model_names, "Primary Model")
             }
 
             # Reference model
             if (self$options$reference_model) {
                 if (!is.null(self$options$reference_predictions)) {
-                    ref_pred <- data[[private$.escapeVar(self$options$reference_predictions)]]
+                    ref_pred <- data[[self$options$reference_predictions]]
                     models[[length(models) + 1]] <- ref_pred
                     model_names <- c(model_names, "Reference Model")
                 } else if (self$options$reference_formula != "") {
@@ -787,7 +728,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 user_names <- trimws(unlist(strsplit(self$options$model_names, ",")))
                 for (i in seq_along(self$options$additional_predictions)) {
                     var_name <- self$options$additional_predictions[[i]]
-                    models[[length(models) + 1]] <- data[[private$.escapeVar(var_name)]]
+                    models[[length(models) + 1]] <- data[[var_name]]
                     if (i <= length(user_names)) {
                         model_names <- c(model_names, user_names[i])
                     } else {
@@ -1047,7 +988,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
 
-            strat_var <- self$data[[private$.escapeVar(self$options$stratify_by)]]
+            strat_var <- self$data[[self$options$stratify_by]]
 
             # Get unique strata
             strata <- unique(strat_var)
@@ -1404,8 +1345,8 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Get data with escaped variable names
             data <- self$data
-            time_var <- data[[private$.escapeVar(self$options$time)]]
-            event_var_raw <- data[[private$.escapeVar(self$options$event)]]
+            time_var <- data[[self$options$time]]
+            event_var_raw <- data[[self$options$event]]
 
             # Handle event_code (same logic as .run())
             if (!is.null(self$options$event_code) && self$options$event_code != "") {
@@ -1427,7 +1368,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 event_var <- as.numeric(event_var_raw)
             }
 
-            pred_surv <- data[[private$.escapeVar(self$options$predicted_survival)]]
+            pred_surv <- data[[self$options$predicted_survival]]
 
             # Remove missing
             complete_cases <- complete.cases(time_var, event_var, pred_surv)

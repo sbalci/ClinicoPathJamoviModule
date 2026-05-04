@@ -377,6 +377,12 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (valid_count > 0) {
                 data_range <- max(var_cleaned) / min(var_cleaned)
                 if (data_range < 10) {
+                    # TODO (forward-looking): when /prepare-translation runs against this
+                    # function, consider migrating this sprintf to jmvcore::format("…
+                    # range ratio = {}", round(data_range, 2)) for consistency with the
+                    # rest of the codebase. Not a drop-in: %.2f happens at format time
+                    # whereas jmvcore::format takes the value as-is, so pre-rounding
+                    # would be required. Keep sprintf for now to preserve behavior.
                     range_warning_title <- .("Data Range Warning:")
                     range_warning_msg <- sprintf(.("Data spans less than one order of magnitude (range ratio = %.2f). Benford's Law may not apply naturally to constrained datasets."),
                                                 data_range)
