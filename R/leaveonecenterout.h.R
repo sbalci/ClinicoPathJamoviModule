@@ -375,7 +375,7 @@ leaveonecenteroutBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "leaveonecenterout",
-                version = c(0,0,37),
+                version = c(0,0,38),
                 options = options,
                 results = leaveonecenteroutResults$new(options=options),
                 data = data,

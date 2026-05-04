@@ -800,7 +800,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassologistic",
-                version = c(0,0,37),
+                version = c(0,0,38),
                 options = options,
                 results = lassologisticResults$new(options=options),
                 data = data,
