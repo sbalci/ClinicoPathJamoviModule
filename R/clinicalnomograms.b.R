@@ -100,7 +100,7 @@ clinicalnomogramsClass <- R6::R6Class(
                 paste0("<h3>Clinical Nomogram Development</h3>
                 <p><b>Nomogram Type:</b> ", gsub("_", " ", stringr::str_to_title(nomogram_type)), "</p>
                 <p><b>Number of Predictors:</b> ", n_predictors, "</p>
-                <p><b>Variables:</b> ", paste(covariates, collapse = ", "), "</p>
+                <p><b>Variables:</b> ", paste(htmltools::htmlEscape(covariates), collapse = ", "), "</p>
                 <p>Configure nomogram settings and click <b>Results</b> to develop your clinical prediction tool.</p>")
             )
         },
@@ -219,10 +219,10 @@ clinicalnomogramsClass <- R6::R6Class(
                 missing_method <- self$options$missing_data_handling
                 
                 if (missing_method == "complete_case") {
-                    complete_cases <- complete.cases(data)
-                    data <- data[complete_cases, ]
-                    
-                    missing_count <- sum(!complete_cases)
+                    nrow_before <- nrow(data)
+                    data <- jmvcore::naOmit(data)
+                    missing_count <- nrow_before - nrow(data)
+
                     if (missing_count > 0) {
                         self$results$diagnostics$setContent(
                             paste0("<p><b>Missing Data:</b> ", missing_count, " cases excluded due to missing values.</p>")
@@ -259,8 +259,8 @@ clinicalnomogramsClass <- R6::R6Class(
                 
                 # Store variable information
                 if (nomogram_type == "survival_nomogram") {
-                    data[[status_var]] <- as.numeric(data[[status_var]])
-                    data[[time_var]] <- as.numeric(data[[time_var]])
+                    data[[status_var]] <- jmvcore::toNumeric(data[[status_var]])
+                    data[[time_var]] <- jmvcore::toNumeric(data[[time_var]])
                     
                     # Check event status coding
                     unique_status <- sort(unique(data[[status_var]]))
@@ -299,7 +299,7 @@ clinicalnomogramsClass <- R6::R6Class(
                             stop("Logistic nomogram requires binary outcome variable")
                         }
                     } else {
-                        data[[outcome_var]] <- as.numeric(data[[outcome_var]])
+                        data[[outcome_var]] <- jmvcore::toNumeric(data[[outcome_var]])
                     }
                     
                     private$data_info <- list(
@@ -318,13 +318,14 @@ clinicalnomogramsClass <- R6::R6Class(
                 return(data)
                 
             }, error = function(e) {
+                safe_msg <- htmltools::htmlEscape(e$message)
                 self$results$diagnostics$setContent(
-                    paste("<p style='color: red;'><b>Data Preparation Error:</b>", e$message, "</p>")
+                    paste("<p style='color: red;'><b>Data Preparation Error:</b>", safe_msg, "</p>")
                 )
                 return(NULL)
             })
         },
-        
+
         .performVariableSelection = function(data) {
             
             tryCatch({
@@ -338,13 +339,15 @@ clinicalnomogramsClass <- R6::R6Class(
                 if (selection_method == "stepwise") {
                     # Simple backward selection based on p-values
                     if (nomogram_type == "survival_nomogram") {
-                        full_formula <- as.formula(paste("Surv(", vars$time, ",", vars$status, ") ~ ", 
-                                                       paste(vars$covariates, collapse = " + ")))
+                        full_formula <- jmvcore::asFormula(
+                            paste("Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~",
+                                  paste(jmvcore::composeTerms(as.list(vars$covariates)), collapse = " + ")),
+                            additional_allowed_functions = c("Surv"))
                         model <- survival::coxph(full_formula, data = data)
                     } else {
-                        full_formula <- as.formula(paste(vars$outcome, " ~ ", 
-                                                       paste(vars$covariates, collapse = " + ")))
-                        model <- glm(full_formula, data = data, 
+                        full_formula <- jmvcore::asFormula(
+                            jmvcore::constructFormula(vars$outcome, vars$covariates))
+                        model <- glm(full_formula, data = data,
                                     family = if(nomogram_type == "logistic_nomogram") binomial() else gaussian())
                     }
                     
@@ -356,11 +359,20 @@ clinicalnomogramsClass <- R6::R6Class(
                     }
                     # Handle factors in names (coxph/glm append level names)
                     # For simplicity, filter original covariates that are present in names
+                    # TODO (correctness): grepl uses `v` as a regex pattern at this site
+                    # and at L<this>+~22 (lasso match-back), L1241, L1272. Covariate
+                    # names containing regex metacharacters (`.`, `(`, `[`, `+`, `*`,
+                    # `^`, `$`, `?`, `|`, `\`) will mis-match or error. Use
+                    # `grepl(v, ..., fixed = TRUE)` for plain-string matching, or
+                    # split coxph/glm/step output into terms via
+                    # `jmvcore::decomposeTerms()` and use `%in%` for set membership.
                     selected_vars <- vars$covariates[sapply(vars$covariates, function(v) any(grepl(v, selected_vars)))]
                     
                 } else if (selection_method == "lasso_selection" && requireNamespace("glmnet", quietly = TRUE)) {
                     # LASSO selection
-                    x <- model.matrix(as.formula(paste("~", paste(vars$covariates, collapse = " + "))), data = data)[,-1]
+                    x <- model.matrix(
+                        jmvcore::asFormula(paste("~", paste(jmvcore::composeTerms(as.list(vars$covariates)), collapse = " + "))),
+                        data = data)[,-1]
                     
                     if (nomogram_type == "survival_nomogram") {
                         y <- survival::Surv(data[[vars$time]], data[[vars$status]])
@@ -392,9 +404,10 @@ clinicalnomogramsClass <- R6::R6Class(
                 return(selected_vars)
                 
             }, error = function(e) {
+                safe_msg <- htmltools::htmlEscape(e$message)
                 self$results$diagnostics$setContent(
                     paste0(self$results$diagnostics$content,
-                           "<p style='color: red;'><b>Variable Selection Error:</b>", e$message, "</p>")
+                           "<p style='color: red;'><b>Variable Selection Error:</b>", safe_msg, "</p>")
                 )
                 return(vars$covariates)
             })
@@ -415,46 +428,50 @@ clinicalnomogramsClass <- R6::R6Class(
                 
                 if (nomogram_type == "survival_nomogram") {
                     # Cox proportional hazards model
-                    formula_str <- paste("Surv(", vars$time, ",", vars$status, ") ~ ",
-                                       paste(selected_vars, collapse = " + "))
-                    
+                    model_formula <- jmvcore::asFormula(
+                        paste("Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~",
+                              paste(jmvcore::composeTerms(as.list(selected_vars)), collapse = " + ")),
+                        additional_allowed_functions = c("Surv"))
+
                     if (requireNamespace('rms', quietly = TRUE)) {
                         # Use rms for nomogram compatibility
-                        model <- rms::cph(as.formula(formula_str), 
-                                        data = data, 
-                                        x = TRUE, 
+                        model <- rms::cph(model_formula,
+                                        data = data,
+                                        x = TRUE,
                                         y = TRUE,
                                         surv = TRUE)
                     } else {
-                        model <- survival::coxph(as.formula(formula_str), data = data)
+                        model <- survival::coxph(model_formula, data = data)
                     }
-                    
+
                 } else if (nomogram_type == "logistic_nomogram") {
                     # Logistic regression
-                    formula_str <- paste(vars$outcome, "~", paste(selected_vars, collapse = " + "))
-                    
+                    model_formula <- jmvcore::asFormula(
+                        jmvcore::constructFormula(vars$outcome, selected_vars))
+
                     if (requireNamespace('rms', quietly = TRUE)) {
-                        model <- rms::lrm(as.formula(formula_str), 
-                                        data = data, 
-                                        x = TRUE, 
+                        model <- rms::lrm(model_formula,
+                                        data = data,
+                                        x = TRUE,
                                         y = TRUE)
                     } else {
-                        model <- glm(as.formula(formula_str), 
-                                   data = data, 
+                        model <- glm(model_formula,
+                                   data = data,
                                    family = binomial())
                     }
-                    
+
                 } else if (nomogram_type == "linear_nomogram") {
                     # Linear regression
-                    formula_str <- paste(vars$outcome, "~", paste(selected_vars, collapse = " + "))
-                    
+                    model_formula <- jmvcore::asFormula(
+                        jmvcore::constructFormula(vars$outcome, selected_vars))
+
                     if (requireNamespace('rms', quietly = TRUE)) {
-                        model <- rms::ols(as.formula(formula_str), 
-                                        data = data, 
-                                        x = TRUE, 
+                        model <- rms::ols(model_formula,
+                                        data = data,
+                                        x = TRUE,
                                         y = TRUE)
                     } else {
-                        model <- lm(as.formula(formula_str), data = data)
+                        model <- lm(model_formula, data = data)
                     }
                 }
                 
@@ -465,9 +482,10 @@ clinicalnomogramsClass <- R6::R6Class(
                 return(model)
                 
             }, error = function(e) {
+                safe_msg <- htmltools::htmlEscape(e$message)
                 self$results$diagnostics$setContent(
                     paste0(self$results$diagnostics$content,
-                           "<p style='color: red;'><b>Model Fitting Error:</b>", e$message, "</p>")
+                           "<p style='color: red;'><b>Model Fitting Error:</b>", safe_msg, "</p>")
                 )
                 return(NULL)
             })
@@ -535,6 +553,13 @@ clinicalnomogramsClass <- R6::R6Class(
                 }
                 
                 nomogram_type <- self$options$nomogram_type
+                # TODO (data hygiene): `prediction_times` is a free-text OptionString
+                # parsed by `as.numeric(strsplit(..., ","))` in 8 places (L<this>,
+                # L614, L739, L852, L885, L932, L1124, plus this one). Bad input
+                # silently produces NA via suppressed warnings. Replace with a
+                # structured option (e.g., OptionArray of OptionNumber) or surface
+                # parse failures via a Notice/HTML panel. Same brittle-DSL pattern
+                # as clinicaldashboard's alertThresholds.
                 pred_times_str <- self$options$prediction_times
                 points_scale <- self$options$points_scale
                 
@@ -575,9 +600,10 @@ clinicalnomogramsClass <- R6::R6Class(
                 return(nomogram_obj)
                 
             }, error = function(e) {
+                safe_msg <- htmltools::htmlEscape(e$message)
                 self$results$diagnostics$setContent(
                     paste0(self$results$diagnostics$content,
-                           "<p style='color: red;'><b>Nomogram Creation Error:</b>", e$message, "</p>")
+                           "<p style='color: red;'><b>Nomogram Creation Error:</b>", safe_msg, "</p>")
                 )
                 return(NULL)
             })
@@ -921,7 +947,9 @@ clinicalnomogramsClass <- R6::R6Class(
                                 model_prob = prob
                             )
                             
-                            dca_formula <- as.formula(paste("Surv(time, status) ~ model_prob"))
+                            dca_formula <- jmvcore::asFormula(
+                                "Surv(time, status) ~ model_prob",
+                                additional_allowed_functions = c("Surv"))
                             dca_res <- dcurves::dca(dca_formula, 
                                                  data = dca_data,
                                                  time = pred_times[1])
@@ -932,11 +960,19 @@ clinicalnomogramsClass <- R6::R6Class(
                     } else if (nomogram_type == "logistic_nomogram") {
                         prob <- predict(model, type = "fitted")
                         
+                        # TODO (correctness): `as.numeric(factor) - 1` here and at
+                        # L<this>+~310 maps factor LEVEL INDICES {1,2} to {0,1} for
+                        # downstream binary modelling. This is fragile if jmvcore
+                        # or a caller hands in a factor with a `values` attribute
+                        # like c(0,1) — the subtraction would produce {-1,0}. Migrate
+                        # to a robust binary encoder, e.g.:
+                        #   outcome = as.integer(data[[vars$outcome]] == levels(data[[vars$outcome]])[2])
+                        # which always returns {0,1} regardless of values attribute.
                         dca_data <- data.frame(
                             outcome = as.numeric(data[[vars$outcome]]) - 1, # Binary 0/1
                             model_prob = prob
                         )
-                        
+
                         dca_res <- dcurves::dca(outcome ~ model_prob, data = dca_data)
                         
                         # Store for plotting
@@ -1103,7 +1139,10 @@ clinicalnomogramsClass <- R6::R6Class(
                         risk_str <- sprintf("%.2f", val)
                     }
                     
-                    pred_summary <- paste(sapply(names(s_data), function(vn) paste0(vn, ": ", format(s_data[[vn]], digits=2))), collapse=", ")
+                    pred_summary <- paste(sapply(names(s_data), function(vn) {
+                        paste0(htmltools::htmlEscape(vn), ": ",
+                               htmltools::htmlEscape(format(s_data[[vn]], digits=2)))
+                    }), collapse=", ")
                     
                     html <- paste0(html, "<tr>")
                     html <- paste0(html, "<td><b>", stringr::str_to_title(n), "</b></td>")
@@ -1133,15 +1172,17 @@ clinicalnomogramsClass <- R6::R6Class(
                 
                 for (v in vars$covariates) {
                     d <- data[[v]]
+                    v_esc <- htmltools::htmlEscape(v)
                     html <- paste0(html, "<div style='margin-bottom: 10px;'>")
-                    html <- paste0(html, "<label style='display: block; font-weight: bold;'>", v, ":</label>")
-                    
+                    html <- paste0(html, "<label style='display: block; font-weight: bold;'>", v_esc, ":</label>")
+
                     if (is.numeric(d)) {
-                        html <- paste0(html, "<input type='number' id='input_", v, "' value='", round(mean(d, na.rm=TRUE), 2), "' style='width: 100%;'>")
+                        html <- paste0(html, "<input type='number' id='input_", v_esc, "' value='", round(mean(d, na.rm=TRUE), 2), "' style='width: 100%;'>")
                     } else {
-                        html <- paste0(html, "<select id='input_", v, "' style='width: 100%;'>")
+                        html <- paste0(html, "<select id='input_", v_esc, "' style='width: 100%;'>")
                         for (lvl in levels(d)) {
-                            html <- paste0(html, "<option value='", lvl, "'>", lvl, "</option>")
+                            lvl_esc <- htmltools::htmlEscape(lvl)
+                            html <- paste0(html, "<option value='", lvl_esc, "'>", lvl_esc, "</option>")
                         }
                         html <- paste0(html, "</select>")
                     }
@@ -1201,13 +1242,15 @@ clinicalnomogramsClass <- R6::R6Class(
                 nomogram_type <- self$options$nomogram_type
                 
                 if (nomogram_type == "survival_nomogram") {
-                    full_formula <- as.formula(paste("Surv(", vars$time, ",", vars$status, ") ~ ", 
-                                                   paste(vars$covariates, collapse = " + ")))
+                    full_formula <- jmvcore::asFormula(
+                        paste("Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~",
+                              paste(jmvcore::composeTerms(as.list(vars$covariates)), collapse = " + ")),
+                        additional_allowed_functions = c("Surv"))
                     model <- survival::coxph(full_formula, data = data)
                 } else {
-                    full_formula <- as.formula(paste(vars$outcome, " ~ ", 
-                                                   paste(vars$covariates, collapse = " + ")))
-                    model <- glm(full_formula, data = data, 
+                    full_formula <- jmvcore::asFormula(
+                        jmvcore::constructFormula(vars$outcome, vars$covariates))
+                    model <- glm(full_formula, data = data,
                                 family = if(nomogram_type == "logistic_nomogram") binomial() else gaussian())
                 }
                 
@@ -1231,8 +1274,10 @@ clinicalnomogramsClass <- R6::R6Class(
                 vars <- private$variable_names
                 nomogram_type <- self$options$nomogram_type
                 
-                x <- model.matrix(as.formula(paste("~", paste(vars$covariates, collapse = " + "))), data = data)[,-1]
-                
+                x <- model.matrix(
+                    jmvcore::asFormula(paste("~", paste(jmvcore::composeTerms(as.list(vars$covariates)), collapse = " + "))),
+                    data = data)[,-1]
+
                 if (nomogram_type == "survival_nomogram") {
                     y <- survival::Surv(data[[vars$time]], data[[vars$status]])
                     cv_fit <- glmnet::cv.glmnet(x, y, family = "cox")
@@ -1264,7 +1309,9 @@ clinicalnomogramsClass <- R6::R6Class(
                     
                     # Create a report in results
                     html <- "<h4>Internal Validation Report (Bootstrap)</h4>"
-                    html <- paste0(html, "<pre>", paste(capture.output(print(v)), collapse = "\n"), "</pre>")
+                    html <- paste0(html, "<pre>",
+                                   htmltools::htmlEscape(paste(capture.output(print(v)), collapse = "\n")),
+                                   "</pre>")
                     self$results$validationReport$setContent(html)
                     
                     return(v)

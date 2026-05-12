@@ -46,6 +46,7 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
                 return()
             }
             
+            # TODO (cleanup): the `covariates` OptionVariables option is declared in jamovi/continuousrelationship.a.yaml / .h.R but is never read by this backend. Either wire it into the model formulas (e.g. add covariates as additional predictors via the existing model-fit helpers) or remove it from .a.yaml/.u.yaml. Current state: dead UI option that does nothing when selected.
             # Get data
             data <- self$data
             outcome <- data[[self$options$outcome]]
@@ -263,34 +264,25 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
             ))
         },
         
+        # TODO (stub): the four .plot methods below (.doseResponsePlot, .partialEffectPlot, .comparisonPlot, .categorizedPlot) are placeholders — no actual ggplot construction. They now safely return FALSE so jamovi renders an empty plot pane rather than crashing or showing whatever the device last contained. Each method needs a real ggplot2 implementation (the existing `image$state` is already wired with plotData for .doseResponsePlot).
         .doseResponsePlot = function(image, ggtheme, theme, ...) {
-            # Implementation of dose-response plot
-            # This would create the main visualization
-            plotData <- image$state
-            
-            # Create plot using ggplot2
-            # ... (implementation details)
-            
-            print(plot)
-            TRUE
+            # Stub — return FALSE until a real ggplot is built (see TODO above).
+            return(FALSE)
         },
         
         .partialEffectPlot = function(image, ggtheme, theme, ...) {
-            # Implementation of partial effect plot
-            # ... (implementation details)
-            TRUE
+            # Stub — see TODO above.
+            return(FALSE)
         },
         
         .comparisonPlot = function(image, ggtheme, theme, ...) {
-            # Implementation showing multiple models for comparison
-            # ... (implementation details)
-            TRUE
+            # Stub — see TODO above.
+            return(FALSE)
         },
         
         .categorizedPlot = function(image, ggtheme, theme, ...) {
-            # Educational plot showing pitfalls of categorization
-            # ... (implementation details)
-            TRUE
+            # Stub — see TODO above.
+            return(FALSE)
         }
     )
 )

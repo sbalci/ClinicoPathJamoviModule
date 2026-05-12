@@ -136,7 +136,7 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             # Data validation
             if (nrow(self$data) == 0) {
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows", code = NULL)
             }
             
             # Process data
@@ -278,9 +278,11 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 stat_html <- paste0(stat_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
                 
                 if (stat_method == "anova") {
-                    # One-way ANOVA
-                    formula_str <- paste(y_var, "~", x_var)
-                    aov_result <- aov(as.formula(formula_str), data = data)
+                    # One-way ANOVA — composeTerm backtick-escapes user column
+                    # names; asFormula validates against jamovi's allow-list.
+                    formula_str <- paste0(jmvcore::composeTerm(y_var), " ~ ",
+                                          jmvcore::composeTerm(x_var))
+                    aov_result <- aov(jmvcore::asFormula(formula_str), data = data)
                     aov_summary <- summary(aov_result)
                     
                     f_stat <- round(aov_summary[[1]]$`F value`[1], 3)
@@ -312,9 +314,10 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     }
                     
                 } else if (stat_method == "kruskal") {
-                    # Kruskal-Wallis test
-                    formula_str <- paste(y_var, "~", x_var)
-                    k_result <- kruskal.test(as.formula(formula_str), data = data)
+                    # Kruskal-Wallis test — composeTerm + asFormula safety pair.
+                    formula_str <- paste0(jmvcore::composeTerm(y_var), " ~ ",
+                                          jmvcore::composeTerm(x_var))
+                    k_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
                     
                     stat_html <- paste0(stat_html, "<p><strong>Kruskal-Wallis Test Results:</strong></p>")
                     stat_html <- paste0(stat_html, "<p>χ² = ", round(k_result$statistic, 3), ", df = ", k_result$parameter, ", p = ", format.pval(k_result$p.value, digits = 3), "</p>")
@@ -371,7 +374,8 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$results$statistical_results$setContent(stat_html)
                 
             }, error = function(e) {
-                error_msg <- paste("Error in statistical analysis:", e$message)
+                error_msg <- paste("Error in statistical analysis:",
+                                   htmltools::htmlEscape(e$message))
                 self$results$statistical_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
@@ -421,7 +425,9 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 range_val <- paste0(round(summary_stats$min[i], 2), " - ", round(summary_stats$max[i], 2))
                 
                 summary_html <- paste0(summary_html, "<tr>")
-                summary_html <- paste0(summary_html, "<td><strong>", group_name, "</strong></td>")
+                summary_html <- paste0(summary_html, "<td><strong>",
+                                       htmltools::htmlEscape(group_name),
+                                       "</strong></td>")
                 summary_html <- paste0(summary_html, "<td>", n, "</td>")
                 summary_html <- paste0(summary_html, "<td>", mean_val, "</td>")
                 summary_html <- paste0(summary_html, "<td>", median_val, "</td>")
@@ -445,10 +451,13 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             legend_html <- paste0(legend_html, "<p><strong>Understanding the Economist-Style Distribution Plot:</strong></p>")
             legend_html <- paste0(legend_html, "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.8;'>")
-            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$tenth_color, "; font-weight: bold;'></span> <strong>10th Percentile:</strong> 10% of values fall below this point</li>")
-            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$median_color, "; font-weight: bold;'></span> <strong>Median (50th Percentile):</strong> Middle value of the distribution</li>")
-            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$ninetieth_color, "; font-weight: bold;'></span> <strong>90th Percentile:</strong> 90% of values fall below this point</li>")
-            legend_html <- paste0(legend_html, "<li><span style='color: ", self$options$distribution_fill, "; font-weight: bold;'>▓</span> <strong>Distribution Area:</strong> Shows the shape and spread of data</li>")
+            # htmlEscape applied to user-supplied String color options so they
+            # cannot break out of the style attribute. A separate follow-up
+            # should constrain these options to a hex/named-color regex.
+            legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$tenth_color), "; font-weight: bold;'></span> <strong>10th Percentile:</strong> 10% of values fall below this point</li>")
+            legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$median_color), "; font-weight: bold;'></span> <strong>Median (50th Percentile):</strong> Middle value of the distribution</li>")
+            legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$ninetieth_color), "; font-weight: bold;'></span> <strong>90th Percentile:</strong> 90% of values fall below this point</li>")
+            legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$distribution_fill), "; font-weight: bold;'>▓</span> <strong>Distribution Area:</strong> Shows the shape and spread of data</li>")
             legend_html <- paste0(legend_html, "</ul>")
             
             legend_html <- paste0(legend_html, "<h5>Visual Design Principles:</h5>")
@@ -501,10 +510,12 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 sep = "\n"
             )
             
-            # Replace placeholders
+            # Replace placeholders, then htmlEscape the result so user column
+            # names cannot break out of the surrounding <code> element.
             actual_code <- gsub("\\{x_var\\}", x_var %||% "x_variable", code_template)
             actual_code <- gsub("\\{y_var\\}", y_var %||% "y_variable", actual_code)
-            
+            actual_code <- htmltools::htmlEscape(actual_code)
+
             code_html <- paste(
                 "<h4>Reproducible R Code</h4>",
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
@@ -609,9 +620,12 @@ economistplotsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     plot <- plot + ggtheme
                 }
                 
-                # Add faceting if specified
+                # Add faceting if specified — composeTerm backtick-escapes,
+                # asFormula validates against jamovi's allow-list.
                 if (!is.null(self$options$facet_var)) {
-                    plot <- plot + ggplot2::facet_wrap(as.formula(paste("~", self$options$facet_var)))
+                    plot <- plot + ggplot2::facet_wrap(jmvcore::asFormula(
+                        paste0("~ ", jmvcore::composeTerm(self$options$facet_var))
+                    ))
                 }
                 
                 # Apply orientation

@@ -34,13 +34,13 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             effectiveness <- effectiveness[complete_cases]
 
             if (length(cost) < 10) {
-                stop("Insufficient data for cost-effectiveness analysis. Need at least 10 complete observations.")
+                jmvcore::reject("Insufficient data for cost-effectiveness analysis. Need at least 10 complete observations.")
             }
 
             # Validate strategies
             strategy_levels <- levels(strategy)
             if (length(strategy_levels) < 2) {
-                stop("Need at least 2 strategies for comparison.")
+                jmvcore::reject("Need at least 2 strategies for comparison.")
             }
 
             # Validate comparator level exists and has sufficient data
@@ -51,27 +51,36 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             # Check comparator exists in filtered data
             if (!(comparator_level %in% strategy_levels)) {
-                stop(sprintf("Comparator strategy '%s' not found in data. Available strategies: %s",
-                            comparator_level, paste(strategy_levels, collapse=", ")))
+                jmvcore::reject("Comparator strategy '{}' not found in data. Available strategies: {}",
+                            comparator_level, paste(strategy_levels, collapse=", "))
             }
 
             # Check comparator has observations after filtering
             comp_idx <- strategy == comparator_level
             if (sum(comp_idx) < 3) {
-                stop(sprintf("Insufficient observations for comparator strategy '%s' (n=%d). Need at least 3 observations after removing missing values.",
-                            comparator_level, sum(comp_idx)))
+                jmvcore::reject("Insufficient observations for comparator strategy '{}' (n={}). Need at least 3 observations after removing missing values.",
+                            comparator_level, sum(comp_idx))
             }
 
             # Check all other strategies have sufficient observations
             for (strat in strategy_levels) {
                 strat_idx <- strategy == strat
                 if (sum(strat_idx) < 3) {
-                    stop(sprintf("Insufficient observations for strategy '%s' (n=%d). Need at least 3 observations per strategy.",
-                                strat, sum(strat_idx)))
+                    jmvcore::reject("Insufficient observations for strategy '{}' (n={}). Need at least 3 observations per strategy.",
+                                strat, sum(strat_idx))
                 }
             }
 
             # Set random seed for reproducibility
+            # Save/restore the user's RNG state so set.seed() doesn't leak into the rest of their session.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    if (exists(".Random.seed", envir = .GlobalEnv)) rm(".Random.seed", envir = .GlobalEnv)
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
             set.seed(self$options$random_seed)
 
             # Perform cost-effectiveness analysis
@@ -107,6 +116,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 }
 
                 # Deterministic sensitivity analysis
+                # TODO (cleanup): the `sensitivity_parameters` OptionString (declared in jamovi/costeffectiveness.a.yaml / .h.R) is never read by this backend — `.performDeterministicSA` uses hardcoded parameter ranges instead of the user's free-text input. Either wire the option into the SA range parser or remove it from .a.yaml/.u.yaml. Current state: dead UI control. Also forward-looking: this analysis lacks an `asSource()` method, so the syntax pane can't reproduce the configured run; once `sensitivity_parameters` is wired (or removed) the asSource implementation should follow.
                 if (self$options$deterministic_sensitivity) {
                     private$.performDeterministicSA(strategy, cost, effectiveness, data[complete_cases, ])
                 }
@@ -125,7 +135,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 private$.populateInterpretation()
 
             }, error = function(e) {
-                stop(paste0("Error in cost-effectiveness analysis: ", e$message))
+                jmvcore::reject("Error in cost-effectiveness analysis: {}", e$message)
             })
         },
 
@@ -1018,8 +1028,10 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             adjustment for time value or perspective-specific cost components.</p>
 
             <h5>Key Decision Rules:</h5>",
-            perspective_label, time_horizon, cost_year, currency, missing_label, discount_msg,
-            currency, format(wtp, big.mark = ","), eff_label)
+            perspective_label, time_horizon, cost_year,
+            htmltools::htmlEscape(currency), missing_label, discount_msg,
+            htmltools::htmlEscape(currency), format(wtp, big.mark = ","),
+            htmltools::htmlEscape(eff_label))
 
             html <- paste0(html, "
             <ul>

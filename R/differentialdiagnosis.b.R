@@ -538,6 +538,18 @@ differentialdiagnosisClass <- R6::R6Class(
         .getDiagnosisDatabase = function() {
             # Comprehensive diagnosis database
             # In real implementation, this would connect to medical knowledge bases
+
+            # TODO (correctness/clinical-readiness): the entire diagnostic engine is a stub.
+            # `.getDiagnosisDatabase` returns a hardcoded 6-diagnosis list; `.calculateBayesianProbability`
+            # (L555) and `.simulateLikelihoodRatio` (L609) call `runif()` against a fixed seed and
+            # ignore `clinical_data` entirely; `.performBayesianReasoning`, `.analyzeUncertainty`,
+            # `.analyzeClinicalContext`, `.performSensitivityTest`, `.calculateModelPerformance`
+            # all return hardcoded literal lists. Output does not reflect the user's data — the
+            # function as shipped is a UI mock, not a clinical tool. Before clinical release: either
+            # (a) replace each stub helper with a real evidence-base/knowledge-graph integration, or
+            # (b) gate the analysis behind a prominent ERROR/STRONG_WARNING notice declaring it as
+            # demonstration/teaching-only and disable it in production menu groups. Search for
+            # "In real implementation" comments at L268, L308, L540, L557 for the affected sites.
             list(
                 name = c(
                     "Acute Myocardial Infarction",
@@ -555,8 +567,22 @@ differentialdiagnosisClass <- R6::R6Class(
         .calculateBayesianProbability = function(diagnosis, clinical_data, prevalence) {
             # Simulate Bayesian probability calculation
             # In real implementation, this would use clinical evidence and knowledge bases
-            set.seed(42)  # For reproducible results
-            
+
+            # Save/restore the user's RNG state so set.seed(42) below does not
+            # leak into subsequent rnorm/runif/sample calls in the jamovi session.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv)
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
+
+            set.seed(42)  # For reproducible results (local to this helper)
+
             # Simulate likelihood calculation based on clinical findings
             likelihood <- runif(1, 1.5, 4.0)
             
@@ -594,8 +620,22 @@ differentialdiagnosisClass <- R6::R6Class(
 
         .simulateLikelihoodRatio = function(finding_data, type) {
             # Simulate likelihood ratio calculation
-            set.seed(42)  # For reproducible results
-            
+
+            # Save/restore the user's RNG state so set.seed(42) below does not
+            # leak into subsequent rnorm/runif/sample calls in the jamovi session.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv)
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
+
+            set.seed(42)  # For reproducible results (local to this helper)
+
             if (type == "positive") {
                 # Positive likelihood ratio typically 1.5-10
                 return(round(runif(1, 1.5, 6.0), 2))

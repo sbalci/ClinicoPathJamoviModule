@@ -400,90 +400,89 @@ effectsizeClass <- R6::R6Class(
         },
         
         .createForestPlot = function(plot_data) {
-            # Create forest plot
-            library(ggplot2)
-            
-            p <- ggplot(plot_data, aes(y = measure, x = estimate)) +
-                geom_point(size = 3, color = "blue") +
-                geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2, color = "blue") +
-                geom_vline(xintercept = 0, linetype = "dashed", color = "red", alpha = 0.7) +
-                geom_vline(xintercept = c(-0.2, 0.2), linetype = "dotted", color = "gray", alpha = 0.7) +
-                geom_vline(xintercept = c(-0.5, 0.5), linetype = "dotted", color = "gray", alpha = 0.7) +
-                geom_vline(xintercept = c(-0.8, 0.8), linetype = "dotted", color = "gray", alpha = 0.7) +
-                labs(
+            # Create forest plot — ggplot2 is in DESCRIPTION's Imports.
+
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(y = measure, x = estimate)) +
+                ggplot2::geom_point(size = 3, color = "blue") +
+                ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper), height = 0.2, color = "blue") +
+                ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "red", alpha = 0.7) +
+                ggplot2::geom_vline(xintercept = c(-0.2, 0.2), linetype = "dotted", color = "gray", alpha = 0.7) +
+                ggplot2::geom_vline(xintercept = c(-0.5, 0.5), linetype = "dotted", color = "gray", alpha = 0.7) +
+                ggplot2::geom_vline(xintercept = c(-0.8, 0.8), linetype = "dotted", color = "gray", alpha = 0.7) +
+                ggplot2::labs(
                     title = "Effect Size Forest Plot",
                     subtitle = "Effect sizes with 95% confidence intervals",
                     x = "Effect Size",
                     y = "Measure"
                 ) +
-                theme_minimal() +
-                theme(
-                    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 12),
-                    axis.text = element_text(size = 10),
-                    axis.title = element_text(size = 12),
-                    panel.grid.minor = element_blank()
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
+                    axis.text = ggplot2::element_text(size = 10),
+                    axis.title = ggplot2::element_text(size = 12),
+                    panel.grid.minor = ggplot2::element_blank()
                 ) +
-                annotate("text", x = -0.2, y = length(plot_data$measure) + 0.5, label = "Small", size = 3, color = "gray60") +
-                annotate("text", x = -0.5, y = length(plot_data$measure) + 0.5, label = "Medium", size = 3, color = "gray60") +
-                annotate("text", x = -0.8, y = length(plot_data$measure) + 0.5, label = "Large", size = 3, color = "gray60")
-            
+                ggplot2::annotate("text", x = -0.2, y = length(plot_data$measure) + 0.5, label = "Small", size = 3, color = "gray60") +
+                ggplot2::annotate("text", x = -0.5, y = length(plot_data$measure) + 0.5, label = "Medium", size = 3, color = "gray60") +
+                ggplot2::annotate("text", x = -0.8, y = length(plot_data$measure) + 0.5, label = "Large", size = 3, color = "gray60")
+
             return(p)
         },
         
         .createBarPlot = function(plot_data) {
-            library(ggplot2)
-            
-            p <- ggplot(plot_data, aes(x = measure, y = estimate)) +
-                geom_col(fill = "steelblue", alpha = 0.7, width = 0.6) +
-                geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2, color = "black") +
-                geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7) +
-                geom_hline(yintercept = c(-0.2, 0.2, -0.5, 0.5, -0.8, 0.8), 
+            # ggplot2 is in DESCRIPTION's Imports.
+
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = measure, y = estimate)) +
+                ggplot2::geom_col(fill = "steelblue", alpha = 0.7, width = 0.6) +
+                ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper), width = 0.2, color = "black") +
+                ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7) +
+                ggplot2::geom_hline(yintercept = c(-0.2, 0.2, -0.5, 0.5, -0.8, 0.8),
                           linetype = "dotted", color = "gray", alpha = 0.5) +
-                labs(
+                ggplot2::labs(
                     title = "Effect Size Bar Chart",
                     subtitle = "Effect sizes with 95% confidence intervals",
                     x = "Effect Size Measure",
                     y = "Effect Size"
                 ) +
-                theme_minimal() +
-                theme(
-                    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 12),
-                    axis.text = element_text(size = 10),
-                    axis.title = element_text(size = 12),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    panel.grid.minor = element_blank()
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
+                    axis.text = ggplot2::element_text(size = 10),
+                    axis.title = ggplot2::element_text(size = 12),
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    panel.grid.minor = ggplot2::element_blank()
                 )
-            
+
             return(p)
         },
         
         .createDotPlot = function(plot_data) {
-            library(ggplot2)
-            
-            p <- ggplot(plot_data, aes(x = measure, y = estimate)) +
-                geom_point(size = 4, color = "darkblue") +
-                geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2, color = "darkblue") +
-                geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7) +
-                geom_hline(yintercept = c(-0.2, 0.2, -0.5, 0.5, -0.8, 0.8), 
+            # ggplot2 is in DESCRIPTION's Imports.
+
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = measure, y = estimate)) +
+                ggplot2::geom_point(size = 4, color = "darkblue") +
+                ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper), width = 0.2, color = "darkblue") +
+                ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7) +
+                ggplot2::geom_hline(yintercept = c(-0.2, 0.2, -0.5, 0.5, -0.8, 0.8),
                           linetype = "dotted", color = "gray", alpha = 0.5) +
-                labs(
+                ggplot2::labs(
                     title = "Effect Size Dot Plot",
                     subtitle = "Effect sizes with 95% confidence intervals",
                     x = "Effect Size Measure",
                     y = "Effect Size"
                 ) +
-                theme_minimal() +
-                theme(
-                    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 12),
-                    axis.text = element_text(size = 10),
-                    axis.title = element_text(size = 12),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    panel.grid.minor = element_blank()
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12),
+                    axis.text = ggplot2::element_text(size = 10),
+                    axis.title = ggplot2::element_text(size = 12),
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                    panel.grid.minor = ggplot2::element_blank()
                 )
-            
+
             return(p)
         }
     )

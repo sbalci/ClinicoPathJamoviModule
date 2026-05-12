@@ -10,6 +10,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
     "comprehensiveSurvivalPowerClass",
     inherit = comprehensiveSurvivalPowerBase,
     private = list(
+        # TODO (cleanup): four Html result items are declared in jamovi/comprehensiveSurvivalPower.r.yaml — `studyDesign`, `protocolSummary`, `regulatoryNotes`, `technicalDetails` — but never populated by this backend (only `instructions` and `clinicalInterpretation` are set via setContent). Either implement the corresponding .populate*() helpers or remove the four unused result entries from the .r.yaml so the UI doesn't render empty panels.
         .init = function() {
             # Initialize instructions
             private$.populateInstructions()
@@ -127,7 +128,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
             # Check required packages
             if (!requireNamespace("gsDesign", quietly = TRUE)) {
-                stop("Package 'gsDesign' required for Schoenfeld method calculations")
+                jmvcore::reject("Package 'gsDesign' required for Schoenfeld method calculations")
             }
 
             # Common parameters
@@ -167,7 +168,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
                 } else {
                     # Complex design using gsDesign
                     if (!requireNamespace("gsDesign", quietly = TRUE)) {
-                        stop("Package 'gsDesign' required for complex study designs")
+                        jmvcore::reject("Package 'gsDesign' required for complex study designs")
                     }
 
                     lambda1 <- -log(0.5) / self$options$median_survival_control
@@ -268,7 +269,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
         .logRankLachin = function() {
             # Lachin-Foulkes method using gsDesign
             if (!requireNamespace("gsDesign", quietly = TRUE)) {
-                stop("Package 'gsDesign' required for Lachin-Foulkes method")
+                jmvcore::reject("Package 'gsDesign' required for Lachin-Foulkes method")
             }
 
             calc_type <- self$options$calculation_type
@@ -345,7 +346,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
         .graysTest = function() {
             # Gray's test power analysis for competing risks
             if (!requireNamespace("CompRisk", quietly = TRUE)) {
-                stop("Package 'CompRisk' or equivalent required for Gray's test power analysis")
+                jmvcore::reject("Package 'CompRisk' or equivalent required for Gray's test power analysis")
             }
 
             results <- list(method = "Gray's Test", package = "CompRisk")
@@ -416,7 +417,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
         .rmstAnalysis = function() {
             # RMST power analysis
             if (!requireNamespace("survRM2", quietly = TRUE)) {
-                stop("Package 'survRM2' recommended for RMST power analysis")
+                jmvcore::reject("Package 'survRM2' recommended for RMST power analysis")
             }
 
             results <- list(method = "RMST Comparison", package = "survRM2")

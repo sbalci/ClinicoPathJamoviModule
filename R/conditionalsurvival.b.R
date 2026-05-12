@@ -145,7 +145,7 @@ conditionalsurvivalClass <- R6::R6Class(
                     }
 
                     if (length(allResults) == 0) {
-                        stop("No groups had enough events (>=3) for conditional survival estimation.")
+                        jmvcore::reject("No groups had enough events (>=3) for conditional survival estimation.")
                     }
 
                     results <- do.call(rbind, allResults)
@@ -253,7 +253,7 @@ conditionalsurvivalClass <- R6::R6Class(
                 # Landmark approach - subset data to those who survived to condTime
                 landmark_idx <- time >= condTime
                 if (sum(landmark_idx) < 10) {
-                    stop("Insufficient subjects surviving to landmark time")
+                    jmvcore::reject("Insufficient subjects surviving to landmark time")
                 }
                 
                 # Adjust time and status for landmark analysis
@@ -287,7 +287,7 @@ conditionalsurvivalClass <- R6::R6Class(
             survAtCondTime <- private$.getSurvProbAtTime(fit, condTime)
             
             if (survAtCondTime <= 0) {
-                stop("No subjects survive to conditioning time")
+                jmvcore::reject("No subjects survive to conditioning time")
             }
             
             # Calculate conditional survival for each time point
@@ -545,7 +545,7 @@ conditionalsurvivalClass <- R6::R6Class(
                                        conditionVar = NULL, data = NULL) {
 
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                stop("ggplot2 package required for plotting")
+                jmvcore::reject("ggplot2 package required for plotting")
             }
 
             # Use jamovi ggtheme if provided, otherwise fall back to theme_minimal
@@ -587,7 +587,7 @@ conditionalsurvivalClass <- R6::R6Class(
                 }
 
                 if (nrow(plot_data) == 0) {
-                    stop("No groups had sufficient data for conditional survival plotting")
+                    jmvcore::reject("No groups had sufficient data for conditional survival plotting")
                 }
 
                 p <- ggplot2::ggplot(
@@ -702,7 +702,7 @@ conditionalsurvivalClass <- R6::R6Class(
                 target_row <- grpRes[which.max(grpRes$time), ]
 
                 grp_label <- if (length(groups) > 1 || grp != "Overall") {
-                    paste0(" in the ", grp, " group")
+                    paste0(" in the ", htmltools::htmlEscape(grp), " group")
                 } else {
                     ""
                 }

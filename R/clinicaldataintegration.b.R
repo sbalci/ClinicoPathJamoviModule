@@ -37,9 +37,25 @@ clinicaldataintegrationClass <- R6::R6Class(
         },
         
         .run = function() {
+            # TODO (stub): the function name "Clinical Data Integration" and
+            # several options promise capabilities that are not implemented:
+            #   - `dataSource` (jamovi/clinicaldataintegration.a.yaml:14-26):
+            #     declared with csv/fhir/hl7/cdisc values, but no actual import
+            #     happens — `data <- self$data` just uses the pre-loaded jamovi
+            #     dataset regardless of this option. Value is only used as a
+            #     display string in .generateDataOverview and .generateExportSummary.
+            #   - `terminologyMapping` (.a.yaml:78-90, values icd10/snomed/loinc/none):
+            #     no terminology resolution happens; only used as a display label
+            #     in the export summary HTML.
+            #   - `exportFormat` (.a.yaml:92-104, values csv/json/fhir/cdisc):
+            #     no actual export happens; only used as a display label.
+            # Either implement these flows (FHIR/HL7/CDISC parsing, terminology
+            # service lookups, format-specific export) or rename the function
+            # and remove the misleading options. Quality-assessment is the only
+            # real capability today.
             if (is.null(self$data))
                 return()
-            
+
             data <- self$data
             
             # Generate data overview
@@ -288,6 +304,13 @@ clinicaldataintegrationClass <- R6::R6Class(
             data_source <- self$options$dataSource
             terminology <- self$options$terminologyMapping
             
+            # TODO (forward-looking): the interpolations below are safe today
+            # because data_source / export_format / terminology are closed-enum
+            # OptionList values and nrow/ncol are integers. If the stub TODO at
+            # .run() (top of file) is resolved by adding free-text inputs (e.g.,
+            # a custom export path or terminology service URL), wrap each
+            # user-influenced value in htmltools::htmlEscape() before paste0(),
+            # as done in R/clinicalcalculators.b.R:143 and L192.
             summary_html <- paste0(
                 '<div class="export-summary">',
                 '<h4>Export Summary</h4>',
@@ -331,16 +354,29 @@ clinicaldataintegrationClass <- R6::R6Class(
             
             if (length(vars_to_plot) == 0) return()
             
+            # TODO (correctness): two issues in this plot method:
+            #   1. The rbind-in-loop below is O(n^2) on the number of variables
+            #      because each iteration reallocates `completeness_data`.
+            #      Replace with a single allocation, e.g.:
+            #        completeness_data <- data.frame(
+            #          Variable = vars_to_plot,
+            #          Completeness = vapply(vars_to_plot, function(v)
+            #            (1 - sum(is.na(data[[v]])) / nrow(data)) * 100,
+            #            numeric(1)),
+            #          stringsAsFactors = FALSE)
+            #   2. geom_hline(... size = 1) at L<below>+~30: ggplot2 >= 3.4
+            #      renames `size` to `linewidth` for line geoms; will warn.
+            #
             # Calculate completeness for each variable
             completeness_data <- data.frame(
                 Variable = character(0),
                 Completeness = numeric(0),
                 stringsAsFactors = FALSE
             )
-            
+
             for (var in vars_to_plot) {
                 completeness <- (1 - sum(is.na(data[[var]])) / nrow(data)) * 100
-                completeness_data <- rbind(completeness_data, 
+                completeness_data <- rbind(completeness_data,
                                          data.frame(Variable = var, Completeness = completeness))
             }
             

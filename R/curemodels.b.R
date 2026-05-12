@@ -56,8 +56,8 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "border-left: 4px solid ", style$border, "; ",
                     "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                     "<strong style='color: ", style$color, ";'>",
-                    notice$title, "</strong><br>",
-                    "<span style='color: #374151;'>", notice$content, "</span>",
+                    htmltools::htmlEscape(notice$title), "</strong><br>",
+                    "<span style='color: #374151;'>", htmltools::htmlEscape(notice$content), "</span>",
                     "</div>"
                 )
 
@@ -100,6 +100,14 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             status_vals <- unique(status_col)
             status_vals <- status_vals[!is.na(status_vals)]
 
+            # TODO (data hygiene): `as.numeric(factor)` here (L104) and at L115, L233, L640 returns level
+            #   indices and ignores any jamovi `values` attribute on the factor. If a user supplies a status
+            #   factor with non-default `values` (e.g., values = c("alive"=0, "dead"=1)), `jmvcore::toNumeric()`
+            #   would honor that mapping and produce different output. Behavior-risk migration — confirm
+            #   intended decoding (factor index vs. values attribute) before swapping.
+            # TODO (UX): `stop()` validations at L106 / L110 / L92 / L96 are caught by tryCatch at L206-214
+            #   and rerouted into `.addNotice()`. Working as designed for the project's structured-notice UX;
+            #   do NOT mechanically convert to `jmvcore::reject()` (would bypass the notice channel).
             if (is.factor(status_col)) {
                 status_numeric <- as.numeric(status_col) - 1
                 if (!all(status_numeric %in% c(0, 1))) {
@@ -129,9 +137,19 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-            # Reset state for each run
+            # Reset state for each run (including model caches — otherwise switching model_type
+            # leaves stale fits visible to .compareModels / .plotSurvival / .plotCureFraction)
             private$.noticeList <- list()
             private$.interpretation_html <- ""
+            private$cure_data <- NULL
+            private$cure_model <- NULL
+            private$nm_cure_model <- NULL
+            private$cure_cure_model <- NULL
+            private$npcure_model <- NULL
+            private$.cure_fraction <- NULL
+            private$.cure_ci_lower <- NULL
+            private$.cure_ci_upper <- NULL
+            private$.cure_ci_method <- NULL
 
             # Check if variables are selected
             if (is.null(self$options$time) || is.null(self$options$status)) {
@@ -370,14 +388,14 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     escaped_status <- jmvcore::composeTerm(status_var)
 
                     surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
-                    surv_formula <- as.formula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
-                    cure_formula <- as.formula(paste("~", paste(escaped_predictors, collapse = " + ")))
+                    surv_formula <- jmvcore::asFormula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
+                    cure_formula <- jmvcore::asFormula(paste("~", paste(escaped_predictors, collapse = " + ")))
                 } else {
                     escaped_time <- jmvcore::composeTerm(time_var)
                     escaped_status <- jmvcore::composeTerm(status_var)
 
                     surv_response <- paste0("Surv(", escaped_time, ", ", escaped_status, ")")
-                    surv_formula <- as.formula(paste(surv_response, "~ 1"))
+                    surv_formula <- jmvcore::asFormula(paste(surv_response, "~ 1"))
                     cure_formula <- ~ 1
                 }
 
@@ -468,9 +486,9 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (length(predictors) > 0) {
                     escaped_predictors <- sapply(predictors, jmvcore::composeTerm)
-                    formula <- as.formula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
+                    formula <- jmvcore::asFormula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
                 } else {
-                    formula <- as.formula(paste(surv_response, "~ 1"))
+                    formula <- jmvcore::asFormula(paste(surv_response, "~ 1"))
                 }
 
                 # Map distribution names to flexsurvcure-compatible names
@@ -527,9 +545,9 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (length(predictors) > 0) {
                     escaped_predictors <- sapply(predictors, jmvcore::composeTerm)
-                    surv_formula <- as.formula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
+                    surv_formula <- jmvcore::asFormula(paste(surv_response, "~", paste(escaped_predictors, collapse = " + ")))
                 } else {
-                    surv_formula <- as.formula(paste(surv_response, "~ 1"))
+                    surv_formula <- jmvcore::asFormula(paste(surv_response, "~ 1"))
                 }
 
                 # Get cuRe-specific options
@@ -1040,7 +1058,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             background_note <- if ((self$options$use_background_mortality %||% FALSE) && !is.null(self$options$background_hazard_var)) {
-                paste0("<p><b>Background Mortality:</b> Included (variable: ", self$options$background_hazard_var, ")</p>")
+                paste0("<p><b>Background Mortality:</b> Included (variable: ", htmltools::htmlEscape(self$options$background_hazard_var), ")</p>")
             } else {
                 "<p><b>Background Mortality:</b> Not included</p>"
             }
@@ -1123,7 +1141,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             summary_html <- paste0(
                 "<h3>Nonparametric Cure Model Results (npcure)</h3>",
-                "<p><b>Covariate:</b> ", covariate_name, "</p>",
+                "<p><b>Covariate:</b> ", htmltools::htmlEscape(covariate_name), "</p>",
                 "<p><b>", bandwidth_info, "</b></p>",
                 "<h4>Model Description:</h4>",
                 "<p>The nonparametric cure model estimates cure probability as a smooth function ",
@@ -1218,7 +1236,9 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 escaped_time <- jmvcore::composeTerm(time_var)
                 escaped_status <- jmvcore::composeTerm(status_var)
-                surv_formula <- as.formula(paste0("survival::Surv(", escaped_time, ", ", escaped_status, ") ~ 1"))
+                surv_formula <- jmvcore::asFormula(
+                    paste0("survival::Surv(", escaped_time, ", ", escaped_status, ") ~ 1"),
+                    additional_allowed_functions = c("survival::Surv"))
                 km_fit <- survival::survfit(surv_formula, data = data)
 
                 surv_data <- data.frame(
@@ -1463,7 +1483,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 self$results$sensitivityAnalysis$setContent(
-                    paste0("<h4>Sensitivity Analysis</h4><p>Failed: ", e$message, "</p>")
+                    paste0("<h4>Sensitivity Analysis</h4><p>Failed: ", htmltools::htmlEscape(e$message), "</p>")
                 )
             })
         },

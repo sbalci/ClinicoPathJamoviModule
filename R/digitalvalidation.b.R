@@ -322,9 +322,9 @@ digitalvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             data <- image$state
             
             # Create validation plot (reference vs test with Bland-Altman inset)
-            library(ggplot2)
-            library(gridExtra)
-            
+            # ggplot2 functions are referenced via the ggplot2:: namespace below,
+            # so attaching the package to the search path is unnecessary.
+
             # Main scatter plot
             p1 <- ggplot2::ggplot(data.frame(Reference = data$reference, Test = data$test), 
                                  ggplot2::aes(x = Reference, y = Test)) +
@@ -350,8 +350,8 @@ digitalvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             data <- image$state
             
             # Create residual plots for validation
-            library(ggplot2)
-            
+            # ggplot2 functions are referenced via the ggplot2:: namespace below.
+
             # Bland-Altman plot with regression line
             mean_diff <- mean(data$differences)
             sd_diff <- sd(data$differences)

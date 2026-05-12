@@ -133,7 +133,8 @@ classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
                 }
                 
             }, error = function(e) {
-                error_msg <- paste("Error in power calculation:", e$message)
+                error_msg <- paste("Error in power calculation:",
+                                   htmltools::htmlEscape(conditionMessage(e)))
                 self$results$power_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
@@ -481,8 +482,15 @@ classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
         },
         
         .plot_power_curve = function(image, ggtheme, theme, ...) {
+            # TODO (forward-looking): ggplot2 (and gsDesign at line ~99) should
+            # be declared in DESCRIPTION under `Imports:` (or `Depends:` for
+            # core dependencies) so jamovi's package manager pulls them in at
+            # module install time. The runtime requireNamespace() + reject()
+            # fallback here and at line ~552 is fine as a guard but module-level
+            # declaration is the canonical jamovi-module convention. Same
+            # concern noted for biomarkerdiscovery and causalmediation.
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                stop("Package 'ggplot2' is required for power curve plots.")
+                jmvcore::reject("Package 'ggplot2' is required for power curve plots.")
             }
             
             if (is.null(private$.results_data)) {
@@ -548,7 +556,7 @@ classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
         
         .plot_timeline = function(image, ggtheme, theme, ...) {
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                stop("Package 'ggplot2' is required for timeline plots.")
+                jmvcore::reject("Package 'ggplot2' is required for timeline plots.")
             }
             
             if (is.null(private$.results_data) || private$.results_data$method != "Lachin-Foulkes") {
@@ -563,6 +571,14 @@ classicalSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             }
             
             # Create timeline plot
+            # TODO (correctness): as.numeric(phase) below relies on factor level
+            # indices (1, 2, 3) for ggplot Y-position. timeline_data is built
+            # internally so phase is always a plain factor without jamovi
+            # `values` attribute — current code is correct. If timeline_data
+            # is ever sourced from a jamovi-loaded column, jmvcore::toNumeric()
+            # would return label values instead of indices, breaking
+            # positioning. Same factor-coding ambiguity flagged at
+            # R/betabinomialdiagnostic.b.R:200 and R/biomarkerdiscovery.b.R:391.
             p <- ggplot2::ggplot(timeline_data, ggplot2::aes(x = time, y = phase, fill = phase)) +
                 ggplot2::geom_rect(
                     ggplot2::aes(xmin = start, xmax = end, ymin = as.numeric(phase) - 0.4, ymax = as.numeric(phase) + 0.4),

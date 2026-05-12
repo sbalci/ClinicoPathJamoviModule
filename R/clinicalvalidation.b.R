@@ -160,16 +160,17 @@ clinicalvalidationClass <- R6::R6Class(
         # Create formula
         if (nchar(self$options$model_formula) > 0) {
           formula_str <- self$options$model_formula
+        } else if (self$options$model_type == "cox") {
+          formula_str <- paste("Surv(", jmvcore::composeTerm(time_var), ",", jmvcore::composeTerm(outcome_var), ") ~",
+                              paste(jmvcore::composeTerms(as.list(predictor_vars)), collapse = " + "))
         } else {
-          if (self$options$model_type == "cox") {
-            formula_str <- paste("Surv(", time_var, ",", outcome_var, ") ~", paste(predictor_vars, collapse = " + "))
-          } else {
-            target_var <- if (self$options$model_type %in% c("logistic", "random_forest", "svm", "lda")) "outcome_binary" else outcome_var
-            formula_str <- paste(target_var, "~", paste(predictor_vars, collapse = " + "))
-          }
+          target_var <- if (self$options$model_type %in% c("logistic", "random_forest", "svm", "lda")) "outcome_binary" else outcome_var
+          formula_str <- jmvcore::constructFormula(target_var, predictor_vars)
         }
-        
-        model_formula <- as.formula(formula_str)
+
+        # asFormula allowlist-validates user-typed `model_formula` strings and
+        # backtick-escaped column names; Surv must be opt-in for the Cox branch.
+        model_formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("Surv"))
         
         # Fit model based on type
         model <- switch(
@@ -242,6 +243,17 @@ clinicalvalidationClass <- R6::R6Class(
       # Stratified or simple random folds
       if (self$options$stratified_sampling && "outcome_binary" %in% names(data)) {
         # Stratified by outcome
+        # TODO (correctness): `as.numeric(factor)` here and at 7 other sites
+        # depends on factor LEVEL INDICES {1, 2}. This file uses the {1, 2}
+        # encoding (positive = 2) at L<this>+1, L<this>; the `- 1` patterns
+        # at L518, L630, L1353 expect indices {1, 2} → {0, 1}. Plus model-
+        # prediction conversions at L482, L488, L494. All are fragile if the
+        # factor has a `values = c(0, 1)` attribute (jmvcore coding) — would
+        # produce {0, 1} pre-subtraction and break the indexing logic.
+        # Replace each site with a robust position-based encoder, e.g.:
+        #   pos_idx <- which(as.character(data$outcome_binary) ==
+        #                    levels(data$outcome_binary)[2])
+        # Or build outcome_binary explicitly with known levels at construction.
         pos_idx <- which(as.numeric(data$outcome_binary) == 2)
         neg_idx <- which(as.numeric(data$outcome_binary) == 1)
 
@@ -712,13 +724,14 @@ clinicalvalidationClass <- R6::R6Class(
 
         # Create formula
         if (model_type == "cox") {
-          formula_str <- paste("Surv(", time_var, ",", outcome_var, ") ~", paste(predictor_vars, collapse = " + "))
+          formula_str <- paste("Surv(", jmvcore::composeTerm(time_var), ",", jmvcore::composeTerm(outcome_var), ") ~",
+                              paste(jmvcore::composeTerms(as.list(predictor_vars)), collapse = " + "))
         } else {
           target_var <- if (model_type %in% c("logistic", "random_forest", "svm", "lda")) "outcome_binary" else outcome_var
-          formula_str <- paste(target_var, "~", paste(predictor_vars, collapse = " + "))
+          formula_str <- jmvcore::constructFormula(target_var, predictor_vars)
         }
 
-        model_formula <- as.formula(formula_str)
+        model_formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("Surv"))
 
         # Fit model based on type
         model <- switch(
@@ -806,10 +819,13 @@ clinicalvalidationClass <- R6::R6Class(
       model <- model_results$model
       model_type <- model_results$model_type
       
+      # The deparsed formula contains user column names (and possibly the
+      # user-typed `model_formula` String option text); escape before HTML.
+      formula_text <- htmltools::htmlEscape(paste(deparse(model_results$formula), collapse = " "))
       html <- paste0(
         "<h3>Model Summary</h3>",
         "<p><strong>Model Type:</strong> ", tools::toTitleCase(gsub("_", " ", model_type)), "</p>",
-        "<p><strong>Formula:</strong> ", deparse(model_results$formula), "</p>",
+        "<p><strong>Formula:</strong> ", formula_text, "</p>",
         "<p><strong>Number of Observations:</strong> ", nobs(model), "</p>"
       )
       
@@ -1142,14 +1158,18 @@ clinicalvalidationClass <- R6::R6Class(
         ci_text <- sprintf(" (95%% CI: %.3f-%.3f)", ci_low, ci_high)
       }
 
+      # Escape user-controlled column names for HTML interpolation below
+      outcome_esc <- htmltools::htmlEscape(self$options$outcome)
+      predictors_esc <- paste(htmltools::htmlEscape(self$options$predictors), collapse = ", ")
+
       # Build comprehensive report
       html <- paste0(
         "<h2>Clinical Model Validation Report</h2>",
         "<h3>Model Specification</h3>",
         "<ul>",
         "<li><strong>Model Type:</strong> ", tools::toTitleCase(gsub("_", " ", model_results$model_type)), "</li>",
-        "<li><strong>Outcome:</strong> ", self$options$outcome, "</li>",
-        "<li><strong>Predictors:</strong> ", paste(self$options$predictors, collapse = ", "), "</li>",
+        "<li><strong>Outcome:</strong> ", outcome_esc, "</li>",
+        "<li><strong>Predictors:</strong> ", predictors_esc, "</li>",
         "<li><strong>Sample Size:</strong> ", nobs(model_results$model), "</li>",
         "<li><strong>Validation Method:</strong> ", tools::toTitleCase(gsub("_", " ", self$options$validation_method)), "</li>",
         "</ul>",
@@ -1196,12 +1216,12 @@ clinicalvalidationClass <- R6::R6Class(
         )
       }
 
-      # Add copy-ready text
+      # Add copy-ready text (reuse outcome_esc / predictors_esc from above)
       html <- paste0(html,
         "<h3>Copy-Ready Report Text</h3>",
         "<div style='background: #f9f9f9; border-left: 4px solid #007bff; padding: 15px; margin: 10px 0;'>",
-        "<p><strong>Methods:</strong> We developed a ", model_results$model_type, " model to predict ", self$options$outcome,
-        " using ", length(self$options$predictors), " predictor variables (", paste(self$options$predictors, collapse = ", "),
+        "<p><strong>Methods:</strong> We developed a ", model_results$model_type, " model to predict ", outcome_esc,
+        " using ", length(self$options$predictors), " predictor variables (", predictors_esc,
         ") in ", nobs(model_results$model), " patients. Model performance was assessed using ", self$options$validation_method,
         " validation", if (self$options$validation_method == "bootstrap") paste0(" with ", self$options$bootstrap_samples, " resamples") else "", ".</p>",
 

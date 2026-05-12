@@ -159,6 +159,14 @@ cochranqClass <- R6::R6Class(
                 var_data <- self$data[[var_name]]
                 
                 # Convert to binary (0/1)
+                # TODO (correctness): the `as.numeric(factor) - 1` branch maps
+                # factor LEVEL INDICES {1, 2} to {0, 1}. Fragile if jmvcore
+                # hands in a factor with `values = c(0, 1)` attribute — would
+                # produce {-1, 0}. Replace with a position-based encoder:
+                #   var_data <- as.integer(var_data == levels(var_data)[2])
+                # which always returns {0, 1} regardless of values attribute.
+                # The else branch (numeric input) at L<this>+~5 is also a no-op
+                # (var_data is already numeric) — could be dropped for cleanup.
                 if (is.factor(var_data)) {
                     var_data <- as.numeric(var_data) - 1
                 } else if (is.logical(var_data)) {
@@ -168,6 +176,13 @@ cochranqClass <- R6::R6Class(
                 }
                 
                 data_matrix[[paste0("var", i)]] <- var_data
+                # TODO (forward-looking): `var_name` is a user-selected column
+                # name preserved verbatim in the *_name companion columns. Used
+                # only internally today (not rendered to HTML), but if any
+                # future feature renders these names in a setContent panel —
+                # e.g. a "Variables Analyzed: X, Y, Z" summary — wrap each in
+                # htmltools::htmlEscape() at the rendering point. Cross-module
+                # idiom: R/clinicalvalidation.b.R:1148-1150.
                 data_matrix[[paste0("var", i, "_name")]] <- rep(var_name, length(var_data))
             }
             
@@ -272,14 +287,27 @@ cochranqClass <- R6::R6Class(
                 return(result)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Error performing Cochran's Q test:", e$message))
+                safe_msg <- htmltools::htmlEscape(e$message)
+                self$results$instructions$setContent(paste("Error performing Cochran's Q test:", safe_msg))
                 return(NULL)
             })
         },
         
         # Exact Cochran's Q test (simplified)
         .exactCochranQ = function(data_matrix, observed_q) {
-            
+
+            # TODO (correctness): this is a permutation-approximation, not a
+            # true exact test. Caps at min(1000, factorial(ncol)) permutations
+            # which for 4+ treatments exceeds 1000 and randomly samples; for
+            # ≤3 treatments enumerates all column permutations but may not
+            # cover the full sample space (only column-permutes, not the
+            # full subject-by-subject permutation). Either:
+            #   (a) clearly label this output as "approximate exact (Monte
+            #       Carlo)" in the results so users don't mistake it for a
+            #       true exact test, or
+            #   (b) implement a proper exact algorithm (e.g., enumerate all
+            #       2^(n*k) binary matrices with fixed row+column sums) for
+            #       small problems and fall back to MC for large ones.
             # Simplified exact test using permutation
             # In practice, would need more sophisticated exact calculation
             

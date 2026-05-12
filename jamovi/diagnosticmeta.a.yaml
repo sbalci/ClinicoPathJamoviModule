@@ -1,7 +1,7 @@
 ---
 name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
-menuGroup: OncoPath
+menuGroup: OncoPathT
 menuSubgroup: IHC Analysis
 version: '0.0.38'
 jas: '1.2'

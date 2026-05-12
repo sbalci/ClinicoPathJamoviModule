@@ -15,12 +15,6 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
         .notices = list(),  # Track notices to avoid serialization issues
 
         #' @keywords internal
-        .escapeVar = function(x) {
-            # Escape variable names with spaces/special characters
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-        },
-
-        #' @keywords internal
         .addNotice = function(name, type, content) {
             # Helper to safely add notices without serialization issues
             # Only create notice if it doesn't already exist for this run
@@ -649,7 +643,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
                 table_html <- paste0(table_html,
                     "<div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-top: 20px;'>",
-                    "<h4>", var_name, " - Success Rate: ", var_success, "/", var_total, " (", var_rate, "%)</h4>"
+                    "<h4>", htmltools::htmlEscape(var_name), " - Success Rate: ", var_success, "/", var_total, " (", var_rate, "%)</h4>"
                 )
 
                 # Show first few examples
@@ -670,7 +664,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                         row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                         if (!result$success[i]) row_bg <- "#ffebee"
 
-                        original_val <- if (is.na(result$original[i])) "NA" else as.character(result$original[i])
+                        original_val <- if (is.na(result$original[i])) "NA" else htmltools::htmlEscape(as.character(result$original[i]))
                         corrected_val <- if (is.na(result$corrected[i])) "NA" else as.character(result$corrected[i])
                         status <- if (result$success[i]) "" else ""
                         method <- result$method_used[i] %||% "unknown"
@@ -791,7 +785,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                     if (err_msg != "") {
                         count <- sorted_errors[[err_msg]]
                         quality_html <- paste0(quality_html,
-                            "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", err_msg, "</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", count, " occurrences</td></tr>"
+                            "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", htmltools::htmlEscape(err_msg), "</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", count, " occurrences</td></tr>"
                         )
                     }
                 }
@@ -907,7 +901,13 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                 "<li><strong>Missing Day Imputation:</strong> ", self$options$day_impute, "</li>",
                 "<li><strong>Missing Month Imputation:</strong> ", self$options$month_impute, "</li>",
                 "<li><strong>Excel Date Handling:</strong> ", if(self$options$handle_excel) "Enabled" else "Disabled", "</li>",
-                "<li><strong>Output Timezone:</strong> ", self$options$timezone, "</li>",
+                # TODO (forward-looking): timezone OptionString is NOT validated against `OlsonNames()` before
+                #   display or before being passed to anytime::anytime (L459) / lubridate (L489).
+                #   `htmltools::htmlEscape` here is the sole XSS defense. datetimeconverter validates via
+                #   `OlsonNames()` and falls back to system default for invalid values — adding the same
+                #   `.resolveTimezone` pattern here would (a) reject typos earlier with a clear notice and
+                #   (b) provide defense-in-depth if the escape is ever accidentally removed.
+                "<li><strong>Output Timezone:</strong> ", htmltools::htmlEscape(self$options$timezone), "</li>",
                 "</ul>",
 
                 "<h4 style='color: #2e7d32;'>Next Steps:</h4>",

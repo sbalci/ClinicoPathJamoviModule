@@ -1,7 +1,7 @@
 ---
 name: optimalcutpoint
 title: Optimal Cutpoint Determination
-menuGroup: ClinicoPathD
+menuGroup: ClinicoPathT
 menuSubgroup: Inferential
 menuTitle: Optimal Cutpoint Determination
 menuSubtitle: Find optimal thresholds for continuous biomarkers
@@ -178,10 +178,30 @@ options:
           - name: "holm"
             title: "Holm"
           - name: "miller_siegmund"
-            title: "Miller-Siegmund"
+            title: "Miller-Siegmund (asymptotic)"
+          - name: "monte_carlo"
+            title: "Monte-Carlo permutation (X-tile-style)"
       default: "miller_siegmund"
       description:
-          R: Multiple testing correction for cutpoint selection
+          R: >
+            Multiple-testing correction for cut-point selection. For survival
+            cut-points the article default Miller-Siegmund uses the
+            Lausen-Schumacher / Hothorn-Lausen asymptotic correction
+            (maxstat::maxstat.test pmethod="HL"); selecting "monte_carlo"
+            performs a permutation-based correction analogous to X-tile
+            (Camp 2004, Clin Cancer Res), which is more robust for small
+            samples or non-Gaussian biomarker distributions.
+
+    - name: nperm
+      title: Number of Monte-Carlo permutations
+      type: Integer
+      min: 200
+      max: 50000
+      default: 2000
+      description:
+          R: >
+            Number of permutations used when multiple_testing = "monte_carlo".
+            Increase for more stable corrected p-values at the cost of runtime.
 
     - name: plot_roc
       title: ROC Curve Plot

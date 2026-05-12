@@ -129,8 +129,8 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
             }, error = function(e) {
                 self$results$todo$setContent(
-                    paste0("<html><body><h3> Analysis Error</h3><p>", 
-                           e$message, "</p></body></html>")
+                    paste0("<html><body><h3> Analysis Error</h3><p>",
+                           htmltools::htmlEscape(e$message), "</p></body></html>")
                 )
             })
         },
@@ -145,11 +145,11 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             # Validate data
             if (any(is.na(data[[elapsedtime]]))) {
-                stop("Time variable contains missing values")
+                jmvcore::reject("Time variable contains missing values", code = NULL)
             }
-            
+
             if (any(data[[elapsedtime]] <= 0)) {
-                stop("Time variable must be positive")
+                jmvcore::reject("Time variable must be positive", code = NULL)
             }
             
             # Prepare outcome variable
@@ -177,7 +177,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             clean_data <- clean_data[complete.cases(clean_data), ]
             
             if (nrow(clean_data) == 0) {
-                stop("No complete cases available for analysis")
+                jmvcore::reject("No complete cases available for analysis", code = NULL)
             }
             
             return(clean_data)
@@ -199,15 +199,17 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 selected_dists <- c("weibull", "exponential", "lognormal", "loglogistic", "gamma")
             }
             
-            # Build formula
+            # Build formula — composeTerms backtick-escapes user column names;
+            # asFormula validates against jamovi's allow-list (Surv is allow-listed).
             explanatory <- self$options$explanatory
             if (length(explanatory) > 0) {
-                formula_str <- paste("Surv(time, event) ~", paste(explanatory, collapse = " + "))
+                formula_str <- paste0("Surv(time, event) ~ ",
+                                      jmvcore::composeTerms(as.list(explanatory)))
             } else {
                 formula_str <- "Surv(time, event) ~ 1"
             }
-            
-            formula_obj <- as.formula(formula_str)
+
+            formula_obj <- jmvcore::asFormula(formula_str)
             
             fitted_models <- list()
             
@@ -248,7 +250,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
             
             if (length(fitted_models) == 0) {
-                stop("No distributions converged successfully")
+                jmvcore::reject("No distributions converged successfully", code = NULL)
             }
             
             return(fitted_models)

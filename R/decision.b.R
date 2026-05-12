@@ -1571,13 +1571,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Consolidated content generation with enhanced error handling
                 test_label <- if (length(self$options$newtest) > 0) {
-                    paste(self$options$newtest, collapse = ", ")
+                    private$.safeHtmlOutput(paste(self$options$newtest, collapse = ", "))
                 } else {
                     "Test"
                 }
 
                 gold_label <- if (length(self$options$gold) > 0) {
-                    paste(self$options$gold, collapse = ", ")
+                    private$.safeHtmlOutput(paste(self$options$gold, collapse = ", "))
                 } else {
                     "Reference"
                 }

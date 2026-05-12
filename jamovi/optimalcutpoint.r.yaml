@@ -21,6 +21,8 @@ items:
           - status_var
           - analysis_type
           - cutpoint_method
+          - multiple_testing
+          - nperm
       columns: []
 
     - name: performance

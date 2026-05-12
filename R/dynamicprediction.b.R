@@ -129,7 +129,8 @@ dynamicpredictionClass <- R6::R6Class(
                 
             }, error = function(e) {
                 self$results$todo$setVisible(TRUE)
-                error_msg <- paste0('<h3>Analysis Error</h3><p><b>Error:</b> ', e$message, '</p>')
+                error_msg <- paste0('<h3>Analysis Error</h3><p><b>Error:</b> ',
+                                    htmltools::htmlEscape(e$message), '</p>')
                 
                 if (grepl("longitudinal|biomarker", e$message, ignore.case = TRUE)) {
                     error_msg <- paste0(error_msg, 
@@ -231,7 +232,7 @@ dynamicpredictionClass <- R6::R6Class(
         .performLandmarkPrediction = function(data) {
             # Landmark approach for dynamic prediction
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("survival package required but not available")
+                jmvcore::reject("survival package required but not available", code = NULL)
             }
             
             # Parse landmark times
@@ -271,9 +272,13 @@ dynamicpredictionClass <- R6::R6Class(
                 }
                 
                 if (length(formula_vars) > 0) {
-                    formula_str <- paste("Surv(time_adj, event) ~", paste(formula_vars, collapse = " + "))
-                    formula_obj <- as.formula(formula_str)
-                    
+                    # composeTerms backtick-escapes user column names; asFormula
+                    # validates against jamovi's allow-list (Surv is allow-listed).
+                    formula_str <- paste0("Surv(time_adj, event) ~ ",
+                                          jmvcore::composeTerms(as.list(formula_vars)))
+                    formula_obj <- jmvcore::asFormula(formula_str,
+                                                     additional_allowed_functions = c("Surv"))
+
                     cox_model <- survival::coxph(formula_obj, data = survivors)
                     
                     # Make predictions
@@ -322,7 +327,7 @@ dynamicpredictionClass <- R6::R6Class(
         .performDynamicCox = function(data) {
             # Dynamic Cox model with time-varying coefficients
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("survival package required but not available")
+                jmvcore::reject("survival package required but not available", code = NULL)
             }
             
             # This is a simplified implementation
@@ -336,11 +341,15 @@ dynamicpredictionClass <- R6::R6Class(
                 # Create time-varying dataset
                 tv_data <- private$.createTimeVaryingData(data)
                 
-                # Fit time-varying Cox model
+                # Fit time-varying Cox model — composeTerms backtick-escapes
+                # user column names; asFormula validates against jamovi's
+                # allow-list (Surv is allow-listed).
                 formula_vars <- c(self$options$baseline, self$options$longitudinal)
-                formula_str <- paste("Surv(tstart, tstop, event) ~", paste(formula_vars, collapse = " + "))
-                formula_obj <- as.formula(formula_str)
-                
+                formula_str <- paste0("Surv(tstart, tstop, event) ~ ",
+                                      jmvcore::composeTerms(as.list(formula_vars)))
+                formula_obj <- jmvcore::asFormula(formula_str,
+                                                 additional_allowed_functions = c("Surv"))
+
                 cox_model <- survival::coxph(formula_obj, data = tv_data)
                 results$model <- cox_model
                 
@@ -888,11 +897,15 @@ dynamicpredictionClass <- R6::R6Class(
             }
             
             if (length(self$options$baseline) > 0) {
-                html <- paste0(html, '<p><b>Baseline Variables:</b> ', paste(self$options$baseline, collapse = ", "), '</p>')
+                html <- paste0(html, '<p><b>Baseline Variables:</b> ',
+                              htmltools::htmlEscape(paste(self$options$baseline, collapse = ", ")),
+                              '</p>')
             }
-            
+
             if (length(self$options$longitudinal) > 0) {
-                html <- paste0(html, '<p><b>Longitudinal Biomarkers:</b> ', paste(self$options$longitudinal, collapse = ", "), '</p>')
+                html <- paste0(html, '<p><b>Longitudinal Biomarkers:</b> ',
+                              htmltools::htmlEscape(paste(self$options$longitudinal, collapse = ", ")),
+                              '</p>')
             }
             
             html <- paste0(html, '<h4>Clinical Utility:</h4>

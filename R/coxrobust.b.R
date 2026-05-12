@@ -208,16 +208,16 @@ coxrobustClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Build formula
             if (is.null(covariates) || length(covariates) == 0) {
-                formula <- as.formula("Surv(time, status) ~ 1")
+                formula <- jmvcore::asFormula("Surv(time, status) ~ 1")
             } else {
-                covar_formula <- paste(covariates, collapse = " + ")
+                covar_formula <- paste(vapply(covariates, jmvcore::composeTerm, character(1)), collapse = " + ")
                 if (!is.null(stratifyVar)) {
-                    formula <- as.formula(paste("Surv(time, status) ~", covar_formula, "+ strata(strata)"))
+                    formula <- jmvcore::asFormula(paste("Surv(time, status) ~", covar_formula, "+ strata(strata)"))
                 } else {
-                    formula <- as.formula(paste("Surv(time, status) ~", covar_formula))
+                    formula <- jmvcore::asFormula(paste("Surv(time, status) ~", covar_formula))
                 }
             }
-            
+
             # Fit standard Cox model
             tryCatch({
                 model <- survival::coxph(
@@ -248,16 +248,16 @@ coxrobustClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Build formula
             if (is.null(covariates) || length(covariates) == 0) {
-                formula <- as.formula("Surv(time, status) ~ 1")
+                formula <- jmvcore::asFormula("Surv(time, status) ~ 1")
             } else {
-                covar_formula <- paste(covariates, collapse = " + ")
+                covar_formula <- paste(vapply(covariates, jmvcore::composeTerm, character(1)), collapse = " + ")
                 if (!is.null(stratifyVar)) {
-                    formula <- as.formula(paste("Surv(time, status) ~", covar_formula, "+ strata(strata)"))
+                    formula <- jmvcore::asFormula(paste("Surv(time, status) ~", covar_formula, "+ strata(strata)"))
                 } else {
-                    formula <- as.formula(paste("Surv(time, status) ~", covar_formula))
+                    formula <- jmvcore::asFormula(paste("Surv(time, status) ~", covar_formula))
                 }
             }
-            
+
             # Check if coxrobust package is available
             if (requireNamespace("coxrobust", quietly = TRUE)) {
                 # Use coxrobust package implementation
@@ -285,7 +285,7 @@ coxrobustClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return(list(model = model, outliers = outliers, weights = weights, error = NULL))
                     
                 }, error = function(e) {
-                    error_msg <- paste("Robust Cox model fitting failed:", e$message)
+                    error_msg <- paste("Robust Cox model fitting failed:", htmltools::htmlEscape(e$message))
                     return(list(error = error_msg))
                 })
                 

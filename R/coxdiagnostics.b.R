@@ -109,7 +109,7 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             # Data validation
             if (nrow(self$data) == 0) {
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows")
             }
             
             # Package requirements check
@@ -222,18 +222,18 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
                 
                 # Fit Cox model
-                formula_obj <- as.formula(formula_str)
+                formula_obj <- jmvcore::asFormula(formula_str)
                 private$.cox_model <- survival::coxph(formula_obj, data = mydata)
                 
                 # Generate proportional hazards test
                 private$.zph_test <- survival::cox.zph(private$.cox_model)
                 
             }, error = function(e) {
-                error_msg <- paste("Error fitting Cox model:", e$message)
+                error_msg <- paste("Error fitting Cox model:", htmltools::htmlEscape(e$message))
                 self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
-        
+
         .generate_model_summary = function() {
             if (is.null(private$.cox_model)) return()
             
@@ -297,7 +297,7 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$results$model_summary$setContent(summary_html)
                 
             }, error = function(e) {
-                error_msg <- paste("Error generating model summary:", e$message)
+                error_msg <- paste("Error generating model summary:", htmltools::htmlEscape(e$message))
                 self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
@@ -356,7 +356,7 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$results$ph_test_results$setContent(ph_html)
                 
             }, error = function(e) {
-                error_msg <- paste("Error generating proportional hazards test:", e$message)
+                error_msg <- paste("Error generating proportional hazards test:", htmltools::htmlEscape(e$message))
                 self$results$ph_test_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
@@ -476,7 +476,7 @@ coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 self$results$vif_results$setContent(vif_html)
                 
             }, error = function(e) {
-                error_msg <- paste("Error calculating VIF:", e$message)
+                error_msg <- paste("Error calculating VIF:", htmltools::htmlEscape(e$message))
                 # Provide specific guidance for common VIF errors
                 if (grepl("aliased coefficients", e$message)) {
                     error_msg <- paste(error_msg, "This may indicate perfect multicollinearity or linear dependencies between variables.")

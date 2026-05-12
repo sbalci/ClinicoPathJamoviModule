@@ -311,21 +311,44 @@ ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
 
         .performCoxRegression = function() {
-            # Univariate Cox regression for each marker
+            # Univariate Cox regression for each marker. Two-pass to allow
+            # panel-wide multiplicity correction across the marker set.
             markers <- colnames(private$.ihc_matrix)
 
+            cox_results <- list()
             for (marker in markers) {
                 marker_data <- private$.ihc_matrix[, marker]
+                cox_results[[marker]] <- private$.calculateMarkerHR(
+                    marker_data, self$options$confidenceLevel
+                )
+            }
 
-                # Use refactored Cox calculation
-                cox_result <- private$.calculateMarkerHR(marker_data, self$options$confidenceLevel)
+            # Panel-wide adjustment of raw Cox p-values across markers.
+            fdr_method <- tryCatch(self$options$fdrMethod, error = function(e) "none")
+            if (is.null(fdr_method) || length(fdr_method) == 0) fdr_method <- "none"
+            raw_ps <- vapply(cox_results,
+                             function(x) suppressWarnings(as.numeric(x$p_value)),
+                             numeric(1))
+            if (fdr_method == "none") {
+                adj_ps <- raw_ps
+            } else {
+                adj_ps <- stats::p.adjust(raw_ps, method = fdr_method)
+            }
+
+            for (marker in markers) {
+                cox_result <- cox_results[[marker]]
+                adj_p <- adj_ps[[marker]]
 
                 if (!is.na(cox_result$hr)) {
                     ci_text <- sprintf("%.3f - %.3f", cox_result$ci_lower, cox_result$ci_upper)
-                    significance <- private$.getSignificance(cox_result$p_value)
-
-                    # Get clinical interpretation
-                    interpretation <- private$.interpretHazardRatio(cox_result$hr, cox_result$p_value, marker)
+                    # Use the adjusted p when reporting significance so the
+                    # asterisks in the table reflect panel-wide multiplicity.
+                    significance <- private$.getSignificance(
+                        if (fdr_method == "none") cox_result$p_value else adj_p
+                    )
+                    interpretation <- private$.interpretHazardRatio(
+                        cox_result$hr, cox_result$p_value, marker
+                    )
 
                     self$results$coxResults$addRow(
                         rowKey = marker,
@@ -334,6 +357,7 @@ ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             hazard_ratio = cox_result$hr,
                             hr_95ci = ci_text,
                             p_value = cox_result$p_value,
+                            p_adjusted = adj_p,
                             significance = significance,
                             clinical_interpretation = interpretation$clinical
                         )
@@ -346,6 +370,7 @@ ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             hazard_ratio = NA,
                             hr_95ci = "Not estimable",
                             p_value = NA,
+                            p_adjusted = NA,
                             significance = "",
                             clinical_interpretation = "Unable to determine clinical significance"
                         )
@@ -376,6 +401,7 @@ ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             hazard_ratio = hr_risk,
                             hr_95ci = ci_text_risk,
                             p_value = p_val_risk,
+                            p_adjusted = NA_real_,
                             significance = significance_risk
                         )
                     )

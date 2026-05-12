@@ -140,6 +140,7 @@ conditionalgeeClass <- R6::R6Class(
             event_data <- as.numeric(data[[event]])
             
             # Check for valid data
+            # TODO (UX): this validation path renders an error via `self$results$todo$setContent(<html>) + return()` rather than `jmvcore::reject()`. Switching would unify the error surface with the rest of the module (one structured error path), but it changes what the user sees, so it was deferred from the /jamovify-function pass. The same setContent-based error pattern is also used in the .fitConditionalGEE tryCatch error handler around L297-301.
             if (any(is.na(gap_time_data)) || any(is.na(event_data)) || any(is.na(subject_data))) {
                 self$results$todo$setContent("<p>Error: Missing values detected in required variables.</p>")
                 return(list(prepared_data = NULL))
@@ -248,9 +249,11 @@ conditionalgeeClass <- R6::R6Class(
                 }
                 
                 # Create formula
+                # TODO (forward-looking): the term-and-paste shape below could collapse to a single jmvcore::constructFormula("gap_time", as.list(formula_terms)) call once we verify the signature in the local jmvcore version. Drop-in equivalent (composeTerm is what constructFormula uses internally); deferred from the /jamovify-function pass to keep the migration minimal.
                 if (length(formula_terms) > 0) {
-                    formula_str <- paste("gap_time ~", paste(formula_terms, collapse = " + "))
-                    model_formula <- as.formula(formula_str)
+                    rhs <- paste(vapply(formula_terms, jmvcore::composeTerm, character(1)), collapse = " + ")
+                    formula_str <- paste("gap_time ~", rhs)
+                    model_formula <- jmvcore::asFormula(formula_str)
                 } else {
                     model_formula <- gap_time ~ 1
                 }
@@ -275,7 +278,7 @@ conditionalgeeClass <- R6::R6Class(
                 complete_data <- prepared_data[complete.cases(prepared_data), ]
                 
                 if (nrow(complete_data) == 0) {
-                    stop("No complete cases available after conditioning")
+                    jmvcore::reject("No complete cases available after conditioning")
                 }
 
                 # Fit GEE model
@@ -292,7 +295,7 @@ conditionalgeeClass <- R6::R6Class(
                 return(fit)
                 
             }, error = function(e) {
-                error_msg <- paste("Conditional GEE model fitting error:", e$message)
+                error_msg <- paste("Conditional GEE model fitting error:", htmltools::htmlEscape(e$message))
                 self$results$todo$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
                 return(NULL)
             })

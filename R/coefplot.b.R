@@ -131,9 +131,10 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                     }
 
                 }, error = function(e) {
+                    safe_msg <- htmltools::htmlEscape(e$message)
                     error_msg <- paste0(
                         "<div style='color: red; font-weight: bold;'>",
-                        "Error in regression analysis: ", e$message,
+                        "Error in regression analysis: ", safe_msg,
                         "<br><br>",
                         "Please check your variable selections and model specification.",
                         "</div>"
@@ -147,9 +148,10 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
 
                 dep_var <- self$options$dep
 
-                # Build formula
-                formula_str <- paste(dep_var, "~", paste(covariates, collapse = " + "))
-                formula_obj <- as.formula(formula_str)
+                # Build formula via jmvcore for backtick-safe terms +
+                # allowlist-validated parsing (closes Cat C1 RCE on user
+                # column names + jamovi 2.7.27 compat).
+                formula_obj <- jmvcore::asFormula(jmvcore::constructFormula(dep_var, covariates))
 
                 # Fit model based on type
                 model_type <- self$options$model_type
@@ -172,9 +174,13 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                         stop("The 'survival' package is required for Cox regression")
                     }
                     time_var <- self$options$time_var
-                    # Create survival object
-                    surv_formula_str <- paste("survival::Surv(", time_var, ",", dep_var, ") ~", paste(covariates, collapse = " + "))
-                    surv_formula <- as.formula(surv_formula_str)
+                    # Create survival formula via jmvcore::asFormula with
+                    # Surv allowlisted for jamovi 2.7.27 compat; column names
+                    # backtick-escaped to close C1 RCE.
+                    surv_formula <- jmvcore::asFormula(
+                        paste("Surv(", jmvcore::composeTerm(time_var), ",", jmvcore::composeTerm(dep_var), ") ~",
+                              paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")),
+                        additional_allowed_functions = c("Surv"))
                     model <- survival::coxph(surv_formula, data = data)
                 } else if (model_type == "poisson") {
                     model <- glm(formula_obj, data = data, family = poisson(link = "log"))
@@ -309,8 +315,10 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                                         "Regression Model")
 
                 html_content <- paste0(html_content, "<h4>", model_type_name, "</h4>")
+                # Escape formula text — contains user-selected column names
+                formula_text <- htmltools::htmlEscape(paste(deparse(formula(model)), collapse = " "))
                 html_content <- paste0(html_content, "<p><strong>Formula:</strong> ",
-                                     deparse(formula(model)), "</p>")
+                                     formula_text, "</p>")
 
                 # Sample size
                 n_obs <- nobs(model)
@@ -443,8 +451,11 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                         ci_upper <- ci_results[i, 2]
                     }
 
+                    # Escape coefficient label for HTML — rownames may contain
+                    # user column names + factor level labels
+                    var_name_esc <- htmltools::htmlEscape(var_name)
                     html_content <- paste0(html_content, "<tr>")
-                    html_content <- paste0(html_content, "<td><strong>", var_name, "</strong></td>")
+                    html_content <- paste0(html_content, "<td><strong>", var_name_esc, "</strong></td>")
                     html_content <- paste0(html_content, "<td>", round(coef_val, 4), "</td>")
                     html_content <- paste0(html_content, "<td>", round(se_val, 4), "</td>")
                     html_content <- paste0(html_content, "<td>", round(p_val, 4), "</td>")

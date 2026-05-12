@@ -213,6 +213,16 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 self$results$todo$setContent(intro_msg)
 
                 # Add ERROR notice for missing variables
+                # TODO (jamovify): this file uses the dynamic
+                # `self$results$insert(N, notice)` pattern with jmvcore::Notice
+                # objects — see all 10 sites at L<this>+1, L238, L267, L320,
+                # L339, L353, L378, L545, L1460, L1472. Per CLAUDE.md and
+                # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md, this pattern can
+                # cause protobuf serialization errors because Notice objects
+                # contain function references. Convert to the .addNotice() +
+                # .renderNotices() HTML-output pattern (see R/waterfall.b.R for
+                # the reference implementation). Tracked here for context, not
+                # urgent — no current crashes reported.
                 notice <- jmvcore::Notice$new(
                     options = self$options,
                     name = 'missingRequiredVars',
@@ -422,7 +432,9 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             if (!is.null(self$options$annotationCols) && length(self$options$annotationCols) > 0) {
                 col_ann_html <- paste0(
                     "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
-                    "<p><strong>Column Annotations:</strong> ", paste(self$options$annotationCols, collapse = ", "), "</p>",
+                    "<p><strong>Column Annotations:</strong> ",
+                    paste(htmltools::htmlEscape(self$options$annotationCols), collapse = ", "),
+                    "</p>",
                     "</div>"
                 )
                 self$results$annotations$columnAnnotations$setContent(col_ann_html)
@@ -431,7 +443,9 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             if (!is.null(self$options$annotationRows) && length(self$options$annotationRows) > 0) {
                 row_ann_html <- paste0(
                     "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
-                    "<p><strong>Row Annotations:</strong> ", paste(self$options$annotationRows, collapse = ", "), "</p>",
+                    "<p><strong>Row Annotations:</strong> ",
+                    paste(htmltools::htmlEscape(self$options$annotationRows), collapse = ", "),
+                    "</p>",
                     "</div>"
                 )
                 self$results$annotations$rowAnnotations$setContent(row_ann_html)
@@ -560,6 +574,20 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             value_var <- plot_data$value_var
             options <- plot_data$options
 
+            # TODO (UX): this file has 13 tryCatch blocks that silently swallow
+            # errors (return NULL or empty {}) — failures are invisible to the
+            # user. Sites: L<this>, L640, L704, L1268, L1332, L1407, L1502,
+            # L1516, L1540, L1549, L1622, L1653, L1685.
+            # Convert at least the user-facing ones to surface error messages
+            # via the existing notice infrastructure, e.g.:
+            #   error = function(e) {
+            #     msg <- htmltools::htmlEscape(jmvcore::extractErrorMessage(e))
+            #     notice <- jmvcore::Notice$new(...)
+            #     notice$setContent(paste("Step failed:", msg))
+            #     self$results$insert(999, notice)
+            #   }
+            # so users know why a panel is empty.
+            #
             # Safely create heatmap with error handling
             tryCatch({
                 # Load required packages
@@ -790,7 +818,8 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             missing_vars <- setdiff(required_vars, names(dataset))
             if (length(missing_vars) > 0) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Variables not found in dataset:", paste(missing_vars, collapse = ", ")))
+                    paste("Variables not found in dataset:",
+                          paste(htmltools::htmlEscape(missing_vars), collapse = ", ")))
                 validation_results$should_stop <- TRUE
                 return(validation_results)
             }
@@ -798,7 +827,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             # Check value variable is numeric
             if (!is.numeric(dataset[[value_var]])) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Value variable", value_var, "must be numeric"))
+                    paste("Value variable", htmltools::htmlEscape(value_var), "must be numeric"))
                 validation_results$should_stop <- TRUE
                 return(validation_results)
             }
@@ -841,6 +870,15 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             return(validation_results)
         },
 
+        # TODO (forward-looking): the for-loops below interpolate strings from
+        # validation_results$errors / $warnings / $info directly into <li> tags
+        # via paste0(). Today this is safe because the user-controlled values
+        # in those strings (column names from .validateInputs L793/L801) are
+        # already wrapped in htmltools::htmlEscape() at construction. If new
+        # validation messages are added that interpolate user-controlled data
+        # (column names, factor levels, free-text option strings), they MUST
+        # likewise escape at construction — OR this rendering point should be
+        # rewritten to escape uniformly here as defense-in-depth.
         .generateValidationSummary = function(validation_results) {
             html_content <- "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>"
             html_content <- paste0(html_content, "<h4 style='color: #495057; margin-top: 0;'> Data Validation Summary</h4>")
@@ -979,13 +1017,17 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             n_cols <- length(unique(data[[col_var]]))
             n_obs <- nrow(data)
 
+            # Escape user-controlled column names for HTML interpolation below
+            row_var_esc <- htmltools::htmlEscape(row_var)
+            col_var_esc <- htmltools::htmlEscape(col_var)
+
             mean_val <- round(mean(data[[value_var]], na.rm = TRUE), 2)
             sd_val <- round(stats::sd(data[[value_var]], na.rm = TRUE), 2)
 
             clinical_summary <- paste0(
                 "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'>",
                 "<h4 style='color: #2980b9; margin-top: 0;'> Clinical Summary</h4>",
-                "<p><strong>Dataset Overview:</strong> ", n_obs, " observations across ", n_rows, " ", row_var, " and ", n_cols, " ", col_var, "</p>",
+                "<p><strong>Dataset Overview:</strong> ", n_obs, " observations across ", n_rows, " ", row_var_esc, " and ", n_cols, " ", col_var_esc, "</p>",
                 "<p><strong>Value Distribution:</strong> Mean = ", mean_val, " (SD = ", sd_val, ")</p>",
                 "<p><strong>Scaling Method:</strong> ", switch(self$options$scaleMethod,
                     "none" = "Raw values (no scaling)",
@@ -1007,6 +1049,10 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             n_cols <- length(unique(data[[col_var]]))
             n_obs <- nrow(data)
 
+            # Escape user-controlled column names for HTML interpolation below
+            row_var_esc <- htmltools::htmlEscape(row_var)
+            col_var_esc <- htmltools::htmlEscape(col_var)
+
             scale_text <- switch(self$options$scaleMethod,
                 "none" = "without scaling",
                 "row" = "with row-wise normalization",
@@ -1020,7 +1066,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
             report_sentence <- paste0(
                 "Clinical heatmap analysis was performed on ", n_obs, " observations representing ",
-                n_rows, " ", row_var, " and ", n_cols, " ", col_var, ". ",
+                n_rows, " ", row_var_esc, " and ", n_cols, " ", col_var_esc, ". ",
                 "Data visualization was conducted ", scale_text, ". ",
                 cluster_text, " to reveal underlying patterns in the data."
             )
@@ -1044,10 +1090,15 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             n_rows <- length(unique(data[[row_var]]))
             n_cols <- length(unique(data[[col_var]]))
 
+            # Escape user-controlled column names for HTML interpolation below
+            row_var_esc   <- htmltools::htmlEscape(row_var)
+            col_var_esc   <- htmltools::htmlEscape(col_var)
+            value_var_esc <- htmltools::htmlEscape(value_var)
+
             # Describe the analysis in plain language
             summary_text <- paste0(
-                "This analysis examined patterns in ", value_var, " across ",
-                n_rows, " different ", row_var, " and ", n_cols, " ", col_var, "."
+                "This analysis examined patterns in ", value_var_esc, " across ",
+                n_rows, " different ", row_var_esc, " and ", n_cols, " ", col_var_esc, "."
             )
 
             # Add scaling interpretation
@@ -1077,8 +1128,8 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
             # Add practical interpretation
             practical_text <- paste0(
-                " This visualization helps identify which ", row_var,
-                " have similar ", col_var, " profiles, and which ", col_var,
+                " This visualization helps identify which ", row_var_esc,
+                " have similar ", col_var_esc, " profiles, and which ", col_var_esc,
                 " tend to vary together. Such patterns can reveal underlying biological relationships,",
                 " quality control issues, or clinically relevant subgroups."
             )
@@ -1514,7 +1565,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                     if (is.numeric(comp_data[[var]])) {
                         # Use ANOVA or Kruskal-Wallis for numeric variables
                         test_result <- tryCatch({
-                            aov_result <- stats::aov(as.formula(paste(var, "~ cluster")), data = comp_data)
+                            aov_result <- stats::aov(jmvcore::asFormula(paste(jmvcore::composeTerm(var), "~ cluster")), data = comp_data)
                             p_value <- summary(aov_result)[[1]][["Pr(>F)"]][1]
 
                             # Get mean by cluster

@@ -263,12 +263,14 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             covariates <- self$options$covariates
             
-            # Build formula
+            # Build formula — composeTerms backtick-escapes user column names.
+            # `Surv` and `frailty` are globally allow-listed in jmvcore.
             if (is.null(covariates) || length(covariates) == 0) {
                 formula <- "Surv(time, status) ~ frailty(frailty_id)"
             } else {
-                formula <- paste("Surv(time, status) ~", paste(covariates, collapse = " + "), 
-                               "+ frailty(frailty_id)")
+                formula <- paste0("Surv(time, status) ~ ",
+                                  jmvcore::composeTerms(as.list(covariates)),
+                                  " + frailty(frailty_id)")
             }
             
             # Initialize convergence tracking
@@ -282,9 +284,10 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             
             tryCatch({
-                # Fit model using survival package with frailty terms
+                # Fit model using survival package with frailty terms.
+                # asFormula validates against jamovi's allow-list.
                 model <- survival::coxph(
-                    as.formula(formula),
+                    jmvcore::asFormula(formula),
                     data = data,
                     method = tiesMethod,
                     model = TRUE,
@@ -347,18 +350,20 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             covariates <- self$options$covariates
             
-            # Fit standard Cox model without frailty
+            # Fit standard Cox model without frailty — composeTerms backtick-
+            # escapes user column names. `Surv` is globally allow-listed.
             if (is.null(covariates) || length(covariates) == 0) {
                 cox_formula <- "Surv(time, status) ~ 1"
             } else {
-                cox_formula <- paste("Surv(time, status) ~", paste(covariates, collapse = " + "))
+                cox_formula <- paste0("Surv(time, status) ~ ",
+                                      jmvcore::composeTerms(as.list(covariates)))
             }
             
             results <- list()
             
             tryCatch({
-                # Standard Cox model
-                cox_model <- survival::coxph(as.formula(cox_formula), data = data)
+                # Standard Cox model — asFormula validates against allow-list.
+                cox_model <- survival::coxph(jmvcore::asFormula(cox_formula), data = data)
                 
                 results[["Standard Cox"]] <- list(
                     model_name = "Standard Cox",
@@ -369,9 +374,9 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     selected = FALSE
                 )
                 
-                # EM Frailty model (current)
+                # EM Frailty model (current) — frailty is globally allow-listed.
                 frailty_formula <- paste(cox_formula, "+ frailty(frailty_id)")
-                frailty_model <- survival::coxph(as.formula(frailty_formula), data = data)
+                frailty_model <- survival::coxph(jmvcore::asFormula(frailty_formula), data = data)
                 
                 results[["EM Frailty"]] <- list(
                     model_name = "EM Frailty",

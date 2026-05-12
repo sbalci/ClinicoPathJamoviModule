@@ -33,6 +33,7 @@ competingRisksPowerClass <- R6::R6Class(
             allocation_str <- self$options$allocationRatio
             allocation_ratio <- private$.parseAllocationRatio(allocation_str)
 
+            # TODO (UX): the two validation paths below (invalid allocation ratio here, and the high-event-rate guard at L51-L58) currently render via `self$results$todo$setContent(<html>) + return()` instead of `jmvcore::reject()`. Switching to reject() would unify the error surface with the rest of the module, but it changes what the user sees, so it was deferred from the /jamovify-function pass.
             if (is.null(allocation_ratio)) {
                 self$results$todo$setContent(
                     "<h4> Invalid Allocation Ratio</h4>
@@ -104,7 +105,7 @@ competingRisksPowerClass <- R6::R6Class(
             }, error = function(e) {
                 error_msg <- paste0(
                     "<h4> Analysis Error</h4>",
-                    "<p>Error in power analysis: ", e$message, "</p>",
+                    "<p>Error in power analysis: ", htmltools::htmlEscape(e$message), "</p>",
                     "<p><b>Common solutions:</b></p>",
                     "<ul>",
                     "<li>Check that event rates are realistic (< 0.9)</li>",
@@ -117,6 +118,7 @@ competingRisksPowerClass <- R6::R6Class(
             })
         },
 
+        # TODO (forward-looking): replace the free-text `allocationRatio` String option ("1:1") with two Number/Integer options (e.g. ratio1, ratio2). The string parsing in this helper is fragile and the only reason this method exists. Constrained numeric inputs would eliminate the parser, the .a.yaml regex requirement, and the "Invalid Allocation Ratio" validation branch above. UX change → out of jamovify scope.
         .parseAllocationRatio = function(ratio_str) {
             if (is.null(ratio_str) || ratio_str == "") return(c(1, 1))
 
@@ -132,7 +134,6 @@ competingRisksPowerClass <- R6::R6Class(
 
         .performPowerAnalysis = function() {
             params <- private$.params
-            set.seed(12345)
 
             switch(params$analysis_type,
                 "power" = {
@@ -794,8 +795,6 @@ competingRisksPowerClass <- R6::R6Class(
         .powerCurvePlot = function(image, ggtheme, theme, ...) {
             if (is.null(private$.params)) return()
 
-            library(ggplot2)
-
             sample_sizes <- seq(50, 500, 25)
             powers <- sapply(sample_sizes, function(n) {
                 params_temp <- private$.params
@@ -805,18 +804,18 @@ competingRisksPowerClass <- R6::R6Class(
 
             plot_data <- data.frame(x = sample_sizes, y = powers)
 
-            p <- ggplot(plot_data, aes(x = x, y = y)) +
-                geom_line(color = "#007bff", size = 1.2) +
-                geom_point(color = "#007bff", size = 2, alpha = 0.7) +
-                geom_hline(yintercept = 0.8, linetype = "dashed", color = "#dc3545", alpha = 0.8) +
-                labs(
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
+                ggplot2::geom_line(color = "#007bff", size = 1.2) +
+                ggplot2::geom_point(color = "#007bff", size = 2, alpha = 0.7) +
+                ggplot2::geom_hline(yintercept = 0.8, linetype = "dashed", color = "#dc3545", alpha = 0.8) +
+                ggplot2::labs(
                     title = "Power Curve: Sample Size vs Power",
                     subtitle = "Competing Risks Power Analysis",
                     x = "Sample Size",
                     y = "Statistical Power"
                 ) +
-                scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-                theme_minimal()
+                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                ggplot2::theme_minimal()
 
             print(p)
             TRUE
@@ -825,7 +824,6 @@ competingRisksPowerClass <- R6::R6Class(
         .eventRatesPlot = function(image, ggtheme, theme, ...) {
             if (is.null(private$.params)) return()
 
-            library(ggplot2)
             params <- private$.params
 
             times <- seq(0, params$follow_up, 0.1)
@@ -838,15 +836,15 @@ competingRisksPowerClass <- R6::R6Class(
                 group = rep(c("Group 1", "Group 2"), each = length(times))
             )
 
-            p <- ggplot(plot_data, aes(x = time, y = cif, color = group)) +
-                geom_line(size = 1.2) +
-                labs(
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = cif, color = group)) +
+                ggplot2::geom_line(size = 1.2) +
+                ggplot2::labs(
                     title = "Cumulative Incidence Functions",
                     x = "Follow-up Time (years)",
                     y = "Cumulative Incidence"
                 ) +
-                scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-                theme_minimal()
+                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                ggplot2::theme_minimal()
 
             print(p)
             TRUE

@@ -33,7 +33,12 @@ private = list(
             "INFO" = "",
             ""
         )
-        private$.warnings <- c(private$.warnings, paste0("<p>", icon, " <strong>", type, ":</strong> ", message, "</p>"))
+        # Escape message at source — covers all callers including the
+        # one at line ~534 that interpolates e$message (R errors can
+        # include user-controlled column names from dep/indep options).
+        private$.warnings <- c(private$.warnings,
+            paste0("<p>", icon, " <strong>", type, ":</strong> ",
+                   htmltools::htmlEscape(message), "</p>"))
     },
 
     # Display accumulated warnings
@@ -77,6 +82,18 @@ private = list(
     },
 
     .run = function() {
+        # TODO (cleanup): library() calls inside .run() / plot helpers attach
+        # entire packages to the search path with side effects — anti-pattern
+        # for jamovi modules. Sites in this file:
+        #   - line ~85, ~86 (here): mlr3, mlr3pipelines
+        #   - line ~156: mlr3pipelines (duplicate)
+        #   - line ~839, ~840: pROC, ggplot2
+        #   - line ~900: rpart.plot
+        #   - line ~915: ggplot2 (duplicate)
+        # Replace with `package::function()` references throughout, declare
+        # the packages in DESCRIPTION under `Imports:` (jamovi's package
+        # manager pulls them in at module install time). Same convention
+        # noted for biomarkerdiscovery, causalmediation, classicalSurvivalPower.
         library('mlr3')
         library('mlr3pipelines')
 
@@ -960,7 +977,7 @@ private = list(
             if (!is.na(sensitivity) && !is.na(precision)) {
                 html <- paste0(html, sprintf(
                     "<li><strong>%s:</strong> Sensitivity %.1f%%, Precision %.1f%% (%d correctly identified out of %d actual cases)</li>",
-                    class_name, sensitivity * 100, precision * 100, tp, tp + fn
+                    htmltools::htmlEscape(class_name), sensitivity * 100, precision * 100, tp, tp + fn
                 ))
             }
         }

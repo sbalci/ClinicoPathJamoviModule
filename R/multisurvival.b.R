@@ -2429,6 +2429,36 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$insert(3, notice)
         }
 
+        # Events-per-variable (EPV) check. With fewer than 10 events per
+        # estimated coefficient, Cox HR estimates and their CIs become
+        # unstable; reviewers expect this to be flagged. See
+        # Vittinghoff & McCulloch (2007) Am J Epidemiol 165:710-8.
+        epv_info <- tryCatch({
+          n_events <- if (!is.null(cox_model$nevent)) cox_model$nevent
+                      else if (!is.null(cox_model$y)) sum(cox_model$y[, "status"] == 1)
+                      else NA_integer_
+          n_coef <- length(stats::coef(cox_model))
+          list(events = n_events, coefficients = n_coef,
+               epv = if (n_coef > 0 && !is.na(n_events)) n_events / n_coef else NA_real_)
+        }, error = function(e) list(events = NA, coefficients = NA, epv = NA))
+
+        if (!is.na(epv_info$epv) && epv_info$epv < 10 && epv_info$coefficients > 0) {
+          notice <- jmvcore::Notice$new(
+            options = self$options,
+            name = 'epvWarning',
+            type = jmvcore::NoticeType$WARNING
+          )
+          notice$setContent(sprintf(
+            paste0("Low events-per-variable: this Cox model fits %d coefficient(s) on %d event(s) ",
+                   "(EPV = %.1f, below the conventional minimum of 10). Hazard-ratio estimates ",
+                   "and CIs may be unstable. Consider: (i) reducing covariates; ",
+                   "(ii) penalised Cox (lassocox / adaptivelasso); ",
+                   "(iii) bootstrap-optimism correction (survivalvalidation)."),
+            epv_info$coefficients, epv_info$events, epv_info$epv
+          ))
+          self$results$insert(3, notice)
+        }
+
         # Proportional hazards diagnostic
         ph_diag <- try(survival::cox.zph(cox_model), silent = TRUE)
         if (!inherits(ph_diag, "try-error")) {

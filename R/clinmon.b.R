@@ -88,9 +88,18 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                 # Get data
                 data <- self$data
                 if (nrow(data) == 0) {
-                    stop("Data contains no rows")
+                    jmvcore::reject("Data contains no rows")
                 }
                 
+                # TODO (forward-looking): the column names collected into
+                # `variable_names` below (from self$options$abp / mcav / icp /
+                # cpp / hr / time_var) are user-selected and currently flow
+                # only into a clintools data-frame column reference and into
+                # jmvcore::reject {} placeholders (both safe paths). If any
+                # future feature renders these names into an HTML setContent
+                # panel — e.g. a "Variables Analyzed: X, Y, Z" summary — wrap
+                # each value in htmltools::htmlEscape() at construction. See
+                # the cross-module idiom at R/clinicalvalidation.b.R:1148-1150.
                 # Prepare variables list for clintools
                 variables_list <- list()
                 variable_names <- c()
@@ -99,12 +108,12 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(self$options$time_var)) {
                     time_col <- self$options$time_var
                     if (!time_col %in% names(data)) {
-                        stop(paste("Time variable", time_col, "not found in data"))
+                        jmvcore::reject("Time variable {} not found in data", time_col)
                     }
                     # Time should be first column for clintools
                     time_data <- data[[time_col]]
                     if (!is.numeric(time_data)) {
-                        stop("Time variable must be numeric (in seconds)")
+                        jmvcore::reject("Time variable must be numeric (in seconds)")
                     }
                 }
                 
@@ -155,14 +164,14 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                     if (var_name %in% names(data)) {
                         clinic_data[[var_name]] <- data[[var_name]]
                     } else {
-                        stop(paste("Variable", var_name, "not found in data"))
+                        jmvcore::reject("Variable {} not found in data", var_name)
                     }
                 }
                 
                 # Validate numeric data
                 for (col in names(clinic_data)) {
                     if (!is.numeric(clinic_data[[col]])) {
-                        stop(paste("All variables must be numeric. Variable", col, "is not numeric."))
+                        jmvcore::reject("All variables must be numeric. Variable {} is not numeric.", col)
                     }
                 }
                 
@@ -200,9 +209,10 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                     }
                     
                 }, error = function(e) {
+                    safe_msg <- htmltools::htmlEscape(e$message)
                     error_msg <- paste0(
                         "<div style='color: red; font-weight: bold;'>",
-                        "Error in clinmon analysis: ", e$message,
+                        "Error in clinmon analysis: ", safe_msg,
                         "<br><br>",
                         "Please check your data format and variable selections.",
                         "</div>"

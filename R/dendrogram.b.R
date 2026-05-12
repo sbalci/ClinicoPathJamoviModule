@@ -6,11 +6,6 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = dendrogramBase,
     private = list(
 
-        # Helper method to escape variable names for safe handling
-        .escapeVar = function(varName) {
-            gsub("[^A-Za-z0-9]", "_", varName)
-        },
-
         .run = function() {
 
             # Check required packages for selected plot type
@@ -281,7 +276,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             infoBullets <- list(
                 paste0("<strong>Number of observations used:</strong> ", nrow(clusterData)),
-                paste0("<strong>Variables used:</strong> ", paste(vars, collapse = ", ")),
+                paste0("<strong>Variables used:</strong> ", paste(htmltools::htmlEscape(vars), collapse = ", ")),
                 paste0("<strong>Distance method:</strong> ", distanceMethod),
                 paste0("<strong>Clustering method:</strong> ", clusterMethod),
                 paste0("<strong>Plot type:</strong> ", plotType)
@@ -296,7 +291,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 infoBullets <- c(infoBullets, "<strong>Scaling:</strong> Not applied; binary distances require raw 0/1 data.")
 
             if (length(prep$zeroVariance) > 0)
-                infoBullets <- c(infoBullets, paste0("<strong>Zero-variance variables:</strong> ", paste(prep$zeroVariance, collapse = ", "), " (no contribution to distances)."))
+                infoBullets <- c(infoBullets, paste0("<strong>Zero-variance variables:</strong> ", paste(htmltools::htmlEscape(prep$zeroVariance), collapse = ", "), " (no contribution to distances)."))
 
             if (highlightClusters) {
                 highlightText <- paste0("<strong>Highlighted clusters:</strong> ", effectiveClusters)
@@ -311,7 +306,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (colorGroups)
-                infoBullets <- c(infoBullets, paste0("<strong>Grouping variable:</strong> ", group))
+                infoBullets <- c(infoBullets, paste0("<strong>Grouping variable:</strong> ", htmltools::htmlEscape(group)))
 
             if (!is.null(compatibilityWarning))
                 infoBullets <- c(infoBullets, paste0("<strong style='color: #dc3545;'> Warning:</strong> ", compatibilityWarning))
@@ -851,7 +846,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     result$messages,
                     paste0(
                         "<strong>Note:</strong> Zero-variance variables (",
-                        paste(zeroVariance, collapse = ", "),
+                        paste(htmltools::htmlEscape(zeroVariance), collapse = ", "),
                         ") were present and contribute no separation."
                     )
                 )

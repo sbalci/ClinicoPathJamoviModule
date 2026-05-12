@@ -130,7 +130,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get data
             data <- self$data
             if (nrow(data) == 0) {
-                stop("Data contains no rows")
+                jmvcore::reject("Data contains no rows")
             }
 
             # Perform survival comparison analysis
@@ -175,7 +175,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 error_msg <- paste0(
                     "<div style='color: red; font-weight: bold;'>",
-                    "Error in survival comparison: ", e$message,
+                    "Error in survival comparison: ", htmltools::htmlEscape(e$message),
                     "<br><br>",
                     "Please check your variable selections and data format:",
                     "<br>• Time variable should be numeric and non-negative",
@@ -194,10 +194,10 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Validate time variable
             time_data <- data[[times]]
             if (!is.numeric(time_data)) {
-                stop("Time variable must be numeric")
+                jmvcore::reject("Time variable must be numeric")
             }
             if (any(time_data < 0, na.rm = TRUE)) {
-                stop("Time variable cannot contain negative values")
+                jmvcore::reject("Time variable cannot contain negative values")
             }
             
             # Validate and convert status variable
@@ -206,14 +206,14 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 status_data <- as.numeric(status_data)
             } else if (is.factor(status_data)) {
                 if (nlevels(status_data) != 2) {
-                    stop("Event indicator must have exactly 2 levels")
+                    jmvcore::reject("Event indicator must have exactly 2 levels")
                 }
                 status_data <- as.numeric(status_data) - 1
             } else {
                 status_data <- as.numeric(status_data)
                 unique_vals <- unique(status_data[!is.na(status_data)])
                 if (!all(unique_vals %in% c(0, 1))) {
-                    stop("Event indicator must be binary (0/1)")
+                    jmvcore::reject("Event indicator must be binary (0/1)")
                 }
             }
             
@@ -223,7 +223,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 group_data <- as.factor(group_data)
             }
             if (nlevels(group_data) < 2) {
-                stop("Grouping variable must have at least 2 levels")
+                jmvcore::reject("Grouping variable must have at least 2 levels")
             }
             
             # Create survival data
@@ -236,7 +236,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Remove missing values
             complete_cases <- complete.cases(survData)
             if (sum(complete_cases) < 10) {
-                stop("Insufficient complete observations for survival analysis")
+                jmvcore::reject("Insufficient complete observations for survival analysis")
             }
             
             survData <- survData[complete_cases, ]
@@ -302,7 +302,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$landmarkNote$setContent(exclusion_msg)
             
             if (n_after < 10) {
-                stop("Insufficient observations after landmark time for analysis")
+                jmvcore::reject("Insufficient observations after landmark time for analysis")
             }
             
             return(survData)

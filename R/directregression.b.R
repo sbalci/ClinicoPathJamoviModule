@@ -34,11 +34,11 @@ directregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Load required packages
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("The 'survival' package is required for direct regression analysis. Please install it.")
+                jmvcore::reject("The 'survival' package is required for direct regression analysis. Please install it.", code = NULL)
             }
-            
+
             if (!requireNamespace("pseudo", quietly = TRUE)) {
-                stop("The 'pseudo' package is required for pseudo-observations. Please install it.")
+                jmvcore::reject("The 'pseudo' package is required for pseudo-observations. Please install it.", code = NULL)
             }
 
             data <- self$data
@@ -53,7 +53,7 @@ directregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             time_points <- time_points[!is.na(time_points)]
 
             if (length(time_points) == 0) {
-                stop("Please specify valid time points for analysis.")
+                jmvcore::reject("Please specify valid time points for analysis.", code = NULL)
             }
 
             # Prepare data
@@ -202,28 +202,29 @@ directregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 reg_data <- self$data[complete.cases(self$data[c(self$options$elapsedtime, self$options$outcome, explanatory_vars)]), ]
                 reg_data$pseudo_value <- pseudo_vals
                 
-                # Build formula
+                # Build formula — jmvcore helpers backtick-escape user column
+                # names and validate the parsed formula against jamovi's allow-list.
                 if (length(explanatory_vars) > 0) {
-                    formula_str <- paste("pseudo_value ~", paste(explanatory_vars, collapse = " + "))
+                    formula_str <- jmvcore::constructFormula("pseudo_value", explanatory_vars)
                 } else {
                     formula_str <- "pseudo_value ~ 1"
                 }
-                
+
                 # Fit regression model
                 tryCatch({
                     if (self$options$regression_type == "linear") {
                         if (self$options$link_function == "identity") {
-                            model <- lm(as.formula(formula_str), data = reg_data)
+                            model <- lm(jmvcore::asFormula(formula_str), data = reg_data)
                         } else {
                             # Use GLM with specified link
                             family_obj <- gaussian(link = self$options$link_function)
-                            model <- glm(as.formula(formula_str), data = reg_data, family = family_obj)
+                            model <- glm(jmvcore::asFormula(formula_str), data = reg_data, family = family_obj)
                         }
                     } else if (self$options$regression_type == "logistic") {
-                        model <- glm(as.formula(formula_str), data = reg_data, family = binomial())
+                        model <- glm(jmvcore::asFormula(formula_str), data = reg_data, family = binomial())
                     } else {
                         # Default to linear
-                        model <- lm(as.formula(formula_str), data = reg_data)
+                        model <- lm(jmvcore::asFormula(formula_str), data = reg_data)
                     }
                     
                     # Store results

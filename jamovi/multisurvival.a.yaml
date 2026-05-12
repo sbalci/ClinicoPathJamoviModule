@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.38'
@@ -398,11 +398,14 @@ options:
     - name: ph_cox
       title: Proportional Hazards Assumption
       type: Bool
-      default: false
+      default: true
       description:
         R: >
-          If true, tests the proportional hazards assumption for the Cox model.
-          Use if you suspect violations of the PH assumption.
+          If true, tests the proportional hazards assumption for the Cox model
+          using survival::cox.zph and surfaces global + per-covariate
+          Schoenfeld residual statistics. REMARK reporting recommends this be
+          reported for any Cox-based prognostic study. Disable only to suppress
+          the diagnostic when not needed.
 
 
 

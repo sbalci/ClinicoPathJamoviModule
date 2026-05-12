@@ -23,6 +23,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # HTML generation helpers ----
+        # TODO (security): the .htmlError / .htmlWarning / .htmlInfo helpers (this method, L43, L60) interpolate `title`, `message`, `details`, and `content` directly into HTML strings without escaping. Callers feed user-controlled data through them: `e$message` from tryCatch (L171, L173), participant ID values (L198 `paste(head(dup_ids, 3), …)`), and free-text `OptionString` labels (study_title, screening_label, …). The fix is to add `htmltools::htmlEscape(...)` at the helper boundary so every caller is protected by default — define the escape once on `title`, `message`, and on each element of `details` (since details items are intentionally HTML for the `<strong>…</strong>` lead-in, those need a more selective escape OR a separate "raw" parameter). Defense-in-depth XSS guard; same shape as the comparingsurvival / competingRisksPower fixes but consolidated at the helper level.
         .htmlError = function(title, message, details = NULL) {
             html <- paste0(
                 "<p style='font-weight: bold; color: #721c24; margin-bottom: 10px;'>",
@@ -1093,6 +1094,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 # Fallback: Create a simple ggplot diagram
+                # TODO (hygiene): drop `library(ggplot2)` here — `library()` inside package R files modifies the user's search path at source-load time and trips `R CMD check`. Replace each `ggplot()`, `aes()`, `geom_*()`, `theme_*()`, `labs()` reference in this fallback block with explicit `ggplot2::` namespacing, or add `@importFrom ggplot2 ...` roxygen at the top of the file. The primary plot path already uses `ggplot2::` namespacing so this is just the error-fallback branch.
                 library(ggplot2)
 
                 # Create simple flow diagram using rectangles

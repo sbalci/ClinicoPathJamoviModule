@@ -66,6 +66,7 @@ items:
         - markers
         - survivalTime
         - survivalEvent
+        - fdrMethod
       columns:
         - name: variable
           title: Variable
@@ -79,6 +80,10 @@ items:
           type: text
         - name: p_value
           title: P-value
+          type: number
+          format: zto:4
+        - name: p_adjusted
+          title: Adjusted p
           type: number
           format: zto:4
         - name: significance

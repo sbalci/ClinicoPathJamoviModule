@@ -72,13 +72,14 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             covariates <- self$options$covariates
             time_covariates <- self$options$time_covariates
             
-            # Clean data
+            # Clean data — c() already drops NULL elements from its inputs, so no
+            # additional NULL filter is needed (and is.null() is not vectorized over a
+            # vector of names anyway).
             analysis_vars <- c(subject_var, time_var, state_var, covariates, time_covariates)
-            analysis_vars <- analysis_vars[!is.null(analysis_vars)]
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
             
             if (nrow(clean_data) < 50) {
-                stop("Insufficient data for Markov modeling (minimum 50 complete observations required)")
+                jmvcore::reject("Insufficient data for Markov modeling (minimum 50 complete observations required)")
             }
             
             # Store for use in other methods
@@ -163,11 +164,11 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$errors$setContent(
-                    paste("Data preparation failed:", e$message)
+                    paste("Data preparation failed:", htmltools::htmlEscape(e$message))
                 )
             })
         },
-        
+
         .populateDataStructure = function() {
             
             table <- self$results$dataStructure
@@ -257,7 +258,7 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 
                 if (!requireNamespace('msm', quietly = TRUE)) {
-                    stop("msm package required for continuous-time Markov modeling")
+                    jmvcore::reject("msm package required for continuous-time Markov modeling")
                 }
                 
                 # Define model structure
@@ -313,7 +314,8 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Prepare covariate formula
                 covariate_formula <- NULL
                 if (length(private$covariates) > 0) {
-                    covariate_formula <- as.formula(paste("~", paste(private$covariates, collapse = " + ")))
+                    rhs <- paste(vapply(private$covariates, jmvcore::composeTerm, character(1)), collapse = " + ")
+                    covariate_formula <- jmvcore::asFormula(paste("~", rhs))
                 }
                 
                 # Fit model using msm
@@ -333,7 +335,7 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$errors$setContent(
-                    paste("Markov model fitting failed:", e$message)
+                    paste("Markov model fitting failed:", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -571,7 +573,7 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<ul>",
                 "<li><b>Subjects:</b> ", n_subjects, " individuals</li>",
                 "<li><b>Observations:</b> ", n_observations, " total state observations</li>",
-                "<li><b>States:</b> ", n_states, " (", paste(private$state_labels, collapse = ", "), ")</li>",
+                "<li><b>States:</b> ", n_states, " (", paste(htmltools::htmlEscape(private$state_labels), collapse = ", "), ")</li>",
                 "<li><b>Model Structure:</b> ", stringr::str_to_title(gsub("_", " ", model_structure)), "</li>",
                 "</ul>",
                 

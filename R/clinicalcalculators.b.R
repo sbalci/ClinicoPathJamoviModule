@@ -29,6 +29,23 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
 
             # 2. Get and clean data
+            # TODO (stub): ~30 options declared in jamovi/clinicalcalculators.a.yaml
+            # are exposed in the UI but never read in this backend. Either wire them
+            # up or hide them in .u.yaml until implemented. Currently unwired:
+            #   calculator_type, validation_method, risk_categories, risk_thresholds,
+            #   confidence_level, bootstrap_samples, cv_folds, include_nomogram,
+            #   include_calibration, include_discrimination, include_decision_curve,
+            #   include_net_benefit, clinical_threshold_low/high, regularization_alpha,
+            #   outlier_detection, outlier_method, calculator_name/description,
+            #   target_population, units_specification, reference_ranges,
+            #   include_uncertainty, interactive_calculator, export_format,
+            #   performance_metrics, include_interpretation, interpretation_text,
+            #   risk_communication, validation_data_source, regulatory_compliance,
+            #   bias_assessment, subgroup_analysis, sensitivity_analysis,
+            #   implementation_guide, stratification_variable.
+            # Only outcome_variable, predictor_variables, time_variable,
+            # event_variable, model_type, feature_selection,
+            # feature_selection_method, and missing_data_method are actually used.
             mydata <- self$data
             outcomeVar <- self$options$outcome_variable
             predictorVars <- self$options$predictor_variables
@@ -81,9 +98,14 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             ))
 
             # 4. Perform Model Fitting
+            # TODO (stub): the model_type option (jamovi/clinicalcalculators.a.yaml:97-119)
+            # advertises 8 choices, but only logistic_regression and cox_regression are
+            # implemented below. linear_regression, random_forest, gradient_boosting,
+            # neural_network, ensemble_model, bayesian_model fall through silently and
+            # produce no model. Either implement or remove from the option enum.
             model_type <- self$options$model_type
             model <- NULL
-            
+
             if (model_type == "logistic_regression") {
                 if (is.numeric(mydata[[outcomeVar]])) {
                     mydata[[outcomeVar]] <- as.factor(mydata[[outcomeVar]])
@@ -91,8 +113,8 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 
                 # Feature Selection (Basic Stepwise AIC)
                 if (self$options$feature_selection && self$options$feature_selection_method == 'stepwise') {
-                    full_formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~", paste(jmvcore::composeTerms(predictorVars), collapse = " + ")))
-                    null_formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~ 1"))
+                    full_formula <- jmvcore::asFormula(jmvcore::constructFormula(outcomeVar, predictorVars))
+                    null_formula <- jmvcore::asFormula(paste(jmvcore::composeTerm(outcomeVar), "~ 1"))
                     
                     full_model <- glm(full_formula, data = mydata, family = binomial(link = "logit"))
                     null_model <- glm(null_formula, data = mydata, family = binomial(link = "logit"))
@@ -114,11 +136,12 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 }
 
                 
-                formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~", paste(jmvcore::composeTerms(predictorVars), collapse = " + ")))
-                model <- try(glm(formula, data = mydata, family = binomial(link = "logit")), silent = TRUE)
-                
-                if (inherits(model, "try-error")) {
-                    self$results$instructions$setContent(paste("Error in Logistic model fitting:", attr(model, "condition")$message))
+                formula <- jmvcore::asFormula(jmvcore::constructFormula(outcomeVar, predictorVars))
+                model <- tryCatch(glm(formula, data = mydata, family = binomial(link = "logit")), error = function(e) e)
+
+                if (jmvcore::isError(model)) {
+                    safe_msg <- htmltools::htmlEscape(jmvcore::extractErrorMessage(model))
+                    self$results$instructions$setContent(paste("Error in Logistic model fitting:", safe_msg))
                     self$results$instructions$setVisible(TRUE)
                     return()
                 }
@@ -158,13 +181,16 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         return()
                     }
                     
-                    formula_cox <- as.formula(paste("survival::Surv(", jmvcore::composeTerm(timeVar), ",", jmvcore::composeTerm(eventVar), ") ~", 
-                                                 paste(jmvcore::composeTerms(predictorVars), collapse = " + ")))
+                    formula_cox <- jmvcore::asFormula(
+                        paste("Surv(", jmvcore::composeTerm(timeVar), ",", jmvcore::composeTerm(eventVar), ") ~",
+                              paste(jmvcore::composeTerms(predictorVars), collapse = " + ")),
+                        additional_allowed_functions = c("Surv"))
                     
-                    model <- try(survival::coxph(formula_cox, data = mydata), silent = TRUE)
-                    
-                    if (inherits(model, "try-error")) {
-                        self$results$instructions$setContent(paste("Error in Cox model fitting:", attr(model, "condition")$message))
+                    model <- tryCatch(survival::coxph(formula_cox, data = mydata), error = function(e) e)
+
+                    if (jmvcore::isError(model)) {
+                        safe_msg <- htmltools::htmlEscape(jmvcore::extractErrorMessage(model))
+                        self$results$instructions$setContent(paste("Error in Cox model fitting:", safe_msg))
                         self$results$instructions$setVisible(TRUE)
                         return()
                     }
@@ -230,6 +256,13 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             self$results$method_explanation$setContent(explanation)
 
         },
+        # TODO (stub): both .plotNomogram (this method) and .plotCalibration
+        # (below) are placeholder implementations that draw "coming soon" text
+        # rather than real plots. Their enabling options (include_nomogram,
+        # include_calibration) default to TRUE in the .a.yaml, so users see the
+        # stubs by default. Implement via the `rms` package (datadist + lrm/cph
+        # + nomogram()) for real nomograms, and a calibration loess/decile plot
+        # for calibration — or hide the plots until ready.
         .plotNomogram = function(image, ...) {
             if (is.null(self$options$outcome_variable) || is.null(self$options$predictor_variables))
                 return(FALSE)

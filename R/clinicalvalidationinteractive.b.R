@@ -126,7 +126,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
         # Handle missing data based on user selection
         original_n <- nrow(analysis_data)
         if (self$options$missing_data_handling == "complete_cases") {
-          analysis_data <- na.omit(analysis_data)
+          analysis_data <- jmvcore::naOmit(analysis_data)
         }
         
         # Validate minimum sample size
@@ -155,8 +155,9 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
         return(analysis_data)
         
       }, error = function(e) {
+        safe_msg <- htmltools::htmlEscape(e$message)
         self$results$parameterValidation$setContent(
-          paste0("<div class='alert alert-danger'> <strong>Data Error:</strong> ", e$message, "</div>")
+          paste0("<div class='alert alert-danger'> <strong>Data Error:</strong> ", safe_msg, "</div>")
         )
         return(NULL)
       })
@@ -164,8 +165,20 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
     
     # Populate model summary table with all options
     .populateModelSummary = function() {
+      # TODO (stub): this UI variant does NOT fit any model — it computes
+      # diagnostic test metrics (AUC/sensitivity/specificity) directly from
+      # the data. But the .a.yaml advertises `model_type` (Logistic / Cox /
+      # Random Forest / SVM / LDA), read here ONLY to display the user's
+      # choice in this summary table — never used to actually fit a model.
+      # Also `outcomeLevel` (OptionLevel) is declared but unread.
+      # The displayed model-type value misleads users into thinking the
+      # selected model was fit. Either:
+      #   (a) implement actual model fitting (mirror R/clinicalvalidation.b.R),
+      #   (b) hide model_type / outcomeLevel from .u.yaml and remove from .a.yaml, or
+      #   (c) rename to "Validation Approach" and tighten the option enum to
+      #       reflect what actually runs.
       model_table <- self$results$modelSummary
-      
+
       # Core model information
       model_table$addRow(rowKey="model_type", values=list(
         parameter = "Model Type",

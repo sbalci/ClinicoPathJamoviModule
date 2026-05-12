@@ -243,25 +243,25 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # Enhanced input validation with specific guidance
             .validateInputParameters = function(test1_sens, test1_spec, test2_sens, test2_spec, prevalence, indep, cond_dep_pos, cond_dep_neg) {
                 if (test1_sens <= 0 || test1_sens >= 1) {
-                    stop("Test 1 sensitivity must be between 0 and 1. Typical clinical values range from 0.60-0.95 for most diagnostic tests.")
+                    jmvcore::reject("Test 1 sensitivity must be between 0 and 1. Typical clinical values range from 0.60-0.95 for most diagnostic tests.")
                 }
                 if (test1_spec <= 0 || test1_spec >= 1) {
-                    stop("Test 1 specificity must be between 0 and 1. Typical clinical values range from 0.70-0.98 for most diagnostic tests.")
+                    jmvcore::reject("Test 1 specificity must be between 0 and 1. Typical clinical values range from 0.70-0.98 for most diagnostic tests.")
                 }
                 if (test2_sens <= 0 || test2_sens >= 1) {
-                    stop("Test 2 sensitivity must be between 0 and 1. Typical clinical values range from 0.60-0.95 for most diagnostic tests.")
+                    jmvcore::reject("Test 2 sensitivity must be between 0 and 1. Typical clinical values range from 0.60-0.95 for most diagnostic tests.")
                 }
                 if (test2_spec <= 0 || test2_spec >= 1) {
-                    stop("Test 2 specificity must be between 0 and 1. Typical clinical values range from 0.70-0.98 for most diagnostic tests.")
+                    jmvcore::reject("Test 2 specificity must be between 0 and 1. Typical clinical values range from 0.70-0.98 for most diagnostic tests.")
                 }
                 if (prevalence <= 0 || prevalence >= 1) {
-                    stop("Disease prevalence must be between 0 and 1. Consider realistic clinical prevalences: rare diseases (0.001-0.01), common conditions (0.05-0.20).")
+                    jmvcore::reject("Disease prevalence must be between 0 and 1. Consider realistic clinical prevalences: rare diseases (0.001-0.01), common conditions (0.05-0.20).")
                 }
                 if (!indep && (cond_dep_pos < -1 || cond_dep_pos > 1)) {
-                    stop("Conditional dependence for positive cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
+                    jmvcore::reject("Conditional dependence for positive cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
                 }
                 if (!indep && (cond_dep_neg < -1 || cond_dep_neg > 1)) {
-                    stop("Conditional dependence for negative cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
+                    jmvcore::reject("Conditional dependence for negative cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
                 }
                 
                 # Additional clinical validity checks
@@ -301,7 +301,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # Clamp probabilities to valid ranges while providing informative notices
             .clampProbability = function(value, lower, upper, context) {
                 if (is.nan(value) || is.infinite(value)) {
-                    stop(sprintf("%s resulted in a non-finite probability.", context))
+                    jmvcore::reject("{} resulted in a non-finite probability.", context)
                 }
 
                 adjusted <- value

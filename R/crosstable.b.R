@@ -87,7 +87,7 @@ NULL
         "border-left: 4px solid ", style$border, ";'>",
         "<p style='margin: 0; color: ", style$title_color, ";'>",
         "<strong>", style$icon, " ", type, ":</strong> ",
-        message,
+        htmltools::htmlEscape(message),
         "</p>",
         "</div>"
     )
@@ -406,10 +406,13 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Report warnings about variable names if any
                 if (length(validation_results$warnings) > 0) {
+                    # Escape each warning individually before joining with <br> so the
+                    # line-break markup is preserved while user-supplied column names
+                    # embedded in the warning text are rendered inert.
                     warning_msg <- paste0(
                         "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
                         "<strong> Variable Name Warnings:</strong><br>",
-                        paste(validation_results$warnings, collapse = "<br>"),
+                        paste(htmltools::htmlEscape(unlist(validation_results$warnings)), collapse = "<br>"),
                         "</div>"
                     )
                     # Display in todo2 section
@@ -552,7 +555,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else {
                     "No group selected"
                 }
-                self$results$subtitle$setContent(paste0("Cross Table Analysis - Grouped by ", group_display))
+                self$results$subtitle$setContent(paste0("Cross Table Analysis - Grouped by ", htmltools::htmlEscape(group_display)))
 
                 # Provide additional information when using 'finalfit' style.
                 if (sty == "finalfit") {
@@ -662,6 +665,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         stats.labels = list(meansd = "Mean (SD)", median = "Median", q1q3 = "Q1, Q3")
                     )
 
+                    # TODO (security, forward-looking): the four `tablestyleN$setContent(...)` paths at L677 (arsenal), L726 (finalfit), L848 (gtsummary), L976 (tangram) push raw HTML produced by third-party packages directly into the result pane. Those packages embed the user's column names and factor labels inside <th>/<td> cells, and header escaping is package-version-dependent — modern versions typically escape cell contents but not always headers. Wrapping the table HTML wholesale would break the table markup. The proper fix is one of: (a) verify each package version escapes headers (audit each release used in production), (b) rename columns to alphanumeric placeholders before passing to the package and substitute display labels via the package's labeling API (arsenal::labels<- / finalfit `dependent_label` / gtsummary `modify_header`), or (c) post-process the HTML with rvest/xml2 to selectively escape <th>/<td> text content. Approach (b) is least fragile but most invasive. Defense-in-depth, not a confirmed exploit chain — flagged forward-looking.
                     tablearsenal <- arsenal::tableby(
                         formula = formula,
                         data = mydata,
@@ -1915,26 +1919,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (is.null(vars) || length(vars) == 0 || is.null(group))
                     return('')
 
-                # Escape variable names that contain spaces or special characters
-                vars_escaped <- sapply(vars, function(v) {
-                    if (!is.null(v) && !identical(make.names(v), v))
-                        paste0('`', v, '`')
-                    else
-                        v
-                })
-
-                # Escape group variable name if needed
-                group_escaped <- if (!is.null(group) && !identical(make.names(group), group)) {
-                    paste0('`', group, '`')
-                } else {
-                    group
-                }
-
-                # Build vars argument
-                vars_arg <- paste0('vars = c(', paste(sapply(vars_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
-
-                # Build group argument
-                group_arg <- paste0('group = "', group_escaped, '"')
+                # `deparse()` produces correctly quoted R literals — handles spaces,
+                # internal quotes, and backslashes, and is identical to the old output
+                # for syntactic names. (Backticks belong on bare symbols, not inside
+                # double-quoted string literals.)
+                vars_arg  <- paste0('vars = ',  paste(deparse(vars),  collapse = ' '))
+                group_arg <- paste0('group = ', deparse(group))
 
                 # Get other arguments using base helper (if available).
                 # .asArgs re-emits every option, so strip vars/group to avoid

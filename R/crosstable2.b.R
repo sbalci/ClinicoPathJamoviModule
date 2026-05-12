@@ -96,7 +96,7 @@ crosstable2Class <- if (requireNamespace('jmvcore'))
 
                 # Check if data has complete rows.
                 if (nrow(self$data) == 0)
-                    stop("The dataset contains no complete rows. Please check your data.")
+                    jmvcore::reject("The dataset contains no complete rows. Please check your data.")
 
                 # Read and label data.
                 cleaneddata <- private$.labelData()
@@ -106,12 +106,19 @@ crosstable2Class <- if (requireNamespace('jmvcore'))
 
                 # Build formula using the cleaned variables.
                 formula <- jmvcore::constructFormula(terms = myvars, dep = mygroup)
-                formula <- as.formula(formula)
+                formula <- jmvcore::asFormula(formula)
 
                 # Exclude missing data if requested.
                 if (self$options$excl)
                     mydata <- jmvcore::naOmit(mydata)
 
+                # TODO (forward-looking): third-party HTML tables flow user data through external renderers
+                #   - L<arsenal>:   self$results$tablestyle1$setContent(tablearsenal)
+                #   - L<finalfit>:  self$results$tablestyle2$setContent(tablefinalfit) (kableExtra escape=FALSE)
+                #   - L<gtsummary>: self$results$tablestyle3$setContent(tablegtsummary)
+                #   - L<tangram>:   self$results$tablestyle4$setContent(tabletangram); also caption interpolates mygroup
+                # Each library handles its own escaping; defense-in-depth would wrap caption text with
+                # htmltools::htmlEscape(mygroup) at the tangram caption site.
                 # Generate table based on selected style.
                 if (sty == "arsenal") {
                     tablearsenal <- arsenal::tableby(
@@ -242,26 +249,9 @@ crosstable2Class <- if (requireNamespace('jmvcore'))
                 if (is.null(vars) || length(vars) == 0 || is.null(group))
                     return('')
 
-                # Escape vars
-                vars_escaped <- sapply(vars, function(v) {
-                    if (!is.null(v) && !identical(make.names(v), v))
-                        paste0('`', v, '`')
-                    else
-                        v
-                })
+                vars_arg <- paste0('vars = ', paste(deparse(vars), collapse = ''))
+                group_arg <- paste0('group = ', deparse(group))
 
-                # Escape group
-                group_escaped <- if (!is.null(group) && !identical(make.names(group), group)) {
-                    paste0('`', group, '`')
-                } else {
-                    group
-                }
-
-                # Build arguments
-                vars_arg <- paste0('vars = c(', paste(sapply(vars_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
-                group_arg <- paste0('group = "', group_escaped, '"')
-
-                # Get other arguments
                 args <- ''
                 if (!is.null(private$.asArgs)) {
                     args <- private$.asArgs(incData = FALSE)
@@ -269,11 +259,9 @@ crosstable2Class <- if (requireNamespace('jmvcore'))
                 if (args != '')
                     args <- paste0(',\n    ', args)
 
-                # Get package name dynamically
                 pkg_name <- utils::packageName()
-                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"
 
-                # Build complete function call
                 paste0(pkg_name, '::crosstable2(\n    data = data,\n    ',
                        vars_arg, ',\n    ', group_arg, args, ')')
             }

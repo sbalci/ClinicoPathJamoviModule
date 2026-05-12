@@ -45,11 +45,11 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
 
                 # Load required packages
                 if (!requireNamespace("party", quietly = TRUE)) {
-                    stop("Package 'party' is required for conditional inference trees. Please install it.")
+                    jmvcore::reject("Package 'party' is required for conditional inference trees. Please install it.")
                 }
                 
                 if (!requireNamespace("survival", quietly = TRUE)) {
-                    stop("Package 'survival' is required for survival analysis. Please install it.")
+                    jmvcore::reject("Package 'survival' is required for survival analysis. Please install it.")
                 }
 
                 # Get data and options
@@ -84,9 +84,10 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                     }
                     
                 }, error = function(e) {
+                    # TODO (UX): this error handler renders via setContent(<html>) rather than jmvcore::reject(). Switching would unify the error surface with the rest of the module (one structured error path), but it changes what the user sees, so it was deferred from the /jamovify-function pass.
                     self$results$todo$setContent(paste0(
                         "<h4> Analysis Error</h4>",
-                        "<p>Error in conditional inference tree analysis: ", e$message, "</p>",
+                        "<p>Error in conditional inference tree analysis: ", htmltools::htmlEscape(e$message), "</p>",
                         "<p>Please check your data and parameter settings.</p>"
                     ))
                 })
@@ -99,7 +100,7 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                 
                 # Validate time variable
                 if (!is.numeric(time_col)) {
-                    stop("Time variable must be numeric")
+                    jmvcore::reject("Time variable must be numeric")
                 }
                 
                 # Handle different event variable types
@@ -107,10 +108,11 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                     # Convert factor to numeric, preserving levels
                     event_col <- as.numeric(event_col) - 1
                 } else if (!is.numeric(event_col)) {
-                    stop("Event variable must be numeric or factor")
+                    jmvcore::reject("Event variable must be numeric or factor")
                 }
                 
                 # Create survival object
+                # TODO (hygiene): drop `library(survival)` here and at L155 (.buildConditionalTree), L213 (.createTreePlot), L292 (.createSurvivalPlot) — `library()` inside package R files modifies the user's search path at source-load time and trips `R CMD check`. Replace each `Surv(...)`, `survfit(...)`, `survdiff(...)` reference with explicit `survival::` namespacing, or add `@importFrom survival Surv survfit survdiff` (etc.) to the roxygen header alongside the existing `@import jmvcore`. Same applies to `library(party)` at L155.
                 library(survival)
                 surv_obj <- Surv(time_col, event_col)
                 
@@ -135,7 +137,7 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                 analysis_data <- analysis_data[complete_cases, ]
                 
                 if (nrow(analysis_data) == 0) {
-                    stop("No complete cases available for analysis")
+                    jmvcore::reject("No complete cases available for analysis")
                 }
                 
                 return(list(
@@ -153,13 +155,10 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                 library(party)
                 
                 # Prepare formula
-                if (is.null(surv_data$strata)) {
-                    formula_str <- paste("survival_object ~", paste(surv_data$predictors, collapse = " + "))
-                } else {
-                    formula_str <- paste("survival_object ~", paste(c(surv_data$predictors, surv_data$strata), collapse = " + "))
-                }
-                
-                formula_obj <- as.formula(formula_str)
+                rhs_terms <- if (is.null(surv_data$strata)) surv_data$predictors else c(surv_data$predictors, surv_data$strata)
+                rhs <- paste(vapply(rhs_terms, jmvcore::composeTerm, character(1)), collapse = " + ")
+                formula_str <- paste("survival_object ~", rhs)
+                formula_obj <- jmvcore::asFormula(formula_str)
                 
                 # Set up control parameters
                 ctrl_params <- party::ctree_control(

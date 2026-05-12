@@ -1,7 +1,7 @@
 ---
 name: ihcsurvival
 title: IHC Survival Analysis
-menuGroup: OncoPathD
+menuGroup: OncoPathT
 menuSubgroup: IHC Analysis
 menuTitle: Survival & Prognosis
 version: '1.0.0'
@@ -206,5 +206,28 @@ options:
       description:
           R: >
             Confidence level for survival estimates and hazard ratios
+
+    - name: fdrMethod
+      title: Cross-marker p-value adjustment
+      type: List
+      options:
+        - name: none
+          title: None (raw p-values)
+        - name: BH
+          title: Benjamini-Hochberg (FDR)
+        - name: BY
+          title: Benjamini-Yekutieli (FDR under dependence)
+        - name: holm
+          title: Holm (FWER)
+        - name: bonferroni
+          title: Bonferroni (FWER)
+      default: BH
+      description:
+          R: >
+            Multiple-testing adjustment applied across markers in the panel.
+            When testing several IHC markers in the same cohort, raw Cox
+            p-values overstate evidence; Benjamini-Hochberg controls FDR
+            under independence/positive dependence, Benjamini-Yekutieli is
+            valid under arbitrary dependence, Holm/Bonferroni control FWER.
 
 ...

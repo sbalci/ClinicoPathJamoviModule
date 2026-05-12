@@ -7,12 +7,11 @@
 #' @noRd
 NULL
 
-# Helper function to escape variable names with special characters for formulas
+# Helper function to escape variable names with special characters for formulas.
+# Thin adapter around jmvcore::composeTerm so the 4 call sites (L366, L367,
+# L1297, L1298) keep their existing signature while using the project idiom.
 .escapeVariableNames <- function(var_names) {
-    # Check if variable names contain special characters that need escaping
-    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
-    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
-    return(var_names)
+    vapply(var_names, jmvcore::composeTerm, character(1), USE.NAMES = FALSE)
 }
 
 decisionpanelClass <- if (requireNamespace("jmvcore"))
@@ -103,9 +102,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     requireNamespace(pkg, quietly = TRUE)
                 })]
                 if (length(missing) > 0) {
-                    stop(sprintf("Required packages not available: %s. Please install using: install.packages(c('%s'))", 
-                                paste(missing, collapse = ", "),
-                                paste(missing, collapse = "', '")))
+                    jmvcore::reject(sprintf("Required packages not available: %s. Please install using: install.packages(c('%s'))",
+                                            paste(missing, collapse = ", "),
+                                            paste(missing, collapse = "', '")))
                 }
                 return(TRUE)
             },
@@ -165,9 +164,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                         paste("• ", validation_errors, collapse = "\n"),
                         "\n\nPlease review your data before proceeding."
                     )
-                    stop(error_msg)
+                    jmvcore::reject(error_msg)
                 }
-                
+
                 return(TRUE)
             },
 
@@ -319,7 +318,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 # Check data existence
                 if (is.null(mydata) || nrow(mydata) == 0) {
                     errors <- c(errors, "No data available for analysis")
-                    stop(paste(errors, collapse = "; "))
+                    jmvcore::reject(paste(errors, collapse = "; "))
                 }
                 
                 # Check variable existence
@@ -338,12 +337,12 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 if (length(errors) > 0) {
-                    stop(paste(errors, collapse = "; "))
+                    jmvcore::reject(paste(errors, collapse = "; "))
                 }
-                
+
                 return(TRUE)
             },
-            
+
             .getSafeBinaryColumnName = function(test_name) {
                 # Create safe column name for binary versions (avoid special chars)
                 safe_test_name <- gsub("[^a-zA-Z0-9._]", "_", test_name)
@@ -578,15 +577,15 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     "<p>Optimizing <strong>", test_info$count, "</strong> diagnostic tests with gold standard</p>",
                     "<div style='margin: 20px 0;'>",
                     "<div style='background: #f5f5f5; border: 2px solid #333; padding: 15px; display: inline-block;'>",
-                    "<strong>Tests:</strong> ", paste(test_info$variables, collapse = ", "), "<br>",
-                    "<strong>Gold Standard:</strong> ", self$options$gold,
+                    "<strong>Tests:</strong> ", paste(htmltools::htmlEscape(test_info$variables), collapse = ", "), "<br>",
+                    "<strong>Gold Standard:</strong> ", htmltools::htmlEscape(self$options$gold),
                     "</div></div></div>"
                 )
                 
                 self$results$summary$setContent(analysis_start_html)
 
                 if (nrow(self$data) == 0) {
-                    stop("Data contains no (complete) rows")
+                    jmvcore::reject("Data contains no (complete) rows")
                 }
 
                 # Set random seed for reproducibility
@@ -630,7 +629,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                         "Invalid positive test levels specified:\n",
                         paste(validation_errors, collapse = "\n")
                     )
-                    stop(error_msg)
+                    jmvcore::reject(error_msg)
                 }
 
                 # Create binary versions of all variables using safe processing
@@ -638,7 +637,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
 
                 # Update summary with analysis information
                 test_level_info <- paste(sapply(1:length(testVariables), function(i) {
-                    paste0("<strong>", testVariables[i], ":</strong> '", testPositiveLevels[i], "' = positive")
+                    paste0("<strong>", htmltools::htmlEscape(testVariables[i]),
+                           ":</strong> '", htmltools::htmlEscape(testPositiveLevels[i]),
+                           "' = positive")
                 }), collapse = "<br>")
                 
                 initial_summary <- paste0(
@@ -647,7 +648,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     "<div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; display: inline-block; text-align: left; margin: 15px;'>",
                     "<p style='margin: 0 0 15px 0;'><strong>Test Configuration:</strong></p>",
                     "<div style='margin-bottom: 15px; font-size: 14px;'>", test_level_info, "</div>",
-                    "<div style='margin-bottom: 15px;'><strong>Gold Standard:</strong> ", self$options$gold, " ('", goldPositive, "' = positive)</div>",
+                    "<div style='margin-bottom: 15px;'><strong>Gold Standard:</strong> ", htmltools::htmlEscape(self$options$gold), " ('", htmltools::htmlEscape(goldPositive), "' = positive)</div>",
                     "<hr style='border: 0; border-top: 1px solid #bbf7d0; margin: 15px 0;'>",
                     "<p style='margin: 0;'><strong>Dataset:</strong> ", nrow(mydata), " subjects | <strong>Prevalence:</strong> ", round(mean(mydata$gold_binary) * 100, 1), "%</p>",
                     "</div></div>"
@@ -673,7 +674,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 if (self$options$useCosts && nchar(self$options$testCosts) > 0) {
                     test_costs <- as.numeric(unlist(strsplit(self$options$testCosts, ",")))
                     if (length(test_costs) != length(testVariables)) {
-                        stop("Number of test costs must match number of tests")
+                        jmvcore::reject("Number of test costs must match number of tests")
                     }
                     names(test_costs) <- testVariables
                 }
@@ -852,7 +853,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                         "<div style='background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 10px 0;'>",
                         "<h4 style='color: #856404; margin-top: 0;'> Clinical Considerations</h4>",
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
-                        paste("<li>", clinical_warnings, "</li>", collapse = ""),
+                        paste("<li>", htmltools::htmlEscape(clinical_warnings), "</li>", collapse = ""),
                         "</ul>",
                         "</div>"
                     )
@@ -1296,8 +1297,8 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 # Create formula with escaped variable names
                 escaped_gold <- .escapeVariableNames(goldVariable)
                 escaped_tests <- .escapeVariableNames(testVariables)
-                formula <- as.formula(paste(escaped_gold, "~",
-                                            paste(escaped_tests, collapse = " + ")))
+                formula <- jmvcore::asFormula(paste(escaped_gold, "~",
+                                                    paste(escaped_tests, collapse = " + ")))
 
                 # Build tree based on method
                 if (self$options$treeMethod == "cart") {
@@ -1314,9 +1315,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                                 levels = c("Negative", "Positive")
                             )
                         } else {
-                            stop(paste("Gold positive level '", self$options$goldPositive, 
-                                     "' not found in gold standard variable. Available levels: ", 
-                                     paste(gold_levels, collapse = ", ")))
+                            jmvcore::reject(paste("Gold positive level '", self$options$goldPositive,
+                                                  "' not found in gold standard variable. Available levels: ",
+                                                  paste(gold_levels, collapse = ", ")))
                         }
                     }
 
@@ -1398,9 +1399,9 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                                 levels = c("Negative", "Positive")
                             )
                         } else {
-                            stop(paste("Gold positive level '", self$options$goldPositive, 
-                                     "' not found in gold standard variable. Available levels: ", 
-                                     paste(gold_levels, collapse = ", ")))
+                            jmvcore::reject(paste("Gold positive level '", self$options$goldPositive,
+                                                  "' not found in gold standard variable. Available levels: ",
+                                                  paste(gold_levels, collapse = ", ")))
                         }
                     }
                     
@@ -2107,7 +2108,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     
                     "<div style='background: white; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                     "<strong>Recommended Test Panel:</strong><br>",
-                    "<span style='color: #27ae60; font-size: 16px;'>", best_panel$tests, "</span>",
+                    "<span style='color: #27ae60; font-size: 16px;'>", htmltools::htmlEscape(best_panel$tests), "</span>",
                     "</div>",
                     
                     "<div style='display: flex; gap: 15px; margin: 15px 0;'>",
@@ -2204,7 +2205,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     "Decision panel analysis of %d diagnostic tests (n = %d subjects) identified the optimal combination as %s, achieving %.1f%% accuracy (95%% CI: %.1f%%-%.1f%%). The panel demonstrates %.1f%% sensitivity for detecting positive cases and %.1f%% specificity for excluding negative cases. With a disease prevalence of %.1f%%, the positive predictive value is %.1f%% and negative predictive value is %.1f%%. This panel ranks #1 among %d evaluated combinations using %s optimization criteria.",
                     length(testVariables),
                     n_subjects,
-                    best_panel$tests,
+                    htmltools::htmlEscape(best_panel$tests),
                     best_panel$accuracy * 100,
                     if (!is.null(best_panel$ci_lower)) best_panel$ci_lower * 100 else best_panel$accuracy * 100 - 5,
                     if (!is.null(best_panel$ci_upper)) best_panel$ci_upper * 100 else best_panel$accuracy * 100 + 5,
@@ -2299,7 +2300,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 if (length(optimal_panels) > 0) {
                     best <- optimal_panels[[1]]
                     html <- paste0(html, "<h4>Optimal Test Panel</h4>")
-                    html <- paste0(html, "<p><strong>Tests:</strong> ", best$tests, "</p>")
+                    html <- paste0(html, "<p><strong>Tests:</strong> ", htmltools::htmlEscape(best$tests), "</p>")
                     html <- paste0(html, "<p><strong>Strategy:</strong> ", best$strategy, "</p>")
                     html <- paste0(html, "<p><strong>Performance:</strong></p>")
                     html <- paste0(html, "<ul>")
@@ -2338,7 +2339,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     html <- paste0(html, "<h4>Primary Recommendation</h4>")
                     html <- paste0(html, "<p>Based on the analysis, the optimal testing approach is:</p>")
                     html <- paste0(html, "<ul>")
-                    html <- paste0(html, "<li><strong>", best$tests, "</strong> using <strong>",
+                    html <- paste0(html, "<li><strong>", htmltools::htmlEscape(best$tests), "</strong> using <strong>",
                                    best$strategy, "</strong> strategy</li>")
                     html <- paste0(html, "</ul>")
 
@@ -2362,20 +2363,20 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                     high_sens <- optimal_panels[order(sapply(optimal_panels,
                                                              function(x) -x$sensitivity))][[1]]
                     html <- paste0(html, sprintf("<li>For maximum sensitivity (%.1f%%): %s</li>",
-                                                 high_sens$sensitivity * 100, high_sens$tests))
+                                                 high_sens$sensitivity * 100, htmltools::htmlEscape(high_sens$tests)))
 
                     # High specificity option
                     high_spec <- optimal_panels[order(sapply(optimal_panels,
                                                              function(x) -x$specificity))][[1]]
                     html <- paste0(html, sprintf("<li>For maximum specificity (%.1f%%): %s</li>",
-                                                 high_spec$specificity * 100, high_spec$tests))
+                                                 high_spec$specificity * 100, htmltools::htmlEscape(high_spec$tests)))
 
                     # Low cost option (if applicable)
                     if (self$options$useCosts) {
                         low_cost <- optimal_panels[order(sapply(optimal_panels,
                                                                 function(x) x$cost))][[1]]
                         html <- paste0(html, sprintf("<li>For minimum cost (%.2f): %s</li>",
-                                                     low_cost$cost, low_cost$tests))
+                                                     low_cost$cost, htmltools::htmlEscape(low_cost$tests)))
                     }
 
                     html <- paste0(html, "</ul>")
@@ -3401,12 +3402,12 @@ decisionpanelClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 if (length(errors) > 0) {
-                    stop(paste(errors, collapse = "; "), call. = FALSE)
+                    jmvcore::reject(paste(errors, collapse = "; "))
                 }
-                
+
                 return(TRUE)
             },
-            
+
             .getCacheEfficiency = function() {
                 total_requests <- private$cache_stats$hits + private$cache_stats$misses
                 if (total_requests > 0) {

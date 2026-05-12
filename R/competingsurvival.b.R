@@ -13,8 +13,8 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # match published reference values. Priority: HIGH before moving
         # from Drafts to production menu.
 
+        # TODO (cleanup): .escapeVar() is defined here but never called anywhere in the class. After the /jamovify-function pass switched the formula construction at L186/L225/L293 to jmvcore::composeTerm(), this private helper is fully redundant. Delete it (and its sibling reference in any docs) unless a future caller is intentionally added.
         .escapeVar = function(x) {
-            # Escape variable names for safe use (handle spaces, special chars)
             if (is.null(x) || length(x) == 0) return(x)
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
@@ -30,13 +30,14 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$todo$setContent("")
         },
 
+        # TODO (forward-looking): .getData() does an original-name → janitor::clean_names() → labelled::var_label() roundtrip to recover the cleaned column name for each option. The standard jamovi pattern is to call jmvcore::composeTerm(self$options$X) directly on the user's column name and let composeTerm handle backticking. The roundtrip is also load-bearing for the security story (janitor cleaning removes function-call shapes from column names before they reach finalfit) — refactoring must preserve that defense, e.g. by keeping janitor or by validating each column name matches `^[A-Za-z_][A-Za-z0-9_.]*$` before use.
         .getData = function() {
             # Clean and label data following survival module pattern
             mydata <- self$data
             mydata$row_names <- rownames(mydata)
             original_names <- names(mydata)
             labels <- setNames(original_names, original_names)
-            
+
             mydata <- mydata %>% janitor::clean_names()
             corrected_labels <- setNames(original_names, names(mydata))
             mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
@@ -64,10 +65,10 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             # Check required packages
             if (!requireNamespace('finalfit', quietly = TRUE)) {
-                stop('The finalfit package is required but not installed')
+                jmvcore::reject('The finalfit package is required but not installed')
             }
             if (!requireNamespace('cmprsk', quietly = TRUE)) {
-                stop('The cmprsk package is required but not installed')
+                jmvcore::reject('The cmprsk package is required but not installed')
             }
             
             # If no variable selected Initial Message ----
@@ -104,7 +105,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             
             # Validate data
             if (nrow(self$data) == 0) {
-                stop('Data contains no (complete) rows')
+                jmvcore::reject('Data contains no (complete) rows')
             }
             
             # Get processed data
@@ -125,20 +126,20 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             if (analysistype == "overall") {
                 # Need at least one death type defined
                 if (is.null(dod) && is.null(dooc)) {
-                    stop("For overall survival, please specify at least one death type (Dead of Disease or Dead of Other)")
+                    jmvcore::reject("For overall survival, please specify at least one death type (Dead of Disease or Dead of Other)")
                 }
             } else if (analysistype == "cause") {
                 # Need disease death defined
                 if (is.null(dod)) {
-                    stop("For cause-specific survival, please specify 'Dead of Disease' level")
+                    jmvcore::reject("For cause-specific survival, please specify 'Dead of Disease' level")
                 }
             } else if (analysistype == "compete") {
                 # Need both death types defined
                 if (is.null(dod)) {
-                    stop("For competing risks analysis, please specify 'Dead of Disease' level")
+                    jmvcore::reject("For competing risks analysis, please specify 'Dead of Disease' level")
                 }
                 if (is.null(dooc)) {
-                    stop("For competing risks analysis, please specify 'Dead of Other' level")
+                    jmvcore::reject("For competing risks analysis, please specify 'Dead of Other' level")
                 }
             }
             
@@ -153,7 +154,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             }
             
             if (nrow(mydata) == 0) {
-                stop('No complete cases available for analysis')
+                jmvcore::reject('No complete cases available for analysis')
             }
             
             # Perform analysis based on type
@@ -183,7 +184,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             )
             
             # Create survival object
-            dependent_os <- paste0("Surv(`", mytime, "`, status_os)")
+            dependent_os <- paste0("Surv(", jmvcore::composeTerm(mytime), ", status_os)")
             
             # Perform survival analysis
             tryCatch({
@@ -211,7 +212,8 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 private$.formatSurvivalResults(result, "Overall Survival")
                 
             }, error = function(e) {
-                stop(paste("Overall survival analysis failed:", e$message))
+                # TODO (security): the three tryCatch blocks at L213, L252, L436 all interpolate `e$message` into a jmvcore::reject() format string. jamovi's reject UI typically renders as plain analysis-error text (no HTML), so the risk is lower than for setContent paths — but third-party error messages from finalfit / cmprsk / survival can echo factor labels or column names from user data. If the reject surface ever gains HTML rendering, these need wrapping with htmltools::htmlEscape(). Defense-in-depth.
+                jmvcore::reject("Overall survival analysis failed: {}", e$message)
             })
         },
         
@@ -222,7 +224,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             )
             
             # Create survival object
-            dependent_dss <- paste0("Surv(`", mytime, "`, status_dss)")
+            dependent_dss <- paste0("Surv(", jmvcore::composeTerm(mytime), ", status_dss)")
             
             # Perform survival analysis
             tryCatch({
@@ -250,7 +252,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 private$.formatSurvivalResults(result, "Cause-Specific Survival")
                 
             }, error = function(e) {
-                stop(paste("Cause-specific survival analysis failed:", e$message))
+                jmvcore::reject("Cause-specific survival analysis failed: {}", e$message)
             })
         },
  
@@ -281,16 +283,14 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             n_disease_events <- sum(mydata$status_crr == 1, na.rm = TRUE)
             n_competing_events <- sum(mydata$status_crr == 2, na.rm = TRUE)
             if (n_disease_events < 5) {
-                stop("Too few disease events (", n_disease_events,
-                     "). Competing risks analysis requires at least 5 events of each type for reliable estimates.")
+                jmvcore::reject("Too few disease events ({}). Competing risks analysis requires at least 5 events of each type for reliable estimates.", n_disease_events)
             }
             if (self$options$analysistype == "compete" && n_competing_events < 5) {
-                stop("Too few competing events (", n_competing_events,
-                     "). Competing risks analysis requires at least 5 events of each type.")
+                jmvcore::reject("Too few competing events ({}). Competing risks analysis requires at least 5 events of each type.", n_competing_events)
             }
 
             # Create survival object for competing risks
-            dependent_crr <- paste0("Surv(`", mytime, "`, status_crr)")
+            dependent_crr <- paste0("Surv(", jmvcore::composeTerm(mytime), ", status_crr)")
             
             tryCatch({
                 # Extract variables
@@ -434,7 +434,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 self$results$kmvscifPlot$setState(plot_state)
                 
             }, error = function(e) {
-                stop(paste("Competing risks analysis failed:", e$message))
+                jmvcore::reject("Competing risks analysis failed: {}", e$message)
             })
         },
         
@@ -757,7 +757,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                     ))
                 }, error = function(e) {
                     self$results$fineGrayTable$setNote("error",
-                        paste("Fine-Gray model details could not be extracted:", e$message))
+                        paste("Fine-Gray model details could not be extracted:", htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -816,7 +816,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
 
                         timepoint_text <- paste0(timepoint_text,
                             "<tr><td>", group_data$time, "</td>",
-                            "<td>", group_name, "</td>",
+                            "<td>", htmltools::htmlEscape(group_name), "</td>",
                             "<td>", round(group_data$estimate, 3), "</td>",
                             "<td>(", round(group_data$ci_lower, 3), ", ",
                             round(group_data$ci_upper, 3), ")</td></tr>"

@@ -16,12 +16,14 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
 
         .run = function() {
+            # TODO (security): the `predictor_formula` OptionString (declared in .a.yaml / .h.R) is currently NEVER read by this backend — it is a stub. If a future implementer wires it into a model formula, the read site MUST go through `jmvcore::asFormula(<string>, additional_allowed_functions = c())` and a tight regex whitelist on the input (e.g. `^[A-Za-z_][A-Za-z0-9_.+\\- ]*$`) — otherwise it becomes a C1 RCE sink because R's `model.frame` evaluates function calls on the formula RHS. Either implement the option safely or remove it from .a.yaml/.u.yaml entirely.
+
             # Check for required inputs
             if (is.null(self$options$time) || is.null(self$options$event) ||
                 is.null(self$options$predictor)) {
                 notice <- jmvcore::Notice$new(options=self$options, name='.requiredInputs', type=jmvcore::NoticeType$ERROR)
                 notice$setContent('Time, Event, and Predictor variables are all required. Please select all three variables and re-run the analysis.')
-                self$results$insert(999, notice)
+                self$results$insert(1, notice)
                 return()
             }
 
@@ -59,7 +61,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             "Event variable has non-binary values (%s). Please specify which value represents the event using the Event Code option.",
                             paste(unique_vals, collapse = ", ")
                         ))
-                        self$results$insert(999, notice)
+                        self$results$insert(1, notice)
                         return()
                     }
                 }
@@ -80,7 +82,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 notice$setContent(
                     "Competing risks C-index is not yet implemented. Please disable this option. Standard C-index will be calculated treating competing events as censored."
                 )
-                self$results$insert(999, notice)
+                self$results$insert(1, notice)
             }
 
             if (self$options$decompose_cindex) {
@@ -92,7 +94,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 notice$setContent(
                     "C-index decomposition by risk groups is not yet implemented. Please disable this option."
                 )
-                self$results$insert(999, notice)
+                self$results$insert(1, notice)
             }
 
             if (self$options$stratified_cindex) {
@@ -104,7 +106,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 notice$setContent(
                     "Stratified C-index analysis is not yet implemented. Please disable this option."
                 )
-                self$results$insert(999, notice)
+                self$results$insert(1, notice)
             }
 
             # Warn about unimplemented plots
@@ -279,9 +281,9 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 notice$setContent(msg)
                 if (pct_missing > 20) {
-                    self$results$insert(999, notice)  # Warning at top
+                    self$results$insert(1, notice)    # WARNING at top
                 } else {
-                    self$results$insert(999, notice)  # Info at bottom
+                    self$results$insert(999, notice)  # INFO at bottom
                 }
             }
 
@@ -296,7 +298,7 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (n_events < 10) {
                 notice <- jmvcore::Notice$new(options=self$options, name='.tooFewEvents', type=jmvcore::NoticeType$ERROR)
                 notice$setContent(sprintf('Too few events for reliable C-index estimation (n_events=%d). Minimum 10 events required, 100+ recommended for stable estimates. Results may be unreliable.', n_events))
-                self$results$insert(999, notice)
+                self$results$insert(1, notice)
                 return()
             } else if (n_events < 50) {
                 notice <- jmvcore::Notice$new(options=self$options, name='.lowEvents', type=jmvcore::NoticeType$STRONG_WARNING)
@@ -550,6 +552,15 @@ concordanceindexClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             if (self$options$ci_method == "bootstrap") {
                 # Bootstrap confidence intervals
+                # Save/restore the user's RNG state so set.seed() doesn't leak into the rest of their session.
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+                on.exit({
+                    if (is.null(old_seed)) {
+                        if (exists(".Random.seed", envir = .GlobalEnv)) rm(".Random.seed", envir = .GlobalEnv)
+                    } else {
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                    }
+                }, add = TRUE)
                 set.seed(self$options$random_seed)
                 n_boot <- self$options$bootstrap_samples
                 n <- length(time_var)

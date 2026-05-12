@@ -89,21 +89,38 @@ clinicalpredictionClass <- R6::R6Class(
                 required_packages <- c(required_packages, "lime")
             }
             
+            # TODO (jamovify): the setNote("error", ...) calls at L<this>+~6, L23, L28
+            # use a deprecated pattern. Per CLAUDE.md, convert to the .addNotice() +
+            # .renderNotices() HTML-output pattern (R/waterfall.b.R reference).
+            missing_packages <- character(0)
             for (pkg in required_packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
-                    tryCatch({
-                        install.packages(pkg, repos = "https://cran.rstudio.com/")
-                    }, error = function(e) {
-                        self$results$overview$setNote("error", paste("Failed to install package:", pkg))
-                        return()
-                    })
+                    missing_packages <- c(missing_packages, pkg)
                 }
+            }
+            if (length(missing_packages) > 0) {
+                self$results$overview$setNote("error",
+                    paste0("Required package(s) not installed: ",
+                           paste(missing_packages, collapse = ", "),
+                           ". Please install with install.packages(c(\"",
+                           paste(missing_packages, collapse = "\", \""),
+                           "\")) in R, then re-run the analysis."))
             }
         },
         
         .processData = function() {
+            # TODO (stub): the .a.yaml declares ~46 options but only 20 are read in
+            # this backend. Unwired options include: baseline_models, bias_analysis,
+            # bootstrap_ci, calibration_analysis, clinical_metrics, clinical_report,
+            # compare_models, decision_curve, detailed_output, ensemble_models,
+            # export_predictions, external_validation, hyperparameter_tuning,
+            # individual_explanations, n_explanations, nomogram, outcome_type,
+            # partial_dependence, performance_metrics, permutation_importance,
+            # regulatory_documentation, save_model, stability_analysis,
+            # threshold_optimization, tuning_method, validation_method.
+            # Either implement or hide them in .u.yaml until ready.
             data <- self$data
-            
+
             # Get variables
             outcome_var <- self$options$outcome_var
             predictor_vars <- self$options$predictor_vars
@@ -152,7 +169,7 @@ clinicalpredictionClass <- R6::R6Class(
             method <- self$options$handle_missing
             
             if (method == "complete_cases") {
-                return(data[complete.cases(data), ])
+                return(jmvcore::naOmit(data))
             } else if (method == "mean_median") {
                 for (col in names(data)) {
                     if (is.numeric(data[[col]])) {
@@ -254,8 +271,7 @@ clinicalpredictionClass <- R6::R6Class(
             
             # Prepare formula
             predictor_vars <- setdiff(names(train_data), outcome_var)
-            formula_str <- paste(outcome_var, "~", paste(predictor_vars, collapse = " + "))
-            model_formula <- as.formula(formula_str)
+            model_formula <- jmvcore::asFormula(jmvcore::constructFormula(outcome_var, predictor_vars))
             
             if (model_type == "random_forest") {
                 if (requireNamespace("randomForest", quietly = TRUE)) {
@@ -270,6 +286,14 @@ clinicalpredictionClass <- R6::R6Class(
                 if (requireNamespace("xgboost", quietly = TRUE)) {
                     # Prepare data for xgboost
                     x_train <- as.matrix(train_data[, predictor_vars, drop = FALSE])
+                    # TODO (correctness): `as.numeric(factor) - 1` here and at
+                    # L<this>+~170 (event_rate computation) maps factor LEVEL
+                    # INDICES {1,2} to {0,1} for binary modelling. Fragile if
+                    # the factor has a `values = c(0,1)` attribute (jmvcore
+                    # coding) — would produce {-1,0}. Replace with a robust
+                    # binary encoder that doesn't depend on level coding:
+                    #   y_train <- as.integer(train_data[[outcome_var]] ==
+                    #                         levels(train_data[[outcome_var]])[2])
                     y_train <- as.numeric(train_data[[outcome_var]]) - 1  # 0-1 encoding
                     
                     private$.model <- xgboost::xgboost(

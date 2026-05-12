@@ -58,7 +58,7 @@ NULL
         "border-left: 4px solid ", style$border, ";'>",
         "<p style='margin: 0; color: ", style$title_color, ";'>",
         "<strong>", style$icon, " ", type, ":</strong> ",
-        message,
+        htmltools::htmlEscape(message),
         "</p>",
         "</div>"
     )
@@ -1254,16 +1254,18 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
 
         } else {
-          # STANDARD SURVIVAL ANALYSIS using Kaplan-Meier
+          # STANDARD SURVIVAL ANALYSIS using Kaplan-Meier — composeTerm backtick-
+          # escapes user column names; asFormula validates against jamovi's
+          # allow-list (Surv is allow-listed).
           formula <-
-            paste('survival::Surv(',
-                  mytime,
-                  ',',
-                  myoutcome,
-                  ') ~ ',
-                  myfactor)
+            paste0('Surv(',
+                   jmvcore::composeTerm(mytime),
+                   ', ',
+                   jmvcore::composeTerm(myoutcome),
+                   ') ~ ',
+                   jmvcore::composeTerm(myfactor))
 
-          formula <- as.formula(formula)
+          formula <- jmvcore::asFormula(formula, additional_allowed_functions = c("Surv"))
 
           km_fit <- private$.safeExecute({
             private$.getCachedSurvfit(formula, mydata, "median")
@@ -1504,9 +1506,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           # Use proper mstate survival fit
           # 0=censored, 1=event of interest, 2=competing event
-          # We construct formula carefully to avoid quoting issues
-          f_str <- paste0('survival::Surv(', mytime, ',', myoutcome, ', type="mstate") ~ 1')
-          formula_mstate <- as.formula(f_str)
+          # composeTerm backtick-escapes user column names; asFormula validates
+          # against jamovi's allow-list (Surv is allow-listed).
+          f_str <- paste0('Surv(',
+                          jmvcore::composeTerm(mytime),
+                          ', ',
+                          jmvcore::composeTerm(myoutcome),
+                          ', type="mstate") ~ 1')
+          formula_mstate <- jmvcore::asFormula(f_str, additional_allowed_functions = c("Surv"))
           
           fit_mstate <- private$.safeExecute({
             private$.getCachedSurvfit(formula_mstate, mydata, "survtable_mstate")
@@ -1572,15 +1579,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return()
         }
         
+        # composeTerm backtick-escapes user column names; asFormula validates
+        # against jamovi's allow-list (Surv is allow-listed).
         formula <-
-          paste('survival::Surv(',
-                mytime,
-                ',',
-                myoutcome,
-                ') ~ ',
-                myfactor)
+          paste0('Surv(',
+                 jmvcore::composeTerm(mytime),
+                 ', ',
+                 jmvcore::composeTerm(myoutcome),
+                 ') ~ ',
+                 jmvcore::composeTerm(myfactor))
 
-        formula <- as.formula(formula)
+        formula <- jmvcore::asFormula(formula, additional_allowed_functions = c("Surv"))
 
         km_fit <- private$.safeExecute({
           private$.getCachedSurvfit(formula, mydata, "survtable")
@@ -2401,8 +2410,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         plotData[[mytime]] <-
           jmvcore::toNumeric(plotData[[mytime]])
 
+        # Unqualified `Surv` (globally allow-listed); mytime/myoutcome already
+        # backtick-escaped via jmvcore::constructFormula above.
         myformula <-
-          paste("survival::Surv(", mytime, ",", myoutcome, ")")
+          paste0("Surv(", mytime, ", ", myoutcome, ")")
 
         private$.checkpoint()
 
@@ -2469,8 +2480,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         plotData[[mytime]] <-
           jmvcore::toNumeric(plotData[[mytime]])
 
+        # Unqualified `Surv` (globally allow-listed); mytime/myoutcome already
+        # backtick-escaped via jmvcore::constructFormula above.
         myformula <-
-          paste("survival::Surv(", mytime, ",", myoutcome, ")")
+          paste0("Surv(", mytime, ", ", myoutcome, ")")
 
         private$.checkpoint()
 
@@ -2537,15 +2550,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         title2 <- "Single Arm Survival"
 
 
+        # mytime/myoutcome/myfactor are already backtick-escaped via
+        # jmvcore::constructFormula above. Switch to unqualified `Surv`
+        # (allow-listed) and asFormula for parse-tree validation.
         myformula <-
-          paste('survival::Surv(',
-                mytime,
-                ',',
-                myoutcome,
-                ') ~ ',
-                myfactor)
+          paste0('Surv(', mytime, ', ', myoutcome, ') ~ ', myfactor)
 
-        myformula <- as.formula(myformula)
+        myformula <- jmvcore::asFormula(myformula, additional_allowed_functions = c("Surv"))
 
         km_fit <-
           survival::survfit(myformula, data = plotData)
@@ -2981,7 +2992,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Provide more specific error information for debugging
           fallback_html <- paste0(
             "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
-            "<p>", .("Error generating clinical summary:"), " ", e$message, "</p>",
+            "<p>", .("Error generating clinical summary:"), " ",
+            htmltools::htmlEscape(e$message), "</p>",
             "<p><small>", .("Debug: Table rows ="), " ", self$results$medianTable$rowCount, "</small></p>",
             "</div>"
           )

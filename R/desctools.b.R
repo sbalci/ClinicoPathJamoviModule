@@ -107,7 +107,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
                 # Get data
                 data <- self$data
                 if (nrow(data) == 0) {
-                    stop("Data contains no rows")
+                    jmvcore::reject("Data contains no rows")
                 }
                 
                 # Perform selected analyses
@@ -128,7 +128,7 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
                 }, error = function(e) {
                     error_msg <- paste0(
                         "<div style='color: red; font-weight: bold;'>",
-                        "Error in statistical analysis: ", e$message,
+                        "Error in statistical analysis: ", htmltools::htmlEscape(e$message),
                         "<br><br>",
                         "Please check your variable selections and data format.",
                         "</div>"
@@ -212,16 +212,16 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
                 html_content <- paste0(html_content, "<th>Group</th><th>N</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th></tr>")
                 
                 html_content <- paste0(html_content, "<tr>")
-                html_content <- paste0(html_content, "<td><strong>", group_levels[1], "</strong></td>")
+                html_content <- paste0(html_content, "<td><strong>", htmltools::htmlEscape(group_levels[1]), "</strong></td>")
                 html_content <- paste0(html_content, "<td>", length(group1_data), "</td>")
                 html_content <- paste0(html_content, "<td>", round(mean(group1_data), 3), "</td>")
                 html_content <- paste0(html_content, "<td>", round(sd(group1_data), 3), "</td>")
                 html_content <- paste0(html_content, "<td>", round(min(group1_data), 3), "</td>")
                 html_content <- paste0(html_content, "<td>", round(max(group1_data), 3), "</td>")
                 html_content <- paste0(html_content, "</tr>")
-                
+
                 html_content <- paste0(html_content, "<tr>")
-                html_content <- paste0(html_content, "<td><strong>", group_levels[2], "</strong></td>")
+                html_content <- paste0(html_content, "<td><strong>", htmltools::htmlEscape(group_levels[2]), "</strong></td>")
                 html_content <- paste0(html_content, "<td>", length(group2_data), "</td>")
                 html_content <- paste0(html_content, "<td>", round(mean(group2_data), 3), "</td>")
                 html_content <- paste0(html_content, "<td>", round(sd(group2_data), 3), "</td>")

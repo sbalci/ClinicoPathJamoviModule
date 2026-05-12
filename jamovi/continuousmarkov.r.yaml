@@ -12,6 +12,14 @@ items:
           - time
           - state
 
+    - name: errors
+      title: Errors
+      type: Html
+
+    - name: warnings
+      title: Warnings
+      type: Html
+
     - name: summary
       title: Model Summary
       type: Html

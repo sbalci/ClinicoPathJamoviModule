@@ -830,7 +830,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     private$.appendInstructionMessage(
                         paste0("<div class='alert alert-warning'><h4> Sensitivity Meta-Regression Failed</h4><p>",
-                               e$message, "</p></div>")
+                               htmltools::htmlEscape(e$message), "</p></div>")
                     )
                     return(NULL)
                 })
@@ -841,7 +841,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     private$.appendInstructionMessage(
                         paste0("<div class='alert alert-warning'><h4> Specificity Meta-Regression Failed</h4><p>",
-                               e$message, "</p></div>")
+                               htmltools::htmlEscape(e$message), "</p></div>")
                     )
                     return(NULL)
                 })

@@ -67,6 +67,11 @@ cohenskappaClass <- R6::R6Class(
         .run = function() {
             
             # Get options
+            # TODO (stub): the `agreement_plot` Bool option is declared in
+            # jamovi/cohenskappa.a.yaml:99-103 but never read in this backend.
+            # The UI exposes it (default TRUE) but toggling it has no effect.
+            # Either implement the agreement plot (e.g., observed vs expected
+            # agreement bar chart) or remove from the .a.yaml.
             rater1 <- self$options$rater1
             rater2 <- self$options$rater2
             
@@ -126,6 +131,21 @@ cohenskappaClass <- R6::R6Class(
             }
             
             # Convert to factors if needed
+            # TODO (correctness): `as.factor(numeric)` orders levels by sort
+            # order of unique values, NOT by the user's intended ordinal
+            # sequence. For ordinal raters (e.g., Likert 1-5 stored as
+            # integers), this happens to coincide. But if levels are sparse
+            # (e.g., 1, 2, 4, 7), kappa weighting (linear/quadratic) treats
+            # them as equally spaced, which silently distorts weighted-kappa
+            # results. For weighted methods (kappa_type %in% c("linear",
+            # "quadratic", "all")), consider:
+            #   (a) requiring users to pre-convert numeric raters to ordered
+            #       factors, or
+            #   (b) explicitly using `factor(x, levels = sort(unique(x)),
+            #       ordered = TRUE)` and surfacing the assumed level order
+            #       in a notice.
+            # This site applies to L<this>+1 (rater1) and L<this>+4 (rater2),
+            # plus the parallel multi-rater path at L573-575.
             if (is.numeric(rater1_data)) {
                 rater1_data <- as.factor(rater1_data)
             }
@@ -526,7 +546,8 @@ cohenskappaClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                error_msg <- glue::glue("<h3>Error in Analysis</h3><p>An error occurred during analysis: {e$message}</p><p>Please check your data and parameter settings.</p>")
+                safe_msg <- htmltools::htmlEscape(e$message)
+                error_msg <- glue::glue("<h3>Error in Analysis</h3><p>An error occurred during analysis: {safe_msg}</p><p>Please check your data and parameter settings.</p>")
                 self$results$summary$setContent(error_msg)
                 return()
             })
@@ -691,9 +712,10 @@ cohenskappaClass <- R6::R6Class(
                 return(list(success = TRUE, kappa = kappa_value, method = method_name))
 
             }, error = function(e) {
+                safe_msg <- htmltools::htmlEscape(e$message)
                 error_msg <- glue::glue("
                 <h3>Error in Multi-Rater Analysis</h3>
-                <p>An error occurred: {e$message}</p>
+                <p>An error occurred: {safe_msg}</p>
                 <p>Please check that:</p>
                 <ul>
                 <li>All raters use the same categories</li>

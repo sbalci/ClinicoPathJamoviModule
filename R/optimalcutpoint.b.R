@@ -195,27 +195,65 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             tryCatch({
 
                 if (method == "maxstat") {
-                    # Maximally selected rank statistics
+                    # Maximally selected rank statistics (Miller-Halpern-style cut-point)
                     formula_str <- paste("Surv(", time_var, ",", status_var, ") ~", biomarker)
+
+                    correction <- self$options$multiple_testing
+                    pmethod <- switch(correction,
+                                      "monte_carlo" = "exactGauss",
+                                      "miller_siegmund" = "HL",
+                                      "bonferroni" = "HL",
+                                      "holm" = "HL",
+                                      "HL")
 
                     maxstat_result <- maxstat::maxstat.test(
                         formula = as.formula(formula_str),
                         data = data,
                         smethod = "LogRank",
-                        pmethod = "HL"
+                        pmethod = pmethod
                     )
 
                     optimal_cutpoint <- maxstat_result$estimate
-                    p_value <- maxstat_result$p.value
+                    asymptotic_p   <- maxstat_result$p.value
+                    observed_stat  <- as.numeric(maxstat_result$statistic)
+
+                    monte_carlo_p <- NA_real_
+                    if (correction == "monte_carlo") {
+                        monte_carlo_p <- private$.maxstatMonteCarloP(
+                            data       = data,
+                            biomarker  = biomarker,
+                            time_var   = time_var,
+                            status_var = status_var,
+                            observed   = observed_stat,
+                            nperm      = self$options$nperm
+                        )
+                        reported_p <- monte_carlo_p
+                        method_label <- sprintf(
+                            "Maximally Selected Rank Statistics (Monte-Carlo, B = %d)",
+                            self$options$nperm
+                        )
+                    } else if (correction == "bonferroni" || correction == "holm") {
+                        n_candidates <- length(unique(stats::na.omit(data[[biomarker]])))
+                        reported_p <- min(1, asymptotic_p * max(n_candidates, 1))
+                        method_label <- sprintf(
+                            "Maximally Selected Rank Statistics (%s of %d candidate cut-points)",
+                            correction, n_candidates
+                        )
+                    } else {
+                        reported_p <- asymptotic_p
+                        method_label <- "Maximally Selected Rank Statistics (Miller-Siegmund / HL)"
+                    }
 
                     private$.populateSurvivalCutpointTable(
                         cutpoint = optimal_cutpoint,
-                        p_value = p_value,
-                        method = "Maximally Selected Rank Statistics",
+                        p_value = reported_p,
+                        method = method_label,
                         data = data,
                         biomarker = biomarker,
                         time_var = time_var,
-                        status_var = status_var
+                        status_var = status_var,
+                        asymptotic_p = asymptotic_p,
+                        monte_carlo_p = monte_carlo_p
                     )
 
                 } else {
@@ -413,7 +451,8 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             table$addRow(rowKey = "youden", values = row)
         },
 
-        .populateSurvivalCutpointTable = function(cutpoint, p_value, method, data, biomarker, time_var, status_var) {
+        .populateSurvivalCutpointTable = function(cutpoint, p_value, method, data, biomarker, time_var, status_var,
+                                                  asymptotic_p = NA_real_, monte_carlo_p = NA_real_) {
 
             table <- self$results$cutpointresults
 
@@ -454,7 +493,9 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 n_total = n_total,
                 n_above = n_above,
                 n_below = n_below,
-                p_value = round(p_value, 4)
+                p_value = if (is.na(p_value)) NA_real_ else round(p_value, 4),
+                p_asymptotic = if (is.na(asymptotic_p)) NA_real_ else round(asymptotic_p, 4),
+                p_monte_carlo = if (is.na(monte_carlo_p)) NA_real_ else round(monte_carlo_p, 4)
             )
 
             table$addRow(rowKey = "survival", values = row)
@@ -695,7 +736,64 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             table$addColumn(name = 'n_total', title = 'N Total', type = 'integer')
             table$addColumn(name = 'n_above', title = 'N Above', type = 'integer')
             table$addColumn(name = 'n_below', title = 'N Below', type = 'integer')
-            table$addColumn(name = 'p_value', title = 'p-value', type = 'number', format = 'zto,pvalue')
+            table$addColumn(name = 'p_value', title = 'p (reported)', type = 'number', format = 'zto,pvalue')
+            table$addColumn(name = 'p_asymptotic', title = 'p (asymptotic)', type = 'number', format = 'zto,pvalue')
+            table$addColumn(name = 'p_monte_carlo', title = 'p (Monte-Carlo)', type = 'number', format = 'zto,pvalue')
+        },
+
+        .maxstatMonteCarloP = function(data, biomarker, time_var, status_var, observed, nperm = 2000) {
+            # Permutation-based correction for the maximally-selected log-rank
+            # statistic. Permutes the biomarker against the (time,status) vector
+            # B times, refits maxstat, and returns the proportion of permuted
+            # statistics >= observed. Equivalent in spirit to the Monte-Carlo
+            # correction used by X-tile (Camp 2004 Clin Cancer Res 10:7252-9).
+            if (!is.finite(observed) || nperm < 1) return(NA_real_)
+
+            biomarker_values <- data[[biomarker]]
+            n <- length(biomarker_values)
+            if (n < 10) return(NA_real_)
+
+            permuted_data <- data
+            null_stats <- numeric(nperm)
+            successes <- 0L
+            failures  <- 0L
+            formula_str <- paste("Surv(", time_var, ",", status_var, ") ~", biomarker)
+            f <- as.formula(formula_str)
+
+            # Use a project-stable seed so re-runs of the same data give the
+            # same corrected p; users can override by setting .Random.seed.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                            get(".Random.seed", envir = .GlobalEnv)
+                        else NULL
+            on.exit({
+                if (!is.null(old_seed))
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+            }, add = TRUE)
+            set.seed(20260506L)
+
+            for (i in seq_len(nperm)) {
+                permuted_data[[biomarker]] <- sample(biomarker_values, n, replace = FALSE)
+                stat_i <- tryCatch(
+                    as.numeric(maxstat::maxstat.test(
+                        formula = f, data = permuted_data,
+                        smethod = "LogRank", pmethod = "none"
+                    )$statistic),
+                    error = function(e) NA_real_
+                )
+                if (is.na(stat_i)) {
+                    failures <- failures + 1L
+                } else {
+                    null_stats[i] <- stat_i
+                    if (stat_i >= observed) successes <- successes + 1L
+                }
+
+                # Surrender control to jamovi periodically so the UI stays alive.
+                if ((i %% 50L) == 0L) private$.checkpoint()
+            }
+
+            effective_B <- nperm - failures
+            if (effective_B < 50) return(NA_real_)
+            (successes + 1) / (effective_B + 1)
         },
 
         .initValidationTable = function() {

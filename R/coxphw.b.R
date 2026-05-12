@@ -210,24 +210,25 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(covariates) || length(covariates) == 0) {
                 formula <- "Surv(time, status) ~ 1"
             } else {
-                formula <- paste("Surv(time, status) ~", paste(covariates, collapse = " + "))
+                rhs <- paste(vapply(covariates, jmvcore::composeTerm, character(1)), collapse = " + ")
+                formula <- paste("Surv(time, status) ~", rhs)
             }
-            
+
             # Add offset
             if (!is.null(offsetVar)) {
                 formula <- paste(formula, "+ offset(offset)")
             }
-            
+
             # Add stratification
             if (!is.null(stratifyVar)) {
                 formula <- paste(formula, "+ strata(strata)")
             }
-            
+
             # Fit standard Cox model
             tryCatch({
                 if (!is.null(clusterVar)) {
                     model <- survival::coxph(
-                        as.formula(formula),
+                        jmvcore::asFormula(formula),
                         data = data,
                         cluster = data$cluster,
                         model = TRUE,
@@ -236,7 +237,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     )
                 } else {
                     model <- survival::coxph(
-                        as.formula(formula),
+                        jmvcore::asFormula(formula),
                         data = data,
                         model = TRUE,
                         x = TRUE,
@@ -264,25 +265,26 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(covariates) || length(covariates) == 0) {
                 formula <- "Surv(time, status) ~ 1"
             } else {
-                formula <- paste("Surv(time, status) ~", paste(covariates, collapse = " + "))
+                rhs <- paste(vapply(covariates, jmvcore::composeTerm, character(1)), collapse = " + ")
+                formula <- paste("Surv(time, status) ~", rhs)
             }
-            
+
             # Add offset
             if (!is.null(offsetVar)) {
                 formula <- paste(formula, "+ offset(offset)")
             }
-            
+
             # Add stratification
             if (!is.null(stratifyVar)) {
                 formula <- paste(formula, "+ strata(strata)")
             }
-            
+
             # Check if coxphw package is available
             if (requireNamespace("coxphw", quietly = TRUE)) {
                 # Use coxphw package implementation
                 tryCatch({
                     model <- coxphw::coxphw(
-                        formula = as.formula(formula),
+                        formula = jmvcore::asFormula(formula),
                         data = data,
                         alpha = alpha,
                         weight = weightMethod,
@@ -297,7 +299,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return(list(model = model, weights = weights, error = NULL))
                     
                 }, error = function(e) {
-                    error_msg <- paste("Weighted Cox model fitting failed:", e$message)
+                    error_msg <- paste("Weighted Cox model fitting failed:", htmltools::htmlEscape(e$message))
                     return(list(error = error_msg))
                 })
                 
@@ -314,7 +316,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Fit standard Cox model first
             if (!is.null(clusterVar)) {
                 standardModel <- survival::coxph(
-                    as.formula(formula),
+                    jmvcore::asFormula(formula),
                     data = data,
                     cluster = data$cluster,
                     model = TRUE,
@@ -323,7 +325,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             } else {
                 standardModel <- survival::coxph(
-                    as.formula(formula),
+                    jmvcore::asFormula(formula),
                     data = data,
                     model = TRUE,
                     x = TRUE,
@@ -337,7 +339,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Refit model with weights
             if (!is.null(clusterVar)) {
                 weightedModel <- survival::coxph(
-                    as.formula(formula),
+                    jmvcore::asFormula(formula),
                     data = data,
                     weights = weights,
                     cluster = data$cluster,
@@ -347,7 +349,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             } else {
                 weightedModel <- survival::coxph(
-                    as.formula(formula),
+                    jmvcore::asFormula(formula),
                     data = data,
                     weights = weights,
                     model = TRUE,

@@ -41,12 +41,6 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             .nmbAnalysis = NULL,
             .nmbSensitivity = NULL,
 
-            # Variable name safety utility for handling special characters
-            .escapeVar = function(x) {
-                if (is.null(x) || length(x) == 0) return(x)
-                make.names(gsub("[^A-Za-z0-9_. -]", "_", as.character(x)))
-            },
-
             # Configuration constants for better maintainability
             DECISIONGRAPH_DEFAULTS = list(
                 psa_chunk_size = 1000,
@@ -92,7 +86,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
 
                 # Handle validation errors
                 if (!validationResult$valid) {
-                    stop(paste(validationResult$messages, collapse = "\n"))
+                    jmvcore::reject(paste(validationResult$messages, collapse = "\n"))
                 }
 
                 # Call enhanced validation for complex parameters
@@ -109,14 +103,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     numSims <- self$options$numSimulations
                     maxSims <- private$DECISIONGRAPH_DEFAULTS$max_simulations
                     if (is.null(numSims) || numSims < 100 || numSims > maxSims) {
-                        stop(paste(.("PSA requires number of simulations between 100 and"), format(maxSims, big.mark = ",")))
+                        jmvcore::reject(paste(.("PSA requires number of simulations between 100 and"), format(maxSims, big.mark = ",")))
                     }
 
                     # Check for PSA-specific requirements
                     if (self$options$correlatedParameters) {
                         hasCorrelationMatrix <- !is.null(self$options$correlationMatrix) && length(self$options$correlationMatrix) > 0
                         if (!hasCorrelationMatrix) {
-                            stop(.("Correlated parameters in PSA require correlation matrix variables"))
+                            jmvcore::reject(.("Correlated parameters in PSA require correlation matrix variables"))
                         }
                     }
                 }
@@ -127,10 +121,10 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     marketPen <- self$options$marketPenetration
 
                     if (is.null(targetPop) || targetPop <= 0) {
-                        stop(.("Budget impact analysis requires a positive target population size"))
+                        jmvcore::reject(.("Budget impact analysis requires a positive target population size"))
                     }
                     if (is.null(marketPen) || marketPen < 0 || marketPen > 1) {
-                        stop(.("Budget impact analysis requires market penetration rate between 0 and 1"))
+                        jmvcore::reject(.("Budget impact analysis requires market penetration rate between 0 and 1"))
                     }
                 }
 
@@ -138,11 +132,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (self$options$valueOfInformation) {
                     hasEVPIParams <- !is.null(self$options$evpi_parameters) && length(self$options$evpi_parameters) > 0
                     if (!hasEVPIParams) {
-                        stop(.("Value of information analysis requires EVPI parameter variables"))
+                        jmvcore::reject(.("Value of information analysis requires EVPI parameter variables"))
                     }
 
                     if (!self$options$probabilisticAnalysis) {
-                        stop(.("Value of information analysis requires probabilistic sensitivity analysis to be enabled"))
+                        jmvcore::reject(.("Value of information analysis requires probabilistic sensitivity analysis to be enabled"))
                     }
                 }
 
@@ -154,15 +148,15 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         thresholdParts <- tryCatch({
                             as.numeric(strsplit(ceacThresholds, ",")[[1]])
                         }, error = function(e) {
-                            stop(.("CEAC thresholds must be in format 'min,max,step' (e.g., '0,100000,5000')"))
+                            jmvcore::reject(.("CEAC thresholds must be in format 'min,max,step' (e.g., '0,100000,5000')"))
                         })
 
                         if (length(thresholdParts) != 3 || any(is.na(thresholdParts))) {
-                            stop(.("CEAC thresholds must contain exactly 3 numeric values: min,max,step"))
+                            jmvcore::reject(.("CEAC thresholds must contain exactly 3 numeric values: min,max,step"))
                         }
 
                         if (thresholdParts[1] >= thresholdParts[2] || thresholdParts[3] <= 0) {
-                            stop(.("CEAC thresholds: min must be < max, and step must be > 0"))
+                            jmvcore::reject(.("CEAC thresholds: min must be < max, and step must be > 0"))
                         }
                     }
                 }
@@ -204,7 +198,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             }
 
                         }, error = function(e) {
-                            stop(paste("Invalid CEAC threshold format:", e$message))
+                            jmvcore::reject(paste("Invalid CEAC threshold format:", e$message))
                         })
                     }
                 }
@@ -213,7 +207,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (!is.null(self$options$discountRate)) {
                     discountRate <- self$options$discountRate
                     if (discountRate < 0 || discountRate > 0.3) {
-                        stop("Discount rate must be between 0 and 30% (0.3)")
+                        jmvcore::reject("Discount rate must be between 0 and 30% (0.3)")
                     }
                 }
 
@@ -221,7 +215,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (!is.null(self$options$timeHorizon)) {
                     timeHorizon <- self$options$timeHorizon
                     if (timeHorizon < 1 || timeHorizon > 100) {
-                        stop("Time horizon must be between 1 and 100 years")
+                        jmvcore::reject("Time horizon must be between 1 and 100 years")
                     }
                 }
 
@@ -229,7 +223,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (self$options$calculateNMB && !is.null(self$options$willingnessToPay)) {
                     wtp <- self$options$willingnessToPay
                     if (wtp < 0 || wtp > 1000000) {
-                        stop("Willingness to pay threshold must be between $0 and $1,000,000")
+                        jmvcore::reject("Willingness to pay threshold must be between $0 and $1,000,000")
                     }
                 }
 
@@ -237,7 +231,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (self$options$probabilisticAnalysis) {
                     numSims <- self$options$numSimulations
                     if (is.null(numSims) || numSims < 100 || numSims > 50000) {
-                        stop("Number of simulations must be between 100 and 50,000 for computational feasibility")
+                        jmvcore::reject("Number of simulations must be between 100 and 50,000 for computational feasibility")
                     }
                 }
 
@@ -245,7 +239,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (self$options$budgetImpactAnalysis && !is.null(self$options$marketPenetration)) {
                     marketPen <- self$options$marketPenetration
                     if (marketPen < 0 || marketPen > 1) {
-                        stop("Market penetration rate must be between 0 and 1 (0% to 100%)")
+                        jmvcore::reject("Market penetration rate must be between 0 and 1 (0% to 100%)")
                     }
                 }
 
@@ -253,7 +247,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                 if (self$options$correlatedParameters && self$options$probabilisticAnalysis) {
                     hasCorrelationMatrix <- !is.null(self$options$correlationMatrix) && length(self$options$correlationMatrix) > 0
                     if (!hasCorrelationMatrix) {
-                        stop("Parameter correlation analysis requires correlation matrix variables to be specified")
+                        jmvcore::reject("Parameter correlation analysis requires correlation matrix variables to be specified")
                     }
                 }
 
@@ -265,7 +259,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             if (prob_var %in% names(self$data)) {
                                 prob_values <- self$data[[prob_var]]
                                 if (any(!is.na(prob_values) & (prob_values < 0 | prob_values > 1))) {
-                                    stop(paste("Probability variable", prob_var, "contains values outside the range [0,1]"))
+                                    jmvcore::reject(paste("Probability variable", prob_var, "contains values outside the range [0,1]"))
                                 }
                             }
                         }
@@ -277,7 +271,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                             if (cost_var %in% names(self$data)) {
                                 cost_values <- self$data[[cost_var]]
                                 if (any(!is.na(cost_values) & cost_values < 0)) {
-                                    stop(paste("Cost variable", cost_var, "contains negative values"))
+                                    jmvcore::reject(paste("Cost variable", cost_var, "contains negative values"))
                                 }
                             }
                         }
@@ -2214,7 +2208,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
 
                     "<div style='background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-left: 4px solid #007bff;'>",
                     "<h4 style='margin-top: 0;'>Key Findings</h4>",
-                    "<p><strong>Optimal Strategy:</strong> ", summary$optimal_strategy, "</p>",
+                    "<p><strong>Optimal Strategy:</strong> ", htmltools::htmlEscape(summary$optimal_strategy), "</p>",
                     "<p><strong>Optimal NMB:</strong> $", format(round(summary$optimal_nmb, 2), big.mark = ","), "</p>",
                     "<p><strong>Strategies Evaluated:</strong> ", summary$strategies_evaluated, "</p>",
                     "<p><strong>Dominated Strategies:</strong> ", summary$dominated_strategies, "</p>",
@@ -2232,12 +2226,12 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     html_content <- paste0(html_content,
                         "<tr", dominance_color, ">",
                         "<td>", if(!is.null(results$nmbRank)) results$nmbRank[i] else i, "</td>",
-                        "<td>", results$strategy[i], "</td>",
+                        "<td>", htmltools::htmlEscape(results$strategy[i]), "</td>",
                         "<td>$", format(round(results$netBenefit[i], 2), big.mark = ","), "</td>",
                         "<td>$", format(round(results$expectedCost[i], 2), big.mark = ","), "</td>",
                         "<td>", round(results$expectedUtility[i], 3), "</td>",
                         "<td>", results$dominance_status[i], "</td>",
-                        "<td style='font-size: 0.8em;'>", results$nmb_components[i], "</td>",
+                        "<td style='font-size: 0.8em;'>", htmltools::htmlEscape(results$nmb_components[i]), "</td>",
                         "</tr>"
                     )
                 }
@@ -2257,8 +2251,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     for (i in 1:nrow(threshold_analysis)) {
                         html_content <- paste0(html_content,
                             "<tr>",
-                            "<td>", threshold_analysis$threshold_range[i], "</td>",
-                            "<td>", threshold_analysis$optimal_strategy[i], "</td>",
+                            "<td>", htmltools::htmlEscape(threshold_analysis$threshold_range[i]), "</td>",
+                            "<td>", htmltools::htmlEscape(threshold_analysis$optimal_strategy[i]), "</td>",
                             "<td>$", format(round(threshold_analysis$nmb_advantage[i], 2), big.mark = ","), "</td>",
                             "</tr>"
                         )
@@ -2278,7 +2272,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
 
                 for (i in 1:nrow(results)) {
                     html_content <- paste0(html_content,
-                        "<p><strong>", results$strategy[i], ":</strong> ", round(results$netHealthBenefit[i], 3), " QALYs</p>"
+                        "<p><strong>", htmltools::htmlEscape(results$strategy[i]), ":</strong> ", round(results$netHealthBenefit[i], 3), " QALYs</p>"
                     )
                 }
 
@@ -2291,7 +2285,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
 
                 for (i in 1:nrow(results)) {
                     html_content <- paste0(html_content,
-                        "<p><strong>", results$strategy[i], ":</strong> $", format(round(results$max_acceptable_cost[i], 2), big.mark = ","), "</p>"
+                        "<p><strong>", htmltools::htmlEscape(results$strategy[i]), ":</strong> $", format(round(results$max_acceptable_cost[i], 2), big.mark = ","), "</p>"
                     )
                 }
 
@@ -2425,8 +2419,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                         "<p>", user_msg, "</p>",
                         "<details><summary>Technical Details (click to expand)</summary>",
                         "<pre style='background-color: #f5f5f5; padding: 10px; margin: 5px 0;'>",
-                        "Context: ", context, "\n",
-                        "Error: ", error_msg, "\n",
+                        "Context: ", htmltools::htmlEscape(context), "\n",
+                        "Error: ", htmltools::htmlEscape(error_msg), "\n",
                         "Time: ", Sys.time(),
                         "</pre></details>",
                         "<p><strong>Suggestions:</strong></p>",
@@ -3119,7 +3113,6 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
 
             .run = function() {
                 # Main execution with comprehensive error handling
-                message("DEBUG: Entering .run")
                 tryCatch({
                     # Try to retrieve previous state first
                     private$.retrieveState()
@@ -3214,7 +3207,6 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     } else {
                         # Build regular decision tree with error handling
                         private$.safeExecute("buildTreeGraph", "building decision tree", function() {
-                            message("DEBUG: Calling .buildTreeGraph")
                             private$.buildTreeGraph()
                         })
 
@@ -3610,7 +3602,6 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
             # Render functions for jamovi outputs
             .treeplot = function(image, ...) {
                 # Main tree plot rendering function
-                message("DEBUG: Entering .treeplot")
                 tryCatch({
                     # Get tree data from state or build if needed
                     treeData <- self$results$treeplot$state
@@ -3633,8 +3624,6 @@ decisiongraphClass <- if (requireNamespace("jmvcore"))
                     }
 
                     # Use utility function to create the plot
-                    message("DEBUG: Calling createDecisionTreePlot")
-                    message(paste("DEBUG: createDecisionTreePlot type:", typeof(createDecisionTreePlot)))
                     plot <- createDecisionTreePlot(
                         treeData = treeData,
                         layout = self$options$layout,

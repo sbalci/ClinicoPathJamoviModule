@@ -269,7 +269,15 @@ dynamiccoeffClass <- R6::R6Class(
                 
                 # Fit static Cox model for comparison
                 if (n_total > 0) {
-                    cox_formula <- as.formula(paste("survival::Surv(time, event) ~", paste(covariate_cols, collapse = " + ")))
+                    # composeTerms backtick-escapes user column names (and the
+                    # `_dynamic`-suffixed variants). asFormula validates against
+                    # jamovi's allow-list; `Surv` is globally allow-listed and
+                    # resolved through survival::coxph at evaluation time.
+                    cox_formula <- jmvcore::asFormula(
+                        paste0("Surv(time, event) ~ ",
+                               jmvcore::composeTerms(as.list(covariate_cols))),
+                        additional_allowed_functions = c("Surv")
+                    )
                     static_cox <- survival::coxph(cox_formula, data = data)
                     static_coefs <- coef(static_cox)
                     static_se <- sqrt(diag(vcov(static_cox)))

@@ -432,7 +432,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Now remove rows with missing values in SELECTED variables only
                 n_before <- nrow(mydata)
-                mydata <- na.omit(mydata)
+                mydata <- jmvcore::naOmit(mydata)
                 n_after <- nrow(mydata)
 
                 if (n_after < n_before) {
@@ -524,7 +524,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         html_table <- knitr::kable(
                             cross_tab,
                             format = "html",
-                            caption = paste("Cross-tabulation of", test_var, "and", goldVariable)
+                            caption = paste("Cross-tabulation of",
+                                            private$.safeHtmlOutput(test_var), "and",
+                                            private$.safeHtmlOutput(goldVariable))
                         )
                         html_tables <- paste(html_tables, html_table, "<br><br>")
                     }
@@ -972,7 +974,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     testVariables <- private$.getTestVariables()
                     all_vars <- c(goldVariable, testVariables, strat_var)
                     mydata <- self$data[, all_vars, drop = FALSE]
-                    mydata <- na.omit(mydata)
+                    mydata <- jmvcore::naOmit(mydata)
                     mydata[[goldVariable]] <- forcats::as_factor(mydata[[goldVariable]])
                 }
 
@@ -1811,7 +1813,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 methods <- sprintf(
                     "We compared the diagnostic performance of %s tests (%s) against the gold standard reference using diagnostic accuracy analysis. The study included %d cases with complete data. Performance metrics calculated included sensitivity, specificity, positive and negative predictive values, likelihood ratios, and overall accuracy. %s",
                     n_tests,
-                    paste(test_names, collapse = ", "),
+                    paste(private$.safeHtmlOutput(test_names), collapse = ", "),
                     n_cases,
                     if (n_tests >= 2 && self$options$statComp) "Statistical comparisons between tests were performed using McNemar's test comparing diagnostic correctness (agreement with gold standard)." else ""
                 )
@@ -1836,7 +1838,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 results <- sprintf(
                     "Among the tests evaluated, %s demonstrated optimal diagnostic performance with %s%% sensitivity (95%% CI: [see confidence interval table]), %s%% specificity (95%% CI: [see confidence interval table]), %s%% positive predictive value, %s%% negative predictive value, and %s%% overall accuracy.%s The likelihood ratio for positive results was %.2f and for negative results was %.2f.",
-                    best_test,
+                    private$.safeHtmlOutput(best_test),
                     sens_pct,
                     spec_pct,
                     ppv_pct,
@@ -1855,28 +1857,29 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 best_metrics <- test_results[[best_test]]$metrics
                 sens_pct <- best_metrics$Sens * 100
                 spec_pct <- best_metrics$Spec * 100
+                best_test_safe <- private$.safeHtmlOutput(best_test)
 
                 recommendations <- '<div style="background-color: #fff3cd; padding: 15px; border-radius: 8px;">'
 
                 if (sens_pct >= 95 && spec_pct >= 95) {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Clinical Use:</strong> ", best_test, " shows excellent performance for both screening and confirmatory testing.</p>"
+                        "<p><strong>Clinical Use:</strong> ", best_test_safe, " shows excellent performance for both screening and confirmatory testing.</p>"
                     )
                 } else if (sens_pct >= 95) {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Screening Application:</strong> ", best_test, " is excellent for initial screening due to high sensitivity (low false negative rate).</p>"
+                        "<p><strong>Screening Application:</strong> ", best_test_safe, " is excellent for initial screening due to high sensitivity (low false negative rate).</p>"
                     )
                 } else if (spec_pct >= 95) {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Confirmatory Application:</strong> ", best_test, " is excellent for confirming diagnosis due to high specificity (low false positive rate).</p>"
+                        "<p><strong>Confirmatory Application:</strong> ", best_test_safe, " is excellent for confirming diagnosis due to high specificity (low false positive rate).</p>"
                     )
                 } else {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Clinical Consideration:</strong> Consider using ", best_test, " in combination with other tests for optimal diagnostic accuracy.</p>"
+                        "<p><strong>Clinical Consideration:</strong> Consider using ", best_test_safe, " in combination with other tests for optimal diagnostic accuracy.</p>"
                     )
                 }
 
@@ -2189,7 +2192,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                             html <- paste0(html, sprintf(
                                 "<p><b>Clinical interpretation:</b> <span style='color:#1976d2;'><b>%s</b></span> ",
-                                best_test
+                                private$.safeHtmlOutput(best_test)
                             ), sprintf(
                                 "shows the highest diagnostic accuracy (%.1f%%). Review pairwise comparisons below to see which differences are statistically significant after multiple comparison correction.</p>",
                                 best_acc * 100
@@ -2219,7 +2222,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                         html <- paste0(html, sprintf(
                             "<p><b>Comparison:</b> %s (accuracy: %.1f%%) vs %s (accuracy: %.1f%%)</p>",
-                            test1_name, acc1 * 100, test2_name, acc2 * 100
+                            private$.safeHtmlOutput(test1_name), acc1 * 100,
+                            private$.safeHtmlOutput(test2_name), acc2 * 100
                         ))
 
                         html <- paste0(html, sprintf(
@@ -2232,7 +2236,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             html <- paste0(html, sprintf(
                                 "<span style='color:#d32f2f;'><b>Significant difference detected.</b></span> ",
                                 "%s shows significantly better diagnostic accuracy.</p>",
-                                better_test
+                                private$.safeHtmlOutput(better_test)
                             ))
                         } else {
                             html <- paste0(
@@ -2290,7 +2294,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                             report <- paste0(report, sprintf(
                                 "%s demonstrated the highest overall diagnostic accuracy.",
-                                best_test
+                                private$.safeHtmlOutput(best_test)
                             ))
                         }
 
@@ -2309,7 +2313,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                         report <- sprintf(
                             "McNemar's test comparing %s and %s showed %s significant difference in diagnostic accuracy (χ²(%d) = %.2f, p = %.3f).",
-                            test1_name, test2_name,
+                            private$.safeHtmlOutput(test1_name),
+                            private$.safeHtmlOutput(test2_name),
                             if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) "a" else "no",
                             mcn_df, mcn_stat, mcn_p
                         )
@@ -2321,7 +2326,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                             report <- paste0(report, sprintf(
                                 " %s demonstrated significantly better diagnostic performance.",
-                                better_test
+                                private$.safeHtmlOutput(better_test)
                             ))
                         }
 

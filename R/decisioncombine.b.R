@@ -46,25 +46,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                     html <- paste0(html,
                         '<div style="background-color: ', color, '; color: white; padding: 10px; margin: 5px 0; border-radius: 4px;">',
-                        '<strong>', icon, ' ', notice$title, ':</strong> ',
-                        notice$content,
+                        '<strong>', icon, ' ', htmltools::htmlEscape(notice$title), ':</strong> ',
+                        htmltools::htmlEscape(notice$content),
                         '</div>'
                     )
                 }
                 html <- paste0(html, '</div>')
 
                 self$results$notices$setContent(html)
-            },
-
-            .escapeVariableNames = function(var_names) {
-                # Escape variable names with spaces/special characters
-                sapply(var_names, function(x) {
-                    if (grepl("[^A-Za-z0-9_.]", x)) {
-                        paste0("`", x, "`")
-                    } else {
-                        x
-                    }
-                }, USE.NAMES = FALSE)
             },
 
             .init = function() {

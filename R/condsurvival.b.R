@@ -59,7 +59,7 @@ condsurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .run = function() {
             # Check for required packages
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("Package 'survival' is required for conditional survival analysis but is not installed.")
+                jmvcore::reject("Package 'survival' is required for conditional survival analysis but is not installed.")
             }
             
             if (!requireNamespace("survminer", quietly = TRUE)) {
@@ -87,6 +87,7 @@ condsurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Remove missing values
+            # TODO (UX): the two validation paths here (insufficient observations) and at L107 (invalid time points) currently render via `self$results$instructions$setContent(<error>) + return()` rather than `jmvcore::reject()`. Switching would unify the error surface with the rest of the module (one structured error path), but it changes what the user sees, so it was deferred from the /jamovify-function pass.
             complete_cases <- complete.cases(time_values, status_values, group_values)
             if (sum(complete_cases) < 10) {
                 self$results$instructions$setContent("Error: Need at least 10 complete observations for conditional survival analysis.")
@@ -575,33 +576,18 @@ condsurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(time) || is.null(status))
                 return('')
 
-            # Escape time variable
-            time_escaped <- if (!is.null(time) && !identical(make.names(time), time)) {
-                paste0('`', time, '`')
-            } else {
-                time
-            }
-
-            # Escape status variable
-            status_escaped <- if (!is.null(status) && !identical(make.names(status), status)) {
-                paste0('`', status, '`')
-            } else {
-                status
-            }
-
-            # Build required arguments
-            time_arg <- paste0('time = "', time_escaped, '"')
-            status_arg <- paste0('status = "', status_escaped, '"')
+            # Build required arguments. `deparse()` produces a correctly quoted-and-escaped
+            # R string literal — backticks belong on bare symbols, not inside double-quoted
+            # strings, so the prior hand-rolled escape-then-quote logic produced invalid R
+            # for non-syntactic names. deparse handles all special chars (quotes, backslash,
+            # spaces) and is identical to the old output for syntactic names.
+            time_arg   <- paste0('time = ',   deparse(time))
+            status_arg <- paste0('status = ', deparse(status))
 
             # Build optional group argument
             group_arg <- ''
             if (!is.null(group)) {
-                group_escaped <- if (!identical(make.names(group), group)) {
-                    paste0('`', group, '`')
-                } else {
-                    group
-                }
-                group_arg <- paste0(',\n    group = "', group_escaped, '"')
+                group_arg <- paste0(',\n    group = ', deparse(group))
             }
 
             # Get other arguments using base helper (if available)

@@ -100,7 +100,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             n_missing <- sum(is.na(data_vec))
             missing_pct <- if (n_total > 0) round(n_missing / n_total * 100, 1) else NA
             n_nonmiss <- n_total - n_missing
-            n_unique <- length(unique(na.omit(data_vec)))
+            n_unique <- length(unique(jmvcore::naOmit(data_vec)))
             dup_pct <- if (n_nonmiss > 0) round((n_nonmiss - n_unique) / n_nonmiss * 100, 1) else NA
             vtype <- paste(class(data_vec), collapse = "/")
 
@@ -214,14 +214,14 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             flags <- flags[!is.na(flags)]
 
             flag_html <- if (length(flags) > 0) {
-                paste0("<p><strong>Variables exceeding ", threshold, "% missing:</strong> ", paste(flags, collapse = ", "), "</p>")
+                paste0("<p><strong>Variables exceeding ", threshold, "% missing:</strong> ", paste(htmltools::htmlEscape(flags), collapse = ", "), "</p>")
             } else {
                 ""
             }
 
             quality_results$missing <- paste0(
                 "<h4>Missing Value Analysis</h4>",
-                paste(names(missing_summary), missing_summary, sep = ": ", collapse = "<br>"),
+                paste(htmltools::htmlEscape(names(missing_summary)), missing_summary, sep = ": ", collapse = "<br>"),
                 "<br>", case_summary,
                 if (mcar_msg != "") paste0("<br>", mcar_msg) else "",
                 flag_html
@@ -248,7 +248,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     key_freq <- key_freq[order(-key_freq$Freq), ]
                     top_keys <- head(key_freq, 5)
                     dup_keys <- paste0("<br><em>Top duplicated patterns (first 5):</em><br>",
-                                       paste(paste(top_keys$Var1, "(n=", top_keys$Freq, ")", sep = ""), collapse = "<br>"))
+                                       paste(paste(htmltools::htmlEscape(top_keys$Var1), " (n=", top_keys$Freq, ")", sep = ""), collapse = "<br>"))
                 }
 
                 quality_results$duplicates <- paste0(
@@ -263,7 +263,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 dup_summary <- sapply(analysis_data, function(x) {
                     total <- length(x)
                     non_missing <- sum(!is.na(x))
-                    unique_vals <- length(unique(na.omit(x)))
+                    unique_vals <- length(unique(jmvcore::naOmit(x)))
                     duplicate_vals <- non_missing - unique_vals
                     dup_pct <- if (non_missing > 0) {
                         round(duplicate_vals / non_missing * 100, 1)
@@ -277,7 +277,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
                 quality_results$duplicates <- paste0(
                     "<h4>Duplicate Value Analysis</h4>",
-                    paste(names(dup_summary), dup_summary, sep = ": ", collapse = "<br>"),
+                    paste(htmltools::htmlEscape(names(dup_summary)), dup_summary, sep = ": ", collapse = "<br>"),
                     "<p style='margin-top: 10px; font-size: 0.9em; color: #555;'>",
                     "<em>Interpretation Note:</em> For categorical variables with few unique levels (e.g., 'Gender', 'Status'), ",
                     "a high number of 'Duplicates' often reflects data redundancy (many observations sharing the same valid value), ",
@@ -311,7 +311,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             df <- do.call(rbind, summary_rows)
             # Basic HTML table
             summary_table <- paste(
-                apply(df, 1, function(r) paste0("<tr>", paste0("<td>", r, "</td>", collapse = ""), "</tr>")),
+                apply(df, 1, function(r) paste0("<tr>", paste0("<td>", htmltools::htmlEscape(r), "</td>", collapse = ""), "</tr>")),
                 collapse = "\n"
             )
             header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Near-zero var</th><th>High card</th><th>Outliers</th></tr>")
@@ -751,7 +751,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #e65100; margin-top: 0;'> High Missingness (>50%)</h4>",
-                "<p><strong>Variables affected:</strong> ", paste(high_missing_vars, collapse = ", "), "</p>",
+                "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(high_missing_vars), collapse = ", "), "</p>",
                 "<p><strong>Actions:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
                 "<li><strong>Investigate root cause:</strong> Why is data missing? (not collected, measurement failure, data entry error)</li>",
@@ -783,7 +783,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #ff8f00; margin-top: 0;'> Moderate Missingness (10-50%)</h4>",
-                "<p><strong>Variables affected:</strong> ", paste(moderate_missing_vars, collapse = ", "), "</p>",
+                "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(moderate_missing_vars), collapse = ", "), "</p>",
                 "<p><strong>Recommended approach:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Preferred:</strong> Multiple imputation with sensitivity analysis</li>",
@@ -830,7 +830,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #ff8f00; margin-top: 0;'> Near-Zero Variance Variables</h4>",
-                "<p><strong>Variables affected:</strong> ", paste(near_zero_vars, collapse = ", "), "</p>",
+                "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(near_zero_vars), collapse = ", "), "</p>",
                 "<p><strong>Actions:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Exclude from models:</strong> Variables with no variation cannot predict outcomes</li>",

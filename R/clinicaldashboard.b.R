@@ -37,9 +37,13 @@ clinicaldashboardClass <- R6::R6Class(
         },
         
         .run = function() {
+            # TODO (stub): realTimeUpdate and exportDashboard options
+            # (jamovi/clinicaldashboard.a.yaml:103-111) are declared in the UI
+            # but never read in this backend. Either wire them up or hide them
+            # from .u.yaml until implemented.
             if (is.null(self$data))
                 return()
-            
+
             data <- self$data
             
             # Generate summary metrics
@@ -283,6 +287,20 @@ clinicaldashboardClass <- R6::R6Class(
                 return()
             }
             
+            # TODO (data hygiene): the alert-threshold DSL below is a brittle
+            # hand-rolled parser. Issues:
+            #   - Only supports `>` and `<`; no `>=`, `<=`, `==`, `!=`.
+            #   - Variable names containing `>` or `<` would be mis-split.
+            #   - Bad numeric tokens silently coerce to NA (suppressed warnings),
+            #     producing zero violations with no user feedback.
+            #   - Unknown var_names silently skip with no notice.
+            #   - On large datasets with permissive thresholds, the inner loop
+            #     can build an O(thresholds * nrow(data)) `alerts` list before
+            #     the L<below>+~50 cap of 20 trims it — wasted work.
+            # Consider replacing with a structured threshold input (one row per
+            # threshold via OptionArray, or per-variable Number options) and
+            # surfacing parse failures via a Notice/HTML panel.
+            #
             # Parse thresholds (simple format: "var1>10,var2<5")
             threshold_pairs <- strsplit(alert_thresholds, ",")[[1]]
             alerts <- list()
@@ -342,6 +360,14 @@ clinicaldashboardClass <- R6::R6Class(
             dashboard_type <- self$options$dashboardType
             time_window <- self$options$timeWindow
             
+            # TODO (forward-looking): the interpolations below are safe today
+            # because dashboard_type / time_window are closed-enum OptionList
+            # values and nrow/ncol/Sys.time() are not attacker-influenced. If
+            # any of these are ever swapped for a free-text OptionString — or
+            # if attacker-controlled tokens (e.g. a column name from outcomeVars
+            # or a parsed alertThresholds value) start being interpolated here —
+            # wrap each user-influenced value in htmltools::htmlEscape() before
+            # paste0(), as done in R/clinicalcalculators.b.R:143 and L192.
             summary_content <- paste0(
                 '<div class="dashboard-summary">',
                 '<h4>Dashboard Overview</h4>',
@@ -382,9 +408,15 @@ clinicaldashboardClass <- R6::R6Class(
                 plot_data$Outcome <- data[[outcome_var]]
                 
                 # Remove missing data
-                plot_data <- plot_data[complete.cases(plot_data), ]
+                plot_data <- jmvcore::naOmit(plot_data)
                 
                 if (nrow(plot_data) > 1) {
+                    # TODO (correctness): replace deprecated ggplot2 aesthetics. Will warn under ggplot2 >= 3.4:
+                    #   - L<this>+1, L<this>+2: geom_line/geom_point use `size =` for line thickness;
+                    #     for line geoms this is renamed to `linewidth =`.
+                    #   - .distributionPlot below uses geom_histogram(aes(y = ..density..)) and
+                    #     geom_density(... size = 1); switch ..density.. → after_stat(density)
+                    #     and the geom_density `size =` → `linewidth =`.
                     p <- ggplot(plot_data, aes(x = Time, y = Outcome)) +
                         geom_line(color = "steelblue", size = 1) +
                         geom_point(color = "steelblue", size = 2, alpha = 0.6) +

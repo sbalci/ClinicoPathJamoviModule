@@ -131,8 +131,9 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             # ── 1. Clean and prepare data ──────────────────────────────
             prepared <- tryCatch(private$.prepareData(), error = function(e) {
+                safe_msg <- htmltools::htmlEscape(e$message)
                 self$results$todo$setContent(paste0(
-                    "<div class='alert alert-danger'><h4>", .("Data Error"), "</h4><p>", e$message, "</p></div>"))
+                    "<div class='alert alert-danger'><h4>", .("Data Error"), "</h4><p>", safe_msg, "</p></div>"))
                 private$.addNotice("ERROR", .("Data Error"),
                     sprintf(.('Data preparation failed: %s'), e$message))
                 private$.renderNotices()
@@ -151,8 +152,9 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             # ── 3. Fit model ───────────────────────────────────────────
             model <- tryCatch(private$.fitModel(prepared), error = function(e) {
+                safe_msg <- htmltools::htmlEscape(e$message)
                 self$results$todo$setContent(paste0(
-                    "<div class='alert alert-danger'><h4>", .("Model Error"), "</h4><p>", e$message, "</p></div>"))
+                    "<div class='alert alert-danger'><h4>", .("Model Error"), "</h4><p>", safe_msg, "</p></div>"))
                 private$.addNotice("ERROR", .("Model Error"),
                     sprintf(.('Model fitting failed: %s'), e$message))
                 private$.renderNotices()
@@ -250,6 +252,14 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                     y_ordered <- factor(as.character(outcome_raw), levels = vals, ordered = TRUE)
                 }
                 # Also create numeric for scoring evaluation
+                # TODO (correctness): `as.numeric(factor) - 1` maps factor LEVEL
+                # INDICES {1..K} to {0..K-1}. Fragile if jmvcore hands in a factor
+                # with a `values` attribute (e.g., c(0,1) for binary or arbitrary
+                # ordinal codings) — `as.numeric` would then return those values
+                # and subtraction breaks the 0-based encoding. Use:
+                #   y <- match(as.character(y_ordered), levels(y_ordered)) - 1L
+                # which always returns {0..K-1} based on level position, regardless
+                # of any values attribute.
                 y <- as.numeric(y_ordered) - 1  # 0-based
                 event_level <- paste(levels(y_ordered), collapse = " < ")
                 ref_level <- levels(y_ordered)[1]
@@ -1245,21 +1255,27 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             p <- length(prepared$expl_vars)
             has_validation <- self$options$bootstrapValidation
 
+            # Escape user-controlled tokens (column name, factor levels) for HTML
+            # interpolation in the TRIPOD checklist below
+            outcome_esc <- htmltools::htmlEscape(self$options$outcome)
+            event_level_esc <- htmltools::htmlEscape(prepared$event_level)
+            ref_level_esc <- htmltools::htmlEscape(prepared$ref_level)
+
             if (prepared$model_type == "linear") {
                 opv <- prepared$n / p
                 size_adequate <- opv >= 15
                 size_label <- sprintf(.("OPV = %.1f %s"), opv, if (size_adequate) .("(adequate)") else .("(INSUFFICIENT)"))
                 participants_label <- sprintf(.("N=%d observations"), prepared$n)
-                outcome_label <- sprintf(.("%s (continuous)"), self$options$outcome)
+                outcome_label <- sprintf(.("%s (continuous)"), outcome_esc)
             } else {
                 epv <- min(prepared$n_events, prepared$n_nonevents) / p
                 size_adequate <- epv >= 10
                 size_label <- sprintf(.("EPV = %.1f %s"), epv, if (size_adequate) .("(adequate)") else .("(INSUFFICIENT)"))
                 participants_label <- sprintf(.("%d events, %d non-events"), prepared$n_events, prepared$n_nonevents)
                 if (prepared$model_type == "ordinal") {
-                    outcome_label <- sprintf(.("%s (ordinal: %s)"), self$options$outcome, prepared$event_level)
+                    outcome_label <- sprintf(.("%s (ordinal: %s)"), outcome_esc, event_level_esc)
                 } else {
-                    outcome_label <- sprintf(.("%s (binary: %s vs %s)"), self$options$outcome, prepared$event_level, prepared$ref_level)
+                    outcome_label <- sprintf(.("%s (binary: %s vs %s)"), outcome_esc, event_level_esc, ref_level_esc)
                 }
             }
 

@@ -1088,8 +1088,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             procedure_notes <- paste0(
                 "<html><body>",
                 "<h4>Decision Curve Analysis Summary</h4>",
-                "<p><strong>Outcome Variable:</strong> ", outcome_var, " (", outcome_positive, " = positive)</p>",
-                "<p><strong>Models Analyzed:</strong> ", paste(model_names, collapse = ", "), "</p>",
+                "<p><strong>Outcome Variable:</strong> ", private$.safeHtmlOutput(outcome_var),
+                    " (", private$.safeHtmlOutput(outcome_positive), " = positive)</p>",
+                "<p><strong>Models Analyzed:</strong> ",
+                    paste(private$.safeHtmlOutput(model_names), collapse = ", "), "</p>",
                 "<p><strong>Sample Size:</strong> ", sum(complete_cases), " complete cases</p>",
                 "<p><strong>Prevalence:</strong> ", round(mean(outcomes == outcome_positive) * 100, 1), "%</p>",
                 "<p><strong>Threshold Range:</strong> ", round(min(thresholds) * 100, 1), "% to ",
@@ -1702,7 +1704,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (!is.null(best_model)) {
                 interpretation <- paste0(
                     interpretation,
-                    "<p><strong>Best Performing Model:</strong> ", best_model, "</p>"
+                    "<p><strong>Best Performing Model:</strong> ", private$.safeHtmlOutput(best_model), "</p>"
                 )
 
                 # Get optimal threshold for best model
@@ -1782,8 +1784,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Clinical decision rule note if applicable
             if (self$options$clinicalDecisionRule && !is.null(self$options$decisionRuleVar)) {
                 footnotes <- paste0(footnotes,
-                    "<li><strong>Clinical Decision Rule:</strong> Applied as provided in the data (", 
-                    self$options$decisionRuleLabel, ")</li>")
+                    "<li><strong>Clinical Decision Rule:</strong> Applied as provided in the data (",
+                    private$.safeHtmlOutput(self$options$decisionRuleLabel), ")</li>")
             }
             
             footnotes <- paste0(footnotes, "</ul></div>")
@@ -1951,8 +1953,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             if (nrow(impact_data) == 0) return(FALSE)
 
-            # Reshape data for stacked bar chart
-            library(tidyr)
+            # Reshape data for stacked bar chart (tidyr::gather namespaced below)
             plot_data <- impact_data %>%
                 tidyr::gather(key = "outcome_type", value = "count",
                               true_positives_per_100, false_positives_per_100) %>%

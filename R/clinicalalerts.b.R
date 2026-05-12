@@ -69,7 +69,6 @@ clinicalalertsClass <- R6::R6Class(
         },
 
         .run = function() {
-            print("Inside clinicalalerts .run")
             # Get options
             clinicalVars <- self$options$clinicalVars
             patientId <- self$options$patientId
@@ -220,7 +219,8 @@ clinicalalertsClass <- R6::R6Class(
                 )
                 
             }, error = function(e) {
-                error_msg <- glue::glue("<h3>Error in Analysis</h3><p>An error occurred during analysis: {e$message}</p><p>Please check your data and parameter settings.</p>")
+                safe_msg <- htmltools::htmlEscape(e$message)
+                error_msg <- glue::glue("<h3>Error in Analysis</h3><p>An error occurred during analysis: {safe_msg}</p><p>Please check your data and parameter settings.</p>")
                 self$results$summary$setContent(error_msg)
                 return()
             })
@@ -228,12 +228,24 @@ clinicalalertsClass <- R6::R6Class(
 
         .getThreshold = function(threshold_name, var_name) {
             # Helper function to get threshold values from options or clinical defaults
-            
+
+            # TODO (stub): several UI options are exposed but not wired to behavior.
+            # Either wire them up or hide them from the .u.yaml until implemented:
+            #   - `custom_thresholds` option (jamovi/clinicalalerts.a.yaml:103-108):
+            #     toggling it currently has no effect — this method always falls
+            #     through to .getClinicalDefaults() regardless of the toggle.
+            #   - `confidence_level` option (jamovi/clinicalalerts.a.yaml:124-131):
+            #     declared but never read in .run() or any helper.
+            #   - `.plotThresholdPlots` (R/clinicalalerts.b.R:~889) and
+            #     `.plotTrendPlots` (R/clinicalalerts.b.R:~895): stub methods
+            #     that return TRUE without rendering, while their enabling
+            #     options (`threshold_plots`, `trend_plots`) are user-visible.
+
             # Use clinical defaults based on variable name patterns
             if (self$options$use_clinical_defaults || is.null(self$options$custom_thresholds)) {
                 return(private$.getClinicalDefaults(threshold_name, var_name))
             }
-            
+
             # For custom thresholds, would integrate with UI input fields
             # This is a placeholder for future custom threshold implementation
             return(private$.getClinicalDefaults(threshold_name, var_name))

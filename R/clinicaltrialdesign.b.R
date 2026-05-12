@@ -104,6 +104,18 @@ clinicaltrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 }
                 
             }, error = function(e) {
+                # TODO (security): e$message is interpolated unescaped into HTML
+                # below. R error messages embed names of objects/columns that
+                # triggered the failure. Although this wizard takes mostly numeric
+                # inputs, this tryCatch wraps the entire .run() pipeline — any
+                # downstream error involving a user-controlled string (a column
+                # name in an .a.yaml that gains Variable-type options later, a
+                # factor level surfaced by `pwr` extension packages, etc.) reaches
+                # this site. Wrap with htmltools::htmlEscape() to match the fix
+                # idiom applied to clinicalalerts/clinicalcalculators/clinicalheatmap/
+                # clinicalnomograms/clinicalscore in this module:
+                #   safe_msg <- htmltools::htmlEscape(e$message)
+                #   error_msg <- paste0("<p style='color: red;'><b>Analysis Error:</b> ", safe_msg, "</p>")
                 error_msg <- paste0("<p style='color: red;'><b>Analysis Error:</b> ", e$message, "</p>")
                 self$results$instructions$setContent(error_msg)
             })

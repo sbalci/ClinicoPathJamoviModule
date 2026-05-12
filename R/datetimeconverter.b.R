@@ -67,9 +67,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (notice in private$.noticeList) {
                 style <- typeStyles[[notice$type]] %||% typeStyles$INFO
 
-                # Sanitize content for HTML
-                safe_title <- gsub("<", "&lt;", gsub(">", "&gt;", notice$title))
-                safe_content <- gsub("<", "&lt;", gsub(">", "&gt;", notice$content))
+                # Sanitize content for HTML (entity-encode &, <, >, ", ')
+                safe_title <- htmltools::htmlEscape(notice$title)
+                safe_content <- htmltools::htmlEscape(notice$content)
 
                 html <- paste0(html,
                     "<div style='background-color: ", style$bgcolor, "; ",
@@ -808,7 +808,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 original_val <- if (is.na(original[i])) {
                     "<em>NA</em>"
                 } else {
-                    as.character(original[i])
+                    htmltools::htmlEscape(as.character(original[i]))
                 }
 
                 parsed_val <- if (is.na(parsed[i])) {
@@ -1020,19 +1020,21 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(tz_display) || is.na(tz_display) || tz_display == "")
                 tz_display <- "System default"
 
+            datetime_var_safe <- htmltools::htmlEscape(datetime_var)
+            tz_display_safe <- htmltools::htmlEscape(tz_display)
             summary_html <- glue::glue("
                 <div style='background-color: #f0f7ff; padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px;'>
                     <h4 style='margin-top: 0;'> Analysis Summary</h4>
-                    <p><strong>Source column:</strong> {datetime_var}</p>
+                    <p><strong>Source column:</strong> {datetime_var_safe}</p>
                     <p><strong>Format detected/used:</strong> {detected_format}</p>
-                    <p><strong>Timezone:</strong> {tz_display}</p>
+                    <p><strong>Timezone:</strong> {tz_display_safe}</p>
                     <p><strong>Successful conversions:</strong> {quality$successfully_parsed}/{quality$total_observations} ({round(quality$success_rate, 1)}%)</p>
                     <p><strong>Components extracted:</strong> {extraction_text}</p>
 
                     <div style='background-color: #e8f4f8; padding: 10px; margin-top: 15px; border-radius: 3px;'>
                         <p style='margin: 0;'><strong> Copy-Ready Summary:</strong></p>
                         <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>
-                        We extracted {extraction_text} from {quality$total_observations} datetime values in column '{datetime_var}' using {detected_format} format, with {round(quality$success_rate, 1)}% successful parsing.
+                        We extracted {extraction_text} from {quality$total_observations} datetime values in column '{datetime_var_safe}' using {detected_format} format, with {round(quality$success_rate, 1)}% successful parsing.
                         </p>
                     </div>
                 </div>
@@ -1319,7 +1321,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (! datetime_var %in% names(data)) {
-                stop(sprintf("The selected datetime variable '%s' was not found in the dataset.", datetime_var), call. = FALSE)
+                jmvcore::reject("The selected datetime variable '{}' was not found in the dataset.", datetime_var)
             }
 
             # Prepare datetime values for parsing
@@ -1460,7 +1462,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(note_lines) > 0) {
                 notes_html <- paste0(
                     "<ul style='margin-top: 10px;'>",
-                    paste0("<li>", note_lines, "</li>", collapse = ""),
+                    paste0("<li>", htmltools::htmlEscape(note_lines), "</li>", collapse = ""),
                     "</ul>"
                 )
             }
@@ -1509,7 +1511,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<ul style='color: #d32f2f;'>"
                 )
                 for (failed_val in quality$failed_samples) {
-                    quality_html <- paste0(quality_html, "<li>", failed_val, "</li>")
+                    quality_html <- paste0(quality_html, "<li>", htmltools::htmlEscape(failed_val), "</li>")
                 }
                 quality_html <- paste0(quality_html, "</ul>")
             }

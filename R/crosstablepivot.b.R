@@ -7,6 +7,8 @@
 #' @import pivottabler
 #' @import dplyr
 #' @export
+# TODO (cleanup): replace whole-namespace `@import pivottabler` / `@import dplyr` with `@importFrom`
+#   for the specific functions actually used (R CMD check prefers narrow imports).
 
 crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "crosstablepivotClass",
@@ -53,21 +55,31 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
             
+            # TODO (correctness): the helper methods (populate_basic_table, generate_summary_stats,
+            #   show_export_info, get_table_styling, populate_pivot_table) are declared in `private = list(...)`
+            #   but invoked here as `self$populate_basic_table()` etc. R6 will not find these on `self`.
+            #   Either (a) move them to `public = list(...)`, or (b) call them via `private$...`.
+            #   This file does not run successfully in its current state.
+            # TODO (stub): pivottabler integration is unfinished. populate_basic_table() at L103-134 is a
+            #   placeholder ("Status: Basic implementation - pivot functionality to be added", L132);
+            #   populate_pivot_table just delegates to populate_basic_table. Wire up real pivot logic.
+            # TODO (security): L73 interpolates `e$message` into HTML without `htmltools::htmlEscape()`;
+            #   wrap when this code path is reactivated after the correctness fix above.
             # Simplified implementation for testing - will be enhanced later
             tryCatch({
                 # Basic table creation without pivottabler for now
                 self$populate_basic_table()
-                
+
                 # Generate summary statistics
                 if (self$options$statistics) {
                     self$generate_summary_stats()
                 }
-                
+
                 # Export information
                 if (self$options$export_excel) {
                     self$show_export_info()
                 }
-                
+
             }, error = function(e) {
                 self$results$instructions$setContent(
                     paste("<p style='color: red;'>Error creating table:", e$message, "</p>")

@@ -145,7 +145,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
                     "<div style='color: orange; padding: 15px; border: 2px solid orange; margin: 10px;'>",
                     "<h4> PyTorch Installation Issue</h4>",
                     "<p>PyTorch is installed but not functioning correctly.</p>",
-                    "<p>Error: ", e$message, "</p>",
+                    "<p>Error: ", htmltools::htmlEscape(e$message), "</p>",
                     "<p>Please reinstall PyTorch with proper CUDA support if needed.</p>",
                     "</div>"
                 )
@@ -222,7 +222,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
                         paste(
                             "<div style='color: orange; padding: 10px; border: 1px solid orange;'>",
                             "<strong>Warning:</strong> Some image files not found (showing first few):<br>",
-                            paste(head(missing_files, 3), collapse = "<br>"),
+                            paste(htmltools::htmlEscape(head(missing_files, 3)), collapse = "<br>"),
                             if (length(missing_files) > 3) paste("<br>... and", length(missing_files) - 3, "more") else "",
                             "<br><br>Analysis will continue with available images.",
                             "</div>"
@@ -297,11 +297,29 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
         .simulateDeepLearningResults = function(image_paths, targets) {
             # This is a simulation of what would happen with real deep learning
             # In production, this would train actual PyTorch models
-            
+
+            # Save & restore RNG state — set.seed() at L306/L354/L434 would otherwise
+            # leak fixed seeds (42, 123, 456) into the user's R session and pin
+            # subsequent unrelated analyses to deterministic output.
+            old_seed <- if (exists(".Random.seed", envir = globalenv())) {
+                get(".Random.seed", envir = globalenv())
+            } else {
+                NULL
+            }
+            on.exit({
+                if (is.null(old_seed)) {
+                    if (exists(".Random.seed", envir = globalenv())) {
+                        rm(".Random.seed", envir = globalenv())
+                    }
+                } else {
+                    assign(".Random.seed", old_seed, envir = globalenv())
+                }
+            }, add = TRUE)
+
             n_samples <- length(image_paths)
             n_epochs <- self$options$epochs
             n_classes <- length(unique(targets))
-            
+
             # Simulate training history
             set.seed(42)
             for (epoch in 1:n_epochs) {

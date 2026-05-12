@@ -81,20 +81,27 @@ directbinomialClass <- R6::R6Class(
             # Load required packages
             requireNamespace("timereg", quietly = TRUE)
             if (!requireNamespace("cmprsk", quietly = TRUE)) {
-                try(install.packages("cmprsk", repos = "https://cran.r-project.org/"), silent = TRUE)
-                requireNamespace("cmprsk", quietly = TRUE)
+                self$results$todo$setContent(
+                    "<h4> Package Required</h4>
+                    <p>This analysis requires the 'cmprsk' package.
+                    Please install it once from your R console:
+                    <code>install.packages('cmprsk')</code></p>"
+                )
+                return()
             }
             
             # Prepare event variable
             event_of_interest <- as.numeric(self$options$eventOfInterest)
             
             # Create survival object and formula
-            time_formula <- paste(time_var, "~", paste(covs, collapse = " + "))
-            
+            # Use jmvcore helpers: constructFormula backtick-escapes names with
+            # spaces/special chars; asFormula validates against jamovi's allow-list.
+            time_formula <- jmvcore::constructFormula(time_var, covs)
+
             tryCatch({
                 # Fit direct binomial model using timereg
                 model_result <- timereg::comp.risk(
-                    formula = as.formula(time_formula),
+                    formula = jmvcore::asFormula(time_formula),
                     data = analysis_data,
                     cause = event_of_interest,
                     model = "additive"
@@ -120,7 +127,8 @@ directbinomialClass <- R6::R6Class(
             }, error = function(e) {
                 error_msg <- paste0(
                     "<h4> Analysis Error</h4>",
-                    "<p>Error in direct binomial regression: ", e$message, "</p>",
+                    "<p>Error in direct binomial regression: ",
+                    htmltools::htmlEscape(e$message), "</p>",
                     "<p><b>Common solutions:</b></p>",
                     "<ul>",
                     "<li>Check that event variable contains appropriate codes</li>",
@@ -383,30 +391,30 @@ directbinomialClass <- R6::R6Class(
             
             # Create placeholder plot
             # In practice, this would generate cumulative incidence plots
-            library(ggplot2)
-            
+            # ggplot2 is in DESCRIPTION's Imports — no need to attach via library().
+
             plot_data <- data.frame(
                 time = seq(0, 10, 0.1),
                 cif = 1 - exp(-seq(0, 10, 0.1) / 5),
                 group = "Event of Interest"
             )
-            
-            p <- ggplot(plot_data, aes(x = time, y = cif)) +
-                geom_step(color = "#007bff", size = 1.2) +
-                labs(
+
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = cif)) +
+                ggplot2::geom_step(color = "#007bff", size = 1.2) +
+                ggplot2::labs(
                     title = "Cumulative Incidence Function",
                     subtitle = "Direct Binomial Regression Model",
                     x = "Follow-up Time",
                     y = "Cumulative Incidence",
                     caption = "Event of Interest"
                 ) +
-                scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-                theme_minimal() +
-                theme(
-                    plot.title = element_text(size = 14, face = "bold"),
-                    plot.subtitle = element_text(size = 12, color = "gray60"),
-                    axis.title = element_text(size = 11),
-                    panel.grid.minor = element_blank()
+                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(size = 14, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(size = 12, color = "gray60"),
+                    axis.title = ggplot2::element_text(size = 11),
+                    panel.grid.minor = ggplot2::element_blank()
                 )
             
             print(p)
@@ -417,35 +425,35 @@ directbinomialClass <- R6::R6Class(
             if (is.null(private$.model)) return()
             
             # Create placeholder residual plot
-            library(ggplot2)
-            
+            # ggplot2 is in DESCRIPTION's Imports — no need to attach via library().
+
             residual_data <- data.frame(
                 fitted = rnorm(100, 0.2, 0.1),
                 residual = rnorm(100, 0, 0.5)
             )
-            
-            p <- ggplot(residual_data, aes(x = fitted, y = residual)) +
-                geom_point(alpha = 0.6, color = "#007bff") +
-                geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-                geom_smooth(method = "loess", se = TRUE, color = "#28a745", alpha = 0.3) +
-                labs(
+
+            p <- ggplot2::ggplot(residual_data, ggplot2::aes(x = fitted, y = residual)) +
+                ggplot2::geom_point(alpha = 0.6, color = "#007bff") +
+                ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+                ggplot2::geom_smooth(method = "loess", se = TRUE, color = "#28a745", alpha = 0.3) +
+                ggplot2::labs(
                     title = "Residual Plot",
                     subtitle = "Model Diagnostic",
                     x = "Fitted Values",
                     y = "Residuals"
                 ) +
-                theme_minimal() +
-                theme(
-                    plot.title = element_text(size = 14, face = "bold"),
-                    plot.subtitle = element_text(size = 12, color = "gray60"),
-                    axis.title = element_text(size = 11),
-                    panel.grid.minor = element_blank()
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(size = 14, face = "bold"),
+                    plot.subtitle = ggplot2::element_text(size = 12, color = "gray60"),
+                    axis.title = ggplot2::element_text(size = 11),
+                    panel.grid.minor = ggplot2::element_blank()
                 )
-            
+
             print(p)
             TRUE
         },
-        
+
         # Private fields to store analysis results
         .model = NULL,
         .analysis_data = NULL
