@@ -1750,6 +1750,22 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # INITIALIZATION METHOD
     # ============================================================================
 
+    # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+    #   [CLINICAL-SAFETY] add AUC < 0.5 ERROR notice ("worse than chance — verify outcome coding")
+    #   [CLINICAL-SAFETY] add AUC < 0.7 STRONG_WARNING ("poor discrimination — interpret cautiously")
+    #     existing .detectInverted flips silently; surface as banner instead
+    #   [CLINICAL-SAFETY] add DeLong sample-size STRONG_WARNING when n_pos × n_neg < 50 per class
+    #   [hygiene/notices] 0 jmvcore::Notice uses in 5,601 LOC; currently jmvcore::reject only — add banners
+    #   [hygiene/jmvcore] mix of reject (good) and bare stop()/message()/warning() — /jamovify-function psychopdaROC
+    #   [hygiene/jmvcore] reject(paste("Reference ref must be one of...", nauc)) at ~L1592 → wrap .() + jmvcore::format
+    #   [integration] 158 declared outputs vs 59 setters (2.7×) — verify DeLong/IDI/NRI/meta-analysis flag combos
+    #     via /check-function-full psychopdaROC
+    #   [statistical-validation] /review-function psychopdaROC — DeLong/IDI/NRI/meta-analysis parity vs
+    #     pROC/cutpointr/metafor reference values
+    #   [i18n] only 26 .() wraps in 5,601 LOC; bootstrap jamovi/i18n/ then /prepare-translation psychopdaROC
+    #   [architecture] 5,601 LOC on the edge of unmaintainable — consider per-feature helper files
+    #   [testing] limited coverage in tests/testthat/test-roc.R (42 LOC) — expand for DeLong + cutpointr + IDI/NRI
+
     # Initialize the analysis
     .init = function() {
       # Keep main tables visible but empty them to prevent loading animations

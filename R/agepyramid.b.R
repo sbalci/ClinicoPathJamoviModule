@@ -17,6 +17,16 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = agepyramidBase,
     private = list(
         .run = function() {
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file —
+            # the welcome HTML, error HTML, plot title fallback ("Age Pyramid"),
+            # and the data-summary section in `.build_data_summary_html` are all
+            # English-only. Address in a /prepare-translation pass for this
+            # function before the next release with i18n support.
+            # TODO (forward-looking, perf): `.run()` and `.plot()` do non-trivial
+            # ggplot/ggcharts work without a single `private$.checkpoint()` call.
+            # Large datasets (n > ~50k) freeze the UI thread until the plot is
+            # ready. Add checkpoints around the `dplyr` aggregation (~L218) and
+            # before the `ggplot2::ggplot` / `ggcharts::pyramid_chart` calls.
             # Check if required options (age and gender) are provided
             if (is.null(self$options$age) || is.null(self$options$gender)) {
                 self$results$welcome$setContent(

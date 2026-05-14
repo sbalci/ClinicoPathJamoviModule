@@ -1790,6 +1790,19 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Main analysis method - Core implementation
         .run = function() {
+            # TODO (security): only 1 `htmlEscape` call across ~2.1k LOC of
+            # HTML construction. Variable names and factor labels flow into
+            # multiple paste0 HTML blocks: error/warning notices (~L1217,
+            # L1233, L1276, L1535, L1559), the educational notes, and the
+            # weighted-data info HTML. Sweep all paste0 HTML construction with
+            # `htmltools::htmlEscape()` on every dynamic interpolation.
+            # TODO (forward-looking, perf): no `private$.checkpoint()` despite
+            # 7+ post-hoc method branches (bonferroni, holm, hochberg, hommel,
+            # BH, BY, fdr) which run pairwise chi-square / Fisher tests over
+            # all level combinations. For tables with many categories
+            # (>10x10), each method can take seconds. Add checkpoints between
+            # the overall test and each post-hoc method branch.
+
             # Initial setup and validation
             if (!private$.handleInitialSetup()) return()
 

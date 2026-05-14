@@ -1681,7 +1681,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     # Fit Cox model for PH testing
                     cox_formula_str <- paste0("survival::Surv(", mytime, ",", myoutcome, ") ~ ", myfactor)
-                    cox_model_ph <- survival::coxph(as.formula(cox_formula_str), data = mydata)
+                    cox_model_ph <- survival::coxph(.asSurvivalFormula(cox_formula_str), data = mydata)
 
                     # Test proportional hazards assumption
                     zph_test <- survival::cox.zph(cox_model_ph)
@@ -1980,7 +1980,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                           ') ~ ',
                           escaped_contexpl)
 
-                formula <- as.formula(formula)
+                formula <- .asSurvivalFormula(formula)
 
                 km_fit <- survival::survfit(formula, data = mydata)
 
@@ -2122,7 +2122,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                           ') ~ ',
                           escaped_contexpl)
 
-                formula <- as.formula(formula)
+                formula <- .asSurvivalFormula(formula)
 
                 km_fit <- survival::survfit(formula, data = mydata)
 
@@ -2436,7 +2436,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                           ') ~ ',
                           escaped_contexpl)
 
-                myformula <- as.formula(formula)
+                myformula <- .asSurvivalFormula(formula)
 
 
                 fit <- survminer::surv_fit(
@@ -2662,7 +2662,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                           ') ~ ',
                           mycontexpl)
 
-                myformula <- as.formula(myformula)
+                myformula <- .asSurvivalFormula(myformula)
 
                 # myformula <-
                 #     paste0("survival::Surv(mytime, myoutcome) ~ ", contfactor)
@@ -2846,7 +2846,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     escaped_contexpl <- private$.escapeVariableNames(mycontexpl)
 
                     formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ ", escaped_contexpl)
-                    formula <- as.formula(formula_str)
+                    formula <- .asSurvivalFormula(formula_str)
 
                     # Fit survival tree with specified depth
                     tree_fit <- rpart::rpart(
@@ -2934,7 +2934,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         escaped_time <- private$.escapeVariableNames(mytime)
                         escaped_outcome <- private$.escapeVariableNames(myoutcome)
                         formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ test_groups")
-                        formula <- as.formula(formula_str)
+                        formula <- .asSurvivalFormula(formula_str)
 
                         test_data <- mydata
                         test_data$test_groups <- test_groups
@@ -2997,7 +2997,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         escaped_time <- private$.escapeVariableNames(mytime)
                         escaped_outcome <- private$.escapeVariableNames(myoutcome)
                         formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ 1")
-                        formula <- as.formula(formula_str)
+                        formula <- .asSurvivalFormula(formula_str)
 
                         km_fit <- survival::survfit(formula, data = group_data)
 
@@ -3072,7 +3072,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     escaped_outcome <- private$.escapeVariableNames(myoutcome)
                     formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ risk_groups")
                     tryCatch({
-                        logrank_test <- survival::survdiff(as.formula(formula_str), data = mydata)
+                        logrank_test <- survival::survdiff(.asSurvivalFormula(formula_str), data = mydata)
                         overall_chisq <- logrank_test$chisq
                         overall_pval <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
 
@@ -3280,7 +3280,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     escaped_time <- private$.escapeVariableNames(mytime)
                     escaped_outcome <- private$.escapeVariableNames(myoutcome)
                     formula_str <- paste0('survival::Surv(', escaped_time, ',', escaped_outcome, ') ~ risk_groups')
-                    surv_formula <- as.formula(formula_str)
+                    surv_formula <- .asSurvivalFormula(formula_str)
 
                     # Fit survival model
                     fit <- survival::survfit(surv_formula, data = plot_data)
@@ -3527,7 +3527,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     escaped_outcome <- private$.escapeVariableNames(myoutcome)
                     escaped_explanatory <- private$.escapeVariableNames(myexplanatory)
                     formula_str <- paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ") ~ ", escaped_explanatory)
-                    cox_formula <- as.formula(formula_str)
+                    cox_formula <- .asSurvivalFormula(formula_str)
 
                     # Fit Cox model
                     cox_model <- survival::coxph(cox_formula, data = data_to_use)
@@ -3623,7 +3623,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 escaped_contexpl <- private$.escapeVariableNames(mycontexpl)
 
                 formula_str <- paste0('survival::Surv(', escaped_time, ',', escaped_outcome, ') ~ ', escaped_contexpl)
-                myformula <- as.formula(formula_str)
+                myformula <- .asSurvivalFormula(formula_str)
 
                 # Fit survival model
                 fit <- survival::survfit(myformula, data = res.cat)

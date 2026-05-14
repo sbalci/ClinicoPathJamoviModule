@@ -201,13 +201,7 @@
 #' @noRd
 NULL
 
-# Helper function to escape variable names with special characters for formulas
-.escapeVariableNames <- function(var_names) {
-    # Check if variable names contain special characters that need escaping
-    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
-    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
-    return(var_names)
-}
+# Note: `.escapeVariableNames` lives in R/utils.R as the canonical definition.
 
 # Helper function to restore original variable names in finalfit output tables
 .restoreOriginalNamesInSurvivalTable <- function(table_data, name_mapping) {
@@ -248,6 +242,36 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .parametric_model_name = NULL,
             .parametric_results = NULL,
             .cachedGetData = NULL,
+
+            # HTML notice helper (avoids the protobuf serialization error caused by
+            # passing jmvcore::Notice objects to self$results$insert / $add).
+            # See R/survivalcont.b.R:700-743 for the reference implementation.
+            .addHtmlMessage = function(type, title, message) {
+                output_name <- switch(type,
+                    "error" = "errors",
+                    "strongWarning" = "strongWarnings",
+                    "warning" = "warnings",
+                    "info" = "infoMessages",
+                    "warnings"
+                )
+                border_color <- switch(type,
+                    "error" = "#d9534f",
+                    "strongWarning" = "#e67e22",
+                    "warning" = "#f0ad4e",
+                    "info" = "#5bc0de",
+                    "#f0ad4e"
+                )
+                current_content <- self$results[[output_name]]$content
+                if (is.null(current_content)) current_content <- ""
+                new_message <- sprintf(
+                    '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+                    border_color,
+                    htmltools::htmlEscape(title),
+                    htmltools::htmlEscape(message)
+                )
+                self$results[[output_name]]$setContent(paste0(current_content, new_message))
+                self$results[[output_name]]$setVisible(TRUE)
+            },
 
             # Unified survival formula builder — always escapes variable names
             .buildSurvFormula = function(time_var, outcome_var, group_var = NULL, ns_prefix = TRUE) {
@@ -776,7 +800,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Validate: no negative survival times
                     n_negative <- sum(mydata[["mytime"]] < 0, na.rm = TRUE)
                     if (n_negative > 0) {
-                        stop(sprintf(
+                        jmvcore::reject(sprintf(
                             .("Invalid data: %d observation(s) have negative survival times. Check that follow-up dates are after diagnosis dates and that time values are correct."),
                             n_negative
                         ))
@@ -816,7 +840,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             mydata[["end"]] <- date_parser(mydata[[fudate]])
                         } else {
                             # ERROR for invalid date format
-                            stop(sprintf(
+                            jmvcore::reject(sprintf(
                                 .('Unknown date format: %s\nSupported formats: %s\nPlease select correct format in Date Type options'),
                                 self$options$timetypedata,
                                 paste(names(lubridate_functions), collapse = ", ")
@@ -824,13 +848,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                     } else {
                         # ERROR for mixed date types
-                        stop(.('Diagnosis date and follow-up date must be in the same format (both numeric or both text)\nPlease check your date variables and ensure consistent formatting'))
+                        jmvcore::reject(.('Diagnosis date and follow-up date must be in the same format (both numeric or both text)\nPlease check your date variables and ensure consistent formatting'))
                     }
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
                         # ERROR for time calculation failure
-                        stop(sprintf(
+                        jmvcore::reject(sprintf(
                             .('Time difference cannot be calculated\nDate parsing produced no valid dates\nCurrent date type setting: %s\nPlease verify date format matches your data'),
                             self$options$timetypedata
                         ))
@@ -851,7 +875,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Validate: no negative survival times from date calculation
                     n_negative <- sum(mydata[["mytime"]] < 0, na.rm = TRUE)
                     if (n_negative > 0) {
-                        stop(sprintf(
+                        jmvcore::reject(sprintf(
                             .("Invalid data: %d observation(s) have negative survival times (follow-up date before diagnosis date). Please check your date variables."),
                             n_negative
                         ))
@@ -891,7 +915,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (inherits(outcome1, contin)) {
                         unique_values <- unique(outcome1[!is.na(outcome1)])
                         if (!(length(unique_values) == 2 && all(unique_values %in% c(0, 1)))) {
-                            stop(sprintf(
+                            jmvcore::reject(sprintf(
                                 .('Outcome variable must be binary (0/1) for survival analysis.\n- Use 0 for censored observations (alive/disease-free)\n- Use 1 for events (death/recurrence)\nCurrent values found: %s\n\nFor multi-state outcomes, enable "Multiple Event Levels" option.'),
                                 paste(unique_values, collapse = ", ")
                             ))
@@ -904,7 +928,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else if (inherits(outcome1, "factor")) {
                         # Validate that outcomeLevel is specified for factor outcomes
                         if (is.null(outcomeLevel) || length(outcomeLevel) == 0) {
-                            stop(sprintf(
+                            jmvcore::reject(sprintf(
                                 .('Event level must be specified for factor outcomes.\nOutcome variable "%s" has levels: %s\nPlease select which level represents the event (death/recurrence) in the analysis options.'),
                                 myoutcome_labelled,
                                 paste(levels(outcome1), collapse = ", ")
@@ -919,7 +943,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             )
 
                     } else {
-                        stop(sprintf(
+                        jmvcore::reject(sprintf(
                             .('Invalid outcome variable format.\nFor survival analysis, the outcome variable must be:\n- Binary numeric (0/1): 0=censored, 1=event\n- Factor variable: Select appropriate event level\n\nCurrent variable type: %s\nFor complex outcomes with multiple states, enable "Multiple Event Levels" option.'),
                             class(outcome1)[1]
                         ))
@@ -980,7 +1004,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     unmapped <- setdiff(unique(outcome1), c(awd, awod, dod, dooc))
                     unmapped <- unmapped[!is.na(unmapped)]
                     if (length(unmapped) > 0) {
-                        stop(glue::glue("Outcome contains levels not mapped to event/censoring: {paste(unmapped, collapse = ', ')}. Please select all four levels for multievent analysis."))
+                        jmvcore::reject(glue::glue("Outcome contains levels not mapped to event/censoring: {paste(unmapped, collapse = ', ')}. Please select all four levels for multievent analysis."))
                     }
 
                 }
@@ -994,14 +1018,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 if (length(invalid_values) > 0) {
                     unique_invalid <- unique(invalid_values)
-                    stop(sprintf(
+                    jmvcore::reject(sprintf(
                         .('Outcome recode produced invalid values: %s\n\nExpected values: 0=censored, 1=event, 2=competing risk\n\nPossible causes:\n- For binary outcomes: Ensure numeric values are exactly 0 and 1\n- For factor outcomes: Verify "Event Level" is selected in analysis options\n- For multi-state outcomes: Enable "Multiple Event Levels" and select all outcome levels (Dead of Disease, Dead of Other Causes, Alive with Disease, Alive without Disease)'),
                         paste(unique_invalid, collapse = ", ")
                     ))
                 }
 
                 # Note: NAs are automatically excluded by jmvcore::naOmit() during cleandata
-                # Cannot use dynamic Notice insertion here due to serialization issues
+                if (length(invalid_values) == 0 && any(!complete.cases(mydata[, "myoutcome", drop = FALSE]))) {
+                    n_missing <- sum(!complete.cases(mydata[, "myoutcome", drop = FALSE]))
+                    private$.addHtmlMessage(
+                        "warning",
+                        "Missing outcome values excluded",
+                        sprintf("%d row(s) with missing outcome were excluded by jmvcore::naOmit() before model fitting.", n_missing)
+                    )
+                }
 
                 df_outcome <- mydata %>% jmvcore::select(c("row_names", "myoutcome"))
 
@@ -1056,7 +1087,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 factor <- private$.definemyfactor()
 
                 if (is.null(time) || is.null(outcome) || is.null(factor)) {
-                    stop(.("Error: Data could not be cleaned for analysis."))
+                    jmvcore::reject(.("Error: Data could not be cleaned for analysis."))
                 }
 
                 cleanData <- dplyr::left_join(time, outcome, by = "row_names") %>%
@@ -1229,7 +1260,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # CRITICAL: < 10 events - ERROR (block analysis)
                 if (n_events < 10) {
-                    stop(sprintf(
+                    jmvcore::reject(sprintf(
                         .('CRITICAL: Only %d events detected\nMinimum 10 events required for reliable survival analysis\nResults cannot be computed\nPlease collect more data before proceeding'),
                         n_events
                     ))
@@ -1291,7 +1322,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.cox(results)
                 }
                 # Note: Competing risk analysis skips Cox regression
-                # Cannot show info notice due to serialization issues
+                if (self$options$multievent && self$options$analysistype == "compete") {
+                    private$.addHtmlMessage(
+                        "info",
+                        "Cox regression skipped (competing risks)",
+                        "Competing-risk mode is selected; standard Cox regression is skipped because cause-specific hazards require a different model (e.g., Fine-Gray subdistribution)."
+                    )
+                }
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Age-Adjusted Cox ----
@@ -1417,7 +1454,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Populate enhanced clinical content
                 private$.populateEnhancedClinicalContent()
 
-                # Note: Analysis completion notice removed due to serialization issues
+                # Analysis completion summary
+                tryCatch({
+                    n_obs <- nrow(results$cleanData)
+                    event_indicator <- .eventIndicator(results$cleanData[[results$name2outcome]])
+                    n_events <- sum(event_indicator, na.rm = TRUE)
+                    event_rate <- if (n_obs > 0) (n_events / n_obs) * 100 else NA_real_
+                    private$.addHtmlMessage(
+                        "info",
+                        "Analysis complete",
+                        sprintf(
+                            "Survival analysis completed on %d observations with %d events (%.1f%% event rate).",
+                            n_obs, n_events, event_rate
+                        )
+                    )
+                }, error = function(e) invisible(NULL))
             }
 
             # RMST Analysis Function ----
@@ -1437,7 +1488,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         tau <- quantile(mydata[[mytime]], 0.75, na.rm = TRUE)
                     }
 
-                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                    formula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                     private$.checkpoint()
 
@@ -1583,7 +1634,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 } else {
                     # STANDARD SURVIVAL MODE: Use Kaplan-Meier
 
-                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                    formula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                     private$.checkpoint()
 
@@ -1782,7 +1833,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Cox model convergence check
                 tryCatch({
-                    cox_check_formula <- as.formula(paste(myformula, "~", explanatory_formula))
+                    cox_check_formula <- .asSurvivalFormula(paste(myformula, "~", explanatory_formula))
                     cox_check_model <- survival::coxph(cox_check_formula, data = mydata)
                     if (!is.null(cox_check_model$iter) && cox_check_model$iter >= 20) {
                         self$results$coxTable$setNote("convergence",
@@ -1797,7 +1848,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(strata_var) && strata_var %in% names(mydata)) {
                     factors_list <- trimws(unlist(strsplit(explanatory_formula, "\\+")))
                     for (var in factors_list) {
-                        strat_form <- as.formula(paste(myformula, "~", var, "+ strata(", strata_var, ")"))
+                        strat_form <- .asSurvivalFormula(paste(myformula, "~", var, "+ strata(", strata_var, ")"))
                         strat_mod <- try(survival::coxph(strat_form, data = mydata), silent = TRUE)
                         if (!inherits(strat_mod, "try-error")) {
                             mod_sum <- summary(strat_mod)
@@ -1823,7 +1874,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                     
                     # Update model metrics for multivariable stratified model
-                    multi_form <- as.formula(paste(myformula, "~", explanatory_formula, "+ strata(", strata_var, ")"))
+                    multi_form <- .asSurvivalFormula(paste(myformula, "~", explanatory_formula, "+ strata(", strata_var, ")"))
                     multi_mod <- try(survival::coxph(multi_form, data = mydata), silent = TRUE)
                     if (!inherits(multi_mod, "try-error")) {
                         tCox[[2]][[1]] <- paste("Stratified by", strata_var, "-", tCox[[2]][[1]])
@@ -1986,7 +2037,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
 
-                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                    formula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 private$.checkpoint()  # Add checkpoint here
 
@@ -1998,8 +2049,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     self$results$cox_ph$setContent(print(zph))
 
-                    # Note: PH assumption violation notice removed due to serialization issues
-                    # Check interpretation section for PH violation details
+                    # PH assumption violation notice — rendered as HTML to avoid Notice protobuf issues
+                    tryCatch({
+                        ph_p <- zph$table[, "p"]
+                        ph_p <- ph_p[!is.na(ph_p)]
+                        if (length(ph_p) > 0 && any(ph_p < 0.05)) {
+                            private$.addHtmlMessage(
+                                "warning",
+                                "Proportional hazards assumption may be violated",
+                                "cox.zph p-values below 0.05 indicate potential violation of the proportional hazards assumption for one or more terms. Consider time-varying effects, stratification, or splitting follow-up; see the PH interpretation section for details."
+                            )
+                        }
+                    }, error = function(e) invisible(NULL))
 
                     # Generate enhanced PH interpretation
                     ph_interpretation <- private$.generatePHInterpretation(zph, myfactor)
@@ -2190,7 +2251,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
 
-                    formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                    formula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                     private$.checkpoint()
 
@@ -2258,7 +2319,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Median Survival Table ----
 
-                formula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                formula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 private$.checkpoint()
 
@@ -2380,7 +2441,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 ## Median Survival Table ----
 
-                formula_p <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                formula_p <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 padjustmethod <-
                     jmvcore::constructFormula(terms = self$options$padjustmethod)
@@ -2513,7 +2574,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
-                formula_obj <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                formula_obj <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 # Define the tests to run
                 tests <- list(
@@ -2679,7 +2740,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     formula_str <- paste0(
                         'survival::Surv(', mytime, ', ', myoutcome, ') ~ ', myfactor
                     )
-                    formula_obj <- as.formula(formula_str)
+                    formula_obj <- .asSurvivalFormula(formula_str)
 
                     # Fit standard Cox model and get apparent C-index
                     cox_fit <- survival::coxph(formula_obj, data = mydata)
@@ -3380,7 +3441,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 plotData[[mytime]] <-
                     jmvcore::toNumeric(plotData[[mytime]])
 
-                myformula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                myformula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 km_fit <- survival::survfit(myformula, data = plotData)
 
@@ -3486,7 +3547,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 title2 <- .getDisplayName(myfactor, original_names_mapping)
 
 
-                myformula <- as.formula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
+                myformula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
                 km_fit <- survival::survfit(myformula, data = plotData)
 
@@ -4493,7 +4554,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         rhs <- paste0(myfactor, ' + ', extra_term)
                     }
                     esc_rhs <- .escapeVariableNames(rhs)
-                    formula <- as.formula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", esc_rhs))
+                    formula <- .asSurvivalFormula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", esc_rhs))
                     cox_model <- survival::coxph(formula, data = mydata)
 
                     # Determine calibration time point
@@ -4786,12 +4847,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Linear model
                     rcs_var_safe <- jmvcore::composeTerm(rcs_var)
                     if (!is.null(myfactor) && nchar(myfactor) > 0) {
-                        formula_linear <- as.formula(paste0(surv_part, ' ~ ', rcs_var_safe, ' + ', myfactor))
-                        formula_spline <- as.formula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
+                        formula_linear <- .asSurvivalFormula(paste0(surv_part, ' ~ ', rcs_var_safe, ' + ', myfactor))
+                        formula_spline <- .asSurvivalFormula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
                                                             ', df = ', n_knots - 1, ') + ', myfactor))
                     } else {
-                        formula_linear <- as.formula(paste0(surv_part, ' ~ ', rcs_var_safe))
-                        formula_spline <- as.formula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
+                        formula_linear <- .asSurvivalFormula(paste0(surv_part, ' ~ ', rcs_var_safe))
+                        formula_spline <- .asSurvivalFormula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
                                                             ', df = ', n_knots - 1, ')'))
                     }
 
@@ -4993,7 +5054,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 #                     formula_str <- paste0("Surv(", time_var, ", ", outcome_var, ") ~ 1")
 #                 }
 #                 
-#                 survival_formula <- as.formula(formula_str)
+#                 survival_formula <- .asSurvivalFormula(formula_str)
 #                 
 #                 # List of distributions to compare if enabled
 #                 if (self$options$compare_distributions) {
@@ -5640,7 +5701,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             }
                         }
 
-                        cox_adjusted <- survival::coxph(as.formula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", rhs)), data = mydata)
+                        cox_adjusted <- survival::coxph(.asSurvivalFormula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", rhs)), data = mydata)
 
                         heading_text <- paste0(
                             "Age-Stratified Cox Model\n",
@@ -5665,7 +5726,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     # Fit both unadjusted and adjusted models for comparison table
                     surv_lhs <- private$.buildSurvFormula(mytime, myoutcome)
-                    cox_unadj <- survival::coxph(as.formula(paste(surv_lhs, "~", myfactor)), data = mydata)
+                    cox_unadj <- survival::coxph(.asSurvivalFormula(paste(surv_lhs, "~", myfactor)), data = mydata)
 
                     if (use_age_strata) {
                         formula_adj_str <- paste(surv_lhs, "~", rhs)
@@ -5676,7 +5737,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                         formula_adj_str <- paste(surv_lhs, "~", rhs_adj)
                     }
-                    cox_adjusted <- survival::coxph(as.formula(formula_adj_str), data = mydata)
+                    cox_adjusted <- survival::coxph(.asSurvivalFormula(formula_adj_str), data = mydata)
 
                     # Extract HRs for the group variable (not age)
                     unadj_summary <- summary(cox_unadj)
@@ -5787,7 +5848,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             "survival::Surv(", mytime, ", ", myoutcome, ") ~ ",
                             myfactor, " * ", jmvcore::composeTerm(age_col_name))
                         cox_interaction <- survival::coxph(
-                            as.formula(formula_interaction_str), data = mydata)
+                            .asSurvivalFormula(formula_interaction_str), data = mydata)
 
                         int_summary <- summary(cox_interaction)
                         int_coefs <- int_summary$coefficients
@@ -5927,7 +5988,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Fit Cox model with age as time scale
                     formula_str <- paste0(
                         "survival::Surv(age_entry, age_exit, ", myoutcome, ") ~ ", myfactor)
-                    cox_age <- survival::coxph(as.formula(formula_str), data = mydata)
+                    cox_age <- survival::coxph(.asSurvivalFormula(formula_str), data = mydata)
 
                     cox_summary <- summary(cox_age)
                     coefs <- cox_summary$conf.int

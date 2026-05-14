@@ -71,11 +71,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # === Helper: Escape Variable Names ===
         .escapeVarName = function(var) {
             if (is.null(var) || var == "") return(var)
-            # Wrap in backticks if contains spaces or special chars
-            if (grepl("[^A-Za-z0-9_.]", var)) {
-                return(paste0("`", var, "`"))
-            }
-            return(var)
+            jmvcore::composeTerm(var)
         },
         
         .option = function(option) {
@@ -901,8 +897,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot_data$facet <- as.factor(data[[self$options$facet_var]])
             }
             
-            # Remove missing values
-            plot_data <- na.omit(plot_data)
+            # Remove missing values (jmvcore::naOmit preserves jamovi column attributes)
+            plot_data <- jmvcore::naOmit(plot_data)
             
             # Reverse order if requested
             if (self$options$reverse_order) {
@@ -2103,17 +2099,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return('')
 
             # Escape variable names
-            x_var_escaped <- if (!is.null(x_var) && !identical(make.names(x_var), x_var)) {
-                paste0('`', x_var, '`')
-            } else {
-                x_var
-            }
-
-            y_var_escaped <- if (!is.null(y_var) && !identical(make.names(y_var), y_var)) {
-                paste0('`', y_var, '`')
-            } else {
-                y_var
-            }
+            x_var_escaped <- jmvcore::composeTerm(x_var)
+            y_var_escaped <- jmvcore::composeTerm(y_var)
 
             # Build arguments
             x_var_arg <- paste0('x_var = "', x_var_escaped, '"')

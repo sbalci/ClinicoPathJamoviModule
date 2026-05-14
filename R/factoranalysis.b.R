@@ -96,7 +96,7 @@ factoranalysisClass <- R6::R6Class(
             
             # Select variables and remove missing values
             data <- data[vars]
-            data <- na.omit(data)
+            data <- jmvcore::naOmit(data)
             
             # Check for sufficient data
             if (nrow(data) < 3 * length(vars)) {
@@ -246,7 +246,7 @@ factoranalysisClass <- R6::R6Class(
                 
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste("<p>Error in factor analysis:", e$message, "</p>")
+                    paste("<p>Error in factor analysis:", htmltools::htmlEscape(e$message), "</p>")
                 )
                 return(NULL)
             })

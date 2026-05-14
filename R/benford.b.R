@@ -401,6 +401,12 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             digits <- self$options$digits %||% 2
             
             # Perform Benford analysis with error handling
+            # TODO (forward-looking, perf): no `private$.checkpoint()` before
+            # the heaviest call below — `benford.analysis::benford()` iterates
+            # the entire vector building the digit-distribution and
+            # goodness-of-fit stats; on large clinical datasets (n > 100k)
+            # this can run for several seconds and freeze the UI. Insert a
+            # checkpoint here.
             tryCatch({
                 # Run Benford analysis
                 bfd.cp <- benford.analysis::benford(data = var,
@@ -503,6 +509,11 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 image$setState(plotData)
                 
             }, error = function(e) {
+                # TODO (security, forward-looking): `e$message` from
+                # benford.analysis is interpolated raw into the summary table
+                # cell (line ~513-520). Package errors are not user-controlled
+                # today, but a defence-in-depth pass would wrap with
+                # `htmltools::htmlEscape(e$message)` before interpolation.
                 # User-friendly error messages with clinical context
                 if (grepl("NA|NaN", e$message)) {
                     error_msg <- .("Error: Variable contains missing or non-numeric values that cannot be analyzed. Please ensure your selected variable contains valid numeric data.")

@@ -1091,6 +1091,29 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            # TODO (security): file-wide htmlEscape gap. Only 2 `htmlEscape`
+            # calls across ~2.2k LOC of HTML construction. Variable names
+            # (from user CSV headers — uncontrolled `<`, `>`, `&`) flow into
+            # `<p><strong>Variable:</strong> ", var_name, "</p>` at ~L2013
+            # and into many other HTML blocks in `.formatQualityHTML`,
+            # `.buildSummaryHtml`, `.buildAboutHtml`, `.buildCaveatsHtml`,
+            # and the heuristic recommendations sections. Sweep all paste0
+            # HTML construction with `htmltools::htmlEscape()` on every
+            # dynamic interpolation. Lower priority than Cat A1 because
+            # variable headers are owned by the user, not an external
+            # attacker — but reports may be exported and re-rendered.
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file
+            # (~2.2k LOC of clinical interpretation copy). Address in a
+            # /prepare-translation pass before i18n release.
+            # TODO (forward-looking, perf): zero `private$.checkpoint()`
+            # calls. The `sapply` loops in `.detectOutliers`, `.runMissingTest`,
+            # and the heuristic scoring block are O(n) but on >100k-row
+            # variables can hold the UI for seconds. Add checkpoints around
+            # each major analysis branch.
+            # TODO (cleanup): file is 2.2k LOC — split into helper files
+            # (`.checkOutliers`, `.checkDistribution`, `.checkPlausibility`,
+            # `.renderHtml`) to keep each unit under ~500 LOC.
+
             # Control visibility based on variable selection
             variable_selected <- !is.null(self$options$var)
 
@@ -1157,14 +1180,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Enhanced error checking and validation
+            # Render notices as HTML to avoid the jamovi protobuf serialization
+            # failure triggered by dynamically inserted jmvcore::Notice objects.
             if (nrow(self$data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'emptyDataset',
-                    type = jmvcore::NoticeType$ERROR
+                self$results$todo$setContent(
+                    "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data for quality assessment.</div>"
                 )
-                notice$setContent('Dataset contains no rows. Please provide data for quality assessment.')
-                self$results$insert(999, notice)
                 return()
             }
 
@@ -1177,14 +1198,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Handle validation errors
             if (!validation_results$is_valid) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'validationError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(paste("Data Validation Error:",
-                    htmltools::htmlEscape(paste(validation_results$error_messages, collapse = "; "))))
-                self$results$insert(999, notice)
+                err_msg <- htmltools::htmlEscape(paste(validation_results$error_messages, collapse = "; "))
+                self$results$todo$setContent(sprintf(
+                    "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Data Validation Error:</strong> %s</div>",
+                    err_msg
+                ))
                 return()
             }
             
@@ -1592,93 +1610,71 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 quality_grade <- "D"
             }
 
-            # Collect quality threshold Notices for user-facing alerts
-            quality_notices <- list()
+            # Collect quality threshold notices as HTML for user-facing alerts.
+            # Rendered into the `todo` Html output rather than via
+            # jmvcore::Notice$new + insert(), which is a documented protobuf
+            # serialization risk (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
+            quality_notices_html <- list()
+            .noticeBox <- function(level, msg) {
+                cfg <- switch(level,
+                    STRONG_WARNING = list(bg = "#fff3cd", border = "#ff9800", title = "Warning", color = "#856404"),
+                    WARNING        = list(bg = "#fff3cd", border = "#ffc107", title = "Warning", color = "#856404"),
+                    INFO           = list(bg = "#d1ecf1", border = "#17a2b8", title = "Note",    color = "#0c5460"))
+                paste0(
+                    "<div style='padding: 12px 15px; margin: 6px 0; background-color: ", cfg$bg,
+                    "; border-left: 4px solid ", cfg$border, "; color: ", cfg$color,
+                    "; border-radius: 4px;'><strong>", cfg$title, ":</strong> ", msg, "</div>")
+            }
 
             # STRONG_WARNING: Severe missing data (>30%)
             if (missing_pct > 30) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'severeMissingData',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf("Severe missing data: %.1f%% missing values. Results may be unreliable; investigate missing data mechanisms (MCAR/MAR/MNAR) before analysis.", missing_pct))
-                quality_notices$severeMissing <- notice
+                quality_notices_html$severeMissing <- .noticeBox("STRONG_WARNING", sprintf(
+                    "Severe missing data: %.1f%% missing values. Results may be unreliable; investigate missing data mechanisms (MCAR/MAR/MNAR) before analysis.",
+                    missing_pct))
             } else if (missing_pct > 15) {
-                # WARNING: Substantial missing data (15-30%)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'substantialMissingData',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf("Substantial missing data: %.1f%% missing values. Consider sensitivity analysis with multiple imputation methods.", missing_pct))
-                quality_notices$substantialMissing <- notice
+                quality_notices_html$substantialMissing <- .noticeBox("WARNING", sprintf(
+                    "Substantial missing data: %.1f%% missing values. Consider sensitivity analysis with multiple imputation methods.",
+                    missing_pct))
             }
 
             # STRONG_WARNING: Very high outlier rate (>15%)
             outlier_rate <- ifelse(n_complete > 0, outliers_found / n_complete, 0)
             if (outlier_rate > 0.15) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'veryHighOutlierRate',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf("Very high outlier rate: %.1f%% of data flagged as outliers. Verify measurement procedures and consider robust analysis methods.", outlier_rate * 100))
-                quality_notices$veryHighOutliers <- notice
+                quality_notices_html$veryHighOutliers <- .noticeBox("STRONG_WARNING", sprintf(
+                    "Very high outlier rate: %.1f%% of data flagged as outliers. Verify measurement procedures and consider robust analysis methods.",
+                    outlier_rate * 100))
             } else if (outlier_rate > 0.10) {
-                # WARNING: High outlier rate (10-15%)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'highOutlierRate',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf("High outlier rate: %.1f%% of data flagged as outliers. Review each outlier for data entry errors and clinical plausibility.", outlier_rate * 100))
-                quality_notices$highOutliers <- notice
+                quality_notices_html$highOutliers <- .noticeBox("WARNING", sprintf(
+                    "High outlier rate: %.1f%% of data flagged as outliers. Review each outlier for data entry errors and clinical plausibility.",
+                    outlier_rate * 100))
             }
 
             # STRONG_WARNING: Very small sample (n<10)
             if (n_total < 10) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'verySmallSample',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf("Very small sample size (n=%d). Statistical analyses unreliable; outlier detection is informative-only. Consider collecting additional data.", n_total))
-                quality_notices$verySmallSample <- notice
+                quality_notices_html$verySmallSample <- .noticeBox("STRONG_WARNING", sprintf(
+                    "Very small sample size (n=%d). Statistical analyses unreliable; outlier detection is informative-only. Consider collecting additional data.",
+                    n_total))
             } else if (n_total < 30) {
-                # WARNING: Small sample (n<30)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSample',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf("Small sample size (n=%d). Use appropriate methods for small samples and consider collecting additional data for robust analysis.", n_total))
-                quality_notices$smallSample <- notice
+                quality_notices_html$smallSample <- .noticeBox("WARNING", sprintf(
+                    "Small sample size (n=%d). Use appropriate methods for small samples and consider collecting additional data for robust analysis.",
+                    n_total))
             }
 
             # STRONG_WARNING: Extremely low variability (<1% unique)
             uniqueness_ratio <- ifelse(n_complete > 0, n_unique / n_complete, 0)
             if (uniqueness_ratio < 0.01) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'extremelyLowVariability',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf("Extremely low variability: <1%% unique values (%d unique out of %d). Investigate constant value cause or data collection procedures.", n_unique, n_complete))
-                quality_notices$extremeLowVar <- notice
+                quality_notices_html$extremeLowVar <- .noticeBox("STRONG_WARNING", sprintf(
+                    "Extremely low variability: <1%% unique values (%d unique out of %d). Investigate constant value cause or data collection procedures.",
+                    n_unique, n_complete))
             }
 
             # WARNING: Clinical plausibility issues (if enabled and issues found)
             if (self$options$clinicalValidation && !is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
                 penalizable <- clinical_issues_found[!grepl("auto-detect|could not auto", clinical_issues_found, ignore.case = TRUE)]
                 if (length(penalizable) > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'clinicalPlausibility',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf("Clinical plausibility issues: %d validation checks failed. Verify measurement units and clinical plausibility before analysis.", length(penalizable)))
-                    quality_notices$clinicalIssues <- notice
+                    quality_notices_html$clinicalIssues <- .noticeBox("WARNING", sprintf(
+                        "Clinical plausibility issues: %d validation checks failed. Verify measurement units and clinical plausibility before analysis.",
+                        length(penalizable)))
                 }
             }
 
@@ -1686,23 +1682,21 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             grade_desc <- ifelse(quality_score >= 90, "Excellent",
                          ifelse(quality_score >= 80, "Good",
                          ifelse(quality_score >= 70, "Fair", "Poor")))
-            notice_info <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice_info$setContent(sprintf("Quality assessment completed: %d observations analyzed. Overall quality: %s (Grade %s). Note: Scoring is heuristic-based; review component breakdown for details.", n_total, grade_desc, quality_grade))
-            quality_notices$analysisComplete <- notice_info
+            quality_notices_html$analysisComplete <- .noticeBox("INFO", sprintf(
+                "Quality assessment completed: %d observations analyzed. Overall quality: %s (Grade %s). Note: Scoring is heuristic-based; review component breakdown for details.",
+                n_total, grade_desc, quality_grade))
 
-            # Insert notices in priority order: STRONG_WARNING → WARNING → INFO
-            position <- 1
+            # Render notices in priority order: STRONG_WARNING -> WARNING -> INFO
             priority_order <- c('severeMissing', 'substantialMissing', 'veryHighOutliers', 'highOutliers',
                                'verySmallSample', 'smallSample', 'extremeLowVar', 'clinicalIssues', 'analysisComplete')
+            rendered <- character()
             for (name in priority_order) {
-                if (!is.null(quality_notices[[name]])) {
-                    self$results$insert(position, quality_notices[[name]])
-                    position <- position + 1
+                if (!is.null(quality_notices_html[[name]])) {
+                    rendered <- c(rendered, quality_notices_html[[name]])
                 }
+            }
+            if (length(rendered) > 0) {
+                self$results$todo$setContent(paste(rendered, collapse = ""))
             }
 
             # IMPROVED: Transparent heuristic quality summary with softened presentation

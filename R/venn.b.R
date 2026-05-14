@@ -221,6 +221,16 @@ vennClass <- if (requireNamespace('jmvcore'))
             },
 
             .run = function() {
+                # TODO (security): zero `htmltools::htmlEscape` calls across
+                # ~1.9k LOC despite extensive HTML construction at L242
+                # (info alerts), L290 (variable-count block), L1007
+                # (intersection sentences), L1467-1521 (set calculations
+                # section). Variable names and set element values (factor
+                # levels) flow into HTML without escaping. The function is
+                # otherwise well-engineered (10 checkpoints, 62 .() i18n
+                # calls, escapeVariableNames helper). Sweep all paste0 HTML
+                # construction with `htmlEscape()` on dynamic interpolations.
+
                 private$.checkpoint()
 
                 # Reset message accumulators at the start of each run

@@ -94,6 +94,19 @@ enhancedROCClass <- R6::R6Class(
           self$results$results$notices$setContent(html)
         },
 
+        # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+        #   [CLINICAL-SAFETY] add AUC < 0.5 ERROR notice ("worse than chance — verify outcome coding")
+        #   [CLINICAL-SAFETY] add AUC < 0.7 STRONG_WARNING ("poor discrimination — interpret cautiously")
+        #     existing .detectInverted hint is fine but currently rendered as HTML body, not banner
+        #   [hygiene/notices] 0 jmvcore::Notice uses (currently jmvcore::reject only) — add top-banner Notice ERROR for
+        #     missing inputs / invalid positive class instead of HTML instructions
+        #   [hygiene/jmvcore] ~3 bare stop() in helpers — /jamovify-function enhancedROC --pattern=error --apply
+        #   [integration] 173 declared outputs vs 60 setters (2.9×); verify clinicalPreset / metaAnalysis flag combos
+        #     via /check-function-full enhancedROC
+        #   [statistical-validation] /review-function enhancedROC — DeLong vs bootstrap CI parity; meta-analysis (metafor?)
+        #   [i18n] 143 .() wraps but NO .po catalog — bootstrap jamovi/i18n/ first, wraps are dormant until then
+        #   [testing] limited coverage in tests/testthat/test-roc.R (42 LOC); expand for DeLong + cutpointr cases
+
         .init = function() {
             # Initialize error handling
             if (exists("clinicopath_init", mode = "function")) {
@@ -374,10 +387,12 @@ enhancedROCClass <- R6::R6Class(
                 )
             }
 
-            # Prepare analysis dataset
+            # Prepare analysis dataset — jmvcore::naOmit preserves jamovi
+            # column attributes (measureType, values, labels) that base
+            # na.omit would strip, breaking downstream labelled-factor handling.
             vars <- c(private$.outcome, private$.predictors)
             data <- self$data[vars]
-            data <- na.omit(data)
+            data <- jmvcore::naOmit(data)
 
             # Convert outcome to binary factor with proper positive class handling
             outcome_var <- data[[private$.outcome]]

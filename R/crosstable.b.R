@@ -48,6 +48,11 @@
 NULL
 
 # Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
+# TODO (security, forward-looking): `message` is interpolated raw into the
+# notice HTML (line ~91 below). All current callers pass static strings, but
+# any future caller that interpolates a variable name or factor label would
+# inject. Defence-in-depth: `message <- htmltools::htmlEscape(message)` at
+# the top of the function. Currently safe but easy to regress.
 .createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
 
@@ -502,6 +507,15 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
             # .run ----
             .run = function() {
+                # TODO (forward-looking, perf): currently only 1
+                # `private$.checkpoint()` call despite 4 large style branches
+                # (`tablestyle1` tableone, `tablestyle2` finalfit, `tablestyle3`
+                # gtsummary, `tablestyle4` arsenal, `tablestyle5` tangram).
+                # Each branch invokes a different third-party table builder
+                # whose computation cost scales with #covariates * #groups.
+                # Add a checkpoint before each style branch (~L677 / L726 /
+                # L848 / L976 / and tablestyle5 site) to keep the UI thread
+                # responsive on wide datasets.
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {

@@ -212,6 +212,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Main Analysis Methods
             # ======================================================================
 
+            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   [SECURITY/D-HIGH] ALREADY PATCHED in ClinicoPath — test_names + best_test wrapped via
+            #     private$.safeHtmlOutput in .generateMethodsSection (~L1816) and .generateResultsSection (~L1841)
+            #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice — consolidate
+            #   [hygiene/notices] add STRONG_WARNING for small cell counts in McNemar paths
+            #   [hygiene/jmvcore] some bare stop("Validation failed", call. = FALSE) — /jamovify-function decisioncompare
+            #   [statistical-validation] /review-function decisioncompare — McNemar small-n + paired-CI checks
+            #   [i18n] 26 .() wraps but no .po catalog; bootstrap jamovi/i18n/
+            #   [testing] no tests/testthat/test-decisioncompare.R
+
             # Initialization - visibility now handled by .r.yaml
             .init = function() {
                 # Initialize table rows for dynamic population

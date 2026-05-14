@@ -35,7 +35,17 @@ featurequalityClass <- R6::R6Class(
                 )
                 return()
             }
-            
+
+            # H4 RNG hygiene: save/restore global RNG state across this analysis
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (!is.null(old_seed)) {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                } else if (exists(".Random.seed", envir = .GlobalEnv)) {
+                    rm(".Random.seed", envir = .GlobalEnv)
+                }
+            }, add = TRUE)
+
             # Update progress
             self$results$progress$setContent(
                 "<p><i>Performing comprehensive feature quality assessment...</i></p>"
@@ -69,7 +79,7 @@ featurequalityClass <- R6::R6Class(
                 
             }, error = function(e) {
                 self$results$progress$setContent(
-                    paste0("<p style='color: red;'>Error during analysis: ", e$message, "</p>")
+                    paste0("<p style='color: red;'>Error during analysis: ", htmltools::htmlEscape(e$message), "</p>")
                 )
             })
         },

@@ -1078,12 +1078,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     return('')
 
                 # Escape variable names that contain spaces or special characters
-                dep_escaped <- sapply(dep, function(v) {
-                    if (!is.null(v) && !identical(make.names(v), v))
-                        paste0('`', v, '`')
-                    else
-                        v
-                })
+                dep_escaped <- vapply(dep, jmvcore::composeTerm, character(1))
 
                 # Build dep argument
                 dep_arg <- paste0('dep = c(', paste(sapply(dep_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')

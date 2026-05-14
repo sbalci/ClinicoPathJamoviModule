@@ -808,11 +808,16 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dplyr::filter(!has_baseline) %>%
                 dplyr::pull(!!patientID)
               if (length(patients_without_baseline) > 0) {
+                # Escape user-supplied patient IDs before HTML interpolation
+                safe_missing_baseline_ids <- paste(
+                  htmltools::htmlEscape(as.character(patients_without_baseline)),
+                  collapse = ", "
+                )
                 validation_messages <- c(validation_messages, paste0(
                   "<br>", .("Missing Baseline Measurements:"),
                   sprintf("<br>%s %s",
                           .("The following patients lack baseline (time = 0) measurements:"),
-                          paste(patients_without_baseline, collapse = ", ")),
+                          safe_missing_baseline_ids),
                   "<br><br>", .("Why this matters:"),
                   "<br>- ", .("Baseline measurements are the reference point for calculating changes"),
                   "<br>- ", .("Without baseline values, percentage changes cannot be calculated accurately"),
@@ -841,11 +846,19 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(!!patientID, !!responseVar)
 
           if (nrow(invalid_shrinkage) > 0) {
+            # Escape the printed data-frame rows (patient IDs + response values)
+            # before HTML interpolation. `capture.output(print(df))` is plain text
+            # but is being concatenated into HTML below, so any `<`/`>`/`&` in a
+            # patient ID would render as markup.
+            safe_invalid_shrinkage <- paste(
+              htmltools::htmlEscape(capture.output(print(invalid_shrinkage))),
+              collapse = "<br>"
+            )
             validation_messages <- c(validation_messages, paste0(
               "<br>", .("Invalid Tumor Shrinkage Values Detected:"),
               "<br>", .("Tumor shrinkage cannot exceed 100% (complete disappearance)."),
               sprintf("<br>%s %d%%:", .("The following measurements will be capped at"), private$RECIST_CR_THRESHOLD),
-              paste(capture.output(print(invalid_shrinkage)), collapse = "<br>"),
+              safe_invalid_shrinkage,
               "<br><br>", .("Recommended actions:"),
               "<br>1. ", .("Verify data entry for calculation errors"),
               "<br>2. ", .("Check if baseline measurements are correct"),
@@ -863,10 +876,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(!!patientID, !!responseVar)
 
           if (nrow(large_growth) > 0) {
+          # Escape printed data-frame rows before HTML interpolation
+          safe_large_growth <- paste(
+              htmltools::htmlEscape(capture.output(print(large_growth))),
+              collapse = "<br>"
+          )
           validation_messages <- c(validation_messages, paste0(
               "<br>", .("Unusually Large Growth Values Detected:"),
               "<br>", .("The following measurements show >200% growth:"),
-              paste(capture.output(print(large_growth)), collapse = "<br>"),
+              safe_large_growth,
               "<br><br>", .("While such large increases are possible, please verify:"),
               "<br>- ", .("Measurement accuracy"),
               "<br>- ", .("Calculation methods"),

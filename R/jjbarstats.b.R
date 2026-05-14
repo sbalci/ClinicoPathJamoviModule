@@ -614,7 +614,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
                     # Weighted contingency table using xtabs
                     formula_str <- paste0(self$options$counts, " ~ ", var1, " + ", var2)
-                    weighted_table <- xtabs(as.formula(formula_str), data = data)
+                    weighted_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
                     return(weighted_table)
                 } else {
                     # Unweighted: regular table
@@ -1289,7 +1289,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Create contingency table
                 if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
                     formula_str <- paste0(self$options$counts, " ~ ", dep, " + ", group)
-                    cont_table <- xtabs(as.formula(formula_str), data = mydata)
+                    cont_table <- xtabs(jmvcore::asFormula(formula_str), data = mydata)
                 } else {
                     cont_table <- table(mydata[[dep]], mydata[[group]])
                 }
@@ -1334,17 +1334,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     return('')
 
                 # Escape variable names that contain spaces or special characters
-                dep_escaped <- if (!is.null(dep) && !identical(make.names(dep), dep)) {
-                    paste0('`', dep, '`')
-                } else {
-                    dep
-                }
-
-                group_escaped <- if (!is.null(group) && !identical(make.names(group), group)) {
-                    paste0('`', group, '`')
-                } else {
-                    group
-                }
+                dep_escaped <- jmvcore::composeTerm(dep)
+                group_escaped <- jmvcore::composeTerm(group)
 
                 # Build arguments
                 dep_arg <- paste0('dep = "', dep_escaped, '"')

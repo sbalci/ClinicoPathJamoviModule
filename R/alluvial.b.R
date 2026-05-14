@@ -45,36 +45,30 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             weight_col <- data[[weight_var]]
 
+            # Notices are rendered as HTML in `dataWarning` to avoid the
+            # jamovi protobuf serialization failure triggered by dynamic
+            # jmvcore::Notice objects (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
+            .errBox <- function(msg)
+                paste0("<div style='padding: 15px; margin: 6px 0; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> ", msg, "</div>")
+
             # Validate weight type
             if (!is.numeric(weight_col)) {
-                # Use plain text error message (no HTML in Notices)
-                error_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "weightNotNumeric",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                error_notice$setContent(sprintf(
+                self$results$dataWarning$setContent(.errBox(sprintf(
                     "Invalid Weight Variable: '%s' must be numeric (current type: %s). Please select a numeric variable containing counts, frequencies, or sampling weights.",
                     htmltools::htmlEscape(weight_var), htmltools::htmlEscape(class(weight_col)[1])
-                ))
-                self$results$insert(999, error_notice)
+                )))
+                self$results$dataWarning$setVisible(TRUE)
                 return(FALSE)
             }
 
             # Check for negative weights
             n_negative <- sum(weight_col < 0, na.rm = TRUE)
             if (n_negative > 0) {
-                # Use plain text error message (no HTML in Notices)
-                error_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "negativeWeights",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                error_notice$setContent(sprintf(
+                self$results$dataWarning$setContent(.errBox(sprintf(
                     "Negative Weights Detected: Weight variable '%s' contains %d negative value%s. Weights must be non-negative (>= 0).",
                     htmltools::htmlEscape(weight_var), n_negative, if(n_negative > 1) "s" else ""
-                ))
-                self$results$insert(999, error_notice)
+                )))
+                self$results$dataWarning$setVisible(TRUE)
                 return(FALSE)
             }
 
@@ -136,29 +130,26 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             data_clean <- data[complete.cases(data[, vars, drop=FALSE]), ]
             n_removed <- n_total - nrow(data_clean)
 
-            # Report missingness transparently
+            # Report missingness transparently as HTML (Notice objects are
+            # not serialization-safe when dynamically inserted in jamovi).
             if (n_removed > 0) {
                 pct_removed <- round(100 * n_removed / n_total, 1)
 
-                info_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "missingDataExcluded",
-                    type = jmvcore::NoticeType$INFO
-                )
-
-                # Build details of which variables have missingness
                 vars_with_missing <- names(missing_counts[missing_counts > 0])
                 missing_details <- paste(sapply(vars_with_missing,
                     function(v) sprintf("%s: %d", htmltools::htmlEscape(v), missing_counts[v])),
                     collapse = ", ")
 
-                info_notice$setContent(paste0(
-                    " <b>Missing Data Excluded:</b> ", n_removed, " of ", n_total,
+                info_html <- paste0(
+                    "<div style='padding: 15px; margin: 6px 0; background-color: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460; border-radius: 5px;'>",
+                    "<strong>Missing Data Excluded:</strong> ", n_removed, " of ", n_total,
                     " observations (", pct_removed, "%) excluded due to missing values.<br/>",
                     "Variables with missingness: ", missing_details, "<br/>",
-                    "Analysis based on ", nrow(data_clean), " complete cases."
-                ))
-                self$results$insert(999, info_notice)
+                    "Analysis based on ", nrow(data_clean), " complete cases.",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(info_html)
+                self$results$dataWarning$setVisible(TRUE)
             }
 
             return(data_clean)
@@ -239,12 +230,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (unique_values > 20) {
                         var_safe <- htmltools::htmlEscape(var)
 
-                        error_notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = "continuousVariableNotAllowed",
-                            type = jmvcore::NoticeType$ERROR)
-                        error_notice$setContent(sprintf("Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.", var_safe, unique_values))
-                        self$results$insert(999, error_notice)
+                        self$results$dataWarning$setContent(sprintf(
+                            "<div style='padding: 15px; margin: 6px 0; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.</div>",
+                            var_safe, unique_values))
+                        self$results$dataWarning$setVisible(TRUE)
                         return(FALSE)
                     }
 
@@ -411,6 +400,16 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(plot)
         },
         .run = function() {
+
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file —
+            # welcome HTML, error/warning HTML, plot captions, and the data
+            # summary are English-only. Internationalise in a
+            # /prepare-translation pass before the next i18n release.
+            # TODO (forward-looking, perf): no `private$.checkpoint()` anywhere
+            # in `.run()` despite ggalluvial / easyalluvial aggregation being
+            # heavy on wide categorical datasets. Add checkpoints before
+            # `.aggregateDataForGgalluvial` (~L102), before the easyalluvial
+            # call, and before plot rendering to keep the UI responsive.
 
             # Input Validation ----
 
@@ -595,18 +594,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Warn user if more variables selected than maxvars allows
                 num_selected <- length(varsName)
                 if (num_selected > maxvars) {
-                    # Use modern jmvcore::Notice
-                    truncate_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "variablesTruncated",
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    truncate_notice$setContent(paste0(
-                        " <b>Variables Truncated:</b> ", num_selected, " variables selected, ",
-                        "but maximum is ", maxvars, ". Only the first ", maxvars, " variables will be displayed.<br/>",
-                        "<b>Tip:</b> Increase 'Maximum variables' setting (up to 20) to display more variables."
-                    ))
-                    self$results$insert(999, truncate_notice)
+                    # Notice rendered as HTML in dataWarning to avoid the
+                    # jamovi protobuf serialization failure caused by
+                    # dynamically inserted jmvcore::Notice objects.
 
                     # Keep detailed warning in dataWarning
                     warning_html <- paste0(

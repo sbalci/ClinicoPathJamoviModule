@@ -133,7 +133,7 @@ epidemiosurvivalClass <- R6::R6Class(
 
             # Validate required variables
             if (is.null(self$options$time_var) || is.null(self$options$event_var)) {
-                stop("Time and event variables are required")
+                jmvcore::reject("Time and event variables are required")
             }
 
             # Extract core variables
@@ -198,22 +198,22 @@ epidemiosurvivalClass <- R6::R6Class(
 
             # Check for missing values in critical variables
             if (any(is.na(data$time))) {
-                stop("Missing values in follow-up time variable")
+                jmvcore::reject("Missing values in follow-up time variable")
             }
 
             if (any(is.na(data$event))) {
-                stop("Missing values in event indicator")
+                jmvcore::reject("Missing values in event indicator")
             }
 
             # Check time variable
             if (any(data$time <= 0, na.rm = TRUE)) {
-                stop("Follow-up time must be positive")
+                jmvcore::reject("Follow-up time must be positive")
             }
 
             # Check event indicator
             unique_events <- unique(data$event)
             if (!all(unique_events %in% c(0, 1))) {
-                stop("Event indicator must be 0 (censored) or 1 (event)")
+                jmvcore::reject("Event indicator must be 0 (censored) or 1 (event)")
             }
 
             # Validate age if provided
@@ -771,10 +771,7 @@ epidemiosurvivalClass <- R6::R6Class(
                 km_fit <- private$.survival_results$km_fit
                 data <- private$.epi_data
 
-                # Create survival plot using survminer
-                library(survminer)
-
-                survival_plot <- ggsurvplot(
+                survival_plot <- survminer::ggsurvplot(
                     km_fit,
                     data = data,
                     pval = TRUE,

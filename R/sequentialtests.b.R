@@ -11,6 +11,16 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
         private = list(
             NUMERICAL_TOLERANCE = 1e-10,
             POPULATION_SIZE = NULL,
+
+            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   Audit verdict: best-engineered function in meddecide; 24 jmvcore::Notice paths covering
+            #   low-performance / extreme-prevalence / near-perfect / similar-names / wrong-direction.
+            #   Open items below are minor:
+            #   [hygiene/notices] independence note buried in HTML body — also surface as top INFO banner
+            #   [i18n] 0 .() wraps (surprising given otherwise exemplary quality); /prepare-translation sequentialtests
+            #   [statistical-validation] /review-function sequentialtests — final parallel-test combined PPV math check
+            #   [testing] no tests/testthat/test-sequentialtests.R
+
             .init = function() {
                 # Add rows to tables during initialization
                 individualTable <- self$results$individual_tests_table

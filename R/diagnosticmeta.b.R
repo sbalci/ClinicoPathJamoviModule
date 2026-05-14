@@ -1,8 +1,8 @@
 #' @title Diagnostic Test Meta-Analysis for Pathology
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import mada
-#' @import metafor
+#' @importFrom mada reitsma phm
+#' @importFrom metafor rma
 #' @importFrom stats qnorm pnorm qt pt
 #' @export
 
@@ -26,12 +26,6 @@ diagnosticmetaClass <- R6::R6Class(
         # Helper for null-safe operations
         `%||%` = function(x, y) {
             if (is.null(x)) y else x
-        },
-
-        # Helper function to escape variable names with special characters
-        .escapeVar = function(x) {
-            if (is.null(x)) return(NULL)
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
         # Helper function to get color palette for accessibility
@@ -101,6 +95,26 @@ diagnosticmetaClass <- R6::R6Class(
         
         .run = function() {
 
+            # TODO (jamovify): i18n — this function emits substantial English
+            # text (HTML banners in .populateWelcome/.populateAbout, table
+            # notes, sprintf-formatted summaries in .generateSummary /
+            # .generateBasicSummary, all interpretation/explanation panels).
+            # Currently zero `.()` calls wrap the literals, so the strings are
+            # not extractable for translation. Run `/prepare-translation
+            # diagnosticmeta` to wrap them and produce the .po file.
+
+            # TODO (jamovify): notices migration — error reporting uses ad-hoc
+            # patterns: (a) the 5 `setNote("error", sprintf(... e$message))`
+            # tryCatch handlers at lines 222/241/253/265/277, (b) HTML alert
+            # banners via `.appendInstructionMessage()`, (c) plain HTML
+            # written to `self$results$instructions$setContent(...)` at 151
+            # and 186. Migrate to the structured notices pattern documented
+            # in docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md and demonstrated in
+            # R/waterfall.b.R (`.addNotice` / `.renderNotices`). Adds proper
+            # severity tiers (ERROR/STRONG_WARNING/WARNING/INFO) and a
+            # consistent UI location instead of the mix of `instructions`,
+            # table-footer notes, and welcome-panel overlays today.
+
             # Invalidate cache when data changes
             private$.data_cache_valid <- FALSE
             private$.mada_data <- NULL
@@ -119,11 +133,17 @@ diagnosticmetaClass <- R6::R6Class(
             }
             
             # Get variables with safe escaping for special characters
-            study_var <- private$.escapeVar(self$options$study)
-            tp_var <- private$.escapeVar(self$options$true_positives)
-            fp_var <- private$.escapeVar(self$options$false_positives)
-            fn_var <- private$.escapeVar(self$options$false_negatives)
-            tn_var <- private$.escapeVar(self$options$true_negatives)
+            # Use raw option values as column-name lookup keys. The previous
+            # .escapeVar() helper mangled names containing spaces/punctuation
+            # (e.g. "Study Name (2020)" became "Study_Name_2020_") and then
+            # used the mangled string as a self$data[[...]] key, which silently
+            # returned NULL and broke the analysis. The variable names never
+            # flow into a formula in this function, so no escaping is needed.
+            study_var <- self$options$study
+            tp_var <- self$options$true_positives
+            fp_var <- self$options$false_positives
+            fn_var <- self$options$false_negatives
+            tn_var <- self$options$true_negatives
 
             # Check if all required variables are provided
             all_provided <- !is.null(study_var) && !is.null(tp_var) &&
@@ -219,7 +239,7 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.pooled_specificity <- NULL
                     # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
                     # Instead, use table note
-                    self$results$bivariateresults$setNote("error", sprintf('Bivariate analysis error: %s', e$message))
+                    self$results$bivariateresults$setNote("error", sprintf('Bivariate analysis error: %s', htmltools::htmlEscape(e$message)))
                     private$.generateSummary(meta_data)
                 })
             } else {
@@ -238,7 +258,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
                     # Use table note instead
-                    self$results$hsrocresults$setNote("error", sprintf('HSROC analysis error: %s', e$message))
+                    self$results$hsrocresults$setNote("error", sprintf('HSROC analysis error: %s', htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -250,7 +270,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
                     # Use table note instead
-                    self$results$heterogeneity$setNote("error", sprintf('Heterogeneity analysis error: %s', e$message))
+                    self$results$heterogeneity$setNote("error", sprintf('Heterogeneity analysis error: %s', htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -262,7 +282,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
                     # Use table note instead
-                    self$results$metaregression$setNote("error", sprintf('Meta-regression error: %s', e$message))
+                    self$results$metaregression$setNote("error", sprintf('Meta-regression error: %s', htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -274,7 +294,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }, error = function(e) {
                     # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
                     # Use table note instead
-                    self$results$publicationbias$setNote("error", sprintf('Publication bias analysis error: %s', e$message))
+                    self$results$publicationbias$setNote("error", sprintf('Publication bias analysis error: %s', htmltools::htmlEscape(e$message)))
                 })
             }
             
@@ -587,6 +607,17 @@ diagnosticmetaClass <- R6::R6Class(
 
                 # Attempt HSROC model fitting
 
+                # TODO (correctness): the function uses `mada::phm` (Holling
+                # proportional-hazards SROC) but labels the output as HSROC
+                # (Rutter-Gatsonis), and `param_labels` at lines 688-690 spell
+                # out the Rutter-Gatsonis θ/Λ parametrization that `phm` does
+                # NOT return. Either (a) relabel the table to "Proportional
+                # Hazards SROC (Holling)" and update the parameter names to
+                # match phm's actual output, or (b) add a true HSROC backend
+                # (the `HSROC` package, or a Stan/JAGS implementation). The
+                # current labels are misleading for clinicians reviewing
+                # diagnostic meta-analyses. See review-function notes.
+
                 # Fit HSROC model with enhanced error handling
                 hsroc_model <- tryCatch({
                     result <- mada::phm(mada_data)
@@ -732,6 +763,25 @@ diagnosticmetaClass <- R6::R6Class(
                 analysis_data$logit_sens <- stats::qlogis(analysis_data$sens)
                 analysis_data$logit_spec <- stats::qlogis(analysis_data$spec)
 
+                # TODO (correctness): all `metafor::rma` calls in this file
+                # silently use the metafor defaults (level=95, method="REML")
+                # and ignore the user's `confidence_level` and `method`
+                # options. Affects:
+                #   - heterogeneity (this block, lines below)
+                #   - meta-regression (.performMetaRegression, ~line 854)
+                # Pass `level = self$options$confidence_level` and
+                # `method = self$options$method` (with the existing Reitsma
+                # method whitelist applied) to each rma() call so the
+                # user-selected confidence level is honored across all tables.
+                #
+                # TODO (correctness): when zero_cell_correction = "none" and
+                # any study has a true zero in TP/FN (or TN/FP), the variance
+                # below becomes 1/0 = Inf and propagates into metafor::rma
+                # without any finite-value check. Add an `is.finite()` guard
+                # on `var_logit_sens` / `var_logit_spec` and either drop those
+                # rows with a STRONG_WARNING notice or force the user to pick
+                # a non-`none` correction. Same pattern in
+                # .performMetaRegression at ~line 851.
                 analysis_data$var_logit_sens <- 1 / analysis_data$tp + 1 / analysis_data$fn
                 analysis_data$var_logit_spec <- 1 / analysis_data$tn + 1 / analysis_data$fp
 
@@ -846,6 +896,12 @@ diagnosticmetaClass <- R6::R6Class(
                     return(NULL)
                 })
 
+                # Defense-in-depth: even though jamovi tables render cells as
+                # plain text, the covariate parameter name originates from a
+                # user-supplied column name. Render it through htmlEscape so
+                # the cell stays safe if a future renderer ever interprets HTML.
+                safe_covariate_label <- htmltools::htmlEscape(covariate_var)
+
                 if (!is.null(sens_metareg)) {
                     metareg_table$addRow(rowKey = "sens_intercept", values = list(
                         measure = "Sensitivity",
@@ -859,7 +915,7 @@ diagnosticmetaClass <- R6::R6Class(
                     if (length(sens_metareg$beta) >= 2) {
                         metareg_table$addRow(rowKey = "sens_covariate", values = list(
                             measure = "Sensitivity",
-                            parameter = covariate_var,
+                            parameter = safe_covariate_label,
                             estimate = sens_metareg$beta[2],
                             std_error = sens_metareg$se[2],
                             z_value = sens_metareg$zval[2],
@@ -881,7 +937,7 @@ diagnosticmetaClass <- R6::R6Class(
                     if (length(spec_metareg$beta) >= 2) {
                         metareg_table$addRow(rowKey = "spec_covariate", values = list(
                             measure = "Specificity",
-                            parameter = covariate_var,
+                            parameter = safe_covariate_label,
                             estimate = spec_metareg$beta[2],
                             std_error = spec_metareg$se[2],
                             z_value = spec_metareg$zval[2],
@@ -1202,6 +1258,16 @@ diagnosticmetaClass <- R6::R6Class(
         
         .srocplot = function(image, ggtheme, theme, ...) {
 
+            # TODO (UX): the SROC plot draws individual study points and the
+            # pooled summary point but does not add the bivariate confidence
+            # region (ellipse) or the SROC regression curve. Publication-grade
+            # diagnostic meta-analysis plots typically include both. Sources:
+            # the Reitsma bivariate vcov gives the joint logit-sens / logit-fpr
+            # covariance; mada has internal SROC machinery (see
+            # `mada:::SROC.reitsma`). Add (a) a 95% confidence ellipse around
+            # the pooled point using the vcov, and (b) the SROC regression
+            # curve (logit-sens as a function of logit-fpr).
+
             state <- image$state
             if (is.null(state)) {
                 return(FALSE)
@@ -1312,6 +1378,24 @@ diagnosticmetaClass <- R6::R6Class(
             }
         },
         
+        # TODO (cleanup): the `welcome` output is defined in .r.yaml and
+        # populated by .populateWelcome below, but every reachable code path
+        # in .run() calls `self$results$welcome$setVisible(FALSE)` (lines 85,
+        # 130, 154, 160 — there is no path where it is set visible). The
+        # output is dead. Either (a) remove the `welcome` entry from .r.yaml
+        # and delete .populateWelcome, or (b) reach a code path that sets it
+        # visible (e.g. when no required variables are selected, show the
+        # welcome panel instead of `instructions`).
+        #
+        # TODO (UX): `self$results$instructions` is overloaded as: (a) onboarding
+        # message when no data, (b) data-validation error sink (lines 151, 186),
+        # (c) meta-regression-missing-covariate notice (.appendInstructionMessage),
+        # (d) HSROC unavailable / sparse-data notices. Mixing onboarding with
+        # error states makes the UI confusing — first-time users see error
+        # styling when they have not yet selected variables. Splitting into a
+        # dedicated `notices` Html output (notice-pattern from waterfall.b.R)
+        # would clarify the UX and align with the notices-migration TODO at
+        # the top of `.run()`.
         .populateWelcome = function() {
             welcome_html <- paste0(
                 "<div class='jmv-welcome' style='padding: 20px; background: #f8f9fa; border-radius: 8px; margin: 10px 0;'>",
@@ -1752,11 +1836,21 @@ diagnosticmetaClass <- R6::R6Class(
                                          empirical = "empirical (1/N) correction",
                                          "unknown method")
 
+                    # Escape user-supplied study names before HTML / note interpolation
+                    safe_studies_note <- paste(
+                        htmltools::htmlEscape(head(private$.corrected_study_names, 3)),
+                        collapse = ", "
+                    )
+                    safe_studies_html <- paste(
+                        htmltools::htmlEscape(head(private$.corrected_study_names, 5)),
+                        collapse = ", "
+                    )
+
                     # SERIALIZATION FIX: Use table note instead of inserting Notice
                     warning_msg <- sprintf(
                         'Zero-cell correction applied (%s) to %d of %d studies (%s). Results should be interpreted with caution as corrections can introduce bias, especially in large studies.',
                         method_label, n_corrected, private$.n_studies,
-                        paste(head(private$.corrected_study_names, 3), collapse = ', ')
+                        safe_studies_note
                     )
                     self$results$bivariateresults$setNote("zero_cell_warning", warning_msg)
 
@@ -1770,7 +1864,7 @@ diagnosticmetaClass <- R6::R6Class(
                         method_label,
                         n_corrected,
                         private$.n_studies,
-                        paste(head(private$.corrected_study_names, 5), collapse = ", ")
+                        safe_studies_html
                     )
                 }
             }
@@ -2375,5 +2469,25 @@ diagnosticmetaClass <- R6::R6Class(
 
             self$results$funnelplot_explanation$setContent(html)
         }
+
+        # TODO (forward-looking): no `.asSource()` method — the jamovi syntax
+        # pane therefore cannot render the equivalent R call for the user's
+        # configured analysis (users cannot copy-paste the analysis as
+        # reproducible R code). Adding one requires emitting a call shape like:
+        #   diagnosticmeta(
+        #       data           = data,
+        #       study          = <varname>,
+        #       true_positives = <varname>, ...
+        #       bivariate_analysis   = <bool>,
+        #       confidence_level     = <int>,
+        #       method               = <enum>,
+        #       zero_cell_correction = <enum>,
+        #       ...
+        #   )
+        # Use `jmvcore::sourcifyOption()` per option and `jmvcore::sourcifyName()`
+        # for variable references (NOT manual paste0 quoting — see project
+        # MEMORY.md `feedback_sourcify_quoting_correct_helper`). The
+        # `/add-R-code diagnosticmeta` skill scaffolds this with the
+        # `showRCode` option + `rCode` Html output.
     )
 )

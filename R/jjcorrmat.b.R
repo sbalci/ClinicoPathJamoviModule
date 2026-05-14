@@ -415,8 +415,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 cor_data[[var]] <- jmvcore::toNumeric(cor_data[[var]])
             }
 
-            # Remove rows with missing values
-            cor_data <- na.omit(cor_data)
+            # Remove rows with missing values (jmvcore::naOmit preserves jamovi column attributes)
+            cor_data <- jmvcore::naOmit(cor_data)
 
             if (nrow(cor_data) < 3) {
                 self$results$interpretation$setContent(.("Insufficient data for correlation interpretation."))
@@ -1007,12 +1007,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return('')
 
             # Escape variable names
-            dep_escaped <- sapply(dep, function(v) {
-                if (!is.null(v) && !identical(make.names(v), v))
-                    paste0('`', v, '`')
-                else
-                    v
-            })
+            dep_escaped <- vapply(dep, jmvcore::composeTerm, character(1))
 
             # Build dep argument
             dep_arg <- paste0('dep = c(', paste(sapply(dep_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')

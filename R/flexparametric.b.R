@@ -223,8 +223,8 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Create formula
                 if (!is.null(covariate_names) && length(covariate_names) > 0) {
-                    formula_str <- paste("surv_obj ~", paste(covariate_names, collapse = " + "))
-                    formula_obj <- as.formula(formula_str)
+                    formula_str <- paste("surv_obj ~", jmvcore::composeTerms(as.list(covariate_names)))
+                    formula_obj <- jmvcore::asFormula(formula_str)
                 } else {
                     formula_obj <- surv_obj ~ 1
                 }
@@ -255,7 +255,7 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 ))
                 
             }, error = function(e) {
-                error_msg <- paste0("<p>Error fitting parametric model: ", e$message, "</p>")
+                error_msg <- paste0("<p>Error fitting parametric model: ", htmltools::htmlEscape(e$message), "</p>")
                 self$results$todo$setContent(error_msg)
                 return(NULL)
             })
@@ -873,8 +873,8 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             surv_obj <- Surv(data$time, data$event)
             
             if (!is.null(covariate_names) && length(covariate_names) > 0) {
-                formula_str <- paste("surv_obj ~", paste(covariate_names, collapse = " + "))
-                return(as.formula(formula_str))
+                formula_str <- paste("surv_obj ~", jmvcore::composeTerms(as.list(covariate_names)))
+                return(jmvcore::asFormula(formula_str))
             } else {
                 return(surv_obj ~ 1)
             }
@@ -923,17 +923,18 @@ flexparametricClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (cov %in% names(coefs)) {
                     estimate <- coefs[cov]
                     hr <- exp(estimate)
-                    
+                    cov_safe <- htmltools::htmlEscape(cov)
+
                     if (hr > 1.1) {
-                        findings <- paste0(findings, "<p>• <strong>", cov, 
-                                          ":</strong> Associated with ", round((hr-1)*100, 1), 
+                        findings <- paste0(findings, "<p>• <strong>", cov_safe,
+                                          ":</strong> Associated with ", round((hr-1)*100, 1),
                                           "% increased hazard (HR=", round(hr, 2), ")</p>")
                     } else if (hr < 0.9) {
-                        findings <- paste0(findings, "<p>• <strong>", cov, 
-                                          ":</strong> Associated with ", round((1-hr)*100, 1), 
+                        findings <- paste0(findings, "<p>• <strong>", cov_safe,
+                                          ":</strong> Associated with ", round((1-hr)*100, 1),
                                           "% decreased hazard (HR=", round(hr, 2), ")</p>")
                     } else {
-                        findings <- paste0(findings, "<p>• <strong>", cov, 
+                        findings <- paste0(findings, "<p>• <strong>", cov_safe,
                                           ":</strong> Minimal effect on hazard (HR=", round(hr, 2), ")</p>")
                     }
                 }

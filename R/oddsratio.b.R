@@ -70,45 +70,69 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
         .nom_object = NULL,
-        .notices = list(),
 
         # Notice management helpers ----
+        # Notices are rendered to dedicated Html outputs (errors / strongWarnings /
+        # warnings / infoMessages) to avoid the protobuf serialization error caused
+        # by jmvcore::Notice objects passed to self$results$insert(). The legacy
+        # function signature is retained so callers don't need to change.
         .addNotice = function(type, message, name = NULL) {
-            if (is.null(name)) {
-                name <- paste0('notice', length(private$.notices) + 1)
-            }
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = name,
-                type = type
-            )
-            notice$setContent(message)
-            priority <- switch(
+            type_str <- switch(
                 as.character(type),
-                "1" = 1,  # ERROR
-                "2" = 2,  # STRONG_WARNING
-                "3" = 3,  # WARNING
-                "4" = 4,  # INFO
-                3         # Default to WARNING
+                "1" = "error",
+                "2" = "strongWarning",
+                "3" = "warning",
+                "4" = "info",
+                "warning"
             )
-            private$.notices[[length(private$.notices) + 1]] <- list(
-                notice = notice,
-                priority = priority
+            title <- switch(
+                type_str,
+                "error" = "Error",
+                "strongWarning" = "Strong warning",
+                "warning" = "Warning",
+                "info" = "Information",
+                "Notice"
             )
+            private$.addHtmlMessage(type_str, title, message)
         },
 
-        .insertNotices = function() {
-            if (length(private$.notices) == 0) return()
-            notices_sorted <- private$.notices[order(sapply(private$.notices, function(x) x$priority))]
-            position <- 1
-            for (n in notices_sorted) {
-                self$results$insert(position, n$notice)
-                position <- position + 1
-            }
+        .addHtmlMessage = function(type, title, message) {
+            output_name <- switch(type,
+                "error" = "errors",
+                "strongWarning" = "strongWarnings",
+                "warning" = "warnings",
+                "info" = "infoMessages",
+                "warnings"
+            )
+            border_color <- switch(type,
+                "error" = "#d9534f",
+                "strongWarning" = "#e67e22",
+                "warning" = "#f0ad4e",
+                "info" = "#5bc0de",
+                "#f0ad4e"
+            )
+            current_content <- self$results[[output_name]]$content
+            if (is.null(current_content)) current_content <- ""
+            new_message <- sprintf(
+                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+                border_color,
+                htmltools::htmlEscape(title),
+                htmltools::htmlEscape(message)
+            )
+            self$results[[output_name]]$setContent(paste0(current_content, new_message))
+            self$results[[output_name]]$setVisible(TRUE)
         },
+
+        # Legacy no-ops kept so existing call sites don't break
+        .insertNotices = function() invisible(NULL),
 
         .resetNotices = function() {
-            private$.notices <- list()
+            for (out in c("errors", "strongWarnings", "warnings", "infoMessages")) {
+                if (!is.null(self$results[[out]])) {
+                    self$results[[out]]$setContent("")
+                    self$results[[out]]$setVisible(FALSE)
+                }
+            }
         },
 
         # Memory cleanup ----
@@ -407,7 +431,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "Ensure your dataset contains complete observations"
                         )
                     )
-                    stop(error_msg)
+                    jmvcore::reject(error_msg)
                 }
 
                 # CHECKPOINT: Before data preprocessing - which can be time-consuming
@@ -436,7 +460,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "Consider removing rows with missing data"
                         )
                     )
-                    stop(error_msg)
+                    jmvcore::reject(error_msg)
                 }
 
                 mydata <- jmvcore::naOmit(mydata)
@@ -613,7 +637,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # myformula <- jmvcore::composeFormula(lht = formulaDependent,
                 #                                      rht = formulaExplanatory)
 
-                # myformula <- as.formula(myformula)
+                # myformula <- .asSurvivalFormula(myformula)
 
                 # CHECKPOINT: Before running finalfit - which can be computationally intensive
                 private$.checkpoint()
@@ -806,7 +830,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     # Check if likelihood ratio calculation failed
                     if (!is.null(lr_results$error) && lr_results$error) {
-                        stop(lr_results$message)
+                        jmvcore::reject(lr_results$message)
                     }
 
                     # Create diagnostic metrics text with explanatory information
@@ -1098,7 +1122,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.checkpoint()
 
                 fit <- rms::lrm(
-                    formula = as.formula(formula_str),
+                    formula = .asSurvivalFormula(formula_str),
                     data = data,
                     x = TRUE,
                     y = TRUE
@@ -1182,17 +1206,17 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (is.null(self$options$explanatory) || is.null(self$options$outcome))
                 return()
                     if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+                jmvcore::reject('Data contains no (complete) rows')
             # Check if outcome variable is suitable or stop
             # myoutcome2 <- self$options$outcome
             # myoutcome2 <- self$data[[myoutcome2]]
             # myoutcome2 <- na.omit(myoutcome2)
                     # if (class(myoutcome2) == "factor")
-            #     stop("Please use a continuous variable for outcome.")
+            #     jmvcore::reject("Please use a continuous variable for outcome.")
             #
             #
             # if (any(myoutcome2 != 0 & myoutcome2 != 1))
-            #     stop('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
+            #     jmvcore::reject('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
                     # mydata <- self$data
                     # formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
                     # formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
@@ -1690,7 +1714,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fitFirthModel = function(.data, dependent, explanatory) {
             # Construct formula
             # finalfit's 'dependent' is the variable name, 'explanatory' is a vector of names
-            f <- as.formula(paste(dependent, "~", paste(explanatory, collapse = " + ")))
+            f <- .asSurvivalFormula(paste(dependent, "~", paste(explanatory, collapse = " + ")))
             
             # Fit Firth model using logistf
             # logistf doesn't directly support data frames in the same way for labels
@@ -1698,7 +1722,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fit <- tryCatch({
                 logistf::logistf(f, data = .data)
             }, error = function(e) {
-                stop(paste("Error fitting Firth model:", e$message))
+                jmvcore::reject(paste("Error fitting Firth model:", e$message))
             })
             
             # Extract coefficients and CIs

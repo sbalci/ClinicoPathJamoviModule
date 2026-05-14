@@ -73,6 +73,24 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            # TODO (cleanup): file contains 8+ commented-out `notice <-
+            # jmvcore::Notice$new(...) + insert(999, notice)` blocks (~L114,
+            # L152, L162, L179, L192, L207, L217, L229, L241, L343, L555).
+            # These were migrated to silent-on-error early returns or
+            # accepted as dead-code paths. The dead blocks add noise; drop
+            # them OR wire each to a dataInfo HTML block (see waterfall.b.R
+            # pattern) so the user gets feedback instead of a silent return.
+            # TODO (security): zero `htmltools::htmlEscape` calls across
+            # ~800 LOC. The clinical-summary HTML at ~L688-708, the about
+            # section at ~L711-723, and the interpretation rendering all
+            # interpolate variable names (which come from user CSV headers).
+            # Sweep all paste0 HTML construction with `htmltools::htmlEscape()`
+            # on dynamic interpolations.
+            # TODO (forward-looking, perf): no `private$.checkpoint()` despite
+            # `vtree::vtree` being the heaviest operation and producing
+            # exponential complexity in #vars × avg #levels. Add a
+            # checkpoint immediately before the `vtree::vtree(...)` call
+            # (~L444) so wide trees don't freeze the UI.
 
             # Initial check for variables
             if (is.null(self$options$vars)) {

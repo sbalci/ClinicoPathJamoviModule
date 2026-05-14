@@ -97,7 +97,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             # Data validation
             if (nrow(self$data) == 0) {
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows", code = NULL)
             }
             
             # Package requirements check
@@ -191,14 +191,15 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                             prop_table <- prop.table(ct) * 100
                         }
                         
-                        # Format table
-                        html_content <- paste0(html_content, "<h5>", var_original, "</h5>")
+                        # Format table — htmlEscape user column names and
+                        # factor labels before HTML interpolation.
+                        html_content <- paste0(html_content, "<h5>", htmltools::htmlEscape(var_original), "</h5>")
                         html_content <- paste0(html_content, "<table class='table table-striped' style='margin: 10px 0; max-width: 800px;'>")
-                        
+
                         # Header
-                        html_content <- paste0(html_content, "<thead><tr><th>", var_original, "</th>")
+                        html_content <- paste0(html_content, "<thead><tr><th>", htmltools::htmlEscape(var_original), "</th>")
                         for (col_name in colnames(ct)) {
-                            html_content <- paste0(html_content, "<th>", col_name, "</th>")
+                            html_content <- paste0(html_content, "<th>", htmltools::htmlEscape(col_name), "</th>")
                         }
                         if (self$options$show_total) {
                             html_content <- paste0(html_content, "<th>Total</th>")
@@ -208,7 +209,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                         # Rows
                         for (j in 1:nrow(ct)) {
                             row_name <- rownames(ct)[j]
-                            html_content <- paste0(html_content, "<tr><td><strong>", row_name, "</strong></td>")
+                            html_content <- paste0(html_content, "<tr><td><strong>", htmltools::htmlEscape(row_name), "</strong></td>")
                             
                             row_total <- 0
                             for (k in 1:ncol(ct)) {
@@ -275,7 +276,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 self$results$crosstable_main$setContent(html_content)
                 
             }, error = function(e) {
-                error_msg <- paste("Error generating cross-table:", e$message)
+                error_msg <- paste("Error generating cross-table:", htmltools::htmlEscape(e$message))
                 self$results$crosstable_main$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
@@ -348,7 +349,9 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
                     effect_html <- paste0(effect_html,
                         "<div style='background-color: #f5f5f5; padding: 12px; border-radius: 5px; margin: 8px 0;'>",
-                        "<strong>", var_name, " vs. ", by_var, "</strong>",
+                        "<strong>",
+                        htmltools::htmlEscape(var_name), " vs. ",
+                        htmltools::htmlEscape(by_var), "</strong>",
                         "<table style='margin-top: 8px; border-collapse: collapse; width: 100%;'>",
                         "<tr><td style='padding: 4px 8px;'>Chi-square</td><td style='padding: 4px 8px;'>",
                         sprintf("%.3f (p = %.4f)", chi2, chi_test$p.value), "</td></tr>",
@@ -383,7 +386,8 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             }, error = function(e) {
                 effect_html <- paste0(effect_html,
-                    "<p style='color: #cc0000;'>Error computing effect sizes: ", e$message, "</p>")
+                    "<p style='color: #cc0000;'>Error computing effect sizes: ",
+                    htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$effect_sizes$setContent(effect_html)
@@ -428,13 +432,16 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             group_sizes <- table(by_var_data, useNA = "ifany")
             
             summary_html <- paste0(summary_html, "<p><strong>Total sample size:</strong> ", total_n, "</p>")
-            summary_html <- paste0(summary_html, "<p><strong>Group sizes for '", self$options$by_var, "':</strong></p>")
+            summary_html <- paste0(summary_html, "<p><strong>Group sizes for '",
+                                   htmltools::htmlEscape(self$options$by_var), "':</strong></p>")
             summary_html <- paste0(summary_html, "<ul>")
             for (i in seq_along(group_sizes)) {
                 group_name <- names(group_sizes)[i]
                 group_n <- group_sizes[i]
                 percentage <- round(100 * group_n / total_n, 1)
-                summary_html <- paste0(summary_html, "<li>", group_name, ": ", group_n, " (", percentage, "%)</li>")
+                summary_html <- paste0(summary_html, "<li>",
+                                       htmltools::htmlEscape(group_name),
+                                       ": ", group_n, " (", percentage, "%)</li>")
             }
             summary_html <- paste0(summary_html, "</ul>")
             

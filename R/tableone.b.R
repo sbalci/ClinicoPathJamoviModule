@@ -32,6 +32,19 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # - NoticeType$STRONG_WARNING for data quality issues
             # - NoticeType$WARNING for recommendations
             # - NoticeType$INFO for confirmations
+            # TODO (forward-looking): no `.()` wrapping in this file — HTML
+            # messages, table titles ("Data Quality Check", "Analysis
+            # Summary"), and report-sentence text are English-only. The
+            # function is otherwise architecturally clean (good checkpoint
+            # coverage, htmlEscape usage, asSource method). Address in a
+            # /prepare-translation pass.
+            # TODO (forward-looking): `kableExtra::kable(..., escape=FALSE)`
+            # at L163 (arsenal branch) is intentional — `arsenal::summary`
+            # already returns escaped HTML. If a future maintainer
+            # substitutes arsenal output for a renderer that does NOT escape,
+            # XSS becomes possible. Add a comment near L163 explaining the
+            # trust assumption, or post-process with `xml2::read_html` +
+            # selective escape of <td> contents.
 
             # Check that the input data has at least one complete row.
             if (is.null(self$data) || nrow(self$data) == 0) {
@@ -151,7 +164,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 private$.checkpoint()
 
                 formula_str <- jmvcore::constructFormula(terms = selected_vars)
-                formula_obj <- as.formula(paste('~', formula_str))
+                formula_obj <- jmvcore::asFormula(paste('~', formula_str))
                 mytable <- tryCatch({
                     tab <- arsenal::tableby(formula = formula_obj,
                                             data = data,

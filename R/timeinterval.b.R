@@ -143,7 +143,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             sample_end <- end_vector[!is.na(end_vector)]
             
             if (length(sample_start) == 0 && length(sample_end) == 0) {
-                stop("No valid dates found for format detection in either column")
+                jmvcore::reject("No valid dates found for format detection in either column")
             }
             
             sample_size <-  min(50, max(length(sample_start), length(sample_end)))
@@ -187,7 +187,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (best_score < 0.5) {
-                stop(glue::glue(
+                jmvcore::reject(glue::glue(
                     "Could not detect a common date format for columns '{start_name}' and '{end_name}'. ",
                     "Please select the correct format manually."
                 ))
@@ -210,7 +210,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "myd" = lubridate::myd,
                 "dmy" = lubridate::dmy,
                 "dym" = lubridate::dym,
-                stop(paste("Unsupported date format:", format))
+                jmvcore::reject(paste("Unsupported date format:", format))
             )
 
             tryCatch({
@@ -222,7 +222,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 return(parsed_dates)
             }, error = function(e) {
-                stop(paste("Error parsing dates with format", format, ":", e$message))
+                jmvcore::reject(paste("Error parsing dates with format", format, ":", e$message))
             })
         },
         
@@ -231,12 +231,12 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             successful <- sum(!is.na(parsed_dates))
             
             if (total_non_missing == 0) {
-                stop(glue::glue("Column '{column_name}' contains only missing values; cannot calculate time intervals."))
+                jmvcore::reject(glue::glue("Column '{column_name}' contains only missing values; cannot calculate time intervals."))
             }
             
             if (successful == 0) {
                 sample_values <- paste(utils::head(unique(original_vector), 3), collapse = ", ")
-                stop(glue::glue(
+                jmvcore::reject(glue::glue(
                     "Date parsing failed for column '{column_name}' using format '{format_label}'. ",
                     "Example values: {sample_values}"
                 ))
@@ -244,7 +244,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             success_rate <- successful / total_non_missing
             if (success_rate < 0.8) {
-                stop(glue::glue(
+                jmvcore::reject(glue::glue(
                     "Only {round(100 * success_rate, 1)}% of non-missing values in '{column_name}' were parsed with format '{format_label}'. ",
                     "Please verify that the selected format matches all values or standardise the column."
                 ))
@@ -256,11 +256,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check for valid date objects
             if (!inherits(start_dates, "Date") && !inherits(start_dates, "POSIXct")) {
-                stop("Start dates are not valid date objects")
+                jmvcore::reject("Start dates are not valid date objects")
             }
             
             if (!inherits(end_dates, "Date") && !inherits(end_dates, "POSIXct")) {
-                stop("End dates are not valid date objects")
+                jmvcore::reject("End dates are not valid date objects")
             }
             
             # Calculate intervals
@@ -286,10 +286,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .calculateCalendarIntervals = function(start_dates, end_dates, output_unit) {
             # Calendar-aware interval calculation that respects varying month lengths
             if (!inherits(start_dates, "Date") && !inherits(start_dates, "POSIXct")) {
-                stop("Start dates are not valid date objects")
+                jmvcore::reject("Start dates are not valid date objects")
             }
             if (!inherits(end_dates, "Date") && !inherits(end_dates, "POSIXct")) {
-                stop("End dates are not valid date objects")
+                jmvcore::reject("End dates are not valid date objects")
             }
 
             intervals <- lubridate::interval(start_dates, end_dates)
@@ -314,7 +314,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (output_unit == "months") return(total_months)
             if (output_unit == "years") return(total_months / 12)
 
-            stop("Unsupported output unit for calendar-based calculation")
+            jmvcore::reject("Unsupported output unit for calendar-based calculation")
         },
         
         .applyLandmarkAnalysis = function(calculated_time, data, landmark_time, output_unit) {
@@ -330,7 +330,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (!is.numeric(landmark_time) || landmark_time < 0) {
-                stop("Landmark time must be a non-negative number")
+                jmvcore::reject("Landmark time must be a non-negative number")
             }
             
             # Identify cases before landmark time
@@ -449,7 +449,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Validate parsing success
             if (all(is.na(start_dates)) || all(is.na(end_dates))) {
-                stop(glue::glue(
+                jmvcore::reject(glue::glue(
                     "Date parsing failed. All values became NA using format '{detected_format}'.\n",
                     "Please verify:\n",
                     "- Date format setting matches your data\n",
@@ -466,7 +466,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (all(is.na(calculated_time_raw))) {
-                stop("No valid time intervals could be calculated; please verify start/end dates and selected format.")
+                jmvcore::reject("No valid time intervals could be calculated; please verify start/end dates and selected format.")
             }
 
             # Preserve original parsed vectors for quality assessment
@@ -490,7 +490,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Row ", example_rows, ": Start=", format(start_dates_raw[example_rows]),
                     ", End=", format(end_dates_raw[example_rows])
                 )
-                stop(glue::glue(
+                jmvcore::reject(glue::glue(
                     "Negative time intervals detected (end date before start date) in {length(negative_idx)} rows.\n",
                     "Please correct the dates or enable 'Remove Negative Intervals'.\n",
                     "Examples:\n{paste(examples, collapse = '\\n')}"

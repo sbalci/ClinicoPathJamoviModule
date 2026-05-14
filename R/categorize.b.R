@@ -196,6 +196,15 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Generate R code for reproducibility
+        # TODO (forward-looking): the generated code below embeds raw
+        # `varname` and `newvarname` into `data$<varname>` strings (~L212-231).
+        # The output is rendered in a `<pre>`-style block via htmlEscape on
+        # the whole code, but the *R code itself* breaks if a variable name
+        # contains `\n`, backticks, or other unbalanced quote chars. If users
+        # ever paste the generated snippet into an R script, the script will
+        # fail or behave unexpectedly. Wrap `varname` / `newvarname` with
+        # `jmvcore::composeTerm()` so generated code uses backtick-quoted
+        # identifiers when needed.
         .generateRCode = function(varname, method, nbins, breaks, sdmult,
                                   labels, customlabels, newvarname,
                                   includelowest, rightclosed, ordered) {
@@ -289,6 +298,15 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file —
+            # the welcome HTML, error notice bodies (already migrated to HTML
+            # boxes), assumption text, and the .noticeBox helper messages are
+            # all English-only. Address in a /prepare-translation pass.
+            # TODO (forward-looking, perf): no `private$.checkpoint()` between
+            # `.calculateBreaks` (Jenks/quantile/meansd are O(n log n)) and
+            # `cut()` on the full vector. Add checkpoints for datasets where
+            # `n > ~100k` to keep the UI responsive.
+
             # Input Validation ----
             if (is.null(self$options$var) || length(self$options$var) == 0) {
                 todo <- "
@@ -326,21 +344,16 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get data ----
             varname <- self$options$var
 
-            # TODO (forward-looking): the Notice + self$results$insert(999, notice)
-            # pattern used throughout this function (10 sites: ~330-680) is the
-            # documented serialization-error-prone pattern (see
-            # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md and the canonical fix in
-            # R/waterfall.b.R: replace dynamic Notice objects with a static Html
-            # output and a .addNotice() helper). Large refactor — out of
-            # jamovify scope.
+            # Notices are rendered as HTML in `todo` to avoid the protobuf
+            # serialization failure triggered by dynamic jmvcore::Notice objects
+            # (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
+            .errBox <- function(msg)
+                paste0("<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> ", msg, "</div>")
+
             if (!(varname %in% names(self$data))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'variableNotFound',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(jmvcore::format("Variable '{}' not found in dataset. Please select a valid variable from the data.", htmltools::htmlEscape(varname)))
-                self$results$insert(999, notice)
+                self$results$todo$setContent(.errBox(jmvcore::format(
+                    "Variable '{}' not found in dataset. Please select a valid variable from the data.",
+                    htmltools::htmlEscape(varname))))
                 return()
             }
 
@@ -348,13 +361,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if numeric
             if (!is.numeric(x)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'nonNumericVariable',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(jmvcore::format("Variable '{}' is not numeric. Categorization requires a continuous numeric variable.", htmltools::htmlEscape(varname)))
-                self$results$insert(999, notice)
+                self$results$todo$setContent(.errBox(jmvcore::format(
+                    "Variable '{}' is not numeric. Categorization requires a continuous numeric variable.",
+                    htmltools::htmlEscape(varname))))
                 return()
             }
 
@@ -367,13 +376,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Basic sanity check for variability
             if (sum(!is.na(x_clean)) < 2 || sd(x_clean, na.rm = TRUE) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noVariability',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(jmvcore::format("Variable '{}' has zero variability (constant value). Cannot create categories from a constant variable.", htmltools::htmlEscape(varname)))
-                self$results$insert(999, notice)
+                self$results$todo$setContent(.errBox(jmvcore::format(
+                    "Variable '{}' has zero variability (constant value). Cannot create categories from a constant variable.",
+                    htmltools::htmlEscape(varname))))
                 return()
             }
 
@@ -413,13 +418,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Validate breaks with detailed error messages
             validation <- private$.validateBreaks(breaks, method)
             if (!validation$valid) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'breakValidationError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(jmvcore::format("Break point validation failed: {}", htmltools::htmlEscape(validation$message)))
-                self$results$insert(999, notice)
+                self$results$todo$setContent(.errBox(jmvcore::format(
+                    "Break point validation failed: {}",
+                    htmltools::htmlEscape(validation$message))))
                 return()
             }
 
@@ -427,13 +428,8 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (method == "manual") {
                 custom <- as.numeric(trimws(strsplit(manual_breaks, ",")[[1]]))
                 if (any(is.na(custom))) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'manualBreaksSyntax',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent("Invalid manual break points. Please enter comma-separated numeric values (e.g., 0, 25, 50, 75, 100).")
-                    self$results$insert(999, notice)
+                    self$results$todo$setContent(.errBox(
+                        "Invalid manual break points. Please enter comma-separated numeric values (e.g., 0, 25, 50, 75, 100)."))
                     return()
                 }
             }
@@ -441,43 +437,43 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check if custom labels match number of categories
             n_categories <- length(breaks) - 1
 
-            # Collect notices for prioritized insertion
-            notices <- list()
+            # Collect notice HTML chunks for prioritized rendering.
+            # Notices are emitted as HTML to avoid the jamovi protobuf
+            # serialization failure caused by dynamically inserted
+            # jmvcore::Notice objects (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
+            notice_html <- list()
+            .noticeBox <- function(level, msg) {
+                cfg <- switch(level,
+                    STRONG_WARNING = list(bg = "#fff3cd", border = "#ff9800", title = "Warning", color = "#856404"),
+                    WARNING        = list(bg = "#fff3cd", border = "#ffc107", title = "Warning", color = "#856404"),
+                    INFO           = list(bg = "#d1ecf1", border = "#17a2b8", title = "Note",    color = "#0c5460"))
+                paste0(
+                    "<div style='padding: 12px 15px; margin: 6px 0; background-color: ", cfg$bg,
+                    "; border-left: 4px solid ", cfg$border, "; color: ", cfg$color,
+                    "; border-radius: 4px;'><strong>", cfg$title, ":</strong> ", msg, "</div>")
+            }
 
             # WARNING: Jenks falls back to quantile
             if (method == "jenks" && !requireNamespace("classInt", quietly = TRUE)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'jenksFallback',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent("Natural Breaks (Jenks) requires the 'classInt' package. Using quantile-based binning instead. Install classInt with install.packages('classInt') to enable true Jenks optimization.")
-                notices$jenksFallback <- notice
+                notice_html$jenksFallback <- .noticeBox("WARNING",
+                    "Natural Breaks (Jenks) requires the 'classInt' package. Using quantile-based binning instead. Install classInt with install.packages('classInt') to enable true Jenks optimization.")
             }
 
             # WARNING: Custom labels mismatch
             if (self$options$labels == "custom" && self$options$customlabels != "") {
                 custom_labels <- trimws(strsplit(self$options$customlabels, ",")[[1]])
                 if (length(custom_labels) != n_categories) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'labelMismatch',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(jmvcore::format("Custom labels mismatch: provided {} labels but have {} categories. Using numbered labels instead.", length(custom_labels), n_categories))
-                    notices$labelMismatch <- notice
+                    notice_html$labelMismatch <- .noticeBox("WARNING", jmvcore::format(
+                        "Custom labels mismatch: provided {} labels but have {} categories. Using numbered labels instead.",
+                        length(custom_labels), n_categories))
                 }
             }
 
             # WARNING: Bin collapse
             if (method %in% c("equal", "quantile", "jenks") && n_categories != nbins) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'binCollapse',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(jmvcore::format("Bin collapse: requested {} categories but only {} distinct bins could be created due to tied values or limited range. Interpretations based on '{}-tiles' (e.g., quartiles, tertiles) may be misleading; verify bin boundaries before use.", nbins, n_categories, nbins))
-                notices$binCollapse <- notice
+                notice_html$binCollapse <- .noticeBox("WARNING", jmvcore::format(
+                    "Bin collapse: requested {} categories but only {} distinct bins could be created due to tied values or limited range. Interpretations based on '{}-tiles' (e.g., quartiles, tertiles) may be misleading; verify bin boundaries before use.",
+                    nbins, n_categories, nbins))
             }
 
             # Generate labels ----
@@ -509,31 +505,19 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # STRONG_WARNING: Very small bins (< 5 observations)
                 small_bins <- sum(bin_counts < 5)
                 if (small_bins > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'smallBins',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(jmvcore::format("Small bins detected: {} bin(s) have fewer than 5 observations. Statistical analyses may be unreliable with such small group sizes; consider reducing the number of categories or using a different binning method.", small_bins))
-                    notices$smallBins <- notice
+                    notice_html$smallBins <- .noticeBox("STRONG_WARNING", jmvcore::format(
+                        "Small bins detected: {} bin(s) have fewer than 5 observations. Statistical analyses may be unreliable with such small group sizes; consider reducing the number of categories or using a different binning method.",
+                        small_bins))
                 }
 
                 # STRONG_WARNING: Severe imbalance (one bin has >70% of observations)
                 max_prop <- max(bin_counts) / n_valid_for_check
                 if (max_prop > 0.70) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'binImbalance',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    # TODO (forward-looking): only remaining sprintf with a
-                    # precision spec (%.1f%%). Migration to jmvcore::format
-                    # would need formatC(max_prop * 100, digits = 1, format = "f")
-                    # to preserve the trailing-zero behavior (sprintf("%.1f", 50)
-                    # gives "50.0", round(50, 1) gives "50"). Address in the
-                    # /prepare-translation pass for this function.
-                    notice$setContent(sprintf("Severe bin imbalance: one bin contains %.1f%% of observations. This may reduce statistical power and affect clinical interpretations; consider using quantile-based binning for balanced groups.", max_prop * 100))
-                    notices$binImbalance <- notice
+                    # sprintf("%.1f%%", x) retained intentionally to preserve trailing-zero
+                    # formatting (e.g. "50.0%"). Translation pass will revisit.
+                    notice_html$binImbalance <- .noticeBox("STRONG_WARNING", sprintf(
+                        "Severe bin imbalance: one bin contains %.1f%% of observations. This may reduce statistical power and affect clinical interpretations; consider using quantile-based binning for balanced groups.",
+                        max_prop * 100))
                 }
             }
 
@@ -547,13 +531,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outliers <- sum(x_clean_check < (q1 - 3 * iqr) | x_clean_check > (q3 + 3 * iqr))
 
                 if (outliers > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'outlierSensitivity',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(jmvcore::format("Outlier sensitivity: detected {} extreme outlier(s). Mean±SD binning is sensitive to outliers, which can create poorly distributed categories. Consider using quantile or natural breaks methods.", outliers))
-                    notices$outlierSensitivity <- notice
+                    notice_html$outlierSensitivity <- .noticeBox("WARNING", jmvcore::format(
+                        "Outlier sensitivity: detected {} extreme outlier(s). Mean±SD binning is sensitive to outliers, which can create poorly distributed categories. Consider using quantile or natural breaks methods.",
+                        outliers))
                 }
             }
 
@@ -671,22 +651,20 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # INFO: Analysis complete with methodological note
-            notice_info <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice_info$setContent(jmvcore::format("Categorization completed: {} valid observations divided into {} groups using {} method. Note: Categorization reduces statistical power and may obscure dose-response relationships (Altman & Royston, BMJ 2006;332:1080). Continuous analyses are generally preferred unless there is strong clinical justification.", n_valid, n_categories, self$options$method))
-            notices$analysisComplete <- notice_info
+            notice_html$analysisComplete <- .noticeBox("INFO", jmvcore::format(
+                "Categorization completed: {} valid observations divided into {} groups using {} method. Note: Categorization reduces statistical power and may obscure dose-response relationships (Altman & Royston, BMJ 2006;332:1080). Continuous analyses are generally preferred unless there is strong clinical justification.",
+                n_valid, n_categories, self$options$method))
 
-            # Insert notices in priority order: STRONG_WARNING → WARNING → INFO
-            position <- 1
+            # Render notices in priority order: STRONG_WARNING -> WARNING -> INFO
             priority_order <- c('smallBins', 'binImbalance', 'jenksFallback', 'labelMismatch', 'binCollapse', 'outlierSensitivity', 'analysisComplete')
+            rendered <- character()
             for (name in priority_order) {
-                if (!is.null(notices[[name]])) {
-                    self$results$insert(position, notices[[name]])
-                    position <- position + 1
+                if (!is.null(notice_html[[name]])) {
+                    rendered <- c(rendered, notice_html[[name]])
                 }
+            }
+            if (length(rendered) > 0) {
+                self$results$todo$setContent(paste(rendered, collapse = ""))
             }
         },
 

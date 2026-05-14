@@ -15,6 +15,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("decisio
         .ACCURACY_EXCELLENT = 0.9, # Accuracy > 0.9: Excellent overall performance
         .ACCURACY_GOOD = 0.8,      # Accuracy > 0.8: Good overall performance
 
+        # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+        #   [hygiene/notices] exemplary — 17 jmvcore::Notice paths; use as the reference impl module-wide
+        #   [i18n] 0 .() wraps despite excellent notice content; high priority — /prepare-translation decisioncalculator
+        #   [statistical-validation] /review-function decisioncalculator — confirm Bayes prior-override math
+        #   [hygiene/notices] add INFO methodology summary at end of .run() (currently absent)
+        #   [testing] no tests/testthat/test-decisioncalculator.R
+
         .init = function() {
 
             # Welcome message

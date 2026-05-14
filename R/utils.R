@@ -9,7 +9,7 @@
 # ============================================================================
 
 #' @importFrom stats binomial qbeta
-#' @importFrom utils install.packages sessionInfo tail
+#' @importFrom utils sessionInfo tail
 NULL
 
 # Suppress R CMD CHECK notes for global variables used in NSE / auto-generated
@@ -30,24 +30,63 @@ utils::globalVariables(c(
     "x"
 ))
 
-#' Load required packages with error handling
-#' @param package_name Character string with package name
-#' @param install_if_missing Logical, whether to install if package is missing
-#' @return Logical indicating success
-load_required_package <- function(package_name, install_if_missing = TRUE) {
-    if (!requireNamespace(package_name, quietly = TRUE)) {
-        if (install_if_missing) {
-            install.packages(package_name)
-            return(requireNamespace(package_name, quietly = TRUE))
-        }
-        return(FALSE)
-    }
-    return(TRUE)
+#' Build a survival formula safely via jmvcore::asFormula
+#'
+#' Wraps `jmvcore::asFormula` with the function allow-list extended to cover
+#' common survival modelling helpers (`Surv`, `strata`, `cluster`, `frailty`,
+#' `tt`, `pspline`, `ns`, `bs`, `I`, `const`, `finegray`). Use this instead of
+#' base `as.formula()` in survival / Cox / Fine-Gray paths so the formula
+#' goes through jmvcore's allow-listed parser.
+#'
+#' @param x A character formula string (e.g. `"survival::Surv(t, d) ~ x"`).
+#' @return A parsed formula object.
+.asSurvivalFormula <- function(x) {
+    jmvcore::asFormula(
+        x,
+        additional_allowed_functions = c(
+            "Surv", "strata", "cluster", "frailty", "tt",
+            "pspline", "ns", "bs", "I", "const", "finegray"
+        )
+    )
 }
 
-# Load essential packages
-load_required_package("rlang")
-load_required_package("magrittr")
+#' Escape variable names containing special characters for formulas
+#'
+#' Adds backticks around names that contain anything other than
+#' `[A-Za-z0-9._]`. Centralises the helper that previously lived in
+#' multiple `.b.R` files so the implementation stays in one place.
+#'
+#' @param var_names Character vector of variable names.
+#' @return Character vector with non-syntactic names backtick-quoted.
+.escapeVariableNames <- function(var_names) {
+    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
+    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
+    var_names
+}
+
+#' Check whether a required package is available
+#'
+#' Thin wrapper around `requireNamespace()` that returns a boolean. Packages a
+#' jamovi module needs must be listed in `DESCRIPTION` `Imports:` so they are
+#' installed at install time — this helper does NOT install anything (auto-
+#' installing dependencies at runtime is a CRAN policy violation and a security
+#' hazard).
+#'
+#' @param package_name Character string with package name.
+#' @param install_if_missing Ignored. Retained for backwards compatibility
+#'   with earlier signatures of this function. A warning is issued when set
+#'   to anything other than its default.
+#' @return Logical indicating whether the package is available.
+#' @export
+load_required_package <- function(package_name, install_if_missing = FALSE) {
+    if (!isFALSE(install_if_missing)) {
+        warning(
+            "load_required_package(install_if_missing = TRUE) is no longer ",
+            "supported; declare the dependency in DESCRIPTION Imports instead."
+        )
+    }
+    requireNamespace(package_name, quietly = TRUE)
+}
 
 #' Null-coalescing operator
 #' @name null_coalescing
@@ -608,14 +647,17 @@ prop_to_percent <- function(x, digits = 1) {
 }
 
 #' Package startup message
-#' @description Displays information about the package author and website
-#' @return Invisible NULL (called for side effects)
+#'
+#' Returns the package author / website banner. Called by `.onAttach()` (see
+#' `R/zzz.R`) via `packageStartupMessage()`, which routes to the message stream
+#' and respects `suppressPackageStartupMessages()`. Available as an exported
+#' function so users can print the banner explicitly.
+#'
+#' @return Invisible NULL (called for side effects).
 #' @export
 clinicopath_startup_message <- function() {
-    cat("Serdar Balci MD Pathologist", "\n",
-        "https://www.serdarbalci.com/", "\n", "\n")
+    packageStartupMessage(
+        "Serdar Balci MD Pathologist\nhttps://www.serdarbalci.com/\n"
+    )
     invisible(NULL)
 }
-
-# Display startup message when package loads
-clinicopath_startup_message()

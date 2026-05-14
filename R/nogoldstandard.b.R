@@ -65,6 +65,20 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.notices <- list()
         },
 
+        # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+        #   [SECURITY/C1-HIGH] FIXED 2026-05-14 — formula now built with jmvcore::composeTerms +
+        #     jmvcore::asFormula (allow-list parse-time guard) at .runLCA (~L642), replacing
+        #     stats::as.formula(paste(.escapeVariableNames(...))). Local helper .escapeVariableNames
+        #     remains defined at L8 for backward compat but is unused; consider removing in a follow-up
+        #   [CLINICAL-SAFETY] add STRONG_WARNING when LCA convergence < ~25% of n_starts in .runLCA
+        #   [CLINICAL-SAFETY] add STRONG_WARNING when total cases < 100 (Hui-Walter assumption)
+        #   [hygiene/notices] custom private$.addNotice parallels jmvcore::Notice — consolidate
+        #   [hygiene/jmvcore] stop(.("Package 'poLCA' is required...")) at ~L624 → jmvcore::reject
+        #   [hygiene/jmvcore] several na.omit() on jamovi-attributed frames → jmvcore::naOmit
+        #   [statistical-validation] /review-function nogoldstandard — Hui-Walter + Joseph-Gyorkos parity
+        #   [i18n] 95 .() wraps but no .po catalog; bootstrap jamovi/i18n/
+        #   [testing] no tests/testthat/test-nogoldstandard.R
+
         .init = function() {
             # Reset notices for new analysis
             private$.resetNotices()
@@ -636,10 +650,14 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            # Create formula with escaped variable names
+            # Create formula with allow-list parse-time guard.
+            # jmvcore::composeTerms backtick-quotes names (handling internal backticks correctly,
+            # unlike the local .escapeVariableNames helper which fails on names containing backticks);
+            # jmvcore::asFormula enforces the parse-time allow-list and rejects code injection in RHS.
+            # cbind is on the global allow-list (jamovi 2.7.27+).
             var_names <- names(lca_data)
-            escaped_var_names <- .escapeVariableNames(var_names)
-            f <- stats::as.formula(paste("cbind(", paste(escaped_var_names, collapse=","), ")~1"))
+            escaped_var_names <- jmvcore::composeTerms(as.list(var_names))
+            f <- jmvcore::asFormula(paste0("cbind(", paste(escaped_var_names, collapse = ","), ") ~ 1"))
 
             # Run LCA with more starts to ensure global optimum
             best_model <- NULL

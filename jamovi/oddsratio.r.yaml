@@ -12,6 +12,26 @@ items:
           - explanatory
           - outcome
 
+    - name:  errors
+      title: Critical Errors
+      type:  Html
+      visible: false
+
+    - name:  strongWarnings
+      title: Strong Warnings
+      type:  Html
+      visible: false
+
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: false
+
+    - name:  infoMessages
+      title: Information
+      type:  Html
+      visible: false
+
     # === MAIN ODDS RATIO ANALYSIS ===
     - name:  text
       title: Odds Ratio Table

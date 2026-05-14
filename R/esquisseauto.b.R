@@ -21,7 +21,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
             .plot = function(image, ...) {
                 # Check if esquisse is available
                 if (!requireNamespace("esquisse", quietly = TRUE)) {
-                    stop("The 'esquisse' package is required but not installed. Please install it with: install.packages('esquisse')")
+                    jmvcore::reject("The 'esquisse' package is required but not installed. Please install it with: install.packages('esquisse')")
                 }
 
                 # Check if x variable is selected
@@ -68,8 +68,14 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                     aes_list$group <- groupvar
                 }
 
-                # Convert to aes() call
-                aes_mapping <- do.call(ggplot2::aes_string, aes_list)
+                # Convert to aes() call with safe symbol construction.
+                # IMPORTANT: never use aes_string() — it runs parse(text=...) on
+                # each argument, which would execute attacker-controlled column
+                # names like `system('whoami')` when ggplot evaluates the
+                # aesthetic in the data context. as.name() creates a symbol
+                # that resolves via name lookup only.
+                aes_syms <- lapply(aes_list, as.name)
+                aes_mapping <- do.call(ggplot2::aes, aes_syms)
 
                 # Determine geom to use
                 if (isTRUE(self$options$autoGeom)) {
@@ -118,29 +124,26 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                     labs_list$y <- self$options$yLabel
                 }
 
-                # Generate plot using ggcall
-                plot_call <- esquisse::ggcall(
-                    data = "plotData",
-                    mapping = aes_list,
-                    geom = selected_geom,
-                    geom_args = geom_args,
-                    labs = labs_list,
-                    theme = paste0("theme_", self$options$plotTheme)
-                )
+                # Build the plot directly. selected_geom and plotTheme are
+                # closed-enum values (List options or potential_geoms
+                # output), so match.fun() resolves to a known ggplot2
+                # function. aes_mapping is built from symbols (Finding 1).
+                # labs_list values are user strings flowing into VALUE
+                # positions of ggplot2::labs(); no parsing happens there.
+                build_plot <- function() {
+                    geom_fn <- match.fun(paste0("geom_", selected_geom))
+                    theme_fn <- match.fun(paste0("theme_", self$options$plotTheme))
+                    p <- ggplot2::ggplot(plotData, aes_mapping) +
+                         do.call(geom_fn, geom_args) +
+                         theme_fn()
+                    if (length(labs_list) > 0) {
+                        p <- p + do.call(ggplot2::labs, labs_list)
+                    }
+                    p
+                }
 
-                # Evaluate the call to create plot with error handling.
-                # Safety: `plot_call` is the language object produced by
-                # `esquisse::ggcall(...)` above. Every input that varies at
-                # runtime flows into VALUE positions (mappings, geom args,
-                # labs, theme name). The `theme` argument is the string
-                # `paste0("theme_", self$options$plotTheme)` where
-                # `plotTheme` is a closed `List` enum in
-                # `jamovi/esquisseauto.a.yaml` — its values are restricted
-                # to {minimal, classic, gray, bw, light, dark, void}, all
-                # of which resolve to real ggplot2 functions. No
-                # user-supplied string reaches a function-name position.
                 p <- tryCatch(
-                    eval(plot_call),
+                    build_plot(),
                     error = function(e) {
                     # Provide user-friendly error messages
                     error_msg <- conditionMessage(e)
@@ -252,12 +255,25 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                 # Add faceting if specified
                 facetvar <- self$options$facetvar
                 if (!is.null(facetvar) && facetvar != "") {
-                    p <- p + ggplot2::facet_wrap(stats::as.formula(paste("~", facetvar)))
+                    p <- p + ggplot2::facet_wrap(jmvcore::asFormula(paste0("~ ", jmvcore::composeTerm(facetvar))))
                 }
 
-                # Store generated code if requested
+                # Store generated code if requested.
+                # esquisse::ggcall is only used here to format R code for the
+                # syntax-display pane — the resulting expression is deparsed
+                # to text and never executed.
                 if (isTRUE(self$options$showCode)) {
-                    code_text <- deparse(plot_call)
+                    code_text <- tryCatch({
+                        display_call <- esquisse::ggcall(
+                            data = "plotData",
+                            mapping = aes_list,
+                            geom = selected_geom,
+                            geom_args = geom_args,
+                            labs = labs_list,
+                            theme = paste0("theme_", self$options$plotTheme)
+                        )
+                        deparse(display_call)
+                    }, error = function(e) "# Code generation failed")
                     self$results$generatedCode$setContent(paste(code_text, collapse = "\n"))
                 }
 
@@ -381,7 +397,9 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                     if (!is.null(yvar)) {
                         aes_list$y <- yvar
                     }
-                    aes_mapping <- do.call(ggplot2::aes_string, aes_list)
+                    # Safe symbol construction (see note in .plot()).
+                    aes_syms <- lapply(aes_list, as.name)
+                    aes_mapping <- do.call(ggplot2::aes, aes_syms)
 
                     selected_geom <- tryCatch({
                         esquisse::potential_geoms(
@@ -401,9 +419,9 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
 
                 # Build aesthetic info list
                 aes_info <- list()
-                aes_info <- c(aes_info, paste0("X: <strong>", xvar, "</strong> (", xtype, ")"))
+                aes_info <- c(aes_info, paste0("X: <strong>", htmltools::htmlEscape(xvar), "</strong> (", xtype, ")"))
                 if (!is.null(yvar)) {
-                    aes_info <- c(aes_info, paste0("Y: <strong>", yvar, "</strong> (", ytype, ")"))
+                    aes_info <- c(aes_info, paste0("Y: <strong>", htmltools::htmlEscape(yvar), "</strong> (", ytype, ")"))
                 }
 
                 colorvar <- self$options$colorvar
@@ -413,19 +431,19 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                 facetvar <- self$options$facetvar
 
                 if (!is.null(colorvar) && colorvar != "") {
-                    aes_info <- c(aes_info, paste0("Color: <strong>", colorvar, "</strong>"))
+                    aes_info <- c(aes_info, paste0("Color: <strong>", htmltools::htmlEscape(colorvar), "</strong>"))
                 }
                 if (!is.null(fillvar) && fillvar != "") {
-                    aes_info <- c(aes_info, paste0("Fill: <strong>", fillvar, "</strong>"))
+                    aes_info <- c(aes_info, paste0("Fill: <strong>", htmltools::htmlEscape(fillvar), "</strong>"))
                 }
                 if (!is.null(sizevar) && sizevar != "") {
-                    aes_info <- c(aes_info, paste0("Size: <strong>", sizevar, "</strong>"))
+                    aes_info <- c(aes_info, paste0("Size: <strong>", htmltools::htmlEscape(sizevar), "</strong>"))
                 }
                 if (!is.null(groupvar) && groupvar != "") {
-                    aes_info <- c(aes_info, paste0("Group: <strong>", groupvar, "</strong>"))
+                    aes_info <- c(aes_info, paste0("Group: <strong>", htmltools::htmlEscape(groupvar), "</strong>"))
                 }
                 if (!is.null(facetvar) && facetvar != "") {
-                    aes_info <- c(aes_info, paste0("Facet: <strong>", facetvar, "</strong>"))
+                    aes_info <- c(aes_info, paste0("Facet: <strong>", htmltools::htmlEscape(facetvar), "</strong>"))
                 }
 
                 aes_list_html <- paste(paste0("<li>", aes_info, "</li>"), collapse = "\n")
@@ -435,7 +453,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                     <p style='margin: 0;'><strong>Plot Configuration:</strong></p>
                     <ul style='margin-bottom: 5px;'>
                         {aes_list_html}
-                        <li>Plot Type: <strong>{selected_geom}</strong> ({geom_source})</li>
+                        <li>Plot Type: <strong>{htmltools::htmlEscape(selected_geom)}</strong> ({geom_source})</li>
                     </ul>
                 </div>
                 ")

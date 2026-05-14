@@ -56,6 +56,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 self$results$notices$setContent(html)
             },
 
+            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice — consolidate
+            #     reference impl: decisioncalculator.b.R (17 jmvcore::Notice uses)
+            #   [hygiene/jmvcore] ~5 bare stop() calls — /jamovify-function decisioncombine --pattern=error --apply
+            #   [hygiene/term] private$.escapeVariableNames (~L59) is similar to jmvcore::composeTerm — swap to jmvcore
+            #   [integration] 72 declared outputs vs 21 setters (3.4×) — many pattern-specific placeholders
+            #     run /check-function-full decisioncombine to verify 2-test/3-test scenarios
+            #   [hygiene/notices] low-cell-count STRONG_WARNING is not quantified — add actual counts
+            #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation decisioncombine
+            #   [statistical-validation] /review-function decisioncombine — pattern enumeration math
+            #   [testing] no tests/testthat/test-decisioncombine.R
+
             .init = function() {
                 # Minimal initialization
                 private$.noticeList <- list()

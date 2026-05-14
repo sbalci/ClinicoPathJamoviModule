@@ -181,7 +181,29 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         },
 
         .run = function() {
-            
+            # TODO (security): zero `htmltools::htmlEscape` calls across
+            # ~1.5k LOC. HTML constructed at ~L1440-1467 (validation summary)
+            # and the educational/clinical content blocks interpolate
+            # variable names from user CSV headers without escaping. Sweep
+            # all paste0 HTML construction with `htmltools::htmlEscape()`
+            # on dynamic interpolations.
+            # TODO (forward-looking): no `.()` wrapping in this file (~1.5k
+            # LOC of educational and method-description text). Address in
+            # a /prepare-translation pass.
+            # TODO (forward-looking, perf): no `private$.checkpoint()` calls.
+            # `performance::check_outliers` with composite scoring across
+            # ≥4 algorithms (Z-scores, IQR, Mahalanobis, MCD, LOF, OPTICS)
+            # can take many seconds on n > 10k. Add checkpoints between
+            # each method branch in `.runUnivariateOutliers` and
+            # `.runMultivariateOutliers`.
+            # TODO (correctness, forward-looking): composite-score thresholds
+            # and method-mixing logic deserve a clinical-readiness review.
+            # When multiple methods disagree (Z-score flags an obs that MCD
+            # does not), the composite score interpretation is opaque and
+            # there is no safeguard against contradictory flags. Document
+            # the composition rule in the .a.yaml description and add a
+            # method-agreement column to the per-row results table.
+
             # Reset messages
             private$.resetMessages()
 

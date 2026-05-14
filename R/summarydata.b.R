@@ -40,6 +40,17 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             
             vars <- self$options$vars
 
+            # TODO (security, forward-looking): `var` (user CSV header name)
+            # is interpolated raw into `warning_msgs` here (L50, L53), which
+            # is then injected into the warning HTML at L58-60 with no
+            # `htmltools::htmlEscape()`. Variable names with `<`, `>`, or `&`
+            # corrupt the rendered HTML. Wrap each `var` with
+            # `htmltools::htmlEscape(var)` in the paste0 lines below.
+            # TODO (forward-looking, perf): no `private$.checkpoint()` between
+            # the heavy `gtExtras::gt_plt_summary()` call (~L177) and its
+            # multi-layered fallback chain. On wide tables, gtExtras can hold
+            # the UI for seconds. Add a checkpoint immediately before the
+            # gtExtras call.
             # Remove non-numeric variables and variables with all NAs
             vars_to_remove <- c()
             warning_msgs <- c()

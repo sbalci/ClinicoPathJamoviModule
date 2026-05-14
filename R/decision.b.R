@@ -34,6 +34,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
+            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   [SECURITY/D-HIGH] FIXED 2026-05-14 — test_name/gold_name now wrapped via private$.safeHtmlOutput
+            #     before sprintf in .generateNaturalLanguageSummary (~L625) and .generateReportTemplate (~L666)
+            #   [hygiene/notices] consolidate the custom private$.addNotice system (parallels jmvcore::Notice)
+            #     into jmvcore::Notice; reference impl: decisioncalculator.b.R (17 uses)
+            #   [hygiene/jmvcore] some bare stop()/na.omit() in helpers — /jamovify-function decision --pattern=error,na
+            #   [integration] 68 declared outputs vs 32 setters (2.1×); verify each show* flag — /check-function-full decision
+            #   [statistical-validation] /review-function decision — Wilson vs Clopper-Pearson CIs; post-test prob direction
+            #   [i18n] 91 .() wraps but no .po catalog; bootstrap jamovi/i18n/
+
             .init = function() {
                 cTable <- self$results$cTable
                 cTable$addRow(rowKey = "Test Positive", values = list(newtest = .("Test Positive")))
@@ -621,9 +631,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 lr_pos_safe <- if (is.na(lr_pos) || !is.finite(lr_pos)) 0 else lr_pos
                 lr_neg_safe <- if (is.na(lr_neg) || !is.finite(lr_neg)) 0 else lr_neg
 
+                # Escape user-derived variable names before HTML interpolation
+                test_name_safe <- private$.safeHtmlOutput(test_name)
+                gold_name_safe <- private$.safeHtmlOutput(gold_name)
+
                 summary <- sprintf(
                     summary_template,
-                    test_name, gold_name,
+                    test_name_safe, gold_name_safe,
                     sample_text, prevalence_text,
                     test_quality, sens_text, benchmarks$sens_quality, spec_text, benchmarks$spec_quality,
                     primary_utility,
@@ -658,14 +672,18 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Generate template
                 template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of %s compared to the gold standard %s. The test demonstrated a sensitivity of %.1f%% and specificity of %.1f%% %s. The positive predictive value was %.1f%% and negative predictive value was %.1f%%. The positive likelihood ratio of %.1f provides %s. These results suggest the test may be clinically useful for diagnostic evaluation.</p></div><p style='font-size: 12px; color: #666;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
 
+                # Escape user-derived variable names before HTML interpolation
+                test_name_safe <- private$.safeHtmlOutput(test_name)
+                gold_name_safe <- private$.safeHtmlOutput(gold_name)
+
                 template <- sprintf(
                     template_string,
-                    test_name, gold_name,
+                    test_name_safe, gold_name_safe,
                     sens * 100, spec * 100, ci_text,
                     ppv * 100, npv * 100,
                     lr_pos, interpretation
                 )
-                
+
                 return(template)
             },
             

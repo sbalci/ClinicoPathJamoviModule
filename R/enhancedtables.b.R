@@ -69,7 +69,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             # Validate data
             if (nrow(self$data) == 0) {
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows", code = NULL)
             }
             
             # Check for gt package
@@ -201,8 +201,8 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }, error = function(e) {
                 return(paste(
                     "<div style='color: red; padding: 10px;'>",
-                    "<strong>Error creating enhanced table:</strong>", 
-                    e$message,
+                    "<strong>Error creating enhanced table:</strong>",
+                    htmltools::htmlEscape(e$message),
                     "</div>"
                 ))
             })
@@ -578,7 +578,8 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<ul>",
                 paste0("<li><strong>Dataset Size:</strong> ", nrow(data), " observations, ", ncol(data), " variables</li>"),
                 paste0("<li><strong>Variables Selected:</strong> ", length(self$options$vars), " variables</li>"),
-                if (!is.null(self$options$group_var)) paste0("<li><strong>Grouping Variable:</strong> ", self$options$group_var, "</li>") else "",
+                if (!is.null(self$options$group_var)) paste0("<li><strong>Grouping Variable:</strong> ",
+                                                              htmltools::htmlEscape(self$options$group_var), "</li>") else "",
                 paste0("<li><strong>Missing Value Handling:</strong> ", self$options$missing_handling, "</li>"),
                 "</ul>",
                 "</div>"
@@ -604,12 +605,14 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 if (var %in% names(data) && var != group_var) {
                     if (is.numeric(data[[var]])) {
                         test_result <- private$.perform_numeric_test(data[[var]], data[[group_var]])
-                        comparison_results <- paste(comparison_results, 
-                                                  "<p><strong>", var, ":</strong> ", test_result, "</p>")
+                        comparison_results <- paste(comparison_results,
+                                                  "<p><strong>", htmltools::htmlEscape(var), ":</strong> ",
+                                                  htmltools::htmlEscape(test_result), "</p>")
                     } else {
                         test_result <- private$.perform_categorical_test(data[[var]], data[[group_var]])
-                        comparison_results <- paste(comparison_results, 
-                                                  "<p><strong>", var, ":</strong> ", test_result, "</p>")
+                        comparison_results <- paste(comparison_results,
+                                                  "<p><strong>", htmltools::htmlEscape(var), ":</strong> ",
+                                                  htmltools::htmlEscape(test_result), "</p>")
                     }
                 }
             }
@@ -690,8 +693,9 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<li><strong>Sample Size:</strong> This analysis includes ", nrow(data), " observations</li>",
                 "<li><strong>Variables:</strong> ", length(self$options$vars), " variables are displayed using ", 
                 self$options$table_theme, " theme</li>",
-                if (!is.null(self$options$group_var)) 
-                    paste0("<li><strong>Grouping:</strong> Data is grouped by ", self$options$group_var, 
+                if (!is.null(self$options$group_var))
+                    paste0("<li><strong>Grouping:</strong> Data is grouped by ",
+                          htmltools::htmlEscape(self$options$group_var),
                           if (self$options$include_pvalues) " with statistical comparisons" else "", "</li>")
                 else "",
                 "</ul>",

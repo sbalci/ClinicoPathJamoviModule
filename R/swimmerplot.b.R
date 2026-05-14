@@ -1212,10 +1212,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (!is.null(stats$response_counts)) {
                 best_response <- names(stats$response_counts)[which.max(stats$response_counts)]
                 best_pct <- stats$response_percentages[[best_response]]
-                
+
                 interpretation$response <- sprintf(
                     .("Most common response was %s (%.1f%% of observations). Response distribution shows clinical patterns suitable for efficacy analysis."),
-                    best_response,
+                    htmltools::htmlEscape(best_response),
                     best_pct
                 )
             }
@@ -1254,6 +1254,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (self$options$responseAnalysis && !is.null(stats$response_counts) && length(stats$response_counts) > 0) {
                 best_response <- names(stats$response_counts)[which.max(stats$response_counts)]
                 best_pct <- stats$response_percentages[[best_response]]
+                safe_best_response <- htmltools::htmlEscape(best_response)
 
                 # Calculate clinical response rates
                 # Note: Response names are normalized to uppercase (CR, PR, SD, PD) during .computeStats()
@@ -1263,17 +1264,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                     dcr_count <- sum(stats$response_counts[names(stats$response_counts) %in% c("CR", "PR", "SD")])
                     dcr_pct <- dcr_count / sum(stats$response_counts) * 100
-                    
+
                     response_text <- sprintf(
                         .(.(" Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients) and disease control rate (DCR) of %.1f%% (%d/%d patients). The most frequent response category was %s (%.1f%%).")),
                         orr_pct, orr_count, sum(stats$response_counts),
                         dcr_pct, dcr_count, sum(stats$response_counts),
-                        best_response, best_pct
+                        safe_best_response, best_pct
                     )
                 } else {
                     response_text <- sprintf(
                         .(.(" Response data was available for all patients, with %s being the most common category (%.1f%% of observations).")),
-                        best_response, best_pct
+                        safe_best_response, best_pct
                     )
                 }
                 
@@ -1478,8 +1479,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # Check for data type mismatch (Date/Time selected but numeric data)
                 if (isTRUE(validation_result$data_type_mismatch)) {
                     # REPLACED Notice with HTML to prevent serialization errors
-                    example_vals <- if (!is.null(validation_result$examples)) {
-                        paste(validation_result$examples[1:min(2, length(validation_result$examples))], collapse=', ')
+                    # Escape user-derived example values before HTML interpolation
+                    safe_examples <- if (!is.null(validation_result$examples)) {
+                        htmltools::htmlEscape(as.character(validation_result$examples))
+                    } else {
+                        character(0)
+                    }
+                    example_vals <- if (length(safe_examples) > 0) {
+                        paste(safe_examples[1:min(2, length(safe_examples))], collapse = ", ")
                     } else {
                         "numeric values"
                     }
@@ -1496,7 +1503,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "</p>",
                         "<p style='margin: 10px 0 0 0; font-size: 14px; color: #666;'>",
                         "Examples: <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>",
-                        paste(validation_result$examples, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
+                        paste(safe_examples, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
                         "</code>",
                         "</p>",
                         "</div>",
@@ -1530,6 +1537,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 # Check if dates were detected (not an error, just guidance needed)
                 if (isTRUE(validation_result$date_detected)) {
+                    # Escape user-derived format / example strings before HTML interpolation
+                    safe_format <- htmltools::htmlEscape(as.character(validation_result$format %||% ""))
+                    safe_examples_date <- if (!is.null(validation_result$examples)) {
+                        htmltools::htmlEscape(as.character(validation_result$examples))
+                    } else {
+                        character(0)
+                    }
                     date_guidance <- paste0(
                         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
 
@@ -1537,11 +1551,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "<div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>",
                         "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #333;'> Date Format Detected</h2>",
                         "<p style='margin: 0; font-size: 14px; color: #666;'>",
-                        "Found date format: <strong style='color: #333;'>", validation_result$format, "</strong> in your time variables",
+                        "Found date format: <strong style='color: #333;'>", safe_format, "</strong> in your time variables",
                         "</p>",
                         "<p style='margin: 10px 0 0 0; font-size: 14px; color: #666;'>",
                         "Examples: <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>",
-                        paste(validation_result$examples, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
+                        paste(safe_examples_date, collapse = "</code>, <code style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>"),
                         "</code>",
                         "</p>",
                         "</div>",
@@ -1553,7 +1567,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "<li><strong>Go to 'Time & Date Settings'</strong> section (click to expand)</li>",
                         "<li><strong>Change 'Time Input Type'</strong> from 'Raw Values' to <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>Date/Time</span></li>",
                         "<li><strong>Select 'Date Format':</strong> <span style='background: #e9e9e9; padding: 2px 6px; border-radius: 3px;'>",
-                        validation_result$format, "</span></li>",
+                        safe_format, "</span></li>",
                         "<li><strong>Choose your preferred 'Time Display'</strong> mode (Relative or Absolute)</li>",
                         "<li><strong>The analysis will be re-run with your settings.</strong></li>",
                         "</ol>",

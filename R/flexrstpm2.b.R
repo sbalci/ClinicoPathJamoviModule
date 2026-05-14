@@ -483,22 +483,23 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
         
         # Base formula
         formula_parts <- c("survival", "~")
-        
-        # Add covariates
+
+        # Add covariates (backtick-escape user names)
         if (length(covar_names) > 0) {
-          formula_parts <- c(formula_parts, paste(covar_names, collapse = " + "))
+          formula_parts <- c(formula_parts, paste(jmvcore::composeTerms(as.list(covar_names)), collapse = " + "))
         }
-        
+
         # Add time-varying effects if specified
         if (!is.null(tvc_names) && length(tvc_names) > 0) {
           if (length(covar_names) > 0) {
             formula_parts <- c(formula_parts, " + ")
           }
-          tvc_terms <- paste0("tt(", tvc_names, ")")
+          tvc_terms <- paste0("tt(", jmvcore::composeTerms(as.list(tvc_names)), ")")
           formula_parts <- c(formula_parts, paste(tvc_terms, collapse = " + "))
         }
-        
-        model_formula <- as.formula(paste(formula_parts, collapse = ""))
+
+        # `tt` is in jmvcore's global allowlist; allowlist-validated parse
+        model_formula <- jmvcore::asFormula(paste(formula_parts, collapse = ""))
         
         # Fit the model using rstpm2
         rstpm2_fit <- rstpm2::stpm2(
@@ -1595,14 +1596,14 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
         tryCatch({
           data <- model_result$data
           
-          # Build formula for comparison models
+          # Build formula for comparison models (backtick-escape user names)
           if (!is.null(self$options$covariates) && length(self$options$covariates) > 0) {
-            covar_terms <- paste(self$options$covariates, collapse = " + ")
+            covar_terms <- paste(jmvcore::composeTerms(as.list(self$options$covariates)), collapse = " + ")
             formula_str <- paste("Surv(elapsedtime, outcome) ~", covar_terms)
           } else {
             formula_str <- "Surv(elapsedtime, outcome) ~ 1"
           }
-          formula_obj <- as.formula(formula_str)
+          formula_obj <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("Surv"))
           
           # Fit comparison models
           models_to_compare <- list()

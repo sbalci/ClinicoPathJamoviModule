@@ -230,7 +230,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(self$data)) {
                         # Weighted contingency table using xtabs
                         formula_str <- paste0(counts_var, " ~ ", self$options$dep, " + ", self$options$group)
-                        contingency_table <- xtabs(as.formula(formula_str), data = self$data)
+                        contingency_table <- xtabs(jmvcore::asFormula(formula_str), data = self$data)
                     } else {
                         # Unweighted contingency table
                         contingency_table <- table(self$data[[self$options$dep]], self$data[[self$options$group]])
@@ -528,7 +528,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create contingency table (weighted if counts present)
                 if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
                     formula_str <- paste0(counts_var, " ~ ", dep_var, " + ", group_var)
-                    cont_table <- xtabs(as.formula(formula_str), data = data)
+                    cont_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
                 } else {
                     cont_table <- table(data[[dep_var]], data[[group_var]])
                 }
@@ -582,7 +582,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
                 # Weighted contingency table
                 formula_str <- paste0(counts_var, " ~ ", dep_var, " + ", group_var)
-                cross_table <- xtabs(as.formula(formula_str), data = data)
+                cross_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
             } else {
                 # Unweighted contingency table
                 cross_table <- table(data[[dep_var]], data[[group_var]])
@@ -654,7 +654,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             counts_var <- self$options$counts
             if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
                 formula_str <- paste0(counts_var, " ~ ", dep_var, " + ", group_var)
-                cont_table <- xtabs(as.formula(formula_str), data = data)
+                cont_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
             } else {
                 cont_table <- table(data[[dep_var]], data[[group_var]])
             }
@@ -1437,7 +1437,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 # Use xtabs to sum counts
-                agg_table <- xtabs(as.formula(formula_str), data = mydata)
+                agg_table <- xtabs(jmvcore::asFormula(formula_str), data = mydata)
                 plot_data <- as.data.frame(agg_table)
                 
                 # Rename count column to 'Freq' for consistency
@@ -1471,7 +1471,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Facet if grouped
             if (!is.null(group) && group != "") {
-                plot <- plot + ggplot2::facet_wrap(as.formula(paste("~", group)))
+                plot <- plot + ggplot2::facet_wrap(jmvcore::asFormula(paste("~", group)))
             }
             
             print(plot)

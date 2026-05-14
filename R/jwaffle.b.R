@@ -956,7 +956,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         caption = combined_caption
                     ) +
                     ggplot2::facet_wrap(
-                        as.formula(paste0("~", facet_var)),
+                        jmvcore::asFormula(paste0("~", facet_var)),
                         nrow = 1,
                         strip.position = "bottom"
                     )
@@ -1047,11 +1047,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return('')
 
             # Escape groups variable
-            groups_escaped <- if (!is.null(groups) && !identical(make.names(groups), groups)) {
-                paste0('`', groups, '`')
-            } else {
-                groups
-            }
+            groups_escaped <- jmvcore::composeTerm(groups)
 
             # Build required arguments
             groups_arg <- paste0('groups = "', groups_escaped, '"')
@@ -1059,22 +1055,14 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Build optional facet argument
             facet_arg <- ''
             if (!is.null(facet)) {
-                facet_escaped <- if (!identical(make.names(facet), facet)) {
-                    paste0('`', facet, '`')
-                } else {
-                    facet
-                }
+                facet_escaped <- jmvcore::composeTerm(facet)
                 facet_arg <- paste0(',\n    facet = "', facet_escaped, '"')
             }
 
             # Build optional counts argument
             counts_arg <- ''
             if (!is.null(counts)) {
-                counts_escaped <- if (!identical(make.names(counts), counts)) {
-                    paste0('`', counts, '`')
-                } else {
-                    counts
-                }
+                counts_escaped <- jmvcore::composeTerm(counts)
                 counts_arg <- paste0(',\n    counts = "', counts_escaped, '"')
             }
 

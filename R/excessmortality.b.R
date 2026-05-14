@@ -172,27 +172,33 @@ excessmortalityClass <- R6::R6Class(
             # Fit Poisson regression for excess mortality
             # This is a simplified approach - real mexhaz uses flexible hazard modeling
             
-            formula_parts <- c("status", "offset(log(pyears))")
-            
+            # Build RHS in two parts: internal hardcoded terms + user-supplied covariates.
+            # User covariate column names are backtick-escaped via jmvcore::composeTerms,
+            # and the final string is parsed via jmvcore::asFormula (allowlist).
+            internal_rhs <- c("offset(log(pyears))")
+
             # Add spline terms for time (simplified)
             if (self$options$splineType == "bs") {
                 # Simple polynomial approximation instead of full spline basis
                 data$time_basis1 <- data$time
                 data$time_basis2 <- data$time^2
                 data$time_basis3 <- data$time^3
-                formula_parts <- c(formula_parts, "time_basis1", "time_basis2", "time_basis3")
+                internal_rhs <- c(internal_rhs, "time_basis1", "time_basis2", "time_basis3")
             }
-            
-            # Add covariates
+
+            # Add covariates (safe backtick-escape for non-syntactic names)
             covariates <- self$options$covariates
+            covar_terms <- character(0)
             if (length(covariates) > 0) {
                 existing_covars <- covariates[covariates %in% names(data)]
-                formula_parts <- c(formula_parts, existing_covars)
+                if (length(existing_covars) > 0) {
+                    covar_terms <- jmvcore::composeTerms(as.list(existing_covars))
+                }
             }
-            
+
             # Create formula
-            formula_str <- paste("status ~", paste(formula_parts[-1], collapse = " + "))
-            model_formula <- as.formula(formula_str)
+            formula_str <- paste0("status ~ ", paste(c(internal_rhs, covar_terms), collapse = " + "))
+            model_formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("offset", "log"))
             
             # Fit Poisson model (approximation of excess hazard model)
             model <- tryCatch({

@@ -470,11 +470,19 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Detect common misuse patterns
         .detectMisusePatterns = function(data, variables) {
+            # TODO (security, forward-looking): the warning messages built
+            # below (and the `paste(missing_vars/non_categorical/empty_vars,
+            # collapse=", ")` joins in `.run()` around L71/L82/L101) embed
+            # raw variable names from user CSV headers into HTML. Variable
+            # names containing `<`, `>`, `&` corrupt rendering. Wrap each
+            # `var` with `htmltools::htmlEscape()` inside the
+            # `glue::glue(...)` calls below (L483, L493, L504) and in the
+            # paste joins in `.run()` for defence in depth.
             warnings <- c()
-            
+
             for (var in variables) {
                 var_data <- data[[var]]
-                
+
                 # Check for too many levels
                 n_levels <- length(unique(var_data[!is.na(var_data)]))
                 if (n_levels > 20) {

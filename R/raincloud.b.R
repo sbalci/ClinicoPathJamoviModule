@@ -299,7 +299,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # Add faceting if specified
             if (!is.null(facet_var) && facet_var != "") {
                 facet_safe <- private$.escapeVar(facet_var)
-                p <- p + ggplot2::facet_wrap(as.formula(paste("~", facet_safe)))
+                p <- p + ggplot2::facet_wrap(jmvcore::asFormula(paste("~", facet_safe)))
             }
             
             # Apply color palette
@@ -774,7 +774,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 dep_safe <- private$.escapeVar(dep_var)
                 group_safe <- private$.escapeVar(group_var)
                 formula_str <- paste(dep_safe, "~", group_safe)
-                aov_result <- aov(as.formula(formula_str), data = data)
+                aov_result <- aov(jmvcore::asFormula(formula_str), data = data)
                 summary_aov <- summary(aov_result)
                 
                 f_stat <- round(summary_aov[[1]]$`F value`[1], 4)
@@ -787,7 +787,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 dep_safe <- private$.escapeVar(dep_var)
                 group_safe <- private$.escapeVar(group_var)
                 formula_str <- paste(dep_safe, "~", group_safe)
-                kw_result <- kruskal.test(as.formula(formula_str), data = data)
+                kw_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
                 
                 test_stat <- round(kw_result$statistic, 4)
                 p_value <- round(kw_result$p.value, 4)

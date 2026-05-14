@@ -112,12 +112,12 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 # Check for missing data
                 if (any(is.na(time)) || any(is.na(status))) {
-                    stop("Missing data in time or status variables. Please remove or impute.")
+                    jmvcore::reject("Missing data in time or status variables. Please remove or impute.")
                 }
 
                 # Check for negative times
                 if (any(time < 0, na.rm = TRUE)) {
-                    stop("Survival time contains negative values.")
+                    jmvcore::reject("Survival time contains negative values.")
                 }
 
                 # Convert status to factor if needed
@@ -184,19 +184,19 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 # Check sample size
                 if (nrow(data) < 10) {
-                    stop("Insufficient data. At least 10 complete observations required.")
+                    jmvcore::reject("Insufficient data. At least 10 complete observations required.")
                 }
 
                 # Check event counts
                 event_counts <- table(data$status_numeric)
                 if (sum(data$status_numeric == 1) < 5) {
-                    stop("Insufficient events of interest (< 5). Cannot fit Fine-Gray model.")
+                    jmvcore::reject("Insufficient events of interest (< 5). Cannot fit Fine-Gray model.")
                 }
 
                 return(data)
 
             }, error = function(e) {
-                stop(paste("Error preparing data:", e$message))
+                jmvcore::reject("Error preparing data: {}", e$message)
             })
 
         },
@@ -232,7 +232,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.fgModel <- fgModel
 
             }, error = function(e) {
-                stop(paste("Error fitting Fine-Gray model:", e$message))
+                jmvcore::reject("Error fitting Fine-Gray model: {}", e$message)
             })
 
         },
@@ -826,7 +826,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 for (event_name in names(private$.competingEventMap)) {
                     event_code <- as.character(private$.competingEventMap[event_name])
                     if (event_code %in% names(event_counts)) {
-                        html <- paste0(html, "<p><b>Competing (", event_name, "):</b> ",
+                        html <- paste0(html, "<p><b>Competing (", htmltools::htmlEscape(event_name), "):</b> ",
                                      event_counts[event_code], "</p>")
                     }
                 }
@@ -950,47 +950,30 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (is.null(survivalTime) || is.null(status))
                 return('')
 
-            # Escape survivalTime variable
-            survivalTime_escaped <- if (!is.null(survivalTime) && !identical(make.names(survivalTime), survivalTime)) {
-                paste0('`', survivalTime, '`')
-            } else {
-                survivalTime
-            }
+            # Escape survivalTime variable (jmvcore::composeTerm handles non-syntactic names safely)
+            survivalTime_escaped <- jmvcore::composeTerm(survivalTime)
 
             # Escape status variable
-            status_escaped <- if (!is.null(status) && !identical(make.names(status), status)) {
-                paste0('`', status, '`')
-            } else {
-                status
-            }
+            status_escaped <- jmvcore::composeTerm(status)
 
-            # Build required arguments
-            survivalTime_arg <- paste0('survivalTime = "', survivalTime_escaped, '"')
-            status_arg <- paste0('status = "', status_escaped, '"')
+            # Build required arguments — use deparse() for safe string quoting (handles embedded " and \)
+            survivalTime_arg <- paste0('survivalTime = ', deparse(survivalTime_escaped))
+            status_arg <- paste0('status = ', deparse(status_escaped))
 
             # Build optional covariates argument
             covariates_arg <- ''
             if (!is.null(covariates) && length(covariates) > 0) {
-                covariates_escaped <- sapply(covariates, function(v) {
-                    if (!is.null(v) && !identical(make.names(v), v))
-                        paste0('`', v, '`')
-                    else
-                        v
-                })
+                covariates_escaped <- vapply(covariates, jmvcore::composeTerm, character(1))
                 covariates_arg <- paste0(',\n    covariates = c(',
-                                       paste(sapply(covariates_escaped, function(v) paste0('"', v, '"')), collapse = ', '),
+                                       paste(vapply(covariates_escaped, deparse, character(1)), collapse = ', '),
                                        ')')
             }
 
             # Build optional groupVar argument
             groupVar_arg <- ''
             if (!is.null(groupVar)) {
-                groupVar_escaped <- if (!identical(make.names(groupVar), groupVar)) {
-                    paste0('`', groupVar, '`')
-                } else {
-                    groupVar
-                }
-                groupVar_arg <- paste0(',\n    groupVar = "', groupVar_escaped, '"')
+                groupVar_escaped <- jmvcore::composeTerm(groupVar)
+                groupVar_arg <- paste0(',\n    groupVar = ', deparse(groupVar_escaped))
             }
 
             # Get other arguments using base helper (if available)

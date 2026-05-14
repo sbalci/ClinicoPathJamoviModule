@@ -53,6 +53,7 @@ firthregressionClass <- R6::R6Class(
             x <- gsub("<", "&lt;", x)
             x <- gsub(">", "&gt;", x)
             x <- gsub("\"", "&quot;", x)
+            x <- gsub("'", "&#39;", x)
             x
         },
 
@@ -202,18 +203,18 @@ firthregressionClass <- R6::R6Class(
             # Check all variables exist
             missing_vars <- setdiff(vars_needed, names(data))
             if (length(missing_vars) > 0) {
-                stop(sprintf("Variables not found in data: %s",
-                    paste(missing_vars, collapse = ", ")))
+                jmvcore::reject("Variables not found in data: {}",
+                    paste(missing_vars, collapse = ", "))
             }
 
             analysis_data <- data[, vars_needed, drop = FALSE]
-            analysis_data <- na.omit(analysis_data)
+            analysis_data <- jmvcore::naOmit(analysis_data)
 
             n_complete <- nrow(analysis_data)
             n_dropped <- nrow(data) - n_complete
 
             if (n_complete < 5) {
-                stop(sprintf("Only %d complete cases available. Need at least 5.", n_complete))
+                jmvcore::reject("Only {} complete cases available. Need at least 5.", n_complete)
             }
 
             if (n_dropped > 0) {
@@ -236,7 +237,7 @@ firthregressionClass <- R6::R6Class(
                 } else if (length(lvls) == 2) {
                     event_binary <- as.integer(outcome_data == lvls[2])
                 } else {
-                    stop(sprintf("Outcome has %d levels. Please specify the Event Level.", length(lvls)))
+                    jmvcore::reject("Outcome has {} levels. Please specify the Event Level.", length(lvls))
                 }
             } else {
                 unique_vals <- sort(unique(outcome_data[!is.na(outcome_data)]))
@@ -249,7 +250,7 @@ firthregressionClass <- R6::R6Class(
                         event_binary <- as.integer(outcome_data == max(unique_vals))
                     }
                 } else {
-                    stop("Outcome must be binary (exactly 2 unique values).")
+                    jmvcore::reject("Outcome must be binary (exactly 2 unique values).")
                 }
             }
 
@@ -257,7 +258,7 @@ firthregressionClass <- R6::R6Class(
             n_nonevents <- sum(event_binary == 0)
 
             if (n_events < 1 || n_nonevents < 1) {
-                stop("Outcome must have at least one event and one non-event.")
+                jmvcore::reject("Outcome must have at least one event and one non-event.")
             }
 
             # Build predictor data
@@ -267,7 +268,7 @@ firthregressionClass <- R6::R6Class(
             x_matrix <- tryCatch(
                 model.matrix(~ . - 1, data = pred_data),
                 error = function(e) {
-                    stop(sprintf("Could not create model matrix: %s", e$message))
+                    jmvcore::reject("Could not create model matrix: {}", e$message)
                 }
             )
 
@@ -283,7 +284,7 @@ firthregressionClass <- R6::R6Class(
             }
 
             if (ncol(x_matrix) == 0) {
-                stop("No valid predictor columns remain after removing constants.")
+                jmvcore::reject("No valid predictor columns remain after removing constants.")
             }
 
             # Prepare time variable for Cox
@@ -291,7 +292,7 @@ firthregressionClass <- R6::R6Class(
             if (is_cox) {
                 time_values <- as.numeric(analysis_data[[self$options$time]])
                 if (any(time_values <= 0, na.rm = TRUE)) {
-                    stop("Time variable must contain only positive values.")
+                    jmvcore::reject("Time variable must contain only positive values.")
                 }
             }
 
@@ -485,10 +486,10 @@ firthregressionClass <- R6::R6Class(
             analysis_data <- data_info$data
             analysis_data$.outcome <- data_info$event_binary
 
-            # Build formula
+            # Build formula (allowlist-validated parse)
             pred_terms <- paste(jmvcore::composeTerms(data_info$predictor_names), collapse = " + ")
             formula_str <- paste(".outcome ~", pred_terms)
-            f <- as.formula(formula_str)
+            f <- jmvcore::asFormula(formula_str)
 
             # Fit Firth model
             ci_alpha <- 1 - self$options$ciLevel
@@ -579,10 +580,10 @@ firthregressionClass <- R6::R6Class(
             analysis_data$.time <- data_info$time_values
             analysis_data$.event <- data_info$event_binary
 
-            # Build formula
+            # Build formula (unqualified `Surv` per in-repo idiom; allowlist-validated parse)
             pred_terms <- paste(jmvcore::composeTerms(data_info$predictor_names), collapse = " + ")
-            formula_str <- paste("survival::Surv(.time, .event) ~", pred_terms)
-            f <- as.formula(formula_str)
+            formula_str <- paste("Surv(.time, .event) ~", pred_terms)
+            f <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("Surv"))
 
             # Fit Firth Cox model
             ci_alpha <- 1 - self$options$ciLevel
@@ -1094,7 +1095,8 @@ firthregressionClass <- R6::R6Class(
                 "No predictors reached statistical significance at the 0.05 level."
             } else {
                 sig_details <- sapply(which(p_vals < 0.05), function(i) {
-                    sprintf("%s (%s = %.2f, p = %.3f)", var_names[i], toupper(substring(effect_label, 1, 2)),
+                    sprintf("%s (%s = %.2f, p = %.3f)", private$.escapeHtml(var_names[i]),
+                        toupper(substring(effect_label, 1, 2)),
                         exp(coefs[i]), p_vals[i])
                 })
                 paste0("Significant predictors: ", paste(sig_details, collapse = "; "), ".")

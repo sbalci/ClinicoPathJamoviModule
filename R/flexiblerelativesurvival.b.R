@@ -210,8 +210,8 @@ flexiblerelativesurvivalClass <- R6::R6Class(
                 }
             }
 
-            # Build model formula
-            formula_parts <- c("status", "offset(log(pyears))", "offset(log(expected_hazard))")
+            # Build model formula — split into internal hardcoded terms + user covariates
+            internal_rhs <- c("offset(log(pyears))", "offset(log(expected_hazard))")
 
             # Add time spline terms
             if (smoothing_method %in% c("splines", "pspline")) {
@@ -219,31 +219,37 @@ flexiblerelativesurvivalClass <- R6::R6Class(
             } else {
                 time_terms <- paste0("time_ns_", 1:min(knots_time, 3))
             }
-            formula_parts <- c(formula_parts, time_terms[1:min(length(time_terms), 3)])
+            internal_rhs <- c(internal_rhs, time_terms[1:min(length(time_terms), 3)])
 
             # Add age spline terms if standardization is enabled
             if (self$options$standardizeAge) {
                 age_terms <- paste0("age_basis_", 1:min(knots_age, 3))
-                formula_parts <- c(formula_parts, age_terms[1:min(length(age_terms), 2)])
+                internal_rhs <- c(internal_rhs, age_terms[1:min(length(age_terms), 2)])
             }
 
-            # Add covariates
+            # Add covariates (backtick-escape user names)
             covariates <- self$options$covariates
+            covar_terms <- character(0)
             if (length(covariates) > 0) {
                 existing_covars <- covariates[covariates %in% names(data)]
-                formula_parts <- c(formula_parts, existing_covars[1:min(length(existing_covars), 3)])
+                existing_covars <- existing_covars[1:min(length(existing_covars), 3)]
+                if (length(existing_covars) > 0) {
+                    covar_terms <- jmvcore::composeTerms(as.list(existing_covars))
+                }
             }
 
-            # Create formula
-            formula_str <- paste("status ~", paste(formula_parts[-1], collapse = " + "))
-            model_formula <- as.formula(formula_str)
+            # Create formula (allowlist-validated parse)
+            formula_str <- paste0("status ~ ", paste(c(internal_rhs, covar_terms), collapse = " + "))
+            model_formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("offset", "log"))
 
             # Fit Poisson model for relative survival
             model <- tryCatch({
                 glm(model_formula, data = data, family = poisson())
             }, error = function(e) {
                 # Simplified model if full model fails
-                simple_formula <- as.formula("status ~ offset(log(pyears)) + offset(log(expected_hazard)) + time_basis_1")
+                simple_formula <- jmvcore::asFormula(
+                    "status ~ offset(log(pyears)) + offset(log(expected_hazard)) + time_basis_1",
+                    additional_allowed_functions = c("offset", "log"))
                 glm(simple_formula, data = data, family = poisson())
             })
 

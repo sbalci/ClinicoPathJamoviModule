@@ -34,14 +34,14 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 geo_col <- self$options$geo_var
                 
                 if (is.null(geo_col)) {
-                    stop("Please select a Geography Variable containing NUTS codes (e.g., 'DE', 'FR').")
+                    jmvcore::reject("Please select a Geography Variable containing NUTS codes (e.g., 'DE', 'FR').")
                 }
-                
+
                 plotData <- self$data
-                
+
                 # Ensure geo column is present (paranoia check)
                 if (!geo_col %in% names(plotData)) {
-                    stop(paste0("Geography variable '", geo_col, "' not found in data."))
+                    jmvcore::reject("Geography variable '{}' not found in data.", geo_col)
                 }
                 
                 # Standardize to 'geo' for downstream processing
@@ -81,8 +81,11 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (is.null(cached_data)) {
                         # Download data with progress indication
                         self$results$instructions$setContent("Downloading data from Eurostat...")
-                        
-                        # Set timeout for download (default is 60 seconds)
+
+                        # Set timeout for download (default is 60 seconds); restore on exit
+                        # so we don't leak the wider timeout to other analyses in the session.
+                        old_timeout <- getOption("timeout")
+                        on.exit(options(timeout = old_timeout), add = TRUE)
                         options(timeout = 120)
                         
                         start_time <- Sys.time()
@@ -131,7 +134,7 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         error_msg <- paste(error_msg, "\n\nSuggestion: Check your internet connection.")
                     }
                     
-                    stop(error_msg)
+                    jmvcore::reject(error_msg)
                     return()
                 })
             }
@@ -245,7 +248,7 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         map_data <- geo_data %>%
                             dplyr::left_join(plotData, by = c("geo" = "geo"))
                     } else {
-                        stop("Local data must contain a 'geo' column with geographic codes")
+                        jmvcore::reject("Local data must contain a 'geo' column with geographic codes")
                     }
                 } else {
                     map_data <- geo_data %>%
@@ -290,7 +293,7 @@ eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(TRUE)
                 
             }, error = function(e) {
-                stop(paste("Error creating map:", e$message))
+                jmvcore::reject("Error creating map: {}", e$message)
                 return(FALSE)
             })
         }

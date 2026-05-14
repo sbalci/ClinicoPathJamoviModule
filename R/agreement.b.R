@@ -22,6 +22,15 @@
 agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
     inherit = agreementBase, private = list(
 
+        # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+        #   [hygiene/jmvcore] replace na.omit(ratings) with jmvcore::naOmit (preserves jamovi attrs)
+        #   [hygiene/jmvcore] replace bare stop() / setNote("error", …) with jmvcore::Notice ERROR (top-banner)
+        #   [hygiene/notices] 0 jmvcore::Notice uses in 10,559 LOC; reference impl: decisioncalculator.b.R / sequentialtests.b.R
+        #   [i18n] only 3 .() wraps in 10,559 LOC; bootstrap jamovi/i18n/ then /prepare-translation agreement
+        #   [integration] 396 declared outputs vs 131 setters (3.0×); verify each show*Guide flag — /check-function-full agreement
+        #   [statistical-validation] /review-function agreement — kappa2/ICC/kripp.alpha/Gwet parity vs irr/psych/irrCAC
+        #   [architecture] split 10,559-LOC monolith per analysis family (agreement_kappa.R, _icc.R, _kripp.R, …)
+        #   [testing] no tests/testthat/test-agreement.R — add unit + integration tests against histopathology dataset
         .init = function() {
             # Pre-initialize tables with column formatting and notes
 

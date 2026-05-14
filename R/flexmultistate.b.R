@@ -76,7 +76,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
             
             if (nrow(clean_data) < 50) {
-                stop("Insufficient data for multi-state modeling (minimum 50 complete cases required)")
+                jmvcore::reject("Insufficient data for multi-state modeling (minimum 50 complete cases required)")
             }
             
             # Store for use in other methods
@@ -202,17 +202,17 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$errors$setContent(
-                    paste("Data preparation failed:", e$message)
+                    paste("Data preparation failed:", htmltools::htmlEscape(e$message))
                 )
             })
         },
-        
+
         .fitTransitionModels = function() {
             
             tryCatch({
                 
                 if (!requireNamespace('flexsurv', quietly = TRUE)) {
-                    stop("flexsurv package required for flexible multi-state modeling")
+                    jmvcore::reject("flexsurv package required for flexible multi-state modeling")
                 }
                 
                 # Get model options
@@ -230,13 +230,14 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     if (nrow(trans_data) < 10) next
                     
-                    # Create formula
+                    # Create formula (backtick-escape user predictor names; allowlist-validated parse)
                     if (length(private$predictors) > 0) {
-                        formula_str <- paste("Surv(time, status) ~", paste(private$predictors, collapse = " + "))
+                        pred_rhs <- jmvcore::composeTerms(as.list(private$predictors))
+                        formula_str <- paste0("Surv(time, status) ~ ", paste(pred_rhs, collapse = " + "))
                     } else {
                         formula_str <- "Surv(time, status) ~ 1"
                     }
-                    formula <- as.formula(formula_str)
+                    formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("Surv"))
                     
                     # Fit flexible parametric model
                     if (hazard_dist == "royston_parmar") {
@@ -271,7 +272,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$errors$setContent(
-                    paste("Model fitting failed:", e$message)
+                    paste("Model fitting failed:", htmltools::htmlEscape(e$message))
                 )
             })
         },
@@ -493,7 +494,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<h3>Flexible Multi-State Model Summary</h3>",
                 "<p><b>Model Type:</b> ", stringr::str_to_title(gsub("_", " ", private$model_type)), "</p>",
                 "<p><b>Sample Size:</b> ", n_subjects, " subjects</p>",
-                "<p><b>States:</b> ", n_states, " (", paste(private$states, collapse = ", "), ")</p>",
+                "<p><b>States:</b> ", n_states, " (", paste(htmltools::htmlEscape(as.character(private$states)), collapse = ", "), ")</p>",
                 "<p><b>Possible Transitions:</b> ", n_transitions, "</p>",
                 "<p><b>Models Fitted:</b> ", n_models_fitted, " transition models</p>",
                 "<p><b>Hazard Distribution:</b> ", stringr::str_to_title(gsub("_", " ", hazard_dist)), "</p>",

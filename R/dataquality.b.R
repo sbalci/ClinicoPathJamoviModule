@@ -15,6 +15,25 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
     .run = function() {
 
+        # TODO (security): `high_missing_vars`, `near_zero_vars`, and
+        # `moderate_missing_vars` (built from user CSV column names) are
+        # `paste(..., collapse=", ")`-joined into recommendation HTML at
+        # ~L662-664, L681-683, L745, L777, L824 in `.generateSummary` and
+        # `.generateRecommendations` without `htmltools::htmlEscape()`.
+        # Variable names with `<`, `>`, or `&` from arbitrary CSV headers
+        # corrupt the rendered HTML. Wrap each name with `htmlEscape()`
+        # before joining.
+        # TODO (data hygiene): optional dependency `BaylorEdPsych::LittleMCAR`
+        # is invoked via `requireNamespace(quietly=TRUE)` (~L201-208) but
+        # the package is not listed in `DESCRIPTION` Imports or Suggests.
+        # Add to Suggests so R CMD check and reverse-dep tools can audit it.
+        # TODO (forward-looking): no `.()` wrapping in this file (~1.1k LOC
+        # of welcome HTML, recommendations, and explanations). Address in
+        # a /prepare-translation pass.
+        # TODO (forward-looking, perf): no `private$.checkpoint()` despite
+        # visdat plot generation (vis_dat, vis_miss, vis_guess) which can be
+        # slow on wide tables. Add checkpoints before each plot path.
+
         # Check if variables have been selected. If not, display a welcoming message.
         if (length(self$options$vars) == 0) {
             intro_msg <- "
@@ -51,14 +70,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         }
 
         # Validate that the dataset contains complete rows.
+        # Notices are rendered as HTML to avoid the jamovi protobuf serialization
+        # error triggered by dynamically inserted jmvcore::Notice objects.
         if (nrow(self$data) == 0) {
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'emptyDataset',
-                type = jmvcore::NoticeType$ERROR
+            self$results$todo$setContent(
+                "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data with at least one observation.</div>"
             )
-            notice$setContent('Dataset contains no rows. Please provide data with at least one observation.')
-            self$results$insert(999, notice)
             return()
         }
 
@@ -74,16 +91,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # Validate that all requested variables exist in the dataset
             missing_vars <- var_list[!var_list %in% names(dataset)]
             if (length(missing_vars) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingVariables',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
-                    'Variables not found in dataset: %s. Please check variable names and try again.',
-                    paste(missing_vars, collapse = ', ')
+                missing_safe <- paste(vapply(missing_vars, htmltools::htmlEscape, character(1)), collapse = ", ")
+                self$results$todo$setContent(sprintf(
+                    "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Variables not found in dataset: %s. Please check variable names and try again.</div>",
+                    missing_safe
                 ))
-                self$results$insert(999, notice)
                 return()
             }
 

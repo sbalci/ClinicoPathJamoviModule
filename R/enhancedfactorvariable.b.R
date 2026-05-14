@@ -697,9 +697,12 @@ enhancedfactorvariableClass <- R6::R6Class(
         },
         
         .setError = function(message) {
-            # Set error state
+            # Set error state — htmlEscape inside the helper so all callers
+            # are safe by default (defense-in-depth against future callers
+            # passing e$message or user-controlled strings).
             html <- self$results$instructions
-            error_content <- paste0("<div style='color: red;'><strong>Error:</strong> ", message, "</div>")
+            error_content <- paste0("<div style='color: red;'><strong>Error:</strong> ",
+                                    htmltools::htmlEscape(message), "</div>")
             html$setContent(error_content)
         }
     )

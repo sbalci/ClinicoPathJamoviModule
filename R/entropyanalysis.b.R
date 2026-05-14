@@ -81,6 +81,16 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         #---------------------------------------------
         .run = function() {
 
+            # H4 RNG hygiene: save/restore global RNG state across this analysis
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (!is.null(old_seed)) {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                } else if (exists(".Random.seed", envir = .GlobalEnv)) {
+                    rm(".Random.seed", envir = .GlobalEnv)
+                }
+            }, add = TRUE)
+
             # CRITICAL FIX: Set random seed for reproducibility
             set.seed(self$options$random_seed)
 
@@ -97,7 +107,7 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             tryCatch({
                 private$.prepareData()
             }, error = function(e) {
-                stop(paste("Data preparation error:", e$message))
+                jmvcore::reject("Data preparation error: {}", e$message)
             })
 
             if (is.null(private$.data_prepared)) {
@@ -164,9 +174,7 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # Check dimensions
             if (ncol(probs_matrix) != n_classes) {
-                stop(paste("Number of probability variables (", ncol(probs_matrix),
-                          ") does not match number of outcome classes (", n_classes, "). ",
-                          "Please provide one probability column per class.", sep = ""))
+                jmvcore::reject("Number of probability variables ({}) does not match number of outcome classes ({}). Please provide one probability column per class.", ncol(probs_matrix), n_classes)
             }
 
             # CRITICAL FIX: Align probability columns with class order

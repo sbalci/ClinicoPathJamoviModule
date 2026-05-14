@@ -43,13 +43,23 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                     return()
                 }
 
+                # H4 RNG hygiene: save/restore global RNG state across this analysis
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+                on.exit({
+                    if (!is.null(old_seed)) {
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                    } else if (exists(".Random.seed", envir = .GlobalEnv)) {
+                        rm(".Random.seed", envir = .GlobalEnv)
+                    }
+                }, add = TRUE)
+
                 # Load required packages
                 if (!requireNamespace("ranger", quietly = TRUE)) {
-                    stop("Package 'ranger' is required for Extremely Randomized Trees. Please install it.")
+                    jmvcore::reject("Package 'ranger' is required for Extremely Randomized Trees. Please install it.")
                 }
-                
+
                 if (!requireNamespace("survival", quietly = TRUE)) {
-                    stop("Package 'survival' is required for survival analysis. Please install it.")
+                    jmvcore::reject("Package 'survival' is required for survival analysis. Please install it.")
                 }
 
                 # Get data and options
@@ -91,7 +101,7 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                 }, error = function(e) {
                     self$results$todo$setContent(paste0(
                         "<h4> Analysis Error</h4>",
-                        "<p>Error in Extra Trees analysis: ", e$message, "</p>",
+                        "<p>Error in Extra Trees analysis: ", htmltools::htmlEscape(e$message), "</p>",
                         "<p>Please check your data and parameter settings.</p>"
                     ))
                 })
@@ -104,20 +114,19 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                 
                 # Validate time variable
                 if (!is.numeric(time_col)) {
-                    stop("Time variable must be numeric")
+                    jmvcore::reject("Time variable must be numeric")
                 }
-                
+
                 # Handle different event variable types
                 if (is.factor(event_col)) {
                     # Convert factor to numeric, preserving levels
                     event_col <- as.numeric(event_col) - 1
                 } else if (!is.numeric(event_col)) {
-                    stop("Event variable must be numeric or factor")
+                    jmvcore::reject("Event variable must be numeric or factor")
                 }
                 
                 # Create survival object
-                library(survival)
-                surv_obj <- Surv(time_col, event_col)
+                surv_obj <- survival::Surv(time_col, event_col)
                 
                 # Extract predictor data
                 pred_data <- data[predictors]
@@ -133,7 +142,7 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                 if (!is.null(weights_var)) {
                     case_weights <- data[[weights_var]]
                     if (!is.numeric(case_weights)) {
-                        stop("Case weights variable must be numeric")
+                        jmvcore::reject("Case weights variable must be numeric")
                     }
                 }
                 
@@ -154,7 +163,7 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                 analysis_data <- analysis_data[complete_cases, ]
                 
                 if (nrow(analysis_data) == 0) {
-                    stop("No complete cases available for analysis")
+                    jmvcore::reject("No complete cases available for analysis")
                 }
                 
                 return(list(
@@ -170,18 +179,18 @@ extratreesClass <- if (requireNamespace("jmvcore"))
             },
 
             .buildExtraTreesModel = function(surv_data) {
-                library(ranger)
-                
                 set.seed(self$options$random_seed)
                 
-                # Prepare formula
+                # Prepare formula — backtick-escape user column names and parse via jmvcore allowlist
+                pred_rhs <- jmvcore::composeTerms(as.list(surv_data$predictors))
                 if (is.null(surv_data$strata)) {
-                    formula_str <- paste("survival_object ~", paste(surv_data$predictors, collapse = " + "))
+                    formula_str <- paste0("survival_object ~ ", paste(pred_rhs, collapse = " + "))
                 } else {
-                    formula_str <- paste("survival_object ~ strata(", surv_data$strata, ") +", paste(surv_data$predictors, collapse = " + "))
+                    strata_term <- paste0("strata(", jmvcore::composeTerm(surv_data$strata), ")")
+                    formula_str <- paste0("survival_object ~ ", strata_term, " + ", paste(pred_rhs, collapse = " + "))
                 }
-                
-                formula_obj <- as.formula(formula_str)
+
+                formula_obj <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("strata"))
                 
                 # Determine mtry value
                 num_predictors <- length(surv_data$predictors)
@@ -219,7 +228,7 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 # Build Extra Trees model using ranger
-                forest_model <- ranger(
+                forest_model <- ranger::ranger(
                     formula = formula_obj,
                     data = surv_data$data,
                     num.trees = self$options$num_trees,

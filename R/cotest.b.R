@@ -16,6 +16,12 @@ cotestClass <- if (requireNamespace("jmvcore"))
             .nomogramCache = NULL,
             .lastNomogramParams = NULL,
             .notices = NULL,
+            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   [hygiene/notices] 0 jmvcore::Notice uses; invalid inputs render silently as NaN — add ERROR notice
+            #   [hygiene/notices] independence assumption only mentioned in HTML body — also surface as STRONG_WARNING banner
+            #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation cotest
+            #   [statistical-validation] /review-function cotest — Bayes update + sequential rules vs textbook reference
+            #   [testing] no tests/testthat/test-cotest.R
             .init = function() {
                 # Add welcome instructions
                 instructions <- '

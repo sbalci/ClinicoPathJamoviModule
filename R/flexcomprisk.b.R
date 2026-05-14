@@ -1,6 +1,7 @@
+#' @import ggplot2
 
 flexcompriskClass <- R6::R6Class(
-    "flexcompriskClass", 
+    "flexcompriskClass",
     inherit = flexcompriskBase,
     private = list(
         .init = function() {
@@ -142,7 +143,7 @@ flexcompriskClass <- R6::R6Class(
             }, error = function(e) {
                 error_msg <- paste0(
                     "<h4> Analysis Error</h4>",
-                    "<p>Error in flexible competing risks analysis: ", e$message, "</p>",
+                    "<p>Error in flexible competing risks analysis: ", htmltools::htmlEscape(e$message), "</p>",
                     "<p><b>Common solutions:</b></p>",
                     "<ul>",
                     "<li>Check that event variable contains appropriate codes</li>",
@@ -151,47 +152,50 @@ flexcompriskClass <- R6::R6Class(
                     "<li>Try a simpler model type first</li>",
                     "</ul>"
                 )
-                
+
                 self$results$todo$setContent(error_msg)
             })
         },
         
         .fitFlexibleModel = function(data, model_type, event_of_interest) {
-            # Create formula
+            # Backtick-escape user names; allowlist-validated parse via jmvcore::asFormula.
             covs <- self$options$covs
-            formula_str <- paste("Surv(", self$options$time, ",", self$options$event, ") ~ ", 
-                               paste(covs, collapse = " + "))
-            
+            base_covs <- jmvcore::composeTerms(as.list(covs))
+
             # Add spline terms for flexible parametric models
             if (model_type == "splines") {
-                spline_type <- self$options$splineType
                 df <- as.numeric(self$options$splineDf)
-                
-                # Add spline terms for continuous variables
-                continuous_vars <- covs  # Simplified - would check variable types
-                
-                if (length(continuous_vars) > 0) {
-                    spline_terms <- switch(spline_type,
-                        "ns" = paste0("splines::ns(", continuous_vars[1], ", df = ", df, ")"),
-                        "rcs" = paste0("splines::ns(", continuous_vars[1], ", df = ", df, ")"),  # Simplified
-                        "bs" = paste0("splines::bs(", continuous_vars[1], ", df = ", df, ")"),
-                        "ps" = paste0("splines::ns(", continuous_vars[1], ", df = ", df, ")")   # Simplified
+                # Simplified — uses first covariate (would check variable types in a fuller implementation)
+                if (length(covs) > 0) {
+                    spline_fn <- switch(self$options$splineType,
+                        "ns" = "ns",
+                        "rcs" = "ns",  # Simplified
+                        "bs" = "bs",
+                        "ps" = "ns"    # Simplified
                     )
-                    
-                    # Replace first continuous variable with spline term
-                    formula_str <- gsub(continuous_vars[1], spline_terms, formula_str)
+                    first_term <- jmvcore::composeTerm(covs[1])
+                    spline_term <- paste0(spline_fn, "(", first_term, ", df = ", df, ")")
+                    # Replace the first composed term with its spline-wrapped form (exact match;
+                    # avoids the substring-collision bug of the previous gsub-based approach).
+                    idx <- which(base_covs == first_term)
+                    if (length(idx) > 0) base_covs[idx[1]] <- spline_term
                 }
             }
-            
+
             # Add time interactions if specified
             time_interactions <- self$options$timeInteractions
             if (!is.null(time_interactions) && length(time_interactions) > 0) {
+                time_term <- jmvcore::composeTerm(self$options$time)
                 for (var in time_interactions) {
-                    formula_str <- paste0(formula_str, " + ", var, " * ", self$options$time)
+                    base_covs <- c(base_covs, paste0(jmvcore::composeTerm(var), " * ", time_term))
                 }
             }
-            
-            formula_obj <- as.formula(formula_str)
+
+            lhs <- paste0("Surv(", jmvcore::composeTerm(self$options$time), ", ",
+                          jmvcore::composeTerm(self$options$event), ")")
+            formula_str <- paste0(lhs, " ~ ", paste(base_covs, collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str,
+                                              additional_allowed_functions = c("Surv", "ns", "bs"))
             
             # Fit model based on type
             switch(model_type,
@@ -310,7 +314,7 @@ flexcompriskClass <- R6::R6Class(
             model <- private$.model
             
             # Extract coefficients
-            if (class(model)[1] == "coxph") {
+            if (inherits(model, "coxph")) {
                 coef_summary <- summary(model)
                 
                 coef_data <- data.frame(
@@ -510,9 +514,7 @@ flexcompriskClass <- R6::R6Class(
         
         .cifPlot = function(image, ggtheme, theme, ...) {
             if (is.null(private$.analysis_data)) return()
-            
-            library(ggplot2)
-            
+
             # Create cumulative incidence plot
             time_points <- seq(0, 10, 0.1)
             
@@ -552,9 +554,7 @@ flexcompriskClass <- R6::R6Class(
         
         .modelComparisonPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$showModelComparison) return()
-            
-            library(ggplot2)
-            
+
             # Create model comparison plot
             comparison_data <- data.frame(
                 model = c("Splines", "Cox", "Fine-Gray", "Forest", "Ensemble"),
@@ -585,9 +585,7 @@ flexcompriskClass <- R6::R6Class(
         
         .validationPlot = function(image, ggtheme, theme, ...) {
             if (self$options$validationType == "none") return()
-            
-            library(ggplot2)
-            
+
             # Create validation plot (calibration)
             predicted <- seq(0.1, 0.8, 0.1)
             observed <- predicted + rnorm(length(predicted), 0, 0.05)
