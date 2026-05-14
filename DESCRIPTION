@@ -796,6 +796,8 @@ Collate:
     'labinterpret.h.R'
     'landmarkanalysis.b.R'
     'landmarkanalysis.h.R'
+    'latentbiomarker.b.R'
+    'latentbiomarker.h.R'
     'lassocox.b.R'
     'lassocox.h.R'
     'lassointro.b.R'
@@ -1136,3 +1138,4 @@ Collate:
     'waterfallrecist.h.R'
     'weightedlogrank.b.R'
     'weightedlogrank.h.R'
+    'zzz.R'
