@@ -211,6 +211,65 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             TRUE
         },
 
+        # ---- Loadings plot render ----
+        .loadingsPlot = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+            df <- data.frame(
+                indicator = factor(state$indicators, levels = rev(state$indicators)),
+                estimate  = state$estimate,
+                ci_lo     = state$ci_lo,
+                ci_hi     = state$ci_hi
+            )
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = indicator)) +
+                ggplot2::geom_vline(xintercept = 0, linetype = "dashed",
+                                    color = "grey60") +
+                ggplot2::geom_errorbarh(ggplot2::aes(xmin = ci_lo, xmax = ci_hi),
+                                         height = 0.2) +
+                ggplot2::geom_point(size = 3) +
+                ggplot2::labs(x = "Standardized loading (95% CI)", y = NULL) +
+                ggtheme
+            print(p)
+            TRUE
+        },
+
+        # ---- Path diagram render ----
+        .pathPlot = function(image, ggtheme, theme, ...) {
+            fit <- private$.fitState$fit
+            if (is.null(fit)) return(FALSE)
+            if (!requireNamespace("semPlot", quietly = TRUE)) {
+                message("semPlot not installed; cannot render path diagram.")
+                return(FALSE)
+            }
+            semPlot::semPaths(
+                fit,
+                whatLabels = "std",
+                edge.label.cex = 0.9,
+                layout = "tree2",
+                rotation = 2,
+                style = "lisrel"
+            )
+            TRUE
+        },
+
+        # ---- Mardia multivariate normality (MLR only) ----
+        .mardiaSkew = function(df, indicators) {
+            mat <- as.matrix(df[, indicators, drop = FALSE])
+            mat <- mat[stats::complete.cases(mat), , drop = FALSE]
+            n <- nrow(mat); p <- ncol(mat)
+            if (n < 20L || p < 2L) return(NA_real_)
+            mu <- colMeans(mat)
+            S  <- stats::cov(mat) * (n - 1L) / n
+            S_inv <- tryCatch(solve(S), error = function(e) NULL)
+            if (is.null(S_inv)) return(NA_real_)
+            centered <- sweep(mat, 2, mu, "-")
+            d <- centered %*% S_inv %*% t(centered)
+            b1p <- sum(d^3) / (n^2)
+            stat <- n * b1p / 6
+            df_chi <- p * (p + 1L) * (p + 2L) / 6
+            stats::pchisq(stat, df = df_chi, lower.tail = FALSE)
+        },
+
         # ---- Holds CFA/Cox state across helper calls within one .run() ----
         .fitState = NULL,
 
@@ -528,6 +587,159 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     event  = event_num,
                     strata = strata
                 ))
+            }
+
+            # ---- Loadings plot state (Task 10) ----
+            if (isTRUE(opt$show_plot_loadings)) {
+                self$results$loadingsPlot$setState(list(
+                    indicators = load_rows$rhs,
+                    estimate   = load_rows$std.all,
+                    ci_lo      = load_rows$std.all - 1.96 * load_rows$se,
+                    ci_hi      = load_rows$std.all + 1.96 * load_rows$se
+                ))
+            }
+
+            # ---- Path diagram state (Task 10) ----
+            # The fit object is read from private$.fitState in the renderer.
+            # We set a non-NULL placeholder so the renderer is invoked.
+            if (isTRUE(opt$show_plot_path)) {
+                self$results$pathPlot$setState(list(ready = TRUE))
+            }
+
+            # ---- Modification indices (Task 11) ----
+            if (isTRUE(opt$show_diagnostics)) {
+                mi <- tryCatch(lavaan::modificationIndices(fit),
+                               error = function(e) NULL)
+                if (!is.null(mi) && nrow(mi) > 0L) {
+                    mi <- mi[!is.na(mi$mi) & mi$mi > 10, , drop = FALSE]
+                    mi <- mi[order(-mi$mi), , drop = FALSE]
+                    mi_table <- self$results$miTable
+                    n_show <- min(10L, nrow(mi))
+                    if (n_show > 0L) {
+                        for (i in seq_len(n_show)) {
+                            mi_table$addRow(rowKey = i, values = list(
+                                lhs = mi$lhs[i], op = mi$op[i],
+                                rhs = mi$rhs[i], mi  = mi$mi[i]
+                            ))
+                        }
+                        private$.addNotice("INFO",
+                            "Modification indices > 10 reported",
+                            paste0("Do not act on these without theoretical justification. ",
+                                   "Modification indices are post-hoc and inflate Type I error ",
+                                   "if used to refit the model."))
+                    }
+                }
+
+                # ---- Mardia normality (Task 11b, MLR only) ----
+                if (est_spec$estimator == "MLR") {
+                    # Only run on the continuous indicators in the analysis dataframe
+                    cont_inds <- itypes$continuous
+                    if (length(cont_inds) >= 2L) {
+                        p_mardia <- private$.mardiaSkew(df, cont_inds)
+                        if (!is.na(p_mardia) && p_mardia < 0.05) {
+                            private$.addNotice("INFO",
+                                "Multivariate normality assumption likely violated",
+                                paste0("Mardia skewness p = ", signif(p_mardia, 3),
+                                       ". MLR robust SEs are appropriate; loadings remain ",
+                                       "unbiased but ML standard errors would be optimistic. ",
+                                       "No action needed - MLR is already in use."))
+                        }
+                    }
+                }
+
+                # ---- Factor-score reliability (Task 11b) ----
+                fs_reg <- tryCatch(
+                    as.numeric(lavaan::lavPredict(fit, method = "regression")),
+                    error = function(e) NULL)
+                fs_bart <- tryCatch(
+                    as.numeric(lavaan::lavPredict(fit, method = "Bartlett")),
+                    error = function(e) NULL)
+                if (!is.null(fs_reg) && !is.null(fs_bart) &&
+                    length(fs_reg) == length(fs_bart) && length(fs_reg) > 2L) {
+                    r_methods <- suppressWarnings(stats::cor(fs_reg, fs_bart,
+                                                              use = "complete.obs"))
+                    if (!is.na(r_methods) && r_methods < 0.95) {
+                        private$.addNotice("INFO",
+                            "Factor-score reliability check",
+                            paste0("Correlation between regression and Bartlett factor scores ",
+                                   "is ", round(r_methods, 3),
+                                   " (< 0.95 indicates noticeable disagreement between methods)."))
+                    }
+                }
+            }
+
+            # ---- Save factor scores to data (Task 11) ----
+            if (self$options$save_factor_scores) {
+                col_name <- opt$factor_score_name
+                if (is.null(col_name) || !nzchar(col_name)) col_name <- "biomarker_factor"
+                full_n <- nrow(self$data)
+                full_vec <- rep(NA_real_, full_n)
+                idx <- as.integer(rownames(df))
+                # idx may be NA when rownames are not integers; guard:
+                if (!all(is.na(idx)) && max(idx, na.rm = TRUE) <= full_n) {
+                    full_vec[idx] <- factor_scores
+                } else {
+                    # Fallback: write only first length(factor_scores) rows
+                    full_vec[seq_along(factor_scores)] <- factor_scores
+                }
+                self$results$save_factor_scores$setValues(
+                    index  = seq_len(full_n),
+                    values = full_vec
+                )
+            }
+
+            # ---- R code export (Task 11) ----
+            if (isTRUE(opt$show_r_code)) {
+                model_str   <- private$.buildModelSyntax(opt$indicators)
+                ordered_arg <- if (length(est_spec$ordered) > 0L)
+                    paste0(", ordered = c(\"",
+                           paste(est_spec$ordered, collapse = "\", \""),
+                           "\")")
+                    else ""
+                missing_arg <- if (!is.null(est_spec$missing))
+                    paste0(", missing = \"", est_spec$missing, "\"")
+                    else ""
+
+                cox_rhs <- paste(c("biomarker_factor",
+                                   if (!is.null(opt$adjusters)) opt$adjusters
+                                   else character(0)),
+                                 collapse = " + ")
+
+                rcode <- paste0(
+"# Reproducible R code generated by ClinicoPath::latentbiomarker
+library(lavaan)
+library(survival)
+
+# 1. Fit the measurement model
+model <- '", model_str, "'
+fit <- lavaan::cfa(
+    model = model,
+    data  = your_data,
+    std.lv = TRUE,
+    estimator = \"", est_spec$estimator, "\"", ordered_arg, missing_arg, "
+)
+summary(fit, fit.measures = TRUE, standardized = TRUE)
+
+# 2. Extract factor scores
+scores <- as.numeric(lavaan::lavPredict(fit, method = \"",
+opt$factor_score_method, "\"))",
+if (isTRUE(opt$standardize_scores))
+    "\nscores <- as.numeric(scale(scores))"
+else "",
+"
+your_data$biomarker_factor <- scores
+
+# 3. Fit Cox regression
+cox_fit <- survival::coxph(
+    survival::Surv(", opt$dep_time, ", ", opt$dep_event,
+                  " == \"", as.character(opt$event_level), "\") ~ ",
+                  cox_rhs, ",
+    data = your_data
+)
+summary(cox_fit)
+survival::cox.zph(cox_fit)
+")
+                self$results$rCode$setContent(rcode)
             }
 
             # Success-path render — gate failures render and return earlier

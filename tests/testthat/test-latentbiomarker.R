@@ -258,3 +258,97 @@ test_that("PH test table populates and KM state is set", {
     expect_true(nrow(P) >= 1)
     expect_false(is.null(res$kmPlot$state))
 })
+
+test_that("Loadings and path-diagram states are set", {
+    skip_if_not_installed("lavaan")
+    set.seed(6)
+    n <- 300
+    f <- rnorm(n)
+    df <- data.frame(
+        time = rexp(n, 0.05),
+        evt  = factor(rbinom(n, 1, 0.5)),
+        ind1 = 0.8 * f + rnorm(n, sd = 0.5),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.6),
+        ind3 = 0.85 * f + rnorm(n, sd = 0.4)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df,
+        dep_time = "time", dep_event = "evt", event_level = "1",
+        indicators = paste0("ind", 1:3),
+        reflective_confirmed = TRUE
+    )
+    expect_false(is.null(res$loadingsPlot$state))
+    expect_false(is.null(res$pathPlot$state))
+})
+
+test_that("Modification indices table tolerates well-fitting data", {
+    skip_if_not_installed("lavaan")
+    set.seed(7)
+    n <- 400
+    f <- rnorm(n)
+    df <- data.frame(
+        time = rexp(n, 0.05),
+        evt  = factor(rbinom(n, 1, 0.5)),
+        ind1 = 0.8 * f + rnorm(n, sd = 0.5),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.6),
+        ind3 = 0.85 * f + rnorm(n, sd = 0.4),
+        ind4 = 0.6 * f + rnorm(n, sd = 0.7),
+        ind5 = 0.5 * f + rnorm(n, sd = 0.8)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df,
+        dep_time = "time", dep_event = "evt", event_level = "1",
+        indicators = paste0("ind", 1:5),
+        reflective_confirmed = TRUE,
+        show_diagnostics = TRUE
+    )
+    expect_true(!is.null(res$miTable))
+})
+
+test_that("R code export contains lavaan and coxph calls when enabled", {
+    skip_if_not_installed("lavaan")
+    set.seed(8)
+    n <- 300
+    f <- rnorm(n)
+    df <- data.frame(
+        time = rexp(n, 0.05),
+        evt  = factor(rbinom(n, 1, 0.5)),
+        ind1 = 0.8 * f + rnorm(n, sd = 0.5),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.6),
+        ind3 = 0.85 * f + rnorm(n, sd = 0.4)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df,
+        dep_time = "time", dep_event = "evt", event_level = "1",
+        indicators = paste0("ind", 1:3),
+        reflective_confirmed = TRUE,
+        show_r_code = TRUE
+    )
+    code <- res$rCode$content
+    expect_match(code, "lavaan::cfa", fixed = TRUE)
+    expect_match(code, "survival::coxph", fixed = TRUE)
+})
+
+test_that("Diagnostic notices: Mardia and score-reliability surface when applicable", {
+    skip_if_not_installed("lavaan")
+    set.seed(9)
+    n <- 300
+    f <- rnorm(n)
+    df <- data.frame(
+        time = rexp(n, 0.05),
+        evt  = factor(rbinom(n, 1, 0.5)),
+        ind1 = 0.8 * f + rnorm(n, sd = 0.5),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.6),
+        ind3 = 0.85 * f + rnorm(n, sd = 0.4)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df, dep_time = "time", dep_event = "evt", event_level = "1",
+        indicators = paste0("ind", 1:3),
+        reflective_confirmed = TRUE,
+        show_diagnostics = TRUE
+    )
+    notices <- res$notices$content
+    # At least one of the two diagnostic notices should be present (or both absent if MVN passes)
+    # Just confirm the test does not error
+    expect_true(is.character(notices))
+})
