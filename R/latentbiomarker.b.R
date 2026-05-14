@@ -181,6 +181,36 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             list(omega = omega, ave = ave)
         },
 
+        # ---- Extract factor scores ----
+        .extractScores = function(fit, method, standardize) {
+            scores <- lavaan::lavPredict(fit, method = method)
+            v <- as.numeric(scores[, 1])
+            if (isTRUE(standardize)) {
+                v <- as.numeric(scale(v))
+            }
+            v
+        },
+
+        # ---- KM render: receives setState payload ----
+        .kmPlot = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+            df <- data.frame(time = state$time, event = state$event,
+                             strata = state$strata)
+            df <- df[stats::complete.cases(df), , drop = FALSE]
+            if (nrow(df) < 5L) return(FALSE)
+            fit <- survival::survfit(survival::Surv(time, event) ~ strata, data = df)
+            p <- survminer::ggsurvplot(
+                fit, data = df,
+                pval = TRUE, risk.table = FALSE,
+                xlab = "Time", ylab = "Survival probability",
+                legend.title = "Factor-score stratum",
+                ggtheme = ggtheme
+            )$plot
+            print(p)
+            TRUE
+        },
+
         # ---- Holds CFA/Cox state across helper calls within one .run() ----
         .fitState = NULL,
 
@@ -383,6 +413,122 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 missing      = ifelse(is.null(est_spec$missing), "listwise",
                                       est_spec$missing)
             ))
+
+            # ---- Extract factor scores ----
+            factor_scores <- tryCatch(
+                private$.extractScores(fit, opt$factor_score_method,
+                                       opt$standardize_scores),
+                error = function(e) NULL)
+            if (is.null(factor_scores) || length(factor_scores) != n) {
+                private$.addNotice("ERROR",
+                    "Factor-score extraction failed",
+                    "lavPredict() did not return scores of length n. This is rare; check for indicator missingness.")
+                private$.renderNotices()
+                return()
+            }
+            private$.fitState$factor_scores <- factor_scores
+
+            # ---- Cox setup ----
+            time_num  <- jmvcore::toNumeric(df[[opt$dep_time]])
+            event_lvl <- as.character(opt$event_level)
+            event_num <- as.integer(as.character(df[[opt$dep_event]]) == event_lvl)
+
+            # ---- G4: events per Cox variable (soft warning) ----
+            n_cox_vars <- 1L + (if (is.null(opt$adjusters)) 0L else length(opt$adjusters))
+            epv <- sum(event_num, na.rm = TRUE) / n_cox_vars
+            if (epv < 10) {
+                private$.addNotice("WARNING",
+                    "Low events-per-variable in Cox model",
+                    private$.messages$G4_warn(epv))
+            }
+
+            # ---- Cox model ----
+            cox_df <- data.frame(.time = time_num, .event = event_num,
+                                 biomarker_factor = factor_scores)
+            if (!is.null(opt$adjusters)) {
+                for (av in opt$adjusters) cox_df[[av]] <- df[[av]]
+            }
+
+            rhs_terms <- c("biomarker_factor",
+                           if (!is.null(opt$adjusters))
+                               vapply(opt$adjusters, jmvcore::composeTerm,
+                                      character(1))
+                           else character(0))
+            cox_formula <- stats::as.formula(
+                paste0("survival::Surv(.time, .event) ~ ",
+                       paste(rhs_terms, collapse = " + ")))
+
+            cox_fit <- tryCatch(
+                survival::coxph(cox_formula, data = cox_df),
+                error = function(e) {
+                    private$.addNotice("ERROR",
+                        "Cox model failed",
+                        paste0("survival::coxph() returned: ", conditionMessage(e)))
+                    NULL
+                })
+            if (is.null(cox_fit)) {
+                private$.renderNotices()
+                return()
+            }
+            private$.fitState$cox_fit <- cox_fit
+            private$.fitState$cox_df  <- cox_df
+
+            # ---- Cox table ----
+            cs <- summary(cox_fit)
+            coef_mat <- cs$coefficients
+            cox_table <- self$results$coxTable
+            for (i in seq_len(nrow(coef_mat))) {
+                cox_table$addRow(rowKey = rownames(coef_mat)[i], values = list(
+                    term  = rownames(coef_mat)[i],
+                    hr    = coef_mat[i, "exp(coef)"],
+                    ci_lo = cs$conf.int[i, "lower .95"],
+                    ci_hi = cs$conf.int[i, "upper .95"],
+                    z     = coef_mat[i, "z"],
+                    pvalue= coef_mat[i, "Pr(>|z|)"]
+                ))
+            }
+
+            # ---- Always-on uncertainty notice ----
+            private$.addNotice("INFO",
+                "Measurement uncertainty not propagated",
+                private$.messages$UNCERTAINTY)
+
+            # ---- PH test (Task 9) ----
+            phz <- tryCatch(survival::cox.zph(cox_fit), error = function(e) NULL)
+            if (!is.null(phz)) {
+                ph_table <- self$results$phTable
+                for (i in seq_len(nrow(phz$table))) {
+                    ph_table$addRow(rowKey = rownames(phz$table)[i], values = list(
+                        term   = rownames(phz$table)[i],
+                        chisq  = phz$table[i, "chisq"],
+                        df     = phz$table[i, "df"],
+                        pvalue = phz$table[i, "p"]
+                    ))
+                }
+                global_p <- phz$table[nrow(phz$table), "p"]
+                if (!is.na(global_p) && global_p < 0.05) {
+                    private$.addNotice("WARNING",
+                        "Proportional-hazards assumption violated",
+                        private$.messages$PH_violated(global_p))
+                }
+            }
+
+            # ---- KM state (Task 9) ----
+            if (isTRUE(opt$show_plot_km)) {
+                strata_n <- switch(opt$km_strata,
+                                   median = 2L, tertile = 3L, quartile = 4L)
+                strata <- cut(factor_scores,
+                              breaks = stats::quantile(factor_scores,
+                                                      probs = seq(0, 1, length.out = strata_n + 1L),
+                                                      na.rm = TRUE),
+                              include.lowest = TRUE,
+                              labels = paste0("Q", seq_len(strata_n)))
+                self$results$kmPlot$setState(list(
+                    time   = time_num,
+                    event  = event_num,
+                    strata = strata
+                ))
+            }
 
             # Success-path render — gate failures render and return earlier
             private$.renderNotices()

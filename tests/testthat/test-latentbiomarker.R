@@ -203,3 +203,58 @@ test_that("Loadings, reliability, and summary tables populate", {
     expect_equal(S$n_params[1], 10)
     expect_equal(S$estimator[1], "MLR")
 })
+
+test_that("Cox table populates with HR for factor and adjusters", {
+    skip_if_not_installed("lavaan")
+    skip_if_not_installed("survival")
+    set.seed(4)
+    n <- 500
+    f <- rnorm(n)
+    age <- rnorm(n, 60, 10)
+    lp <- 0.7 * f + 0.02 * age
+    time <- rexp(n, exp(lp - mean(lp)) * 0.05)
+    evt <- factor(rbinom(n, 1, 0.6))
+    df <- data.frame(
+        time = time, evt = evt, age = age,
+        ind1 = 0.8 * f + rnorm(n, sd = 0.6),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.7),
+        ind3 = 0.75 * f + rnorm(n, sd = 0.65)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df,
+        dep_time = "time", dep_event = "evt", event_level = "1",
+        indicators = paste0("ind", 1:3),
+        adjusters = "age",
+        reflective_confirmed = TRUE
+    )
+
+    C <- res$coxTable$asDF
+    expect_true("biomarker_factor" %in% C$term || "Factor" %in% C$term)
+    expect_true("age" %in% C$term)
+    expect_true(all(C$hr > 0))
+    expect_match(res$notices$content, "measurement uncertainty", fixed = TRUE)
+})
+
+test_that("PH test table populates and KM state is set", {
+    skip_if_not_installed("lavaan")
+    skip_if_not_installed("survminer")
+    set.seed(5)
+    n <- 400
+    f <- rnorm(n)
+    time <- rexp(n, exp(0.5 * f - 0.5 * mean(f)) * 0.05)
+    df <- data.frame(
+        time = time, evt = factor(rbinom(n, 1, 0.5)),
+        ind1 = 0.8 * f + rnorm(n, sd = 0.5),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.6),
+        ind3 = 0.85 * f + rnorm(n, sd = 0.4)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df,
+        dep_time = "time", dep_event = "evt", event_level = "1",
+        indicators = paste0("ind", 1:3),
+        reflective_confirmed = TRUE
+    )
+    P <- res$phTable$asDF
+    expect_true(nrow(P) >= 1)
+    expect_false(is.null(res$kmPlot$state))
+})
