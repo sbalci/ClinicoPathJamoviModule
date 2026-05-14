@@ -217,6 +217,7 @@ latentbiomarkerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 clearWith=list(
                     "dep_time",
                     "dep_event",
+                    "event_level",
                     "indicators",
                     "adjusters",
                     "reflective_confirmed",

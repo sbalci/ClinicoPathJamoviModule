@@ -10,6 +10,7 @@ items:
       clearWith:
         - dep_time
         - dep_event
+        - event_level
         - indicators
         - adjusters
         - reflective_confirmed

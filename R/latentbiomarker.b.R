@@ -29,17 +29,17 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 WARNING        = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047"),
                 INFO           = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd")
             )
-            html <- "<div style='margin:10px 0;'>"
+            html <- "<div style='margin: 10px 0;'>"
             for (n in private$.noticeList) {
                 style <- typeStyles[[n$type]]
                 if (is.null(style)) style <- typeStyles$INFO
                 html <- paste0(html,
-                    "<div style='background-color:", style$bgcolor,
-                    "; border-left:4px solid ", style$border,
-                    "; padding:12px; margin:8px 0; border-radius:4px;'>",
-                    "<strong style='color:", style$color, ";'>",
+                    "<div style='background-color: ", style$bgcolor,
+                    "; border-left: 4px solid ", style$border,
+                    "; padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
                     htmltools::htmlEscape(n$title), "</strong><br>",
-                    "<span style='color:#374151;'>",
+                    "<span style='color: #374151;'>",
                     htmltools::htmlEscape(n$content), "</span>",
                     "</div>")
             }
@@ -75,6 +75,7 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
 
             # Subsequent gates and computation added in later tasks
+            # Success-path render — gate failures render and return earlier
             private$.renderNotices()
         }
     )
