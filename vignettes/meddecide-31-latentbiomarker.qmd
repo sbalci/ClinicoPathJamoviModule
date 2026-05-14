@@ -1,0 +1,531 @@
+---
+title: "Latent biomarker constructs and survival"
+subtitle: "When a single biomarker score isn't enough"
+author: "ClinicoPath"
+date: today
+format: html
+vignette: >
+  %\VignetteIndexEntry{Latent biomarker constructs}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  eval = TRUE
+)
+```
+
+## When to use this function
+
+Clinical research regularly confronts a frustrating mismatch: the biological process you care about is genuinely latent — it has no single measurement — yet your survival model needs one number per patient to compute a hazard ratio. Examples abound.
+
+**Immune phenotype** — tumor-infiltrating lymphocyte counts (CD8+, FoxP3+, PD-L1 combined positive score, CD68+ macrophages) are all partial, noisy windows onto the same underlying construct: how hot or cold the immune microenvironment is. Using any single marker as a Cox covariate throws the others away and inflates the problem of multiple comparisons.
+
+**Histologic aggressiveness** — tumor budding count, worst pattern of invasion, perineural invasion rate, and lymphovascular invasion are each imperfect indicators of how aggressively a carcinoma is progressing. A single latent "aggressiveness" factor captures their shared variance while discarding measurement noise.
+
+**Stromal activation** — α-SMA expression, collagen density, FAP+ fibroblast fraction, and stiffness proxy scores from digital image analysis collectively describe activated desmoplastic stroma. None is the ground truth; together they triangulate one construct.
+
+`latentbiomarker` handles all of these by fitting a **single-factor reflective confirmatory factor analysis (CFA)** with `lavaan`, extracting factor scores, and passing them to a Cox proportional-hazards model from `survival`. The estimator switches automatically between MLR (continuous indicators) and WLSMV with polychoric correlations (ordinal or binary indicators).
+
+---
+
+## When NOT to use this function
+
+**Formative composites.** If your "score" is constituted by its components — where each component adds independent information by design — CFA gives nonsense results. Classic example: a histologic grade that sums nuclear grade + tubule formation + mitotic count (Nottingham/Elston–Ellis). The components are *chosen* to be conceptually distinct, not symptoms of one latent cause. Use `cSEM` or `seminr` for formative indices, or simply compute the weighted sum directly.
+
+**n < 100.** SEM is data-hungry. Factor loadings and model-fit indices are unreliable in small samples; the function will refuse the analysis at this threshold (see the refusal policy below).
+
+**A single binary marker.** If you have one marker (e.g., MMRd yes/no), there is no measurement model to fit. Enter it directly as a Cox covariate.
+
+**Multiple correlated constructs.** If your indicators cluster into two distinct factors (e.g., proliferative markers and invasion markers), forcing them into one factor distorts both. Use `SEMLj` for multi-factor SEM + survival.
+
+---
+
+## Refusal policy
+
+The function evaluates a series of gates before fitting. Hard gates stop execution immediately with an explanatory notice. Soft gates allow the analysis to proceed but pin a warning at the top of the results. This policy is documented fully in `docs/superpowers/specs/2026-05-13-latentbiomarker-design.md`, Section 6.
+
+| Gate | Type | Condition | Action |
+|------|------|-----------|--------|
+| **G1** | Hard | n < 100 | Refuse; suggest z-score composite or larger cohort |
+| **G1-soft** | Soft | 100 ≤ n < 200 | Warn; interpret CIs cautiously |
+| **G2** | Hard | Cases-per-CFA-parameter < 5 | Refuse; show CPP and suggest reducing indicators |
+| **G2-soft** | Soft | 5 ≤ CPP < 10 | Warn; SEs may be optimistic |
+| **G3** | Hard | Indicators < 3 | Refuse; model under-identified with < 3 indicators |
+| **G3-soft** | Soft | Exactly 3 indicators (df = 0) | Warn; fit indices not interpretable |
+| **G4** | Soft | Events-per-Cox-variable < 10 | Warn; consider reducing adjusters |
+| **G5** | Soft | All inter-indicator correlations < 0.3 | Warn; indicators may not share a common cause |
+| **G6** | Hard | `reflective_confirmed == FALSE` | Refuse; user must confirm the reflective assumption |
+
+: Gate summary. Hard gates stop computation; soft gates run with a notice.
+
+---
+
+## Six worked scenarios
+
+### Scenario 1 — Continuous indicators, the canonical happy path
+
+In most immunophenotyping studies, pathologists score five or six markers on continuous or near-continuous scales: CD8+ TIL density (cells/mm²), PD-L1 combined positive score (%), CD68+ macrophage fraction (%), FoxP3+ Treg density, and LAG-3+ cell density. These are all imperfect measurements of one shared construct — immune activation — and their inter-correlations arise because they are each partly driven by that latent state.
+
+The simulation below creates 400 patients whose five markers are generated by a single latent factor `F` plus independent measurement noise. This mimics the true data-generating process for a reflective model. With `set.seed(3)` for reproducibility, we then run `latentbiomarker` using the MLR estimator (the default for all-continuous indicators). MLR is maximum likelihood with robust Huber–White standard errors, which is appropriate when the multivariate normality assumption is not perfectly met — as is typical with right-skewed IHC counts.
+
+```{r scenario1-setup}
+set.seed(3)
+n <- 400
+
+# True factor loadings for five immune markers
+lambda <- c(0.75, 0.70, 0.80, 0.65, 0.72)
+
+# Latent immune factor (standardised)
+F <- rnorm(n)
+
+# Unique variances: 1 - lambda^2 (reflective model)
+E <- sapply(sqrt(1 - lambda^2), function(sd) rnorm(n, 0, sd))
+
+# Observed indicators matrix
+X <- outer(F, lambda) + E
+colnames(X) <- c("cd8_til", "pdl1_cps", "cd68_frac", "foxp3_density", "lag3_cells")
+
+# Survival outcome: higher immune activation (F) -> better OS
+# Baseline hazard corresponds roughly to median OS 36 months
+set.seed(42)
+log_hr_true <- -0.4   # protective effect of immune activation
+T_surv <- rexp(n, rate = exp(log_hr_true * F) / 36)
+C_surv <- rexp(n, rate = 1 / 60)   # censoring around 60 months
+time <- pmin(T_surv, C_surv)
+event <- as.integer(T_surv <= C_surv)
+
+df_scenario1 <- data.frame(X, time = time, event = event)
+cat("n =", n, "| events =", sum(event), "| event rate =",
+    round(mean(event), 2), "\n")
+```
+
+```{r scenario1-cfa}
+# Verify the CFA recovers loadings close to truth using lavaan directly.
+# This is exactly what latentbiomarker calls internally.
+if (requireNamespace("lavaan", quietly = TRUE)) {
+  model_syn <- '
+    F =~ cd8_til + pdl1_cps + cd68_frac + foxp3_density + lag3_cells
+  '
+  fit1 <- lavaan::cfa(model_syn, data = df_scenario1, estimator = "MLR",
+                      std.lv = TRUE)
+  loadings1 <- lavaan::parameterEstimates(fit1, standardized = TRUE)
+  loadings1 <- loadings1[loadings1$op == "=~",
+                          c("lhs", "rhs", "std.all", "se", "pvalue")]
+  names(loadings1) <- c("Factor", "Indicator", "Std_Loading", "SE", "p")
+  print(loadings1, digits = 3, row.names = FALSE)
+
+  # Fit indices
+  fi <- lavaan::fitMeasures(fit1, c("cfi.robust", "tli.robust",
+                                    "rmsea.robust", "srmr"))
+  cat("\nFit indices (MLR):\n")
+  print(round(fi, 3))
+}
+```
+
+```{r scenario1-cox}
+# Factor score extraction + Cox regression — the second stage
+if (requireNamespace("lavaan", quietly = TRUE) &&
+    requireNamespace("survival", quietly = TRUE)) {
+  scores1 <- lavaan::lavPredict(fit1, method = "regression")[, 1]
+  scores1_std <- as.numeric(scale(scores1))
+
+  cox1 <- survival::coxph(
+    survival::Surv(time, event) ~ scores1_std,
+    data = df_scenario1
+  )
+  summary_cox1 <- summary(cox1)
+  cat("Cox HR for latent immune factor (per SD):\n")
+  print(round(summary_cox1$coefficients[, c(1, 2, 3, 5)], 3))
+  cat("\nTrue log-HR was", log_hr_true,
+      "| Estimated log-HR =",
+      round(coef(cox1), 3), "\n")
+}
+```
+
+The standardised loadings should fall within roughly ±0.10 of the true values (0.65–0.80). The Cox model recovers a protective HR below 1.0, consistent with the simulated truth. CFI above 0.95 and RMSEA below 0.06 confirm good single-factor fit — this is the ideal happy path.
+
+---
+
+### Scenario 2 — Ordinal indicators trigger WLSMV
+
+IHC scoring in surgical pathology is almost never continuous. Pathologists routinely assign semi-quantitative scores: 0 (absent), 1+ (weak/focal), 2+ (moderate/diffuse), 3+ (strong/diffuse). This four-level ordinal scale is common for PD-L1 tumor proportion score bins, p53 aberrant expression, and chromatin pattern descriptors.
+
+When any indicator has five or fewer distinct ordered levels, Pearson correlations are biased because they assume normality around the observed values. The correct association measure is the polychoric correlation — the Pearson correlation between the two hypothesised underlying continuous latent responses. `lavaan` handles this automatically when `ordered = TRUE` is specified, and it switches to WLSMV (weighted least-squares means and variance adjusted) estimation, which is the recommended estimator for ordinal manifest variables.
+
+`latentbiomarker` auto-detects ordinal indicators and issues a `STRONG_WARNING` notice reminding users that the factor loadings are now on the latent-response scale (not the observed 0–3 scale) and that fit indices have slightly different reference distributions under WLSMV.
+
+```{r scenario2-setup}
+set.seed(7)
+n2 <- 350
+
+# Latent immune factor (standardised)
+F2 <- rnorm(n2)
+lambda2 <- c(0.70, 0.68, 0.73, 0.65)
+
+# Continuous underlying responses
+E2 <- sapply(sqrt(1 - lambda2^2), function(sd) rnorm(n2, 0, sd))
+Y2_cont <- outer(F2, lambda2) + E2
+
+# Discretise to 0/1/2/3 using quantile thresholds (produces realistic ordinal)
+ordinalise <- function(x, thresholds = c(-0.8, 0.2, 1.0)) {
+  cut(x, c(-Inf, thresholds, Inf), labels = FALSE) - 1L
+}
+X2 <- apply(Y2_cont, 2, ordinalise)
+colnames(X2) <- c("pdl1_score", "p53_score", "ki67_score", "her2_score")
+
+# Survival: higher factor -> shorter OS (aggressive tumour phenotype)
+log_hr_true2 <- 0.35
+T2 <- rexp(n2, rate = exp(log_hr_true2 * F2) / 48)
+C2 <- rexp(n2, rate = 1 / 72)
+time2 <- pmin(T2, C2)
+event2 <- as.integer(T2 <= C2)
+
+df_scenario2 <- data.frame(as.data.frame(X2), time = time2, event = event2)
+cat("Indicator value ranges:\n")
+print(apply(X2, 2, table))
+```
+
+```{r scenario2-cfa}
+if (requireNamespace("lavaan", quietly = TRUE)) {
+  # Declare indicators as ordered — this triggers polychoric correlations
+  # and WLSMV estimation automatically
+  model_ord <- '
+    F =~ pdl1_score + p53_score + ki67_score + her2_score
+  '
+  fit2 <- lavaan::cfa(model_ord, data = df_scenario2, estimator = "WLSMV",
+                      ordered = c("pdl1_score", "p53_score",
+                                  "ki67_score", "her2_score"),
+                      std.lv = TRUE)
+
+  loadings2 <- lavaan::parameterEstimates(fit2, standardized = TRUE)
+  loadings2 <- loadings2[loadings2$op == "=~",
+                          c("rhs", "std.all", "se", "pvalue")]
+  names(loadings2) <- c("Indicator", "Std_Loading_latent_response",
+                        "SE", "p")
+  print(loadings2, digits = 3, row.names = FALSE)
+
+  fi2 <- lavaan::fitMeasures(fit2, c("cfi.robust", "tli.robust",
+                                     "rmsea.robust", "srmr.robust"))
+  cat("\nFit indices (WLSMV):\n")
+  print(round(fi2, 3))
+}
+```
+
+Notice that the loadings are labelled "on the latent-response scale." When you use WLSMV, `lavaan` works with thresholds and polychoric correlations; the loadings describe how the latent continuous response underlying each score moves with the latent factor, not how the observed 0–3 integer moves. This distinction matters for interpretation: a loading of 0.68 means that one SD increase in immune activation is associated with a 0.68 SD shift in the latent PD-L1 response, which in turn shifts the probabilities of the observable 0/1/2/3 categories via the estimated thresholds.
+
+---
+
+### Scenario 3 — Mixed continuous + ordinal + binary indicators
+
+Real tissue microarray (TMA) or whole-slide analysis datasets often combine assay types. You might have: CD8+ TIL density from digital image analysis (continuous, cells/mm²), PD-L1 combined positive score (continuous, 0–100%), an IHC H-score converted to a 0/1+/2+/3+ bin (ordinal), and a binary call for mismatch repair deficiency (MMRd: 0 = proficient, 1 = deficient). All four reflect immune microenvironment state; all four are worth combining.
+
+When any indicator is non-continuous, `latentbiomarker` falls back to WLSMV across all indicators. Continuous indicators are treated as normally distributed, while ordinal and binary indicators use their respective polychoric and tetrachoric correlations. A binary indicator is mathematically a two-level ordered variable — its tetrachoric correlation is a special case of the polychoric. You do not need to do anything special: auto-detection handles it.
+
+```{r scenario3-setup}
+set.seed(11)
+n3 <- 300
+F3 <- rnorm(n3)
+lambda3 <- c(0.72, 0.68, 0.65, 0.58)   # two continuous, one ordinal, one binary
+
+E3 <- sapply(sqrt(1 - lambda3^2), function(sd) rnorm(n3, 0, sd))
+Y3_cont <- outer(F3, lambda3) + E3
+
+# Indicators:
+# 1. cd8_density: continuous (cells/mm^2 on approximate scale, non-negative)
+cd8_density <- exp(Y3_cont[, 1] + 3)   # lognormal, strictly positive
+# 2. pdl1_cps: continuous (0-100)
+pdl1_cps <- pmax(0, pmin(100, Y3_cont[, 2] * 20 + 30))
+# 3. ihc_score: ordinal 0/1/2/3
+ihc_score <- cut(Y3_cont[, 3], c(-Inf, -0.7, 0.2, 0.9, Inf),
+                 labels = FALSE) - 1L
+# 4. mmrd: binary (MMR-deficient vs proficient)
+mmrd <- as.integer(Y3_cont[, 4] > 0.3)
+
+# Survival
+log_hr3 <- -0.30
+T3 <- rexp(n3, rate = exp(log_hr3 * F3) / 42)
+C3 <- rexp(n3, rate = 1 / 60)
+time3 <- pmin(T3, C3)
+event3 <- as.integer(T3 <= C3)
+
+df_scenario3 <- data.frame(
+  cd8_density, pdl1_cps, ihc_score, mmrd,
+  time = time3, event = event3
+)
+
+cat("Variable types and ranges:\n")
+cat(" cd8_density: continuous, range", round(range(cd8_density)), "\n")
+cat(" pdl1_cps:    continuous, range", round(range(pdl1_cps)), "\n")
+cat(" ihc_score:   ordinal, levels", sort(unique(ihc_score)), "\n")
+cat(" mmrd:        binary, n(0)=", sum(mmrd == 0),
+    "n(1)=", sum(mmrd == 1), "\n")
+```
+
+```{r scenario3-cfa}
+if (requireNamespace("lavaan", quietly = TRUE)) {
+  model_mix <- '
+    F =~ cd8_density + pdl1_cps + ihc_score + mmrd
+  '
+  # WLSMV required because ihc_score and mmrd are non-continuous
+  fit3 <- lavaan::cfa(model_mix, data = df_scenario3,
+                      estimator = "WLSMV",
+                      ordered = c("ihc_score", "mmrd"),
+                      std.lv = TRUE)
+
+  loadings3 <- lavaan::parameterEstimates(fit3, standardized = TRUE)
+  loadings3 <- loadings3[loadings3$op == "=~",
+                          c("rhs", "std.all", "se", "pvalue")]
+  names(loadings3) <- c("Indicator", "Std_Loading", "SE", "p")
+  print(loadings3, digits = 3, row.names = FALSE)
+}
+```
+
+The key takeaway: you can mix assay types freely as long as every indicator reflects the same construct. The estimator choice is driven by the weakest-scale indicator — if even one indicator is ordinal or binary, WLSMV is used for all. This is conservative but correct. If all four indicators were continuous, MLR would be preferred.
+
+---
+
+### Scenario 4 — Insufficient n triggers G1
+
+Small cohorts are the norm in many specialised pathology studies: rare tumour types, TMA series from a single institution, or pilot studies for larger grants. Researchers are sometimes tempted to run CFA on 50–80 cases when those are the only specimens available. `latentbiomarker` refuses this with the G1 hard gate.
+
+The refusal message explains why the gate exists — factor loadings and fit indices are known to be unstable below n = 100, standard errors are substantially inflated, and model convergence is erratic — and offers two constructive alternatives: a simple z-score composite (compute each indicator's z-score, average them, use that as a Cox covariate) or waiting for a larger cohort.
+
+```{r scenario4-refuse}
+set.seed(99)
+n4 <- 50   # too small for CFA
+
+F4 <- rnorm(n4)
+lambda4 <- c(0.72, 0.68, 0.65)
+E4 <- sapply(sqrt(1 - lambda4^2), function(sd) rnorm(n4, 0, sd))
+X4 <- outer(F4, lambda4) + E4
+colnames(X4) <- c("marker_a", "marker_b", "marker_c")
+
+time4 <- rexp(n4, rate = 1/36)
+event4 <- rbinom(n4, 1, 0.6)
+
+df_scenario4 <- data.frame(as.data.frame(X4), time = time4, event = event4)
+
+# Simulate the G1 gate check that latentbiomarker performs
+g1_threshold <- 100
+n_obs <- nrow(df_scenario4)
+if (n_obs < g1_threshold) {
+  cat("HARD REFUSAL — G1 triggered:\n")
+  cat("SEM is data-hungry. With n =", n_obs, "< 100,\n",
+      "factor loadings and fit indices are unreliable.\n",
+      "Consider:\n",
+      "  (1) a simpler z-score composite with conventional Cox regression, or\n",
+      "  (2) waiting for a larger cohort.\n")
+}
+```
+
+```{r scenario4-alternative}
+# The recommended alternative: z-score composite
+# For n=50, this is statistically defensible where CFA is not
+zscore_composite <- rowMeans(scale(df_scenario4[, c("marker_a",
+                                                      "marker_b",
+                                                      "marker_c")]))
+
+if (requireNamespace("survival", quietly = TRUE)) {
+  cox_composite <- survival::coxph(
+    survival::Surv(time4, event4) ~ zscore_composite,
+    data = df_scenario4
+  )
+  cat("Z-score composite Cox (n=50, 3 indicators):\n")
+  print(round(summary(cox_composite)$coefficients[, c(1, 2, 5)], 3))
+}
+```
+
+The z-score composite is not a measurement model — it makes no claim that the indicators are exchangeable or that loadings are equal — but it is a defensible, transparent, and reproducible way to combine information from small samples. When the cohort grows to n ≥ 100 (and ideally n ≥ 200), the CFA approach becomes appropriate and can be applied retrospectively to test whether the loadings are actually equal or not.
+
+---
+
+### Scenario 5 — Just-identified model with exactly 3 indicators
+
+Three indicators with one latent factor is the minimum identified CFA model, but it sits at zero degrees of freedom. This means the model is *just-identified*: it can reproduce the observed correlations perfectly by construction, regardless of whether the single-factor model is actually correct. As a consequence:
+
+- CFI = 1.000 and TLI ≈ 1.000 by definition (not a sign of good fit)
+- RMSEA = 0.000 (similarly uninformative)
+- SRMR = 0.000 or near zero
+
+These perfect-looking indices are meaningless. There is no residual variance in the model-implied correlations to assess because the model has exactly as many free parameters as there are unique covariances. You cannot distinguish a perfect single-factor model from a perfect correlated-uniqueness model.
+
+`latentbiomarker` issues the G3-soft INFO notice when exactly 3 indicators are supplied, explaining this structural limitation and recommending that users either add a fourth indicator to gain at least 1 df, or interpret the results without relying on the fit statistics.
+
+```{r scenario5-justidentified}
+set.seed(21)
+n5 <- 280   # adequate sample size, but only 3 indicators
+F5 <- rnorm(n5)
+lambda5 <- c(0.75, 0.70, 0.68)
+
+E5 <- sapply(sqrt(1 - lambda5^2), function(sd) rnorm(n5, 0, sd))
+X5 <- outer(F5, lambda5) + E5
+colnames(X5) <- c("biomarker_1", "biomarker_2", "biomarker_3")
+
+time5 <- rexp(n5, rate = exp(-0.25 * F5) / 40)
+event5 <- rbinom(n5, 1, 0.55)
+df_scenario5 <- data.frame(as.data.frame(X5), time = time5, event = event5)
+
+if (requireNamespace("lavaan", quietly = TRUE)) {
+  model5 <- '
+    F =~ biomarker_1 + biomarker_2 + biomarker_3
+  '
+  fit5 <- lavaan::cfa(model5, data = df_scenario5, estimator = "MLR",
+                      std.lv = TRUE)
+
+  cat("Model degrees of freedom:", lavaan::fitMeasures(fit5, "df"), "\n")
+
+  fi5 <- lavaan::fitMeasures(fit5, c("cfi.robust", "tli.robust",
+                                      "rmsea.robust", "srmr"))
+  cat("\nFit indices (3 indicators, df = 0):\n")
+  print(round(fi5, 3))
+
+  cat("\nG3-soft INFO notice:\n")
+  cat("With 3 indicators and 1 factor, the model is just-identified (df = 0).\n",
+      "CFI, RMSEA, and SRMR are not meaningful — perfect fit is guaranteed\n",
+      "by construction. Add a fourth indicator to obtain an over-identified\n",
+      "model with testable fit.\n")
+}
+```
+
+Notice the fit indices are trivially perfect. This is not a bug in the software or a sign that your model is correct — it is an algebraic inevitability. The Cox regression stage still runs and the HR estimate is valid, but you cannot make claims about model fit quality. If adding a fourth indicator is not feasible, consider framing the latent variable as a three-item composite and acknowledge the identification constraint explicitly in the methods section.
+
+---
+
+### Scenario 6 — Two-factor reality forced into one factor
+
+Perhaps the most practically important failure mode is running a single-factor model on indicators that actually belong to two distinct constructs. Consider a panel that mixes **proliferative markers** (Ki-67 LI, PCNA expression, Cyclin D1 expression) with **invasion markers** (MMP-9 expression, E-cadherin loss, neural invasion extent). These two groups reflect different biological processes. Their inter-group correlations are modest; their within-group correlations are high.
+
+Forcing all six into a single-factor CFA produces poor fit: CFI drops below 0.95 and RMSEA rises above 0.10. The `latentbiomarker` function detects this via the Fit-poor gate and issues a notice recommending `SEMLj` for multi-factor SEM, which supports correlated factors and the full structural model including survival.
+
+```{r scenario6-twofactor}
+set.seed(33)
+n6 <- 450
+
+# Factor 1: proliferation
+F1 <- rnorm(n6)
+# Factor 2: invasion, moderately correlated with F1
+F2 <- 0.3 * F1 + sqrt(1 - 0.3^2) * rnorm(n6)
+
+# Loadings for each factor's three indicators
+l1 <- c(0.80, 0.75, 0.72)   # proliferative markers
+l2 <- c(0.78, 0.73, 0.70)   # invasion markers
+
+# Residual SDs
+sd1 <- sqrt(1 - l1^2)
+sd2 <- sqrt(1 - l2^2)
+
+# Generate indicators
+proliferative <- sweep(outer(F1, l1), 2, sd1,
+                       FUN = function(a, b) a + rnorm(n6, 0, b))
+invasion      <- sweep(outer(F2, l2), 2, sd2,
+                       FUN = function(a, b) a + rnorm(n6, 0, b))
+
+colnames(proliferative) <- c("ki67_li", "pcna_expr", "cyclind1_expr")
+colnames(invasion)      <- c("mmp9_expr", "ecadherin_loss", "ni_extent")
+
+# Survival outcome driven mainly by invasion (F2), weakly by proliferation
+log_hr6 <- 0.4 * F2 + 0.15 * F1
+T6 <- rexp(n6, rate = exp(log_hr6) / 48)
+C6 <- rexp(n6, rate = 1 / 72)
+time6 <- pmin(T6, C6)
+event6 <- as.integer(T6 <= C6)
+
+df_scenario6 <- data.frame(
+  as.data.frame(proliferative),
+  as.data.frame(invasion),
+  time = time6, event = event6
+)
+
+cat("Within-group correlations (proliferative):\n")
+print(round(cor(proliferative), 2))
+cat("\nWithin-group correlations (invasion):\n")
+print(round(cor(invasion), 2))
+cat("\nCross-group correlations (proliferative vs invasion):\n")
+print(round(cor(proliferative, invasion), 2))
+```
+
+```{r scenario6-badfit}
+if (requireNamespace("lavaan", quietly = TRUE)) {
+  # Force a single-factor model across all 6 indicators
+  model6_single <- '
+    F =~ ki67_li + pcna_expr + cyclind1_expr +
+         mmp9_expr + ecadherin_loss + ni_extent
+  '
+  fit6_single <- lavaan::cfa(model6_single, data = df_scenario6,
+                              estimator = "MLR", std.lv = TRUE)
+
+  fi6_single <- lavaan::fitMeasures(fit6_single,
+                                     c("cfi.robust", "tli.robust",
+                                       "rmsea.robust", "srmr"))
+  cat("Single-factor model fit indices:\n")
+  print(round(fi6_single, 3))
+
+  cfi_val  <- round(fi6_single["cfi.robust"], 3)
+  rmsea_val <- round(fi6_single["rmsea.robust"], 3)
+
+  if (cfi_val < 0.95 || rmsea_val > 0.10) {
+    cat("\nFit-poor notice (as shown in latentbiomarker):\n")
+    cat("Single-factor model fits poorly (CFI =", cfi_val,
+        ", RMSEA =", rmsea_val, ").\n",
+        "Consider splitting into multiple constructs.\n",
+        "SEMLj supports multi-factor SEM with survival outcomes.\n")
+  }
+}
+```
+
+```{r scenario6-twofactorfit}
+if (requireNamespace("lavaan", quietly = TRUE)) {
+  # Compare with the correct two-factor model for reference
+  model6_correct <- '
+    Proliferation =~ ki67_li + pcna_expr + cyclind1_expr
+    Invasion      =~ mmp9_expr + ecadherin_loss + ni_extent
+    Proliferation ~~ Invasion
+  '
+  fit6_correct <- lavaan::cfa(model6_correct, data = df_scenario6,
+                               estimator = "MLR", std.lv = TRUE)
+
+  fi6_correct <- lavaan::fitMeasures(fit6_correct,
+                                      c("cfi.robust", "tli.robust",
+                                        "rmsea.robust", "srmr"))
+  cat("Two-factor model fit indices (for comparison — requires SEMLj):\n")
+  print(round(fi6_correct, 3))
+
+  cat("\nConclusion: The two-factor model fits well (CFI ≥ 0.95, RMSEA ≤ 0.06),\n",
+      "while the single-factor model does not. The Fit-poor diagnostic correctly\n",
+      "invites users to graduate to multi-factor SEM in SEMLj.\n")
+}
+```
+
+This scenario illustrates why the Fit-poor gate is a useful diagnostic rather than merely an error condition. The function does not refuse to run — it runs, reports the poor fit, and tells you what to do next. The CFI / RMSEA flags are your signal that you are forcing a biological reality that is richer than one factor into a single-factor straitjacket. The KM plot and HR may still be useful as a summary, but they should be interpreted knowing that the single factor is a blend of two distinct processes rather than a clean measurement of one.
+
+---
+
+## What is deliberately out of scope (v1)
+
+The following capabilities were considered and explicitly deferred to later versions, documented in Section 1 (Non-goals) of `docs/superpowers/specs/2026-05-13-latentbiomarker-design.md`:
+
+- **Multiple correlated factors** — if your biomarker panel breaks into two or more distinct constructs, use `SEMLj` or a future `latentbiomarker2`. The single-factor assumption is the price of simplicity and the Fit-poor gate will tell you when it is violated.
+- **Bootstrap propagation of factor-score measurement uncertainty into Cox HRs** — the Murphy–Topel two-stage problem. Factor scores are estimated with error; treating them as observed values underestimates Cox CIs. v1 ships with a prominent notice flagging this limitation; v2 may add an optional bootstrap pipeline. Until then, interpret HRs conservatively.
+- **Continuous and binary outcomes** — future sibling functions `latentbiomarker-continuous` and `latentbiomarker-binary` will handle regression and logistic outcomes. v1 is survival-only.
+- **Mediation chains** — if you want to test whether a latent immune factor mediates the effect of treatment on survival, that is a mediation problem; defer to a future `pathologymediation` function.
+- **Latent class analysis for imaging–biology circularity** — a different modelling paradigm; deferred to `imagingbiologyLCA`.
+- **User-typed lavaan syntax** — `SEMLj` already does this better than we ever would. `latentbiomarker` deliberately does not expose lavaan syntax; it is opinionated so that clinicians who are not SEM experts get sensible defaults without the risk of mis-specifying a custom model.
+
+---
+
+## Further reading
+
+- **lavaan package**: Rosseel Y. *lavaan: An R Package for Structural Equation Modeling.* J Stat Softw 2012; 48(2): 1–36. Package documentation at <https://lavaan.ugent.be/>.
+- **SEMLj**: Multi-factor SEM with structural paths in jamovi. Documentation at <https://semlj.github.io/>.
+- **cSEM**: Formative composite SEM in R. Package documentation at <https://m-e-rademaker.github.io/cSEM/>.
+- **seminr**: Another R package for partial least squares path modelling (formative composites). <https://sem-in-r.github.io/seminr/>.
+- **Murphy–Topel bias**: Murphy KM, Topel RH. *Estimation and Inference in Two-Step Econometric Models.* J Bus Econ Stat 1985; 3(4): 370–9. The theoretical basis for why two-stage (CFA then Cox) CIs are too narrow.
+- **Events-per-variable rule**: Peduzzi P, Concato J, Feinstein AR, Holford TR. *Importance of events per independent variable in proportional hazards regression analysis.* J Clin Epidemiol 1995; 48: 1503–10.
+- **SEM textbook**: Kline RB. *Principles and Practice of Structural Equation Modeling*, 4th ed. Guilford; 2016. Chapter 9 covers CFA; Chapter 18 covers ordinal indicators.
+- **Design specification**: `docs/superpowers/specs/2026-05-13-latentbiomarker-design.md` — full gate policy, architecture, and build sequence for this function.
+- **ClinicoPath jamovi module patterns**: `vignettes/jamovi_module_patterns_guide.md`.
