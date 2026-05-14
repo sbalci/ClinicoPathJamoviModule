@@ -1,5 +1,11 @@
 # ClinicoPath News
 
+# ClinicoPath 0.0.39.0
+
+## New features
+
+* `latentbiomarker` — Latent biomarker construct + Cox regression. Single-factor reflective CFA with auto MLR/WLSMV estimator selection, factor-score extraction, internal Cox regression with KM plot, modification indices, save-to-data, generated reproducible R code, and explicit refusal of inappropriate inputs (n < 100, cases-per-parameter < 5, < 3 indicators, unconfirmed reflective measurement). Diagnostics include Mardia multivariate normality and regression-vs-Bartlett factor-score reliability. Routed via meddecideT (JamoviTest module) for testing before production promotion.
+
 # ClinicoPath 0.0.37.02
 
 ### March 16, 2026 - Penalized Cox Regression Suite: Comprehensive Quality Improvements

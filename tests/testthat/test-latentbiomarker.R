@@ -352,3 +352,44 @@ test_that("Diagnostic notices: Mardia and score-reliability surface when applica
     # Just confirm the test does not error
     expect_true(is.character(notices))
 })
+
+test_that("Integration: histopathology dataset end-to-end", {
+    skip_if_not_installed("lavaan")
+    skip_if_not_installed("survminer")
+    data("histopathology", package = "ClinicoPath")
+
+    # Confirm the expected survival columns exist
+    skip_if(!all(c("OverallTime", "Outcome") %in% names(histopathology)),
+            "histopathology lacks OverallTime/Outcome columns for this test")
+
+    # MeasurementA/B/Measurement1 exist in histopathology but are near-zero
+    # correlated (r_max ~ 0.08), so a single-factor CFA does not converge on
+    # them.  Attach synthetic correlated indicators to the real survival data
+    # so we exercise the full CFA -> factor-score -> Cox pipeline with genuine
+    # OverallTime / Outcome values.
+    set.seed(42)
+    hp_complete <- histopathology[
+        !is.na(histopathology$OverallTime) & !is.na(histopathology$Outcome), ]
+    n_hp <- nrow(hp_complete)
+    f  <- rnorm(n_hp)
+    hp_complete$BioA <- 0.8 * f + rnorm(n_hp, sd = 0.5)
+    hp_complete$BioB <- 0.7 * f + rnorm(n_hp, sd = 0.6)
+    hp_complete$BioC <- 0.75 * f + rnorm(n_hp, sd = 0.55)
+
+    event_lvl <- as.character(levels(factor(hp_complete$Outcome))[1])
+
+    res <- ClinicoPath::latentbiomarker(
+        data = hp_complete,
+        dep_time = "OverallTime",
+        dep_event = "Outcome",
+        event_level = event_lvl,
+        indicators = c("BioA", "BioB", "BioC"),
+        reflective_confirmed = TRUE
+    )
+
+    # End-to-end smoke checks
+    expect_false(grepl("Insufficient", res$notices$content, fixed = TRUE))
+    expect_equal(nrow(res$summaryTable$asDF), 1)
+    expect_gt(nrow(res$coxTable$asDF), 0)
+    expect_gt(nrow(res$loadingsTable$asDF), 0)
+})
