@@ -103,6 +103,40 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             2L * as.integer(n_indicators)
         },
 
+        # ---- Detect indicator types ----
+        # Returns list(continuous = chr, ordinal = chr, all_continuous = lgl)
+        .detectIndicatorTypes = function(df, indicators, override) {
+            if (identical(override, "continuous")) {
+                return(list(continuous = indicators, ordinal = character(0), all_continuous = TRUE))
+            }
+            if (identical(override, "ordinal")) {
+                return(list(continuous = character(0), ordinal = indicators, all_continuous = FALSE))
+            }
+            # auto: ordinal if factor, ordered, logical, or numeric with <= 5 unique values
+            is_ord <- vapply(indicators, function(v) {
+                x <- df[[v]]
+                is.factor(x) || is.ordered(x) || is.logical(x) ||
+                    (is.numeric(x) && length(unique(stats::na.omit(x))) <= 5L)
+            }, logical(1))
+            list(
+                continuous = indicators[!is_ord],
+                ordinal    = indicators[is_ord],
+                all_continuous = !any(is_ord)
+            )
+        },
+
+        # ---- Choose estimator based on indicator types ----
+        .chooseEstimator = function(itypes) {
+            if (itypes$all_continuous) {
+                list(estimator = "MLR", missing = "fiml", ordered = NULL)
+            } else {
+                list(estimator = "WLSMV", missing = "pairwise", ordered = itypes$ordinal)
+            }
+        },
+
+        # ---- Holds CFA/Cox state across helper calls within one .run() ----
+        .fitState = NULL,
+
         # ---- Pipeline ----
         .run = function() {
             private$.noticeList <- list()
@@ -114,7 +148,7 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 return()
             }
 
-            # ---- Gate G6: reflective confirmation (hard refusal, runs first) ----
+            # ---- Gate G6: reflective confirmation ----
             if (!isTRUE(opt$reflective_confirmed)) {
                 private$.addNotice("ERROR",
                     "Reflective-measurement confirmation required",
@@ -123,7 +157,6 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 return()
             }
 
-            # Pull data using jmvcore conventions
             df <- self$data
             df <- jmvcore::naOmit(df[, c(opt$dep_time, opt$dep_event,
                                          opt$indicators, opt$adjusters), drop = FALSE])
@@ -154,7 +187,70 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     private$.messages$G1_warn(n))
             }
 
-            # Subsequent gates and computation in later tasks
+            # ---- Indicator-type detection + estimator selection ----
+            indicator_types_opt <- if (!is.null(opt$indicator_types)) opt$indicator_types else "auto"
+            itypes <- private$.detectIndicatorTypes(df, opt$indicators, indicator_types_opt)
+            est_spec <- private$.chooseEstimator(itypes)
+
+            if (!itypes$all_continuous) {
+                private$.addNotice("STRONG_WARNING",
+                    "WLSMV estimator selected (ordinal/binary indicators detected)",
+                    paste0(
+                        "Using WLSMV with polychoric/tetrachoric correlations for ",
+                        length(itypes$ordinal), " ordinal/binary indicator(s): ",
+                        paste(itypes$ordinal, collapse = ", "),
+                        ". WLSMV requires larger samples than MLR; recommended n >= 500."))
+            }
+
+            # ---- Gate G2: cases per CFA parameter ----
+            n_params <- private$.countCFAParams(k)
+            cpp <- n / n_params
+            if (cpp < 5) {
+                private$.addNotice("ERROR",
+                    "Insufficient cases per CFA parameter",
+                    private$.messages$G2_refuse(n_params, n, cpp))
+                private$.renderNotices()
+                return()
+            }
+            if (cpp < 10) {
+                private$.addNotice("WARNING",
+                    "Low cases-per-parameter ratio",
+                    private$.messages$G2_warn(cpp))
+            }
+
+            # ---- Gate G3-soft: just-identified model ----
+            if (k == 3L) {
+                private$.addNotice("INFO",
+                    "Just-identified model",
+                    private$.messages$G3_warn)
+            }
+
+            # ---- Gate G5: indicator correlations ----
+            cor_mat <- tryCatch(
+                stats::cor(
+                    data.frame(lapply(df[, opt$indicators, drop = FALSE], function(x)
+                        as.numeric(if (is.factor(x)) as.integer(x) else x))),
+                    use = "pairwise.complete.obs"),
+                error = function(e) NULL)
+            if (!is.null(cor_mat)) {
+                off_diag <- abs(cor_mat[upper.tri(cor_mat)])
+                off_diag <- off_diag[is.finite(off_diag)]
+                if (length(off_diag) > 0L) {
+                    rmax <- max(off_diag, na.rm = TRUE)
+                    if (rmax < 0.3) {
+                        private$.addNotice("WARNING",
+                            "Weak inter-indicator correlations",
+                            private$.messages$G5_warn(rmax))
+                    }
+                }
+            }
+
+            # Persist state for downstream tasks
+            private$.fitState <- list(
+                df = df, n = n, k = k, n_params = n_params, cpp = cpp,
+                itypes = itypes, est_spec = est_spec
+            )
+
             # Success-path render — gate failures render and return earlier
             private$.renderNotices()
         }
