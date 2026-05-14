@@ -367,7 +367,7 @@ analyses:
   - title: Multi-Variable Visual Quality
     name: dataquality
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Multi-Variable Visual Quality
     description: >
@@ -1015,7 +1015,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1058,7 +1058,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1165,7 +1165,7 @@ analyses:
   - title: DateTime Converter
     name: datetimeconverter
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: Data Preparation
     menuTitle: DateTime Converter
     menuSubtitle: Convert datetime and extract components
@@ -1381,7 +1381,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1393,7 +1393,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1485,7 +1485,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
@@ -1521,7 +1521,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Analyze combined test results
@@ -2629,7 +2629,7 @@ analyses:
     name: optimalcutpoint
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: ClinicoPathT
     menuSubgroup: Inferential
     menuTitle: Optimal Cutpoint Determination
     menuSubtitle: Find optimal thresholds for continuous biomarkers
@@ -2680,7 +2680,7 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
@@ -4747,7 +4747,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -5012,7 +5012,7 @@ analyses:
     name: ihcsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathD
+    menuGroup: OncoPathT
     menuSubgroup: IHC Analysis
     menuTitle: Survival & Prognosis
     description: >
@@ -5878,6 +5878,19 @@ analyses:
       estimating Oncotype DX Recurrence Score from standard pathology variables.
       Provides all four published equations (Original + 3 new) with risk
       category classification and concordance analysis.
+  - title: Latent Biomarker Construct + Cox Regression
+    name: latentbiomarker
+    ns: ClinicoPath
+    menuGroup: meddecideT
+    menuSubgroup: Biomarkers
+    menuTitle: Latent Biomarker Construct + Cox Regression
+    menuSubtitle: Reflective CFA on biomarker indicators + survival
+    description: >-
+      Estimate a single reflective latent biomarker construct from 3+ indicators
+      and relate it to a right-censored survival outcome via Cox regression.
+      Auto-selects MLR (continuous) or WLSMV (ordinal/binary) estimation.
+      Refuses inappropriate inputs with explanatory messages.
+    category: analyses
 usesNative: true
 minApp: 2.7.27
 

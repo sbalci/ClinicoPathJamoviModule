@@ -1,0 +1,145 @@
+---
+name: latentbiomarker
+title: "Latent Biomarker Construct + Cox Regression"
+menuGroup: meddecideT
+menuSubgroup: Biomarkers
+menuSubtitle: "Reflective CFA on biomarker indicators + survival"
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >-
+        Estimate a single reflective latent biomarker construct from 3+ indicators
+        and relate it to a right-censored survival outcome via Cox regression.
+        Auto-selects MLR (continuous) or WLSMV (ordinal/binary) estimation.
+        Refuses inappropriate inputs with explanatory messages.
+    R:
+        dontrun: true
+        usage: |
+            data('histopathology', package='ClinicoPath')
+            ClinicoPath::latentbiomarker(
+                data = histopathology,
+                dep_time = "OverallTime",
+                dep_event = "Outcome",
+                event_level = "1",
+                indicators = c("MeasurementA", "MeasurementB", "Measurement1"),
+                reflective_confirmed = TRUE
+            )
+
+options:
+  - name: data
+    type: Data
+    description:
+      R: The data as a data frame.
+
+  - name: dep_time
+    title: "Time"
+    type: Variable
+    suggested: [continuous]
+    permitted: [numeric]
+    default: null
+
+  - name: dep_event
+    title: "Event"
+    type: Variable
+    suggested: [nominal]
+    permitted: [factor, numeric]
+    default: null
+
+  - name: event_level
+    title: "Event level"
+    type: Level
+    variable: (dep_event)
+
+  - name: indicators
+    title: "Indicators (>=3)"
+    type: Variables
+    suggested: [continuous, ordinal, nominal]
+    permitted: [numeric, factor]
+    default: null
+
+  - name: adjusters
+    title: "Adjust Cox for"
+    type: Variables
+    suggested: [continuous, ordinal, nominal]
+    permitted: [numeric, factor]
+    default: null
+
+  - name: indicator_types
+    title: "Indicator type"
+    type: List
+    options:
+      - name: auto
+        title: "Auto-detect"
+      - name: continuous
+        title: "All continuous"
+      - name: ordinal
+        title: "All ordinal/binary"
+    default: auto
+
+  - name: reflective_confirmed
+    title: "Indicators reflect an underlying construct (not a composite)"
+    type: Bool
+    default: false
+
+  - name: factor_score_method
+    title: "Factor score method"
+    type: List
+    options:
+      - name: regression
+        title: "Regression"
+      - name: Bartlett
+        title: "Bartlett"
+    default: regression
+
+  - name: standardize_scores
+    title: "Standardize factor scores"
+    type: Bool
+    default: true
+
+  - name: save_factor_scores
+    title: "Save factor scores to data"
+    type: Output
+
+  - name: factor_score_name
+    title: "Factor score column name"
+    type: String
+    default: "biomarker_factor"
+
+  - name: km_strata
+    title: "KM stratification"
+    type: List
+    options:
+      - name: median
+        title: "Median"
+      - name: tertile
+        title: "Tertile"
+      - name: quartile
+        title: "Quartile"
+    default: tertile
+
+  - name: show_plot_km
+    title: "Kaplan-Meier plot"
+    type: Bool
+    default: true
+
+  - name: show_plot_loadings
+    title: "Loadings plot"
+    type: Bool
+    default: true
+
+  - name: show_plot_path
+    title: "Path diagram"
+    type: Bool
+    default: true
+
+  - name: show_diagnostics
+    title: "Model diagnostics"
+    type: Bool
+    default: true
+
+  - name: show_r_code
+    title: "Show R code"
+    type: Bool
+    default: false
+...

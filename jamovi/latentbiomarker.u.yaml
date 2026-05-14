@@ -1,0 +1,79 @@
+title: Latent Biomarker Construct + Cox Regression
+name: latentbiomarker
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time
+        children:
+          - type: VariablesListBox
+            name: dep_time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Event
+        children:
+          - type: VariablesListBox
+            name: dep_event
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: event_level
+            label: Event level
+      - type: TargetLayoutBox
+        label: Indicators (>=3)
+        children:
+          - type: VariablesListBox
+            name: indicators
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Adjust Cox for
+        children:
+          - type: VariablesListBox
+            name: adjusters
+            isTarget: true
+
+  - type: CollapseBox
+    label: Measurement model
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: reflective_confirmed
+        label: "I confirm these indicators reflect an underlying construct (not a composite score)"
+      - type: ComboBox
+        name: indicator_types
+        label: Indicator type
+      - type: ComboBox
+        name: factor_score_method
+        label: Factor score method
+      - type: CheckBox
+        name: standardize_scores
+
+  - type: CollapseBox
+    label: Output
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: show_plot_km
+        children:
+          - type: ComboBox
+            name: km_strata
+      - type: CheckBox
+        name: show_plot_loadings
+      - type: CheckBox
+        name: show_plot_path
+      - type: CheckBox
+        name: show_diagnostics
+      - type: Output
+        name: save_factor_scores
+      - type: TextBox
+        name: factor_score_name
+        format: string
+        enable: (save_factor_scores)
+      - type: CheckBox
+        name: show_r_code

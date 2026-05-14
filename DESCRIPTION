@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.38.1
+Version: 0.0.39.0
 Date: 2026-05-01
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
@@ -347,7 +347,8 @@ Suggests:
     superpc,
     ncvreg,
     relsurv,
-    rstpm2
+    rstpm2,
+    semPlot
 Config/testthat/edition: 3
 Collate: 
     '00jmv.R'

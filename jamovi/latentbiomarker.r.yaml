@@ -1,0 +1,266 @@
+---
+name:  latentbiomarker
+title: Latent Biomarker Construct + Cox Regression
+jrs:   '1.1'
+
+items:
+    - name: notices
+      title: Notices
+      type: Html
+      clearWith:
+        - dep_time
+        - dep_event
+        - indicators
+        - adjusters
+        - reflective_confirmed
+        - indicator_types
+
+    - name: summaryTable
+      title: Sample & Model Summary
+      type: Table
+      rows: 1
+      visible: (reflective_confirmed)
+      clearWith:
+        - dep_time
+        - dep_event
+        - indicators
+        - indicator_types
+      columns:
+        - name: n
+          title: "N"
+          type: integer
+        - name: n_events
+          title: "Events"
+          type: integer
+        - name: n_indicators
+          title: "Indicators"
+          type: integer
+        - name: n_params
+          title: "CFA parameters"
+          type: integer
+        - name: cpp
+          title: "Cases / parameter"
+          type: number
+          format: zto
+        - name: estimator
+          title: "Estimator"
+          type: text
+        - name: missing
+          title: "Missing-data handling"
+          type: text
+
+    - name: loadingsTable
+      title: Factor Loadings
+      type: Table
+      visible: (reflective_confirmed)
+      clearWith:
+        - indicators
+        - indicator_types
+      columns:
+        - name: indicator
+          title: "Indicator"
+          type: text
+        - name: est_std
+          title: "lambda (std)"
+          type: number
+        - name: est
+          title: "lambda (raw)"
+          type: number
+        - name: se
+          title: "SE"
+          type: number
+        - name: z
+          title: "z"
+          type: number
+        - name: pvalue
+          title: "p"
+          type: number
+          format: zto,pvalue
+        - name: r2
+          title: "R2 (communality)"
+          type: number
+
+    - name: reliabilityTable
+      title: Reliability
+      type: Table
+      rows: 1
+      visible: (reflective_confirmed)
+      clearWith:
+        - indicators
+      columns:
+        - name: omega
+          title: "omega (McDonald)"
+          type: number
+        - name: ave
+          title: "AVE"
+          type: number
+
+    - name: fitTable
+      title: Model Fit
+      type: Table
+      rows: 1
+      visible: (reflective_confirmed)
+      clearWith:
+        - indicators
+        - indicator_types
+      columns:
+        - name: chisq
+          title: "chi-sq"
+          type: number
+        - name: df
+          title: "df"
+          type: integer
+        - name: chisq_p
+          title: "p"
+          type: number
+          format: zto,pvalue
+        - name: cfi
+          title: "CFI"
+          type: number
+        - name: tli
+          title: "TLI"
+          type: number
+        - name: rmsea
+          title: "RMSEA"
+          type: number
+        - name: rmsea_lo
+          title: "RMSEA 90% lo"
+          type: number
+        - name: rmsea_hi
+          title: "RMSEA 90% hi"
+          type: number
+        - name: srmr
+          title: "SRMR"
+          type: number
+        - name: interpretation
+          title: "Fit"
+          type: text
+
+    - name: coxTable
+      title: Cox Regression
+      type: Table
+      visible: (reflective_confirmed)
+      clearWith:
+        - dep_time
+        - dep_event
+        - indicators
+        - adjusters
+      columns:
+        - name: term
+          title: "Term"
+          type: text
+        - name: hr
+          title: "HR"
+          type: number
+        - name: ci_lo
+          title: "95% CI lo"
+          type: number
+        - name: ci_hi
+          title: "95% CI hi"
+          type: number
+        - name: z
+          title: "z"
+          type: number
+        - name: pvalue
+          title: "p"
+          type: number
+          format: zto,pvalue
+
+    - name: phTable
+      title: Proportional-Hazards Test (cox.zph)
+      type: Table
+      visible: (reflective_confirmed && show_diagnostics)
+      clearWith:
+        - dep_time
+        - dep_event
+        - indicators
+        - adjusters
+      columns:
+        - name: term
+          title: "Term"
+          type: text
+        - name: chisq
+          title: "chi-sq"
+          type: number
+        - name: df
+          title: "df"
+          type: number
+        - name: pvalue
+          title: "p"
+          type: number
+          format: zto,pvalue
+
+    - name: kmPlot
+      title: Kaplan-Meier Plot by Factor-Score Stratum
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .kmPlot
+      visible: (reflective_confirmed && show_plot_km)
+      clearWith:
+        - dep_time
+        - dep_event
+        - indicators
+        - km_strata
+
+    - name: loadingsPlot
+      title: Standardized Loadings
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .loadingsPlot
+      visible: (reflective_confirmed && show_plot_loadings)
+      clearWith:
+        - indicators
+        - indicator_types
+
+    - name: pathPlot
+      title: Path Diagram
+      type: Image
+      width: 600
+      height: 450
+      renderFun: .pathPlot
+      visible: (reflective_confirmed && show_plot_path)
+      clearWith:
+        - indicators
+        - indicator_types
+        - adjusters
+
+    - name: miTable
+      title: Modification Indices (> 10)
+      type: Table
+      visible: (reflective_confirmed && show_diagnostics)
+      clearWith:
+        - indicators
+      columns:
+        - name: lhs
+          title: "LHS"
+          type: text
+        - name: op
+          title: "Op"
+          type: text
+        - name: rhs
+          title: "RHS"
+          type: text
+        - name: mi
+          title: "MI"
+          type: number
+
+    - name: rCode
+      title: Reproducible R Code
+      type: Preformatted
+      visible: (reflective_confirmed && show_r_code)
+      clearWith:
+        - dep_time
+        - dep_event
+        - indicators
+        - adjusters
+
+    - name: save_factor_scores
+      type: Output
+      varTitle: '`{factor_score_name}`'
+      measureType: continuous
+      clearWith:
+        - indicators
+        - indicator_types
+...
