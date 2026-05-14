@@ -134,6 +134,53 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
         },
 
+        # ---- Build lavaan model syntax with escaped indicator names ----
+        .buildModelSyntax = function(indicators) {
+            rhs <- paste(vapply(indicators, jmvcore::composeTerm, character(1)),
+                         collapse = " + ")
+            paste0("Factor =~ ", rhs)
+        },
+
+        # ---- Fit CFA ----
+        .fitCFA = function(df, indicators, est_spec) {
+            model <- private$.buildModelSyntax(indicators)
+            args <- list(
+                model = model,
+                data = df,
+                std.lv = TRUE,
+                estimator = est_spec$estimator
+            )
+            if (!is.null(est_spec$ordered) && length(est_spec$ordered) > 0L) {
+                args$ordered <- est_spec$ordered
+            }
+            if (!is.null(est_spec$missing)) {
+                args$missing <- est_spec$missing
+            }
+            do.call(lavaan::cfa, args)
+        },
+
+        # ---- Interpret fit indices ----
+        .interpretFit = function(cfi, tli, rmsea, srmr) {
+            if (is.na(cfi) || is.na(rmsea)) return("Just-identified - fit untestable")
+            good <- isTRUE(cfi >= 0.95) && isTRUE(tli >= 0.95) &&
+                    isTRUE(rmsea <= 0.06) && isTRUE(srmr <= 0.08)
+            acceptable <- isTRUE(cfi >= 0.90) && isTRUE(rmsea <= 0.10) && isTRUE(srmr <= 0.10)
+            if (good) "Good fit"
+            else if (acceptable) "Acceptable fit"
+            else "Poor fit"
+        },
+
+        # ---- McDonald's omega and AVE from standardized loadings ----
+        # omega = (sum lambda)^2 / ( (sum lambda)^2 + sum theta )
+        # AVE   = mean(lambda^2)
+        .computeReliability = function(std_loadings) {
+            lam <- std_loadings
+            theta <- 1 - lam^2
+            omega <- (sum(lam))^2 / ((sum(lam))^2 + sum(theta))
+            ave   <- mean(lam^2)
+            list(omega = omega, ave = ave)
+        },
+
         # ---- Holds CFA/Cox state across helper calls within one .run() ----
         .fitState = NULL,
 
@@ -245,11 +292,97 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }
             }
 
-            # Persist state for downstream tasks
+            # Persist pipeline state
             private$.fitState <- list(
                 df = df, n = n, k = k, n_params = n_params, cpp = cpp,
                 itypes = itypes, est_spec = est_spec
             )
+
+            # ---- Fit CFA ----
+            fit <- tryCatch(
+                private$.fitCFA(df, opt$indicators, est_spec),
+                error = function(e) {
+                    private$.addNotice("ERROR",
+                        "CFA estimation failed",
+                        paste0("lavaan::cfa() returned an error: ", conditionMessage(e),
+                               ". This often means the indicator covariance matrix is ",
+                               "non-positive-definite, or an indicator has zero variance."))
+                    NULL
+                })
+            if (is.null(fit) || !lavaan::lavInspect(fit, "converged")) {
+                if (!is.null(fit)) {
+                    private$.addNotice("ERROR",
+                        "CFA did not converge",
+                        "The lavaan model failed to converge. Check for near-zero variance indicators or extreme collinearity.")
+                }
+                private$.renderNotices()
+                return()
+            }
+            private$.fitState$fit <- fit
+
+            # ---- Fit indices table ----
+            fm <- lavaan::fitMeasures(fit,
+                c("chisq", "df", "pvalue", "cfi", "tli",
+                  "rmsea", "rmsea.ci.lower", "rmsea.ci.upper", "srmr"))
+            interp <- private$.interpretFit(fm["cfi"], fm["tli"], fm["rmsea"], fm["srmr"])
+            self$results$fitTable$setRow(rowNo = 1, list(
+                chisq          = unname(fm["chisq"]),
+                df             = unname(fm["df"]),
+                chisq_p        = unname(fm["pvalue"]),
+                cfi            = unname(fm["cfi"]),
+                tli            = unname(fm["tli"]),
+                rmsea          = unname(fm["rmsea"]),
+                rmsea_lo       = unname(fm["rmsea.ci.lower"]),
+                rmsea_hi       = unname(fm["rmsea.ci.upper"]),
+                srmr           = unname(fm["srmr"]),
+                interpretation = interp
+            ))
+
+            if (!is.na(fm["cfi"]) && (fm["cfi"] < 0.95 || fm["rmsea"] > 0.10)) {
+                private$.addNotice("WARNING",
+                    "Poor model fit",
+                    private$.messages$FIT_poor(fm["cfi"], fm["rmsea"]))
+            }
+
+            # ---- Loadings table ----
+            pe_std <- lavaan::parameterEstimates(fit, standardized = TRUE)
+            load_rows <- pe_std[pe_std$op == "=~" & pe_std$lhs == "Factor", , drop = FALSE]
+            loadings_table <- self$results$loadingsTable
+            for (i in seq_len(nrow(load_rows))) {
+                lam <- load_rows$std.all[i]
+                loadings_table$addRow(rowKey = i, values = list(
+                    indicator = load_rows$rhs[i],
+                    est_std   = lam,
+                    est       = load_rows$est[i],
+                    se        = load_rows$se[i],
+                    z         = load_rows$z[i],
+                    pvalue    = load_rows$pvalue[i],
+                    r2        = lam^2
+                ))
+            }
+
+            # ---- Reliability table ----
+            rel <- private$.computeReliability(load_rows$std.all)
+            self$results$reliabilityTable$setRow(rowNo = 1, list(
+                omega = rel$omega,
+                ave   = rel$ave
+            ))
+
+            # ---- Summary table ----
+            time_col  <- df[[opt$dep_time]]
+            event_col <- df[[opt$dep_event]]
+            n_events <- sum(as.character(event_col) == as.character(opt$event_level),
+                            na.rm = TRUE)
+            self$results$summaryTable$setRow(rowNo = 1, list(
+                n            = n,
+                n_events     = n_events,
+                n_indicators = k,
+                n_params     = n_params,
+                cpp          = cpp,
+                estimator    = est_spec$estimator,
+                missing      = ifelse(is.null(est_spec$missing), "listwise",
+                                      est_spec$missing)
+            ))
 
             # Success-path render — gate failures render and return earlier
             private$.renderNotices()

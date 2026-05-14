@@ -137,3 +137,69 @@ test_that("G3 soft warning: exactly 3 indicators is just-identified", {
     )
     expect_match(res$notices$content, "just-identified", fixed = TRUE)
 })
+
+test_that("CFA fit produces non-empty fit-indices row with traffic-light interpretation", {
+    skip_if_not_installed("lavaan")
+    set.seed(3)
+    n <- 400
+    f <- rnorm(n)
+    df <- data.frame(
+        time = rexp(n, 0.05),
+        evt  = factor(rbinom(n, 1, 0.4)),
+        ind1 = 0.8 * f + rnorm(n, sd = 0.6),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.7),
+        ind3 = 0.75 * f + rnorm(n, sd = 0.65),
+        ind4 = 0.85 * f + rnorm(n, sd = 0.5),
+        ind5 = 0.6 * f + rnorm(n, sd = 0.8)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df,
+        dep_time = "time",
+        dep_event = "evt",
+        event_level = "1",
+        indicators = paste0("ind", 1:5),
+        reflective_confirmed = TRUE
+    )
+    rows <- res$fitTable$asDF
+    expect_equal(nrow(rows), 1)
+    expect_true(rows$cfi[1] > 0.9)
+    expect_true(rows$rmsea[1] < 0.1)
+    expect_true(nchar(rows$interpretation[1]) > 0)
+})
+
+test_that("Loadings, reliability, and summary tables populate", {
+    skip_if_not_installed("lavaan")
+    set.seed(3)
+    n <- 400
+    f <- rnorm(n)
+    df <- data.frame(
+        time = rexp(n, 0.05),
+        evt  = factor(rbinom(n, 1, 0.4)),
+        ind1 = 0.8 * f + rnorm(n, sd = 0.6),
+        ind2 = 0.7 * f + rnorm(n, sd = 0.7),
+        ind3 = 0.75 * f + rnorm(n, sd = 0.65),
+        ind4 = 0.85 * f + rnorm(n, sd = 0.5),
+        ind5 = 0.6 * f + rnorm(n, sd = 0.8)
+    )
+    res <- ClinicoPath::latentbiomarker(
+        data = df,
+        dep_time = "time", dep_event = "evt", event_level = "1",
+        indicators = paste0("ind", 1:5),
+        reflective_confirmed = TRUE
+    )
+
+    L <- res$loadingsTable$asDF
+    expect_equal(nrow(L), 5)
+    expect_true(all(L$est_std > 0.3))
+    expect_true(all(L$r2 > 0 & L$r2 < 1))
+
+    R <- res$reliabilityTable$asDF
+    expect_true(R$omega[1] > 0.7)
+    expect_true(R$ave[1] > 0.3)
+
+    S <- res$summaryTable$asDF
+    expect_equal(S$n[1], n)
+    expect_equal(S$n_indicators[1], 5)
+    expect_equal(S$n_params[1], 10)
+    expect_equal(S$estimator[1], "MLR")
+})
