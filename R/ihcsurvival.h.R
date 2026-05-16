@@ -21,7 +21,8 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             landmarkAnalysis = FALSE,
             landmarkTime = 60,
             landmarkTimePoints = "12,24,36,48,60",
-            confidenceLevel = 0.95, ...) {
+            confidenceLevel = 0.95,
+            fdrMethod = "BH", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -140,6 +141,16 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 min=0.8,
                 max=0.99,
                 default=0.95)
+            private$..fdrMethod <- jmvcore::OptionList$new(
+                "fdrMethod",
+                fdrMethod,
+                options=list(
+                    "none",
+                    "BH",
+                    "BY",
+                    "holm",
+                    "bonferroni"),
+                default="BH")
 
             self$.addOption(private$..markers)
             self$.addOption(private$..survivalTime)
@@ -157,6 +168,7 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..landmarkTime)
             self$.addOption(private$..landmarkTimePoints)
             self$.addOption(private$..confidenceLevel)
+            self$.addOption(private$..fdrMethod)
         }),
     active = list(
         markers = function() private$..markers$value,
@@ -174,7 +186,8 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         landmarkAnalysis = function() private$..landmarkAnalysis$value,
         landmarkTime = function() private$..landmarkTime$value,
         landmarkTimePoints = function() private$..landmarkTimePoints$value,
-        confidenceLevel = function() private$..confidenceLevel$value),
+        confidenceLevel = function() private$..confidenceLevel$value,
+        fdrMethod = function() private$..fdrMethod$value),
     private = list(
         ..markers = NA,
         ..survivalTime = NA,
@@ -191,7 +204,8 @@ ihcsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..landmarkAnalysis = NA,
         ..landmarkTime = NA,
         ..landmarkTimePoints = NA,
-        ..confidenceLevel = NA)
+        ..confidenceLevel = NA,
+        ..fdrMethod = NA)
 )
 
 ihcsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -289,7 +303,8 @@ ihcsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 clearWith=list(
                     "markers",
                     "survivalTime",
-                    "survivalEvent"),
+                    "survivalEvent",
+                    "fdrMethod"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -307,6 +322,11 @@ ihcsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="p_value", 
                         `title`="P-value", 
+                        `type`="number", 
+                        `format`="zto:4"),
+                    list(
+                        `name`="p_adjusted", 
+                        `title`="Adjusted p", 
                         `type`="number", 
                         `format`="zto:4"),
                     list(
@@ -533,6 +553,11 @@ ihcsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis (e.g., "12,24,36")
 #' @param confidenceLevel Confidence level for survival estimates and hazard
 #'   ratios
+#' @param fdrMethod Multiple-testing adjustment applied across markers in the
+#'   panel. When testing several IHC markers in the same cohort, raw Cox
+#'   p-values overstate evidence; Benjamini-Hochberg controls FDR under
+#'   independence/positive dependence, Benjamini-Yekutieli is valid under
+#'   arbitrary dependence, Holm/Bonferroni control FWER.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -573,7 +598,8 @@ ihcsurvival <- function(
     landmarkAnalysis = FALSE,
     landmarkTime = 60,
     landmarkTimePoints = "12,24,36,48,60",
-    confidenceLevel = 0.95) {
+    confidenceLevel = 0.95,
+    fdrMethod = "BH") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcsurvival requires jmvcore to be installed (restart may be required)")
@@ -613,7 +639,8 @@ ihcsurvival <- function(
         landmarkAnalysis = landmarkAnalysis,
         landmarkTime = landmarkTime,
         landmarkTimePoints = landmarkTimePoints,
-        confidenceLevel = confidenceLevel)
+        confidenceLevel = confidenceLevel,
+        fdrMethod = fdrMethod)
 
     analysis <- ihcsurvivalClass$new(
         options = options,

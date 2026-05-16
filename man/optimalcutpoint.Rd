@@ -20,6 +20,7 @@ optimalcutpoint(
   survival_analysis = TRUE,
   confidence_level = 0.95,
   multiple_testing = "miller_siegmund",
+  nperm = 2000,
   plot_roc = TRUE,
   plot_distribution = TRUE,
   plot_survival = TRUE
@@ -56,7 +57,17 @@ stability}
 
 \item{confidence_level}{Confidence level for intervals and tests}
 
-\item{multiple_testing}{Multiple testing correction for cutpoint selection}
+\item{multiple_testing}{Multiple-testing correction for cut-point
+selection. For survival cut-points the article default Miller-Siegmund uses
+the Lausen-Schumacher / Hothorn-Lausen asymptotic correction
+(maxstat::maxstat.test pmethod="HL"); selecting "monte_carlo" performs a
+permutation-based correction analogous to X-tile (Camp 2004, Clin Cancer
+Res), which is more robust for small samples or non-Gaussian biomarker
+distributions.}
+
+\item{nperm}{Number of permutations used when multiple_testing =
+"monte_carlo". Increase for more stable corrected p-values at the cost of
+runtime.}
 
 \item{plot_roc}{Generate ROC curve with optimal cutpoint}
 

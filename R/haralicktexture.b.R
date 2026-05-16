@@ -67,7 +67,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 self$results$interpretation$setContent(
                     paste0("<div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;'>
                     <h4> Data Validation Error</h4>
-                    <p><strong>Problem:</strong> ", e$message, "</p>
+                    <p><strong>Problem:</strong> ", htmltools::htmlEscape(e$message), "</p>
                     <p><strong>Common solutions:</strong></p>
                     <ul>
                     <li>Check that your selected columns contain numeric texture values</li>
@@ -189,7 +189,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     "Texture feature validation failed:\n",
                     paste(names(validation_results$errors), ": ", validation_results$errors, collapse = "\n")
                 )
-                stop(error_msg)
+                jmvcore::reject(error_msg)
             }
             
             if (length(validation_results$warnings) > 0) {
@@ -1234,7 +1234,6 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 return(FALSE)
                 
             data <- image$state
-            library(ggplot2)
             
             # Create texture distribution plots
             texture_cols <- data$texture_features
@@ -1281,7 +1280,6 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 return(FALSE)
                 
             data <- image$state
-            library(ggplot2)
             
             texture_data <- data$texture_data
             
@@ -1362,7 +1360,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 "<h4>Texture Heterogeneity Assessment:</h4>",
                 "<ul>",
-                "<li><strong>Most Variable Feature:</strong> ", most_variable, " (CV = ", round(highest_cv, 3), ")",
+                "<li><strong>Most Variable Feature:</strong> ", htmltools::htmlEscape(most_variable), " (CV = ", round(highest_cv, 3), ")",
                 ifelse(highest_cv > 0.5, " - High heterogeneity detected", " - Moderate heterogeneity"), "</li>",
                 
                 if (length(feature_summaries) > 0) {
@@ -1502,7 +1500,7 @@ haralicktextureClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 "<ul style='margin-left: 20px; line-height: 1.8;'>",
                 "<li><strong>Sample Size:</strong> ", n_cases, " cases</li>",
                 "<li><strong>Texture Features:</strong> ", n_features, " Haralick measurements</li>",
-                "<li><strong>Most Variable Feature:</strong> ", most_variable, " (CV = ", round(highest_cv, 3), ")</li>",
+                "<li><strong>Most Variable Feature:</strong> ", htmltools::htmlEscape(most_variable), " (CV = ", round(highest_cv, 3), ")</li>",
                 "<li><strong>Data Completeness:</strong> ", round(complete_rate, 1), "%</li>",
                 if (biomarker_context != "general" && biomarker_context != "custom") {
                     paste0("<li><strong>Biomarker Context:</strong> ", 

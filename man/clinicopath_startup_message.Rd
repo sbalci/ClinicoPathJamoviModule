@@ -7,8 +7,11 @@
 clinicopath_startup_message()
 }
 \value{
-Invisible NULL (called for side effects)
+Invisible NULL (called for side effects).
 }
 \description{
-Displays information about the package author and website
+Returns the package author / website banner. Called by \code{.onAttach()} (see
+\code{R/zzz.R}) via \code{packageStartupMessage()}, which routes to the message stream
+and respects \code{suppressPackageStartupMessages()}. Available as an exported
+function so users can print the banner explicitly.
 }

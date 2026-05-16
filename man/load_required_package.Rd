@@ -2,18 +2,24 @@
 % Please edit documentation in R/utils.R
 \name{load_required_package}
 \alias{load_required_package}
-\title{Load required packages with error handling}
+\title{Check whether a required package is available}
 \usage{
-load_required_package(package_name, install_if_missing = TRUE)
+load_required_package(package_name, install_if_missing = FALSE)
 }
 \arguments{
-\item{package_name}{Character string with package name}
+\item{package_name}{Character string with package name.}
 
-\item{install_if_missing}{Logical, whether to install if package is missing}
+\item{install_if_missing}{Ignored. Retained for backwards compatibility
+with earlier signatures of this function. A warning is issued when set
+to anything other than its default.}
 }
 \value{
-Logical indicating success
+Logical indicating whether the package is available.
 }
 \description{
-Load required packages with error handling
+Thin wrapper around \code{requireNamespace()} that returns a boolean. Packages a
+jamovi module needs must be listed in \code{DESCRIPTION} \verb{Imports:} so they are
+installed at install time — this helper does NOT install anything (auto-
+installing dependencies at runtime is a CRAN policy violation and a security
+hazard).
 }

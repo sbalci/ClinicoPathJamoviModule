@@ -763,6 +763,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
+        errors = function() private$.items[["errors"]],
+        strongWarnings = function() private$.items[["strongWarnings"]],
+        warnings = function() private$.items[["warnings"]],
+        infoMessages = function() private$.items[["infoMessages"]],
         medianSurvivalHeading = function() private$.items[["medianSurvivalHeading"]],
         medianSummary = function() private$.items[["medianSummary"]],
         medianTable = function() private$.items[["medianTable"]],
@@ -878,6 +882,26 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Critical Errors",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="strongWarnings",
+                title="Strong Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="infoMessages",
+                title="Information",
+                visible=FALSE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSurvivalHeading",
@@ -2566,6 +2590,10 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$medianSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr

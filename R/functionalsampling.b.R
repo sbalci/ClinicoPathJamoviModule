@@ -29,8 +29,8 @@ functionalsamplingClass <- R6::R6Class(
         .prepareData = function() {
             raw_data <- self$data
             data_list <- list(
-                x = as.numeric(raw_data[[self$options$x_coord]]),
-                y = as.numeric(raw_data[[self$options$y_coord]]),
+                x = jmvcore::toNumeric(raw_data[[self$options$x_coord]]),
+                y = jmvcore::toNumeric(raw_data[[self$options$y_coord]]),
                 type = as.factor(raw_data[[self$options$event_type]])
             )
             private$.data <- as.data.frame(data_list)

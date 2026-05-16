@@ -98,5 +98,11 @@ children:
     margin: large
     children:
       - type: TextBox
+        name: nperm
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
         name: cv_folds
         format: number

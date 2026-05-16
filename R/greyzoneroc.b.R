@@ -26,7 +26,7 @@ greyzonerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Validate binary outcome
             outcome_levels <- levels(outcome)
             if (length(outcome_levels) != 2) {
-                stop("Outcome variable must have exactly 2 levels for grey-zone ROC analysis")
+                jmvcore::reject("Outcome variable must have exactly 2 levels for grey-zone ROC analysis")
             }
 
             # Get positive level

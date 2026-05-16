@@ -357,6 +357,10 @@ A results object containing:
 \tabular{llllll}{
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
+\code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 \code{results$medianSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr

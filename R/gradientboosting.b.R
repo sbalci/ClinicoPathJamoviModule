@@ -38,6 +38,19 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
             },
 
             .run = function() {
+                # Preserve global RNG state so set.seed() in .buildGradientBoostingModel
+                # and runif() in placeholder predictions do not leak into the user's session.
+                if (exists(".Random.seed", envir = .GlobalEnv)) {
+                    .saved_seed <- get(".Random.seed", envir = .GlobalEnv)
+                    on.exit(assign(".Random.seed", .saved_seed, envir = .GlobalEnv), add = TRUE)
+                } else {
+                    on.exit(
+                        if (exists(".Random.seed", envir = .GlobalEnv))
+                            rm(".Random.seed", envir = .GlobalEnv),
+                        add = TRUE
+                    )
+                }
+
                 # Check for required variables
                 if (is.null(self$options$time) || is.null(self$options$event) || length(self$options$predictors) == 0) {
                     return()
@@ -53,12 +66,12 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                 
                 for (pkg in required_packages[[algorithm]]) {
                     if (!requireNamespace(pkg, quietly = TRUE)) {
-                        stop(paste("Package '", pkg, "' is required for", algorithm, "algorithm. Please install it."))
+                        jmvcore::reject(paste("Package '", pkg, "' is required for", algorithm, "algorithm. Please install it."))
                     }
                 }
-                
+
                 if (!requireNamespace("survival", quietly = TRUE)) {
-                    stop("Package 'survival' is required for survival analysis. Please install it.")
+                    jmvcore::reject("Package 'survival' is required for survival analysis. Please install it.")
                 }
 
                 # Get data and options
@@ -99,7 +112,7 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                 }, error = function(e) {
                     self$results$todo$setContent(paste0(
                         "<h4> Analysis Error</h4>",
-                        "<p>Error in gradient boosting analysis: ", e$message, "</p>",
+                        "<p>Error in gradient boosting analysis: ", htmltools::htmlEscape(e$message), "</p>",
                         "<p>Please check your data and parameter settings.</p>"
                     ))
                 })
@@ -112,20 +125,19 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                 
                 # Validate time variable
                 if (!is.numeric(time_col)) {
-                    stop("Time variable must be numeric")
+                    jmvcore::reject("Time variable must be numeric")
                 }
-                
+
                 # Handle different event variable types
                 if (is.factor(event_col)) {
                     # Convert factor to numeric, preserving levels
                     event_col <- as.numeric(event_col) - 1
                 } else if (!is.numeric(event_col)) {
-                    stop("Event variable must be numeric or factor")
+                    jmvcore::reject("Event variable must be numeric or factor")
                 }
                 
                 # Create survival object
-                library(survival)
-                surv_obj <- Surv(time_col, event_col)
+                surv_obj <- survival::Surv(time_col, event_col)
                 
                 # Extract predictor data
                 pred_data <- data[predictors]
@@ -153,7 +165,7 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                 analysis_data <- analysis_data[complete_cases, ]
                 
                 if (nrow(analysis_data) == 0) {
-                    stop("No complete cases available for analysis")
+                    jmvcore::reject("No complete cases available for analysis")
                 }
                 
                 return(list(
@@ -213,39 +225,39 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
             },
 
             .buildMboostModel = function(surv_data) {
-                library(mboost)
-                
                 # Prepare formula
+                rhs_predictors <- jmvcore::composeTerms(as.list(surv_data$predictors))
                 if (is.null(surv_data$strata)) {
-                    formula_str <- paste("survival_object ~", paste(surv_data$predictors, collapse = " + "))
+                    formula_str <- paste0("survival_object ~ ", paste(rhs_predictors, collapse = " + "))
                 } else {
-                    formula_str <- paste("survival_object ~ strata(", surv_data$strata, ") +", paste(surv_data$predictors, collapse = " + "))
+                    strata_term <- paste0("strata(", jmvcore::composeTerm(surv_data$strata), ")")
+                    formula_str <- paste0("survival_object ~ ", strata_term, " + ", paste(rhs_predictors, collapse = " + "))
                 }
-                
-                formula_obj <- as.formula(formula_str)
-                
+
+                formula_obj <- jmvcore::asFormula(formula_str)
+
                 # Set up control parameters
-                ctrl_params <- boost_control(
+                ctrl_params <- mboost::boost_control(
                     mstop = self$options$n_trees,
                     nu = self$options$learning_rate,
                     trace = FALSE
                 )
-                
+
                 # Build model with Cox proportional hazards
-                model <- glmboost(
+                model <- mboost::glmboost(
                     formula_obj,
                     data = surv_data$data,
-                    family = CoxPH(),
+                    family = mboost::CoxPH(),
                     control = ctrl_params
                 )
-                
+
                 # Perform cross-validation if requested
                 cv_result <- NULL
                 if (self$options$cv_folds > 0) {
-                    cv_result <- cvrisk(model, folds = cv(model.weights(model), type = "kfold", B = self$options$cv_folds))
-                    
+                    cv_result <- mboost::cvrisk(model, folds = mboost::cv(mboost::model.weights(model), type = "kfold", B = self$options$cv_folds))
+
                     if (self$options$early_stopping) {
-                        optimal_mstop <- mstop(cv_result)
+                        optimal_mstop <- mboost::mstop(cv_result)
                         model[optimal_mstop]
                     }
                 }
@@ -259,17 +271,15 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
             },
 
             .buildGbmModel = function(surv_data) {
-                library(gbm)
-                
                 # Prepare data for gbm (needs separate time, event, and predictors)
                 time_col <- surv_data$data$survival_object[, "time"]
                 event_col <- surv_data$data$survival_object[, "status"]
                 pred_data <- surv_data$data[surv_data$predictors]
-                
+
                 # Build GBM model
-                model <- gbm(
+                model <- gbm::gbm(
                     x = pred_data,
-                    y = Surv(time_col, event_col),
+                    y = survival::Surv(time_col, event_col),
                     distribution = "coxph",
                     n.trees = self$options$n_trees,
                     shrinkage = self$options$learning_rate,
@@ -280,9 +290,9 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                     cv.folds = self$options$cv_folds,
                     verbose = FALSE
                 )
-                
+
                 # Find optimal number of trees
-                optimal_trees <- gbm.perf(model, method = "cv", plot.it = FALSE)
+                optimal_trees <- gbm::gbm.perf(model, method = "cv", plot.it = FALSE)
                 
                 return(list(
                     model = model,
@@ -293,22 +303,19 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
             },
 
             .buildXgboostModel = function(surv_data) {
-                library(xgboost)
-                library(Matrix)
-                
                 # Prepare data for XGBoost
                 time_col <- surv_data$data$survival_object[, "time"]
                 event_col <- surv_data$data$survival_object[, "status"]
                 pred_data <- as.matrix(surv_data$data[surv_data$predictors])
-                
+
                 # Create XGBoost survival objective (using AFT approximation)
                 # Note: XGBoost doesn't natively support Cox PH, so we use AFT approximation
                 y_lower <- ifelse(event_col == 1, time_col, -Inf)
                 y_upper <- ifelse(event_col == 1, time_col, time_col)
-                
+
                 # Prepare DMatrix
-                dtrain <- xgb.DMatrix(data = pred_data, label = log(time_col + 1))
-                
+                dtrain <- xgboost::xgb.DMatrix(data = pred_data, label = log(time_col + 1))
+
                 # Set parameters
                 params <- list(
                     objective = "survival:aft",
@@ -320,11 +327,11 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                     lambda = self$options$reg_lambda,
                     verbosity = 0
                 )
-                
+
                 # Train model with cross-validation
                 cv_result <- NULL
                 if (self$options$cv_folds > 0) {
-                    cv_result <- xgb.cv(
+                    cv_result <- xgboost::xgb.cv(
                         params = params,
                         data = dtrain,
                         nrounds = self$options$n_trees,
@@ -332,14 +339,14 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                         early_stopping_rounds = if (self$options$early_stopping) self$options$patience else NULL,
                         verbose = FALSE
                     )
-                    
+
                     optimal_trees <- cv_result$best_iteration
                 } else {
                     optimal_trees <- self$options$n_trees
                 }
-                
+
                 # Train final model
-                model <- xgb.train(
+                model <- xgboost::xgb.train(
                     params = params,
                     data = dtrain,
                     nrounds = optimal_trees,

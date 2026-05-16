@@ -232,6 +232,10 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        errors = function() private$.items[["errors"]],
+        strongWarnings = function() private$.items[["strongWarnings"]],
+        warnings = function() private$.items[["warnings"]],
+        infoMessages = function() private$.items[["infoMessages"]],
         summary = function() private$.items[["summary"]],
         outputTable = function() private$.items[["outputTable"]],
         diagnosticsTable = function() private$.items[["diagnosticsTable"]],
@@ -272,6 +276,26 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "awod",
                     "recurrence",
                     "recurrenceLevel")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Critical Errors",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="strongWarnings",
+                title="Strong Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="infoMessages",
+                title="Information",
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -539,6 +563,10 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$outputTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$diagnosticsTable} \tab \tab \tab \tab \tab a table \cr

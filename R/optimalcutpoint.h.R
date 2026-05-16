@@ -20,6 +20,7 @@ optimalcutpointOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             survival_analysis = TRUE,
             confidence_level = 0.95,
             multiple_testing = "miller_siegmund",
+            nperm = 2000,
             plot_roc = TRUE,
             plot_distribution = TRUE,
             plot_survival = TRUE, ...) {
@@ -123,8 +124,15 @@ optimalcutpointOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "none",
                     "bonferroni",
                     "holm",
-                    "miller_siegmund"),
+                    "miller_siegmund",
+                    "monte_carlo"),
                 default="miller_siegmund")
+            private$..nperm <- jmvcore::OptionInteger$new(
+                "nperm",
+                nperm,
+                min=200,
+                max=50000,
+                default=2000)
             private$..plot_roc <- jmvcore::OptionBool$new(
                 "plot_roc",
                 plot_roc,
@@ -152,6 +160,7 @@ optimalcutpointOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..survival_analysis)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..multiple_testing)
+            self$.addOption(private$..nperm)
             self$.addOption(private$..plot_roc)
             self$.addOption(private$..plot_distribution)
             self$.addOption(private$..plot_survival)
@@ -171,6 +180,7 @@ optimalcutpointOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         survival_analysis = function() private$..survival_analysis$value,
         confidence_level = function() private$..confidence_level$value,
         multiple_testing = function() private$..multiple_testing$value,
+        nperm = function() private$..nperm$value,
         plot_roc = function() private$..plot_roc$value,
         plot_distribution = function() private$..plot_distribution$value,
         plot_survival = function() private$..plot_survival$value),
@@ -189,6 +199,7 @@ optimalcutpointOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..survival_analysis = NA,
         ..confidence_level = NA,
         ..multiple_testing = NA,
+        ..nperm = NA,
         ..plot_roc = NA,
         ..plot_distribution = NA,
         ..plot_survival = NA)
@@ -236,7 +247,9 @@ optimalcutpointResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "time_var",
                     "status_var",
                     "analysis_type",
-                    "cutpoint_method"),
+                    "cutpoint_method",
+                    "multiple_testing",
+                    "nperm"),
                 columns=list()))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -393,7 +406,16 @@ optimalcutpointBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param performance_metrics Calculate comprehensive performance metrics
 #' @param survival_analysis Perform survival analysis for optimal groups
 #' @param confidence_level Confidence level for intervals and tests
-#' @param multiple_testing Multiple testing correction for cutpoint selection
+#' @param multiple_testing Multiple-testing correction for cut-point
+#'   selection. For survival cut-points the article default Miller-Siegmund uses
+#'   the Lausen-Schumacher / Hothorn-Lausen asymptotic correction
+#'   (maxstat::maxstat.test pmethod="HL"); selecting "monte_carlo" performs a
+#'   permutation-based correction analogous to X-tile (Camp 2004, Clin Cancer
+#'   Res), which is more robust for small samples or non-Gaussian biomarker
+#'   distributions.
+#' @param nperm Number of permutations used when multiple_testing =
+#'   "monte_carlo". Increase for more stable corrected p-values at the cost of
+#'   runtime.
 #' @param plot_roc Generate ROC curve with optimal cutpoint
 #' @param plot_distribution Show biomarker distribution with cutpoint
 #' @param plot_survival Generate Kaplan-Meier curves for optimal groups
@@ -435,6 +457,7 @@ optimalcutpoint <- function(
     survival_analysis = TRUE,
     confidence_level = 0.95,
     multiple_testing = "miller_siegmund",
+    nperm = 2000,
     plot_roc = TRUE,
     plot_distribution = TRUE,
     plot_survival = TRUE) {
@@ -470,6 +493,7 @@ optimalcutpoint <- function(
         survival_analysis = survival_analysis,
         confidence_level = confidence_level,
         multiple_testing = multiple_testing,
+        nperm = nperm,
         plot_roc = plot_roc,
         plot_distribution = plot_distribution,
         plot_survival = plot_survival)

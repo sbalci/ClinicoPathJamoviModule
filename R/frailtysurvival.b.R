@@ -57,9 +57,9 @@ frailtysurvivalClass <- R6::R6Class(
             
             self$results$instructions$setContent(
                 paste0("<h3>Frailty Survival Analysis Ready</h3>
-                <p><b>Time Variable:</b> ", time_var, "</p>
-                <p><b>Status Variable:</b> ", status_var, "</p>
-                <p><b>Cluster Variable:</b> ", cluster_var, "</p>
+                <p><b>Time Variable:</b> ", htmltools::htmlEscape(time_var), "</p>
+                <p><b>Status Variable:</b> ", htmltools::htmlEscape(status_var), "</p>
+                <p><b>Cluster Variable:</b> ", htmltools::htmlEscape(cluster_var), "</p>
                 <p><b>Frailty Type:</b> ", stringr::str_to_title(gsub("_", " ", self$options$frailty_type)), "</p>
                 <p><b>Distribution:</b> ", stringr::str_to_title(gsub("_", " ", self$options$frailty_distribution)), "</p>
                 <p>Click <b>Results</b> below to view the analysis results.</p>")
@@ -86,8 +86,8 @@ frailtysurvivalClass <- R6::R6Class(
             missing_vars <- required_vars[!(required_vars %in% names(data))]
             if (length(missing_vars) > 0) {
                 self$results$model_summary$setContent(
-                    paste("Error: The following required variables were not found:", 
-                          paste(missing_vars, collapse = ", "))
+                    paste("Error: The following required variables were not found:",
+                          paste(htmltools::htmlEscape(missing_vars), collapse = ", "))
                 )
                 return()
             }
@@ -105,8 +105,8 @@ frailtysurvivalClass <- R6::R6Class(
                     missing_covs <- covariates[!(covariates %in% names(data))]
                     if (length(missing_covs) > 0) {
                         self$results$model_summary$setContent(
-                            paste("Error: The following covariates were not found:", 
-                                  paste(missing_covs, collapse = ", "))
+                            paste("Error: The following covariates were not found:",
+                                  paste(htmltools::htmlEscape(missing_covs), collapse = ", "))
                         )
                         return()
                     }
@@ -143,7 +143,7 @@ frailtysurvivalClass <- R6::R6Class(
                 private$.fitFrailtyModels(analysis_data, time_var, status_var, cluster_var, covariates)
                 
             }, error = function(e) {
-                self$results$model_summary$setContent(paste("Analysis error:", e$message))
+                self$results$model_summary$setContent(paste("Analysis error:", htmltools::htmlEscape(e$message)))
             })
         },
         
@@ -157,9 +157,9 @@ frailtysurvivalClass <- R6::R6Class(
             # Create survival object
             surv_obj <- Surv(analysis_data$time, analysis_data$status)
             
-            # Build formula
+            # Build formula (backtick-escape user covariate names)
             if (length(covariates) > 0) {
-                covariate_terms <- paste(covariates, collapse = " + ")
+                covariate_terms <- paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                 if (frailty_type == "shared") {
                     if (estimation_method == "penalized_likelihood") {
                         # Use survival::frailty
@@ -187,28 +187,30 @@ frailtysurvivalClass <- R6::R6Class(
             # Fit models
             tryCatch({
                 
-                # Fit frailty model
+                # Fit frailty model (allowlist-validated parse; `frailty` is globally allow-listed in jmvcore)
                 if (estimation_method == "penalized_likelihood" && frailty_type == "shared") {
                     # Use survival package
-                    frailty_model <- coxph(as.formula(formula_str), data = analysis_data)
+                    frailty_model <- coxph(jmvcore::asFormula(formula_str), data = analysis_data)
                 } else if (estimation_method %in% c("em_algorithm", "laplace_approximation")) {
-                    # Use coxme package
+                    # Use coxme package (covariate names backtick-escaped via composeTerms)
                     if (length(covariates) > 0) {
-                        coxme_formula <- as.formula(paste("surv_obj ~", paste(covariates, collapse = " + "), "+ (1|cluster)"))
+                        coxme_rhs <- paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
+                        coxme_formula <- jmvcore::asFormula(paste0("surv_obj ~ ", coxme_rhs, " + (1|cluster)"))
                     } else {
-                        coxme_formula <- as.formula("surv_obj ~ (1|cluster)")
+                        coxme_formula <- jmvcore::asFormula("surv_obj ~ (1|cluster)")
                     }
                     frailty_model <- coxme(coxme_formula, data = analysis_data)
                 } else {
                     # Fallback to basic frailty
-                    frailty_model <- coxph(as.formula(formula_str), data = analysis_data)
+                    frailty_model <- coxph(jmvcore::asFormula(formula_str), data = analysis_data)
                 }
-                
+
                 # Fit standard Cox model for comparison
                 if (length(covariates) > 0) {
-                    cox_formula <- as.formula(paste("surv_obj ~", paste(covariates, collapse = " + ")))
+                    cox_rhs <- paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
+                    cox_formula <- jmvcore::asFormula(paste0("surv_obj ~ ", cox_rhs))
                 } else {
-                    cox_formula <- as.formula("surv_obj ~ 1")
+                    cox_formula <- jmvcore::asFormula("surv_obj ~ 1")
                 }
                 standard_model <- coxph(cox_formula, data = analysis_data)
                 
@@ -234,7 +236,7 @@ frailtysurvivalClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                self$results$model_summary$setContent(paste("Model fitting error:", e$message))
+                self$results$model_summary$setContent(paste("Model fitting error:", htmltools::htmlEscape(e$message)))
             })
         },
         
@@ -401,14 +403,14 @@ frailtysurvivalClass <- R6::R6Class(
                             se <- round(covariate_coefs[i, "se(coef)"], 4)
                             z <- round(covariate_coefs[i, "z"], 3)
                             p_val <- format.pval(covariate_coefs[i, "Pr(>|z|)"])
-                            
+
                             # Calculate 95% CI
                             ci_lower <- round(exp(coef - 1.96 * se), 4)
                             ci_upper <- round(exp(coef + 1.96 * se), 4)
                             ci_text <- paste0("(", ci_lower, ", ", ci_upper, ")")
-                            
+
                             html <- paste0(html, "<tr>")
-                            html <- paste0(html, "<td>", var_name, "</td>")
+                            html <- paste0(html, "<td>", htmltools::htmlEscape(var_name), "</td>")
                             html <- paste0(html, "<td>", coef, "</td>")
                             html <- paste0(html, "<td>", exp_coef, "</td>")
                             html <- paste0(html, "<td>", se, "</td>")
@@ -437,9 +439,9 @@ frailtysurvivalClass <- R6::R6Class(
                             se <- round(coefficients[i, 2], 4)
                             z <- round(coefficients[i, 3], 3)
                             p_val <- format.pval(coefficients[i, 4])
-                            
+
                             html <- paste0(html, "<tr>")
-                            html <- paste0(html, "<td>", var_name, "</td>")
+                            html <- paste0(html, "<td>", htmltools::htmlEscape(var_name), "</td>")
                             html <- paste0(html, "<td>", coef, "</td>")
                             html <- paste0(html, "<td>", exp_coef, "</td>")
                             html <- paste0(html, "<td>", se, "</td>")

@@ -26,7 +26,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             multievent = FALSE,
             hr = FALSE,
             sty = "t1",
-            ph_cox = FALSE,
+            ph_cox = TRUE,
             km = FALSE,
             endplot = 60,
             byplot = 12,
@@ -206,7 +206,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..ph_cox <- jmvcore::OptionBool$new(
                 "ph_cox",
                 ph_cox,
-                default=FALSE)
+                default=TRUE)
             private$..km <- jmvcore::OptionBool$new(
                 "km",
                 km,
@@ -523,6 +523,10 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        errors = function() private$.items[["errors"]],
+        strongWarnings = function() private$.items[["strongWarnings"]],
+        warnings = function() private$.items[["warnings"]],
+        infoMessages = function() private$.items[["infoMessages"]],
         multivariableCoxHeading = function() private$.items[["multivariableCoxHeading"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
@@ -602,6 +606,26 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Critical Errors",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="strongWarnings",
+                title="Strong Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="infoMessages",
+                title="Information",
+                visible=FALSE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="multivariableCoxHeading",
@@ -1384,7 +1408,10 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sty The style of the hazard ratio (forest) plot. "finalfit" or
 #'   "survminer forestplot".
 #' @param ph_cox If true, tests the proportional hazards assumption for the
-#'   Cox model. Use if you suspect violations of the PH assumption.
+#'   Cox model using survival::cox.zph and surfaces global + per-covariate
+#'   Schoenfeld residual statistics. REMARK reporting recommends this be
+#'   reported for any Cox-based prognostic study. Disable only to suppress the
+#'   diagnostic when not needed.
 #' @param km If true, produces a Kaplan-Meier survival plot. Useful for
 #'   visualization of survival functions without covariate adjustment.
 #' @param endplot The maximum follow-up time (in units defined by
@@ -1450,6 +1477,10 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
@@ -1529,7 +1560,7 @@ multisurvival <- function(
     multievent = FALSE,
     hr = FALSE,
     sty = "t1",
-    ph_cox = FALSE,
+    ph_cox = TRUE,
     km = FALSE,
     endplot = 60,
     byplot = 12,

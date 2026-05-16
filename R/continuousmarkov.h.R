@@ -251,6 +251,8 @@ continuousmarkovResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        errors = function() private$.items[["errors"]],
+        warnings = function() private$.items[["warnings"]],
         summary = function() private$.items[["summary"]],
         dataStructure = function() private$.items[["dataStructure"]],
         transitionMatrix = function() private$.items[["transitionMatrix"]],
@@ -285,6 +287,14 @@ continuousmarkovResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "subject",
                     "time",
                     "state")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Errors"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -656,6 +666,8 @@ continuousmarkovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataStructure} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$transitionMatrix} \tab \tab \tab \tab \tab a table \cr

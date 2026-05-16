@@ -38,8 +38,8 @@ groomecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
                 html <- paste0(html,
                     '<div style="margin: 8px 0; padding: 10px; background-color: ', color, '22; border-left: 4px solid ', color, '; border-radius: 3px;">',
-                    '<strong style="color: ', color, ';">', icon, ' ', notice$title, '</strong><br/>',
-                    '<span style="color: #333;">', notice$content, '</span>',
+                    '<strong style="color: ', color, ';">', icon, ' ', htmltools::htmlEscape(notice$title), '</strong><br/>',
+                    '<span style="color: #333;">', htmltools::htmlEscape(notice$content), '</span>',
                     '</div>'
                 )
             }
@@ -72,6 +72,22 @@ groomecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
         # Main run function
         .run = function() {
+            # Preserve global RNG state so set.seed() in bootstrap path does not
+            # leak into the user's session.
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                .saved_seed <- get(".Random.seed", envir = .GlobalEnv)
+                on.exit(assign(".Random.seed", .saved_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv),
+                    add = TRUE
+                )
+            }
+
+            # Reset notice list to avoid carrying over notices from prior .run() calls
+            private$.noticeList <- list()
+
             # Check inputs
             if (is.null(self$options$time) || is.null(self$options$event) ||
                 is.null(self$options$stage1) || is.null(self$options$stage2)) {

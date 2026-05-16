@@ -87,7 +87,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Validate data
             if (nrow(self$data) == 0) {
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows")
             }
             
             # Process and validate data
@@ -197,7 +197,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             processed_data <- processed_data[complete.cases(processed_data), ]
             
             if (nrow(processed_data) == 0) {
-                stop("No complete cases found for selected variables")
+                jmvcore::reject("No complete cases found for selected variables")
             }
             
             return(processed_data)
@@ -254,7 +254,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_val <- length(x[!is.na(x)])
             
             paste(
-                "<p><strong>", var_name, ":</strong>",
+                "<p><strong>", htmltools::htmlEscape(var_name), ":</strong>",
                 sprintf("%.3f ± %.3f", central_val, sd_val),
                 "(n =", n_val, ")</p>"
             )
@@ -282,8 +282,8 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             html <- paste(html, "<th style='border: 1px solid #ddd; padding: 8px;'>Median</th></tr>")
             
             for (i in 1:nrow(group_summary)) {
-                html <- paste(html, 
-                    "<tr><td style='border: 1px solid #ddd; padding: 8px;'>", group_summary[[group_var]][i], "</td>",
+                html <- paste(html,
+                    "<tr><td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(group_summary[[group_var]][i]), "</td>",
                     "<td style='border: 1px solid #ddd; padding: 8px;'>", group_summary$n[i], "</td>",
                     "<td style='border: 1px solid #ddd; padding: 8px;'>", 
                     sprintf("%.3f ± %.3f", group_summary$mean[i], group_summary$sd[i]), "</td>",
@@ -313,16 +313,16 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 switch(self$options$stat_method,
                     "anova_1way" = {
                         if (!is.null(group_var)) {
-                            formula_str <- paste(y_var, "~", group_var)
-                            aov_result <- aov(as.formula(formula_str), data = data)
+                            formula_str <- paste0(jmvcore::composeTerm(y_var), " ~ ", jmvcore::composeTerm(group_var))
+                            aov_result <- aov(jmvcore::asFormula(formula_str), data = data)
                             results$anova <- summary(aov_result)
                             results$model <- aov_result
                         }
                     },
                     "anova_2way" = {
                         if (!is.null(group_var) && !is.null(self$options$blocks)) {
-                            formula_str <- paste(y_var, "~", group_var, "*", self$options$blocks)
-                            aov_result <- aov(as.formula(formula_str), data = data)
+                            formula_str <- paste0(jmvcore::composeTerm(y_var), " ~ ", jmvcore::composeTerm(group_var), " * ", jmvcore::composeTerm(self$options$blocks))
+                            aov_result <- aov(jmvcore::asFormula(formula_str), data = data)
                             results$anova <- summary(aov_result)
                             results$model <- aov_result
                         }
@@ -365,7 +365,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!stat_results$success) {
                 error_html <- paste(
                     "<div style='color: red; padding: 10px;'>",
-                    "<strong>Statistical Analysis Error:</strong>", stat_results$error,
+                    "<strong>Statistical Analysis Error:</strong>", htmltools::htmlEscape(stat_results$error),
                     "</div>"
                 )
                 self$results$statistical_analysis$setContent(error_html)
@@ -391,7 +391,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(results$anova)) {
                 html <- paste(html, "<h5>Analysis of Variance:</h5>")
                 anova_table <- results$anova[[1]]
-                html <- paste(html, "<pre>", paste(capture.output(print(anova_table)), collapse = "\n"), "</pre>")
+                html <- paste(html, "<pre>", htmltools::htmlEscape(paste(capture.output(print(anova_table)), collapse = "\n")), "</pre>")
             }
             
             # t-test results
@@ -444,10 +444,10 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "levelwise" = grafify::posthoc_Levelwise(model)
                 )
                 
-                html <- paste(html, "<pre>", paste(capture.output(print(posthoc_results)), collapse = "\n"), "</pre>")
+                html <- paste(html, "<pre>", htmltools::htmlEscape(paste(capture.output(print(posthoc_results)), collapse = "\n")), "</pre>")
                 
             }, error = function(e) {
-                html <- paste(html, "<p style='color: red;'>Error in post-hoc analysis:", e$message, "</p>")
+                html <- paste(html, "<p style='color: red;'>Error in post-hoc analysis:", htmltools::htmlEscape(e$message), "</p>")
             })
             
             html <- paste(html, "</div>")
@@ -560,7 +560,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if (!requireNamespace("grafify", quietly = TRUE)) {
-                stop("grafify package is required for plotting")
+                jmvcore::reject("grafify package is required for plotting")
             }
             
             # Generate the plot based on type
@@ -582,7 +582,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Validate required variables for plot type
                 if (is.null(plot_data$x_var) || is.null(plot_data$y_var)) {
                     if (!plot_type %in% c("density", "histogram")) {
-                        stop("X and Y variables required for this plot type")
+                        jmvcore::reject("X and Y variables required for this plot type")
                     }
                 }
                 
@@ -646,7 +646,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             } else {
                 # Single group scatterbar
-                plot <- ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var)) +
+                plot <- ggplot2::ggplot(data, do.call(ggplot2::aes, lapply(list(x = x_var, y = y_var), as.name))) +
                     ggplot2::geom_point(alpha = plot_data$transparency, size = plot_data$point_size)
             }
             
@@ -671,7 +671,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     width = plot_data$jitter_width
                 )
             } else {
-                plot <- ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var)) +
+                plot <- ggplot2::ggplot(data, do.call(ggplot2::aes, lapply(list(x = x_var, y = y_var), as.name))) +
                     ggplot2::geom_boxplot() +
                     ggplot2::geom_point(alpha = plot_data$transparency, size = plot_data$point_size)
             }
@@ -697,7 +697,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     width = plot_data$jitter_width
                 )
             } else {
-                plot <- ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var)) +
+                plot <- ggplot2::ggplot(data, do.call(ggplot2::aes, lapply(list(x = x_var, y = y_var), as.name))) +
                     ggplot2::geom_violin() +
                     ggplot2::geom_point(alpha = plot_data$transparency, size = plot_data$point_size)
             }
@@ -724,7 +724,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             } else {
                 # Create summary dot plot manually
-                plot <- ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var)) +
+                plot <- ggplot2::ggplot(data, do.call(ggplot2::aes, lapply(list(x = x_var, y = y_var), as.name))) +
                     ggplot2::stat_summary(fun = mean, geom = "point", size = plot_data$point_size)
             }
             
@@ -747,7 +747,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     size = plot_data$point_size
                 )
             } else {
-                plot <- ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var)) +
+                plot <- ggplot2::ggplot(data, do.call(ggplot2::aes, lapply(list(x = x_var, y = y_var), as.name))) +
                     ggplot2::geom_boxplot() +
                     ggplot2::stat_summary(fun = mean, geom = "point", size = plot_data$point_size)
             }
@@ -771,7 +771,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     size = plot_data$point_size
                 )
             } else {
-                plot <- ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var)) +
+                plot <- ggplot2::ggplot(data, do.call(ggplot2::aes, lapply(list(x = x_var, y = y_var), as.name))) +
                     ggplot2::geom_violin() +
                     ggplot2::stat_summary(fun = mean, geom = "point", size = plot_data$point_size)
             }
@@ -781,7 +781,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_befafter_box_plot = function(data, plot_data) {
             if (is.null(plot_data$befafter_shape_var) || is.null(plot_data$befafter_id_var)) {
-                stop("Before-after plots require shape and ID variables")
+                jmvcore::reject("Before-after plots require shape and ID variables")
             }
             
             plot <- grafify::plot_befafter_box(
@@ -799,7 +799,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_befafter_colors_plot = function(data, plot_data) {
             if (is.null(plot_data$befafter_shape_var) || is.null(plot_data$befafter_id_var)) {
-                stop("Before-after plots require shape and ID variables")
+                jmvcore::reject("Before-after plots require shape and ID variables")
             }
             
             plot <- grafify::plot_befafter_colors(
@@ -817,7 +817,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_3d_scatter_plot = function(data, plot_data) {
             if (is.null(plot_data$groups)) {
-                stop("3D scatter plot requires grouping variable")
+                jmvcore::reject("3D scatter plot requires grouping variable")
             }
             
             plot <- grafify::plot_3d_scatterbar(
@@ -836,7 +836,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_4d_scatter_plot = function(data, plot_data) {
             if (is.null(plot_data$groups) || is.null(plot_data$facet_var)) {
-                stop("4D scatter plot requires grouping and faceting variables")
+                jmvcore::reject("4D scatter plot requires grouping and faceting variables")
             }
             
             plot <- grafify::plot_4d_scatterbar(
@@ -858,7 +858,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             var_name <- plot_data$y_var %||% plot_data$x_var %||% plot_data$vars[1]
             
             if (is.null(var_name)) {
-                stop("Variable required for density plot")
+                jmvcore::reject("Variable required for density plot")
             }
             
             plot <- grafify::plot_density(
@@ -876,7 +876,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             var_name <- plot_data$y_var %||% plot_data$x_var %||% plot_data$vars[1]
             
             if (is.null(var_name)) {
-                stop("Variable required for histogram")
+                jmvcore::reject("Variable required for histogram")
             }
             
             plot <- grafify::plot_histogram(

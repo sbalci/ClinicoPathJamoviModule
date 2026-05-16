@@ -165,7 +165,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 self$results$plotnotes$setContent(
                     paste0("<div style='color: #d32f2f; background-color: #ffebee; padding: 10px; border-radius: 5px;'>",
-                           "<strong> Input Error:</strong> ", e$message, "</div>")
+                           "<strong> Input Error:</strong> ", htmltools::htmlEscape(e$message), "</div>")
                 )
                 return()
             })
@@ -188,7 +188,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 self$results$plotnotes$setContent(
                     paste0("<div style='color: #d32f2f; background-color: #ffebee; padding: 10px; border-radius: 5px;'>",
-                           "<strong> Processing Error:</strong> ", e$message, "</div>")
+                           "<strong> Processing Error:</strong> ", htmltools::htmlEscape(e$message), "</div>")
                 )
             })
         },
@@ -431,7 +431,8 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Perform the test
             result <- switch(test_type,
                 "anova" = {
-                    model <- aov(as.formula(paste(item_name, "~", group_var)), data = data)
+                    formula_str <- paste0(jmvcore::composeTerm(item_name), " ~ ", jmvcore::composeTerm(group_var))
+                    model <- aov(jmvcore::asFormula(formula_str), data = data)
                     summary_model <- summary(model)
                     list(
                         test_name = "One-way ANOVA",
@@ -445,7 +446,8 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     )
                 },
                 "kruskal" = {
-                    test_result <- kruskal.test(as.formula(paste(item_name, "~", group_var)), data = data)
+                    formula_str <- paste0(jmvcore::composeTerm(item_name), " ~ ", jmvcore::composeTerm(group_var))
+                    test_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
                     list(
                         test_name = "Kruskal-Wallis",
                         statistic = test_result$statistic,
@@ -494,12 +496,9 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Load required packages
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                stop("ggplot2 package is required for plotting")
+                jmvcore::reject("ggplot2 package is required for plotting")
             }
-            
-            library(ggplot2)
-            library(dplyr)
-            
+
             plot_data <- private$.plot_data
             groups_var <- self$options$groups
             

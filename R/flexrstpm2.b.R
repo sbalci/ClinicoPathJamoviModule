@@ -34,6 +34,7 @@
 #' @seealso \code{\link{flexrstpm2}} for the main user interface function
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @import ggplot2
 #' @keywords internal
 
 flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
@@ -633,8 +634,8 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           "<p><strong>Baseline Spline DF:</strong> ", model_results$df, "</p>",
           if (!is.null(data_prep$tvc_names) && length(data_prep$tvc_names) > 0) {
             paste0(
-              "<p><strong>Time-Varying Covariates:</strong> ", 
-              paste(data_prep$tvc_names, collapse = ", "), 
+              "<p><strong>Time-Varying Covariates:</strong> ",
+              paste(htmltools::htmlEscape(data_prep$tvc_names), collapse = ", "),
               " (DF: ", model_results$tvc_df, ")</p>"
             )
           } else "",
@@ -2320,7 +2321,6 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
           
           # Generate plot
-          library(ggplot2)
           p <- ggplot(plot_data, aes(x = time, y = hazard)) +
             geom_line(color = "blue", size = 1) +
             labs(title = "Hazard Function Over Time",
@@ -2347,8 +2347,7 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           df <- self$options$df
           
           # Generate basis functions
-          library(splines)
-          basis_matrix <- ns(log(time_range), df = df)
+          basis_matrix <- splines::ns(log(time_range), df = df)
           
           # Create plot data
           plot_data <- data.frame(
@@ -2358,7 +2357,6 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
           
           # Generate plot
-          library(ggplot2)
           p <- ggplot(plot_data, aes(x = time, y = basis_value, color = basis_function)) +
             geom_line(size = 1) +
             labs(title = paste("Spline Basis Functions (df =", df, ")"),
@@ -2393,7 +2391,6 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
           
           # Generate plot
-          library(ggplot2)
           p <- ggplot(plot_data, aes(x = reorder(Model, -AIC), y = AIC)) +
             geom_col(fill = "steelblue", alpha = 0.7) +
             geom_text(aes(label = round(AIC, 1)), vjust = -0.5) +
@@ -2435,7 +2432,6 @@ flexrstpm2Class <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
           
           # Generate plot
-          library(ggplot2)
           p <- ggplot(plot_data, aes(x = time, y = derivative_value, color = derivative_type)) +
             geom_line(size = 1) +
             facet_wrap(~derivative_type, scales = "free_y") +

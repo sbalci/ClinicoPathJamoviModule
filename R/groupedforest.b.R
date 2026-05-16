@@ -65,7 +65,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
+                jmvcore::reject("Error: The provided dataset contains no complete rows. Please check your data and try again.")
             }
 
             # Get data and variables
@@ -86,12 +86,12 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
             if (nrow(analysis_data) == 0) {
-                stop("Error: No complete cases found for the selected variables.")
+                jmvcore::reject("Error: No complete cases found for the selected variables.")
             }
 
             # Convert variables to appropriate types
-            analysis_data[[time_var]] <- as.numeric(analysis_data[[time_var]])
-            analysis_data[[event_var]] <- as.numeric(analysis_data[[event_var]])
+            analysis_data[[time_var]] <- jmvcore::toNumeric(analysis_data[[time_var]])
+            analysis_data[[event_var]] <- jmvcore::toNumeric(analysis_data[[event_var]])
             analysis_data[[treatment_var]] <- as.factor(analysis_data[[treatment_var]])
             analysis_data[[grouping_var]] <- as.factor(analysis_data[[grouping_var]])
 
@@ -219,14 +219,16 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 }
                 
                 # Build formula
+                lhs <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(event_var), ")")
                 if (length(covariates) > 0) {
-                    formula_str <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", treatment_var, " + ", 
-                                         paste(covariates, collapse = " + "))
+                    rhs_terms <- c(jmvcore::composeTerm(treatment_var),
+                                   jmvcore::composeTerms(as.list(covariates)))
+                    formula_str <- paste0(lhs, " ~ ", paste(rhs_terms, collapse = " + "))
                 } else {
-                    formula_str <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", treatment_var)
+                    formula_str <- paste0(lhs, " ~ ", jmvcore::composeTerm(treatment_var))
                 }
-                
-                cox_formula <- as.formula(formula_str)
+
+                cox_formula <- jmvcore::asFormula(formula_str)
                 
                 tryCatch({
                     # Fit Cox model
@@ -260,7 +262,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             }
             
             if (length(results_list) == 0) {
-                stop("No valid Cox regression results obtained for any subgroup")
+                jmvcore::reject("No valid Cox regression results obtained for any subgroup")
             }
             
             return(results_list)
@@ -373,7 +375,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 
                 stats_html <- paste0(stats_html,
                     "<tr style='background-color: ", row_bg, ";'>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6;'><strong>", group_name, "</strong></td>",
+                    "<td style='padding: 10px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(group_name), "</strong></td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", result$n_total, " (", result$n_events, ")</td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", sprintf("%.3f", result$hr_exp), "</td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", 
@@ -397,14 +399,16 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
         .generate_overall_analysis = function(data, time_var, event_var, treatment_var, covariates) {
             # Perform overall analysis (all groups combined)
             
+            lhs <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(event_var), ")")
             if (length(covariates) > 0) {
-                formula_str <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", treatment_var, " + ", 
-                                     paste(covariates, collapse = " + "))
+                rhs_terms <- c(jmvcore::composeTerm(treatment_var),
+                               jmvcore::composeTerms(as.list(covariates)))
+                formula_str <- paste0(lhs, " ~ ", paste(rhs_terms, collapse = " + "))
             } else {
-                formula_str <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", treatment_var)
+                formula_str <- paste0(lhs, " ~ ", jmvcore::composeTerm(treatment_var))
             }
-            
-            cox_formula <- as.formula(formula_str)
+
+            cox_formula <- jmvcore::asFormula(formula_str)
             cox_model <- survival::coxph(cox_formula, data = data)
             
             model_summary <- broom::tidy(cox_model, conf.int = TRUE, conf.level = self$options$confidence_level)
@@ -448,8 +452,8 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#fff3e0"
                 counts_html <- paste0(counts_html,
                     "<tr style='background-color: ", row_bg, ";'>",
-                    "<td style='padding: 8px; border: 1px solid #ddd;'>", counts_table[[grouping_var]][i], "</td>",
-                    "<td style='padding: 8px; border: 1px solid #ddd;'>", counts_table[[treatment_var]][i], "</td>",
+                    "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(counts_table[[grouping_var]][i]), "</td>",
+                    "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(counts_table[[treatment_var]][i]), "</td>",
                     "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", counts_table$n[i], "</td>",
                     "</tr>"
                 )
@@ -463,14 +467,16 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             # Test for interaction between treatment and grouping variable
             
             # Build formula with interaction
+            lhs <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(event_var), ")")
+            interaction_rhs <- paste0(jmvcore::composeTerm(treatment_var), " * ", jmvcore::composeTerm(grouping_var))
             if (length(covariates) > 0) {
-                formula_str <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", treatment_var, " * ", grouping_var, " + ", 
-                                     paste(covariates, collapse = " + "))
+                rhs_terms <- c(interaction_rhs, jmvcore::composeTerms(as.list(covariates)))
+                formula_str <- paste0(lhs, " ~ ", paste(rhs_terms, collapse = " + "))
             } else {
-                formula_str <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", treatment_var, " * ", grouping_var)
+                formula_str <- paste0(lhs, " ~ ", interaction_rhs)
             }
-            
-            cox_formula <- as.formula(formula_str)
+
+            cox_formula <- jmvcore::asFormula(formula_str)
             cox_model <- survival::coxph(cox_formula, data = data)
             
             # Extract interaction terms
@@ -496,7 +502,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 for (i in 1:nrow(interaction_terms)) {
                     interaction_html <- paste0(interaction_html,
                         "<tr>",
-                        "<td style='padding: 8px; border: 1px solid #ddd;'>", interaction_terms$term[i], "</td>",
+                        "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(interaction_terms$term[i]), "</td>",
                         "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", sprintf("%.4f", interaction_terms$estimate[i]), "</td>",
                         "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", sprintf("%.4f", interaction_terms$p.value[i]), "</td>",
                         "</tr>"
@@ -542,8 +548,8 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 
                 "<h4 style='color: #2e7d32;'>Analysis Summary:</h4>",
                 "<ul>",
-                "<li><strong>Treatment Variable:</strong> ", treatment_var, "</li>",
-                "<li><strong>Grouping Variable:</strong> ", grouping_var, "</li>",
+                "<li><strong>Treatment Variable:</strong> ", htmltools::htmlEscape(treatment_var), "</li>",
+                "<li><strong>Grouping Variable:</strong> ", htmltools::htmlEscape(grouping_var), "</li>",
                 "<li><strong>Number of Subgroups:</strong> ", n_groups, "</li>",
                 "<li><strong>Analysis Method:</strong> Separate Cox regression for each subgroup</li>",
                 "</ul>",

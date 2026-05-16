@@ -179,7 +179,7 @@ friedmantestClass <- R6::R6Class(
             
             # Create analysis dataset
             analysis_data <- data.frame(
-                dependent = as.numeric(self$data[[dep_var]]),
+                dependent = jmvcore::toNumeric(self$data[[dep_var]]),
                 subject = as.factor(self$data[[subj_var]]),
                 within = as.factor(self$data[[within_var]]),
                 stringsAsFactors = FALSE
@@ -315,7 +315,7 @@ friedmantestClass <- R6::R6Class(
                 return(result)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Error performing Friedman test:", e$message))
+                self$results$instructions$setContent(paste("Error performing Friedman test:", htmltools::htmlEscape(e$message)))
                 return(NULL)
             })
         },

@@ -68,6 +68,19 @@ grouplassoClass <- R6::R6Class(
         },
 
         .run = function() {
+            # Preserve global RNG state so set.seed() in CV/stability/nested/permutation
+            # paths does not leak into the user's session.
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                .saved_seed <- get(".Random.seed", envir = .GlobalEnv)
+                on.exit(assign(".Random.seed", .saved_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv),
+                    add = TRUE
+                )
+            }
+
             if (is.null(self$data) || is.null(self$options$time) || is.null(self$options$event) ||
                 length(self$options$predictors) == 0) {
                 return()
@@ -184,7 +197,7 @@ grouplassoClass <- R6::R6Class(
                     label <- switch(as.character(type),
                         "1" = "ERROR", "2" = "WARNING", "3" = "WARNING", "4" = "INFO", "NOTE")
                     self$results$todo$setContent(paste0(
-                        existing, "<p><strong>", label, ":</strong> ", content, "</p>"
+                        existing, "<p><strong>", label, ":</strong> ", htmltools::htmlEscape(content), "</p>"
                     ))
                 }, error = function(e2) NULL)
             })
@@ -207,7 +220,7 @@ grouplassoClass <- R6::R6Class(
             # Create analysis dataset
             vars_needed <- c(time_var, event_var, pred_vars)
             analysis_data <- data[, vars_needed, drop = FALSE]
-            analysis_data <- na.omit(analysis_data)
+            analysis_data <- jmvcore::naOmit(analysis_data)
 
             if (nrow(analysis_data) < length(pred_vars) + 10) {
                 private$.insertNotice(
@@ -219,7 +232,7 @@ grouplassoClass <- R6::R6Class(
             }
 
             # Prepare survival object
-            time_values <- as.numeric(analysis_data[[time_var]])
+            time_values <- jmvcore::toNumeric(analysis_data[[time_var]])
 
             # Two-level outcome encoding using outcomeLevel / censorLevel
             event_data <- analysis_data[[event_var]]
@@ -1380,7 +1393,7 @@ grouplassoClass <- R6::R6Class(
             }
 
             selected_text <- if (length(selected_group_names) > 0) {
-                paste(selected_group_names, collapse = ", ")
+                htmltools::htmlEscape(paste(selected_group_names, collapse = ", "))
             } else {
                 "none"
             }
@@ -1400,7 +1413,7 @@ grouplassoClass <- R6::R6Class(
                     hr <- exp(coef_vec[idx])
                     direction <- if (hr > 1) "increased" else "decreased"
                     hr_parts[k] <- sprintf("<li><strong>%s</strong>: HR = %.3f (%s risk per unit increase)</li>",
-                                           group_data$var_names[idx], hr, direction)
+                                           htmltools::htmlEscape(group_data$var_names[idx]), hr, direction)
                 }
                 hr_lines <- paste0("<ul>", paste(hr_parts, collapse = ""), "</ul>")
             }

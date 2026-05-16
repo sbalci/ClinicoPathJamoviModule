@@ -91,7 +91,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
+                jmvcore::reject("Error: The provided dataset contains no complete rows. Please check your data and try again.")
             }
 
             # Safely require ggprism
@@ -126,17 +126,17 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
             if (nrow(analysis_data) == 0) {
-                stop("Error: No complete cases found for the selected variables.")
+                jmvcore::reject("Error: No complete cases found for the selected variables.")
             }
 
             # Convert variables to appropriate types
-            analysis_data[[y_var]] <- as.numeric(analysis_data[[y_var]])
-            
+            analysis_data[[y_var]] <- jmvcore::toNumeric(analysis_data[[y_var]])
+
             # Handle x_var type conversion
             if (is.factor(analysis_data[[x_var]]) || is.character(analysis_data[[x_var]])) {
                 analysis_data[[x_var]] <- as.factor(analysis_data[[x_var]])
             } else {
-                analysis_data[[x_var]] <- as.numeric(analysis_data[[x_var]])
+                analysis_data[[x_var]] <- jmvcore::toNumeric(analysis_data[[x_var]])
             }
             
             if (!is.null(group_var) && group_var != "") {
@@ -255,10 +255,11 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             
             # Create base plot
             if (!is.null(group_mapping)) {
-                p <- ggplot2::ggplot(analysis_data, ggplot2::aes_string(x = x_var, y = y_var, 
-                                                                       fill = group_mapping, color = group_mapping))
+                aes_list <- list(x = x_var, y = y_var, fill = group_mapping, color = group_mapping)
+                p <- ggplot2::ggplot(analysis_data, do.call(ggplot2::aes, lapply(aes_list, as.name)))
             } else {
-                p <- ggplot2::ggplot(analysis_data, ggplot2::aes_string(x = x_var, y = y_var))
+                aes_list <- list(x = x_var, y = y_var)
+                p <- ggplot2::ggplot(analysis_data, do.call(ggplot2::aes, lapply(aes_list, as.name)))
             }
             
             # Add plot type specific geoms
@@ -315,8 +316,8 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                         dplyr::summarise(mean_y = mean(.data[[y_var]], na.rm = TRUE),
                                        se_y = sd(.data[[y_var]], na.rm = TRUE) / sqrt(dplyr::n()),
                                        .groups = 'drop')
-                    p <- ggplot2::ggplot(summary_data, ggplot2::aes_string(x = x_var, y = "mean_y", 
-                                                                          fill = group_mapping))
+                    aes_list <- list(x = x_var, y = "mean_y", fill = group_mapping)
+                    p <- ggplot2::ggplot(summary_data, do.call(ggplot2::aes, lapply(aes_list, as.name)))
                     p <- p + ggplot2::geom_col(position = "dodge", alpha = 0.8)
                     if (self$options$error_bars != "none") {
                         p <- p + ggplot2::geom_errorbar(ggplot2::aes(ymin = mean_y - se_y, ymax = mean_y + se_y),
@@ -328,7 +329,8 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                         dplyr::summarise(mean_y = mean(.data[[y_var]], na.rm = TRUE),
                                        se_y = sd(.data[[y_var]], na.rm = TRUE) / sqrt(dplyr::n()),
                                        .groups = 'drop')
-                    p <- ggplot2::ggplot(summary_data, ggplot2::aes_string(x = x_var, y = "mean_y"))
+                    aes_list <- list(x = x_var, y = "mean_y")
+                    p <- ggplot2::ggplot(summary_data, do.call(ggplot2::aes, lapply(aes_list, as.name)))
                     p <- p + ggplot2::geom_col(alpha = 0.8)
                     if (self$options$error_bars != "none") {
                         p <- p + ggplot2::geom_errorbar(ggplot2::aes(ymin = mean_y - se_y, ymax = mean_y + se_y),
@@ -338,7 +340,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 
             } else if (plot_type == "line") {
                 if (!is.null(group_mapping)) {
-                    p <- p + ggplot2::geom_line(ggplot2::aes_string(group = group_mapping), size = 1.2)
+                    p <- p + ggplot2::geom_line(do.call(ggplot2::aes, list(group = as.name(group_mapping))), size = 1.2)
                 } else {
                     p <- p + ggplot2::geom_line(size = 1.2)
                 }
@@ -381,7 +383,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             
             # Add faceting if specified
             if (!is.null(facet_var) && facet_var != "") {
-                p <- p + ggplot2::facet_wrap(as.formula(paste("~", facet_var)))
+                p <- p + ggplot2::facet_wrap(jmvcore::asFormula(paste0("~ ", jmvcore::composeTerm(facet_var))))
             }
             
             # Add labels
@@ -613,7 +615,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                 summary_html <- paste0(summary_html,
                     "<tr style='background-color: ", row_bg, ";'>",
-                    "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>", stats_summary[[group_col]][i], "</strong></td>",
+                    "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(stats_summary[[group_col]][i]), "</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$n[i], "</td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$mean[i], "</td>",
                     "<td style='padding: 8px; border: 1px solid #dee2e6; text-align: center;'>", stats_summary$median[i], "</td>",
@@ -710,8 +712,8 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 test_details <- paste0("W = ", test_stat)
                 
             } else if (test_method == "ANOVA") {
-                formula_str <- paste(y_var, "~", group_var)
-                aov_result <- aov(as.formula(formula_str), data = data)
+                formula_str <- paste0(jmvcore::composeTerm(y_var), " ~ ", jmvcore::composeTerm(group_var))
+                aov_result <- aov(jmvcore::asFormula(formula_str), data = data)
                 summary_aov <- summary(aov_result)
                 
                 f_stat <- round(summary_aov[[1]]$`F value`[1], 4)
@@ -721,8 +723,8 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 test_details <- paste0("F(", df1, ",", df2, ") = ", f_stat)
                 
             } else if (test_method == "Kruskal-Wallis") {
-                formula_str <- paste(y_var, "~", group_var)
-                kw_result <- kruskal.test(as.formula(formula_str), data = data)
+                formula_str <- paste0(jmvcore::composeTerm(y_var), " ~ ", jmvcore::composeTerm(group_var))
+                kw_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
                 
                 test_stat <- round(kw_result$statistic, 4)
                 p_value <- round(kw_result$p.value, 4)
@@ -893,8 +895,8 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 "<li><strong>Plot Type:</strong> ", stringr::str_to_title(plot_type), " plot with Prism styling</li>",
                 "<li><strong>Theme:</strong> ", stringr::str_to_title(prism_theme), " Prism theme</li>",
                 "<li><strong>Color Palette:</strong> ", stringr::str_to_title(prism_palette), " color scheme</li>",
-                "<li><strong>Variables:</strong> ", y_var, " by ", x_var, 
-                if (!is.null(group_var) && group_var != "") paste0(", grouped by ", group_var) else "", "</li>",
+                "<li><strong>Variables:</strong> ", htmltools::htmlEscape(y_var), " by ", htmltools::htmlEscape(x_var),
+                if (!is.null(group_var) && group_var != "") paste0(", grouped by ", htmltools::htmlEscape(group_var)) else "", "</li>",
                 "<li><strong>Observations:</strong> ", n_total, " data points</li>",
                 "</ul>",
                 
@@ -982,7 +984,14 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             plot_type <- self$options$plot_type
             palette_name <- self$options$prism_palette
             theme_name <- self$options$prism_theme
-            
+
+            # Escape user-controlled tokens for both R syntax and HTML rendering.
+            x_term <- htmltools::htmlEscape(jmvcore::composeTerm(x_var))
+            y_term <- htmltools::htmlEscape(jmvcore::composeTerm(y_var))
+            group_term <- if (!is.null(group_var) && group_var != "") htmltools::htmlEscape(jmvcore::composeTerm(group_var)) else NULL
+            palette_lit <- htmltools::htmlEscape(deparse(palette_name))
+            title_lit <- htmltools::htmlEscape(deparse(self$options$plot_title))
+
             code_html <- paste0(
                 "<div style='background-color: #f5f5f5; padding: 20px; border-radius: 8px;'>",
                 "<h3 style='color: #424242; margin-top: 0;'> Reproducible R Code</h3>",
@@ -993,14 +1002,14 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
                 "library(ggplot2)\n",
                 "library(ggprism)\n\n",
                 "# Create the plot\n",
-                "ggplot(data, aes(x = ", x_var, ", y = ", y_var,
-                if (!is.null(group_var) && group_var != "") paste0(", fill = ", group_var, ", color = ", group_var) else "",
+                "ggplot(data, aes(x = ", x_term, ", y = ", y_term,
+                if (!is.null(group_term)) paste0(", fill = ", group_term, ", color = ", group_term) else "",
                 ")) +\n",
                 "  geom_", plot_type, "() +\n",
                 "  theme_prism(base_size = ", self$options$base_size, ") +\n",
-                "  scale_fill_prism(palette = '", palette_name, "') +\n",
-                "  scale_color_prism(palette = '", palette_name, "') +\n",
-                "  labs(title = '", self$options$plot_title, "')\n",
+                "  scale_fill_prism(palette = ", palette_lit, ") +\n",
+                "  scale_color_prism(palette = ", palette_lit, ") +\n",
+                "  labs(title = ", title_lit, ")\n",
                 "</code></pre>",
                 "<p style='font-size: 12px; color: #666;'>",
                 "<em> Copy this code to reproduce your exact visualization in any R environment</em>",
@@ -1154,8 +1163,8 @@ ggprismClass <- if (requireNamespace("jmvcore")) R6::R6Class("ggprismClass",
             summary_html <- paste(
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0; border-left: 5px solid #2e7d32;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'> Clinical Summary</h3>",
-                paste0("<p><strong>Analysis:</strong> ", stringr::str_to_title(analysis_type), " of ", y_var,
-                       if (!is.null(group_var) && group_var != "") paste(" across", group_var) else "",
+                paste0("<p><strong>Analysis:</strong> ", stringr::str_to_title(analysis_type), " of ", htmltools::htmlEscape(y_var),
+                       if (!is.null(group_var) && group_var != "") paste(" across", htmltools::htmlEscape(group_var)) else "",
                        " (n = ", n_total,
                        if (is_sampled) paste0("; displaying ", n_displayed, " sampled points for performance") else "",
                        ")</p>"),

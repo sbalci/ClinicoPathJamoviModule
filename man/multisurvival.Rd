@@ -26,7 +26,7 @@ multisurvival(
   multievent = FALSE,
   hr = FALSE,
   sty = "t1",
-  ph_cox = FALSE,
+  ph_cox = TRUE,
   km = FALSE,
   endplot = 60,
   byplot = 12,
@@ -136,7 +136,10 @@ variable in the Cox model.}
 "survminer forestplot".}
 
 \item{ph_cox}{If true, tests the proportional hazards assumption for the
-Cox model. Use if you suspect violations of the PH assumption.}
+Cox model using survival::cox.zph and surfaces global + per-covariate
+Schoenfeld residual statistics. REMARK reporting recommends this be
+reported for any Cox-based prognostic study. Disable only to suppress the
+diagnostic when not needed.}
 
 \item{km}{If true, produces a Kaplan-Meier survival plot. Useful for
 visualization of survival functions without covariate adjustment.}
@@ -232,6 +235,10 @@ visual clutter when summaries are not needed.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
+\code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr

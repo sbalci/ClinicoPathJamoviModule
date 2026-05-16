@@ -70,6 +70,19 @@ generalizedrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #---------------------------------------------
         .run = function() {
 
+            # Preserve global RNG state so set.seed() in .calculateGeneralizedROC
+            # does not leak into the user's session.
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                .saved_seed <- get(".Random.seed", envir = .GlobalEnv)
+                on.exit(assign(".Random.seed", .saved_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv),
+                    add = TRUE
+                )
+            }
+
             # Check requirements
             if (is.null(self$options$outcome) || self$options$outcome == "") {
                 return()
@@ -138,11 +151,11 @@ generalizedrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Extract data
             y <- as.factor(data[[outcome_var]])
-            x <- as.numeric(data[[predictor_var]])
+            x <- jmvcore::toNumeric(data[[predictor_var]])
 
             # Check binary outcome
             if (length(levels(y)) != 2) {
-                stop("Outcome variable must have exactly 2 levels for generalized ROC")
+                jmvcore::reject("Outcome variable must have exactly 2 levels for generalized ROC")
             }
 
             # Check for missing values
@@ -160,12 +173,12 @@ generalizedrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
                 if (transformation == "log") {
                     if (any(x <= 0)) {
-                        stop("Log transformation requires all values > 0. Consider adding a constant.")
+                        jmvcore::reject("Log transformation requires all values > 0. Consider adding a constant.")
                     }
                     x <- log(x)
                 } else if (transformation == "sqrt") {
                     if (any(x < 0)) {
-                        stop("Square root transformation requires all values >= 0")
+                        jmvcore::reject("Square root transformation requires all values >= 0")
                     }
                     x <- sqrt(x)
                 } else if (transformation == "boxcox") {
@@ -731,7 +744,7 @@ generalizedrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Check for tram package
             if (!requireNamespace('tram', quietly = TRUE)) {
-                stop("tram package is required but not installed. Install using: install.packages('tram')")
+                jmvcore::reject("tram package is required but not installed. Install using: install.packages('tram')")
             }
 
             # Get options
@@ -748,15 +761,16 @@ generalizedrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Build formula for transformation model
             # tram models predict the test result (predictor) using disease status + covariates
+            lhs <- jmvcore::composeTerm(predictor_var)
             if (!is.null(covariates) && length(covariates) > 0) {
-                formula_str <- paste(predictor_var, "~", outcome_var, "+",
-                                   paste(covariates, collapse = " + "))
+                rhs_terms <- jmvcore::composeTerms(as.list(c(outcome_var, covariates)))
             } else {
-                formula_str <- paste(predictor_var, "~", outcome_var)
+                rhs_terms <- jmvcore::composeTerms(as.list(outcome_var))
             }
+            formula_str <- paste0(lhs, " ~ ", paste(rhs_terms, collapse = " + "))
 
             # Fit transformation model
-            tram_formula <- as.formula(formula_str)
+            tram_formula <- jmvcore::asFormula(formula_str)
 
             tryCatch({
                 # Fit the appropriate tram model
@@ -781,7 +795,7 @@ generalizedrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 }
 
             }, error = function(e) {
-                error_msg <- e$message
+                error_msg <- htmltools::htmlEscape(e$message)
 
                 if (grepl("not installed|namespace", error_msg, ignore.case = TRUE)) {
                     detailed_msg <- paste(
@@ -903,7 +917,7 @@ generalizedrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # AUC results
             if (!is.null(auc_results$aucs)) {
                 html <- paste0(html, "<h4>Covariate-Adjusted AUC</h4>")
-                html <- paste0(html, "<p><b>Covariate:</b> ", auc_results$covariate_name, "</p>")
+                html <- paste0(html, "<p><b>Covariate:</b> ", htmltools::htmlEscape(auc_results$covariate_name), "</p>")
                 html <- paste0(html, "<p><b>AUC Range:</b> ",
                               round(min(auc_results$aucs, na.rm = TRUE), 3), " to ",
                               round(max(auc_results$aucs, na.rm = TRUE), 3), "</p>")

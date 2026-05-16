@@ -43,7 +43,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check for data ----
             if (nrow(self$data) == 0)
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows")
 
             # Get data and variables ----
             mydata <- self$data
@@ -89,7 +89,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Show date processing info
                 dateInfo <- glue::glue("
                     <br><b>Date Processing:</b><br>
-                    Variable: {dateVar}<br>
+                    Variable: {htmltools::htmlEscape(dateVar)}<br>
                     Format: {self$options$dateFormat}<br>
                     Aggregation: {self$options$timeAggregation}<br>
                 ")
@@ -126,7 +126,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     groupVars[groupVars == dateVar] <- time_agg_var
 
                 }, error = function(e) {
-                    stop(paste("Error parsing date variable:", e$message))
+                    jmvcore::reject(paste("Error parsing date variable:", e$message))
                 })
             }
 

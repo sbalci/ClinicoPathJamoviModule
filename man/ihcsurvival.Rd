@@ -21,7 +21,8 @@ ihcsurvival(
   landmarkAnalysis = FALSE,
   landmarkTime = 60,
   landmarkTimePoints = "12,24,36,48,60",
-  confidenceLevel = 0.95
+  confidenceLevel = 0.95,
+  fdrMethod = "BH"
 )
 }
 \arguments{
@@ -64,6 +65,12 @@ analysis (e.g., "12,24,36")}
 
 \item{confidenceLevel}{Confidence level for survival estimates and hazard
 ratios}
+
+\item{fdrMethod}{Multiple-testing adjustment applied across markers in the
+panel. When testing several IHC markers in the same cohort, raw Cox
+p-values overstate evidence; Benjamini-Hochberg controls FDR under
+independence/positive dependence, Benjamini-Yekutieli is valid under
+arbitrary dependence, Holm/Bonferroni control FWER.}
 }
 \value{
 A results object containing:

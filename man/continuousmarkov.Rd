@@ -84,6 +84,8 @@ continuousmarkov(
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataStructure} \tab \tab \tab \tab \tab a table \cr
 \code{results$transitionMatrix} \tab \tab \tab \tab \tab a table \cr

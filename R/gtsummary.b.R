@@ -9,7 +9,7 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Error checking ----
             if (nrow(self$data) == 0) {
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows")
             }
             
             # Welcome message if no variables selected ----
@@ -89,7 +89,7 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                error_msg <- paste("Error creating table:", e$message)
+                error_msg <- paste("Error creating table:", htmltools::htmlEscape(e$message))
                 self$results$maintable$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
             })
         },
@@ -173,7 +173,7 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .createCrossTable = function(data) {
             if (length(self$options$vars) < 2) {
-                stop("Cross table requires at least 2 variables")
+                jmvcore::reject("Cross table requires at least 2 variables")
             }
             
             row_var <- self$options$vars[1]
@@ -196,15 +196,17 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .createRegressionTable = function(data) {
             # Simple implementation - would need model specification in real use
             if (length(self$options$vars) < 2) {
-                stop("Regression table requires at least 2 variables (outcome and predictors)")
+                jmvcore::reject("Regression table requires at least 2 variables (outcome and predictors)")
             }
             
             # Basic linear model as example
             outcome <- self$options$vars[1]
             predictors <- self$options$vars[-1]
             
-            formula_str <- paste(outcome, "~", paste(predictors, collapse = " + "))
-            model <- lm(as.formula(formula_str), data = data)
+            lhs <- jmvcore::composeTerm(outcome)
+            rhs <- jmvcore::composeTerms(as.list(predictors))
+            formula_str <- paste0(lhs, " ~ ", paste(rhs, collapse = " + "))
+            model <- lm(jmvcore::asFormula(formula_str), data = data)
             
             table <- gtsummary::tbl_regression(model)
             
@@ -213,7 +215,7 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .createSurvivalTable = function(data) {
             # Placeholder for survival table - would need survival variables
-            stop("Survival tables require time-to-event data and survival package integration")
+            jmvcore::reject("Survival tables require time-to-event data and survival package integration")
         },
         
         .applyFormatting = function(table) {
@@ -308,7 +310,7 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add footnote if provided
             if (!is.null(self$options$footnote) && nchar(self$options$footnote) > 0) {
-                notes <- paste0(notes, "<p><i>", self$options$footnote, "</i></p>")
+                notes <- paste0(notes, "<p><i>", htmltools::htmlEscape(self$options$footnote), "</i></p>")
             }
             
             return(notes)
@@ -321,7 +323,7 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             info <- paste0(info, "<p><b>Variables included:</b> ", length(self$options$vars), "</p>")
             
             if (!is.null(self$options$byvar)) {
-                info <- paste0(info, "<p><b>Grouped by:</b> ", self$options$byvar, "</p>")
+                info <- paste0(info, "<p><b>Grouped by:</b> ", htmltools::htmlEscape(self$options$byvar), "</p>")
             }
             
             info <- paste0(info, "<p><b>Table type:</b> ", self$options$tableType, "</p>")
@@ -336,12 +338,12 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             code <- paste0(code, "library(dplyr)\n\n")
             
             # Variable selection
-            vars_str <- paste0("c(", paste0("\"", self$options$vars, "\"", collapse = ", "), ")")
+            vars_str <- paste0("c(", paste(vapply(self$options$vars, deparse, character(1)), collapse = ", "), ")")
             code <- paste0(code, "# Select variables\n")
             code <- paste0(code, "selected_vars <- ", vars_str, "\n")
-            
+
             if (!is.null(self$options$byvar)) {
-                code <- paste0(code, "by_var <- \"", self$options$byvar, "\"\n")
+                code <- paste0(code, "by_var <- ", deparse(self$options$byvar), "\n")
             }
             
             code <- paste0(code, "\n# Create table\n")
@@ -356,7 +358,7 @@ gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             code <- paste0(code, "  tbl_summary(")
             
             if (!is.null(self$options$byvar)) {
-                code <- paste0(code, "by = ", self$options$byvar)
+                code <- paste0(code, "by = ", jmvcore::composeTerm(self$options$byvar))
             }
             
             code <- paste0(code, ")\n")

@@ -110,7 +110,7 @@ generalpseudoClass <- R6::R6Class(
                 
             }, error = function(e) {
                 self$results$todo$setVisible(TRUE)
-                error_msg <- paste0('<h3>Analysis Error</h3><p><b>Error:</b> ', e$message, '</p>')
+                error_msg <- paste0('<h3>Analysis Error</h3><p><b>Error:</b> ', htmltools::htmlEscape(e$message), '</p>')
                 
                 if (grepl("pseudo", e$message, ignore.case = TRUE)) {
                     error_msg <- paste0(error_msg, 
@@ -391,8 +391,9 @@ generalpseudoClass <- R6::R6Class(
                 
                 # Build formula
                 explanatory_vars <- self$options$explanatory
-                formula_str <- paste("pseudo ~", paste(explanatory_vars, collapse = " + "))
-                formula_obj <- as.formula(formula_str)
+                rhs_terms <- jmvcore::composeTerms(as.list(explanatory_vars))
+                formula_str <- paste0("pseudo ~ ", paste(rhs_terms, collapse = " + "))
+                formula_obj <- jmvcore::asFormula(formula_str)
                 
                 # Fit regression model
                 if (self$options$regression_type == "linear") {
@@ -754,7 +755,7 @@ generalpseudoClass <- R6::R6Class(
                           <p><b>Time Points:</b> ', paste(time_points, collapse = ", "), '</p>')
             
             if (length(self$options$explanatory) > 0) {
-                html <- paste0(html, '<p><b>Explanatory Variables:</b> ', paste(self$options$explanatory, collapse = ", "), '</p>')
+                html <- paste0(html, '<p><b>Explanatory Variables:</b> ', htmltools::htmlEscape(paste(self$options$explanatory, collapse = ", ")), '</p>')
             }
             
             # Add summary statistics

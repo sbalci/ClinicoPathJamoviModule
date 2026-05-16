@@ -233,8 +233,10 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Build formula
-            formula_str <- paste(outcome_var, "~", paste(predictor_vars, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            lhs <- jmvcore::composeTerm(outcome_var)
+            rhs <- jmvcore::composeTerms(as.list(predictor_vars))
+            formula_str <- paste0(lhs, " ~ ", paste(rhs, collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
 
             # Get family
             family_choice <- switch(self$options$family,

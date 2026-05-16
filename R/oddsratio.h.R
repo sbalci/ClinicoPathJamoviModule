@@ -101,6 +101,10 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        errors = function() private$.items[["errors"]],
+        strongWarnings = function() private$.items[["strongWarnings"]],
+        warnings = function() private$.items[["warnings"]],
+        infoMessages = function() private$.items[["infoMessages"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
@@ -132,6 +136,26 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Critical Errors",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="strongWarnings",
+                title="Strong Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="infoMessages",
+                title="Information",
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
@@ -293,6 +317,10 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
