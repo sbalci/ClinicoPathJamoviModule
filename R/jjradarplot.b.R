@@ -10,21 +10,35 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
         inherit = jjradarplotBase,
         private = list(
             # init ----
+            # TODO (data hygiene): .init sizing path at L22 forces a full-column
+            # as.factor() coercion every time the user toggles splitBy, even before
+            # they finish configuring the analysis. On large datasets this is
+            # wasteful. Worse, cols*400 / rows*400 is unbounded: a splitBy column
+            # with hundreds of unique levels produces enormous canvases. Cap
+            # num_levels at a sane upper bound (e.g., 16) and emit a notice when
+            # exceeded, or defer sizing to .run() / .plot() once data is validated.
+            #
+            # TODO (forward-looking): function lacks `.asSource()` and a reproducible
+            # R code export (showRCode option + rCode Html result). Adding either
+            # would require defining a `public = list(.asSource = function() {...})`
+            # block. When implemented, use `deparse()` for string literals and
+            # `jmvcore::composeTerm` for column names to keep codegen safe for
+            # non-syntactic variable names (e.g., `Tumor Grade`, `weird"name\path`).
             .init = function() {
                 # Set default plot size
                 self$results$plot$setSize(600, 600)
-                
+
                 # Adjust plot size based on number of groups if splitting
                 if (!is.null(self$options$splitBy)) {
                     mydata <- self$data
                     splitBy <- self$options$splitBy
-                    
+
                     num_levels <- nlevels(as.factor(mydata[[splitBy]]))
-                    
+
                     # Calculate grid dimensions
                     cols <- ceiling(sqrt(num_levels))
                     rows <- ceiling(num_levels / cols)
-                    
+
                     self$results$plot$setSize(cols * 400, rows * 400)
                 }
             },
@@ -56,15 +70,18 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
                     self$results$todo$setContent(todo)
                     return()
                 } else {
+                    safe_vars <- htmltools::htmlEscape(paste(vars, collapse = ", "))
+                    safe_cat <- htmltools::htmlEscape(categoryVar)
+                    safe_split <- if (!is.null(self$options$splitBy)) paste0(", split by ", htmltools::htmlEscape(self$options$splitBy)) else ""
                     todo <- glue::glue(
-                        "<br>Radar plot analysis for variables: {paste(vars, collapse=', ')} by {categoryVar}{if(!is.null(self$options$splitBy)) paste0(', split by ', self$options$splitBy) else ''}.<br><hr>"
+                        "<br>Radar plot analysis for variables: {safe_vars} by {safe_cat}{safe_split}.<br><hr>"
                     )
-                    
+
                     self$results$todo$setContent(todo)
                     
                     # Data validation
                     if (nrow(self$data) == 0)
-                        stop('Data contains no (complete) rows')
+                        jmvcore::reject(.('Data contains no (complete) rows'))
                     
                     # Add checkpoint for user feedback
                     private$.checkpoint()
@@ -81,17 +98,17 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
                     return()
                 
                 if (nrow(self$data) == 0)
-                    stop('Data contains no (complete) rows')
-                
+                    jmvcore::reject(.('Data contains no (complete) rows'))
+
                 # Add checkpoint for user feedback
                 private$.checkpoint()
-                
+
                 # Prepare Data ----
                 mydata <- self$data
                 mydata <- jmvcore::naOmit(mydata)
-                
+
                 if (nrow(mydata) == 0)
-                    stop('Data contains no (complete) rows after removing missing values')
+                    jmvcore::reject(.('Data contains no (complete) rows after removing missing values'))
                 
                 # Select only needed variables
                 radar_vars <- c(vars, categoryVar)
@@ -105,7 +122,7 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
                 numeric_vars <- sapply(mydata[vars], is.numeric)
                 if (!all(numeric_vars)) {
                     non_numeric <- names(numeric_vars)[!numeric_vars]
-                    stop(paste("Variables must be numeric for radar plot:", paste(non_numeric, collapse=", ")))
+                    jmvcore::reject(.('Variables must be numeric for radar plot: {vars}'), vars = paste(non_numeric, collapse = ", "))
                 }
                 
                 # Create radar plot
@@ -201,7 +218,7 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
                     ggplot2::geom_point(size = self$options$pointSize) +
                     ggplot2::coord_polar() +
                     ggplot2::scale_y_continuous(limits = c(0, ifelse(self$options$scaleData, 1, NA))) +
-                    ggplot2::facet_wrap(stats::as.formula(paste("~", splitBy))) +
+                    ggplot2::facet_wrap(jmvcore::asFormula(paste0("~", jmvcore::composeTerm(splitBy)))) +
                     ggtheme +
                     ggplot2::labs(
                         title = self$options$title,

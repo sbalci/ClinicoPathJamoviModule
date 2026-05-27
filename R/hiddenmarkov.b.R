@@ -125,7 +125,8 @@ hiddenmarkovClass <- R6::R6Class(
                 cov_formula <- NULL
                 if (!is.null(private$.data$covs)) {
                     cov_names <- names(private$.data$covs)
-                    cov_formula <- as.formula(paste("~", paste(cov_names, collapse = " + ")))
+                    rhs <- jmvcore::composeTerms(as.list(cov_names))
+                    cov_formula <- jmvcore::asFormula(paste0("~ ", paste(rhs, collapse = " + ")))
                 }
                 
                 # Build emission matrix if misclassification is specified

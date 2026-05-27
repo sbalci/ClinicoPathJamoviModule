@@ -82,7 +82,15 @@ idiClass <- R6::R6Class(
         },
 
         .run = function() {
-            if (is.null(self$data) || is.null(self$options$outcome) || 
+            # Save and restore RNG state to avoid leaking seed into caller's session
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                old_seed <- .GlobalEnv$.Random.seed
+                on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+            }
+
+            if (is.null(self$data) || is.null(self$options$outcome) ||
                 is.null(self$options$baseline_risk) || is.null(self$options$new_risk)) {
                 return()
             }
@@ -114,8 +122,8 @@ idiClass <- R6::R6Class(
                 }
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste0("<html><body><h3>Analysis Error</h3><p>", 
-                           "Error in IDI calculation: ", e$message,
+                    paste0("<html><body><h3>Analysis Error</h3><p>",
+                           "Error in IDI calculation: ", htmltools::htmlEscape(e$message),
                            "</p><p>Please check data format and model predictions.</p></body></html>")
                 )
             })
@@ -146,7 +154,7 @@ idiClass <- R6::R6Class(
             
             # Handle missing data based on strategy
             if (self$options$missing_handling == "complete") {
-                analysis_data <- na.omit(analysis_data)
+                analysis_data <- jmvcore::naOmit(analysis_data)
             }
             
             if (nrow(analysis_data) < 20) {
@@ -158,7 +166,7 @@ idiClass <- R6::R6Class(
             }
 
             # Validate outcome variable
-            outcome_values <- as.numeric(analysis_data[[outcome_var]])
+            outcome_values <- jmvcore::toNumeric(analysis_data[[outcome_var]])
             if (!all(outcome_values %in% c(0, 1), na.rm = TRUE)) {
                 self$results$instructions$setContent(
                     "<html><body><h3>Invalid Outcome</h3>
@@ -168,8 +176,8 @@ idiClass <- R6::R6Class(
             }
 
             # Validate risk predictions
-            baseline_risks <- as.numeric(analysis_data[[baseline_var]])
-            new_risks <- as.numeric(analysis_data[[new_var]])
+            baseline_risks <- jmvcore::toNumeric(analysis_data[[baseline_var]])
+            new_risks <- jmvcore::toNumeric(analysis_data[[new_var]])
             
             # Check for reasonable risk ranges (warn if outside 0-1 but don't stop)
             if (any(baseline_risks < 0 | baseline_risks > 1, na.rm = TRUE) ||

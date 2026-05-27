@@ -85,18 +85,20 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return(FALSE)
             if (nrow(self$data) == 0)
-                stop(.('Data contains no (complete) rows'))
-            
+                jmvcore::reject(.('Data contains no (complete) rows'))
+
             # Get available variables for helpful error messages
             available_vars <- paste(names(self$data), collapse = '", "')
-            
+
             # Check variable existence with helpful error messages
             for (var in self$options$dep) {
                 if (!(var %in% names(self$data)))
-                    stop(glue::glue(.('Variable "{var}" not found in data. Available variables: "{available_vars}"')))
+                    jmvcore::reject(.('Variable "{var}" not found in data. Available variables: "{available_vars}"'),
+                                    var = var, available_vars = available_vars)
             }
             if (!(self$options$group %in% names(self$data)))
-                stop(glue::glue(.('Grouping variable "{group}" not found in data. Available variables: "{available_vars}"'), group = self$options$group))
+                jmvcore::reject(.('Grouping variable "{group}" not found in data. Available variables: "{available_vars}"'),
+                                group = self$options$group, available_vars = available_vars)
                 
             return(TRUE)
         },
@@ -110,13 +112,15 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(num_vals) < 3) {
                     # ACCUMULATE instead of overwrite
                     private$.appendMessage(
-                        glue::glue(.("<br> Warning: {var} has less than 3 valid observations<br>"))
+                        glue::glue(.("<br> Warning: {var} has less than 3 valid observations<br>"),
+                                   var = htmltools::htmlEscape(var))
                     )
                 }
                 if (length(unique(num_vals)) < 2) {
                     # ACCUMULATE instead of overwrite
                     private$.appendMessage(
-                        glue::glue(.("<br> Warning: {var} has no variation (all values are the same)<br>"))
+                        glue::glue(.("<br> Warning: {var} has no variation (all values are the same)<br>"),
+                                   var = htmltools::htmlEscape(var))
                     )
                 }
             }
@@ -205,7 +209,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         clinical_text <- sprintf(
                             .("<div class='clinical-summary'><h4>Results Summary</h4><p>{test} comparing {vars} between groups.</p><p class='subtitle-stats'>{subtitle}</p></div>"),
-                            test = test_name, vars = paste(variables, collapse = ", "), subtitle = subtitle_text
+                            test = test_name,
+                            vars = htmltools::htmlEscape(paste(variables, collapse = ", ")),
+                            subtitle = htmltools::htmlEscape(subtitle_text)
                         )
                         return(clinical_text)
                     }
@@ -258,7 +264,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min_group_size <- min(group_counts)
 
                 if (min_group_size < 3) {
-                    warnings <- c(warnings, sprintf(.(" {var}: Minimum group size is {size} (recommend ≥3)"), var = var, size = min_group_size))
+                    warnings <- c(warnings, sprintf(.(" {var}: Minimum group size is {size} (recommend ≥3)"),
+                                                    var = htmltools::htmlEscape(var), size = min_group_size))
                 }
 
                 if (test_type == "parametric" && min_group_size >= 3) {
@@ -272,7 +279,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             if (levene_p < 0.05 && !self$options$varequal) {
                                 warnings <- c(warnings, sprintf(
                                     .(" {var}: Variances differ significantly between groups (Levene's test p = %.3f). Consider enabling 'Equal Variances = FALSE' or using non-parametric test."),
-                                    var, levene_p
+                                    htmltools::htmlEscape(var), levene_p
                                 ))
                             }
                         }
@@ -291,7 +298,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             if (p_val < 0.05) {
                                 warnings <- c(warnings, sprintf(
                                     .(" {var}: Data may not be normally distributed in group '{level}' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
-                                    var, level, p_val
+                                    htmltools::htmlEscape(var), htmltools::htmlEscape(level), p_val
                                 ))
                             }
                         } else if (n_subset > 200) {
@@ -308,7 +315,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             if (abs(skewness) > 1) {
                                 warnings <- c(warnings, sprintf(
                                     .(" {var}: Large sample (n = %d) in group '{level}' shows substantial skewness (%.2f). Visual inspection recommended."),
-                                    var, n_subset, level, skewness
+                                    htmltools::htmlEscape(var), n_subset, htmltools::htmlEscape(level), skewness
                                 ))
                             }
                         }
@@ -404,7 +411,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         }
                         # ACCUMULATE instead of overwrite
                         private$.appendMessage(
-                            glue::glue(.("<br> {var} has {n_outliers} potential outlier(s) detected<br>"))
+                            glue::glue(.("<br> {var} has {n_outliers} potential outlier(s) detected<br>"),
+                                       var = htmltools::htmlEscape(var))
                         )
                     }
                 }
@@ -506,6 +514,17 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
 .run = function() {
+    # Save and restore RNG state to avoid leaking global RNG entropy via
+    # internal sample() calls (.detectOutliers uses sample() for >5000-row datasets)
+    .rng_saved_seed <- if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+        get(".Random.seed", envir = .GlobalEnv) else NULL
+    on.exit({
+        if (!is.null(.rng_saved_seed))
+            assign(".Random.seed", .rng_saved_seed, envir = .GlobalEnv)
+        else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+            rm(".Random.seed", envir = .GlobalEnv)
+    }, add = TRUE)
+
     # Always generate About content
     private$.generateAboutContent()
 
@@ -536,16 +555,16 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     } else {
         todo <- glue::glue(
             .("<br>Violin plot analysis comparing {vars} by {group}{grouped}.<br><hr>"),
-            vars = paste(self$options$dep, collapse=', '),
-            group = self$options$group,
-            grouped = if(!is.null(self$options$grvar)) paste0(', grouped by ', self$options$grvar) else ''
+            vars = htmltools::htmlEscape(paste(self$options$dep, collapse=', ')),
+            group = htmltools::htmlEscape(self$options$group),
+            grouped = if(!is.null(self$options$grvar)) paste0(', grouped by ', htmltools::htmlEscape(self$options$grvar)) else ''
         )
 
         self$results$todo$setContent(todo)
 
         # Data validation
         if (nrow(self$data) == 0)
-            stop(.('Data contains no (complete) rows'))
+            jmvcore::reject(.('Data contains no (complete) rows'))
             
         # Add checkpoint for user feedback
         private$.checkpoint()
@@ -582,11 +601,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     mydata <- private$.prepareData()
     n_total <- nrow(mydata)
     n_groups <- length(unique(mydata[[self$options$group]]))
-    dep_vars <- paste(self$options$dep, collapse = ", ")
-    
+    dep_vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
+
     test_method <- switch(self$options$typestatistics,
         "parametric" = if (self$options$varequal) "ANOVA" else "Welch's ANOVA",
-        "nonparametric" = "Kruskal-Wallis test", 
+        "nonparametric" = "Kruskal-Wallis test",
         "robust" = "Robust ANOVA",
         "bayes" = "Bayesian ANOVA",
         "ANOVA"
@@ -606,7 +625,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     summary_content <- paste0(
         "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>",
         "<h4 style='color: #28a745; margin-top: 0;'> Analysis Summary</h4>",
-        "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", self$options$group, "</p>",
+        "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", htmltools::htmlEscape(self$options$group), "</p>",
         multi_var_note,  # Add multi-variable clarification
         "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
         "<p><strong>Statistical Method:</strong> ", test_method, "</p>",
@@ -615,7 +634,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$options$padjustmethod, " correction</p>"
         ) else "",
         if (!is.null(self$options$grvar)) paste0(
-            "<p><strong>Subgroup Analysis:</strong> Results stratified by ", self$options$grvar, "</p>"
+            "<p><strong>Subgroup Analysis:</strong> Results stratified by ", htmltools::htmlEscape(self$options$grvar), "</p>"
         ) else "",
         "<p><strong>Confidence Level:</strong> ", (self$options$conflevel * 100), "%</p>",
         "</div>"
@@ -708,10 +727,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # MULTI-ENDPOINT CLARITY: Distinguish single vs multiple variables
     if (length(self$options$dep) == 1) {
-        dep_vars <- self$options$dep[1]
+        dep_vars <- htmltools::htmlEscape(self$options$dep[1])
         multi_var_note <- ""
     } else {
-        dep_vars <- paste(self$options$dep, collapse = ", ")
+        dep_vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
         multi_var_note <- paste0(
             "<p><strong> Note:</strong> ", length(self$options$dep),
             " dependent variables analyzed. Each variable is tested separately. ",
@@ -733,8 +752,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         "<div style='background-color: #ffffff; padding: 15px; border: 1px dashed #6c757d; margin: 10px 0;'>",
         "<h5>Methods:</h5>",
-        "<p>A between-groups analysis was conducted to compare the levels of ", dep_vars, 
-        " across ", n_groups, " groups of ", self$options$group, ". A ", test_method, 
+        "<p>A between-groups analysis was conducted to compare the levels of ", dep_vars,
+        " across ", n_groups, " groups of ", htmltools::htmlEscape(self$options$group), ". A ", test_method,
         " was used to test for significant differences. ",
         
         if (self$options$pairwisecomparisons && n_groups > 2) {

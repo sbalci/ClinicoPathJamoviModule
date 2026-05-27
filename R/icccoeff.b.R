@@ -218,7 +218,7 @@ icccoeffClass <- R6::R6Class(
                 self$results$instructions$setContent(
                     paste0("<div style='padding: 20px; color: #d32f2f;'>
                     <strong> ICC Calculation Error</strong><br>
-                    ", e$message, "
+                    ", htmltools::htmlEscape(e$message), "
                     </div>")
                 )
                 private$.icc_results <- NULL

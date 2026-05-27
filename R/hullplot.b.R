@@ -102,7 +102,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             required_vars <- c(x_var, y_var, group_var)
             missing_vars <- required_vars[!required_vars %in% names(dataset)]
             if (length(missing_vars) > 0) {
-                stop(paste("Error: Variables not found in dataset:", paste(missing_vars, collapse = ", ")))
+                jmvcore::reject("Variables not found in dataset: {missing}", missing = paste(missing_vars, collapse = ", "))
             }
 
             # Prepare data - create subset with required variables
@@ -130,7 +130,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             plot_data <- plot_data[complete.cases(plot_data[required_cols]), ]
 
             if (nrow(plot_data) == 0) {
-                stop("Error: No complete cases found for the selected variables.")
+                jmvcore::reject("No complete cases found for the selected variables.")
             }
 
             # Convert group variable to factor
@@ -519,8 +519,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>Group</th>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>N</th>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", x_var, " Mean ± SD</th>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", y_var, " Mean ± SD</th>",
+                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(x_var), " Mean ± SD</th>",
+                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(y_var), " Mean ± SD</th>",
                 "</tr></thead><tbody>"
             )
             
@@ -528,7 +528,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                 stats_html <- paste0(stats_html,
                     "<tr style='background-color: ", row_bg, ";'>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6;'><strong>", group_stats[[group_var]][i], "</strong></td>",
+                    "<td style='padding: 10px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(group_stats[[group_var]][i]), "</strong></td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$n[i], "</td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$x_mean[i], " ± ", group_stats$x_sd[i], "</td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$y_mean[i], " ± ", group_stats$y_sd[i], "</td>",
@@ -581,7 +581,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 count <- outliers_list[[group]]
                 total_outliers <- total_outliers + count
                 outlier_html <- paste0(outlier_html,
-                    "<li><strong>", group, ":</strong> ", count, " potential outliers detected</li>"
+                    "<li><strong>", htmltools::htmlEscape(group), ":</strong> ", count, " potential outliers detected</li>"
                 )
             }
             
@@ -608,7 +608,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     "<h4 style='color: #856404; margin-top: 0;'> Data Quality Warnings</h4>"
                 )
                 for (warning in validation_warnings) {
-                    warnings_html <- paste0(warnings_html, "<p style='color: #856404; margin: 5px 0;'>• ", warning, "</p>")
+                    warnings_html <- paste0(warnings_html, "<p style='color: #856404; margin: 5px 0;'>• ", htmltools::htmlEscape(warning), "</p>")
                 }
                 warnings_html <- paste0(warnings_html, "</div>")
             }
@@ -620,8 +620,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
                 "<h4 style='color: #0c5460;'>Plot Summary:</h4>",
                 "<ul>",
-                "<li><strong>Variables:</strong> ", x_var, " (X-axis) vs ", y_var, " (Y-axis)</li>",
-                "<li><strong>Groups:</strong> ", n_groups, " groups defined by ", group_var, "</li>",
+                "<li><strong>Variables:</strong> ", htmltools::htmlEscape(x_var), " (X-axis) vs ", htmltools::htmlEscape(y_var), " (Y-axis)</li>",
+                "<li><strong>Groups:</strong> ", n_groups, " groups defined by ", htmltools::htmlEscape(group_var), "</li>",
                 "<li><strong>Observations:</strong> ", n_total, " data points</li>",
                 "</ul>",
 
@@ -726,8 +726,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<div style='background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #c3e6cb;'>",
                 "<h4 style='color: #155724; margin-top: 0;'>Copy-Ready Text:</h4>",
                 "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6; margin: 0;'>",
-                "<strong>Hull plot analysis revealed ", n_groups, " distinct groups based on ", group_var, " classifications. ",
-                "The visualization shows the relationship between ", x_var, " and ", y_var, " across ", n_total, " observations. ",
+                "<strong>Hull plot analysis revealed ", n_groups, " distinct groups based on ", htmltools::htmlEscape(group_var), " classifications. ",
+                "The visualization shows the relationship between ", htmltools::htmlEscape(x_var), " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations. ",
                 "Groups appear ", separation_quality, " in the two-dimensional space, ",
                 "with hull boundaries clearly delineating the extent of each group's distribution.</strong>",
                 "</p>",
@@ -742,7 +742,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 group_name <- group_stats[[group_var]][i]
                 n_points <- group_stats$n[i]
                 summary_html <- paste0(summary_html,
-                    "<li><strong>", group_name, ":</strong> ", n_points, " observations (",
+                    "<li><strong>", htmltools::htmlEscape(group_name), ":</strong> ", n_points, " observations (",
                     round(100 * n_points / n_total, 1), "% of total)</li>"
                 )
             }

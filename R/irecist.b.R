@@ -331,8 +331,8 @@ irecistClass <- R6::R6Class(
             # Create working dataframe
             data <- data.frame(
                 patientId = as.character(mydata[[patientId]]),
-                assessmentTime = as.numeric(mydata[[assessmentTime]]),
-                targetSum = as.numeric(mydata[[targetLesionSum]]),
+                assessmentTime = jmvcore::toNumeric(mydata[[assessmentTime]]),
+                targetSum = jmvcore::toNumeric(mydata[[targetLesionSum]]),
                 newLesions = parseNewLesions(mydata[[newLesions]]),
                 stringsAsFactors = FALSE
             )

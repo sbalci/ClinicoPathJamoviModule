@@ -95,7 +95,7 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             packages <- c('ggplot2', 'ggstats', 'dplyr', 'broom')
             for (pkg in packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
-                    stop(paste0("Package '", pkg, "' is required but not installed"))
+                    jmvcore::reject("Package '{pkg}' is required but not installed", pkg = pkg)
                 }
             }
             
@@ -228,26 +228,26 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create survey visualization using ggstats approach
             if (!is.null(self$options$weight_var)) {
-                plot <- ggplot2::ggplot(survey_data, ggplot2::aes_string(
-                    x = self$options$dependent_var,
-                    weight = self$options$weight_var
+                plot <- ggplot2::ggplot(survey_data, ggplot2::aes(
+                    x = .data[[self$options$dependent_var]],
+                    weight = .data[[self$options$weight_var]]
                 )) +
-                ggstats::stat_prop(by = self$options$grouping_var) +
+                ggstats::stat_prop(by = if (!is.null(self$options$grouping_var)) rlang::sym(self$options$grouping_var) else NULL) +
                 ggplot2::geom_bar(ggplot2::aes(y = ggplot2::after_stat(prop)))
-                
+
                 if (!is.null(self$options$grouping_var)) {
-                    plot <- plot + ggplot2::aes_string(fill = self$options$grouping_var)
+                    plot <- plot + ggplot2::aes(fill = .data[[self$options$grouping_var]])
                 }
             } else {
                 # Regular proportion plot without weights
-                plot <- ggplot2::ggplot(survey_data, ggplot2::aes_string(
-                    x = self$options$dependent_var
+                plot <- ggplot2::ggplot(survey_data, ggplot2::aes(
+                    x = .data[[self$options$dependent_var]]
                 )) +
                 ggstats::stat_prop() +
                 ggplot2::geom_bar(ggplot2::aes(y = ggplot2::after_stat(prop)))
-                
+
                 if (!is.null(self$options$grouping_var)) {
-                    plot <- plot + ggplot2::aes_string(fill = self$options$grouping_var)
+                    plot <- plot + ggplot2::aes(fill = .data[[self$options$grouping_var]])
                 }
             }
             
@@ -256,28 +256,28 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_stat_prop = function(data) {
             # Create proportion analysis plot
-            plot <- ggplot2::ggplot(data, ggplot2::aes_string(
-                x = self$options$dependent_var
+            plot <- ggplot2::ggplot(data, ggplot2::aes(
+                x = .data[[self$options$dependent_var]]
             )) +
             ggstats::stat_prop() +
             ggplot2::geom_bar(ggplot2::aes(y = ggplot2::after_stat(prop)))
-            
+
             if (!is.null(self$options$grouping_var)) {
-                plot <- plot + ggplot2::aes_string(fill = self$options$grouping_var)
+                plot <- plot + ggplot2::aes(fill = .data[[self$options$grouping_var]])
             }
-            
+
             return(plot)
         },
         
         .create_stat_cross = function(data) {
             # Create cross-tabulation plot
             if (is.null(self$options$grouping_var)) {
-                stop("Grouping variable required for cross-tabulation")
+                jmvcore::reject("Grouping variable required for cross-tabulation")
             }
             
-            plot <- ggplot2::ggplot(data, ggplot2::aes_string(
-                x = self$options$dependent_var,
-                fill = self$options$grouping_var
+            plot <- ggplot2::ggplot(data, ggplot2::aes(
+                x = .data[[self$options$dependent_var]],
+                fill = .data[[self$options$grouping_var]]
             )) +
             ggstats::stat_cross() +
             ggplot2::geom_bar(position = "fill")
@@ -288,13 +288,13 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .create_weighted_mean = function(data) {
             # Create weighted mean plot
             if (is.null(self$options$weight_var)) {
-                stop("Weight variable required for weighted means")
+                jmvcore::reject("Weight variable required for weighted means")
             }
             
-            plot <- ggplot2::ggplot(data, ggplot2::aes_string(
-                x = self$options$grouping_var,
-                y = self$options$dependent_var,
-                weight = self$options$weight_var
+            plot <- ggplot2::ggplot(data, ggplot2::aes(
+                x = .data[[self$options$grouping_var]],
+                y = .data[[self$options$dependent_var]],
+                weight = .data[[self$options$weight_var]]
             )) +
             ggstats::stat_weighted_mean() +
             ggplot2::geom_point()
@@ -328,20 +328,20 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .build_formula = function(data) {
             if (nchar(self$options$model_formula) > 0) {
-                return(as.formula(self$options$model_formula))
+                return(jmvcore::asFormula(self$options$model_formula, additional_allowed_functions = c("Surv", "|", "||")))
             }
-            
+
             # Auto-build formula
             dependent <- self$options$dependent_var
-            
+
             if (!is.null(self$options$independent_vars) && length(self$options$independent_vars) > 0) {
-                independent <- paste(self$options$independent_vars, collapse = " + ")
-                formula_str <- paste(dependent, "~", independent)
+                independent <- paste(jmvcore::composeTerms(as.list(self$options$independent_vars)), collapse = " + ")
+                formula_str <- paste(jmvcore::composeTerm(dependent), "~", independent)
             } else {
-                formula_str <- paste(dependent, "~ 1")
+                formula_str <- paste(jmvcore::composeTerm(dependent), "~ 1")
             }
-            
-            return(as.formula(formula_str))
+
+            return(jmvcore::asFormula(formula_str))
         },
         
         .fit_model = function(data, formula) {
@@ -356,21 +356,21 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (requireNamespace('survival', quietly = TRUE)) {
                         survival::coxph(formula, data = data)
                     } else {
-                        stop("survival package required for Cox regression")
+                        jmvcore::reject("survival package required for Cox regression")
                     }
                 },
                 "lmer" = {
                     if (requireNamespace('lme4', quietly = TRUE)) {
                         lme4::lmer(formula, data = data)
                     } else {
-                        stop("lme4 package required for mixed effects models")
+                        jmvcore::reject("lme4 package required for mixed effects models")
                     }
                 },
                 "glmer" = {
                     if (requireNamespace('lme4', quietly = TRUE)) {
                         lme4::glmer(formula, data = data, family = family_type)
                     } else {
-                        stop("lme4 package required for generalized mixed effects models")
+                        jmvcore::reject("lme4 package required for generalized mixed effects models")
                     }
                 },
                 stats::lm(formula, data = data)
@@ -389,9 +389,9 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Second model with interaction if grouping variable exists
             if (!is.null(self$options$grouping_var)) {
-                formula_str <- paste(as.character(formula)[2], "~", 
-                                   as.character(formula)[3], "*", self$options$grouping_var)
-                formula2 <- as.formula(formula_str)
+                formula_str <- paste(as.character(formula)[2], "~",
+                                   as.character(formula)[3], "*", jmvcore::composeTerm(self$options$grouping_var))
+                formula2 <- jmvcore::asFormula(formula_str)
                 model2 <- self$.fit_model(data, formula2)
                 return(list("Model 1" = model1, "Model 2" = model2))
             }
@@ -422,7 +422,7 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(self$options$weight_var)) {
                 weight_var <- self$options$weight_var
                 if (!is.numeric(data[[weight_var]])) {
-                    data[[weight_var]] <- as.numeric(data[[weight_var]])
+                    data[[weight_var]] <- jmvcore::toNumeric(data[[weight_var]])
                 }
                 # Remove rows with missing or invalid weights
                 data <- data[!is.na(data[[weight_var]]) & data[[weight_var]] > 0, ]

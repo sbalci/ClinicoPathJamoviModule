@@ -20,28 +20,6 @@ tryCatch({
     # Utilities will be loaded by package
 })
 
-# Ensure utility functions exist
-if (!exists("convertIHCToNumeric")) {
-    convertIHCToNumeric <- function(data, markers, id_variable = NULL) {
-        ihc_matrix <- matrix(0, nrow = nrow(data), ncol = length(markers))
-        colnames(ihc_matrix) <- markers
-        for (i in seq_along(markers)) {
-            marker_data <- data[[markers[i]]]
-            if (is.factor(marker_data) || is.character(marker_data)) {
-                levels <- sort(unique(marker_data[!is.na(marker_data)]))
-                numeric_values <- as.numeric(factor(marker_data, levels = levels)) - 1
-            } else {
-                numeric_values <- as.numeric(marker_data)
-            }
-            ihc_matrix[, i] <- numeric_values
-        }
-        if (!is.null(id_variable) && id_variable != "" && id_variable %in% names(data)) {
-            rownames(ihc_matrix) <- as.character(data[[id_variable]])
-        }
-        return(ihc_matrix)
-    }
-}
-
 ihcadvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "ihcadvancedClass",
     inherit = ihcadvancedBase,
@@ -84,6 +62,14 @@ ihcadvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
+            # Save and restore RNG state to avoid leaking seed into caller's session
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                old_seed <- .GlobalEnv$.Random.seed
+                on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+            }
+
             # Validate inputs
             if (is.null(self$data) || length(self$options$markers) < 2) {
                 return()
@@ -133,6 +119,14 @@ ihcadvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .prepareData = function() {
             tryCatch({
+                # Invalidate cached state from any previous run
+                private$.distance_matrix <- NULL
+                private$.optimal_k <- NULL
+                private$.clusters <- NULL
+                private$.pca_results <- NULL
+                private$.selected_markers <- NULL
+                private$.validation_results <- NULL
+
                 # Convert IHC data to numeric matrix
                 markers <- self$options$markers
                 private$.ihc_data <- convertIHCToNumeric(
@@ -179,7 +173,7 @@ ihcadvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste0("<p style='color: red;'>Error preparing data: ", e$message, "</p>")
+                    paste0("<p style='color: red;'>Error preparing data: ", htmltools::htmlEscape(e$message), "</p>")
                 )
                 private$.ihc_data <- NULL
             })
@@ -651,7 +645,7 @@ ihcadvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(private$.selected_markers)) {
                 summary_html <- paste0(summary_html, sprintf(
                     "<p><b>Selected Markers:</b> %s</p>",
-                    paste(private$.selected_markers, collapse = ", ")
+                    htmltools::htmlEscape(paste(private$.selected_markers, collapse = ", "))
                 ))
             }
 
@@ -748,7 +742,7 @@ ihcadvancedClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             n_samples <- nrow(private$.ihc_data)
             n_markers <- length(self$options$markers)
-            marker_names <- paste(self$options$markers, collapse = ", ")
+            marker_names <- htmltools::htmlEscape(paste(self$options$markers, collapse = ", "))
 
             report <- sprintf(
                 "Advanced clustering analysis was performed on %d cases using %d IHC markers (%s). ",

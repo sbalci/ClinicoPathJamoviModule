@@ -43,7 +43,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!private$.validateInputs()) return()
 
             if (!requireNamespace("ggpubr", quietly = TRUE)) {
-                stop("The 'ggpubr' package is required. Install with: install.packages('ggpubr')")
+                jmvcore::reject(.("The 'ggpubr' package is required. Install with: install.packages('ggpubr')"))
             }
 
             if (self$options$showExplanations) {
@@ -92,24 +92,20 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Check if it's numeric with few unique values (possible patient IDs, etc.)
                         if (is.numeric(x_data)) {
                             n_unique <- length(unique(x_data[!is.na(x_data)]))
-                            stop(paste0(
-                                "X variable '", self$options$xvar, "' is numeric (", n_unique, " unique values) but ",
-                                self$options$plotType, " requires a categorical variable.\n\n",
-                                " WARNING: Using numeric IDs (e.g., patient IDs) as categorical groups produces ",
-                                "meaningless statistical comparisons.\n\n",
-                                " Solution: Convert numeric codes to factors or select a proper grouping variable ",
-                                "(e.g., treatment group, disease stage)."
-                            ))
+                            jmvcore::reject(
+                                .("X variable '{var}' is numeric ({n} unique values) but {plot} requires a categorical variable. WARNING: Using numeric IDs (e.g., patient IDs) as categorical groups produces meaningless statistical comparisons. Solution: Convert numeric codes to factors or select a proper grouping variable (e.g., treatment group, disease stage)."),
+                                var = self$options$xvar, n = n_unique, plot = self$options$plotType
+                            )
                         }
                     }
                 } else if (self$options$plotType %in% numeric_x_plots) {
                     if (!is.numeric(x_data)) {
                         # Allow conversion for histogram/density if it's a factor with numeric levels
                         if (self$options$plotType %in% c("histogram", "density")) {
-                            stop(paste0(
-                                "X variable '", self$options$xvar, "' must be numeric for ",
-                                self$options$plotType, " plots. Current type: ", class(x_data)[1]
-                            ))
+                            jmvcore::reject(
+                                .("X variable '{var}' must be numeric for {plot} plots. Current type: {cls}"),
+                                var = self$options$xvar, plot = self$options$plotType, cls = class(x_data)[1]
+                            )
                         }
                     }
                 }
@@ -119,38 +115,25 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     y_data <- self$data[[self$options$yvar]]
                     if (!is.numeric(y_data)) {
                         if (self$options$plotType == "scatter") {
-                            stop(paste0(
-                                "Scatter plots require both X and Y to be numeric.
-",
-                                "Y variable '", self$options$yvar, "' is ", class(y_data)[1],
-                                " (must be numeric).
-
-",
-                                " Solution: Select continuous numeric variables for both axes."
-                            ))
+                            jmvcore::reject(
+                                .("Scatter plots require both X and Y to be numeric. Y variable '{var}' is {cls} (must be numeric). Solution: Select continuous numeric variables for both axes."),
+                                var = self$options$yvar, cls = class(y_data)[1]
+                            )
                         }
-                        stop(paste0(
-                            "Y variable '", self$options$yvar, "' must be numeric for ",
-                            self$options$plotType, " plots. Current type: ", class(y_data)[1], "
-
-",
-                            " Solution: Select a continuous numeric variable (e.g., biomarker level, ",
-                            "measurement value, score)."
-                        ))
+                        jmvcore::reject(
+                            .("Y variable '{var}' must be numeric for {plot} plots. Current type: {cls}. Solution: Select a continuous numeric variable (e.g., biomarker level, measurement value, score)."),
+                            var = self$options$yvar, plot = self$options$plotType, cls = class(y_data)[1]
+                        )
                     }
                 }
 
                 # Validate scatter plot specifically (both X and Y must be numeric)
                 if (self$options$plotType == "scatter") {
                     if (!is.numeric(x_data)) {
-                        stop(paste0(
-                            "Scatter plots require both X and Y to be numeric.
-",
-                            "X variable '", self$options$xvar, "' is ", class(x_data)[1], " (must be numeric).
-
-",
-                            " Solution: Select continuous numeric variables for both axes."
-                        ))
+                        jmvcore::reject(
+                            .("Scatter plots require both X and Y to be numeric. X variable '{var}' is {cls} (must be numeric). Solution: Select continuous numeric variables for both axes."),
+                            var = self$options$xvar, cls = class(x_data)[1]
+                        )
                     }
                 }
 
@@ -178,7 +161,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent(paste0(
                     "<div style='padding: 20px; background: #fff3cd; border: 2px solid #ff6b6b;'>",
                     "<h3> Data Validation Error</h3>",
-                    "<p><strong>", e$message, "</strong></p>",
+                    "<p><strong>", htmltools::htmlEscape(e$message), "</strong></p>",
                     "</div>"))
                 stop(e)
             })
@@ -570,7 +553,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_failed <- FALSE
                 if (n_groups >= 2 && requireNamespace("car", quietly = TRUE)) {
                     formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
-                    lv <- tryCatch(car::leveneTest(as.formula(formula_str), data = data, center = median), error = function(e) NULL)
+                    lv <- tryCatch(car::leveneTest(jmvcore::asFormula(formula_str), data = data, center = median), error = function(e) NULL)
                     if (!is.null(lv) && !is.na(lv$`Pr(>F)`[1]) && lv$`Pr(>F)`[1] < 0.05) var_failed <- TRUE
                 }
 
@@ -660,7 +643,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check variance homogeneity (Levene's test)
             if (length(groups) >= 2 && requireNamespace("car", quietly = TRUE)) {
                 formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
-                formula_obj <- as.formula(formula_str)
+                formula_obj <- jmvcore::asFormula(formula_str)
 
                 levene_result <- tryCatch({
                     car::leveneTest(formula_obj, data = complete_data, center = median)
@@ -694,17 +677,17 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Validate that both variables are numeric
                 if (!is.numeric(x_data)) {
-                    stop(paste0(
-                        "Correlation requires numeric variables. ",
-                        "X variable '", x_col, "' is ", class(x_data)[1], " (must be numeric)."
-                    ))
+                    jmvcore::reject(
+                        .("Correlation requires numeric variables. X variable '{var}' is {cls} (must be numeric)."),
+                        var = x_col, cls = class(x_data)[1]
+                    )
                 }
 
                 if (!is.numeric(y_data)) {
-                    stop(paste0(
-                        "Correlation requires numeric variables. ",
-                        "Y variable '", y_col, "' is ", class(y_data)[1], " (must be numeric)."
-                    ))
+                    jmvcore::reject(
+                        .("Correlation requires numeric variables. Y variable '{var}' is {cls} (must be numeric)."),
+                        var = y_col, cls = class(y_data)[1]
+                    )
                 }
 
                 # Kendall CI notice
@@ -897,7 +880,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     omnibus_result <- if (infer$omnibus == "anova") {
                         # One-way ANOVA
                         formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
-                        anova_result <- aov(as.formula(formula_str), data = complete_data)
+                        anova_result <- aov(jmvcore::asFormula(formula_str), data = complete_data)
                         summary_result <- summary(anova_result)
                         list(
                             statistic = summary_result[[1]]$`F value`[1],
@@ -908,7 +891,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                     } else { # kruskal.test
                         # Kruskal-Wallis test
-                        kw_result <- kruskal.test(as.formula(paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))), data = complete_data)
+                        kw_result <- kruskal.test(jmvcore::asFormula(paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))), data = complete_data)
                         list(
                             statistic = kw_result$statistic,
                             p.value = kw_result$p.value,
@@ -921,7 +904,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     omnibus_effect_size <- if (infer$omnibus == "anova") {
                         # Eta-squared for ANOVA: SS_between / SS_total
                         formula_str <- paste(private$.escapeVarName(y_col), "~", private$.escapeVarName(x_col))
-                        anova_result <- aov(as.formula(formula_str), data = complete_data)
+                        anova_result <- aov(jmvcore::asFormula(formula_str), data = complete_data)
                         summary_result <- summary(anova_result)
                         ss_between <- summary_result[[1]]$`Sum Sq`[1]
                         ss_total <- sum(summary_result[[1]]$`Sum Sq`)
@@ -1189,8 +1172,8 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             df <- private$..stats_df
             infer <- private$..inferredMethod
             n_groups <- length(unique(self$data[[self$options$xvar]]))
-            x_var <- self$options$xvar
-            y_var <- self$options$yvar
+            x_var <- htmltools::htmlEscape(self$options$xvar)
+            y_var <- htmltools::htmlEscape(self$options$yvar)
 
             # Omnibus result summary (if >2 groups)
             omnibus_text <- ""
@@ -1276,12 +1259,12 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             html <- paste0(
                 "<div style='padding: 10px; background: #f9f9f9; border: 1px solid #ddd;'>",
                 "<h4>", plot_name, "</h4>",
-                "<p><strong>X:</strong> ", self$options$xvar, "</p>")
+                "<p><strong>X:</strong> ", htmltools::htmlEscape(self$options$xvar), "</p>")
 
             if (!is.null(self$options$yvar))
-                html <- paste0(html, "<p><strong>Y:</strong> ", self$options$yvar, "</p>")
+                html <- paste0(html, "<p><strong>Y:</strong> ", htmltools::htmlEscape(self$options$yvar), "</p>")
             if (!is.null(self$options$groupvar))
-                html <- paste0(html, "<p><strong>Group:</strong> ", self$options$groupvar, "</p>")
+                html <- paste0(html, "<p><strong>Group:</strong> ", htmltools::htmlEscape(self$options$groupvar), "</p>")
 
             html <- paste0(html, "<p><strong>Palette:</strong> ", self$options$palette,
                           " | <strong>Theme:</strong> ", self$options$theme, "</p></div>")
@@ -1313,6 +1296,13 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</p></div>")
         },
 
+        # TODO (correctness): This helper mutates options via the
+        #   `self$options$option("name")$value <- ...` pattern (L1312-1314, L1322-1324,
+        #   L1332-1334). jamovi options are read-only at runtime — this workaround may
+        #   silently no-op or raise a runtime error in newer jamovi. Same correctness
+        #   concern as jjbarstats/jjcoefstats/jjhistostats `.applyClinicalPreset`.
+        #   Recommended fix: compute derived option values in a helper that returns
+        #   them without mutation (matching jjoncoplot's `.optionsWithPreset` pattern).
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalPreset
             if (preset == "custom") return()

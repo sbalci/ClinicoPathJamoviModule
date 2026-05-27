@@ -644,6 +644,118 @@ items:
       clearWith:
           - showPairwiseKappaGuide
 
+    # ---- All-Pairs Cohen's Kappa Table (every rater pair) ----
+
+    - name: allPairsKappaHeading
+      title: All-Pairs Cohen's Kappa
+      type: Preformatted
+      visible: (allPairsKappa || showAllPairsKappaGuide)
+      clearWith:
+          - allPairsKappa
+          - showAllPairsKappaGuide
+
+    - name: allPairsKappaTable
+      title: "All-Pairs Kappa (Every Rater Pair)"
+      type: Table
+      visible: (allPairsKappa)
+      rows: 0
+      columns:
+        - name: rater_a
+          title: 'Rater A'
+          type: text
+        - name: rater_b
+          title: 'Rater B'
+          type: text
+        - name: n
+          title: 'Cases'
+          type: integer
+        - name: peragree
+          title: 'Agreement'
+          type: number
+          format: zto
+        - name: kappa
+          title: 'Kappa'
+          type: number
+        - name: se
+          title: 'SE'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          visible: (allPairsCI)
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          visible: (allPairsCI)
+        - name: z
+          title: 'z'
+          type: number
+        - name: p
+          title: 'p'
+          type: number
+          format: zto,pvalue
+        - name: p_adj
+          title: 'p (adjusted)'
+          type: number
+          format: zto,pvalue
+          visible: (multipleTestCorrection:bonferroni || multipleTestCorrection:bh || multipleTestCorrection:holm)
+      clearWith:
+          - vars
+          - wght
+          - allPairsCI
+          - multipleTestCorrection
+
+    - name: allPairsKappaExplanation
+      title: "About All-Pairs Kappa Analysis"
+      type: Html
+      visible: (showAllPairsKappaGuide)
+      clearWith:
+          - showAllPairsKappaGuide
+
+    # ---- Per-Category Item-Modal Agreement ----
+
+    - name: itemModalAgreementHeading
+      title: Per-Category Item-Modal Agreement
+      type: Preformatted
+      visible: (itemModalCategoryAgreement || showItemModalGuide)
+      clearWith:
+          - itemModalCategoryAgreement
+          - showItemModalGuide
+
+    - name: itemModalAgreementTable
+      title: "Agreement by Item Modal Category"
+      type: Table
+      visible: (itemModalCategoryAgreement)
+      rows: 0
+      columns:
+        - name: category
+          title: 'Modal Category'
+          type: text
+        - name: n_cases
+          title: 'Cases with this Mode'
+          type: integer
+        - name: mean_agreement
+          title: 'Mean Agreement'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          format: zto
+      clearWith:
+          - vars
+
+    - name: itemModalAgreementExplanation
+      title: "About Per-Category Item-Modal Agreement"
+      type: Html
+      visible: (showItemModalGuide)
+      clearWith:
+          - showItemModalGuide
+
     - name: hierarchicalHeading
       title: Hierarchical / Multilevel Agreement
       type:  Preformatted

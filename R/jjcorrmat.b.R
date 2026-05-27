@@ -14,6 +14,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Cache for processed data and options to avoid redundant computation
         .processedData = NULL,
         .processedOptions = NULL,
+        .data_hash = NULL,
         .options_hash = NULL,
         # .preset_recommendations = NULL,  # Commented out - clinical preset feature disabled
         .warnings = list(),  # Collect warnings for HTML display (avoids Notice serialization errors)
@@ -124,7 +125,21 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Optimized data preparation with caching
         .prepareData = function(force_refresh = FALSE) {
-            if (!is.null(private$.processedData) && !force_refresh) {
+            # Hash-based invalidation — mirrors .options_hash pattern.
+            # Without this, stale filtered data could be returned when dep/grvar/
+            # naHandling change between .run() invocations on the same R6 instance.
+            current_data_hash <- digest::digest(list(
+                dep = self$options$dep,
+                grvar = self$options$grvar,
+                naHandling = self$options$naHandling,
+                data_dim = dim(self$data),
+                col_names = names(self$data)
+            ), algo = "md5")
+
+            if (!is.null(private$.processedData) &&
+                !is.null(private$.data_hash) &&
+                private$.data_hash == current_data_hash &&
+                !force_refresh) {
                 return(private$.processedData)
             }
 
@@ -177,6 +192,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Cache the processed data
             private$.processedData <- mydata
+            private$.data_hash <- current_data_hash
             return(mydata)
         },
 
@@ -203,7 +219,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (var in self$options$dep) {
                 varname <- resolve_name(var)
                 if (!(varname %in% names(mydata))) {
-                    private$.addWarning("ERROR", sprintf('Variable "%s" not found in data. Please select valid variables and re-run.', var))
+                    private$.addWarning("ERROR", sprintf('Variable "%s" not found in data. Please select valid variables and re-run.', htmltools::htmlEscape(var)))
                     return(FALSE)
                 }
             }
@@ -234,7 +250,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Stop if correlating category codes
             if (length(factor_warnings) > 0) {
-                private$.addWarning("ERROR", sprintf('Correlation analysis requires numeric variables. The following are categorical: %s. Please select continuous numeric variables.', paste(factor_warnings, collapse = ', ')))
+                private$.addWarning("ERROR", sprintf('Correlation analysis requires numeric variables. The following are categorical: %s. Please select continuous numeric variables.', htmltools::htmlEscape(paste(factor_warnings, collapse = ', '))))
                 return(FALSE)
             }
 
@@ -344,7 +360,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Generate clinical interpretation
             interpretation <- paste0(
                 .("A "), strength, " ", direction, .(" correlation (r = "), sprintf("%.3f", r),
-                .(") between "), var1, .(" and "), var2, .(" that is "), significance,
+                .(") between "), htmltools::htmlEscape(var1), .(" and "), htmltools::htmlEscape(var2),
+                .(" that is "), significance,
                 .(" using "), method, .(" correlation.")
             )
 
@@ -1006,11 +1023,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(dep) || length(dep) == 0)
                 return('')
 
-            # Escape variable names
-            dep_escaped <- vapply(dep, jmvcore::composeTerm, character(1))
-
-            # Build dep argument
-            dep_arg <- paste0('dep = c(', paste(sapply(dep_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
+            # Build dep argument — deparse on a character vector emits c("a", "b")
+            # with proper escaping for embedded quotes/backslashes
+            dep_arg <- paste0('dep = ', deparse(dep))
 
             # Get other arguments
             args <- ''

@@ -672,7 +672,7 @@ ihcpredictClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.loadTrainingModel(opts)
             }, error = function(e) {
                 self$results$modelSummary$setContent(
-                    paste0("<p><strong>Error loading training model:</strong> ", e$message, "</p>")
+                    paste0("<p><strong>Error loading training model:</strong> ", htmltools::htmlEscape(e$message), "</p>")
                 )
                 return(NULL)
             })
@@ -762,23 +762,23 @@ ihcpredictClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (opts$useStoredModel == "stored") {
                 # Try to retrieve from jamovi state (future enhancement)
-                stop("Stored model functionality not yet implemented. Please use 'Load training data from CSV file' option.")
+                jmvcore::reject("Stored model functionality not yet implemented. Please use 'Load training data from CSV file' option.")
             } else {
                 # Load from CSV file
                 trainingFile <- opts$trainingFile
                 if (trainingFile == "" || is.null(trainingFile)) {
-                    stop("Please specify a training data file path.")
+                    jmvcore::reject("Please specify a training data file path.")
                 }
 
                 if (!file.exists(trainingFile)) {
-                    stop(paste0("Training file not found: ", trainingFile))
+                    jmvcore::reject("Training file not found: {file}", file = trainingFile)
                 }
 
                 trainingData <- read.csv(trainingFile, stringsAsFactors = TRUE)
                 diagnosisVar <- opts$trainingDiagnosis %||% "Diagnosis"
 
                 if (!diagnosisVar %in% colnames(trainingData)) {
-                    stop(paste0("Diagnosis column '", diagnosisVar, "' not found in training data."))
+                    jmvcore::reject("Diagnosis column '{var}' not found in training data.", var = diagnosisVar)
                 }
 
                 # Extract markers
@@ -789,7 +789,7 @@ ihcpredictClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Check markers exist
                 missing_markers <- setdiff(markerVars, colnames(trainingData))
                 if (length(missing_markers) > 0) {
-                    stop(paste0("Markers not found in training data: ", paste(missing_markers, collapse=", ")))
+                    jmvcore::reject("Markers not found in training data: {missing}", missing = paste(missing_markers, collapse=", "))
                 }
 
                 # Build training model
@@ -1554,9 +1554,9 @@ ihcpredictClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </table>
             ",
                 model$n_training,
-                paste(model$diagnoses, collapse=", "),
-                paste(model$markerVars, collapse=", "),
-                basename(model$training_file)
+                htmltools::htmlEscape(paste(model$diagnoses, collapse=", ")),
+                htmltools::htmlEscape(paste(model$markerVars, collapse=", ")),
+                htmltools::htmlEscape(basename(model$training_file))
             )
 
             self$results$modelSummary$setContent(html)
@@ -1849,7 +1849,7 @@ ihcpredictClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 opts$distanceWeight %||% 0.3,
                 opts$silhouetteWeight %||% 0.2,
                 model$n_training,
-                paste(model$diagnoses, collapse=", "),
+                htmltools::htmlEscape(paste(model$diagnoses, collapse=", ")),
                 length(model$markerVars),
                 length(model$catVars),
                 length(model$contVars),
@@ -1899,7 +1899,7 @@ ihcpredictClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             for (dx in diagnoses) {
                 dx_count <- sum(predictions$predicted_diagnosis == dx)
                 dx_mean_conf <- mean(predictions$confidence[predictions$predicted_diagnosis == dx])
-                lines <- c(lines, sprintf("  %s: %d cases (mean confidence: %.3f)", dx, dx_count, dx_mean_conf))
+                lines <- c(lines, sprintf("  %s: %d cases (mean confidence: %.3f)", htmltools::htmlEscape(dx), dx_count, dx_mean_conf))
             }
 
             lines <- c(lines,

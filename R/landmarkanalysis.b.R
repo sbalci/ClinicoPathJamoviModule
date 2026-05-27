@@ -74,7 +74,7 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             landmark_times <- as.numeric(trimws(strsplit(landmark_times_str, ",")[[1]]))
             
             if (any(is.na(landmark_times))) {
-                stop("Invalid landmark times. Please use comma-separated numbers (e.g., '6, 12, 24')")
+                jmvcore::reject("Invalid landmark times. Please use comma-separated numbers (e.g., '6, 12, 24')")
             }
             
             # Clean data
@@ -82,12 +82,22 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
             
             # Ensure status is numeric (0/1) for calculations
+            # TODO (correctness): as.numeric(as.factor(...)) - 1 assumes the first level
+            # is "censored" and the second is "event" — alphabetical / canonical level
+            # order. For a factor with levels c("dead", "alive") the mapping inverts and
+            # the Cox model fits the *wrong* event. Either add an `eventLevel` option
+            # (`type: Level` bound to the status Variable, like R/survival.b.R uses)
+            # and explicit `as.integer(clean_data[[status_var]] == event_level)`, or
+            # require status to already be numeric and reject() otherwise.
+            # ⚠ Not a drop-in jmvcore::toNumeric() swap — toNumeric() returns the
+            # encoded `values` attribute when present (e.g. 0/1) and has no -1 offset,
+            # so behavior diverges from current code for unlabelled R factors.
             if (is.factor(clean_data[[status_var]]) || is.character(clean_data[[status_var]])) {
                 clean_data[[status_var]] <- as.numeric(as.factor(clean_data[[status_var]])) - 1
             }
             
             if (nrow(clean_data) < 50) {
-                stop("Insufficient data for landmark analysis (minimum 50 complete cases required)")
+                jmvcore::reject("Insufficient data for landmark analysis (minimum 50 complete cases required)")
             }
             
             # Store for use in other methods
@@ -135,11 +145,18 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fitBaselineModel = function() {
             
             tryCatch({
-                # Fit standard Cox model without landmark restriction
-                formula_str <- paste("Surv(", private$time_var, ",", private$status_var, ") ~ ", 
-                                   paste(private$predictors, collapse = " + "))
-                formula <- as.formula(formula_str)
-                
+                # Fit standard Cox model without landmark restriction.
+                # Backtick-escape column names (composeTerm/composeTerms) and route the
+                # formula string through jmvcore::asFormula() so a poisoned column name
+                # cannot reach model.frame as a callable expression.
+                # Surv is globally allow-listed in current jmvcore — no extras needed.
+                formula_str <- paste0(
+                    "Surv(", jmvcore::composeTerm(private$time_var), ", ",
+                    jmvcore::composeTerm(private$status_var), ") ~ ",
+                    jmvcore::composeTerms(as.list(private$predictors))
+                )
+                formula <- jmvcore::asFormula(formula_str)
+
                 baseline_model <- survival::coxph(formula, data = private$clean_data)
                 
                 # Store model
@@ -162,8 +179,12 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
+                # coxph error messages quote predictor variable names back to the user;
+                # those names come from the user's dataset and reach an Html output, so
+                # escape before paste/setContent.
                 self$results$errors$setContent(
-                    paste("Baseline model fitting failed:", e$message)
+                    paste("Baseline model fitting failed:",
+                          htmltools::htmlEscape(conditionMessage(e)))
                 )
             })
         },
@@ -208,11 +229,15 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         next
                     }
                     
-                    # Fit Cox model at this landmark
-                    formula_str <- paste("Surv(lm_time, lm_status) ~ ", 
-                                        paste(private$predictors, collapse = " + "))
-                    formula <- as.formula(formula_str)
-                    
+                    # Fit Cox model at this landmark. lm_time / lm_status are local
+                    # synthetic columns (added a few lines above) so they're literal
+                    # R-syntactic names; only the user-supplied predictors need escaping.
+                    formula_str <- paste0(
+                        "Surv(lm_time, lm_status) ~ ",
+                        jmvcore::composeTerms(as.list(private$predictors))
+                    )
+                    formula <- jmvcore::asFormula(formula_str)
+
                     lm_model <- survival::coxph(formula, data = lm_data)
                     landmark_models[[paste0("LM_", lm_time)]] <- lm_model
                     
@@ -252,8 +277,11 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$landmark_models <- landmark_models
                 
             }, error = function(e) {
+                # coxph error messages may quote predictor names from the user's data;
+                # escape before paste/setContent on the Html output.
                 self$results$errors$setContent(
-                    paste("Landmark analysis failed:", e$message)
+                    paste("Landmark analysis failed:",
+                          htmltools::htmlEscape(conditionMessage(e)))
                 )
             })
         },
@@ -291,6 +319,24 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$summary$setContent(summary_html)
         },
         
+        # TODO (stub): three large analysis sites below ship static-HTML placeholders
+        # in place of actual computation, which silently misleads users:
+        #   .fitSuperModel()                — emits "Super Model Approach" prose at
+        #                                     ~line 320 but never pools landmark data
+        #                                     into a combined model.
+        #   .performBootstrapValidation()   — emits "Optimism-corrected C-index: Available"
+        #                                     at ~line 375 with no actual resampling done.
+        #   .plotDynamicRisk() (~line 395)  — draws `1 - exp(-0.05 * t)` simulated risk
+        #                                     curves, not predictions from the fitted models.
+        #   .plotCalibration() (~line 426)  — draws `pred + rnorm(0, 0.05)` random points,
+        #                                     not actual observed-vs-predicted.
+        #   .plotDiscrimination() (~line 459) — draws a flat 0.7 C-index line with hardcoded
+        #                                     0.65/0.75 confidence segments, ignoring the
+        #                                     actual `c_index` values already computed at
+        #                                     line 247 of .performLandmarkAnalysis.
+        # Each renders convincingly enough that a clinician would believe it's real output.
+        # Either gate these behind a "demo mode" option, implement them properly, or
+        # remove the result items from .r.yaml until they ship.
         .fitSuperModel = function() {
             
             tryCatch({

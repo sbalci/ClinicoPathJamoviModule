@@ -87,9 +87,17 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .run = function() {
-            if (is.null(self$options$intensity_var) || is.null(self$options$proportion_var)) 
+            # Save and restore RNG state to avoid leaking seed into caller's session
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                old_seed <- .GlobalEnv$.Random.seed
+                on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+            }
+
+            if (is.null(self$options$intensity_var) || is.null(self$options$proportion_var))
                 return()
-                
+
             data <- self$data
             if (nrow(data) == 0) return()
             
@@ -154,7 +162,7 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (self$options$multiple_cutoffs) {
                 tryCatch({
                     if (is.null(self$options$cutoff_values) || nchar(self$options$cutoff_values) == 0) {
-                        stop("Multiple cutoff analysis requires cutoff values to be specified")
+                        jmvcore::reject("Multiple cutoff analysis requires cutoff values to be specified")
                     }
                     private$.performMultipleCutoffAnalysis(intensity, proportion, groups)
                 }, error = function(e) {
@@ -171,7 +179,7 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (self$options$cps_analysis) {
                 tryCatch({
                     if (is.null(self$options$tumor_cells_var) || is.null(self$options$immune_cells_var)) {
-                        stop("CPS analysis requires both tumor cells and immune cells variables")
+                        jmvcore::reject("CPS analysis requires both tumor cells and immune cells variables")
                     }
                     private$.performCPSAnalysis(intensity, proportion, groups)
                 }, error = function(e) {
@@ -325,12 +333,12 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .calculateScores = function(intensity, proportion, sample_ids = NULL, groups = NULL) {
             # Input validation
             if (length(intensity) != length(proportion)) {
-                stop("Intensity and proportion vectors must have the same length")
+                jmvcore::reject("Intensity and proportion vectors must have the same length")
             }
 
             n <- length(intensity)
             if (n == 0) {
-                stop("No data available for scoring calculation")
+                jmvcore::reject("No data available for scoring calculation")
             }
 
             if (is.null(sample_ids)) {
@@ -1075,7 +1083,7 @@ ihcscoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # This is a placeholder for the actual image processing pipeline
             
             if (!requireNamespace("reticulate", quietly = TRUE)) {
-                stop("reticulate package required for Python integration")
+                jmvcore::reject("reticulate package required for Python integration")
             }
             
             tryCatch({

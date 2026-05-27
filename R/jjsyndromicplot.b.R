@@ -25,13 +25,28 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .componentToUse = NULL,
         .presetMessage = "",
 
-        # Variable name escaping utility for special characters
+        # TODO (cleanup): `.escapeVar` is dead code — defined here but never
+        # called anywhere in this file (grep confirms 1 occurrence: the
+        # definition). Safe to delete. For any future formula-context need,
+        # use `jmvcore::composeTerm()`; for symbol-context, use `rlang::sym()`
+        # directly (handles non-syntactic names natively) — do NOT resurrect
+        # this helper.
         .escapeVar = function(x) {
             # Convert variable names with special characters to safe R names
             # This mirrors the modelbuilder behavior for handling spaces and punctuation
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
+        # TODO (forward-looking): `.setNotice` uses
+        # `self$results$notices$insert(999, notice)` with `jmvcore::Notice`
+        # objects. Per CLAUDE.md "Notice Serialization" section: Notice
+        # objects contain function references that cannot be serialized by
+        # jamovi's protobuf system — known cause of "attempt to apply
+        # non-function" errors. Recommended migration: convert to HTML-based
+        # Notice pattern per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md
+        # (waterfall.b.R reference impl: `.noticeList` + `.addNotice` +
+        # `.renderNotices` rendering to a single Html result item). 13+
+        # `.setNotice` call sites would be affected; defer to a separate PR.
         # Notice creation helper with single-line enforcement
         .setNotice = function(content, type = 3) {
             # Convert multi-line content to single line
@@ -112,7 +127,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (nrow(self$data) == 0) {
                     private$.setNotice("Data contains no complete rows after removing missing values.", type = 1)
-                    stop('Data contains no (complete) rows')
+                    jmvcore::reject(.('Data contains no (complete) rows'))
                 }
             }
 
@@ -258,7 +273,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # No rows dropped
             } else {
                 # Listwise Deletion (default)
-                pca_data <- na.omit(pca_data)
+                pca_data <- jmvcore::naOmit(pca_data)
             }
 
             final_n <- nrow(pca_data)
@@ -307,7 +322,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         warning_msgs <- c(
                             warning_msgs,
                             paste0(
-                                "<p> Variable '<code>", var_name, "</code>' has only ",
+                                "<p> Variable '<code>", htmltools::htmlEscape(var_name), "</code>' has only ",
                                 unique_vals, " unique values. It may be categorical rather than ",
                                 "continuous. PCA assumes continuous variables.</p>"
                             )
@@ -329,7 +344,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p><strong>PCA requires continuous numeric variables only.</strong></p>",
                     "<p>The following variables are categorical/non-numeric:</p>",
                     "<ul>",
-                    paste0("<li><code>", non_numeric_vars, "</code></li>", collapse = ""),
+                    paste0("<li><code>", htmltools::htmlEscape(non_numeric_vars), "</code></li>", collapse = ""),
                     "</ul>",
                     "<p><strong>Action required:</strong> Remove these variables or convert them to numeric if appropriate.</p>",
                     "</div>"
@@ -354,7 +369,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     warning_msgs,
                     paste0(
                         "<p> The following variables have zero variance and were removed before PCA: ",
-                        paste0("<code>", zero_var_names, "</code>", collapse = ", "),
+                        paste0("<code>", htmltools::htmlEscape(zero_var_names), "</code>", collapse = ", "),
                         ".</p>"
                     )
                 )
@@ -372,7 +387,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
                 private$.setNotice("Insufficient data for PCA. Need at least 3 complete observations.", type = 1)
-                stop('Insufficient data for PCA. Need at least 3 complete observations.')
+                jmvcore::reject(.('Insufficient data for PCA. Need at least 3 complete observations.'))
             }
 
             # Run PCA
@@ -587,7 +602,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(p$loading) < 1) {
                 private$.setNotice(paste0(pc, " has no loadings above cutoff. Try lowering the cutoff threshold."), type = 1)
-                stop(paste(pc, 'has no loadings above cutoff'))
+                jmvcore::reject(.('{pc} has no loadings above cutoff'), pc = pc)
             }
 
             # Order variables
@@ -606,7 +621,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (nrow(p) < 1) {
                 private$.setNotice(paste0("No loadings above cutoff (", cutoff, ") for ", pc, ". Try lowering the cutoff threshold."), type = 1)
-                stop(paste('There is no loading above cutoff for', pc))
+                jmvcore::reject(.('There is no loading above cutoff for {pc}'), pc = pc)
             }
 
             # Calculate positions

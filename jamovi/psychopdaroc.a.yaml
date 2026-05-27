@@ -1,10 +1,10 @@
 ---
 name: psychopdaROC
 title: Advanced ROC Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '0.0.37'
+version: '0.0.38'
 jas: '1.2'
 
 description:
@@ -13,9 +13,27 @@ description:
 
 options:
     # ==========================================
+    # MANUAL RUN GATE (defer heavy recomputation)
+    # ==========================================
+
+    - name: manualRun
+      title: Run manually
+      type: Bool
+      default: false
+      description:
+          R: >
+            When TRUE, results are only computed after clicking the Run button.
+            Useful for skipping intermediate recomputes while adjusting options
+            on slow bootstrap or cutpoint analyses.
+
+    - name: run
+      title: Run
+      type: Action
+
+    # ==========================================
     # CLINICAL ANALYSIS MODE SELECTION
     # ==========================================
-    
+
     - name: clinicalMode
       title: Analysis Level
       type: List

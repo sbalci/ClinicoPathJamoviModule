@@ -124,6 +124,13 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
             
+            # TODO (correctness): R6 cache state (`private$variable_names`,
+            # `private$long_model`, `private$surv_model`) is not explicitly reset at
+            # `.run()` entry. If a run fails partway through `.fitJointModel`, the
+            # next run could read stale model objects. Add reset block here:
+            #   private$variable_names <- NULL
+            #   private$long_model <- NULL
+            #   private$surv_model <- NULL
             # Initialize progress tracking
             private$.progress_steps = private$.calculateProgressSteps()
             private$.current_step = 0
@@ -212,7 +219,13 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             self$results$progress$setContent(progress_html)
-            
+
+            # TODO (cleanup): `Sys.sleep(0.1)` below is a "force UI update" workaround
+            # that adds 100ms latency to every progress update — multiplied across 5-9
+            # steps that's ~1 second of pure sleep per run. jamovi UI doesn't poll
+            # synchronously, so the sleep doesn't actually help responsiveness. Remove,
+            # or replace with `private$.checkpoint()` for cooperative progress that
+            # actually integrates with jamovi's progress UI.
             # Force UI update (this may help with real-time updates in jamovi)
             Sys.sleep(0.1)
         },
@@ -250,20 +263,20 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data <- data[complete.cases(data), ]
                 
                 if (nrow(data) < 50) {
-                    stop("Insufficient data for joint modeling (minimum 50 observations required)")
+                    jmvcore::reject(.("Insufficient data for joint modeling (minimum 50 observations required)"))
                 }
-                
+
                 # Data structure validation
                 n_patients <- length(unique(data[[id_var]]))
                 n_observations <- nrow(data)
                 avg_obs_per_patient <- n_observations / n_patients
-                
+
                 if (avg_obs_per_patient < 2) {
-                    stop("Joint models require multiple measurements per patient (average < 2 measurements found)")
+                    jmvcore::reject(.("Joint models require multiple measurements per patient (average < 2 measurements found)"))
                 }
-                
+
                 if (n_patients < 20) {
-                    stop("Joint models require at least 20 patients for stable estimation")
+                    jmvcore::reject(.("Joint models require at least 20 patients for stable estimation"))
                 }
                 
                 # Convert variables to appropriate types
@@ -271,7 +284,10 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data[[time_long_var]] <- as.numeric(data[[time_long_var]])
                 data[[biomarker_var]] <- as.numeric(data[[biomarker_var]])
                 data[[surv_time_var]] <- as.numeric(data[[surv_time_var]])
-                data[[surv_status_var]] <- as.numeric(data[[surv_status_var]])
+                # survival_status permits factor per .h.R:81-88; jmvcore::toNumeric
+                # honors the jamovi `values` attribute (returns user-coded 0/1 not level
+                # indices 1/2 like as.numeric(factor) does — same correctness bug as jointfrailty)
+                data[[surv_status_var]] <- jmvcore::toNumeric(data[[surv_status_var]])
                 
                 # Store variable names
                 private$variable_names <- list(
@@ -303,10 +319,11 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(data)
                 
             }, error = function(e) {
+                # htmlEscape e$message — nlme/JMbayes2/etc. errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Data Preparation Error</h4>
-                    <p><b>Error:</b> ", e$message, "</p>
+                    <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Common Issues:</b></p>
                     <ul>
                     <li>Data not in long format (multiple rows per patient)</li>
@@ -324,7 +341,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             tryCatch({
                 if (!requireNamespace('nlme', quietly = TRUE)) {
-                    stop("nlme package is required for longitudinal models")
+                    jmvcore::reject(.("nlme package is required for longitudinal models"))
                 }
                 
                 vars <- private$variable_names
@@ -334,48 +351,55 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 random_effects <- self$options$random_effects %||% "intercept_slope"
                 error_structure <- self$options$error_structure %||% "independent"
                 
+                # Backtick-escape user column names for safe formula construction
+                biomarker_t <- jmvcore::composeTerm(vars$biomarker)
+                time_long_t <- jmvcore::composeTerm(vars$time_long)
+                id_t <- jmvcore::composeTerm(vars$id)
+
                 # Fixed effects formula
                 if (functional_form == "linear") {
-                    fixed_formula <- paste(vars$biomarker, "~", vars$time_long)
+                    fixed_formula <- paste(biomarker_t, "~", time_long_t)
                 } else if (functional_form == "quadratic") {
-                    fixed_formula <- paste(vars$biomarker, "~", vars$time_long, "+ I(", vars$time_long, "^2)")
+                    fixed_formula <- paste(biomarker_t, "~", time_long_t, "+ I(", time_long_t, "^2)")
                 } else if (functional_form == "cubic") {
-                    fixed_formula <- paste(vars$biomarker, "~", vars$time_long, "+ I(", vars$time_long, "^2) + I(", vars$time_long, "^3)")
+                    fixed_formula <- paste(biomarker_t, "~", time_long_t, "+ I(", time_long_t, "^2) + I(", time_long_t, "^3)")
                 } else if (functional_form %in% c("splines", "ns", "bs")) {
                     if (requireNamespace('splines', quietly = TRUE)) {
-                        fixed_formula <- paste(vars$biomarker, "~", "splines::ns(", vars$time_long, ", df = 3)")
+                        fixed_formula <- paste(biomarker_t, "~", "splines::ns(", time_long_t, ", df = 3)")
                     } else {
-                        fixed_formula <- paste(vars$biomarker, "~", vars$time_long)  # Fallback
+                        fixed_formula <- paste(biomarker_t, "~", time_long_t)  # Fallback
                     }
                 }
-                
-                # Add covariates if present
+
+                # Add covariates if present (composeTerms backtick-escapes each name)
                 if (!is.null(vars$covariates)) {
-                    fixed_formula <- paste(fixed_formula, "+", paste(vars$covariates, collapse = " + "))
+                    fixed_formula <- paste(fixed_formula, "+", jmvcore::composeTerms(as.list(vars$covariates)))
                 }
-                
-                # Random effects formula
+
+                # Random effects formula. nlme's `~ form | group` uses the `|` conditioning
+                # bar (groupedData), which is not in jmvcore's default formula allowlist —
+                # pass additional_allowed_functions = c("|") to permit.
                 if (random_effects == "intercept") {
-                    random_formula <- as.formula(paste("~ 1 |", vars$id))
+                    random_formula <- jmvcore::asFormula(paste("~ 1 |", id_t), additional_allowed_functions = c("|"))
                 } else if (random_effects == "intercept_slope") {
-                    random_formula <- as.formula(paste("~", vars$time_long, "|", vars$id))
+                    random_formula <- jmvcore::asFormula(paste("~", time_long_t, "|", id_t), additional_allowed_functions = c("|"))
                 } else if (random_effects == "full_quadratic") {
-                    random_formula <- as.formula(paste("~", vars$time_long, "+ I(", vars$time_long, "^2) |", vars$id))
+                    random_formula <- jmvcore::asFormula(paste("~", time_long_t, "+ I(", time_long_t, "^2) |", id_t), additional_allowed_functions = c("|"))
                 }
-                
+
                 # Correlation structure
                 if (error_structure == "ar1") {
-                    correlation <- nlme::corAR1(form = as.formula(paste("~ 1 |", vars$id)))
+                    correlation <- nlme::corAR1(form = jmvcore::asFormula(paste("~ 1 |", id_t), additional_allowed_functions = c("|")))
                 } else if (error_structure == "compound") {
-                    correlation <- nlme::corCompSymm(form = as.formula(paste("~ 1 |", vars$id)))
+                    correlation <- nlme::corCompSymm(form = jmvcore::asFormula(paste("~ 1 |", id_t), additional_allowed_functions = c("|")))
                 } else {
                     correlation <- NULL
                 }
-                
+
                 # Fit longitudinal model
                 if (is.null(correlation)) {
                     long_model <- nlme::lme(
-                        fixed = as.formula(fixed_formula),
+                        fixed = jmvcore::asFormula(fixed_formula),
                         random = random_formula,
                         data = data,
                         method = "ML",
@@ -383,7 +407,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 } else {
                     long_model <- nlme::lme(
-                        fixed = as.formula(fixed_formula),
+                        fixed = jmvcore::asFormula(fixed_formula),
                         random = random_formula,
                         correlation = correlation,
                         data = data,
@@ -401,10 +425,11 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(long_model)
                 
             }, error = function(e) {
+                # htmlEscape e$message — nlme errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Longitudinal Model Fitting Error</h4>
-                    <p><b>Error:</b> ", e$message, "</p>
+                    <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Possible Solutions:</b></p>
                     <ul>
                     <li>Try simpler functional form (linear instead of cubic)</li>
@@ -432,10 +457,11 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
+                # htmlEscape e$message — JMbayes2/joineR errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Joint Model Fitting Error</h4>
-                    <p><b>Error:</b> ", e$message, "</p>
+                    <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Troubleshooting:</b></p>
                     <ul>
                     <li>Try reducing MCMC iterations for faster initial run</li>
@@ -452,7 +478,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fitBayesianJoint = function(data, long_model, surv_model) {
             
             if (!requireNamespace('JMbayes2', quietly = TRUE)) {
-                stop("JMbayes2 package is required for Bayesian joint models")
+                jmvcore::reject(.("JMbayes2 package is required for Bayesian joint models"))
             }
             
             vars <- private$variable_names
@@ -514,7 +540,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <h4> Longitudinal Model Results</h4>
                 <p><b>Fixed Effects (Population Level):</b></p>
                 <ul>",
-                paste0("<li>", names(fixed_effects), ": ", round(fixed_effects, 4), "</li>", collapse = ""),
+                paste0("<li>", htmltools::htmlEscape(names(fixed_effects)), ": ", round(fixed_effects, 4), "</li>", collapse = ""),
                 "</ul>
                 <p><b>Model Fit:</b></p>
                 <ul>
@@ -532,22 +558,25 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             tryCatch({
                 if (!requireNamespace('survival', quietly = TRUE)) {
-                    stop("survival package is required")
+                    jmvcore::reject(.("survival package is required"))
                 }
                 
                 vars <- private$variable_names
                 survival_model <- self$options$survival_model %||% "cox"
                 
-                # Create survival formula
-                surv_formula <- paste("Surv(", vars$surv_time, ",", vars$surv_status, ") ~ 1")
+                # Create survival formula (composeTerm backtick-escapes user column names;
+                # Surv is globally allow-listed in jmvcore)
+                surv_time_t <- jmvcore::composeTerm(vars$surv_time)
+                surv_status_t <- jmvcore::composeTerm(vars$surv_status)
+                surv_formula <- paste("Surv(", surv_time_t, ",", surv_status_t, ") ~ 1")
                 if (!is.null(vars$covariates)) {
-                    surv_formula <- paste("Surv(", vars$surv_time, ",", vars$surv_status, ") ~", 
-                                        paste(vars$covariates, collapse = " + "))
+                    surv_formula <- paste("Surv(", surv_time_t, ",", surv_status_t, ") ~",
+                                        jmvcore::composeTerms(as.list(vars$covariates)))
                 }
-                
+
                 # Fit survival model based on type
                 if (survival_model == "cox") {
-                    surv_model <- survival::coxph(as.formula(surv_formula), data = data)
+                    surv_model <- survival::coxph(jmvcore::asFormula(surv_formula), data = data)
                 } else {
                     # Parametric models using survreg
                     dist <- switch(survival_model,
@@ -556,8 +585,8 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                  "lognormal" = "lognormal",
                                  "loglogistic" = "loglogistic",
                                  "weibull")  # default
-                    
-                    surv_model <- survival::survreg(as.formula(surv_formula), 
+
+                    surv_model <- survival::survreg(jmvcore::asFormula(surv_formula),
                                                    data = data, dist = dist)
                 }
                 
@@ -570,10 +599,11 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(surv_model)
                 
             }, error = function(e) {
+                # htmlEscape e$message — survival package errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Survival Model Fitting Error</h4>
-                    <p><b>Error:</b> ", e$message, "</p>
+                    <p><b>Error:</b> ", htmltools::htmlEscape(e$message), "</p>
                     <p><b>Possible Solutions:</b></p>
                     <ul>
                     <li>Check for sufficient events in survival data</li>
@@ -599,9 +629,9 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <h4> Cox Survival Model Results</h4>
                         <p><b>Hazard Ratios:</b></p>
                         <ul>",
-                        paste0("<li>", rownames(coef_table), ": HR = ", round(exp(coef_table[,1]), 3),
+                        paste0("<li>", htmltools::htmlEscape(rownames(coef_table)), ": HR = ", round(exp(coef_table[,1]), 3),
                               " (95% CI: ", round(exp(coef_table[,1] - 1.96*coef_table[,3]), 3), "-",
-                              round(exp(coef_table[,1] + 1.96*coef_table[,3]), 3), ")", 
+                              round(exp(coef_table[,1] + 1.96*coef_table[,3]), 3), ")",
                               " p = ", round(coef_table[,5], 4), "</li>", collapse = ""),
                         "</ul>
                         <p><b>Model Fit:</b></p>
@@ -622,8 +652,8 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <p><b>Distribution:</b> {surv_model$dist}</p>
                     <p><b>Coefficients:</b></p>
                     <ul>",
-                    paste0("<li>", rownames(coef_table), ": ", round(coef_table[,1], 4),
-                          " (SE: ", round(coef_table[,2], 4), ")", 
+                    paste0("<li>", htmltools::htmlEscape(rownames(coef_table)), ": ", round(coef_table[,1], 4),
+                          " (SE: ", round(coef_table[,2], 4), ")",
                           " p = ", round(coef_table[,4], 4), "</li>", collapse = ""),
                     "</ul>
                     <p><b>Log-likelihood:</b> ", round(surv_model$loglik[2], 2), "</p>
@@ -638,7 +668,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             tryCatch({
                 if (!requireNamespace('joineR', quietly = TRUE)) {
-                    stop("joineR package is required for two-stage joint models")
+                    jmvcore::reject(.("joineR package is required for two-stage joint models"))
                 }
                 
                 vars <- private$variable_names
@@ -652,11 +682,16 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     time.col = vars$time_long
                 )
                 
-                # Fit joint model using joineR
+                # Fit joint model using joineR (composeTerm backtick-escapes user names;
+                # Surv globally allow-listed in jmvcore)
+                biomarker_t <- jmvcore::composeTerm(vars$biomarker)
+                time_long_t <- jmvcore::composeTerm(vars$time_long)
+                surv_time_t <- jmvcore::composeTerm(vars$surv_time)
+                surv_status_t <- jmvcore::composeTerm(vars$surv_status)
                 joint_model <- joineR::joint(
                     data = joint_data,
-                    long.formula = as.formula(paste(vars$biomarker, "~", vars$time_long)),
-                    surv.formula = as.formula(paste("Surv(", vars$surv_time, ",", vars$surv_status, ") ~ 1")),
+                    long.formula = jmvcore::asFormula(paste(biomarker_t, "~", time_long_t)),
+                    surv.formula = jmvcore::asFormula(paste("Surv(", surv_time_t, ",", surv_status_t, ") ~ 1")),
                     model = "int"
                 )
                 
@@ -850,29 +885,35 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create comprehensive results summary
                 vars <- private$variable_names
                 estimation_method <- self$options$estimation_method %||% "bayesian"
-                
+                # htmlEscape user column names before glue interpolation
+                biomarker_safe <- htmltools::htmlEscape(vars$biomarker)
+                surv_time_safe <- htmltools::htmlEscape(vars$surv_time)
+                surv_status_safe <- htmltools::htmlEscape(vars$surv_status)
+                id_safe <- htmltools::htmlEscape(vars$id)
+                time_long_safe <- htmltools::htmlEscape(vars$time_long)
+
                 final_summary <- glue::glue(
                     "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid #4caf50;'>
                     <h3> Joint Longitudinal-Survival Model Summary</h3>
-                    
+
                     <h4> Model Specification</h4>
                     <ul>
-                    <li><b>Longitudinal Outcome:</b> {vars$biomarker}</li>
-                    <li><b>Survival Outcome:</b> {vars$surv_time} (Status: {vars$surv_status})</li>
-                    <li><b>Patient Identifier:</b> {vars$id}</li>
-                    <li><b>Time Variable:</b> {vars$time_long}</li>
+                    <li><b>Longitudinal Outcome:</b> {biomarker_safe}</li>
+                    <li><b>Survival Outcome:</b> {surv_time_safe} (Status: {surv_status_safe})</li>
+                    <li><b>Patient Identifier:</b> {id_safe}</li>
+                    <li><b>Time Variable:</b> {time_long_safe}</li>
                     <li><b>Estimation Method:</b> {stringr::str_to_title(estimation_method)}</li>
                     </ul>
-                    
+
                     <h4> Key Findings</h4>
                     <ul>
                     <li><b>Association Structure:</b> {self$options$association_structure %||% 'current_value'}</li>
                     <li><b>Functional Form:</b> {stringr::str_to_title(self$options$functional_form %||% 'linear')}</li>
                     <li><b>Random Effects:</b> {stringr::str_replace_all(self$options$random_effects %||% 'intercept_slope', '_', ' ')}</li>
                     </ul>
-                    
+
                     <h4> Clinical Interpretation</h4>
-                    <p>The joint model quantifies how changes in <b>{vars$biomarker}</b> over time 
+                    <p>The joint model quantifies how changes in <b>{biomarker_safe}</b> over time
                     are associated with the risk of the survival event. This enables:</p>
                     <ul>
                     <li>Dynamic risk prediction as new biomarker values become available</li>
@@ -900,6 +941,10 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
         
+        # TODO (cleanup): `.parseFormulaVars` is dead code — defined here but never
+        # called anywhere in this file (grep confirms 1 occurrence: the definition).
+        # If a future need arises to decompose a formula into variable names, prefer
+        # `jmvcore::decomposeFormula()` over hand-rolled regex parsing.
         .parseFormulaVars = function(formula_str) {
             # Simple formula parsing - extract variable names
             vars <- strsplit(formula_str, "[+*:~\\(\\)\\s]+")[[1]]

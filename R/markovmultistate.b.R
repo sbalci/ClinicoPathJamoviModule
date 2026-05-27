@@ -24,11 +24,30 @@ markovmultistateClass <- R6::R6Class(
         },
         
         .run = function() {
+            # TODO (stub): all 6 `.fit*Model` branches at L114-132 return `.generateMockResults()`
+            # instead of fitting real msm/mstate models — output transition intensities, sojourn
+            # times, covariate effects, and state probabilities are HARD-CODED MOCK DATA, not
+            # derived from user data. Either implement real msm/mstate fits OR remove this
+            # analysis from production menus. menuGroup `SurvivalD` is already D-suffixed
+            # (dev-routed) so production users do not see this function — but anyone running
+            # it via JamoviTest must understand the output is not real.
+
             # Check for required variables
             if (is.null(self$options$time) || is.null(self$options$event) || is.null(self$options$subject)) {
                 return()
             }
-            
+
+            # STUB warning — displays prominently before any analysis runs so users do not
+            # mistake mock output for real Markov model results.
+            stub_warning <- paste0(
+                "<div class='alert alert-danger' style='border:3px solid #dc3545;padding:14px;margin-bottom:12px;'>",
+                "<h3 style='margin-top:0;color:#dc3545;'>", htmltools::htmlEscape(.("STUB IMPLEMENTATION — NOT FOR CLINICAL USE")), "</h3>",
+                "<p>", htmltools::htmlEscape(.("This analysis returns hard-coded mock results, not real multi-state model fits. All transition intensities, sojourn times, covariate effects, and state probabilities below are placeholders. Do not use the output for clinical interpretation, prognostic decisions, or research conclusions.")), "</p>",
+                "<p><strong>", htmltools::htmlEscape(.("Use 'Multistate Survival' (multistatesurvival) or 'Multi-State Cox' (jointmodeling) for real msm/mstate fits.")), "</strong></p>",
+                "</div>"
+            )
+            self$results$todo$setContent(stub_warning)
+
             # Get the data
             data <- self$data
             
@@ -86,7 +105,7 @@ markovmultistateClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                error_msg <- paste("Model fitting error:", e$message)
+                error_msg <- paste("Model fitting error:", htmltools::htmlEscape(e$message))
                 self$results$todo$setContent(error_msg)
             })
         },
@@ -645,57 +664,52 @@ markovmultistateClass <- R6::R6Class(
         # Plotting functions
         .stateTransitionDiagram = function(image, ggtheme, theme, ...) {
             if (is.null(private$.model_results)) return()
-            
-            # Create state transition diagram
-            library(ggplot2)
-            
+
             # Simple diagram representation
             n_states <- private$.model_results$n_states
             states <- paste("State", 1:n_states)
-            
+
             # Create a simple network diagram
             transitions <- private$.model_results$transition_intensities
-            
+
             # Create coordinates for states in a circle
             angles <- seq(0, 2*pi, length.out = n_states + 1)[1:n_states]
             x_coords <- cos(angles)
             y_coords <- sin(angles)
-            
+
             state_df <- data.frame(
                 state = states,
                 x = x_coords,
                 y = y_coords
             )
-            
+
             # Create basic plot
-            p <- ggplot() +
-                geom_point(data = state_df, aes(x = x, y = y), 
+            p <- ggplot2::ggplot() +
+                ggplot2::geom_point(data = state_df, ggplot2::aes(x = x, y = y),
                           size = 10, color = "lightblue", alpha = 0.8) +
-                geom_text(data = state_df, aes(x = x, y = y, label = state), 
+                ggplot2::geom_text(data = state_df, ggplot2::aes(x = x, y = y, label = state),
                          size = 3, color = "black") +
-                coord_fixed() +
-                theme_void() +
-                labs(title = "State Transition Diagram",
+                ggplot2::coord_fixed() +
+                ggplot2::theme_void() +
+                ggplot2::labs(title = "State Transition Diagram",
                      subtitle = paste("Multi-State Model with", n_states, "states")) +
                 ggtheme
-            
+
             print(p)
         },
         
         .stateProbabilityPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotStateProbs || is.null(private$.model_results)) return()
-            
-            library(ggplot2)
-            
+
             state_data <- private$.model_results$state_probs
-            
-            p <- ggplot(state_data, aes(x = time_point, y = probability, 
+
+            p <- ggplot2::ggplot(state_data, ggplot2::aes(x = time_point, y = probability,
                                       color = state, fill = state)) +
-                geom_line(size = 1.2, alpha = 0.8) +
-                geom_point(size = 3, alpha = 0.9) +
-                geom_ribbon(aes(ymin = lower_ci, ymax = upper_ci), alpha = 0.2) +
-                scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-                labs(
+                ggplot2::geom_line(size = 1.2, alpha = 0.8) +
+                ggplot2::geom_point(size = 3, alpha = 0.9) +
+                ggplot2::geom_ribbon(ggplot2::aes(ymin = lower_ci, ymax = upper_ci), alpha = 0.2) +
+                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                ggplot2::labs(
                     title = "State Occupation Probabilities Over Time",
                     subtitle = "Probability of being in each state at specified time points",
                     x = paste("Time (", self$options$timeUnits, ")", sep = ""),
@@ -703,69 +717,62 @@ markovmultistateClass <- R6::R6Class(
                     color = "State",
                     fill = "State"
                 ) +
-                theme(legend.position = "bottom") +
+                ggplot2::theme(legend.position = "bottom") +
                 ggtheme
-            
+
             print(p)
         },
         
         .transitionProbabilityPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotTransitionProbs || is.null(private$.model_results)) return()
-            
-            library(ggplot2)
-            
+
             trans_data <- private$.model_results$transition_probs
-            
+
             # Create heatmap for a specific time point
             time_point <- as.numeric(strsplit(self$options$transitionTimes, ",")[[1]])[1]
             plot_data <- trans_data[trans_data$time_point == time_point, ]
-            
-            p <- ggplot(plot_data, aes(x = from_state, y = to_state, fill = probability)) +
-                geom_tile(color = "white", size = 0.5) +
-                geom_text(aes(label = round(probability, 2)), color = "white", size = 4) +
-                scale_fill_gradient2(low = "blue", mid = "white", high = "red", 
+
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = from_state, y = to_state, fill = probability)) +
+                ggplot2::geom_tile(color = "white", size = 0.5) +
+                ggplot2::geom_text(ggplot2::aes(label = round(probability, 2)), color = "white", size = 4) +
+                ggplot2::scale_fill_gradient2(low = "blue", mid = "white", high = "red",
                                    midpoint = 0.5, name = "Probability") +
-                labs(
+                ggplot2::labs(
                     title = paste("Transition Probability Matrix at Time", time_point),
                     subtitle = "Probability of transitioning from row state to column state",
                     x = "From State",
                     y = "To State"
                 ) +
-                theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
                 ggtheme
-            
+
             print(p)
         },
         
         .hazardRatioPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotHazardRatios || is.null(private$.model_results$covariate_effects)) return()
-            
-            library(ggplot2)
-            
+
             cov_data <- private$.model_results$covariate_effects
-            
-            p <- ggplot(cov_data, aes(x = hazard_ratio, y = paste(covariate, transition, sep = " - "))) +
-                geom_vline(xintercept = 1, linetype = "dashed", color = "red", alpha = 0.7) +
-                geom_point(size = 3, alpha = 0.8) +
-                geom_errorbarh(aes(xmin = lower_ci, xmax = upper_ci), height = 0.2, alpha = 0.6) +
-                scale_x_log10() +
-                labs(
+
+            p <- ggplot2::ggplot(cov_data, ggplot2::aes(x = hazard_ratio, y = paste(covariate, transition, sep = " - "))) +
+                ggplot2::geom_vline(xintercept = 1, linetype = "dashed", color = "red", alpha = 0.7) +
+                ggplot2::geom_point(size = 3, alpha = 0.8) +
+                ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower_ci, xmax = upper_ci), height = 0.2, alpha = 0.6) +
+                ggplot2::scale_x_log10() +
+                ggplot2::labs(
                     title = "Covariate Effects on Transition Rates",
                     subtitle = "Hazard ratios with 95% confidence intervals",
                     x = "Hazard Ratio (log scale)",
                     y = "Covariate - Transition"
                 ) +
                 ggtheme
-            
+
             print(p)
         },
         
         .diagnosticsPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotModelDiagnostics || is.null(private$.model_results)) return()
-            
-            library(ggplot2)
-            library(gridExtra)
-            
+
             # Generate mock diagnostic data
             n <- 100
             residuals_data <- data.frame(
@@ -774,26 +781,26 @@ markovmultistateClass <- R6::R6Class(
                 qq_theoretical = qnorm(ppoints(n)),
                 qq_sample = sort(rnorm(n))
             )
-            
+
             # Residual plot
-            p1 <- ggplot(residuals_data, aes(x = fitted, y = residuals)) +
-                geom_point(alpha = 0.6) +
-                geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-                geom_smooth(se = FALSE, color = "blue") +
-                labs(title = "Residuals vs Fitted", x = "Fitted Values", y = "Residuals") +
+            p1 <- ggplot2::ggplot(residuals_data, ggplot2::aes(x = fitted, y = residuals)) +
+                ggplot2::geom_point(alpha = 0.6) +
+                ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+                ggplot2::geom_smooth(se = FALSE, color = "blue") +
+                ggplot2::labs(title = "Residuals vs Fitted", x = "Fitted Values", y = "Residuals") +
                 ggtheme
-            
+
             # QQ plot
-            p2 <- ggplot(residuals_data, aes(x = qq_theoretical, y = qq_sample)) +
-                geom_point(alpha = 0.6) +
-                geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
-                labs(title = "Q-Q Plot", x = "Theoretical Quantiles", y = "Sample Quantiles") +
+            p2 <- ggplot2::ggplot(residuals_data, ggplot2::aes(x = qq_theoretical, y = qq_sample)) +
+                ggplot2::geom_point(alpha = 0.6) +
+                ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+                ggplot2::labs(title = "Q-Q Plot", x = "Theoretical Quantiles", y = "Sample Quantiles") +
                 ggtheme
-            
+
             # Combine plots
-            combined_plot <- grid.arrange(p1, p2, ncol = 2, 
+            combined_plot <- gridExtra::grid.arrange(p1, p2, ncol = 2,
                                         top = "Model Diagnostic Plots")
-            
+
             print(combined_plot)
         },
         

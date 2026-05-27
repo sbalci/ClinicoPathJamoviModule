@@ -65,7 +65,7 @@ swimmerplot(
 
 }
 \seealso{
-Other swimmer plot datasets: 
+Other swimmer plot datasets:
 \code{\link{swimmer_unified_basic}},
 \code{\link{swimmer_unified_comprehensive}},
 \code{\link{swimmer_unified_datetime}},

@@ -8,6 +8,11 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
     inherit = mendelianrandomizationBase,
     private = list(
 
+        # TODO (stub): Add .asSource() / .sourcifyOption() for jamovi syntax-mode
+        # reproducibility. Currently no R-code emission when users toggle "Syntax
+        # mode". See vignettes/jamovi_module_patterns_guide.md (Syntax Generation)
+        # and jmvbaseR examples.
+
         # Data storage
         .mr_input = NULL,
         .mr_results = NULL,
@@ -206,7 +211,8 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
                 }
 
             }, error = function(e) {
-                error_msg <- paste0("<h3>MR Analysis Error</h3><p>", e$message, "</p>")
+                error_msg <- paste0("<h3>MR Analysis Error</h3><p>",
+                                    htmltools::htmlEscape(e$message), "</p>")
                 self$results$dataInfo$setContent(error_msg)
             })
         },
@@ -221,21 +227,21 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
 
             # Extract columns
             snp <- as.character(data[[self$options$snp_column]])
-            beta_exp <- as.numeric(data[[self$options$beta_exposure]])
-            se_exp <- as.numeric(data[[self$options$se_exposure]])
-            beta_out <- as.numeric(data[[self$options$beta_outcome]])
-            se_out <- as.numeric(data[[self$options$se_outcome]])
+            beta_exp <- jmvcore::toNumeric(data[[self$options$beta_exposure]])
+            se_exp <- jmvcore::toNumeric(data[[self$options$se_exposure]])
+            beta_out <- jmvcore::toNumeric(data[[self$options$beta_outcome]])
+            se_out <- jmvcore::toNumeric(data[[self$options$se_outcome]])
 
             # P-values (optional)
             if (!is.null(self$options$pval_exposure)) {
-                pval_exp <- as.numeric(data[[self$options$pval_exposure]])
+                pval_exp <- jmvcore::toNumeric(data[[self$options$pval_exposure]])
             } else {
                 # Calculate from beta/SE if not provided
                 pval_exp <- 2 * pnorm(-abs(beta_exp / se_exp))
             }
 
             if (!is.null(self$options$pval_outcome)) {
-                pval_out <- as.numeric(data[[self$options$pval_outcome]])
+                pval_out <- jmvcore::toNumeric(data[[self$options$pval_outcome]])
             } else {
                 pval_out <- 2 * pnorm(-abs(beta_out / se_out))
             }
@@ -245,6 +251,10 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
                              !is.na(beta_out) & !is.na(se_out)
 
             if (sum(!complete_cases) > 0) {
+                # TODO (UX): base R `warning()` only writes to the R console; jamovi
+                # users never see it. Convert to a `private$.addNotice("WARNING", ...)`
+                # call so the missing-SNP count surfaces in the UI. See R/waterfall.b.R
+                # for the canonical notice helper pattern.
                 warning(paste("Removed", sum(!complete_cases), "SNPs with missing data"))
             }
 
@@ -280,8 +290,8 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             significant_snps <- mr_data$pval_exp < pval_threshold
 
             if (sum(significant_snps) == 0) {
-                stop(paste("No SNPs meet the p-value threshold of", pval_threshold,
-                          ". Consider relaxing the threshold."))
+                jmvcore::reject("No SNPs meet the p-value threshold of {}. Consider relaxing the threshold.",
+                                pval_threshold)
             }
 
             selected_data <- mr_data[significant_snps, ]
@@ -289,8 +299,8 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             # Check minimum SNPs
             min_snps <- self$options$min_snps %||% 3
             if (nrow(selected_data) < min_snps) {
-                stop(paste("Insufficient SNPs:", nrow(selected_data),
-                          "selected, minimum required:", min_snps))
+                jmvcore::reject("Insufficient SNPs: {} selected, minimum required: {}.",
+                                nrow(selected_data), min_snps)
             }
 
             # Store selected SNPs
@@ -529,6 +539,13 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
         #---------------------------------------------
         # VISUALIZATION
         #---------------------------------------------
+        # TODO (stub): All four plot renderers below (.plotForest / .plotFunnel /
+        # .plotScatter / .plotLeaveOneOut) are placeholders that just return TRUE.
+        # The jamovi r.yaml exposes Image outputs bound to these renderers, so
+        # users currently see four empty plot panels. Implement using
+        # MendelianRandomization::mr_forest(), mr_funnel(), mr_plot(), and
+        # mr_loo() (or ggplot2 equivalents) operating on `private$.mr_results`
+        # and `private$.selected_snps`. Sites: L532, L537, L542, L547.
         .plotForest = function(image, ...) {
             # Placeholder for forest plot
             TRUE

@@ -36,7 +36,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     "info" = "alert-success",
                     "alert-info")
                 sprintf("<div class='alert %s' style='padding:6px 12px;margin:2px 0;font-size:0.9em;'>%s</div>",
-                        css_class, n$content)
+                        css_class, htmltools::htmlEscape(n$content))
             }, character(1))
             self$results$notices$setContent(paste(html_parts, collapse = "\n"))
         },
@@ -68,12 +68,21 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 is.null(self$options$predictors) || length(self$options$predictors) == 0 ||
                 is.null(self$options$centerVariable)) return()
 
+            # Save/restore RNG state so set.seed() doesn't pin user's global .Random.seed
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (!is.null(old_seed)) {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                } else if (exists(".Random.seed", envir = .GlobalEnv)) {
+                    rm(".Random.seed", envir = .GlobalEnv)
+                }
+            }, add = TRUE)
             set.seed(self$options$random_seed)
 
             # ── 1. Prepare data ────────────────────────────────────────────
             prepared <- tryCatch(private$.prepareData(), error = function(e) {
                 self$results$todo$setContent(paste0(
-                    "<div class='alert alert-danger'><h4>Data Error</h4><p>", e$message, "</p></div>"))
+                    "<div class='alert alert-danger'><h4>Data Error</h4><p>", htmltools::htmlEscape(e$message), "</p></div>"))
                 return(NULL)
             })
             if (is.null(prepared)) return()
@@ -213,7 +222,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             time_val <- NULL
             if (model_type == "cox") {
                 if (is.null(self$options$elapsedtime)) {
-                    stop(.("Time variable is required for Cox regression."))
+                    jmvcore::reject(.("Time variable is required for Cox regression."))
                 }
                 time_val <- jmvcore::toNumeric(data[[self$options$elapsedtime]])
             }
@@ -225,7 +234,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 complete <- complete.cases(y, predictors, center_raw)
             }
             n_complete <- sum(complete)
-            if (n_complete < 20) stop(.("Too few complete cases for LOOCV."))
+            if (n_complete < 20) jmvcore::reject(.("Too few complete cases for LOOCV."))
 
             y <- y[complete]
             predictors <- predictors[complete, , drop = FALSE]
@@ -235,8 +244,8 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             centers <- sort(unique(center_raw))
             n_centers <- length(centers)
             if (n_centers < 3) {
-                stop(sprintf(.("At least 3 centers are required for LOOCV. Found %d center(s): %s"),
-                             n_centers, paste(centers, collapse = ", ")))
+                jmvcore::reject(.("At least 3 centers are required for LOOCV. Found {n} center(s): {centers}"),
+                                n = n_centers, centers = paste(centers, collapse = ", "))
             }
 
             # Check minimum cases per center
@@ -723,6 +732,15 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             cv_results <- private$.cv_results
             if (is.null(cv_results)) {
                 # Recompute if needed (ensure reproducibility)
+                # Save/restore RNG state so set.seed() doesn't pin user's global .Random.seed
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+                on.exit({
+                    if (!is.null(old_seed)) {
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                    } else if (exists(".Random.seed", envir = .GlobalEnv)) {
+                        rm(".Random.seed", envir = .GlobalEnv)
+                    }
+                }, add = TRUE)
                 set.seed(self$options$random_seed)
                 prepared <- tryCatch(private$.prepareData(), error = function(e) NULL)
                 if (is.null(prepared)) return(FALSE)

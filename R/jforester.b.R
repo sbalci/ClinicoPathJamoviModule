@@ -170,21 +170,21 @@ jforesterClass <- R6::R6Class(
             # Extract data
             forest_data <- data.frame(
                 study = as.character(data[[study_var]]),
-                estimate = as.numeric(data[[estimate_var]]),
-                ci_lower = as.numeric(data[[ci_lower_var]]),
-                ci_upper = as.numeric(data[[ci_upper_var]]),
+                estimate = jmvcore::toNumeric(data[[estimate_var]]),
+                ci_lower = jmvcore::toNumeric(data[[ci_lower_var]]),
+                ci_upper = jmvcore::toNumeric(data[[ci_upper_var]]),
                 stringsAsFactors = FALSE
             )
-            
+
             # Add optional variables
             if (!is.null(sample_var)) {
-                forest_data$sample_size <- as.numeric(data[[sample_var]])
+                forest_data$sample_size <- jmvcore::toNumeric(data[[sample_var]])
             } else {
                 forest_data$sample_size <- NA
             }
-            
+
             if (!is.null(events_var)) {
-                forest_data$events <- as.numeric(data[[events_var]])
+                forest_data$events <- jmvcore::toNumeric(data[[events_var]])
             } else {
                 forest_data$events <- NA
             }

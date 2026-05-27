@@ -1,3 +1,5 @@
+#' @import ggplot2
+
 hierarchicalbayesClass <- R6::R6Class(
     "hierarchicalbayesClass",
     inherit = hierarchicalbayesBase,
@@ -609,8 +611,6 @@ hierarchicalbayesClass <- R6::R6Class(
         .plotForestSensitivity = function(image, ggtheme, theme, ...) {
             if (!self$options$forest_plots) return()
             
-            library(ggplot2)
-            
             # Placeholder forest plot
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "Hierarchical Bayesian Forest Plot\nSensitivity\n(Requires MCMC implementation)"),
@@ -625,8 +625,6 @@ hierarchicalbayesClass <- R6::R6Class(
         .plotForestSpecificity = function(image, ggtheme, theme, ...) {
             if (!self$options$forest_plots) return()
             
-            library(ggplot2)
-            
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "Hierarchical Bayesian Forest Plot\nSpecificity\n(Requires MCMC implementation)"),
                          size = 6, hjust = 0.5) +
@@ -639,8 +637,6 @@ hierarchicalbayesClass <- R6::R6Class(
         
         .plotSROCCurve = function(image, ggtheme, theme, ...) {
             if (!self$options$sroc_curves) return()
-            
-            library(ggplot2)
             
             # Create hierarchical SROC curve
             fpr_vals <- seq(0, 1, length.out = 100)
@@ -684,8 +680,6 @@ hierarchicalbayesClass <- R6::R6Class(
         .plotTraces = function(image, ggtheme, theme, ...) {
             if (!self$options$trace_plots) return()
             
-            library(ggplot2)
-            
             # Placeholder trace plot
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "MCMC Trace Plots\n(Requires actual MCMC chains)"),
@@ -699,8 +693,6 @@ hierarchicalbayesClass <- R6::R6Class(
         
         .plotPosteriorDensities = function(image, ggtheme, theme, ...) {
             if (!self$options$density_plots) return()
-            
-            library(ggplot2)
             
             # Simulated posterior densities
             x_sens <- seq(0.5, 0.95, length.out = 100)
@@ -739,8 +731,6 @@ hierarchicalbayesClass <- R6::R6Class(
         .plotPairs = function(image, ggtheme, theme, ...) {
             if (!self$options$pairs_plots) return()
             
-            library(ggplot2)
-            
             # Placeholder pairs plot
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "Parameter Correlation Plot\n(Requires MCMC samples)"),
@@ -754,8 +744,6 @@ hierarchicalbayesClass <- R6::R6Class(
         
         .plotShrinkage = function(image, ggtheme, theme, ...) {
             if (!self$options$shrinkage_plots) return()
-            
-            library(ggplot2)
             
             # Placeholder shrinkage plot
             p <- ggplot() +

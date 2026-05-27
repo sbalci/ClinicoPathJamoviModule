@@ -49,11 +49,11 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .computeJaccardDistance = function(binary_matrix) {
             # Validate binary data
             if (!all(binary_matrix %in% c(0, 1, NA))) {
-                stop("Jaccard distance requires binary (0/1) data. Convert categorical markers to binary first.")
+                jmvcore::reject("Jaccard distance requires binary (0/1) data. Convert categorical markers to binary first.")
             }
             # Use proxy package
             if (!requireNamespace("proxy", quietly = TRUE)) {
-                stop("Package 'proxy' required for Jaccard distance. Please install it: install.packages('proxy')")
+                jmvcore::reject("Package 'proxy' required for Jaccard distance. Please install it: install.packages('proxy')")
             }
             dist_matrix <- proxy::dist(binary_matrix, method = "Jaccard")
             return(dist_matrix)
@@ -162,7 +162,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 for (var in catVars) {
                     if (!var %in% colnames(df)) next
-                    levels_str <- paste(levels(df[[var]]), collapse=", ")
+                    levels_str <- htmltools::htmlEscape(paste(levels(df[[var]]), collapse=", "))
                     n_pos <- sum(df[[var]] %in% pos_indicators, na.rm = TRUE)
                     n_neg <- sum(!df[[var]] %in% pos_indicators, na.rm = TRUE)
 
@@ -174,9 +174,9 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         status_color <- "#dc3545"
                     }
                     # Relaxed check for standard coding
-                    
+
                     html <- paste0(html, "<tr>")
-                    html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'><b>", var, "</b></td>")
+                    html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'><b>", htmltools::htmlEscape(var), "</b></td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>", levels_str, "</td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>", n_pos, "</td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>", n_neg, "</td>")
@@ -209,7 +209,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     n_below <- sum(var_data <= var_median, na.rm = TRUE)
 
                     html <- paste0(html, "<tr>")
-                    html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'><b>", var, "</b></td>")
+                    html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'><b>", htmltools::htmlEscape(var), "</b></td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>",
                                   sprintf("%.1f - %.1f", var_range[1], var_range[2]), "</td>")
                     html <- paste0(html, "<td style='padding:8px; border:1px solid #dee2e6;'>",
@@ -593,7 +593,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             auxVars <- auxVars[auxVars %in% colnames(data)]
 
             if (length(allVars) == 0)
-                stop("No markers supplied for clustering")
+                jmvcore::reject("No markers supplied for clustering")
 
             # Include markers and auxiliary variables
             df <- data[, c(allVars, auxVars), drop = FALSE]
@@ -626,7 +626,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Re-verify we have enough markers
             if (length(c(catVars, contVars)) < 2)
-                 stop("At least two markers with data are required for clustering")
+                 jmvcore::reject("At least two markers with data are required for clustering")
 
             # Harmonise categorical markers
             if (length(catVars) > 0) {
@@ -657,7 +657,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         next
                     x <- df[[var]]
                     if (!is.numeric(x))
-                        stop(sprintf("Variable '%s' must be numeric for continuous analysis", var))
+                        jmvcore::reject("Variable '{var}' must be numeric for continuous analysis", var = var)
 
                     if (all(is.na(x)))
                         next
@@ -694,7 +694,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             if (nrow(df) < 5)
-                stop("Insufficient data after preprocessing. Need at least 5 cases.")
+                jmvcore::reject("Insufficient data after preprocessing. Need at least 5 cases.")
 
             if (length(info$missingCategorical) > 0 && identical(info$handleMissing, "pairwise"))
                 notes <- c(notes, sprintf("Missing categorical markers handled via pairwise Gower distances for: %s", paste(info$missingCategorical, collapse = ", ")))
@@ -767,7 +767,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (method == "kmodes") {
                 dist_input <- df[, catVars, drop = FALSE]
                 if (ncol(dist_input) == 0)
-                    stop("k-modes requires at least one categorical marker")
+                    jmvcore::reject("k-modes requires at least one categorical marker")
                 if (!is.null(dist_weights)) {
                     dist_weights <- dist_weights[colnames(dist_input)]
                     if (any(is.na(dist_weights)))
@@ -821,7 +821,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             chooseK <- function(candidateKs, computeSilhouette) {
                 candidateKs <- candidateKs[candidateKs < nrow(df)]
                 if (length(candidateKs) == 0)
-                    stop("Candidate cluster sizes must be smaller than the number of cases")
+                    jmvcore::reject("Candidate cluster sizes must be smaller than the number of cases")
                 sil_values <- vapply(candidateKs, function(kk) {
                     # TESTING: tryCatch and suppressWarnings disabled - errors will be visible
                     # suppressWarnings(tryCatch({
@@ -833,7 +833,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 finite_vals[!is.finite(finite_vals)] <- -Inf
 
                 if (all(is.infinite(finite_vals)))
-                    stop("Unable to compute silhouette widths for any candidate cluster size. Check data quality or reduce k range.")
+                    jmvcore::reject("Unable to compute silhouette widths for any candidate cluster size. Check data quality or reduce k range.")
 
                 best_index <- which.max(finite_vals)
                 selected <- seq_along(candidateKs) == best_index
@@ -1121,6 +1121,14 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
+            # Save and restore RNG state to avoid leaking seed into caller's session
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                old_seed <- .GlobalEnv$.Random.seed
+                on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+            }
+
 
             if (is.null(self$data))
                 return()
@@ -1922,7 +1930,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 ")
 
             if (!is.null(self$results$summary)) {
-                self$results$summary$setContent(paste0("<pre>", txt, "</pre>"))
+                self$results$summary$setContent(paste0("<pre>", htmltools::htmlEscape(txt), "</pre>"))
             } else if (!is.null(self$results$text)) {
                 self$results$text$setContent(txt)
             }
@@ -2813,7 +2821,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else if (length(contVars) > 0 && length(catVars) == 0) {
                 # Continuous only: PCA
                 contData <- df[, contVars, drop=FALSE]
-                contData_complete <- stats::na.omit(contData)
+                contData_complete <- jmvcore::naOmit(contData)
 
                 pca <- stats::prcomp(contData_complete, scale. = TRUE, center = TRUE)
 
@@ -3335,10 +3343,10 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Variables analyzed
                 if (length(catVars) > 0) {
-                    summary_lines <- c(summary_lines, paste0("Categorical Markers: ", paste(catVars, collapse = ", ")))
+                    summary_lines <- c(summary_lines, paste0("Categorical Markers: ", htmltools::htmlEscape(paste(catVars, collapse = ", "))))
                 }
                 if (length(contVars) > 0) {
-                    summary_lines <- c(summary_lines, paste0("Continuous Markers: ", paste(contVars, collapse = ", ")))
+                    summary_lines <- c(summary_lines, paste0("Continuous Markers: ", htmltools::htmlEscape(paste(contVars, collapse = ", "))))
                 }
                 summary_lines <- c(summary_lines, "")
 
@@ -4569,7 +4577,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .analyzeSpatialCompartments = function(data, spatialVar, catVars, contVars, mode = "both") {
             # Validate inputs
             if (is.null(spatialVar) || !spatialVar %in% names(data)) {
-                stop("Spatial compartment variable not found in data")
+                jmvcore::reject("Spatial compartment variable not found in data")
             }
 
             compartmentCol <- data[[spatialVar]]
@@ -4586,7 +4594,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_compartments <- length(compartments)
 
             if (n_compartments < 2) {
-                stop("Spatial analysis requires at least 2 compartments")
+                jmvcore::reject("Spatial analysis requires at least 2 compartments")
             }
 
             markerVars <- c(catVars, contVars)
@@ -5641,13 +5649,13 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(detailsHtml)) {
                 html <- "<div style='padding:15px;'>"
                 html <- paste0(html, "<h4>Supervised Clustering Details</h4>")
-                html <- paste0(html, "<p>Clustering performed separately within each group of: <b>", self$options$supervisedVariable, "</b></p>")
+                html <- paste0(html, "<p>Clustering performed separately within each group of: <b>", htmltools::htmlEscape(self$options$supervisedVariable), "</b></p>")
 
                 for (group_name in names(supervisedResults)) {
                     result <- supervisedResults[[group_name]]
 
                     html <- paste0(html, "<div style='margin-top:20px; padding:15px; border:1px solid #dee2e6; background-color:#f8f9fa;'>")
-                    html <- paste0(html, "<h5 style='margin-top:0; color:#495057;'>Group: ", result$group, "</h5>")
+                    html <- paste0(html, "<h5 style='margin-top:0; color:#495057;'>Group: ", htmltools::htmlEscape(result$group), "</h5>")
                     html <- paste0(html, "<p><b>N Cases:</b> ", result$n_cases, "</p>")
 
                     if (result$status == "Success") {

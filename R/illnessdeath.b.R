@@ -152,7 +152,7 @@ illnessdeathClass <- R6::R6Class(
             }
             
             analysis_data <- data[, vars_needed, drop = FALSE]
-            analysis_data <- na.omit(analysis_data)
+            analysis_data <- jmvcore::naOmit(analysis_data)
             
             if (nrow(analysis_data) < 10) {
                 self$results$instructions$setContent(
@@ -175,8 +175,8 @@ illnessdeathClass <- R6::R6Class(
             }
 
             # Validate and prepare state variables
-            from_states <- as.numeric(analysis_data[[from_var]])
-            to_states <- as.numeric(analysis_data[[to_var]])
+            from_states <- jmvcore::toNumeric(analysis_data[[from_var]])
+            to_states <- jmvcore::toNumeric(analysis_data[[to_var]])
             
             # Check state coding
             valid_states <- c(0, 1, 2)
@@ -387,9 +387,9 @@ illnessdeathClass <- R6::R6Class(
                         
                         # Fit Cox model
                         if (length(self$options$covariates) > 0) {
-                            formula_str <- paste("surv_obj ~", paste(self$options$covariates, collapse = " + "))
-                            formula_obj <- as.formula(formula_str)
-                            
+                            formula_str <- paste("surv_obj ~", paste(jmvcore::composeTerms(as.list(self$options$covariates)), collapse = " + "))
+                            formula_obj <- jmvcore::asFormula(formula_str)
+
                             cox_fit <- survival::coxph(formula_obj, data = trans_data)
                         } else {
                             # Fit model with no covariates

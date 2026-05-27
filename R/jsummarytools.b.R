@@ -29,6 +29,17 @@ jsummarytoolsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             self$results$crosstab_output$setVisible(analysis_type == "ctable")
         },
         
+        # TODO (correctness): the hash helpers below are fragile:
+        # (1) `.calculateDataHash` uses `paste(analysis_type, nrow, ncol, var_names,
+        #     range(...))` — mutations within the min/max range (row shuffling,
+        #     value changes preserving extremes) won't invalidate the cache →
+        #     stale `summary_output`/`crosstab_output` HTML possible.
+        # (2) `.calculateOptionsHash` uses `paste(options_list, collapse = "_")` —
+        #     option values with colliding string representations would yield
+        #     same hash.
+        # Recommend content-based invalidation matching jjpiestats/jjtreemap pattern:
+        #   digest::digest(list(analysis_type, self$data[, relevant_vars, drop = FALSE]), algo = "md5")
+        #   digest::digest(options_list, algo = "md5")
         # Performance optimization methods
         .calculateDataHash = function() {
             if (is.null(self$data) || nrow(self$data) == 0) {
@@ -162,7 +173,7 @@ jsummarytoolsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # Check if summarytools package is available
             if (!requireNamespace('summarytools', quietly = TRUE)) {
-                stop('The summarytools package is required but not installed. Please install it using install.packages("summarytools")')
+                jmvcore::reject(.('The summarytools package is required but not installed. Please install it using install.packages("summarytools")'))
             }
             
             # Performance optimization: check if we can use cached results
@@ -237,8 +248,19 @@ jsummarytoolsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             })
         },
         
+        # TODO (security forward-looking): `summarytools::view(...)` (called from
+        # L278/L345/L408/L459) generates HTML that flows to `summary_output$setContent`
+        # / `crosstab_output$setContent` at L287/L357/L414/L465/L466. User column
+        # data (factor labels, values) is passed in via `data[[options$vars]]`/
+        # `data[[options$cross_var1]]`/`data[[options$cross_var2]]`/`data[[options$group_var]]`.
+        # summarytools normally escapes in its bootstrap.css rendering path but the
+        # full escape posture across dfSummary/freq/descr/ctable hasn't been audited
+        # with adversarial inputs. If a factor level literally named
+        # `<img src=x onerror=alert(1)>` flows through unescaped, XSS lands in the
+        # summary panel. Mitigation requires summarytools-side hardening or
+        # pre-sanitizing values before passing in (would lose original labels).
         .runDfSummary = function(data, options) {
-            
+
             # Select variables
             if (length(options$vars) > 0) {
                 data_subset <- data[options$vars]

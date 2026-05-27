@@ -103,9 +103,22 @@ imagingcorrelationClass <- R6::R6Class(
 
         # Main analysis runner
         .run = function() {
-            
+
             if (is.null(self$data) || is.null(self$options$imagingFindings) || length(self$options$imagingFindings) == 0)
                 return()
+
+            # RNG hygiene: stub plots use runif/rnorm without seeds; save and restore
+            # the global RNG state so a user's set.seed() outside this analysis is not
+            # advanced by plot rendering.
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                .saved_seed <- get(".Random.seed", envir = .GlobalEnv)
+                on.exit(assign(".Random.seed", .saved_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit({
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv)
+                }, add = TRUE)
+            }
 
             # Get data
             data <- self$data

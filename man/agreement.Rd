@@ -72,6 +72,11 @@ agreement(
   referenceRater = NULL,
   rankRaters = FALSE,
   showPairwiseKappaGuide = FALSE,
+  allPairsKappa = FALSE,
+  allPairsCI = TRUE,
+  showAllPairsKappaGuide = FALSE,
+  itemModalCategoryAgreement = FALSE,
+  showItemModalGuide = FALSE,
   hierarchicalKappa = FALSE,
   clusterVariable = NULL,
   iccHierarchical = FALSE,
@@ -481,6 +486,28 @@ or those ready for certification.}
 \item{showPairwiseKappaGuide}{Show educational guide for pairwise kappa
 analysis against a reference rater.}
 
+\item{allPairsKappa}{For studies with 3+ raters, compute Cohen's kappa,
+observed agreement, standard error, 95 percent CI, z, and p-value for every
+rater pair (C(k,2) rows). Reproduces the conventional pairwise agreement
+table reported in interobserver reliability studies. Honors the 'wght'
+(weights) and 'multipleTestCorrection' options.}
+
+\item{allPairsCI}{Compute Fisher-z 95 percent CI for each pairwise kappa
+using the analytical standard error returned by irr::kappa2.}
+
+\item{showAllPairsKappaGuide}{Show educational guide for all-pairs kappa:
+when to report the full pairwise table versus average (Light's) or overall
+(Fleiss') kappa.}
+
+\item{itemModalCategoryAgreement}{For each rating category, compute the
+mean within-case agreement rate across raters on cases whose modal rating
+equals that category. Identifies which categories drive disagreement (e.g.,
+YSRB Category IV "suspicious" is a known agreement bottleneck in breast
+cytology). Cases with no unique mode (ties) are excluded.}
+
+\item{showItemModalGuide}{Show educational guide for per-category
+item-modal agreement.}
+
 \item{hierarchicalKappa}{Enable hierarchical (multilevel) kappa analysis
 for nested data structures (e.g., pathologists nested within institutions,
 readers nested within centers). Accounts for clustering effects and
@@ -877,6 +904,12 @@ A results object containing:
 \code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$allPairsKappaHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$allPairsKappaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$allPairsKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$itemModalAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$itemModalAgreementTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$itemModalAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$hierarchicalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr

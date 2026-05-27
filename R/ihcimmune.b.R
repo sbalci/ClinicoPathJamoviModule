@@ -14,7 +14,6 @@ ihcimmuneClass <- R6::R6Class(
         .tumor_regions = NULL,
         .detected_presets = NULL,
         .applied_preset = NULL,
-        .cache = list(),  # Performance caching
         .large_dataset_threshold = 1000,  # Threshold for large dataset optimizations
 
         .init = function() {
@@ -782,7 +781,7 @@ ihcimmuneClass <- R6::R6Class(
                 density_category <- ifelse(mean_expr < 5, "Low", ifelse(mean_expr < 20, "Moderate", "High"))
 
                 report_sections[[length(report_sections) + 1]] <- paste0(
-                    "<li><strong>", marker_name, ":</strong> Mean expression ", mean_expr,
+                    "<li><strong>", htmltools::htmlEscape(marker_name), ":</strong> Mean expression ", mean_expr,
                     "%, Positivity rate ", positive_rate, "% (", density_category, " density)</li>"
                 )
             }
@@ -875,17 +874,6 @@ ihcimmuneClass <- R6::R6Class(
                 return(TRUE)
             }
             return(FALSE)
-        },
-
-        .getCachedOrCompute = function(cache_key, compute_function, ...) {
-            # Caching system for expensive computations
-            if (cache_key %in% names(private$.cache)) {
-                return(private$.cache[[cache_key]])
-            }
-
-            result <- compute_function(...)
-            private$.cache[[cache_key]] <- result
-            return(result)
         },
 
         # Helper functions for spatial analysis
@@ -1241,7 +1229,7 @@ ihcimmuneClass <- R6::R6Class(
                 "<h5>General Clinical Guidelines</h5>",
                 "<ul>",
                 "<li><b>Sample Size:</b> Current analysis includes ", n_samples, " cases</li>",
-                "<li><b>Markers Analyzed:</b> ", paste(markers, collapse = ", "), "</li>",
+                "<li><b>Markers Analyzed:</b> ", htmltools::htmlEscape(paste(markers, collapse = ", ")), "</li>",
                 "<li><b>Prognostic Value:</b> Higher TIL density generally associated with better outcomes</li>",
                 "<li><b>Therapeutic Implications:</b> Immune-infiltrated tumors more responsive to immunotherapy</li>",
                 "<li><b>Validation:</b> Results should be validated in independent cohorts</li>",

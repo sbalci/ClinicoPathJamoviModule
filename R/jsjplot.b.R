@@ -157,9 +157,18 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(private$.prepared_options)
         },
         
+        # TODO (correctness): R6 cache invalidation here relies on
+        # `.calculateDataHash()`/`.calculateOptionsHash()` (called from
+        # `.canUseCache()` — see the cache check at L174-188 and L160). If
+        # those hash helpers use fragile patterns like `paste(nrow, ncol,
+        # var_names)` without mixing in actual data content, mutations within
+        # the data won't invalidate the cache and stale `model_table`/`plot`/
+        # `statistics`/`summary` results leak between runs. Recommend content-
+        # based invalidation via `digest::digest(list(data, options), algo = "md5")`
+        # matching jjpiestats/.processedData and post-audit jjtreemap pattern.
         .canUseModelCache = function() {
             # Check if we can reuse the fitted model
-            return(!is.null(private$.cached_model) && 
+            return(!is.null(private$.cached_model) &&
                    private$.canUseCache())
         },
         
@@ -167,7 +176,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Check if sjPlot package is available
             if (!requireNamespace('sjPlot', quietly = TRUE)) {
-                stop('The sjPlot package is required but not installed. Please install it using install.packages("sjPlot")')
+                jmvcore::reject(.('The sjPlot package is required but not installed. Please install it using install.packages("sjPlot")'))
             }
             
             # Performance optimization: check if we can use cached results
@@ -516,9 +525,10 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             tryCatch({
-                # Build formula
-                formula_str <- paste(dep_var, "~", paste(indep_vars, collapse = " + "))
-                model_formula <- as.formula(formula_str)
+                # Build formula (composeTerm backtick-escapes non-syntactic names;
+                # asFormula allowlist-validates against lm/glm/lmer model.frame RCE)
+                formula_str <- paste(jmvcore::composeTerm(dep_var), "~", jmvcore::composeTerms(as.list(indep_vars)))
+                model_formula <- jmvcore::asFormula(formula_str)
                 
                 # Fit model based on type
                 if (model_type == "lm") {
@@ -568,17 +578,18 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             int_vars <- options$interaction_vars[1:2]  # Take first two
             other_vars <- setdiff(options$independent_vars, int_vars)
             
-            # Build interaction formula
-            int_term <- paste(int_vars[1], "*", int_vars[2])
-            other_terms <- if (length(other_vars) > 0) paste(other_vars, collapse = " + ") else ""
-            
+            # Build interaction formula (composeTerm backtick-escapes non-syntactic
+            # names; asFormula allowlist-validates against lm model.frame RCE)
+            int_term <- paste(jmvcore::composeTerm(int_vars[1]), "*", jmvcore::composeTerm(int_vars[2]))
+            other_terms <- if (length(other_vars) > 0) jmvcore::composeTerms(as.list(other_vars)) else ""
+
             if (other_terms != "") {
-                formula_str <- paste(dep_var, "~", int_term, "+", other_terms)
+                formula_str <- paste(jmvcore::composeTerm(dep_var), "~", int_term, "+", other_terms)
             } else {
-                formula_str <- paste(dep_var, "~", int_term)
+                formula_str <- paste(jmvcore::composeTerm(dep_var), "~", int_term)
             }
-            
-            model_formula <- as.formula(formula_str)
+
+            model_formula <- jmvcore::asFormula(formula_str)
             
             # Clean data
             all_vars <- c(dep_var, int_vars, other_vars)
@@ -595,10 +606,19 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(model)
         },
         
+        # TODO (security forward-looking): `sjPlot::tab_model` below generates HTML
+        # internally that flows to `model_table$setContent` at L249. sjPlot's
+        # internal HTML generation assumes its output is publication-safe but
+        # doesn't necessarily htmlEscape arbitrary user column names. If a user
+        # column literally named `<img src=x onerror=alert(1)>` is included in
+        # the model, sjPlot may render it raw. Mitigation requires either
+        # post-processing sjPlot output through htmlEscape (which would also
+        # escape sjPlot's own HTML tags, breaking the table) or pre-renaming
+        # columns to syntactic-safe names before fitting the model.
         .jtab_model = function(model) {
-            
+
             options <- self$options
-            
+
             # Generate model table using sjPlot::tab_model with j-prefix wrapper
             if (options$html_output) {
                 table_output <- sjPlot::tab_model(
@@ -629,7 +649,8 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 for (i in 1:nrow(coefs)) {
                     html_table <- paste0(html_table, "<tr>")
-                    html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", rownames(coefs)[i], "</td>")
+                    # htmlEscape coefficient row names — derived from formula RHS (user column names)
+                    html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(rownames(coefs)[i]), "</td>")
                     html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", round(coefs[i, 1], 4), "</td>")
                     html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", round(coefs[i, 2], 4), "</td>")
                     html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", round(coefs[i, 3], 3), "</td>")
@@ -755,18 +776,19 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             for (var in categorical_vars[1:min(5, length(categorical_vars))]) {  # Limit to first 5
                 freq_table <- table(data[[var]], useNA = "ifany")
                 prop_table <- prop.table(freq_table) * 100
-                
-                freq_html <- paste0(freq_html, "<h4>", var, "</h4>")
+
+                # htmlEscape user column name + factor-level values before HTML interpolation
+                freq_html <- paste0(freq_html, "<h4>", htmltools::htmlEscape(var), "</h4>")
                 freq_html <- paste0(freq_html, "<table style='border-collapse: collapse; margin-bottom: 20px;'>")
                 freq_html <- paste0(freq_html, "<tr style='background-color: #f2f2f2;'>")
                 freq_html <- paste0(freq_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Level</th>")
                 freq_html <- paste0(freq_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Frequency</th>")
                 freq_html <- paste0(freq_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Percentage</th>")
                 freq_html <- paste0(freq_html, "</tr>")
-                
+
                 for (level in names(freq_table)) {
                     freq_html <- paste0(freq_html, "<tr>")
-                    freq_html <- paste0(freq_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", level, "</td>")
+                    freq_html <- paste0(freq_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(level), "</td>")
                     freq_html <- paste0(freq_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", freq_table[level], "</td>")
                     freq_html <- paste0(freq_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", round(prop_table[level], 1), "%</td>")
                     freq_html <- paste0(freq_html, "</tr>")
@@ -814,14 +836,15 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cor_html <- paste0(cor_html, "<tr style='background-color: #f2f2f2;'>")
             cor_html <- paste0(cor_html, "<th style='border: 1px solid #ddd; padding: 8px;'>Variable</th>")
             for (var in colnames(cor_matrix)) {
-                cor_html <- paste0(cor_html, "<th style='border: 1px solid #ddd; padding: 8px;'>", var, "</th>")
+                # htmlEscape user numeric variable name before HTML interpolation
+                cor_html <- paste0(cor_html, "<th style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(var), "</th>")
             }
             cor_html <- paste0(cor_html, "</tr>")
-            
+
             # Data rows
             for (i in 1:nrow(cor_matrix)) {
                 cor_html <- paste0(cor_html, "<tr>")
-                cor_html <- paste0(cor_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", rownames(cor_matrix)[i], "</td>")
+                cor_html <- paste0(cor_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(rownames(cor_matrix)[i]), "</td>")
                 for (j in 1:ncol(cor_matrix)) {
                     cor_val <- round(cor_matrix[i, j], 3)
                     cor_html <- paste0(cor_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", cor_val, "</td>")

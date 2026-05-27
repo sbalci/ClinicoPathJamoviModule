@@ -60,11 +60,12 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             # ── 1. Clean data ──────────────────────────────────────────────
             data <- tryCatch(private$.cleanData(), error = function(e) {
+                msg_html <- htmltools::htmlEscape(e$message)
                 self$results$todo$setContent(paste0(
-                    "<div class='alert alert-danger'><h4>Data Error</h4><p>", e$message, "</p></div>"))
+                    "<div class='alert alert-danger'><h4>Data Error</h4><p>", msg_html, "</p></div>"))
                 notice <- jmvcore::Notice$new(options = self$options,
                     name = 'dataError', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(sprintf(.('Data preparation failed: %s'), e$message))
+                notice$setContent(sprintf(.('Data preparation failed: %s'), msg_html))
                 self$results$insert(1, notice)
                 return(NULL)
             })
@@ -81,11 +82,12 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             # ── 3. Fit LASSO model ─────────────────────────────────────────
             fit_result <- tryCatch(private$.fitLasso(data), error = function(e) {
+                msg_html <- htmltools::htmlEscape(e$message)
                 self$results$todo$setContent(paste0(
-                    "<div class='alert alert-danger'><h4>Model Fitting Error</h4><p>", e$message, "</p></div>"))
+                    "<div class='alert alert-danger'><h4>Model Fitting Error</h4><p>", msg_html, "</p></div>"))
                 notice <- jmvcore::Notice$new(options = self$options,
                     name = 'modelError', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(sprintf(.('LASSO model fitting failed: %s'), e$message))
+                notice$setContent(sprintf(.('LASSO model fitting failed: %s'), msg_html))
                 self$results$insert(1, notice)
                 return(NULL)
             })
@@ -164,7 +166,7 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             explanatory_vars <- self$options$explanatory
 
             if (length(explanatory_vars) < 2) {
-                stop(.("At least 2 explanatory variables are required for LASSO regression."))
+                jmvcore::reject(.("At least 2 explanatory variables are required for LASSO regression."))
             }
 
             outcome_raw <- data[[outcome_var]]
@@ -175,7 +177,7 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 outcome_chr <- as.character(outcome_raw)
                 observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
                 if (length(observed_levels) < 2) {
-                    stop(.("Outcome variable must have at least 2 observed values."))
+                    jmvcore::reject(.("Outcome variable must have at least 2 observed values."))
                 }
                 outcome_level_opt <- self$options$outcomeLevel
                 if (is.null(outcome_level_opt) || !nzchar(as.character(outcome_level_opt))) {
@@ -191,7 +193,7 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 outcome_num <- jmvcore::toNumeric(outcome_raw)
                 observed_levels <- sort(unique(outcome_num[!is.na(outcome_num)]))
                 if (length(observed_levels) < 2) {
-                    stop(.("Numeric outcome must have at least 2 observed values."))
+                    jmvcore::reject(.("Numeric outcome must have at least 2 observed values."))
                 }
                 outcome_level_opt <- self$options$outcomeLevel
                 if (!is.null(outcome_level_opt) && nzchar(as.character(outcome_level_opt))) {
@@ -222,22 +224,22 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 predictors <- predictors[, !constant_vars, drop = FALSE]
                 explanatory_vars <- names(predictors)
             }
-            if (ncol(predictors) < 2) stop(.("Fewer than 2 non-constant predictors remain."))
+            if (ncol(predictors) < 2) jmvcore::reject(.("Fewer than 2 non-constant predictors remain."))
 
             # Complete-case filtering
             complete <- complete.cases(status, predictors)
             n_complete <- sum(complete)
-            if (n_complete < 10) stop(.("Too few complete cases for analysis."))
+            if (n_complete < 10) jmvcore::reject(.("Too few complete cases for analysis."))
 
             status_cc <- status[complete]
             if (!(length(unique(status_cc)) == 2 && all(unique(status_cc) %in% c(0, 1)))) {
-                stop(.("Outcome is not binary after filtering."))
+                jmvcore::reject(.("Outcome is not binary after filtering."))
             }
 
             n_events <- sum(status_cc == 1)
             n_nonevents <- sum(status_cc == 0)
             if (n_events < 5 || n_nonevents < 5) {
-                stop(.("Need at least 5 cases in each outcome class."))
+                jmvcore::reject(.("Need at least 5 cases in each outcome class."))
             }
 
             # Build design matrix
@@ -246,13 +248,13 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 mm <- model.matrix(~ ., data = pred_cc)
                 mm[, -1, drop = FALSE]  # remove intercept
             }, error = function(e) {
-                stop(paste0("Design matrix error: ", e$message))
+                jmvcore::reject("Design matrix error: {}", e$message)
             })
 
             # Remove degenerate columns
             col_vars <- apply(X, 2, var, na.rm = TRUE)
             good_cols <- !is.na(col_vars) & col_vars > 0
-            if (sum(good_cols) < 2) stop(.("Too few non-degenerate predictor columns."))
+            if (sum(good_cols) < 2) jmvcore::reject(.("Too few non-degenerate predictor columns."))
             X <- X[, good_cols, drop = FALSE]
 
             # Optional standardization

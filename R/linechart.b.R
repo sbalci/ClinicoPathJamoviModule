@@ -155,7 +155,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check if variables exist in data
             missing_vars <- setdiff(required_vars, names(self$data))
             if (length(missing_vars) > 0) {
-                stop(paste(.("Variables not found in data:"), paste(missing_vars, collapse = ", ")))
+                jmvcore::reject(paste(.("Variables not found in data:"), paste(missing_vars, collapse = ", ")))
             }
 
             # Select and clean data
@@ -170,7 +170,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Looks numeric, convert
                     x_data <- as.numeric(x_data)
                     if (any(is.na(x_data))) {
-                        stop(.("X-axis variable contains non-numeric values that cannot be converted."))
+                        jmvcore::reject(.("X-axis variable contains non-numeric values that cannot be converted."))
                     }
                 } else {
                     # Convert to ordered factor
@@ -189,7 +189,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Validate Y variable (must be numeric)
             y_data <- jmvcore::toNumeric(data[[yvar]])
             if (all(is.na(y_data))) {
-                stop(.("Y-axis variable must be numeric (continuous variable)."))
+                jmvcore::reject(.("Y-axis variable must be numeric (continuous variable)."))
             }
             data[[yvar]] <- y_data
 
@@ -205,6 +205,12 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Check number of groups
                 n_groups <- length(unique(data[[groupby]]))
                 if (n_groups > 10) {
+                    # TODO (UX): migrate warning() calls to the .addNotice() HTML pattern from
+                    #   R/waterfall.b.R + docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md so messages
+                    #   surface as a structured panel rather than R warnings (which jamovi
+                    #   collapses into a generic banner). Sites in this file:
+                    #   L208 (groups > 10), L223 (rows removed), L244 (refline non-numeric),
+                    #   L315 (grouped-data independence), L325 (repeated-measures independence).
                     warning(.("Grouping variable has more than 10 levels. Consider reducing groups for clarity."))
                 }
             }
@@ -215,7 +221,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             complete_after <- nrow(data)
 
             if (complete_after == 0) {
-                stop(.("No complete cases found. Please check for missing values in selected variables."))
+                jmvcore::reject(.("No complete cases found. Please check for missing values in selected variables."))
             }
 
             if (complete_after < complete_before) {
@@ -225,14 +231,14 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Enhanced minimum data requirements with suggestions
             if (nrow(data) < 3) {
-                stop(paste0(.("At least 3 complete observations are required for line chart analysis. "),
+                jmvcore::reject(paste0(.("At least 3 complete observations are required for line chart analysis. "),
                            .("Current dataset has "), nrow(data), .(" observations. "),
                            .("Consider checking for missing values or selecting different variables.")))
             }
 
             # Enhanced variation check with suggestions
             if (var(data[[yvar]], na.rm = TRUE) == 0) {
-                stop(paste0(.("Y-axis variable has no variation (all values are identical). "),
+                jmvcore::reject(paste0(.("Y-axis variable has no variation (all values are identical). "),
                            .("Line charts require variation in the Y variable. "),
                            .("Please select a different variable with varying values.")))
             }
@@ -308,6 +314,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             avg_obs_per_x <- n_observations / n_unique_x
 
             # Flag if likely repeated measures (multiple obs per x-value)
+            # TODO (correctness): the > 1.5 threshold is a rough heuristic. A grouped dataset
+            #   with one observation per group per time-point can legitimately produce
+            #   avg_obs_per_x > 1.5 without being "repeated measures" in the statistical
+            #   sense. Consider using a patient/subject ID option (if available) to detect
+            #   true within-subject replication, or document the heuristic in the panel.
             has_repeated_measures <- avg_obs_per_x > 1.5  # More than 1.5 obs per x on average
 
             # Issue warnings for statistical validity
@@ -892,7 +903,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<p>", gsub("\n", "<br>", error_msg), "</p>",
                     "</div>"
                 ))
-                stop(paste(missing_packages, collapse = ", "))
+                jmvcore::reject(paste(missing_packages, collapse = ", "))
             }
         },
 
@@ -1059,6 +1070,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Add trend information if available
             if (self$options$trendline && is.numeric(data[[xvar]])) {
+                # TODO (cleanup): .calculateCorrelation(data) is also invoked in .run() at L124
+                #   when trendline=TRUE. Reuse the result by threading correlation_stats
+                #   into .generateNaturalSummary() instead of recomputing here (avoids a
+                #   second cor.test/lm pass on the same data).
                 correlation_stats <- private$.calculateCorrelation(data)
                 if (!is.null(correlation_stats$slope)) {
                     trend_direction <- if (correlation_stats$slope > 0) .("increasing") else .("decreasing")
@@ -1090,6 +1105,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             # Find relevant suggestion
+            # TODO (forward-looking): this string-match dispatch on e$message is fragile —
+            #   any rewording of the validation rejects in .cleanData() / .checkDependencies()
+            #   silently breaks the mapping. Now that those sites use jmvcore::reject(),
+            #   pass a stable `code = "..."` argument from each reject() site and switch
+            #   this loop to dispatch on conditionMessage/class instead of substring grep.
             suggestion <- .("Please verify your data and variable selections.")
             for (pattern in names(error_suggestions)) {
                 if (grepl(pattern, e$message, ignore.case = TRUE)) {

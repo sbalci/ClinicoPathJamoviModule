@@ -266,10 +266,11 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.savePlotData(data)
                 
             }, error = function(e) {
+                msg_html <- htmltools::htmlEscape(e$message)
                 error_msg <- paste0(
                     "<div class='alert alert-danger'>",
                     "<h4>Analysis Error</h4>",
-                    "<p><strong>Error:</strong> ", e$message, "</p>",
+                    "<p><strong>Error:</strong> ", msg_html, "</p>",
                     "<p>Please check your data and variable selections.</p>",
                     "</div>"
                 )
@@ -287,7 +288,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check if variables exist in data
             missing_vars <- setdiff(c(dep_var, group_var), names(self$data))
             if (length(missing_vars) > 0) {
-                stop(paste(.("Variables not found in data:"), paste(missing_vars, collapse = ", ")))
+                jmvcore::reject(.("Variables not found in data: {missing}"), missing = paste(missing_vars, collapse = ", "))
             }
             
             # Select and clean data
@@ -299,7 +300,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Validate dependent variable (must be numeric)
             dep_data <- jmvcore::toNumeric(data[[dep_var]])
             if (all(is.na(dep_data))) {
-                stop(.("Dependent variable must be numeric (continuous variable)."))
+                jmvcore::reject(.("Dependent variable must be numeric (continuous variable)."))
             }
             data[[dep_var]] <- dep_data
             
@@ -314,7 +315,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check number of groups
             n_groups <- length(unique(data[[group_var]]))
             if (n_groups < 2) {
-                stop(.("Grouping variable must have at least 2 different categories."))
+                jmvcore::reject(.("Grouping variable must have at least 2 different categories."))
             }
 
             if (n_groups > 50) {
@@ -334,7 +335,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             complete_after <- nrow(data)
             
             if (complete_after == 0) {
-                stop(.("No complete cases found. Please check for missing values in selected variables."))
+                jmvcore::reject(.("No complete cases found. Please check for missing values in selected variables."))
             }
             
             if (complete_after < complete_before) {
@@ -349,7 +350,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Check minimum data requirements
             if (nrow(data) < 2) {
-                stop(.("At least 2 complete observations are required for lollipop chart analysis."))
+                jmvcore::reject(.("At least 2 complete observations are required for lollipop chart analysis."))
             }
             
             # Validate highlight level if provided and highlighting is enabled
@@ -362,7 +363,8 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (self$options$useHighlight && !is.null(highlight_level) && highlight_level != "" && !highlight_level %in% data[[group_var]]) {
                 private$.addNotice(
                     jmvcore::NoticeType$WARNING,
-                    sprintf("Highlight level '%s' not found in grouping variable. Highlight will be ignored.", highlight_level),
+                    sprintf("Highlight level '%s' not found in grouping variable. Highlight will be ignored.",
+                            htmltools::htmlEscape(highlight_level)),
                     'highlightNotFound'
                 )
                 highlight_level <- NULL  # Disable highlighting for this case
@@ -381,7 +383,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     sprintf(
                         "Multiple observations per group detected (max=%d per group). Groups with duplicates: %s. Use aggregation (mean/median/sum) to avoid over-plotting and misleading visualization.",
                         max_count,
-                        paste(head(groups_with_dups, 5), collapse = ", ")
+                        htmltools::htmlEscape(paste(head(groups_with_dups, 5), collapse = ", "))
                     ),
                     'duplicateGroups'
                 )
@@ -495,21 +497,23 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         # Generate clinical summary for easier interpretation
         .generateClinicalSummary = function(summary_stats, dep_var, group_var) {
+            highest_safe <- htmltools::htmlEscape(as.character(summary_stats$groups_with_highest))
+            lowest_safe  <- htmltools::htmlEscape(as.character(summary_stats$groups_with_lowest))
             summary_html <- paste0(
                 "<div class='alert alert-success'>",
                 "<h5>", .("Clinical Summary"), "</h5>",
                 "<p><strong>", .("Analysis Overview"), ":</strong> ",
                 .("This analysis compared"), " <strong>", summary_stats$n_observations, "</strong> ",
-                .("observations across"), " <strong>", summary_stats$n_groups, "</strong> ", 
+                .("observations across"), " <strong>", summary_stats$n_groups, "</strong> ",
                 .("groups"), ".</p>",
-                
+
                 "<p><strong>", .("Key Findings"), ":</strong></p>",
                 "<ul>",
                 "<li>", .("Mean value"), ": <strong>", round(summary_stats$dep_mean, 2), "</strong> ",
                 "(", .("Standard Deviation"), " = ", round(summary_stats$dep_sd, 2), ")</li>",
                 "<li>", .("Value range"), ": ", round(summary_stats$dep_min, 2), " - ", round(summary_stats$dep_max, 2), "</li>",
-                "<li>", .("Highest values found in"), ": <strong>", summary_stats$groups_with_highest, "</strong></li>",
-                "<li>", .("Lowest values found in"), ": <strong>", summary_stats$groups_with_lowest, "</strong></li>",
+                "<li>", .("Highest values found in"), ": <strong>", highest_safe, "</strong></li>",
+                "<li>", .("Lowest values found in"), ": <strong>", lowest_safe,  "</strong></li>",
                 "</ul>",
                 
                 "<p><strong>", .("Clinical Interpretation"), ":</strong> ",
@@ -945,22 +949,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(dep) || is.null(group))
                 return('')
 
-            # Escape variable names
-            dep_escaped <- if (!is.null(dep) && !identical(make.names(dep), dep)) {
-                paste0('`', dep, '`')
-            } else {
-                dep
-            }
-
-            group_escaped <- if (!is.null(group) && !identical(make.names(group), group)) {
-                paste0('`', group, '`')
-            } else {
-                group
-            }
-
-            # Build arguments
-            dep_arg <- paste0('dep = "', dep_escaped, '"')
-            group_arg <- paste0('group = "', group_escaped, '"')
+            # Use deparse() to produce a valid R string literal with proper escaping
+            # for internal "/\\ and non-syntactic names (project memory feedback).
+            dep_arg <- paste0('dep = ', deparse(dep))
+            group_arg <- paste0('group = ', deparse(group))
 
             # Get other arguments
             args <- ''

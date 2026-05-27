@@ -15,6 +15,17 @@ This is the definitive, comprehensive guide to writing `.u.yaml` files for devel
 9. [Clinical and Scientific Interface Design](#9-clinical-and-scientific-interface-design)
 10. [Best Practices and Design Principles](#10-best-practices-and-design-principles)
 11. [Complete Examples](#11-complete-examples)
+12. [Patterns Adopted from the SummaryTables Module](#12-patterns-adopted-from-the-summarytables-module)
+    - 12.1 Manual Run Gate (Defer Computation)
+    - 12.2 Per-Variable Customization via Templated ListBox
+    - 12.3 Inline JavaScript `enable` Expressions
+    - 12.4 Two-Column `cell`-Addressed Options Panel
+    - 12.5 The Standard "Appearance" Block
+    - 12.6 The "Save to Word" Export Block
+    - 12.7 `Supplier` + `format: term` Model Builder
+    - 12.8 `RadioButton` with `optionName` / `optionPart`
+    - 12.9 Compact UI Niceties
+    - 12.10 Component Quick-Reference (Additions)
 
 ---
 
@@ -1363,6 +1374,376 @@ children:
             name: colorScheme
             label: Color Scheme
 ```
+
+---
+
+## 12. Patterns Adopted from the SummaryTables Module
+
+This section captures advanced patterns observed in the [NourEdinDarwish/SummaryTables](https://github.com/NourEdinDarwish/SummaryTables) module (which mirrors the gtsummary R package as a jamovi UI). These patterns are battle-tested for clinical summary tables, regression tables, and survival tables — many are directly applicable to ClinicoPath functions and are currently underused.
+
+### 12.1 Manual Run Gate (Defer Computation)
+
+Heavy analyses (survival, regression, ROC, bootstrapping) re-execute on every option change in jamovi, which can hang the UI. SummaryTables uses a paired `CheckBox` + `ActionButton` to give the user explicit "run when ready" control.
+
+**`.a.yaml`** (paired options):
+```yaml
+- name: manualRun
+  title: Run manually
+  type: Bool
+  default: false
+
+- name: run
+  title: Run
+  type: Action
+```
+
+**`.u.yaml`** (the CheckBox owns the button as a child):
+```yaml
+- type: CheckBox
+  name: manualRun
+  children:
+    - type: ActionButton
+      name: run
+      enable: (manualRun)
+```
+
+**`.b.R`** (gate the run):
+```r
+.run = function() {
+    if (self$options$manualRun && !self$options$run)
+        return()
+    # ... heavy computation
+}
+```
+
+**When to use in ClinicoPath:** `survival`, `multisurvival`, `psychopdaroc`, `decisiongraph` (Markov), `stagemigration`, `modelbuilder`, `ihccluster`, `aivalidation`, anything with bootstrap/MCMC/permutations.
+
+---
+
+### 12.2 Per-Variable Customization via Templated `ListBox`
+
+The single most powerful pattern in SummaryTables: a "Default" ComboBox sets the choice for *all* variables, and a paired `ListBox` shows one row per selected variable letting users *override* the default for individual variables. This collapses what would otherwise be dozens of options into a clean two-tier UI.
+
+**`.a.yaml`** (two options — a List default and an Array of Groups):
+```yaml
+- name: statContDefault
+  title: Default statistic
+  type: List
+  options:
+    - { title: "Mean (SD)",       name: meanSd }
+    - { title: "Median (IQR)",    name: medianIqr }
+    - { title: "Median (Range)",  name: medianRange }
+  default: meanSd
+
+- name: statContSpecific
+  title: Specific statistics
+  type: Array
+  template:
+    type: Group
+    elements:
+      - name: var
+        type: Variable
+      - name: stat
+        title: Statistic
+        type: List
+        options:
+          - { title: "Same as default", name: useDefault }
+          - { title: "Mean (SD)",       name: meanSd }
+          - { title: "Median (IQR)",    name: medianIqr }
+        default: useDefault
+```
+
+**`.u.yaml`** (the paired ComboBox + ListBox with templated columns):
+```yaml
+- type: ComboBox
+  name: statContDefault
+- type: ListBox
+  name: statContSpecific
+  showColumnHeaders: true
+  fullRowSelect: true
+  stretchFactor: 1
+  height: large
+  columns:
+    - name: var
+      label: Variable
+      selectable: false
+      stretchFactor: 1
+      maxWidth: 300
+      template:
+        type: VariableLabel
+    - name: stat
+      label: Statistic
+      selectable: false
+      stretchFactor: 1
+      template:
+        type: ComboBox
+        label: ""
+```
+
+**`.b.R` resolution helper** (the standard idiom):
+```r
+.resolveStat = function(varName) {
+    spec <- self$options$statContSpecific
+    for (row in spec) {
+        if (identical(row$var, varName) && !identical(row$stat, "useDefault"))
+            return(row$stat)
+    }
+    self$options$statContDefault
+}
+```
+
+**When to use in ClinicoPath:** any function that currently applies a single setting (test, transform, plot type, color, scaling) to a *set* of variables — e.g. `jjbetweenstats` (per-DV test type), `multisurvival` (per-covariate display), `psychopdaroc` (per-marker direction), `tableone`/`crosstable` (per-variable statistic), `agreement` (per-rater weights), `crosstable` (per-row chi-square vs Fisher).
+
+---
+
+### 12.3 Inline JavaScript `enable` Expressions
+
+ClinicoPath already uses the short-form `enable: (option && !other)`. SummaryTables adds two more expressive forms that the jamovi compiler supports:
+
+| Form | Use case | Example |
+|------|----------|---------|
+| **Short form** | Simple Bool/List logic | `enable: (addCi)` |
+| **Negated List value** | "not equal to a List value" | `enable: (!(missing:no))` |
+| **JS arrow function** | Needs variable presence, list length, or array introspection | `enable: ({return !!ui['groupVar'].value();})` |
+| **Length check** | Enable only when N variables selected | `enable: ({return (ui['strata'].value() \|\| []).length > 0;})` |
+| **Multi-condition JS** | Several variables/options must agree | `enable: ({return !!ui['groupVar'].value() && ui['addCi'].value();})` |
+
+**YAML folding for long expressions** keeps them readable:
+```yaml
+enable: >
+  ({return (ui['strata'].value() || []).length > 0 &&
+  ui['addPvalue'].value() &&
+  ui['boldPvalue'].value();})
+```
+
+**Rule of thumb:** if you need to ask "*is a variable selected at all*" or "*how many variables*", use the JS form. Pure option-vs-option logic can stay in the short form.
+
+---
+
+### 12.4 Two-Column `cell`-Addressed Options Panel
+
+For dense options screens, SummaryTables splits a `CollapseBox` into a side-by-side two-column grid using `LayoutBox` cells. This nearly halves vertical scroll on regression tables.
+
+```yaml
+- type: CollapseBox
+  label: Options
+  children:
+    - type: LayoutBox
+      stretchFactor: 1
+      children:
+        - type: LayoutBox
+          cell: { column: 0, row: 0 }
+          stretchFactor: 1
+          children:
+            - type: Label
+              label: General
+              children:
+                - type: CheckBox
+                  name: exponentiate
+                - type: ComboBox
+                  name: digitsCoef
+        - type: LayoutBox
+          cell: { column: 1, row: 0 }
+          stretchFactor: 1
+          children:
+            - type: Label
+              label: P-value
+              children:
+                - type: ComboBox
+                  name: digitsPvalue
+                - type: CheckBox
+                  name: boldPvalue
+```
+
+This is more compact than nested `fitToGrid` and avoids the 2×N checkbox-grid limitation.
+
+---
+
+### 12.5 The Standard "Appearance" Block (Journal Style + Typography)
+
+SummaryTables uses an identical `Appearance` `CollapseBox` across every analysis — a strong UX win because users learn it once. The pattern: theme picker, compact toggle, language selector, then a 2×2 typography grid.
+
+```yaml
+- type: CollapseBox
+  label: Appearance
+  collapsed: true
+  children:
+    - type: ComboBox
+      name: journal           # default | jama | lancet | nejm | qjecon
+    - type: CheckBox
+      name: compact
+    - type: ComboBox
+      name: language          # en, fr, de, es, ja, kr, zh-cn, tr, ...
+    - type: LayoutBox
+      fitToGrid: true
+      children:
+        - type: CheckBox
+          name: boldLabels
+          cell: { row: 0, column: 0 }
+        - type: CheckBox
+          name: boldLevels
+          cell: { row: 0, column: 1 }
+        - type: CheckBox
+          name: italicizeLabels
+          cell: { row: 1, column: 0 }
+        - type: CheckBox
+          name: italicizeLevels
+          cell: { row: 1, column: 1 }
+```
+
+The `journal` value is read in `.b.R` to switch CSS / table styling (e.g. `gtsummary::theme_gtsummary_journal("jama")`). ClinicoPath table-producing functions (`tableone`, `crosstable`, `summarydata`) should adopt this exact block for visual consistency.
+
+---
+
+### 12.6 The "Save to Word" Export Block
+
+SummaryTables ships a trailing `CollapseBox` that lets users export the rendered table directly to `.docx`. This is more polished than asking users to copy/paste from the results panel.
+
+**`.a.yaml`**:
+```yaml
+- name: path
+  title: File path
+  type: String
+  default: ""
+
+- name: export
+  title: Save
+  type: Action
+```
+
+**`.u.yaml`**:
+```yaml
+- type: CollapseBox
+  label: Save to Word
+  collapsed: true
+  children:
+    - type: TextBox
+      name: path
+      format: string
+      stretchFactor: 1
+    - type: ActionButton
+      name: export
+```
+
+**`.b.R`** (responds to the button click via `.run()` checking the action option):
+```r
+.run = function() {
+    # ... build table ...
+    if (isTRUE(self$options$export) && nzchar(self$options$path %||% "")) {
+        flextable::save_as_docx(my_flextable, path = self$options$path)
+    }
+}
+```
+
+**Security note:** validate the `path` value before writing — restrict to known directories or use `tools::file_path_sans_ext()` + a controlled extension. See `feedback_skip_approval_prompt_when_clean.md` for related guidance.
+
+---
+
+### 12.7 `Supplier` + `format: term` + `transferAction: interactions` (Model Builder)
+
+SummaryTables exposes a model-term builder (drag covariates → "Add interaction") for its multivariable regression analyses. This is the *same* mechanism jamovi's built-in Linear Regression uses, and it's missing from ClinicoPath's regression-style functions (`multisurvival`, `modelbuilder`, `hierarchicalbayes`).
+
+**`.a.yaml`**:
+```yaml
+- name: modelTerms
+  title: Model terms
+  type: Terms                   # NOT Variables — Terms supports interactions
+  default: []
+```
+
+**`.u.yaml`**:
+```yaml
+- type: Supplier
+  name: modelSupplier
+  label: Predictors
+  persistentItems: true
+  stretchFactor: 1
+  format: term
+  higherOrders: true            # enables 3+ way interactions
+  children:
+    - type: TargetLayoutBox
+      transferAction: interactions   # adds the "Interactions" transfer button
+      children:
+        - type: ListBox
+          name: modelTerms
+          valueFilter: unique
+          isTarget: true
+          template:
+            type: TermLabel       # renders "covA:covB" interaction labels
+```
+
+**`.b.R`** uses `jmvcore::composeTerms()` to render the formula:
+```r
+rhs <- jmvcore::composeTerms(self$options$modelTerms)
+formula <- as.formula(paste0(lhs, " ~ ", paste(rhs, collapse = " + ")))
+```
+
+---
+
+### 12.8 `RadioButton` with `optionName` / `optionPart`
+
+When a List option has only 2–3 mutually exclusive choices *and* each branch should reveal different sub-controls, `RadioButton` is more discoverable than ComboBox. The `optionName` + `optionPart` binding lets each radio control one value of a shared List option:
+
+```yaml
+# .a.yaml
+- name: statistic
+  type: List
+  options:
+    - { name: times,  title: "At specific times" }
+    - { name: median, title: "Median survival" }
+  default: median
+
+# .u.yaml
+- type: RadioButton
+  name: statistic_times
+  optionName: statistic
+  optionPart: times
+  children:                       # only shown when "times" is selected
+    - type: TextBox
+      name: times
+      enable: (statistic:times)
+    - type: ComboBox
+      name: type
+      enable: (statistic:times)
+- type: RadioButton
+  name: statistic_median
+  optionName: statistic
+  optionPart: median
+```
+
+Use cases in ClinicoPath: `survival` (timepoint vs median vs landmark), `decisiongraph` (tree type), `psychopdaroc` (Youden vs cost-based threshold), `multisurvival` (analysis subtype).
+
+---
+
+### 12.9 Compact UI Niceties
+
+Small details that lift the perceived polish of SummaryTables:
+
+| Pattern | Example | Use |
+|---------|---------|-----|
+| Numeric suffix | `suffix: "%"` on `TextBox` | percentages, units (`"months"`, `"per QALY"`) |
+| `format: number` | `format: number` on TextBox | numeric validation w/o regex |
+| `width: large` | `width: large` on TextBox | wide free-text fields (label overrides, paths) |
+| `height: large` | `height: large` on ListBox | per-variable customization grids |
+| `maxWidth: 300` | column property | prevent runaway widths in templated grids |
+| `persistentItems: false` | on `VariableSupplier` | clear variable list when source changes |
+| `valueFilter: unique` | on `ListBox` | reject duplicate terms in model builder |
+| `selectable: false` | on ListBox columns | columns are display-only, not draggable |
+
+---
+
+### 12.10 Component Quick-Reference (Additions)
+
+| Component | Notable property | Purpose |
+|-----------|------------------|---------|
+| `Supplier` | `format: term`, `higherOrders: true` | model-builder source |
+| `TargetLayoutBox` | `transferAction: interactions` | adds "Interactions" button |
+| `ListBox` | `columns: [...] template: { type: ... }` | per-row editable grid |
+| `ListBox` column template | `VariableLabel`, `ComboBox`, `TermLabel` | inline editors |
+| `ActionButton` | bound to `type: Action` option | manual run / export trigger |
+| `RadioButton` | `optionName` + `optionPart` | mutually exclusive sub-panels |
+| `VariableSupplier` | `persistentItems: false` | reset on dataset change |
+| `LayoutBox` | `cell: { column: N, row: M }` | side-by-side columns |
 
 ---
 

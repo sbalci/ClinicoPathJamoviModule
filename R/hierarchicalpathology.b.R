@@ -103,7 +103,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
 
             # Create analysis dataset
             analysisData <- data[, vars_to_check, drop = FALSE]
-            analysisData <- na.omit(analysisData)
+            analysisData <- jmvcore::naOmit(analysisData)
 
             if (nrow(analysisData) < 10) {
                 self$results$instructions$setContent("Insufficient data for hierarchical analysis. Need at least 10 complete observations.")
@@ -257,27 +257,28 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
             covariates <- self$options$covariates
             model_type <- self$options$model_type
 
-            # Build formula based on available levels
+            # Build formula based on available levels (backtick-escape all user-controlled column names)
+            dep_term <- jmvcore::composeTerm(dependent)
             formula_parts <- list()
             random_parts <- list()
 
             # Fixed effects
             if (!is.null(covariates) && length(covariates) > 0) {
-                formula_parts <- c(formula_parts, paste(covariates, collapse = " + "))
+                formula_parts <- c(formula_parts, paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
             } else {
                 formula_parts <- c(formula_parts, "1")
             }
 
-            # Random effects structure
+            # Random effects structure (composeTerm-escape each level)
             if (!is.null(level_1) && !is.null(level_2) && !is.null(level_3)) {
                 # Three-level model: (1 | level_3/level_2/level_1)
-                random_parts <- c(random_parts, paste("(1 |", level_3, "/", level_2, "/", level_1, ")"))
+                random_parts <- c(random_parts, paste0("(1 | ", jmvcore::composeTerm(level_3), "/", jmvcore::composeTerm(level_2), "/", jmvcore::composeTerm(level_1), ")"))
             } else if (!is.null(level_2) && !is.null(level_3)) {
                 # Two-level model: (1 | level_3/level_2)
-                random_parts <- c(random_parts, paste("(1 |", level_3, "/", level_2, ")"))
+                random_parts <- c(random_parts, paste0("(1 | ", jmvcore::composeTerm(level_3), "/", jmvcore::composeTerm(level_2), ")"))
             } else if (!is.null(level_3)) {
                 # Simple random intercept: (1 | level_3)
-                random_parts <- c(random_parts, paste("(1 |", level_3, ")"))
+                random_parts <- c(random_parts, paste0("(1 | ", jmvcore::composeTerm(level_3), ")"))
             }
 
             if (length(random_parts) == 0) {
@@ -285,23 +286,24 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                 return()
             }
 
-            # Complete formula
-            formula_str <- paste(dependent, "~", paste(formula_parts, collapse = " + "), "+",
-                               paste(random_parts, collapse = " + "))
+            # Complete formula — lme4 random-effects bar `|` requires allow-list extension
+            formula_str <- paste0(dep_term, " ~ ", paste(formula_parts, collapse = " + "), " + ",
+                                  paste(random_parts, collapse = " + "))
+            lmer_formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("|"))
 
             # Fit model based on type
             tryCatch({
                 if (model_type == "linear") {
-                    model <- lme4::lmer(formula(formula_str), data = data)
+                    model <- lme4::lmer(lmer_formula, data = data)
                 } else if (model_type == "logistic") {
-                    model <- lme4::glmer(formula(formula_str), data = data, family = binomial)
+                    model <- lme4::glmer(lmer_formula, data = data, family = binomial)
                 } else if (model_type == "poisson") {
-                    model <- lme4::glmer(formula(formula_str), data = data, family = poisson)
+                    model <- lme4::glmer(lmer_formula, data = data, family = poisson)
                 } else if (model_type == "negative_binomial") {
                     # Use glmmTMB for negative binomial
-                    model <- glmmTMB::glmmTMB(formula(formula_str), data = data, family = glmmTMB::nbinom2)
+                    model <- glmmTMB::glmmTMB(lmer_formula, data = data, family = glmmTMB::nbinom2)
                 } else {
-                    model <- lme4::lmer(formula(formula_str), data = data)
+                    model <- lme4::lmer(lmer_formula, data = data)
                 }
 
                 # Store model for later use
@@ -314,7 +316,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                 private$.populateRandomEffectsTable(model)
 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Model fitting failed:", e$message))
+                self$results$instructions$setContent(paste("Model fitting failed:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -373,7 +375,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                 }
 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Variance component calculation failed:", e$message))
+                self$results$instructions$setContent(paste("Variance component calculation failed:", htmltools::htmlEscape(e$message)))
             })
         },
 

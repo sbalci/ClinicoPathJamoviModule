@@ -23,6 +23,23 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Performance optimization methods ----
         
+        # TODO (correctness): the hash below only mixes variable NAMES + nrow,
+        # not data CONTENTS. If the user mutates values within the same row count
+        # without changing variable selections, this cache returns stale
+        # `.prepared_data`. Consider replacing with content-based invalidation:
+        #   digest::digest(list(group, size, color,
+        #                        self$data[, c(group, size, color), drop = FALSE]),
+        #                  algo = "md5")
+        # — matches the hashing pattern used in `.prepareOptions` (post-audit) and
+        # in `.processedData` of jjpiestats.
+        #
+        # TODO (operational hygiene): namespaced refs `treemap::treemap` (L168),
+        # `tibble::as_tibble` (L196), `ggfittext::geom_fit_text` (L220), and
+        # `dplyr::*` are called without `requireNamespace(..., quietly = TRUE)`
+        # gates. If any of these aren't installed (treemap and ggfittext are
+        # Suggests-only in many configurations), the plot path crashes mid-render
+        # with a low-information error. Wrap each in a requireNamespace gate that
+        # emits a `jmvcore::reject(.('Required package {pkg} is not installed'), pkg = ...)`.
         .prepareData = function() {
             # Create a simple hash of current data to detect changes
             current_hash <- paste(self$options$group, self$options$size, self$options$color, nrow(self$data), collapse = "_")
@@ -39,6 +56,11 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Ensure size variable is numeric
                     if (!is.null(self$options$size)) {
                         mydata[[self$options$size]] <- as.numeric(mydata[[self$options$size]])
+                        # TODO (data hygiene): pmax silently clamps negative/zero values
+                        # to 0.01. Users get no signal that their data was transformed
+                        # (which can change the treemap proportions). Emit a Notice when
+                        # any clamping occurred (e.g., n_clamped = sum(orig <= 0); if >0
+                        # show "N values <= 0 were clamped to 0.01 for treemap rendering").
                         # Ensure all values are positive for treemap
                         mydata[[self$options$size]] <- pmax(mydata[[self$options$size]], 0.01)
                     }
@@ -54,9 +76,25 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .prepareOptions = function() {
-            # Cache processed options
-            if (is.null(private$.prepared_options)) {
-                
+            # Hash of all option values to detect changes between runs against the
+            # same R6 instance (jamovi reuses instances when options change)
+            current_hash <- digest::digest(list(
+                self$options$labelFontFace, self$options$labelAlignH, self$options$labelAlignV,
+                self$options$group, self$options$size, self$options$color,
+                self$options$aspectRatio, self$options$borderWidth,
+                self$options$borderLevel1Width, self$options$borderLevel2Width,
+                self$options$borderLevel1Color, self$options$borderLevel2Color,
+                self$options$labelLevel1Size, self$options$labelLevel2Size,
+                self$options$labelLevel1Color, self$options$labelLevel2Color,
+                self$options$labelBackground, self$options$labelOverlap,
+                self$options$showLabels, self$options$labelSize,
+                self$options$title, self$options$subtitle, self$options$caption
+            ), algo = "md5")
+
+            # Cache processed options; invalidate when any option changes
+            if (is.null(private$.prepared_options) ||
+                !identical(attr(private$.prepared_options, "hash"), current_hash)) {
+
                 # Convert font face option to numeric
                 font_face_map <- list(
                     "normal" = 1,
@@ -65,7 +103,7 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "bolditalic" = 4
                 )
                 font_face <- font_face_map[[self$options$labelFontFace]]
-                
+
                 # Create alignment list based on user options
                 align_labels <- list(
                     c(self$options$labelAlignH, self$options$labelAlignV)
@@ -73,7 +111,7 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$color)) {
                     align_labels[[2]] <- c(self$options$labelAlignH, self$options$labelAlignV)
                 }
-                
+
                 private$.prepared_options <- list(
                     group_var = self$options$group,
                     size_var = self$options$size,
@@ -98,8 +136,9 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     subtitle = self$options$subtitle,
                     caption = self$options$caption
                 )
+                attr(private$.prepared_options, "hash") <- current_hash
             }
-            
+
             return(private$.prepared_options)
         },
 
@@ -130,8 +169,8 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
-            
+                jmvcore::reject(.('Data contains no (complete) rows'))
+
             # Prepare data and options
             private$.prepareData()
             private$.prepareOptions()
@@ -144,7 +183,7 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+                jmvcore::reject(.('Data contains no (complete) rows'))
 
             # Use prepared data and options ----
             mydata <- private$.prepareData()
@@ -256,8 +295,9 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 TRUE
                 
             }, error = function(e) {
+                # htmlEscape e$message since treemap::treemap errors may include user column-name fragments
                 error_msg <- paste0(
-                    "<br>Error creating treemap: ", e$message, 
+                    "<br>Error creating treemap: ", htmltools::htmlEscape(e$message),
                     "<br><br>Please check that:",
                     "<br>• Group variable is categorical",
                     "<br>• Size variable contains numeric values",

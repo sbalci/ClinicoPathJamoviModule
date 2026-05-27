@@ -6784,6 +6784,259 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
             }
         },
 
+        .populateAllPairsKappaExplanation = function() {
+            html_content <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is the All-Pairs Kappa table?</h3>
+                    <p style='margin: 0; color: #333;'>
+                        For studies with three or more raters, the All-Pairs table reports
+                        Cohen's kappa, observed agreement, standard error, 95% confidence
+                        interval, z, and p-value for <strong>every pair</strong> of raters
+                        (C(k,2) rows). This is the conventional supplementary table in
+                        interobserver reliability studies, complementing the single overall
+                        Fleiss kappa.
+                    </p>
+                </div>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to use it</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li>Identifying which rater pairs disagree most (training needs)</li>
+                        <li>Reporting in agreement studies that follow Layfield et al. 2020 or Boler et al. 2022 conventions</li>
+                        <li>Detecting outlier raters whose pairwise kappas are systematically lower</li>
+                    </ul>
+                </div>
+                <div style='background: #fff3cd; border-left: 4px solid #856404; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #856404;'>Multiplicity caveat</h4>
+                    <p style='margin: 0; color: #856404;'>
+                        With k raters you compute C(k,2) p-values. For k=4 that is 6 tests; for
+                        k=6 it is 15. Enable a multiple-testing correction (Bonferroni, BH, or
+                        Holm) under <em>Mixed-Effects Comparison &rarr; Multiple Testing
+                        Correction</em> to control familywise error or FDR.
+                    </p>
+                </div>
+                <p style='font-size: 0.9em; color: #666;'>
+                    Weights for ordinal categories follow the <em>Weighted Kappa</em> option
+                    (unweighted / linear / squared).
+                </p>
+            </div>"
+            self$results$allPairsKappaExplanation$setContent(html_content)
+        },
+
+        .calculateAllPairsKappa = function(ratings) {
+            tbl <- self$results$allPairsKappaTable
+
+            if (is.null(ratings) || ncol(ratings) < 3) {
+                tbl$setNote("n_raters",
+                    "All-Pairs Kappa requires at least 3 raters. With 2 raters use the standard Cohen's kappa shown in the main table.")
+                return(invisible(NULL))
+            }
+
+            rater_names <- colnames(ratings)
+            n_raters <- ncol(ratings)
+            wght <- self$options$wght
+            irr_weight <- if (identical(wght, "equal")) "equal"
+                          else if (identical(wght, "squared")) "squared"
+                          else "unweighted"
+
+            pairs <- utils::combn(n_raters, 2, simplify = FALSE)
+            rows <- list()
+
+            for (pp in pairs) {
+                a <- pp[1]; b <- pp[2]
+                sub <- ratings[, c(a, b), drop = FALSE]
+                sub <- sub[stats::complete.cases(sub), , drop = FALSE]
+                n_pair <- nrow(sub)
+                key <- paste(rater_names[a], rater_names[b], sep = "__")
+
+                if (n_pair < 5) {
+                    rows[[key]] <- list(
+                        rater_a = rater_names[a], rater_b = rater_names[b],
+                        n = n_pair, peragree = NA_real_, kappa = NA_real_,
+                        se = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
+                        z = NA_real_, p = NA_real_, p_adj = NA_real_,
+                        error = "Fewer than 5 complete pairs"
+                    )
+                    next
+                }
+
+                peragree <- mean(as.character(sub[[1]]) == as.character(sub[[2]]))
+
+                kres <- tryCatch(
+                    irr::kappa2(sub, weight = irr_weight),
+                    error = function(e) NULL
+                )
+
+                if (is.null(kres) || is.na(kres$value)) {
+                    rows[[key]] <- list(
+                        rater_a = rater_names[a], rater_b = rater_names[b],
+                        n = n_pair, peragree = peragree, kappa = NA_real_,
+                        se = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
+                        z = NA_real_, p = NA_real_, p_adj = NA_real_,
+                        error = if (!is.null(kres)) "kappa undefined" else "kappa2() failed"
+                    )
+                    next
+                }
+
+                se <- if (!is.null(kres$statistic) && !is.na(kres$statistic) &&
+                          abs(kres$statistic) > .Machine$double.eps)
+                          kres$value / kres$statistic else NA_real_
+
+                ci <- if (!is.na(se))
+                          kres$value + c(-1, 1) * stats::qnorm(0.975) * se
+                      else c(NA_real_, NA_real_)
+
+                rows[[key]] <- list(
+                    rater_a = rater_names[a],
+                    rater_b = rater_names[b],
+                    n = n_pair,
+                    peragree = peragree,
+                    kappa = kres$value,
+                    se = se,
+                    ci_lower = ci[1],
+                    ci_upper = ci[2],
+                    z = kres$statistic,
+                    p = kres$p.value,
+                    p_adj = NA_real_,
+                    error = NULL
+                )
+            }
+
+            corr <- self$options$multipleTestCorrection
+            if (!identical(corr, "none") && length(rows) > 1) {
+                pvals <- vapply(rows, function(r) r$p, numeric(1))
+                method <- switch(corr,
+                    bonferroni = "bonferroni",
+                    bh         = "BH",
+                    holm       = "holm",
+                    "none")
+                if (!identical(method, "none")) {
+                    padj <- stats::p.adjust(pvals, method = method)
+                    for (k in seq_along(rows)) rows[[k]]$p_adj <- padj[k]
+                }
+            }
+
+            for (k in seq_along(rows)) {
+                r <- rows[[k]]
+                values <- list(
+                    rater_a = r$rater_a, rater_b = r$rater_b, n = r$n,
+                    peragree = r$peragree, kappa = r$kappa, se = r$se,
+                    ci_lower = r$ci_lower, ci_upper = r$ci_upper,
+                    z = r$z, p = r$p, p_adj = r$p_adj
+                )
+                tbl$addRow(rowKey = names(rows)[k], values = values)
+                if (!is.null(r$error)) {
+                    tbl$addFootnote(rowKey = names(rows)[k], col = "kappa", r$error)
+                }
+            }
+
+            note_bits <- c(
+                sprintf("%d rater pairs evaluated.", length(rows)),
+                if (!identical(irr_weight, "unweighted"))
+                    sprintf("Weights: %s.", irr_weight),
+                if (!identical(corr, "none"))
+                    sprintf("p-values adjusted using %s.", corr)
+            )
+            if (length(note_bits) > 0)
+                tbl$setNote("summary", paste(note_bits, collapse = " "))
+        },
+
+        .populateItemModalAgreementExplanation = function() {
+            html_content <- "
+            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h3 style='margin: 0 0 10px 0; color: #333;'>What is item-modal-category agreement?</h3>
+                    <p style='margin: 0; color: #333;'>
+                        For each rating category <em>c</em>, this metric reports the mean
+                        within-case agreement rate <em>across raters</em> on the cases whose
+                        modal rating is <em>c</em>. In a 4-rater study, a case all 4 raters
+                        score the same gets agreement 1.00; a 3-1 split gets 0.75; a 2-2 split
+                        has no unique mode and is excluded.
+                    </p>
+                </div>
+                <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
+                    <h4 style='margin: 0 0 10px 0; color: #333;'>When to use it</h4>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li>Identifying which categories are the agreement bottleneck (e.g., YSRB Category IV 'suspicious' in breast cytology)</li>
+                        <li>Reporting per-category agreement alongside an overall Fleiss kappa</li>
+                        <li>Quality assurance: where should category-specific training focus?</li>
+                    </ul>
+                </div>
+                <p style='font-size: 0.9em; color: #666;'>
+                    Cases with no unique mode (ties) are excluded and reported in a footnote.
+                    95% CIs are normal-approximation Wald intervals on the case-level mean
+                    agreement, bounded to [0, 1].
+                </p>
+            </div>"
+            self$results$itemModalAgreementExplanation$setContent(html_content)
+        },
+
+        .calculateItemModalAgreement = function(ratings) {
+            tbl <- self$results$itemModalAgreementTable
+
+            if (is.null(ratings) || ncol(ratings) < 2) {
+                tbl$setNote("n_raters",
+                    "Item-modal agreement requires at least 2 raters.")
+                return(invisible(NULL))
+            }
+
+            df <- as.data.frame(ratings, stringsAsFactors = FALSE)
+            df <- df[stats::complete.cases(df), , drop = FALSE]
+            if (nrow(df) < 5) {
+                tbl$setNote("n_cases",
+                    "At least 5 complete cases are required for item-modal agreement.")
+                return(invisible(NULL))
+            }
+
+            char_df <- as.data.frame(lapply(df, as.character), stringsAsFactors = FALSE)
+
+            modal_info <- lapply(seq_len(nrow(char_df)), function(i) {
+                vals <- unlist(char_df[i, ], use.names = FALSE)
+                tab <- table(vals)
+                top <- max(tab)
+                mode_vals <- names(tab)[tab == top]
+                list(mode = if (length(mode_vals) == 1) mode_vals else NA_character_,
+                     agree = top / length(vals))
+            })
+
+            modes <- vapply(modal_info, function(x) x$mode, character(1))
+            agrees <- vapply(modal_info, function(x) x$agree, numeric(1))
+
+            n_ties <- sum(is.na(modes))
+            keep <- !is.na(modes)
+            modes <- modes[keep]
+            agrees <- agrees[keep]
+
+            if (length(modes) == 0) {
+                tbl$setNote("all_ties",
+                    "All cases had tied modes; no per-category summary computable.")
+                return(invisible(NULL))
+            }
+
+            cats <- sort(unique(modes))
+            z975 <- stats::qnorm(0.975)
+
+            for (cat in cats) {
+                idx <- which(modes == cat)
+                m <- mean(agrees[idx])
+                se <- if (length(idx) > 1) stats::sd(agrees[idx]) / sqrt(length(idx)) else 0
+                ci <- m + c(-1, 1) * z975 * se
+                ci <- pmax(0, pmin(1, ci))
+                tbl$addRow(rowKey = cat, values = list(
+                    category       = as.character(cat),
+                    n_cases        = length(idx),
+                    mean_agreement = m,
+                    ci_lower       = ci[1],
+                    ci_upper       = ci[2]
+                ))
+            }
+
+            if (n_ties > 0) {
+                tbl$setNote("ties",
+                    sprintf("%d case(s) had no unique mode and were excluded.", n_ties))
+            }
+        },
+
         .populateICCExplanation = function() {
             # Provide educational content about ICC
 
@@ -10293,6 +10546,36 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                         "Please select a reference rater variable to perform pairwise kappa analysis."
                     )
                 }
+            }
+        }
+
+        private$.checkpoint()
+
+        # All-Pairs Cohen's Kappa (if requested) ----
+        if (self$options$showAllPairsKappaGuide) {
+            private$.populateAllPairsKappaExplanation()
+        }
+        if (self$options$allPairsKappa) {
+            if (is_continuous && n_unique_vals > 20) {
+                self$results$allPairsKappaTable$setNote("type_error",
+                    "All-Pairs Kappa requires categorical data. Your data appears to be continuous. Consider ICC or Lin's CCC instead.")
+            } else {
+                private$.calculateAllPairsKappa(ratings)
+            }
+        }
+
+        private$.checkpoint()
+
+        # Per-Category Item-Modal Agreement (if requested) ----
+        if (self$options$showItemModalGuide) {
+            private$.populateItemModalAgreementExplanation()
+        }
+        if (self$options$itemModalCategoryAgreement) {
+            if (is_continuous && n_unique_vals > 20) {
+                self$results$itemModalAgreementTable$setNote("type_error",
+                    "Item-modal agreement requires categorical data. Your data appears to be continuous.")
+            } else {
+                private$.calculateItemModalAgreement(ratings)
             }
         }
 

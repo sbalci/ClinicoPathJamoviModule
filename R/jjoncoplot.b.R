@@ -271,7 +271,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             } else {
                 guidance_html <- paste0(guidance_html,
-                    "<p style='color: #28a745; margin: 5px 0;'> <strong>Sample ID Variable:</strong> ", sampleVar, " selected</p>"
+                    "<p style='color: #28a745; margin: 5px 0;'> <strong>Sample ID Variable:</strong> ", htmltools::htmlEscape(sampleVar), " selected</p>"
                 )
             }
             
@@ -308,7 +308,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<h4 style='color: #dc3545; margin-top: 15px;'> Variable Check</h4>",
                         "<p style='margin: 8px 0;'>These variables were not found in your dataset:</p>",
                         "<p style='background-color: #ffe6e6; padding: 8px; border-radius: 4px; margin: 8px 0;'>",
-                        paste(missing_vars, collapse=", "), "</p>",
+                        htmltools::htmlEscape(paste(missing_vars, collapse=", ")), "</p>",
                         "<p style='margin: 8px 0;'><strong> Tip:</strong> Check variable names for typos or case sensitivity</p>"
                     )
                 }
@@ -784,6 +784,13 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             df <- df[!duplicated(df[[sampleVar]]), , drop = FALSE]
 
             # Process gene variables - convert to numeric (0/1) - VECTORIZED
+            # TODO (data hygiene): `apply(matrix, 2, fn)` returns a vector (not a matrix)
+            #   when geneVars has length 1, which would break the subsequent
+            #   `as.data.frame(gene_matrix)` column shape. Modern R + length(geneVars)>=2
+            #   is fine in practice (validateData already requires >=1 gene), but a
+            #   one-gene edge case could mis-shape the assignment. Consider wrapping with
+            #   `vapply(..., numeric(nrow(gene_matrix)))` or `as.matrix(..., ncol = length(geneVars))`
+            #   for shape-stability across all gene-count branches.
             if (length(geneVars) > 0) {
                 gene_matrix <- as.matrix(df[, geneVars, drop = FALSE])
                 gene_matrix <- apply(gene_matrix, 2, function(x) {
@@ -1259,14 +1266,14 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<ul style='margin-bottom: 5px;'>\n")
                 
                 for (i in 1:min(3, nrow(top_genes))) {
-                    gene <- top_genes$gene[i]
+                    gene <- htmltools::htmlEscape(top_genes$gene[i])
                     freq_pct <- top_genes$frequency_pct[i]
                     count <- top_genes$mutated_samples[i]
-                    
+
                     clinical_significance <- private$.getGeneSignificance(gene)
-                    
+
                     clinical_text <- paste0(clinical_text,
-                        "<li><strong>", gene, "</strong>: ", count, "/", total_samples, " samples (", freq_pct, 
+                        "<li><strong>", gene, "</strong>: ", count, "/", total_samples, " samples (", freq_pct,
                         "%) - ", clinical_significance, "</li>\n")
                 }
                 clinical_text <- paste0(clinical_text, "</ul>\n</div>\n")
@@ -1396,11 +1403,11 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Top 3 genes summary
                 gene_summaries <- c()
                 for (i in 1:min(3, nrow(top_genes))) {
-                    gene <- top_genes$gene[i]
+                    gene <- htmltools::htmlEscape(top_genes$gene[i])
                     freq_pct <- top_genes$frequency_pct[i]
                     count <- top_genes$mutated_samples[i]
-                    
-                    gene_summaries <- c(gene_summaries, 
+
+                    gene_summaries <- c(gene_summaries,
                         paste0(gene, " was mutated in ", count, " samples (", freq_pct, "%)"))
                 }
                 

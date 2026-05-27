@@ -21,6 +21,15 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .processedAesthetics = NULL,
             .optionsHash = NULL,
 
+            # TODO (correctness): This helper mutates `self$options$<name>` directly
+            #   (L34/L39/L44/L49). jamovi options are read-only — these assignments
+            #   silently no-op or raise a runtime error in newer jamovi. The JS-side
+            #   `onChange_clinicalPreset` handler at jamovi/js/jjhistostats.events.js
+            #   (L3-76) is the correct mechanism and already wires the same presets,
+            #   making this R-side helper redundant dead code. Either remove the
+            #   function and its `.init()` caller (L57), or convert it to read-only
+            #   logic that returns derived option values without mutation.
+
             # Apply clinical preset configurations
             .applyClinicalPreset = function() {
                 preset <- self$options$clinicalPreset
@@ -184,9 +193,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 # Stop if any factors detected
                 if (length(factor_warnings) > 0) {
-                    stop(paste0("Histogram analysis requires numeric variables. The following variables are categorical: ",
-                               paste(factor_warnings, collapse = ", "),
-                               ". Please select continuous numeric variables for histogram analysis."))
+                    jmvcore::reject(
+                        .("Histogram analysis requires numeric variables. The following variables are categorical: {vars}. Please select continuous numeric variables for histogram analysis."),
+                        vars = paste(factor_warnings, collapse = ", ")
+                    )
                 }
 
                 # Get the data - ggstatsplot handles NAs internally
@@ -329,7 +339,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     # Sample size warnings
                     if (length(var_data) < 30) {
                         warnings <- c(warnings, paste0(
-                            " Small sample size (n=", length(var_data), ") for '", var, 
+                            " Small sample size (n=", length(var_data), ") for '", htmltools::htmlEscape(var),
                             "'. Consider nonparametric analysis or interpret results cautiously."
                         ))
                     }
@@ -342,7 +352,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             outliers <- sum(abs(var_data - med) > 3 * mad_val)
                             if (outliers > 0) {
                                 warnings <- c(warnings, paste0(
-                                    " Detected ", outliers, " extreme outlier(s) in '", var, 
+                                    " Detected ", outliers, " extreme outlier(s) in '", htmltools::htmlEscape(var),
                                     "'. Consider reviewing data quality or using robust methods."
                                 ))
                             }
@@ -352,14 +362,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     # Constant data warning
                     if (length(unique(var_data)) == 1) {
                         warnings <- c(warnings, paste0(
-                            " Variable '", var, "' has constant values. Histogram analysis may not be meaningful."
+                            " Variable '", htmltools::htmlEscape(var), "' has constant values. Histogram analysis may not be meaningful."
                         ))
                     }
-                    
+
                     # Very few unique values warning
                     if (length(unique(var_data)) < 5 && length(var_data) > 10) {
                         warnings <- c(warnings, paste0(
-                            " Variable '", var, "' has only ", length(unique(var_data)), 
+                            " Variable '", htmltools::htmlEscape(var), "' has only ", length(unique(var_data)),
                             " unique values. Consider treating as categorical or ordinal data."
                         ))
                     }
@@ -373,7 +383,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     if (any(group_sizes < 10)) {
                         small_groups <- names(group_sizes[group_sizes < 10])
                         warnings <- c(warnings, paste0(
-                            " Small group size(s) detected: ", paste(small_groups, collapse = ", "), 
+                            " Small group size(s) detected: ", htmltools::htmlEscape(paste(small_groups, collapse = ", ")),
                             " (n < 10). Results may be unreliable for these groups."
                         ))
                     }
@@ -453,7 +463,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     
                     # Generate interpretation
                     var_interpretation <- paste0(
-                        "<h4>", var, "</h4>",
+                        "<h4>", htmltools::htmlEscape(var), "</h4>",
                         "<ul>",
                         "<li><strong>Sample size:</strong> ", n, " observations</li>",
                         "<li><strong>Central tendency:</strong> Mean = ", round(mean_val, 2), 
@@ -646,7 +656,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     if (!validation_result$valid) {
                         # Only show error for actual data problems, not missing variables
                         if (!grepl("Please select at least one variable", validation_result$message)) {
-                            stop(validation_result$message)
+                            jmvcore::reject(validation_result$message)
                         }
                     }
 
@@ -697,7 +707,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 validation_result <- private$.validateInputs()
                 if (!validation_result$valid) {
                     if (!is.null(validation_result$message)) {
-                        stop(validation_result$message)
+                        jmvcore::reject(validation_result$message)
                     }
                     return()
                 }
@@ -709,7 +719,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 mydata <- private$.prepareData()
                 options_data <- private$.prepareOptions()
                 aesthetics_data <- private$.prepareAesthetics()
-                
+
                 dep <- options_data$dep
 
                 # Single variable plot
@@ -782,7 +792,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 validation_result <- private$.validateInputs()
                 if (!validation_result$valid) {
                     if (!is.null(validation_result$message)) {
-                        stop(validation_result$message)
+                        jmvcore::reject(validation_result$message)
                     }
                     return()
                 }
@@ -1077,11 +1087,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (is.null(dep) || length(dep) == 0)
                     return('')
 
-                # Escape variable names that contain spaces or special characters
-                dep_escaped <- vapply(dep, jmvcore::composeTerm, character(1))
-
-                # Build dep argument
-                dep_arg <- paste0('dep = c(', paste(sapply(dep_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
+                # Build dep argument — deparse on a character vector emits c("a", "b")
+                # with proper escaping for embedded quotes/backslashes
+                dep_arg <- paste0('dep = ', deparse(dep))
 
                 # Get other arguments using base helper (if available)
                 args <- ''

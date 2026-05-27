@@ -1,10 +1,10 @@
 ---
 name:  jjhistostats
 title: Histogram
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: Distribution
 # menuSubtitle: Histogram
-version: '0.0.37'
+version: '0.0.38'
 jas: '1.2'
 
 

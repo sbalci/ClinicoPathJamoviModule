@@ -101,7 +101,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 
                 missing_vars <- all_vars[!all_vars %in% names(self$data)]
                 if (length(missing_vars) > 0) {
-                    stop(paste("Variables not found in data:", paste(missing_vars, collapse = ", ")))
+                    jmvcore::reject(.('Variables not found in data: {vars}'),
+                                    vars = paste(missing_vars, collapse = ", "))
                 }
                 
                 # Check that variables are appropriate for bar charts (categorical)
@@ -115,8 +116,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             if (is.numeric(self$data[[var]])) {
                                 unique_vals <- length(unique(self$data[[var]], na.rm = TRUE))
                                 if (unique_vals > 10) {
-                                    stop(paste("Variable '", var, "' appears to be continuous (", unique_vals, 
-                                             " unique values). Bar charts are for categorical data. Consider converting to groups first."))
+                                    jmvcore::reject(.("Variable '{var}' appears to be continuous ({n} unique values). Bar charts are for categorical data. Consider converting to groups first."),
+                                                    var = var, n = unique_vals)
                                 }
                             }
                         }
@@ -129,10 +130,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     private$.checkpoint(flush = FALSE)
                     counts_var <- self$options$counts
                     if (!is.numeric(self$data[[counts_var]])) {
-                        stop(paste("Counts variable '", counts_var, "' must be numeric."))
+                        jmvcore::reject(.("Counts variable '{var}' must be numeric."),
+                                        var = counts_var)
                     }
                     if (any(self$data[[counts_var]] < 0, na.rm = TRUE)) {
-                        stop(paste("Counts variable '", counts_var, "' contains negative values."))
+                        jmvcore::reject(.("Counts variable '{var}' contains negative values."),
+                                        var = counts_var)
                     }
                 }
                 
@@ -158,7 +161,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     }
 
                     if (length(group_sizes) < 2) {
-                        stop("Grouping variable must have at least 2 categories for comparison.")
+                        jmvcore::reject(.("Grouping variable must have at least 2 categories for comparison."))
                     }
 
                     # INSPECT JOINT DISTRIBUTION: Check expected counts in contingency table
@@ -201,7 +204,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         }
 
                         if (dep_levels_count < 2) {
-                            stop(paste("Variable '", dep_var, "' has insufficient variation (only", dep_levels_count, "level). Need at least 2 categories."))
+                            jmvcore::reject(.("Variable '{var}' has insufficient variation (only {n} level). Need at least 2 categories."),
+                                            var = dep_var, n = dep_levels_count)
                         }
                     }
                 }
@@ -352,28 +356,28 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 group_counts <- private$.getWeightedGroupCounts(analysis_data, self$options$group)
                 n_groups <- length(group_counts)
 
-                dep_vars <- paste(self$options$dep, collapse = ", ")
-                
+                dep_vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
+
                 test_method <- switch(self$options$typestatistics,
                     "parametric" = if (self$options$paired) "McNemar's test" else "Chi-square test of independence",
-                    "nonparametric" = "Non-parametric association test", 
+                    "nonparametric" = "Non-parametric association test",
                     "robust" = "Robust statistical test",
                     "bayes" = "Bayesian contingency table analysis",
                     "Chi-square test"
                 )
-                
+
                 summary_content <- paste0(
                     "<div style='padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745; margin: 10px 0;'>",
                     "<h4 style='color: #28a745; margin-top: 0;'> Analysis Summary</h4>",
-                    "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", self$options$group, "</p>",
+                    "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", htmltools::htmlEscape(self$options$group), "</p>",
                     "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
                     "<p><strong>Statistical Method:</strong> ", test_method, "</p>",
                     if (self$options$pairwisecomparisons && n_groups > 2) paste0(
-                        "<p><strong>Post-hoc Analysis:</strong> Pairwise comparisons with ", 
+                        "<p><strong>Post-hoc Analysis:</strong> Pairwise comparisons with ",
                         self$options$padjustmethod, " correction</p>"
                     ) else "",
                     if (!is.null(self$options$grvar)) paste0(
-                        "<p><strong>Subgroup Analysis:</strong> Results stratified by ", self$options$grvar, "</p>"
+                        "<p><strong>Subgroup Analysis:</strong> Results stratified by ", htmltools::htmlEscape(self$options$grvar), "</p>"
                     ) else "",
                     "<p><strong>Confidence Level:</strong> ", (self$options$conflevel * 100), "%</p>",
                     "</div>"
@@ -552,17 +556,17 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 group_counts <- private$.getWeightedGroupCounts(analysis_data, self$options$group)
                 n_groups <- length(group_counts)
 
-                dep_vars <- paste(self$options$dep, collapse = " and ")
-                
+                dep_vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = " and "))
+
                 # Generate template report
                 report_template <- paste0(
                     "<div style='padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; margin: 10px 0;'>",
                     "<h4 style='color: #495057; margin-top: 0;'> Copy-Ready Report Template</h4>",
-                    
+
                     "<div style='background-color: #ffffff; padding: 15px; border: 1px dashed #6c757d; margin: 10px 0;'>",
                     "<h5>Methods:</h5>",
-                    "<p>Bar chart analysis was performed to examine the association between ", dep_vars, 
-                    " and ", self$options$group, " using ", 
+                    "<p>Bar chart analysis was performed to examine the association between ", dep_vars,
+                    " and ", htmltools::htmlEscape(self$options$group), " using ",
                     switch(self$options$typestatistics,
                         "parametric" = if (self$options$paired) "McNemar's test" else "chi-square test of independence",
                         "nonparametric" = "non-parametric association testing",
@@ -613,7 +617,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .getWeightedTable = function(data, var1, var2) {
                 if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
                     # Weighted contingency table using xtabs
-                    formula_str <- paste0(self$options$counts, " ~ ", var1, " + ", var2)
+                    formula_str <- paste0(jmvcore::composeTerm(self$options$counts),
+                                          " ~ ", jmvcore::composeTerm(var1),
+                                          " + ", jmvcore::composeTerm(var2))
                     weighted_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
                     return(weighted_table)
                 } else {
@@ -720,7 +726,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 if (nrow(mydata) == 0) {
-                    stop('No complete data rows available after handling missing values. Please check your data or change the "Exclude Missing (NA)" setting.')
+                    jmvcore::reject(.('No complete data rows available after handling missing values. Please check your data or change the "Exclude Missing (NA)" setting.'))
                 }
 
                 return(mydata)
@@ -1040,7 +1046,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     tryCatch({
                         # Basic data check
                         if (nrow(self$data) == 0) {
-                            stop('Dataset is empty. Please ensure your data contains observations.')
+                            jmvcore::reject(.('Dataset is empty. Please ensure your data contains observations.'))
                         }
                         
                         # Checkpoint before data validation and preparation
@@ -1077,17 +1083,17 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             analysis_info <- paste0(analysis_info, "<br>• Using paired/repeated measures design (McNemar's test)")
                         }
                         if (!is.null(self$options$counts)) {
-                            analysis_info <- paste0(analysis_info, "<br>• Using counts variable: ", self$options$counts)
+                            analysis_info <- paste0(analysis_info, "<br>• Using counts variable: ", htmltools::htmlEscape(self$options$counts))
                         }
                         if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
-                            analysis_info <- paste0(analysis_info, "<br>• Expected proportions: ", self$options$ratio)
+                            analysis_info <- paste0(analysis_info, "<br>• Expected proportions: ", htmltools::htmlEscape(self$options$ratio))
                         }
                         if (self$options$label != "percentage") {
                             analysis_info <- paste0(analysis_info, "<br>• Label display: ", self$options$label)
                         }
-                        
+
                         todo <- glue::glue(
-                            "<br>Bar chart analysis comparing {paste(self$options$dep, collapse=', ')} by {self$options$group}{if(!is.null(self$options$grvar)) paste0(', grouped by ', self$options$grvar) else ''}.<br>
+                            "<br>Bar chart analysis comparing {htmltools::htmlEscape(paste(self$options$dep, collapse=', '))} by {htmltools::htmlEscape(self$options$group)}{if(!is.null(self$options$grvar)) paste0(', grouped by ', htmltools::htmlEscape(self$options$grvar)) else ''}.<br>
                             <br>Data prepared: {nrow(prepared_data)} observations{if(!self$options$excl) ' (missing values will be handled by statistical functions)' else ' (complete cases only)'}{cache_status}.<br>
                             {analysis_info}
                             {perf_warning}
@@ -1155,7 +1161,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         
                         error_msg <- glue::glue(
                             "<br> <b>Error in Bar Chart Analysis:</b><br>
-                            <br>{e$message}<br>
+                            <br>{htmltools::htmlEscape(e$message)}<br>
                             {error_context}
                             <br><b>General Troubleshooting:</b><br>
                             • Ensure dependent and grouping variables are categorical<br>
@@ -1288,7 +1294,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Create contingency table
                 if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
-                    formula_str <- paste0(self$options$counts, " ~ ", dep, " + ", group)
+                    formula_str <- paste0(jmvcore::composeTerm(self$options$counts),
+                                          " ~ ", jmvcore::composeTerm(dep),
+                                          " + ", jmvcore::composeTerm(group))
                     cont_table <- xtabs(jmvcore::asFormula(formula_str), data = mydata)
                 } else {
                     cont_table <- table(mydata[[dep]], mydata[[group]])
@@ -1333,13 +1341,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (is.null(dep) || is.null(group))
                     return('')
 
-                # Escape variable names that contain spaces or special characters
-                dep_escaped <- jmvcore::composeTerm(dep)
-                group_escaped <- jmvcore::composeTerm(group)
-
-                # Build arguments
-                dep_arg <- paste0('dep = "', dep_escaped, '"')
-                group_arg <- paste0('group = "', group_escaped, '"')
+                # Build arguments — deparse produces a valid R string literal
+                # with proper escaping for embedded quotes/backslashes
+                dep_arg <- paste0('dep = ', deparse(dep))
+                group_arg <- paste0('group = ', deparse(group))
 
                 # Get other arguments using base helper (if available)
                 args <- ''

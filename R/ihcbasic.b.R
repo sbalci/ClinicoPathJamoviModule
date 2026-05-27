@@ -43,6 +43,14 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
         },
 
         .run = function() {
+            # Save and restore RNG state to avoid leaking seed into caller's session
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                old_seed <- .GlobalEnv$.Random.seed
+                on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+            }
+
             # Step 1: Validate data
             if (is.null(self$data) || length(self$options$markers) == 0) {
                 return()
@@ -51,7 +59,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             validation <- private$.validateData()
             if (!validation$valid) {
                 self$results$instructions$setContent(
-                    paste0("<p style='color: red;'><b>Error:</b> ", validation$message, "</p>")
+                    paste0("<p style='color: red;'><b>Error:</b> ", htmltools::htmlEscape(validation$message), "</p>")
                 )
                 return()
             }
@@ -433,7 +441,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
                 </div>",
                 n_samples, n_clusters, n_markers,
                 dominant_pattern$cluster_id, dominant_pattern$count, dominant_pattern$percentage,
-                dominant_pattern$description,
+                htmltools::htmlEscape(dominant_pattern$description),
                 private$.getClinicalRelevance(cluster_profiles),
                 private$.getQualityAssessment()
             )
@@ -546,9 +554,9 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
 
                 <p><small><em> Tip: Copy the text above for your pathology report or manuscript.</em></small></p>
                 </div>",
-                n_samples, n_markers, paste(self$options$markers, collapse = ", "),
+                n_samples, n_markers, htmltools::htmlEscape(paste(self$options$markers, collapse = ", ")),
                 tools::toTitleCase(method), n_clusters,
-                dominant$cluster_id, dominant$count, n_samples, dominant$percentage, dominant$description,
+                dominant$cluster_id, dominant$count, n_samples, dominant$percentage, htmltools::htmlEscape(dominant$description),
                 private$.getClinicalRelevance(cluster_profiles),
                 method, self$options$distanceMetric,
                 if(self$options$silhouetteAnalysis) private$.getQualityAssessment() else "Cluster quality assessment was not performed."

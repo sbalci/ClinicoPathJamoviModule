@@ -416,7 +416,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outcome_safe <- private$.escapeVar(outcome_var)
                 predictors_safe <- sapply(predictor_vars, private$.escapeVar)
                 formula_str <- paste(outcome_safe, "~", paste(predictors_safe, collapse = " + "))
-                formula <- as.formula(formula_str)
+                formula <- jmvcore::asFormula(formula_str)
             }
 
             # Fit model based on type
@@ -515,8 +515,11 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Create Surv object and formula with escaped predictors
                     predictors_safe <- sapply(predictor_vars, private$.escapeVar)
-                    surv_formula <- as.formula(paste0("survival::Surv(", private$.escapeVar(time_var), ", ", private$.escapeVar(event_var), ") ~ ",
-                                                     paste(predictors_safe, collapse = " + ")))
+                    surv_formula <- jmvcore::asFormula(
+                        paste0("Surv(", private$.escapeVar(time_var), ", ", private$.escapeVar(event_var), ") ~ ",
+                               paste(predictors_safe, collapse = " + ")),
+                        additional_allowed_functions = c("Surv")
+                    )
                     model <- survival::coxph(surv_formula, data = mydata)
 
                 } else if (model_type == "mixed") {
@@ -543,9 +546,12 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Construct formula with random intercept: outcome ~ predictors + (1|group)
                     predictors_safe <- sapply(predictor_vars, private$.escapeVar)
-                    mixed_formula <- as.formula(paste0(private$.escapeVar(outcome_var), " ~ ",
-                                                      paste(predictors_safe, collapse = " + "),
-                                                      " + (1|", private$.escapeVar(random_var), ")"))
+                    mixed_formula <- jmvcore::asFormula(
+                        paste0(private$.escapeVar(outcome_var), " ~ ",
+                               paste(predictors_safe, collapse = " + "),
+                               " + (1|", private$.escapeVar(random_var), ")"),
+                        additional_allowed_functions = c("|", "||")
+                    )
 
                     # Determine whether to use lmer (continuous) or glmer (binary)
                     outcome_unique <- sort(unique(mydata[[outcome_var]][!is.na(mydata[[outcome_var]])]))
@@ -910,7 +916,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if ("p.value" %in% names(private$.tidyCoefs) && nrow(private$.tidyCoefs) > 0) {
                 sig_idx <- which.min(private$.tidyCoefs$p.value)
                 if (length(sig_idx) > 0) {
-                    example_term <- private$.tidyCoefs$term[sig_idx]
+                    example_term <- private$.safeHtmlOutput(private$.tidyCoefs$term[sig_idx])
                     example_est <- private$.tidyCoefs$estimate[sig_idx]
                     example_ci_low <- private$.tidyCoefs$conf.low[sig_idx]
                     example_ci_high <- private$.tidyCoefs$conf.high[sig_idx]
@@ -1069,28 +1075,14 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(outcome))
                 return('')
 
-            # Escape outcome variable
-            outcome_escaped <- if (!is.null(outcome) && !identical(make.names(outcome), outcome)) {
-                paste0('`', outcome, '`')
-            } else {
-                outcome
-            }
+            # Build outcome argument — deparse emits valid R string literal with
+            # proper escaping for embedded quotes/backslashes/special chars
+            outcome_arg <- paste0('outcome = ', deparse(outcome))
 
-            # Build outcome argument
-            outcome_arg <- paste0('outcome = "', outcome_escaped, '"')
-
-            # Escape predictors if present
+            # Predictors — deparse on a character vector emits c("a", "b") literal
             predictors_arg <- ''
             if (!is.null(predictors) && length(predictors) > 0) {
-                predictors_escaped <- sapply(predictors, function(v) {
-                    if (!is.null(v) && !identical(make.names(v), v))
-                        paste0('`', v, '`')
-                    else
-                        v
-                })
-                predictors_arg <- paste0(',\n    predictors = c(',
-                                       paste(sapply(predictors_escaped, function(v) paste0('"', v, '"')), collapse = ', '),
-                                       ')')
+                predictors_arg <- paste0(',\n    predictors = ', deparse(predictors))
             }
 
             # Get other arguments

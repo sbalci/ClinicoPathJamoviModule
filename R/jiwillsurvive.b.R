@@ -151,7 +151,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                         
                     }, error = function(e) {
                         self$results$instructions$setContent(
-                            paste("Error calculating follow-up time:", e$message)
+                            paste("Error calculating follow-up time:", htmltools::htmlEscape(e$message))
                         )
                         return(NULL)
                     })
@@ -188,9 +188,9 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # Fit survival model
             if (!is.null(group_col) && group_col %in% names(data)) {
-                formula <- as.formula(paste("surv_obj ~", group_col))
+                formula <- jmvcore::asFormula(paste("surv_obj ~", jmvcore::composeTerm(group_col)))
                 fit <- survival::survfit(formula, data = data, conf.int = self$options$confidence_level)
-                
+
                 # Log-rank test
                 if (self$options$show_statistics) {
                     logrank_test <- survival::survdiff(formula, data = data)
@@ -199,7 +199,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             } else {
                 fit <- survival::survfit(surv_obj ~ 1, data = data, conf.int = self$options$confidence_level)
             }
-            
+
             # Create survival plot
             private$.createSurvivalPlot(fit, data)
             
@@ -238,12 +238,12 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # Fit survival model
             if (!is.null(group_col) && group_col %in% names(data)) {
-                formula <- as.formula(paste("surv_obj ~", group_col))
+                formula <- jmvcore::asFormula(paste("surv_obj ~", jmvcore::composeTerm(group_col)))
                 fit <- survival::survfit(formula, data = data, conf.int = self$options$confidence_level)
             } else {
                 fit <- survival::survfit(surv_obj ~ 1, data = data, conf.int = self$options$confidence_level)
             }
-            
+
             # Create KM plot with classic styling
             private$.createKMPlot(fit, data)
             
@@ -281,8 +281,8 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     "<h3> Data Preparation Summary</h3>",
                     "<h4>Follow-up Time Calculation:</h4>",
                     "<ul>",
-                    "<li><strong>Start Date Variable:</strong>", self$options$start_date_var, "</li>",
-                    "<li><strong>End Date Variable:</strong>", self$options$end_date_var, "</li>",
+                    "<li><strong>Start Date Variable:</strong>", htmltools::htmlEscape(self$options$start_date_var), "</li>",
+                    "<li><strong>End Date Variable:</strong>", htmltools::htmlEscape(self$options$end_date_var), "</li>",
                     "<li><strong>Time Units:</strong>", self$options$followup_units, "</li>",
                     "<li><strong>Derived Variable:</strong> derived_followup_time</li>",
                     "</ul>",
@@ -365,7 +365,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 print(p)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Error creating survival plot:", e$message))
+                self$results$instructions$setContent(paste("Error creating survival plot:", htmltools::htmlEscape(e$message)))
             })
         },
         
@@ -389,7 +389,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 print(p)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Error creating KM plot:", e$message))
+                self$results$instructions$setContent(paste("Error creating KM plot:", htmltools::htmlEscape(e$message)))
             })
         },
         
@@ -398,8 +398,8 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             tryCatch({
                 
                 if (self$options$followup_plot_type == "histogram") {
-                    
-                    p <- ggplot2::ggplot(data, ggplot2::aes_string(x = time_col)) +
+
+                    p <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[time_col]])) +
                         ggplot2::geom_histogram(bins = 30, fill = "steelblue", alpha = 0.7) +
                         ggplot2::labs(
                             title = "Distribution of Follow-up Times",
@@ -407,12 +407,12 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                             y = "Count"
                         ) +
                         ggplot2::theme_minimal()
-                    
+
                 } else if (self$options$followup_plot_type == "timeline") {
-                    
+
                     # Create timeline plot
                     data$patient_id <- seq_len(nrow(data))
-                    p <- ggplot2::ggplot(data, ggplot2::aes_string(x = time_col, y = "patient_id")) +
+                    p <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[time_col]], y = .data[["patient_id"]])) +
                         ggplot2::geom_point(alpha = 0.6) +
                         ggplot2::labs(
                             title = "Patient Follow-up Timeline",
@@ -450,7 +450,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 print(p)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Error creating follow-up plot:", e$message))
+                self$results$instructions$setContent(paste("Error creating follow-up plot:", htmltools::htmlEscape(e$message)))
             })
         },
         
@@ -514,8 +514,8 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     lcl <- median_surv[i, "0.95LCL"]
                     ucl <- median_surv[i, "0.95UCL"]
                     
-                    stats_text <- paste(stats_text, 
-                        "<li><strong>", group_name, ":</strong> ", median_time, 
+                    stats_text <- paste(stats_text,
+                        "<li><strong>", htmltools::htmlEscape(group_name), ":</strong> ", median_time,
                         " (95% CI: ", lcl, " - ", ucl, ")</li>", sep = "")
                 }
                 stats_text <- paste(stats_text, "</ul>", sep = "\n")

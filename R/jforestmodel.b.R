@@ -166,8 +166,8 @@ jforestmodelClass <- R6::R6Class(
             predictor_vars <- self$options$predictor_vars
             
             # Create formula
-            formula_string <- paste(dependent_var, "~", paste(predictor_vars, collapse = " + "))
-            model_formula <- as.formula(formula_string)
+            formula_string <- paste(jmvcore::composeTerm(dependent_var), "~", paste(jmvcore::composeTerms(as.list(predictor_vars)), collapse = " + "))
+            model_formula <- jmvcore::asFormula(formula_string)
             
             tryCatch({
                 if (model_type == "lm") {
@@ -188,9 +188,9 @@ jforestmodelClass <- R6::R6Class(
                     # Cox model requires survival formula
                     time_var <- self$options$time_var
                     event_var <- self$options$event_var
-                    cox_formula_string <- paste0("Surv(", time_var, ", ", event_var, ") ~ ", 
-                                                paste(predictor_vars, collapse = " + "))
-                    cox_formula <- as.formula(cox_formula_string)
+                    cox_formula_string <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(event_var), ") ~ ",
+                                                paste(jmvcore::composeTerms(as.list(predictor_vars)), collapse = " + "))
+                    cox_formula <- jmvcore::asFormula(cox_formula_string)
                     
                     if (requireNamespace("survival", quietly = TRUE)) {
                         private$.model <- survival::coxph(cox_formula, data = data)
@@ -211,7 +211,7 @@ jforestmodelClass <- R6::R6Class(
                 self$results$instructions$setContent(
                     paste0("<div style='padding: 20px; color: #d32f2f;'>
                     <strong> Model Fitting Error</strong><br>
-                    ", e$message, "
+                    ", htmltools::htmlEscape(e$message), "
                     </div>")
                 )
                 private$.model <- NULL

@@ -1,9 +1,9 @@
 ---
 name: hullplot
 title: Hull Plot
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: Continuous vs Continuous
-version: '0.0.37'
+version: '0.0.38'
 jas: '1.2'
 
 description:

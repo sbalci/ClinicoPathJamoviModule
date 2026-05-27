@@ -31,7 +31,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             # Check if ggstatsplot is available
             if (!requireNamespace("ggstatsplot", quietly = TRUE)) {
-                stop("The ggstatsplot package is required but not installed.")
+                jmvcore::reject("The ggstatsplot package is required but not installed.")
             }
             
             # Prepare data
@@ -205,7 +205,7 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     )
                 }
             }, error = function(e) {
-                stop(paste("Error creating ggstatsplot analysis:", e$message))
+                jmvcore::reject("Error creating ggstatsplot analysis: {msg}", msg = e$message)
             })
             
             return(result)
@@ -343,10 +343,10 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             # Add column headers
             for (col_name in names(data)) {
-                html <- paste0(html, "<th>", col_name, "</th>")
+                html <- paste0(html, "<th>", htmltools::htmlEscape(col_name), "</th>")
             }
             html <- paste0(html, "</tr></thead><tbody>")
-            
+
             # Add data rows
             for (i in seq_len(nrow(data))) {
                 html <- paste0(html, "<tr>")
@@ -354,6 +354,8 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     value <- data[i, j]
                     if (is.numeric(value)) {
                         value <- round(value, 4)
+                    } else {
+                        value <- htmltools::htmlEscape(as.character(value))
                     }
                     html <- paste0(html, "<td>", value, "</td>")
                 }
@@ -390,11 +392,11 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             interpretation <- paste0(
                 "<h3>Statistical Data Extraction Interpretation</h3>",
                 "<p><strong>Analysis Overview:</strong> Successfully extracted statistical details from ggstatsplot analysis ",
-                "of <em>", dep_var, "</em>"
+                "of <em>", htmltools::htmlEscape(dep_var), "</em>"
             )
-            
+
             if (!is.null(group_var)) {
-                interpretation <- paste0(interpretation, " grouped by <em>", group_var, "</em>")
+                interpretation <- paste0(interpretation, " grouped by <em>", htmltools::htmlEscape(group_var), "</em>")
             }
             
             interpretation <- paste0(interpretation, " with ", n_obs, " observations.</p>")
@@ -438,18 +440,18 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (!is.null(dep_var)) {
                 dep_data <- self$data[[dep_var]]
                 if (!is.numeric(dep_data)) {
-                    stop("Dependent variable must be numeric for statistical analysis")
+                    jmvcore::reject("Dependent variable must be numeric for statistical analysis")
                 }
-                
+
                 if (all(is.na(dep_data))) {
-                    stop("Dependent variable contains only missing values")
+                    jmvcore::reject("Dependent variable contains only missing values")
                 }
             }
-            
+
             if (!is.null(group_var)) {
                 group_data <- self$data[[group_var]]
                 if (length(unique(group_data[!is.na(group_data)])) < 2) {
-                    stop("Grouping variable must have at least 2 levels for between-groups analysis")
+                    jmvcore::reject("Grouping variable must have at least 2 levels for between-groups analysis")
                 }
             }
         }

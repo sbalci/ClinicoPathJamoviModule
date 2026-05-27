@@ -103,7 +103,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           self$results$todo$setContent(paste0(
             "<div class='alert alert-danger'>",
             "<h4>Validation Error</h4>",
-            "<p>", validation$message, "</p></div>"))
+            "<p>", htmltools::htmlEscape(validation$message), "</p></div>"))
           return()
         }
 
@@ -205,7 +205,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
               ifelse(is.na(model_results$concordance), 0, model_results$concordance))
 
             if (length(collected_warnings) > 0) {
-              warn_items <- paste0("<li>", collected_warnings, "</li>", collapse = "")
+              warn_items <- paste0("<li>", htmltools::htmlEscape(collected_warnings), "</li>", collapse = "")
               todo_html <- paste0(
                 "<div class='alert alert-warning'>",
                 "<h4>Analysis Notes</h4>",
@@ -222,7 +222,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             error_msg <- paste0(
               "<div class='alert alert-danger'>",
               "<h4>Analysis Error</h4>",
-              "<p><strong>Error:</strong> ", e$message, "</p>",
+              "<p><strong>Error:</strong> ", htmltools::htmlEscape(e$message), "</p>",
               "<p>Please check your data and variable selections.</p></div>")
             private$.clearAnalysisOutputs()
             self$results$todo$setContent(error_msg)

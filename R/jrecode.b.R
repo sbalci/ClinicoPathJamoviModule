@@ -11,6 +11,13 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (inherits(result, "try-error")) {
                 err <- attr(result, "condition")
                 msg <- if (!is.null(err)) conditionMessage(err) else as.character(result)
+                # TODO (forward-looking): `opt$value <- NULL` mutates jamovi option at
+                # runtime — same fragile API noted in jjbarstats/jjcoefstats/jjhistostats/
+                # jjpubr/jjridges/jjscatterstats `.applyClinicalPreset` patterns. Here
+                # the mutation is defensive cleanup (clearing stale dep when dataset
+                # changes), which is a more legitimate use than preset-override mutations.
+                # Flag only if newer jamovi versions break this pattern; for now the
+                # defensive intent is documented.
                 if (!is.null(msg) && grepl("not present in the dataset", msg, fixed = TRUE)) {
                     opt <- self$options$option("dep")
                     if (!is.null(opt))
@@ -31,6 +38,10 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .escapeQuotes = function(x) {
+            # Escape backslashes first (must come before single-quote escape),
+            # then single quotes — produces valid R single-quoted string literals
+            # for user values that may contain `\` (e.g., Windows paths like C:\Users)
+            x <- gsub("\\", "\\\\", x, fixed = TRUE)
             gsub("'", "\\\\'", x, fixed = TRUE)
         },
 
@@ -276,9 +287,10 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             if (length(unknown_levels) > 0) {
+                # htmlEscape user-typed text from recode_rules OptionString before HTML interpolation
                 result$notices <- c(result$notices,
                     paste0("<span style='color: orange;'> Unknown levels: ",
-                           paste(unknown_levels, collapse = ", "), "</span>"))
+                           htmltools::htmlEscape(paste(unknown_levels, collapse = ", ")), "</span>"))
             }
 
             if (length(rules_map) == 0) {
@@ -430,8 +442,10 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Validate variable name
             if (!grepl("^[a-zA-Z][a-zA-Z0-9_]*$", new_var_name)) {
+                # htmlEscape new_var_name — regex rejection happens AFTER interpolation,
+                # so the invalid name (which may contain HTML metachars) reaches HTML raw
                 notice <- paste0(
-                    "<span style='color: red;'> Invalid variable name: '", new_var_name,
+                    "<span style='color: red;'> Invalid variable name: '", htmltools::htmlEscape(new_var_name),
                     "'. Must start with a letter and contain only letters, numbers, and underscores.</span>"
                 )
                 current_notices <- self$results$notices$content
@@ -451,9 +465,12 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # For now, we'll create the code that users can apply
 
             # Show a notice about how to create the variable
+            # htmlEscape new_var_name for defense-in-depth (regex above currently
+            # rejects HTML metachars but a one-line edit relaxing the pattern would
+            # open this site to XSS)
             notice <- paste0(
                 "<div style='padding: 10px; background-color: #e7f3ff; border-left: 4px solid #2196F3;'>",
-                "<b>To create the new variable '", new_var_name, "':</b><br>",
+                "<b>To create the new variable '", htmltools::htmlEscape(new_var_name), "':</b><br>",
                 "1. Copy the generated R code below<br>",
                 "2. Use Data → Compute to create a new variable<br>",
                 "3. Or run the code in an R console with your data<br>",

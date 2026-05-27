@@ -12,6 +12,11 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
     inherit = mageeequationBase,
     private = list(
 
+        # TODO (stub): Add .asSource() / .sourcifyOption() for jamovi syntax-mode
+        # reproducibility. Currently the function emits no R code when users
+        # toggle "Syntax mode" in jamovi. See vignettes/jamovi_module_patterns_guide.md
+        # (Syntax Generation) and the jmvbaseR examples for the pattern.
+
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
@@ -93,7 +98,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             prepared <- tryCatch(private$.prepareData(), error = function(e) {
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'><h4>", .("Data Error"),
-                    "</h4><p>", e$message, "</p></div>"))
+                    "</h4><p>", htmltools::htmlEscape(e$message), "</p></div>"))
                 return(NULL)
             })
             if (is.null(prepared)) return()
@@ -118,7 +123,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             }
 
             private$.addNotice("INFO", .("Analysis Complete"),
-                sprintf(.("Magee Equations computed for %d patients. Risk cutoffs: Low <= %d, High >= %d (TAILORx)."),
+                jmvcore::format(.("Magee Equations computed for {} patients. Risk cutoffs: Low <= {}, High >= {} (TAILORx)."),
                     prepared$n, self$options$lowCutoff, self$options$highCutoff))
             private$.renderNotices()
         },
@@ -185,7 +190,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             # Complete cases for required variables
             complete <- complete.cases(nuc_grade, mitosis, er_val, pr_val, her2_pos)
             n <- sum(complete)
-            if (n < 1) stop(.("No complete cases for the required variables."))
+            if (n < 1) jmvcore::reject(.("No complete cases for the required variables."))
 
             # Validation
             if (any(nuc_grade[complete] < 1 | nuc_grade[complete] > 3, na.rm = TRUE))
@@ -330,7 +335,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             }
 
             table$setNote("cutoffs",
-                sprintf(.("Risk cutoffs: Low <= %d, Intermediate %d-%d, High >= %d"),
+                jmvcore::format(.("Risk cutoffs: Low <= {}, Intermediate {}-{}, High >= {}"),
                     self$options$lowCutoff, self$options$lowCutoff + 1,
                     self$options$highCutoff - 1, self$options$highCutoff))
         },
@@ -355,7 +360,7 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             if (length(idx) > 200) {
                 table$setNote("truncated",
-                    sprintf(.("Showing first 200 of %d patients."), length(idx)))
+                    jmvcore::format(.("Showing first 200 of {} patients."), length(idx)))
             }
         },
 
@@ -418,6 +423,10 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 ggplot2::geom_histogram(bins = 30, alpha = 0.6, position = "identity") +
                 ggplot2::geom_vline(xintercept = low, linetype = "dashed", color = "#27AE60", linewidth = 0.8) +
                 ggplot2::geom_vline(xintercept = high, linetype = "dashed", color = "#E74C3C", linewidth = 0.8) +
+                # TODO (UX/i18n): Wrap these plot annotation labels in .()
+                # for translation (covers both this line and the High >= label
+                # below). Currently English-only while all other user-facing
+                # strings in this function are gettext-extractable.
                 ggplot2::annotate("text", x = low, y = Inf, vjust = 2,
                     label = sprintf("Low <= %d", low), color = "#27AE60", size = 3) +
                 ggplot2::annotate("text", x = high, y = Inf, vjust = 2,

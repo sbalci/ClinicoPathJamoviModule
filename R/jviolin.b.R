@@ -30,6 +30,14 @@ jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
         },
         
         # Performance optimization methods
+        # TODO (correctness): fragile cache helpers — .calculateDataHash (L33) uses
+        # paste-based hash that misses row-shuffling / value mutations preserving
+        # min/max; .calculateOptionsHash (L76) uses paste-collapse that collides
+        # for different option values with same string representation. Migrate to
+        # `digest::digest(list(<relevant_columns>, <options>), algo = "md5")`
+        # content-based pattern matching jjpiestats/.processedData and
+        # post-audit jjtreemap. Affects .canUseCache (L111), .prepareData (L124),
+        # .prepareOptions (L149).
         .calculateDataHash = function() {
             if (is.null(self$data) || nrow(self$data) == 0) {
                 return(NULL)
@@ -214,6 +222,15 @@ jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             private$.generateExplanations()
         },
 
+        # TODO (correctness): jamovi options are READ-ONLY at runtime. Assignments
+        # below (`self$options$add_boxplot <- TRUE`, `self$options$themex <- "bw"`,
+        # `self$options$themex <- "pubr"`) fail silently — the clinicalPreset enum
+        # currently does nothing in the rendered plot. To make presets actually
+        # apply, branch on `self$options$clinicalPreset` inside `.plot()` and
+        # override the LOCAL variables (e.g., `add_boxplot_eff`, `themex_eff`)
+        # used in plot construction, not the options object itself. Also remove
+        # the dead "pubr" theme assignment — "pubr" isn't in the themex enum
+        # (jamovi/jviolin.a.yaml L195-L222) so it would fall through to no theme.
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalPreset
             if (preset == "custom") {
@@ -309,6 +326,16 @@ jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
             violin_args$alpha <- self$options$violin_alpha
             
             # Add quantile lines if requested
+            # TODO (correctness): quantile_lines is a String option (jamovi/jviolin.a.yaml L81-L84
+            # default "0.25,0.5,0.75"), NOT a vector. `length(self$options$quantile_lines)` always
+            # returns 1 for any non-empty string (so the gate is always-true). `as.numeric("0.25,0.5,0.75")`
+            # returns NA with a warning — the feature is currently broken. Fix:
+            #   raw <- self$options$quantile_lines
+            #   if (self$options$draw_quantiles && nzchar(raw)) {
+            #       quantiles <- suppressWarnings(as.numeric(strsplit(raw, "[,;\\s]+", perl = TRUE)[[1]]))
+            #       quantiles <- quantiles[!is.na(quantiles) & quantiles > 0 & quantiles < 1]
+            #       if (length(quantiles) > 0) violin_args$draw_quantiles <- quantiles
+            #   }
             if (self$options$draw_quantiles && length(self$options$quantile_lines) > 0) {
                 quantiles <- as.numeric(self$options$quantile_lines)
                 quantiles <- quantiles[!is.na(quantiles) & quantiles > 0 & quantiles < 1]

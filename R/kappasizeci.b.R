@@ -158,7 +158,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(private$.params_hash) || private$.params_hash != current_hash) {
                 props_result <- private$.validateProportions()
                 if (!is.null(props_result$error)) {
-                    stop(props_result$error)
+                    jmvcore::reject(props_result$error)
                 }
 
                 is_one_sided <- (self$options$citype == "one_sided")
@@ -185,7 +185,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .calculateSampleSize = function(params) {
             if (!requireNamespace('kappaSize', quietly = TRUE)) {
-                stop('The kappaSize package is required but not installed. Please install it using install.packages("kappaSize")')
+                jmvcore::reject('The kappaSize package is required but not installed. Please install it using install.packages("kappaSize")')
             }
 
             kappa_function <- switch(
@@ -210,7 +210,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return(result)
 
             }, error = function(e) {
-                stop(paste("Error in sample size calculation:", e$message))
+                jmvcore::reject("Error in sample size calculation: {}", e$message)
             })
         },
 

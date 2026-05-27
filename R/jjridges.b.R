@@ -193,25 +193,25 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check variable selection
             if (is.null(self$options$x_var)) {
-                stop(.("Please select a continuous variable for X (Distribution)"))
+                jmvcore::reject(.("Please select a continuous variable for X (Distribution)"))
             }
             if (is.null(self$options$y_var)) {
-                stop(.("Please select a grouping variable for Y (Groups)"))
+                jmvcore::reject(.("Please select a grouping variable for Y (Groups)"))
             }
 
             # Check data availability
             if (is.null(self$data) || nrow(self$data) == 0) {
-                stop(.("No data available for analysis"))
+                jmvcore::reject(.("No data available for analysis"))
             }
 
             # Type checks
             x_col <- self$data[[self$options$x_var]]
             y_col <- self$data[[self$options$y_var]]
             if (!is.numeric(x_col)) {
-                stop(paste0(.("X variable must be numeric for ridge plotting. Selected"), ": ", self$options$x_var))
+                jmvcore::reject(.("X variable must be numeric for ridge plotting. Selected: {var}"), var = self$options$x_var)
             }
             if (!is.factor(y_col) && !is.character(y_col)) {
-                stop(paste0(.("Y variable should be categorical (factor/character). Selected"), ": ", self$options$y_var))
+                jmvcore::reject(.("Y variable should be categorical (factor/character). Selected: {var}"), var = self$options$y_var)
             }
             
             # Check minimum sample size
@@ -236,7 +236,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for minimum group count
             n_groups <- length(unique(plot_data$y))
             if (n_groups < 2) {
-                stop(.("At least 2 groups required for ridge plot comparison"))
+                jmvcore::reject(.("At least 2 groups required for ridge plot comparison"))
             }
             
             # Check group sizes with clinical context
@@ -320,14 +320,16 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateClinicalSummary = function(data, has_stats = FALSE) {
             n_groups <- length(unique(data$y))
             n_total <- nrow(data)
-            
+            x_var_safe <- htmltools::htmlEscape(self$options$x_var)
+            y_var_safe <- htmltools::htmlEscape(self$options$y_var)
+
             # Basic summary
             summary <- paste0(
                 "<div class='clinical-summary' style='background:#f8f9fa; border-left:4px solid #007bff; padding:15px; margin:10px 0;'>",
                 "<h4 style='color:#007bff; margin-top:0;'>", .("Clinical Summary"), "</h4>",
-                "<p><strong>", .("Analysis:"), "</strong> ", .("Ridge plot comparing the distribution of"), " <strong>", 
-                self$options$x_var, "</strong> ", .("across"), " <strong>", n_groups, " ", .("groups"), "</strong> ", .("defined by"), " <strong>", 
-                self$options$y_var, "</strong>.</p>",
+                "<p><strong>", .("Analysis:"), "</strong> ", .("Ridge plot comparing the distribution of"), " <strong>",
+                x_var_safe, "</strong> ", .("across"), " <strong>", n_groups, " ", .("groups"), "</strong> ", .("defined by"), " <strong>",
+                y_var_safe, "</strong>.</p>",
                 "<p><strong>", .("Sample:"), "</strong> n = ", n_total, " ", .("total observations across all groups"), ".</p>"
             )
             
@@ -347,8 +349,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .generateReportSummary = function(data, has_stats = FALSE) {
             # Generate copy-ready plain text summary for pathology reports
-            x_var <- self$options$x_var
-            y_var <- self$options$y_var
+            x_var <- htmltools::htmlEscape(self$options$x_var)
+            y_var <- htmltools::htmlEscape(self$options$y_var)
             n_groups <- length(unique(data$y))
             n_total <- nrow(data)
 
@@ -388,7 +390,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (i in 1:nrow(stats_by_group)) {
                 row <- stats_by_group[i, ]
                 text_summary <- paste0(text_summary,
-                    "<p>", row$y, " (n=", row$n, "): ",
+                    "<p>", htmltools::htmlEscape(as.character(row$y)), " (n=", row$n, "): ",
                     "Mean=", sprintf("%.2f", row$mean), " (SD=", sprintf("%.2f", row$sd), "), ",
                     "Median=", sprintf("%.2f", row$median), " (IQR: ",
                     sprintf("%.2f", row$q1), "-", sprintf("%.2f", row$q3), ")",
@@ -611,6 +613,17 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(html)
         },
 
+        # TODO (correctness): `.applyClinicalPreset` writes back to jamovi option objects
+        # via `opt$value <- value` at L628. jamovi options are read-only at runtime;
+        # this mutation pattern may silently no-op or raise a runtime error in newer
+        # jamovi versions. Same concern as jjbarstats/jjcoefstats/jjhistostats/jjpubr.
+        # The `private$overrides` + `private$.option(name)` indirection works without
+        # the mutation — drop the direct `opt$value <- value` line and rely on the
+        # override list (jjoncoplot's `.optionsWithPreset` L34-93 is the right pattern).
+        #
+        # TODO (UX): L719 emits `warning(msg)` AND L723-728 sets `warnings$setContent`.
+        # Duplicate notification; keep only the panel since R warnings are not visible
+        # to the typical jamovi UI user.
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalPreset
             private$overrides <- list()
@@ -734,6 +747,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check requirements
             if (is.null(self$options$x_var) || is.null(self$options$y_var))
                 return()
+
+            # Reset notice list so prior-run notices don't persist across re-runs
+            # (jamovi may reuse the same R6 instance when options change)
+            private$.noticeList <- list()
 
             # Apply clinical preset if selected (must be done before other processing)
             private$.applyClinicalPreset()
@@ -1809,6 +1826,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check 3: Look for variables with "patient", "subject", "id" in the data
             # (checked in parent data, not just plot_data)
+            # TODO (correctness): the grepl pattern below is a naive substring match —
+            # "id" matches inside "candidate", "android", "video"; "case" matches inside
+            # "lowercase", "phasecase". Use word-boundary anchors:
+            #   grepl("\\b(patient|subject|id|case)\\b", col_names)
+            # to reduce false positives in the heuristic.
             if (!is.null(self$data)) {
                 col_names <- tolower(names(self$data))
                 has_id_vars <- any(grepl("patient|subject|id|case", col_names))
@@ -1890,6 +1912,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 all_test_results <- list()
                 all_p_values <- numeric()
 
+                # TODO (security forward-looking): `stratum_label` below interpolates
+                # `stratum_val` which is a factor-level VALUE from user fill_var/facet_var
+                # columns. Today it flows into Notice content (plain-text, safe) and
+                # tests-table `comparison` cells (auto-escaped, safe). If this label
+                # ever flows to a Html$setContent sink, wrap with `htmltools::htmlEscape`
+                # at the assignment below.
                 for (s in seq_len(nrow(strata_combinations))) {
                     # Filter data for this stratum
                     stratum_data <- data
@@ -1965,16 +1993,18 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateInterpretation = function(data) {
             # Generate clinical summary first
             clinical_summary <- private$.generateClinicalSummary(data, private$.option("show_stats"))
-            
+
             # Traditional interpretation
             n_groups <- length(unique(data$y))
             n_total <- nrow(data)
-            
+            x_var_safe <- htmltools::htmlEscape(self$options$x_var)
+            y_var_safe <- htmltools::htmlEscape(self$options$y_var)
+
             interpretation <- paste0(
                 clinical_summary,
                 "<h4>", .("Technical Interpretation"), "</h4>",
-                "<p>", .("The ridge plot displays the distribution of"), " <strong>", self$options$x_var, "</strong> ",
-                .("across"), " <strong>", n_groups, " ", .("groups"), "</strong> ", .("defined by"), " <strong>", self$options$y_var, "</strong>.</p>",
+                "<p>", .("The ridge plot displays the distribution of"), " <strong>", x_var_safe, "</strong> ",
+                .("across"), " <strong>", n_groups, " ", .("groups"), "</strong> ", .("defined by"), " <strong>", y_var_safe, "</strong>.</p>",
                 "<ul>",
                 "<li><strong>", .("Each ridge:"), "</strong> ", .("Shows the probability density or frequency distribution for a group"), "</li>",
                 "<li><strong>", .("Overlapping areas:"), "</strong> ", .("Indicate similar value ranges between groups"), "</li>",
@@ -1988,8 +2018,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interpretation <- paste0(
                     interpretation,
                     "<div style='background:#e3f2fd; padding:10px; margin:10px 0; border-radius:4px;'>",
-                    "<strong> ", .("Gradient Coloring:"), "</strong> ", .("Colors represent the value of"), " ", 
-                    self$options$x_var, " ", .("along each ridge, helping visualize how values are distributed within groups."), "</div>"
+                    "<strong> ", .("Gradient Coloring:"), "</strong> ", .("Colors represent the value of"), " ",
+                    x_var_safe, " ", .("along each ridge, helping visualize how values are distributed within groups."), "</div>"
                 )
             }
             
@@ -2098,13 +2128,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(x_var) || is.null(y_var))
                 return('')
 
-            # Escape variable names
-            x_var_escaped <- jmvcore::composeTerm(x_var)
-            y_var_escaped <- jmvcore::composeTerm(y_var)
-
-            # Build arguments
-            x_var_arg <- paste0('x_var = "', x_var_escaped, '"')
-            y_var_arg <- paste0('y_var = "', y_var_escaped, '"')
+            # Build arguments (deparse() emits a valid R string literal with proper escape
+            # for ", \, etc. — composeTerm is for formula contexts, not string literals)
+            x_var_arg <- paste0('x_var = ', deparse(x_var))
+            y_var_arg <- paste0('y_var = ', deparse(y_var))
 
             # Get other arguments
             args <- ''

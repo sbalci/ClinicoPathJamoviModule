@@ -142,7 +142,8 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         time_var <- self$options$aval_var
                         event_var <- self$options$cnsr_var
                         # Convert CNSR to event (CNSR: 1=censored, 0=event -> EVENT: 1=event, 0=censored)
-                        mydata[[paste0(event_var, '_event')]] <- 1 - mydata[[event_var]]
+                        # toNumeric handles factor CNSR (permitted: [factor, numeric] in .a.yaml) — honors `values` attribute
+                        mydata[[paste0(event_var, '_event')]] <- 1 - jmvcore::toNumeric(mydata[[event_var]])
                         mydata$time_variable <- mydata[[time_var]]
                         mydata$event_variable <- mydata[[paste0(event_var, '_event')]]
                     }
@@ -275,11 +276,11 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create survival formula using prepared time and event variables
             if (!is.null(strata_var) && strata_var %in% names(data)) {
-                formula <- as.formula(paste('Surv(time_variable, event_variable) ~', strata_var))
+                formula <- jmvcore::asFormula(paste('Surv(time_variable, event_variable) ~', jmvcore::composeTerm(strata_var)))
             } else {
-                formula <- as.formula('Surv(time_variable, event_variable) ~ 1')
+                formula <- jmvcore::asFormula('Surv(time_variable, event_variable) ~ 1')
             }
-            
+
             # Estimate Kaplan-Meier curves using enhanced visR integration
             tryCatch({
                 # Use enhanced KM estimation with better visR integration
@@ -335,7 +336,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     summary_text <- paste(
                         "<h3>Cumulative Incidence Analysis</h3>",
                         "<p>Analysis includes", nrow(data), "observations.</p>",
-                        if (!is.null(strata_var)) paste("<p>Stratified by:", strata_var, "</p>") else ""
+                        if (!is.null(strata_var)) paste("<p>Stratified by:", htmltools::htmlEscape(strata_var), "</p>") else ""
                     )
                     private$.cached_summary <- summary_text
                     self$results$summary$setContent(summary_text)
@@ -368,9 +369,9 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Generate Table One using existing method
                 table_one <- self$.jtable_one(data)
-                
-                # Convert to HTML for display
-                html_table <- knitr::kable(table_one, format = 'html', escape = FALSE)
+
+                # Convert to HTML for display (escape=TRUE — table cells include user column names and factor levels)
+                html_table <- knitr::kable(table_one, format = 'html', escape = TRUE)
                 
                 # Cache and set results
                 private$.cached_summary <- html_table
@@ -444,11 +445,11 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Create survival object for risk table using prepared variables
                 if (!is.null(strata_var) && strata_var %in% names(data)) {
-                    formula <- as.formula(paste('Surv(time_variable, event_variable) ~', strata_var))
+                    formula <- jmvcore::asFormula(paste('Surv(time_variable, event_variable) ~', jmvcore::composeTerm(strata_var)))
                 } else {
-                    formula <- as.formula('Surv(time_variable, event_variable) ~ 1')
+                    formula <- jmvcore::asFormula('Surv(time_variable, event_variable) ~ 1')
                 }
-                
+
                 km_fit <- survival::survfit(formula, data = data)
                 
                 # Generate risk table
@@ -647,7 +648,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             if (!is.null(strata_var)) {
                 interpretation <- paste(interpretation,
-                    "<p><strong>Stratification:</strong> Analysis stratified by", strata_var, "</p>"
+                    "<p><strong>Stratification:</strong> Analysis stratified by", htmltools::htmlEscape(strata_var), "</p>"
                 )
             }
             
@@ -664,13 +665,14 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .jcumulative_incidence = function(data, time_var, event_var, strata_var = NULL) {
             
             # Create cumulative incidence plot
-            p <- ggplot2::ggplot(data, ggplot2::aes_string(x = time_var)) +
-                ggplot2::geom_step(ggplot2::aes_string(y = paste0('cumsum(', event_var, ') / n()'))) +
+            data$.j_cum_event <- cumsum(data[[event_var]]) / nrow(data)
+            p <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[time_var]])) +
+                ggplot2::geom_step(ggplot2::aes(y = .data$.j_cum_event)) +
                 ggplot2::labs(x = "Time", y = "Cumulative Incidence", title = "Cumulative Incidence Curve") +
                 ggplot2::theme_minimal()
-            
+
             if (!is.null(strata_var)) {
-                p <- p + ggplot2::aes_string(color = strata_var)
+                p <- p + ggplot2::aes(color = .data[[strata_var]])
             }
             
             return(p)

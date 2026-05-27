@@ -1269,8 +1269,9 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
             }, error = function(e) {
+                msg_html <- htmltools::htmlEscape(e$message)
                 self$results$instructions$setContent(
-                    paste0("<p><b>Error in diagnostic test accuracy analysis:</b> ", e$message, "</p>")
+                    paste0("<p><b>Error in diagnostic test accuracy analysis:</b> ", msg_html, "</p>")
                 )
             })
         },
@@ -1384,8 +1385,9 @@ metaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ))
 
             }, error = function(e) {
+                msg_html <- htmltools::htmlEscape(e$message)
                 self$results$instructions$setContent(
-                    paste0("<p><b>Error in network meta-analysis:</b> ", e$message, "</p>")
+                    paste0("<p><b>Error in network meta-analysis:</b> ", msg_html, "</p>")
                 )
             })
         },

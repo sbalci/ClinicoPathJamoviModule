@@ -33,6 +33,16 @@ children:
             isTarget: true
 
   # ==============================================
+  # 1b. MANUAL RUN GATE (defer heavy recompute)
+  # ==============================================
+  - type: CheckBox
+    name: manualRun
+    children:
+      - type: ActionButton
+        name: run
+        enable: (manualRun)
+
+  # ==============================================
   # 2. ANALYSIS CONFIGURATION (always visible)
   # ==============================================
   - type: LayoutBox
@@ -211,85 +221,96 @@ children:
     collapsed: true
     children:
       - type: LayoutBox
-        margin: large
+        stretchFactor: 1
         children:
-          - type: Label
-            label: ROC Curve Settings
-          - type: CheckBox
-            name: plotROC
-            label: Show ROC curves
-          - type: CheckBox
-            name: combinePlots
-            label: Combine all curves in one plot
-            enable: (plotROC)
-          - type: CheckBox
-            name: showOptimalPoint
-            label: Show optimal cutpoint
-            enable: (plotROC)
-          - type: CheckBox
-            name: directLabel
-            label: Label curves directly
-            enable: (plotROC && combinePlots)
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Plot Style
-          - type: CheckBox
-            name: cleanPlot
-            label: Publication-quality plot
-            enable: (plotROC)
-          - type: ComboBox
-            name: legendPosition
-            label: Legend position
-            enable: (plotROC && combinePlots && !directLabel)
-          - type: CheckBox
-            name: smoothing
-            label: Apply LOESS smoothing
-            enable: (plotROC)
-          - type: CheckBox
-            name: displaySE
-            label: Show standard error bands
-            enable: (plotROC && smoothing && !cleanPlot)
-          - type: CheckBox
-            name: interactiveROC
-            label: Create interactive plot
-            enable: (plotROC)
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Confidence Intervals on Plot
-          - type: CheckBox
-            name: showConfidenceBands
-            label: Show confidence bands
-            enable: (plotROC && !cleanPlot)
-          - type: CheckBox
-            name: quantileCIs
-            label: Show CIs at quantiles
-            enable: (plotROC && !cleanPlot)
-          - type: TextBox
-            name: quantiles
-            format: string
-            label: Quantile positions
-            enable: (quantileCIs)
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Diagnostic Plots
-          - type: CheckBox
-            name: showCriterionPlot
-            label: Sensitivity/Specificity vs. Threshold
-          - type: CheckBox
-            name: showPrevalencePlot
-            label: Predictive Values vs. Prevalence
-          - type: CheckBox
-            name: showDotPlot
-            label: Test Values Distribution
-          - type: CheckBox
-            name: precisionRecallCurve
-            label: Precision-Recall Curve
+          - type: LayoutBox
+            cell: { column: 0, row: 0 }
+            stretchFactor: 1
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: Label
+                    label: ROC Curve Settings
+                  - type: CheckBox
+                    name: plotROC
+                    label: Show ROC curves
+                  - type: CheckBox
+                    name: combinePlots
+                    label: Combine all curves in one plot
+                    enable: (plotROC)
+                  - type: CheckBox
+                    name: showOptimalPoint
+                    label: Show optimal cutpoint
+                    enable: (plotROC)
+                  - type: CheckBox
+                    name: directLabel
+                    label: Label curves directly
+                    enable: (plotROC && combinePlots)
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: Label
+                    label: Plot Style
+                  - type: CheckBox
+                    name: cleanPlot
+                    label: Publication-quality plot
+                    enable: (plotROC)
+                  - type: ComboBox
+                    name: legendPosition
+                    label: Legend position
+                    enable: (plotROC && combinePlots && !directLabel)
+                  - type: CheckBox
+                    name: smoothing
+                    label: Apply LOESS smoothing
+                    enable: (plotROC)
+                  - type: CheckBox
+                    name: displaySE
+                    label: Show standard error bands
+                    enable: (plotROC && smoothing && !cleanPlot)
+                  - type: CheckBox
+                    name: interactiveROC
+                    label: Create interactive plot
+                    enable: (plotROC)
+          - type: LayoutBox
+            cell: { column: 1, row: 0 }
+            stretchFactor: 1
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: Label
+                    label: Confidence Intervals on Plot
+                  - type: CheckBox
+                    name: showConfidenceBands
+                    label: Show confidence bands
+                    enable: (plotROC && !cleanPlot)
+                  - type: CheckBox
+                    name: quantileCIs
+                    label: Show CIs at quantiles
+                    enable: (plotROC && !cleanPlot)
+                  - type: TextBox
+                    name: quantiles
+                    format: string
+                    label: Quantile positions
+                    enable: (quantileCIs)
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: Label
+                    label: Diagnostic Plots
+                  - type: CheckBox
+                    name: showCriterionPlot
+                    label: Sensitivity/Specificity vs. Threshold
+                  - type: CheckBox
+                    name: showPrevalencePlot
+                    label: Predictive Values vs. Prevalence
+                  - type: CheckBox
+                    name: showDotPlot
+                    label: Test Values Distribution
+                  - type: CheckBox
+                    name: precisionRecallCurve
+                    label: Precision-Recall Curve
 
   # ==============================================
   # 8. ADVANCED ROC ANALYSIS

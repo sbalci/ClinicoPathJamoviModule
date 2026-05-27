@@ -111,7 +111,14 @@ labinterpretClass <- R6::R6Class(
 
         # Main analysis runner
         .run = function() {
-            
+
+            # TODO (UX): silent return() on missing required inputs gives the user no
+            # feedback about *why* the analysis didn't produce results. Replace with
+            # jmvcore::reject("Please select at least one Laboratory Values variable.")
+            # (or surface a notice via private$.addNotice in waterfall.b.R's style) so
+            # the structured-error UI explains the gap. Same pattern at .init():9 and
+            # .interpretationPlot():992, .trendPlot():1055, .referencePlot():1118,
+            # .deltaPlot():1181, .correlationPlot():1256 — touch the .run() site first.
             if (is.null(self$data) || is.null(self$options$labValues) || length(self$options$labValues) == 0)
                 return()
 
@@ -290,7 +297,12 @@ labinterpretClass <- R6::R6Class(
                         clinical_significance = clinicalSignificance
                     ))
                 }, error = function(e) {
-                    # Handle regression errors
+                    # TODO (correctness): empty handler swallows lm() failures silently —
+                    # the trendAnalysisTable simply skips that row with no user notice.
+                    # Same pattern at the correlation tryCatch ~line 430. Either populate
+                    # the table row with a "Trend analysis failed: <reason>" cell, or
+                    # accumulate via private$.addNotice("WARNING", ...) so the user knows
+                    # something didn't compute. Handle regression errors here.
                 })
             }
         },
@@ -551,6 +563,24 @@ labinterpretClass <- R6::R6Class(
 
         # Helper functions for calculations and interpretations
 
+        # TODO (correctness): the clinical-knowledge lookups below are all keyed on
+        # *exact* variable-name matches (e.g. "Hemoglobin", "Glucose", "Creatinine").
+        # Users whose datasets use different spellings ("HGB", "FBS", "K+", "Hgb")
+        # silently fall through to the default branch — generic "units" string, default
+        # reference range [0, 100], blanket interpretation. Sites:
+        #   .determineUnits()                 — units_map at line ~559
+        #   .calculateReferenceRange()        — base_ranges at line ~579
+        #   .generateInterpretation()         — interpretations at line ~626
+        #   .getCriticalLimits()              — critical_limits at line ~680
+        #   .getRequiredAction()              — actions list at line ~696
+        #   .assessClinicalSignificance()     — significance_thresholds at line ~728
+        #   .getMedicationEffects()           — effects_db at line ~762
+        #   .calculateAnalyticalSensitivity() — sensitivities at line ~836
+        #   .assessReferenceQuality()         — quality_ratings at line ~852
+        # Fix shape: expose a user-facing mapping option (e.g. type: Array of Group with
+        # var + canonical name) and resolve labVar → canonical key before lookup; or at
+        # minimum, surface a notice when a labVar doesn't match any known canonical name
+        # so the user knows the displayed reference range is the generic fallback.
         # Determine units for laboratory test
         .determineUnits = function(labVar) {
             units_map <- list(
@@ -910,7 +940,10 @@ labinterpretClass <- R6::R6Class(
                 status <- private$.determineStatus(meanValue, refRange)
                 
                 if (status != "Normal") {
-                    finding <- paste("•", labVar, "is", tolower(status), sprintf("(%.2f)", meanValue))
+                    # labVar is a column name from the user's dataset; escape before
+                    # it flows into the HTML returned to .generateInterpretationSummary.
+                    finding <- paste("•", htmltools::htmlEscape(labVar), "is",
+                                     tolower(status), sprintf("(%.2f)", meanValue))
                     findings <- c(findings, finding)
                 }
             }
@@ -959,17 +992,21 @@ labinterpretClass <- R6::R6Class(
                 refRange <- private$.calculateReferenceRange(labVar, data)
                 meanValue <- mean(labData, na.rm = TRUE)
                 status <- private$.determineStatus(meanValue, refRange)
-                
+
+                # labVar is a column name from the user's dataset; escape once before
+                # it flows through into the HTML built by .generateClinicalRecommendations().
+                labVar_safe <- htmltools::htmlEscape(labVar)
+
                 if (status == "Critically Low" || status == "Critically High") {
                     recommendations[[length(recommendations) + 1]] <- list(
-                        category = paste(labVar, "Critical Value"),
-                        text = paste("Immediate physician notification required for", labVar),
+                        category = paste(labVar_safe, "Critical Value"),
+                        text = paste("Immediate physician notification required for", labVar_safe),
                         urgency = "urgent"
                     )
                 } else if (status == "Low" || status == "High") {
                     recommendations[[length(recommendations) + 1]] <- list(
-                        category = paste(labVar, "Abnormal"),
-                        text = paste("Consider clinical correlation and possible repeat testing for", labVar),
+                        category = paste(labVar_safe, "Abnormal"),
+                        text = paste("Consider clinical correlation and possible repeat testing for", labVar_safe),
                         urgency = "monitoring"
                     )
                 }

@@ -72,6 +72,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             referenceRater = NULL,
             rankRaters = FALSE,
             showPairwiseKappaGuide = FALSE,
+            allPairsKappa = FALSE,
+            allPairsCI = TRUE,
+            showAllPairsKappaGuide = FALSE,
+            itemModalCategoryAgreement = FALSE,
+            showItemModalGuide = FALSE,
             hierarchicalKappa = FALSE,
             clusterVariable = NULL,
             iccHierarchical = FALSE,
@@ -465,6 +470,26 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showPairwiseKappaGuide <- jmvcore::OptionBool$new(
                 "showPairwiseKappaGuide",
                 showPairwiseKappaGuide,
+                default=FALSE)
+            private$..allPairsKappa <- jmvcore::OptionBool$new(
+                "allPairsKappa",
+                allPairsKappa,
+                default=FALSE)
+            private$..allPairsCI <- jmvcore::OptionBool$new(
+                "allPairsCI",
+                allPairsCI,
+                default=TRUE)
+            private$..showAllPairsKappaGuide <- jmvcore::OptionBool$new(
+                "showAllPairsKappaGuide",
+                showAllPairsKappaGuide,
+                default=FALSE)
+            private$..itemModalCategoryAgreement <- jmvcore::OptionBool$new(
+                "itemModalCategoryAgreement",
+                itemModalCategoryAgreement,
+                default=FALSE)
+            private$..showItemModalGuide <- jmvcore::OptionBool$new(
+                "showItemModalGuide",
+                showItemModalGuide,
                 default=FALSE)
             private$..hierarchicalKappa <- jmvcore::OptionBool$new(
                 "hierarchicalKappa",
@@ -956,6 +981,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..referenceRater)
             self$.addOption(private$..rankRaters)
             self$.addOption(private$..showPairwiseKappaGuide)
+            self$.addOption(private$..allPairsKappa)
+            self$.addOption(private$..allPairsCI)
+            self$.addOption(private$..showAllPairsKappaGuide)
+            self$.addOption(private$..itemModalCategoryAgreement)
+            self$.addOption(private$..showItemModalGuide)
             self$.addOption(private$..hierarchicalKappa)
             self$.addOption(private$..clusterVariable)
             self$.addOption(private$..iccHierarchical)
@@ -1103,6 +1133,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         referenceRater = function() private$..referenceRater$value,
         rankRaters = function() private$..rankRaters$value,
         showPairwiseKappaGuide = function() private$..showPairwiseKappaGuide$value,
+        allPairsKappa = function() private$..allPairsKappa$value,
+        allPairsCI = function() private$..allPairsCI$value,
+        showAllPairsKappaGuide = function() private$..showAllPairsKappaGuide$value,
+        itemModalCategoryAgreement = function() private$..itemModalCategoryAgreement$value,
+        showItemModalGuide = function() private$..showItemModalGuide$value,
         hierarchicalKappa = function() private$..hierarchicalKappa$value,
         clusterVariable = function() private$..clusterVariable$value,
         iccHierarchical = function() private$..iccHierarchical$value,
@@ -1249,6 +1284,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..referenceRater = NA,
         ..rankRaters = NA,
         ..showPairwiseKappaGuide = NA,
+        ..allPairsKappa = NA,
+        ..allPairsCI = NA,
+        ..showAllPairsKappaGuide = NA,
+        ..itemModalCategoryAgreement = NA,
+        ..showItemModalGuide = NA,
         ..hierarchicalKappa = NA,
         ..clusterVariable = NA,
         ..iccHierarchical = NA,
@@ -1370,6 +1410,12 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         stuartMaxwellExplanation = function() private$.items[["stuartMaxwellExplanation"]],
         pairwiseKappaTable = function() private$.items[["pairwiseKappaTable"]],
         pairwiseKappaExplanation = function() private$.items[["pairwiseKappaExplanation"]],
+        allPairsKappaHeading = function() private$.items[["allPairsKappaHeading"]],
+        allPairsKappaTable = function() private$.items[["allPairsKappaTable"]],
+        allPairsKappaExplanation = function() private$.items[["allPairsKappaExplanation"]],
+        itemModalAgreementHeading = function() private$.items[["itemModalAgreementHeading"]],
+        itemModalAgreementTable = function() private$.items[["itemModalAgreementTable"]],
+        itemModalAgreementExplanation = function() private$.items[["itemModalAgreementExplanation"]],
         hierarchicalHeading = function() private$.items[["hierarchicalHeading"]],
         hierarchicalOverallTable = function() private$.items[["hierarchicalOverallTable"]],
         clusterSpecificTable = function() private$.items[["clusterSpecificTable"]],
@@ -2109,6 +2155,130 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showPairwiseKappaGuide)",
                 clearWith=list(
                     "showPairwiseKappaGuide")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="allPairsKappaHeading",
+                title="All-Pairs Cohen's Kappa",
+                visible="(allPairsKappa || showAllPairsKappaGuide)",
+                clearWith=list(
+                    "allPairsKappa",
+                    "showAllPairsKappaGuide")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="allPairsKappaTable",
+                title="All-Pairs Kappa (Every Rater Pair)",
+                visible="(allPairsKappa)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="rater_a", 
+                        `title`="Rater A", 
+                        `type`="text"),
+                    list(
+                        `name`="rater_b", 
+                        `title`="Rater B", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="peragree", 
+                        `title`="Agreement", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `visible`="(allPairsCI)"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `visible`="(allPairsCI)"),
+                    list(
+                        `name`="z", 
+                        `title`="z", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="p_adj", 
+                        `title`="p (adjusted)", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(multipleTestCorrection:bonferroni || multipleTestCorrection:bh || multipleTestCorrection:holm)")),
+                clearWith=list(
+                    "vars",
+                    "wght",
+                    "allPairsCI",
+                    "multipleTestCorrection")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="allPairsKappaExplanation",
+                title="About All-Pairs Kappa Analysis",
+                visible="(showAllPairsKappaGuide)",
+                clearWith=list(
+                    "showAllPairsKappaGuide")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="itemModalAgreementHeading",
+                title="Per-Category Item-Modal Agreement",
+                visible="(itemModalCategoryAgreement || showItemModalGuide)",
+                clearWith=list(
+                    "itemModalCategoryAgreement",
+                    "showItemModalGuide")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="itemModalAgreementTable",
+                title="Agreement by Item Modal Category",
+                visible="(itemModalCategoryAgreement)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Modal Category", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="Cases with this Mode", 
+                        `type`="integer"),
+                    list(
+                        `name`="mean_agreement", 
+                        `title`="Mean Agreement", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `format`="zto")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="itemModalAgreementExplanation",
+                title="About Per-Category Item-Modal Agreement",
+                visible="(showItemModalGuide)",
+                clearWith=list(
+                    "showItemModalGuide")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="hierarchicalHeading",
@@ -3676,7 +3846,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agreement",
-                version = c(0,0,37),
+                version = c(0,0,38),
                 options = options,
                 results = agreementResults$new(options=options),
                 data = data,
@@ -3958,6 +4128,23 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   or those ready for certification.
 #' @param showPairwiseKappaGuide Show educational guide for pairwise kappa
 #'   analysis against a reference rater.
+#' @param allPairsKappa For studies with 3+ raters, compute Cohen's kappa,
+#'   observed agreement, standard error, 95 percent CI, z, and p-value for every
+#'   rater pair (C(k,2) rows). Reproduces the conventional pairwise agreement
+#'   table reported in interobserver reliability studies. Honors the 'wght'
+#'   (weights) and 'multipleTestCorrection' options.
+#' @param allPairsCI Compute Fisher-z 95 percent CI for each pairwise kappa
+#'   using the analytical standard error returned by irr::kappa2.
+#' @param showAllPairsKappaGuide Show educational guide for all-pairs kappa:
+#'   when to report the full pairwise table versus average (Light's) or overall
+#'   (Fleiss') kappa.
+#' @param itemModalCategoryAgreement For each rating category, compute the
+#'   mean within-case agreement rate across raters on cases whose modal rating
+#'   equals that category. Identifies which categories drive disagreement (e.g.,
+#'   YSRB Category IV "suspicious" is a known agreement bottleneck in breast
+#'   cytology). Cases with no unique mode (ties) are excluded.
+#' @param showItemModalGuide Show educational guide for per-category
+#'   item-modal agreement.
 #' @param hierarchicalKappa Enable hierarchical (multilevel) kappa analysis
 #'   for nested data structures (e.g., pathologists nested within institutions,
 #'   readers nested within centers). Accounts for clustering effects and
@@ -4275,6 +4462,12 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$allPairsKappaHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$allPairsKappaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$allPairsKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$itemModalAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$itemModalAgreementTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$itemModalAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$hierarchicalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr
@@ -4427,6 +4620,11 @@ agreement <- function(
     referenceRater = NULL,
     rankRaters = FALSE,
     showPairwiseKappaGuide = FALSE,
+    allPairsKappa = FALSE,
+    allPairsCI = TRUE,
+    showAllPairsKappaGuide = FALSE,
+    itemModalCategoryAgreement = FALSE,
+    showItemModalGuide = FALSE,
     hierarchicalKappa = FALSE,
     clusterVariable = NULL,
     iccHierarchical = FALSE,
@@ -4596,6 +4794,11 @@ agreement <- function(
         referenceRater = referenceRater,
         rankRaters = rankRaters,
         showPairwiseKappaGuide = showPairwiseKappaGuide,
+        allPairsKappa = allPairsKappa,
+        allPairsCI = allPairsCI,
+        showAllPairsKappaGuide = showAllPairsKappaGuide,
+        itemModalCategoryAgreement = itemModalCategoryAgreement,
+        showItemModalGuide = showItemModalGuide,
         hierarchicalKappa = hierarchicalKappa,
         clusterVariable = clusterVariable,
         iccHierarchical = iccHierarchical,

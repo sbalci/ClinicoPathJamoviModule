@@ -141,9 +141,11 @@ jointfrailtyClass <- R6::R6Class(
             # Convert variables to appropriate names
             subject_data <- as.character(data[[subjectID]])
             time_data <- as.numeric(data[[time]])
-            event_data <- as.numeric(data[[event]])
+            # event/terminal_event are permitted: factor only per .h.R; use jmvcore::toNumeric
+            # to honor the jamovi `values` attribute (returns user-coded 0/1, not level indices 1/2)
+            event_data <- jmvcore::toNumeric(data[[event]])
             terminal_time_data <- as.numeric(data[[terminal_time]])
-            terminal_event_data <- as.numeric(data[[terminal_event]])
+            terminal_event_data <- jmvcore::toNumeric(data[[terminal_event]])
             
             # Check for valid data
             if (any(is.na(time_data)) || any(is.na(event_data)) || any(is.na(subject_data)) ||
@@ -179,6 +181,14 @@ jointfrailtyClass <- R6::R6Class(
                     rec_specific <- data[recurrent_covariates]
                     rec_covariates <- cbind(rec_covariates, rec_specific)
                 }
+                # TODO (correctness): `as.numeric(factor) - 1` only works correctly for
+                # binary 2-level factors (produces 0/1). Multi-level factors get coded as
+                # sequential integers (0, 1, 2, ...) which treats them as ordinal-numeric —
+                # losing nominal-factor semantics. Better: let frailtypack's formula
+                # construction handle factors via `model.matrix` one-hot encoding (pass
+                # the factor column through unchanged), or use `jmvcore::toNumeric` which
+                # honors the jamovi `values` attribute. Applies to L185 (recurrent) and
+                # L200 (terminal) covariate loops below.
                 if (ncol(rec_covariates) > 0) {
                     for (i in 1:ncol(rec_covariates)) {
                         if (is.factor(rec_covariates[[i]])) {
@@ -232,16 +242,18 @@ jointfrailtyClass <- R6::R6Class(
                 term_covars <- prepared_data$terminal_covariates
                 
                 if (!is.null(rec_covars) && length(rec_covars) > 0) {
-                    rec_formula_str <- paste("Surv(time, event) ~", paste(rec_covars, collapse = " + "))
-                    rec_formula <- as.formula(rec_formula_str)
+                    # composeTerms backtick-escapes non-syntactic column names;
+                    # asFormula allowlist-validates against frailtypack RCE surface
+                    rec_formula_str <- paste("Surv(time, event) ~", jmvcore::composeTerms(as.list(rec_covars)))
+                    rec_formula <- jmvcore::asFormula(rec_formula_str)
                 } else {
                     rec_formula <- Surv(time, event) ~ 1
                 }
-                
+
                 if (!is.null(term_covars) && length(term_covars) > 0) {
-                    term_formula_str <- paste("Surv(terminal_time, terminal_event) ~", 
-                                            paste(term_covars, collapse = " + "))
-                    term_formula <- as.formula(term_formula_str)
+                    term_formula_str <- paste("Surv(terminal_time, terminal_event) ~",
+                                            jmvcore::composeTerms(as.list(term_covars)))
+                    term_formula <- jmvcore::asFormula(term_formula_str)
                 } else {
                     term_formula <- Surv(terminal_time, terminal_event) ~ 1
                 }
@@ -266,6 +278,12 @@ jointfrailtyClass <- R6::R6Class(
                     "positive_stable" = "PVF"
                 )
 
+                # TODO (operational hygiene): `frailtypack::jointfrailty` (below) and
+                # `frailtypack::frailtyPenal` (in else branch) are called without a
+                # `requireNamespace("frailtypack", quietly = TRUE)` gate. If frailtypack
+                # isn't installed, the fit path crashes mid-call with a low-information
+                # error. Wrap with a gate + `jmvcore::reject(.('Required package frailtypack is not installed'))`
+                # at function entry for a cleaner UX.
                 # Fit joint frailty model using frailtypack
                 if (association_type == "shared_frailty") {
                     fit <- frailtypack::jointfrailty(
@@ -297,7 +315,8 @@ jointfrailtyClass <- R6::R6Class(
                 return(fit)
                 
             }, error = function(e) {
-                error_msg <- paste("Joint frailty model fitting error:", e$message)
+                # htmlEscape e$message — frailtypack errors may include user column-name fragments
+                error_msg <- paste("Joint frailty model fitting error:", htmltools::htmlEscape(e$message))
                 self$results$todo$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
                 return(NULL)
             })

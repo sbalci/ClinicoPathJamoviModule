@@ -1,9 +1,9 @@
 ---
 name:  jwaffle
 title: Waffle Charts
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Distribution'
-version: '0.0.37'
+version: '0.0.38'
 jas: '1.2'
 
 description:

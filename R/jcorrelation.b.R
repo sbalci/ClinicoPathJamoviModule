@@ -23,14 +23,14 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (nrow(self$data) == 0) {
-                stop('Data contains no (complete) rows')
+                jmvcore::reject('Data contains no (complete) rows')
             }
 
             # Clean and prepare data
             data <- private$.cleanData()
-            
+
             if (nrow(data) < 3) {
-                stop('At least 3 complete observations are required for correlation analysis')
+                jmvcore::reject('At least 3 complete observations are required for correlation analysis')
             }
 
             # Perform correlation analysis
@@ -284,9 +284,9 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     cor_report <- report::report(cor_analysis)
                     
                     report_text <- as.character(cor_report)
-                    report_html <- paste0(report_html, 
+                    report_html <- paste0(report_html,
                                          "<p style='margin-bottom: 0; line-height: 1.6; color: #212529;'>",
-                                         gsub("\n", "<br>", report_text),
+                                         gsub("\n", "<br>", htmltools::htmlEscape(report_text)),
                                          "</p>")
                 }, error = function(e) {
                     # Fallback to basic reporting
@@ -502,27 +502,16 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(vars) || length(vars) == 0)
                 return('')
 
-            # Escape variable names that contain spaces or special characters
-            vars_escaped <- sapply(vars, function(v) {
-                if (!is.null(v) && !identical(make.names(v), v))
-                    paste0('`', v, '`')
-                else
-                    v
-            })
+            # Build vars argument — deparse() safely quotes column names,
+            # including names containing embedded quotes or backslashes.
+            vars_arg <- paste0('vars = c(',
+                               paste(vapply(vars, deparse, character(1)), collapse = ', '),
+                               ')')
 
-            # Build vars argument
-            vars_arg <- paste0('vars = c(', paste(sapply(vars_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
-
-            # Escape group variable if present
+            # Build optional group argument
             group_arg <- ''
-            if (!is.null(group)) {
-                group_escaped <- if (!identical(make.names(group), group)) {
-                    paste0('`', group, '`')
-                } else {
-                    group
-                }
-                group_arg <- paste0(',\n    group = "', group_escaped, '"')
-            }
+            if (!is.null(group))
+                group_arg <- paste0(',\n    group = ', deparse(group))
 
             # Get other arguments using base helper (if available)
             args <- ''

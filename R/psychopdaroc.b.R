@@ -1855,6 +1855,19 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       }
 
       # -----------------------------------------------------------------------
+      # 0a. MANUAL RUN GATE
+      # -----------------------------------------------------------------------
+      if (isTRUE(self$options$manualRun) && !isTRUE(self$options$run)) {
+        self$results$instructions$setContent(
+          "<html><body><div class='instructions'>
+            <p><b>Manual run mode active.</b></p>
+            <p>Adjust options as needed, then click the <b>Run</b> button to compute results.</p>
+          </div></body></html>"
+        )
+        return()
+      }
+
+      # -----------------------------------------------------------------------
       # 1. INSTRUCTIONS AND PRELIMINARY CHECKS
       # -----------------------------------------------------------------------
 

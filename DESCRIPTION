@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.39.0
+Version: 0.0.38.1
 Date: 2026-05-01
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
@@ -224,7 +224,6 @@ Imports:
     spatstat.geom,
     spatstat.explore,
     flexsurv,
-    VIF,
     DoE.base,
     coxme,
     frailtypack,
@@ -234,7 +233,6 @@ Imports:
     rsm,
     interval,
     Icens,
-    regplot,
     smcure,
     brms,
     metaBMA,
@@ -311,7 +309,6 @@ Encoding: UTF-8
 LazyData: true
 LazyDataCompression: xz
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Suggests:
     rmarkdown,
     condSURV,
@@ -796,14 +793,14 @@ Collate:
     'labinterpret.h.R'
     'landmarkanalysis.b.R'
     'landmarkanalysis.h.R'
-    'latentbiomarker.b.R'
-    'latentbiomarker.h.R'
     'lassocox.b.R'
     'lassocox.h.R'
     'lassointro.b.R'
     'lassointro.h.R'
     'lassologistic.b.R'
     'lassologistic.h.R'
+    'latentbiomarker.b.R'
+    'latentbiomarker.h.R'
     'leaveonecenterout.b.R'
     'leaveonecenterout.h.R'
     'likelihoodratio.b.R'
@@ -1139,3 +1136,4 @@ Collate:
     'weightedlogrank.b.R'
     'weightedlogrank.h.R'
     'zzz.R'
+Config/roxygen2/version: 8.0.0

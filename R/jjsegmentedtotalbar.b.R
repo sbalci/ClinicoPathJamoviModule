@@ -44,7 +44,12 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .preset_style_override = NULL,
         .preset_palette_override = NULL,
 
-        # Variable name escaping utility for special characters
+        # TODO (cleanup): `.escapeVar` is dead code — defined here but never called
+        # anywhere in this file (grep confirms 1 occurrence: the definition).
+        # Safe to delete. Removed for now via "no callers" rationale, but if a
+        # future need arises, use `jmvcore::composeTerm()` for formula contexts
+        # or `rlang::sym()` directly (handles non-syntactic names natively) for
+        # symbol contexts — do NOT resurrect this helper.
         .escapeVar = function(x) {
             # Convert variable names with special characters to safe R names
             # This mirrors the modelbuilder behavior for handling spaces and punctuation
@@ -88,8 +93,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
               "border-left: 4px solid ", style$border, "; ",
               "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
               "<strong style='color: ", style$color, ";'>",
-              style$icon, " ", notice$title, "</strong><br>",
-              "<span style='color: #374151;'>", notice$content, "</span>",
+              style$icon, " ", htmltools::htmlEscape(notice$title), "</strong><br>",
+              "<span style='color: #374151;'>", htmltools::htmlEscape(notice$content), "</span>",
               "</div>"
             )
           }
@@ -159,6 +164,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 is.null(self$options$fill_var)) {
                 return()
             }
+
+            # Reset notice list so prior-run notices don't persist across re-runs
+            # (jamovi may reuse the same R6 instance when options change)
+            private$.noticeList <- list()
 
             # Clear existing tables to prevent accumulation
             self$results$composition_table$deleteRows()
@@ -848,10 +857,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 "</ul>",
                 "<p><strong>Key Findings:</strong></p>",
                 "<ul>",
-                paste0("<li><strong>Largest segment:</strong> ", largest_segment$segment[1],
-                       " in ", largest_segment$category[1],
+                paste0("<li><strong>Largest segment:</strong> ", htmltools::htmlEscape(as.character(largest_segment$segment[1])),
+                       " in ", htmltools::htmlEscape(as.character(largest_segment$category[1])),
                        " (", round(largest_segment$percentage[1], 1), "%)</li>"),
-                paste0("<li><strong>Most balanced category:</strong> ", balanced_category$category[1],
+                paste0("<li><strong>Most balanced category:</strong> ", htmltools::htmlEscape(as.character(balanced_category$category[1])),
                        " shows the most even distribution across segments</li>"),
                 "</ul>",
                 "</div>"
@@ -983,6 +992,12 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 p <- p + ggplot2::coord_flip()
 
             # Faceting (simple)
+            # TODO (forward-looking): `facet_wrap(rlang::sym(...))` passes a bare
+            # symbol — works via ggplot2 tidy-eval coercion but is undocumented API.
+            # For forward-compat, prefer either:
+            #   facet_wrap(ggplot2::vars(!!rlang::sym(self$options$facet_var)), scales = "free_x")
+            #   or
+            #   facet_wrap(jmvcore::asFormula(paste0("~", jmvcore::composeTerm(self$options$facet_var))), scales = "free_x")
             if (!is.null(self$options$facet_var) && self$options$facet_var != "") {
                 p <- p + ggplot2::facet_wrap(rlang::sym(self$options$facet_var), scales = "free_x")
             }
@@ -1219,29 +1234,38 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::slice(1)
 
             # Generate clinical summary text
+            # htmlEscape user column names + factor-level values before sprintf
+            # so downstream setContent rendering is XSS-safe
+            x_var_safe <- htmltools::htmlEscape(self$options$x_var)
+            y_var_safe <- htmltools::htmlEscape(self$options$y_var)
+            fill_var_safe <- htmltools::htmlEscape(self$options$fill_var)
+            largest_segment_safe <- htmltools::htmlEscape(as.character(largest_segment$segment[1]))
+            largest_category_safe <- htmltools::htmlEscape(as.character(largest_segment$category[1]))
+            balanced_category_safe <- htmltools::htmlEscape(as.character(category_balance$category[1]))
+
             summary_text <- sprintf(
                 .("This analysis examined %d observations across %d categories of %s, with data segmented by %s into %d distinct groups. The most prominent finding was '%s' in the '%s' category, representing %.1f%% of that group. The '%s' category showed the most balanced distribution across all segments, indicating relatively equal representation of different outcomes within that group."),
                 as.integer(total_obs),
                 as.integer(n_categories),
-                self$options$x_var,
-                self$options$fill_var,
+                x_var_safe,
+                fill_var_safe,
                 as.integer(n_segments),
-                largest_segment$segment[1],
-                largest_segment$category[1],
+                largest_segment_safe,
+                largest_category_safe,
                 largest_segment$percentage[1],
-                category_balance$category[1]
+                balanced_category_safe
             )
 
             # Create copy-ready report sentence
             report_sentence <- sprintf(
                 .("Segmented total bar chart analysis of %s by %s (N=%d): %s was the predominant segment in %s (%.1f%%). Distribution patterns varied across categories, with %s showing the most balanced composition."),
-                self$options$y_var,
-                self$options$x_var,
+                y_var_safe,
+                x_var_safe,
                 as.integer(total_obs),
-                largest_segment$segment[1],
-                largest_segment$category[1],
+                largest_segment_safe,
+                largest_category_safe,
                 largest_segment$percentage[1],
-                category_balance$category[1]
+                balanced_category_safe
             )
 
             # Create clinical summary HTML
@@ -1262,10 +1286,17 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             self$results$clinical_summary$setContent(clinical_summary_html)
         },
         
+        # TODO (correctness): `.preset_config` is a stale-R6-cache hazard. The
+        # function only assigns to `private$.preset_config` when `preset !=
+        # "custom"` (early return below for custom). If a user switches from a
+        # preset to "custom" between runs against the same R6 instance, the
+        # prior preset's config persists and leaks into the next analysis.
+        # Fix: clear it on the early-return path —
+        #   if (preset == "custom") { private$.preset_config <- NULL; return() }
         .applyPresetConfiguration = function() {
-            
+
             preset <- self$options$analysis_preset
-            
+
             if (preset == "custom") {
                 return()  # No preset configuration
             }

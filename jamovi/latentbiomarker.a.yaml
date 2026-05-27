@@ -4,7 +4,7 @@ title: "Latent Biomarker Construct + Cox Regression"
 menuGroup: meddecideT
 menuSubgroup: Biomarkers
 menuSubtitle: "Reflective CFA on biomarker indicators + survival"
-version: '0.0.1'
+version: '0.0.38'
 jas: '1.2'
 
 description:

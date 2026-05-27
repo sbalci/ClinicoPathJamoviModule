@@ -5,7 +5,7 @@
 #' @importFrom sva ComBat
 #' @importFrom stats prcomp var cor dist hclust cutree
 #' @importFrom utils capture.output
-#' @importFrom VIF vif
+
 #' @export
 
 batcheffectClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(

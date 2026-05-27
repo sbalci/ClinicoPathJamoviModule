@@ -58,6 +58,19 @@ intervalsurvivalClass <- R6::R6Class(
                 return()
             }
 
+            # RNG hygiene: .handleIntervalBounds() pins set.seed(123) when
+            # imputation_method == "random". Save and restore the global RNG
+            # state so a user's set.seed() outside this analysis is preserved.
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                .saved_seed <- get(".Random.seed", envir = .GlobalEnv)
+                on.exit(assign(".Random.seed", .saved_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit({
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv)
+                }, add = TRUE)
+            }
+
             left_time <- self$options$left_time
             right_time <- self$options$right_time
             status_var <- self$options$status_var
@@ -72,7 +85,7 @@ intervalsurvivalClass <- R6::R6Class(
             if (length(missing_vars) > 0) {
                 self$results$data_summary$setContent(
                     paste("Error: The following required variables were not found:",
-                          paste(missing_vars, collapse = ", "))
+                          htmltools::htmlEscape(paste(missing_vars, collapse = ", ")))
                 )
                 return()
             }
@@ -96,7 +109,7 @@ intervalsurvivalClass <- R6::R6Class(
                     if (length(missing_covs) > 0) {
                         self$results$data_summary$setContent(
                             paste("Error: The following covariates were not found:",
-                                  paste(missing_covs, collapse = ", "))
+                                  htmltools::htmlEscape(paste(missing_covs, collapse = ", ")))
                         )
                         return()
                     }
@@ -147,7 +160,7 @@ intervalsurvivalClass <- R6::R6Class(
                 private$.performIntervalAnalysis(analysis_data, left_time, right_time, status_var, covariates)
 
             }, error = function(e) {
-                self$results$data_summary$setContent(paste("Analysis error:", e$message))
+                self$results$data_summary$setContent(paste("Analysis error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -187,7 +200,7 @@ intervalsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                self$results$model_results$setContent(paste("Interval analysis error:", e$message))
+                self$results$model_results$setContent(paste("Interval analysis error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -247,7 +260,7 @@ intervalsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Data summary error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Data summary error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$data_summary$setContent(html)
@@ -341,7 +354,7 @@ intervalsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Non-parametric analysis error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Non-parametric analysis error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$model_results$setContent(html)
@@ -369,8 +382,8 @@ intervalsurvivalClass <- R6::R6Class(
 
                     # Fit AFT model
                     if (length(covariates) > 0) {
-                        formula_str <- paste("surv_obj ~", paste(covariates, collapse = " + "))
-                        aft_model <- survreg(as.formula(formula_str), data = analysis_data, dist = distribution)
+                        formula_str <- paste("surv_obj ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
+                        aft_model <- survreg(jmvcore::asFormula(formula_str), data = analysis_data, dist = distribution)
                     } else {
                         aft_model <- survreg(surv_obj ~ 1, data = analysis_data, dist = distribution)
                     }
@@ -404,7 +417,7 @@ intervalsurvivalClass <- R6::R6Class(
                             accel_factor <- if (param_name != "(Intercept)") round(exp(estimate), 4) else "-"
 
                             html <- paste0(html, "<tr>")
-                            html <- paste0(html, "<td>", param_name, "</td>")
+                            html <- paste0(html, "<td>", htmltools::htmlEscape(param_name), "</td>")
                             html <- paste0(html, "<td>", estimate, "</td>")
                             html <- paste0(html, "<td>", se, "</td>")
                             html <- paste0(html, "<td>", z_val, "</td>")
@@ -425,7 +438,7 @@ intervalsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>AFT analysis error: ", e$message, "</p>")
+                html <- paste0(html, "<p>AFT analysis error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$model_results$setContent(html)
@@ -452,8 +465,8 @@ intervalsurvivalClass <- R6::R6Class(
 
                     # Fit Cox model
                     if (length(covariates) > 0) {
-                        formula_str <- paste("surv_obj ~", paste(covariates, collapse = " + "))
-                        cox_model <- coxph(as.formula(formula_str), data = analysis_data)
+                        formula_str <- paste("surv_obj ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
+                        cox_model <- coxph(jmvcore::asFormula(formula_str), data = analysis_data)
                     } else {
                         cox_model <- coxph(surv_obj ~ 1, data = analysis_data)
                     }
@@ -479,7 +492,7 @@ intervalsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Cox analysis error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Cox analysis error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$model_results$setContent(html)
@@ -566,7 +579,7 @@ intervalsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Covariate effects error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Covariate effects error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$covariate_effects$setContent(html)
@@ -634,7 +647,7 @@ intervalsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Survival estimates error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Survival estimates error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$survival_estimates$setContent(html)

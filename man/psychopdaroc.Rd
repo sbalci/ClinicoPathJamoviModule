@@ -5,6 +5,8 @@
 \title{Advanced ROC Analysis}
 \usage{
 psychopdaROC(
+  manualRun = FALSE,
+  run = FALSE,
   clinicalMode = "basic",
   data,
   dependentVars,
@@ -85,6 +87,12 @@ psychopdaROC(
 )
 }
 \arguments{
+\item{manualRun}{When TRUE, results are only computed after clicking the
+Run button. Useful for skipping intermediate recomputes while adjusting
+options on slow bootstrap or cutpoint analyses.}
+
+\item{run}{.}
+
 \item{clinicalMode}{Select the complexity level of analysis: Basic -
 Essential ROC metrics for clinical decision making Advanced - Additional
 statistical comparisons and metrics Comprehensive - Full research-grade

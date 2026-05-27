@@ -34,6 +34,16 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             testVar <- testVar[complete_cases]
             refStd <- refStd[complete_cases]
             
+            # TODO (UX): six validation failures in this file report errors by writing
+            # an `<p><b>Error:</b> ...</p>` block to the `instructions` Html output
+            # and then silently `return()`. Sites: lines ~38, 46, 54, 78, 85, 118.
+            # jmvcore::reject() is the standard idiom — surfaces a structured error in
+            # jamovi's UI (with code attribute for testing), and lets the user click
+            # outside the banner to clear it without having to change inputs.
+            # All current messages are static strings (no XSS risk from this pattern).
+            # Convert each site:
+            #   self$results$instructions$setContent("<p><b>Error:</b> ...</p>"); return()
+            # → jmvcore::reject(.("..."), code = "<some-code>")
             if (length(testVar) == 0) {
                 self$results$instructions$setContent("<p><b>Error:</b> No complete cases found.</p>")
                 return()
@@ -47,6 +57,19 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     return()
                 }
                 # Convert to 0/1 (0 = negative, 1 = positive)
+                # TODO (correctness): as.numeric(factor) - 1 assumes the FIRST level is
+                # "negative" and the SECOND is "positive" — i.e. alphabetical level order
+                # determines the encoding. For a factor with levels c("positive", "negative")
+                # the encoding inverts and downstream LR+ / LR- semantics swap, producing
+                # silently wrong results. Same pattern at the testVar-binary site below
+                # (~line 91) inside .runBinaryAnalysis.
+                # Fix shape: add an explicit positiveLevel option (`type: Level` bound to
+                # the refStandard / testVariable Variables, like R/survival.b.R uses) and
+                # encode via:  as.integer(refStd == positive_level)
+                # Not a drop-in jmvcore::toNumeric() swap — toNumeric returns the `values`
+                # attribute when present (0/1 for properly labelled factors) but otherwise
+                # returns level indices without the -1 offset, so behavior would diverge
+                # for unlabelled R factors.
                 refStd_binary <- as.numeric(refStd) - 1
             } else {
                 refStd_unique <- sort(unique(refStd))

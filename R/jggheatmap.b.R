@@ -64,7 +64,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             packages <- c('ggplot2', 'tidyr', 'dplyr', 'stats')
             for (pkg in packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
-                    stop(paste0("Package '", pkg, "' is required but not installed"))
+                    jmvcore::reject("Package '{pkg}' is required but not installed", pkg = pkg)
                 }
             }
             
@@ -106,7 +106,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     as.matrix()
                     
             } else {
-                stop("Please specify either Matrix Variables or Row/Column/Value variables")
+                jmvcore::reject("Please specify either Matrix Variables or Row/Column/Value variables")
             }
             
             # Apply scaling

@@ -22,49 +22,6 @@ tryCatch({
     # Utilities will be loaded by package
 })
 
-# Ensure functions exist
-if (!exists("convertIHCToNumeric")) {
-    # Define fallback implementation
-    convertIHCToNumeric <- function(data, markers, id_variable = NULL) {
-        ihc_matrix <- matrix(0, nrow = nrow(data), ncol = length(markers))
-        colnames(ihc_matrix) <- markers
-
-        for (i in seq_along(markers)) {
-            marker_data <- data[[markers[i]]]
-            if (is.factor(marker_data) || is.character(marker_data)) {
-                levels <- sort(unique(marker_data[!is.na(marker_data)]))
-                numeric_values <- as.numeric(factor(marker_data, levels = levels)) - 1
-            } else {
-                numeric_values <- as.numeric(marker_data)
-            }
-            ihc_matrix[, i] <- numeric_values
-        }
-
-        if (!is.null(id_variable) && id_variable != "" && id_variable %in% names(data)) {
-            rownames(ihc_matrix) <- as.character(data[[id_variable]])
-        }
-
-        return(ihc_matrix)
-    }
-}
-
-if (!exists("validateIHCData")) {
-    # Define fallback implementation
-    validateIHCData <- function(data, markers) {
-        if (is.null(data) || nrow(data) < 3) {
-            return(list(valid = FALSE, message = "At least 3 samples are required for IHC analysis"))
-        }
-        if (length(markers) < 2) {
-            return(list(valid = FALSE, message = "At least 2 IHC markers are required for clustering analysis"))
-        }
-        missing_markers <- markers[!markers %in% names(data)]
-        if (length(missing_markers) > 0) {
-            return(list(valid = FALSE, message = paste("Missing marker columns:", paste(missing_markers, collapse = ", "))))
-        }
-        return(list(valid = TRUE, message = NULL))
-    }
-}
-
 ihcdiagnosticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "ihcdiagnosticClass",
     inherit = ihcdiagnosticBase,
@@ -128,6 +85,14 @@ ihcdiagnosticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         },
 
         .run = function() {
+            # Save and restore RNG state to avoid leaking seed into caller's session
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                old_seed <- .GlobalEnv$.Random.seed
+                on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
+            } else {
+                on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+            }
+
             # Validate inputs
             if (is.null(self$data) || length(self$options$markers) == 0 ||
                 is.null(self$options$diagnosis) || self$options$diagnosis == "") {
@@ -137,7 +102,7 @@ ihcdiagnosticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             validation <- private$.validateData()
             if (!validation$valid) {
                 self$results$instructions$setContent(
-                    paste0("<p style='color: red;'><b>Error:</b> ", validation$message, "</p>")
+                    paste0("<p style='color: red;'><b>Error:</b> ", htmltools::htmlEscape(validation$message), "</p>")
                 )
                 return()
             }
@@ -207,13 +172,13 @@ ihcdiagnosticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                     id_variable = if(!is.null(self$options$id) && self$options$id != "") self$options$id else NULL
                 )
             }, error = function(e) {
-                stop(paste("Error converting IHC data:", e$message))
+                jmvcore::reject("Error converting IHC data: {msg}", msg = e$message)
             })
 
             # Store diagnosis groups
             diagnosis_data <- self$data[[self$options$diagnosis]]
             if (is.null(diagnosis_data)) {
-                stop("Diagnosis variable not found in data")
+                jmvcore::reject("Diagnosis variable not found in data")
             }
             private$.diagnosis_groups <- factor(diagnosis_data)
         },
@@ -1053,7 +1018,7 @@ ihcdiagnosticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                             <li>AUC: %.3f (%.1f%% accuracy)</li>
                             <li>Clinical interpretation: %s</li>
                         </ul>",
-                        best_marker, best_auc, best_accuracy,
+                        htmltools::htmlEscape(best_marker), best_auc, best_accuracy,
                         if (best_auc > 0.9) "Excellent diagnostic value"
                         else if (best_auc > 0.8) "Good diagnostic value"
                         else if (best_auc > 0.7) "Fair diagnostic value"
@@ -1131,7 +1096,7 @@ ihcdiagnosticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             if (!is.null(best_marker)) {
                 sentence <- paste0(sentence, sprintf(
                     "%s demonstrated the highest diagnostic performance (AUC = %.3f), ",
-                    best_marker, best_auc
+                    htmltools::htmlEscape(best_marker), best_auc
                 ))
 
                 if (best_auc > 0.8) {

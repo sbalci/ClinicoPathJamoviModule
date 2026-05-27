@@ -18,6 +18,15 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
         .repro_stats = NULL,
 
+        # TODO (correctness): .escapeVar mangles non-syntactic column names then
+        # uses the mangled name to look up data[[mangled_name]] — silently breaks
+        # variable lookup for any column with spaces/dashes/special chars (callers
+        # at L183, L232, L338 hit `data[[.escapeVar(name)]]` which returns NULL).
+        # Same broken pattern as finegray's .escapeVar (project-wide cleanup needed).
+        # Fix: either remove .escapeVar entirely and let `data[[name]]` use the
+        # original name (jamovi columns retain their literal names), or only use
+        # the mangled name for variable-name display in formulas via
+        # jmvcore::composeTerm(name) for backtick-safe quoting.
         # Add variable name safety utility
         .escapeVar = function(x) {
             # Handle variables with spaces and special characters
@@ -235,7 +244,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 } else {
                     # Handle case where spatial_id is selected but not in data
                     self$results$interpretation$setContent(
-                        paste0("<p style='color: red;'><strong>Error:</strong> Spatial ID variable '", self$options$spatial_id, "' not found in data.</p>")
+                        paste0("<p style='color: red;'><strong>Error:</strong> Spatial ID variable '", htmltools::htmlEscape(self$options$spatial_id), "' not found in data.</p>")
                     )
                     return()
                 }

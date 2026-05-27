@@ -31,7 +31,7 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # Check if ComplexUpset is available
             if (!requireNamespace("ComplexUpset", quietly = TRUE)) {
-                stop("The ComplexUpset package is required but not installed.")
+                jmvcore::reject("The ComplexUpset package is required but not installed.")
             }
             
             # Prepare data
@@ -241,7 +241,7 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 size <- set_sizes[[var]]
                 percentage <- round((size / total_elements) * 100, 1)
                 html <- paste0(html, "<tr>")
-                html <- paste0(html, "<td>", var, "</td>")
+                html <- paste0(html, "<td>", htmltools::htmlEscape(var), "</td>")
                 html <- paste0(html, "<td>", size, "</td>")
                 html <- paste0(html, "<td>", percentage, "%</td>")
                 html <- paste0(html, "</tr>")
@@ -321,15 +321,15 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 "<h3>UpSet Plot Interpretation</h3>",
                 "<p><strong>Dataset Overview:</strong> The UpSet plot visualizes intersections among ", n_sets, " sets ",
                 "with a total of ", total_elements, " elements.</p>",
-                "<p><strong>Set Sizes:</strong> The largest set is <em>", largest_set, "</em> with ", max(set_sizes), " elements, ",
-                "while the smallest set is <em>", smallest_set, "</em> with ", min(set_sizes), " elements.</p>"
+                "<p><strong>Set Sizes:</strong> The largest set is <em>", htmltools::htmlEscape(largest_set), "</em> with ", max(set_sizes), " elements, ",
+                "while the smallest set is <em>", htmltools::htmlEscape(smallest_set), "</em> with ", min(set_sizes), " elements.</p>"
             )
-            
+
             if (nrow(intersections) > 0) {
                 largest_intersection <- intersections[1, ]
                 interpretation <- paste0(interpretation,
                     "<p><strong>Intersection Analysis:</strong> There are ", nrow(intersections), " non-empty intersections. ",
-                    "The largest intersection is <em>", largest_intersection$intersection, "</em> with ", largest_intersection$size, " elements.</p>"
+                    "The largest intersection is <em>", htmltools::htmlEscape(largest_intersection$intersection), "</em> with ", largest_intersection$size, " elements.</p>"
                 )
             }
             
@@ -346,22 +346,22 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             set_vars <- self$options$set_vars
             
             if (length(set_vars) < 2) {
-                stop("At least 2 set variables are required for UpSet plots")
+                jmvcore::reject("At least 2 set variables are required for UpSet plots")
             }
-            
+
             if (length(set_vars) > 10) {
-                stop("Maximum of 10 set variables supported for readability")
+                jmvcore::reject("Maximum of 10 set variables supported for readability")
             }
-            
+
             # Check if variables exist and have valid data
             for (var in set_vars) {
                 if (!var %in% names(self$data)) {
-                    stop(paste("Variable", var, "not found in data"))
+                    jmvcore::reject("Variable {var} not found in data", var = var)
                 }
-                
+
                 var_data <- self$data[[var]]
                 if (all(is.na(var_data))) {
-                    stop(paste("Variable", var, "contains only missing values"))
+                    jmvcore::reject("Variable {var} contains only missing values", var = var)
                 }
             }
         },
@@ -390,27 +390,16 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (is.null(set_vars) || length(set_vars) < 2)
                 return('')
 
-            # Escape set_vars
-            set_vars_escaped <- sapply(set_vars, function(v) {
-                if (!is.null(v) && !identical(make.names(v), v))
-                    paste0('`', v, '`')
-                else
-                    v
-            })
-
-            # Build set_vars argument
-            set_vars_arg <- paste0('set_vars = c(', paste(sapply(set_vars_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
+            # Build set_vars argument — deparse() safely quotes column names,
+            # including names containing embedded quotes or backslashes.
+            set_vars_arg <- paste0('set_vars = c(',
+                                   paste(vapply(set_vars, deparse, character(1)), collapse = ', '),
+                                   ')')
 
             # Build optional value_var argument
             value_var_arg <- ''
-            if (!is.null(value_var)) {
-                value_var_escaped <- if (!identical(make.names(value_var), value_var)) {
-                    paste0('`', value_var, '`')
-                } else {
-                    value_var
-                }
-                value_var_arg <- paste0(',\n    value_var = "', value_var_escaped, '"')
-            }
+            if (!is.null(value_var))
+                value_var_arg <- paste0(',\n    value_var = ', deparse(value_var))
 
             # Get other arguments
             args <- ''

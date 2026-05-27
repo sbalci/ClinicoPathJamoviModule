@@ -132,7 +132,10 @@ marginalrecurrentClass <- R6::R6Class(
             event_data <- tryCatch(
                 private$.coerceIndicator(data[[event]], "Event indicator"),
                 error = function(e) {
-                    self$results$todo$setContent(paste0("<p>", e$message, "</p>"))
+                    # e$message may carry user-controlled fragments from a future
+                    # base-R error inside .coerceIndicator; escape before HTML setContent.
+                    self$results$todo$setContent(
+                        paste0("<p>", htmltools::htmlEscape(conditionMessage(e)), "</p>"))
                     return(NULL)
                 }
             )
@@ -173,7 +176,9 @@ marginalrecurrentClass <- R6::R6Class(
                 terminal_data <- tryCatch(
                     private$.coerceIndicator(data[[terminal_event]], "Terminal event indicator", allow_all_zero = TRUE),
                     error = function(e) {
-                        self$results$todo$setContent(paste0("<p>", e$message, "</p>"))
+                        # Defensive escape — see parallel handler above.
+                        self$results$todo$setContent(
+                            paste0("<p>", htmltools::htmlEscape(conditionMessage(e)), "</p>"))
                         return(NULL)
                     }
                 )
@@ -289,10 +294,14 @@ marginalrecurrentClass <- R6::R6Class(
             )
 
             if (!is.null(covariates) && length(covariates) > 0) {
-                rhs <- paste(covariates, collapse = " + ")
-                model_formula <- stats::as.formula(paste("..recur_response ~", rhs))
+                # Backtick-escape user-controlled covariate column names via composeTerms,
+                # and parse via jmvcore::asFormula() for allow-list validation. Closes
+                # the C1 RCE vector where a poisoned column name would otherwise reach
+                # reReg::reReg's model.frame as a callable expression.
+                rhs <- jmvcore::composeTerms(as.list(covariates))
+                model_formula <- jmvcore::asFormula(paste("..recur_response ~", rhs))
             } else {
-                model_formula <- stats::as.formula("..recur_response ~ 1")
+                model_formula <- jmvcore::asFormula("..recur_response ~ 1")
             }
 
             model_code <- private$.determineModelCode(model_type, has_terminal)
@@ -307,7 +316,10 @@ marginalrecurrentClass <- R6::R6Class(
                 )
                 return(fit)
             }, error = function(e) {
-                error_msg <- paste("Model fitting error:", e$message)
+                # reReg error messages quote predictor column names verbatim, which
+                # are user-controlled. Escape before flowing into the Html setContent sink.
+                error_msg <- paste("Model fitting error:",
+                                   htmltools::htmlEscape(conditionMessage(e)))
                 self$results$todo$setContent(paste0("<p style='color: red;'>", error_msg, "</p>"))
                 return(NULL)
             })
@@ -571,6 +583,21 @@ marginalrecurrentClass <- R6::R6Class(
                 return(NULL)
 
             if (is.factor(x)) {
+                # TODO (correctness): as.numeric(factor) - 1 assumes the FIRST level is
+                # "censored/no-event" and the SECOND is "event" — i.e. alphabetical level
+                # order determines the 0/1 encoding. For a factor with levels c("event",
+                # "censored") the encoding inverts and reReg models are fit on the wrong
+                # event indicator. Same pattern flagged in R/landmarkanalysis.b.R:86 and
+                # R/likelihoodratio.b.R:60.
+                # The downstream rescaling at lines ~603-606 (`(values - min(uniq)) /
+                # diff(range(uniq))`) normalises {0,1} but cannot recover which factor
+                # level was meant to be the positive class.
+                # Fix shape: add an `eventLevel` option (`type: Level` bound to each
+                # binary Variable, like R/survival.b.R) and encode via
+                # `as.integer(x == event_level)`.
+                # ⚠ NOT a drop-in jmvcore::toNumeric() swap — toNumeric honors the
+                # `values` attribute and has no -1 offset; behavior diverges for
+                # unlabelled R factors.
                 values <- as.numeric(x) - 1
             } else if (is.logical(x)) {
                 values <- as.numeric(x)
@@ -579,19 +606,19 @@ marginalrecurrentClass <- R6::R6Class(
                 if (length(lvl) == 2) {
                     values <- as.numeric(x == lvl[2])
                 } else {
-                    stop(paste(label, "must contain exactly two unique categories."), call. = FALSE)
+                    jmvcore::reject("{} must contain exactly two unique categories.", label)
                 }
             } else {
                 values <- suppressWarnings(as.numeric(x))
             }
 
             if (any(is.na(values))) {
-                stop(paste(label, "contains missing or non-numeric values."), call. = FALSE)
+                jmvcore::reject("{} contains missing or non-numeric values.", label)
             }
 
             uniq <- sort(unique(values))
             if (length(uniq) > 2) {
-                stop(paste(label, "must be binary (two unique values)."), call. = FALSE)
+                jmvcore::reject("{} must be binary (two unique values).", label)
             }
 
             if (!all(uniq %in% c(0, 1))) {
@@ -605,11 +632,11 @@ marginalrecurrentClass <- R6::R6Class(
             values <- as.numeric(round(values))
 
             if (!allow_all_zero && all(values == 0)) {
-                stop(paste(label, "contains no positive events."), call. = FALSE)
+                jmvcore::reject("{} contains no positive events.", label)
             }
 
             if (!all(values %in% c(0, 1))) {
-                stop(paste(label, "coercion failed; ensure the variable only contains two levels."), call. = FALSE)
+                jmvcore::reject("{} coercion failed; ensure the variable only contains two levels.", label)
             }
 
             return(values)

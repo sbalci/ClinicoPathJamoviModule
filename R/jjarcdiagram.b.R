@@ -61,7 +61,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Validate data
             if (nrow(self$data) == 0) {
-                stop(.('Data contains no (complete) rows'))
+                jmvcore::reject(.('Data contains no (complete) rows'))
             }
             
             private$.checkpoint()
@@ -960,8 +960,8 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stats_text <- paste(stats_text,
                     .("<h4>Centrality Measures:</h4>"),
                     "<ul>",
-                    paste(.("<li><strong>Highest Degree:</strong>"), highest_degree_node, " (", round(max_degree, 2), " ", degree_label, ")</li>"),
-                    paste(.("<li><strong>Highest Betweenness:</strong>"), highest_betweenness_node, " (", round(max_betweenness, 2), ")</li>"),
+                    paste(.("<li><strong>Highest Degree:</strong>"), htmltools::htmlEscape(highest_degree_node), " (", round(max_degree, 2), " ", degree_label, ")</li>"),
+                    paste(.("<li><strong>Highest Betweenness:</strong>"), htmltools::htmlEscape(highest_betweenness_node), " (", round(max_betweenness, 2), ")</li>"),
                     "</ul>",
                     sep = "\n"
                 )
@@ -970,10 +970,10 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 centrality_interp <- paste(
                     "<div style='background-color: #fff5f5; padding: 8px; margin: 8px 0; border-left: 4px solid #FF6B6B;'>",
                     sprintf(.("<p><strong> Key Players:</strong> '%s' is the most connected entity (%.2f %s), suggesting it may be a hub or central player.</p>"),
-                            highest_degree_node, max_degree, degree_label),
+                            htmltools::htmlEscape(highest_degree_node), max_degree, degree_label),
                     if (highest_betweenness_node != highest_degree_node) {
                         sprintf(.("<p><strong> Bridge Entity:</strong> '%s' has the highest betweenness centrality, indicating it serves as an important bridge between different network regions.</p>"),
-                                highest_betweenness_node)
+                                htmltools::htmlEscape(highest_betweenness_node))
                     } else {
                         .("<p><strong> Central Hub:</strong> The same entity serves as both the most connected node and the main bridge in the network.</p>")
                     },
@@ -991,7 +991,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stats_text <- paste(stats_text,
                     .("<h4>Group Distribution (Node Counts):</h4>"),
                     "<ul>",
-                    paste("<li><strong>", names(group_counts), ":</strong>", group_counts, .(" nodes"), "</li>", collapse = ""),
+                    paste("<li><strong>", htmltools::htmlEscape(names(group_counts)), ":</strong>", group_counts, .(" nodes"), "</li>", collapse = ""),
                     "</ul>",
                     sep = "\n"
                 )
@@ -1080,10 +1080,10 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Use appropriate label for weighted vs unweighted
                     if (!is.null(igraph::E(network_data$g)$weight) && any(igraph::E(network_data$g)$weight != 1)) {
                         sprintf(.("<p><strong>Key Findings:</strong> The entity '%s' emerged as the most highly connected hub with %.2f weighted connections, suggesting its central role in the network.</p>"),
-                                highest_degree_node, max_degree)
+                                htmltools::htmlEscape(highest_degree_node), max_degree)
                     } else {
                         sprintf(.("<p><strong>Key Findings:</strong> The entity '%s' emerged as the most highly connected hub with %.0f direct connections, suggesting its central role in the network.</p>"),
-                                highest_degree_node, max_degree)
+                                htmltools::htmlEscape(highest_degree_node), max_degree)
                     }
                 } else {
                     ""

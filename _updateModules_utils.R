@@ -217,6 +217,34 @@ check_module_dependencies <- function(module_dir) {
   })
 }
 
+# Prune DESCRIPTION.backup.<timestamp> files older than `days` days.
+# Uses the filename timestamp (not file mtime) so git checkouts / OS-level
+# touches don't accidentally extend the lifespan. Silent on no-op; reports
+# count + paths on actual removal.
+prune_description_backups <- function(module_dir, days = 10) {
+  if (!dir.exists(module_dir)) return(invisible(0L))
+
+  pattern <- "^DESCRIPTION\\.backup\\.([0-9]{8}_[0-9]{6})$"
+  candidates <- list.files(module_dir, pattern = pattern, full.names = TRUE)
+  if (length(candidates) == 0) return(invisible(0L))
+
+  stamps <- regmatches(basename(candidates), regexec(pattern, basename(candidates)))
+  parsed <- vapply(stamps, function(m) if (length(m) == 2) m[[2]] else NA_character_, character(1))
+  times <- as.POSIXct(parsed, format = "%Y%m%d_%H%M%S", tz = "UTC")
+
+  cutoff <- Sys.time() - as.difftime(days, units = "days")
+  stale <- !is.na(times) & times < cutoff
+  if (!any(stale)) return(invisible(0L))
+
+  removed <- file.remove(candidates[stale])
+  n_removed <- sum(removed)
+  if (n_removed > 0) {
+    message("🧹 Pruned ", n_removed, " DESCRIPTION backup(s) older than ", days,
+            " days in ", basename(module_dir))
+  }
+  invisible(n_removed)
+}
+
 # NAMESPACE-DESCRIPTION Synchronization: Check and update DESCRIPTION based on NAMESPACE
 sync_namespace_with_description <- function(module_dir, dry_run = FALSE) {
   namespace_file <- file.path(module_dir, "NAMESPACE")
@@ -274,61 +302,73 @@ sync_namespace_with_description <- function(module_dir, dry_run = FALSE) {
     
     message("📦 Found packages in NAMESPACE: ", paste(imported_packages, collapse = ", "))
     
-    # Read current DESCRIPTION file
-    desc_content <- read.dcf(desc_file)
-    
-    # Get current Imports and Suggests
-    current_imports <- if ("Imports" %in% colnames(desc_content) && !is.na(desc_content[1, "Imports"])) {
-      trimws(strsplit(desc_content[1, "Imports"], ",")[[1]])
-    } else {
-      c()
+    # Read current DESCRIPTION via the `desc` package, which preserves the
+    # multi-line formatting of fields like `Remotes:` that base R's
+    # read.dcf() + write.dcf() round-trip would reflow.
+    if (!requireNamespace("desc", quietly = TRUE)) {
+      warning("❌ The 'desc' package is required for safe DESCRIPTION editing. ",
+              "Install with: install.packages('desc'). Skipping sync for ",
+              basename(module_dir))
+      return(FALSE)
     }
-    
-    current_suggests <- if ("Suggests" %in% colnames(desc_content) && !is.na(desc_content[1, "Suggests"])) {
-      trimws(strsplit(desc_content[1, "Suggests"], ",")[[1]])
-    } else {
-      c()
-    }
-    
-    # Clean package names (remove version specifications)
-    current_imports <- gsub("\\s*\\([^)]*\\)", "", current_imports)
-    current_suggests <- gsub("\\s*\\([^)]*\\)", "", current_suggests)
-    current_imports <- trimws(current_imports[nchar(current_imports) > 0])
-    current_suggests <- trimws(current_suggests[nchar(current_suggests) > 0])
-    
+    d <- desc::desc(file = desc_file)
+
+    # Get current Imports and Suggests as character vectors (version specs included)
+    current_imports_raw <- tryCatch(d$get_list("Imports"), error = function(e) character(0))
+    current_suggests_raw <- tryCatch(d$get_list("Suggests"), error = function(e) character(0))
+
+    # Clean package names (remove version specifications) for comparison
+    strip_versions <- function(x) trimws(gsub("\\s*\\([^)]*\\)", "", x))
+    current_imports <- strip_versions(current_imports_raw)
+    current_suggests <- strip_versions(current_suggests_raw)
+    current_imports <- current_imports[nchar(current_imports) > 0]
+    current_suggests <- current_suggests[nchar(current_suggests) > 0]
+
     # Find missing packages
     all_declared <- c(current_imports, current_suggests)
     missing_packages <- imported_packages[!imported_packages %in% all_declared]
-    
+
     if (length(missing_packages) == 0) {
       message("✅ All NAMESPACE packages are declared in DESCRIPTION for ", basename(module_dir))
       return(TRUE)
     }
-    
+
     message("⚠️ Missing packages in DESCRIPTION for ", basename(module_dir), ": ", paste(missing_packages, collapse = ", "))
-    
+
     if (dry_run) {
       message("🔍 DRY RUN: Would add packages to Imports: ", paste(missing_packages, collapse = ", "))
       return(TRUE)
     }
-    
-    # Add missing packages to Imports
-    updated_imports <- c(current_imports, missing_packages)
-    updated_imports <- unique(updated_imports)
-    updated_imports <- sort(updated_imports)
-    
-    # Update DESCRIPTION content
-    desc_content[1, "Imports"] <- paste(updated_imports, collapse = ",\n    ")
-    
+
+    # Update the Imports field — preserve any existing version specs on
+    # already-declared packages, add bare names for new ones, sort for stable ordering.
+    bare_to_raw <- setNames(current_imports_raw, current_imports)
+    updated_imports_bare <- sort(unique(c(current_imports, missing_packages)))
+    updated_imports_full <- vapply(
+      updated_imports_bare,
+      function(name) if (name %in% names(bare_to_raw)) bare_to_raw[[name]] else name,
+      character(1)
+    )
+    # Write as a clean multi-line block (`Imports:\n    pkg1,\n    pkg2`).
+    # desc::set_list collapses with a header offset that drops the space after
+    # the colon; building the value as a single string with leading newline +
+    # 4-space indent gives the standard CRAN-style formatting.
+    d$set(Imports = paste0("\n    ", paste(updated_imports_full, collapse = ",\n    ")))
+
+    # Prune backups older than 10 days before creating a new one (keeps the
+    # working tree tidy without losing recent rollback options).
+    prune_description_backups(module_dir, days = 10)
+
     # Create backup of original DESCRIPTION
     backup_file <- paste0(desc_file, ".backup.", format(Sys.time(), "%Y%m%d_%H%M%S"))
     file.copy(desc_file, backup_file)
     message("💾 Created backup: ", basename(backup_file))
-    
-    # Write updated DESCRIPTION
-    write.dcf(desc_content, desc_file)
+
+    # Write updated DESCRIPTION. `desc` rewrites only fields it touched and
+    # preserves the original formatting of Remotes, Authors@R, etc.
+    d$write(file = desc_file)
     message("✅ Updated DESCRIPTION for ", basename(module_dir), " - added: ", paste(missing_packages, collapse = ", "))
-    
+
     return(TRUE)
     
   }, error = function(e) {

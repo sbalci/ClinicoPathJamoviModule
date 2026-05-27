@@ -21,16 +21,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .noticesList = NULL,
         # .currentPreset = "basic",
 
-        # Variable name escaping for special characters
-        .escapeVar = function(var) {
-            if (is.null(var)) return(NULL)
-            # Use backticks for variables with spaces/special chars
-            if (grepl("[^A-Za-z0-9_\\.]", var)) {
-                return(paste0("`", var, "`"))
-            }
-            return(var)
-        },
-
         # Notice accumulation system (HTML-based, avoids serialization issues)
         .addNotice = function(message, type = "INFO") {
             if (is.null(private$.noticesList)) {
@@ -142,14 +132,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check variable existence with better context
             if (!(self$options$dep %in% names(self$data))) {
-                available_vars <- paste(names(self$data), collapse=", ")
-                private$.addNotice(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid continuous variable for the dependent variable.', self$options$dep, available_vars), "ERROR")
+                available_vars <- htmltools::htmlEscape(paste(names(self$data), collapse=", "))
+                private$.addNotice(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid continuous variable for the dependent variable.', htmltools::htmlEscape(self$options$dep), available_vars), "ERROR")
                 return(FALSE)
             }
 
             if (!(self$options$group %in% names(self$data))) {
-                available_vars <- paste(names(self$data), collapse=", ")
-                private$.addNotice(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid grouping variable.', self$options$group, available_vars), "ERROR")
+                available_vars <- htmltools::htmlEscape(paste(names(self$data), collapse=", "))
+                private$.addNotice(sprintf('Variable "%s" not found in data. Available variables: %s. Please select a valid grouping variable.', htmltools::htmlEscape(self$options$group), available_vars), "ERROR")
                 return(FALSE)
             }
 
@@ -176,7 +166,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             min_group_n <- min(group_sizes)
             if (min_group_n < 10) {
                 min_group_name <- names(which.min(group_sizes))
-                private$.addNotice(sprintf('Very small group sizes detected (minimum n = %d in group "%s"). Groups with n < 10 may produce unreliable test results. Consider combining groups or collecting more data.', min_group_n, min_group_name), "STRONG_WARNING")
+                private$.addNotice(sprintf('Very small group sizes detected (minimum n = %d in group "%s"). Groups with n < 10 may produce unreliable test results. Consider combining groups or collecting more data.', min_group_n, htmltools::htmlEscape(min_group_name)), "STRONG_WARNING")
             }
 
             # Validate centrality parameter consistency
@@ -209,6 +199,18 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$todo$setContent(paste(private$.messages, collapse = ""))
         },
         
+        # TODO (security): Dead helpers below have latent D1 XSS — callers at
+        #   `.run()` L843-845 are commented out, so this is not currently reachable.
+        #   If uncommented, the following sites interpolate user column names and
+        #   factor-level values into HTML without htmltools::htmlEscape:
+        #     - .generateClinicalInterpretation L243 (group factor levels),
+        #       L249-258 (factor levels), L272-275 (dep_var/group_var)
+        #     - .checkAssumptions L363-364 (names(group_counts) — factor levels)
+        #     - .generateReportSentence L450 (dep_var, group_var)
+        #   Before uncommenting any `.run()` call, wrap user-controlled tokens
+        #   with htmltools::htmlEscape() at the glue/sprintf sources, matching
+        #   the pattern applied in `.addNotice` / `.accumulateMessage` callers.
+
         # Clinical interpretation helper
         .generateClinicalInterpretation = function(mydata) {
             dep_var <- self$options$dep
@@ -388,6 +390,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
         
+        # TODO (cleanup): Commented-out preset infrastructure is dead code —
+        #   `.applyClinicalPreset` below (L382-405 of original), `.generateGuidedSteps`
+        #   (L462-480), `.generateRecommendations` (L483-527), the `.currentPreset`
+        #   field declaration at L22, and the `.run()` body calls at L843-849.
+        #   Either remove entirely or revive (and apply XSS escaping per the
+        #   `# TODO (security)` note at .generateClinicalInterpretation).
+
         # Clinical preset application
         # .applyClinicalPreset = function() {
         #     preset <- self$options$clinicalPreset
@@ -543,12 +552,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (length(num_vals) < 3) {
                 private$.accumulateMessage(
-                    glue::glue("<br> Warning: {dep_var} has less than 3 valid observations<br>")
+                    glue::glue("<br> Warning: {dep_var} has less than 3 valid observations<br>",
+                               dep_var = htmltools::htmlEscape(dep_var))
                 )
             }
             if (length(unique(num_vals)) < 2) {
                 private$.accumulateMessage(
-                    glue::glue("<br> Warning: {dep_var} has no variation (all values are the same)<br>")
+                    glue::glue("<br> Warning: {dep_var} has no variation (all values are the same)<br>",
+                               dep_var = htmltools::htmlEscape(dep_var))
                 )
             }
         },
@@ -566,7 +577,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outliers <- which(data[[var]] < (Q1 - 1.5 * IQR) | data[[var]] > (Q3 + 1.5 * IQR))
                 if (length(outliers) > 0) {
                     private$.accumulateMessage(
-                        glue::glue("<br> {length(outliers)} potential outlier(s) detected in {var}<br>")
+                        glue::glue("<br> {length(outliers)} potential outlier(s) detected in {var}<br>",
+                                   var = htmltools::htmlEscape(var))
                     )
                 }
             }
@@ -858,7 +870,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # private$.generateGuidedSteps()
                     # private$.generateRecommendations()
                 }, error = function(e) {
-                    private$.addNotice(sprintf('Data processing failed: %s. Please check your variable selections and try again.', e$message), "ERROR")
+                    private$.addNotice(sprintf('Data processing failed: %s. Please check your variable selections and try again.', htmltools::htmlEscape(e$message)), "ERROR")
                     return()
                 })
 
@@ -886,8 +898,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot <- tryCatch({
                 ggstatsplot::ggbetweenstats(
                     data = mydata,
-                    x = !!rlang::sym(private$.escapeVar(options_data$group)),
-                    y = !!rlang::sym(private$.escapeVar(options_data$dep)),
+                    x = !!rlang::sym(options_data$group),
+                    y = !!rlang::sym(options_data$dep),
                     title = options_data$mytitle,
                     xlab = options_data$xlab,
                     ylab = options_data$ylab,
@@ -903,7 +915,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
                 )
             }, error = function(e) {
-                private$.addNotice(sprintf('Plot generation failed: %s. Please check your data for issues (constant variables, insufficient variation, or extreme outliers) or try a different statistical test.', e$message), "ERROR")
+                private$.addNotice(sprintf('Plot generation failed: %s. Please check your data for issues (constant variables, insufficient variation, or extreme outliers) or try a different statistical test.', htmltools::htmlEscape(e$message)), "ERROR")
                 return(NULL)
             })
 
@@ -956,8 +968,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot2 <- tryCatch({
                     ggstatsplot::grouped_ggbetweenstats(
                         data = mydata,
-                        x = !!rlang::sym(private$.escapeVar(options_data$group)),
-                        y = !!rlang::sym(private$.escapeVar(options_data$dep)),
+                        x = !!rlang::sym(options_data$group),
+                        y = !!rlang::sym(options_data$dep),
                         grouping.var = !!rlang::sym(grvar),
                         type = options_data$typestatistics,
                         effsize.type = options_data$effsizetype,
@@ -974,7 +986,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         title = options_data$mytitle
                     )
                 }, error = function(e) {
-                    private$.addNotice(sprintf('Grouped plot generation failed: %s. Please check your grouping variable and data.', e$message), "ERROR")
+                    private$.addNotice(sprintf('Grouped plot generation failed: %s. Please check your grouping variable and data.', htmltools::htmlEscape(e$message)), "ERROR")
                     return(NULL)
                 })
 
@@ -1005,23 +1017,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(dep) || is.null(group))
                 return('')
 
-            # Escape dep variable
-            dep_escaped <- if (!is.null(dep) && !identical(make.names(dep), dep)) {
-                paste0('`', dep, '`')
-            } else {
-                dep
-            }
-
-            # Escape group variable
-            group_escaped <- if (!is.null(group) && !identical(make.names(group), group)) {
-                paste0('`', group, '`')
-            } else {
-                group
-            }
-
-            # Build arguments
-            dep_arg <- paste0('dep = "', dep_escaped, '"')
-            group_arg <- paste0('group = "', group_escaped, '"')
+            # Build arguments — deparse emits valid R string literal with
+            # proper escaping for embedded quotes/backslashes/special chars
+            dep_arg <- paste0('dep = ', deparse(dep))
+            group_arg <- paste0('group = ', deparse(group))
 
             # Get other arguments using base helper (if available)
             args <- ''

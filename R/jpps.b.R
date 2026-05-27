@@ -247,7 +247,17 @@ jppsClass <- R6::R6Class(
             # Apply sample size limit if specified
             sample_size <- self$options$sample_size
             if (sample_size > 0 && nrow(clean_data) > sample_size) {
-                set.seed(123)  # For reproducibility
+                # Save/restore RNG state so this set.seed doesn't pollute the user's
+                # global R session — reproducible subsampling within this run, without
+                # affecting any other analysis in the same session
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                                get(".Random.seed", envir = .GlobalEnv)
+                            else NULL
+                on.exit({
+                    if (!is.null(old_seed)) assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                    else if (exists(".Random.seed", envir = .GlobalEnv)) rm(".Random.seed", envir = .GlobalEnv)
+                }, add = TRUE)
+                set.seed(123)  # For reproducibility (now scoped to this function)
                 clean_data <- clean_data[sample(nrow(clean_data), sample_size), ]
             }
             
@@ -267,6 +277,13 @@ jppsClass <- R6::R6Class(
                    current_options_hash == private$.options_hash)
         },
         
+        # TODO (correctness): the hash below is fragile — `data_info$sample_sum`
+        # only sums the first 5 complete rows, so mutations to row 6+ won't
+        # invalidate the cache and downstream code will reuse stale results.
+        # Replace with content-based invalidation:
+        #   digest::digest(list(vars_to_use, data_subset[complete.cases(data_subset), ]),
+        #                  algo = "md5")
+        # Matches the pattern in jjpiestats/.processedData and post-audit jjtreemap.
         .calculateDataHash = function() {
             # Create a hash based on the data and selected variables
             analysis_type <- self$options$analysis_type
@@ -341,10 +358,14 @@ jppsClass <- R6::R6Class(
                 algorithm <- self$options$algorithm
                 cv_folds <- self$options$cv_folds
                 
+                # TODO (cleanup): identity switch below (every arm returns the
+                # input verbatim). Replace with `algo <- algorithm` or add validation
+                # via `match.arg(algorithm, c("tree", "forest", "auto"))` if the intent
+                # is to reject unknown values explicitly.
                 # Set algorithm
                 algo <- switch(algorithm,
                     "tree" = "tree",
-                    "forest" = "forest", 
+                    "forest" = "forest",
                     "auto" = "auto"
                 )
                 
@@ -429,10 +450,11 @@ jppsClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
+                # htmlEscape e$message — ppsr errors may include user column-name fragments
                 self$results$instructions$setContent(
                     paste0("<div style='padding: 20px; color: #d32f2f;'>
                     <strong> PPS Analysis Error</strong><br>
-                    ", e$message, "
+                    ", htmltools::htmlEscape(e$message), "
                     </div>")
                 )
                 private$.pps_results <- NULL

@@ -67,6 +67,37 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 missing_packages <- c(missing_packages, "survival")
             }
             
+            # TODO (correctness): file-wide `jmvcore::format(template, list(name=value))`
+            # pattern silently fails to interpolate — emits "…" placeholders instead of
+            # actual values. Empirical confirmation:
+            #   > jmvcore::format("Found {n}", list(n = 3))   → "Found …"
+            #   > jmvcore::format("Found {n}", n = 3)         → "Found 3"
+            # Reason: jmvcore::format reads `...` as positional args and does NOT
+            # auto-unwrap a single-list arg, so the inner list() becomes one ignored
+            # positional value and named {n}, {levels}, {pkgs}, {cmd}, {msg} etc. all
+            # resolve to the "…" fallback (see deparse(jmvcore::format), the named-arg
+            # branch checks `name %in% names(args)` where names(args) is "" because
+            # the outer ... wasn't named).
+            #
+            # Project-wide scan (2026-05-27): lassocox.b.R is the ONLY file in this
+            # codebase using this broken pattern. 23 affected sites in this file.
+            # To enumerate the current sites, run:
+            #   grep -nE 'jmvcore::format\\(' R/lassocox.b.R |
+            #     awk '/jmvcore::format/,/\\)/'  # then keep lines that also contain "list("
+            # (or use the paren-balanced awk script in the audit chat for an exact count).
+            #
+            # Fix shape per site — drop the format() wrapper, pass placeholders as
+            # named `...` args directly (jmvcore::reject forwards them to format()):
+            #   # broken (current)
+            #   jmvcore::reject(jmvcore::format(.('Found {n}'), list(n = v)))
+            #   # correct
+            #   jmvcore::reject(.('Found {n}'), n = v)
+            # And for the format-only sites that feed setContent (e.g. lines 73, 1195),
+            # call format() directly with named args: jmvcore::format(.('…{n}…'), n = v).
+            #
+            # Behavior change: users currently see "…" in error/info messages; after
+            # the fix they'll see the actual values. Defer to a dedicated correctness
+            # pass — not appropriate for a drop-in jamovify migration.
             if (length(missing_packages) > 0) {
                 pkg_list <- paste(missing_packages, collapse = ", ")
                 install_cmd <- paste0("install.packages(c(", paste0("'", missing_packages, "'", collapse = ", "), "))")
@@ -193,7 +224,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # Display collected warnings in results panel
                     if (length(collected_warnings) > 0) {
-                        warn_items <- paste0("<li>", collected_warnings, "</li>",
+                        warn_items <- paste0("<li>", htmltools::htmlEscape(collected_warnings), "</li>",
                                              collapse = "")
                         warn_html <- paste0(
                             "<div class='alert alert-warning'>",
@@ -209,7 +240,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     error_msg <- paste0(
                         "<div class='alert alert-danger'>",
                         "<h4>", .("Analysis Error"), "</h4>",
-                        "<p><strong>", .("Error:"), "</strong> ", e$message, "</p>",
+                        "<p><strong>", .("Error:"), "</strong> ", htmltools::htmlEscape(e$message), "</p>",
                         "<p>", .("Please check your data and variable selections."), "</p>",
                         "</div>"
                     )
@@ -252,7 +283,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Validate predictors
             if (length(explanatory_vars) < 2) {
-                stop(.("At least 2 explanatory variables are required for Lasso regression."))
+                jmvcore::reject(.("At least 2 explanatory variables are required for Lasso regression."))
             }
 
             # Extract core variables
@@ -270,7 +301,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 outcome_chr <- as.character(outcome_raw)
                 observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
                 if (length(observed_levels) < 2) {
-                    stop(jmvcore::format(.('Outcome variable must have at least 2 observed values. Found {n} level(s): {levels}'),
+                    # See file-wide TODO (correctness) near line 73 — broken format-list pattern.
+                    jmvcore::reject(jmvcore::format(.('Outcome variable must have at least 2 observed values. Found {n} level(s): {levels}'),
                         list(n = length(observed_levels), levels = paste(observed_levels, collapse = ", "))))
                 }
 
@@ -281,7 +313,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else {
                     event_level_used <- as.character(outcome_level_opt)
                     if (!(event_level_used %in% observed_levels)) {
-                        stop(jmvcore::format(.("Selected event level ('{level}') is not present in observed outcome data."),
+                        jmvcore::reject(jmvcore::format(.("Selected event level ('{level}') is not present in observed outcome data."),
                             list(level = event_level_used)))
                     }
                 }
@@ -292,19 +324,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Default: first observed level that is not the event level
                     remaining <- setdiff(observed_levels, event_level_used)
                     if (length(remaining) == 0) {
-                        stop(.("Cannot determine censored level: all observed levels equal the event level."))
+                        jmvcore::reject(.("Cannot determine censored level: all observed levels equal the event level."))
                     }
                     censor_level_used <- remaining[1]
                 } else {
                     censor_level_used <- as.character(censor_level_opt)
                     if (!(censor_level_used %in% observed_levels)) {
-                        stop(jmvcore::format(.("Selected censored level ('{level}') is not present in observed outcome data."),
+                        jmvcore::reject(jmvcore::format(.("Selected censored level ('{level}') is not present in observed outcome data."),
                             list(level = censor_level_used)))
                     }
                 }
 
                 if (event_level_used == censor_level_used) {
-                    stop(.("Event level and censored level must be different."))
+                    jmvcore::reject(.("Event level and censored level must be different."))
                 }
 
                 # Strict two-level encoding: only recognized levels get 0/1
@@ -325,7 +357,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 outcome_num <- jmvcore::toNumeric(outcome_raw)
                 observed_levels <- sort(unique(outcome_num[!is.na(outcome_num)]))
                 if (length(observed_levels) < 2) {
-                    stop(jmvcore::format(.('Numeric outcome must have at least 2 observed values. Found: {values}'),
+                    jmvcore::reject(jmvcore::format(.('Numeric outcome must have at least 2 observed values. Found: {values}'),
                         list(values = paste(observed_levels, collapse = ", "))))
                 }
 
@@ -334,7 +366,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (!is.null(outcome_level_opt) && nzchar(as.character(outcome_level_opt))) {
                     event_level_num <- suppressWarnings(as.numeric(outcome_level_opt))
                     if (is.na(event_level_num) || !(event_level_num %in% observed_levels)) {
-                        stop(.("For numeric outcomes, Event Level must be one of the observed outcome values."))
+                        jmvcore::reject(.("For numeric outcomes, Event Level must be one of the observed outcome values."))
                     }
                 } else if (all(observed_levels %in% c(0, 1))) {
                     event_level_num <- 1
@@ -347,7 +379,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (!is.null(censor_level_opt) && nzchar(as.character(censor_level_opt))) {
                     censor_level_num <- suppressWarnings(as.numeric(censor_level_opt))
                     if (is.na(censor_level_num) || !(censor_level_num %in% observed_levels)) {
-                        stop(.("For numeric outcomes, Censored Level must be one of the observed outcome values."))
+                        jmvcore::reject(.("For numeric outcomes, Censored Level must be one of the observed outcome values."))
                     }
                 } else if (all(observed_levels %in% c(0, 1))) {
                     censor_level_num <- 0
@@ -356,7 +388,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 if (event_level_num == censor_level_num) {
-                    stop(.("Event level and censored level must be different."))
+                    jmvcore::reject(.("Event level and censored level must be different."))
                 }
 
                 event_level_used <- as.character(event_level_num)
@@ -394,7 +426,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     list(vars = paste(constant_var_names, collapse = ", "))))
             }
             if (ncol(predictors) == 0) {
-                stop(.("No valid explanatory variables remain after removing constant predictors."))
+                jmvcore::reject(.("No valid explanatory variables remain after removing constant predictors."))
             }
             if (ncol(predictors) == 1) {
                 warning(.("Only one non-constant explanatory variable remains; LASSO selection is limited."))
@@ -406,7 +438,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_excluded <- length(complete) - n_complete
 
             if (n_complete < 10) {
-                stop(jmvcore::format(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
+                jmvcore::reject(jmvcore::format(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
                     list(n = n_complete)))
             }
             if (n_excluded > 0) {
@@ -418,10 +450,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             status_cc <- status[complete]
 
             if (any(!is.finite(time_cc))) {
-                stop(.("Time variable contains non-finite values after filtering. Please correct the input."))
+                jmvcore::reject(.("Time variable contains non-finite values after filtering. Please correct the input."))
             }
             if (any(time_cc < 0, na.rm = TRUE)) {
-                stop(.("Time variable contains negative values. Survival times must be non-negative."))
+                jmvcore::reject(.("Time variable contains negative values. Survival times must be non-negative."))
             }
             if (any(time_cc == 0, na.rm = TRUE)) {
                 warning(.("Time variable contains zero values. Consider adding a small constant if convergence issues occur."))
@@ -429,12 +461,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Outcome must remain binary after complete-case filtering
             if (!(length(unique(status_cc)) == 2 && all(unique(status_cc) %in% c(0, 1)))) {
-                stop(.("Outcome is not binary after complete-case filtering. Check event level and missing-data pattern."))
+                jmvcore::reject(.("Outcome is not binary after complete-case filtering. Check event level and missing-data pattern."))
             }
 
             n_events <- sum(status_cc == 1)
             if (n_events < 5) {
-                stop(jmvcore::format(.('Too few events for analysis ({n}). Need at least 5 events for reliable estimation.'),
+                jmvcore::reject(jmvcore::format(.('Too few events for analysis ({n}). Need at least 5 events for reliable estimation.'),
                     list(n = n_events)))
             }
 
@@ -452,7 +484,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     for (var_name in names(factor_vars)[factor_vars]) {
                         factor_levels <- length(unique(predictors[complete, var_name]))
                         if (factor_levels < 2) {
-                            stop(jmvcore::format(.("Factor variable '{var}' has insufficient variation in complete cases."),
+                            jmvcore::reject(jmvcore::format(.("Factor variable '{var}' has insufficient variation in complete cases."),
                                 list(var = var_name)))
                         }
                     }
@@ -460,18 +492,18 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 X <- model.matrix(~ ., data = predictors[complete, , drop = FALSE])[, -1, drop = FALSE]
                 if (ncol(X) == 0) {
-                    stop(.("No valid predictors remaining after model-matrix encoding."))
+                    jmvcore::reject(.("No valid predictors remaining after model-matrix encoding."))
                 }
 
                 valid_cols <- apply(X, 2, function(col) {
                     !all(is.na(col)) && is.finite(var(col, na.rm = TRUE)) && var(col, na.rm = TRUE) > 0
                 })
                 if (!any(valid_cols)) {
-                    stop(.("No valid predictors after removing degenerate design-matrix columns."))
+                    jmvcore::reject(.("No valid predictors after removing degenerate design-matrix columns."))
                 }
                 X <- X[, valid_cols, drop = FALSE]
             }, error = function(e) {
-                stop(jmvcore::format(.('Error creating design matrix: {msg}. Check factor coding and missing values.'),
+                jmvcore::reject(jmvcore::format(.('Error creating design matrix: {msg}. Check factor coding and missing values.'),
                     list(msg = e$message)))
             })
 
@@ -492,7 +524,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             if (any(is.infinite(X))) {
-                stop(.("Design matrix contains infinite values. Check for extreme outliers."))
+                jmvcore::reject(.("Design matrix contains infinite values. Check for extreme outliers."))
             }
 
             return(list(
@@ -573,7 +605,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Validate package availability
             if (!requireNamespace("glmnet", quietly = TRUE) ||
                 !requireNamespace("survival", quietly = TRUE)) {
-                stop(.("Required packages 'glmnet' and 'survival' not available"))
+                jmvcore::reject(.("Required packages 'glmnet' and 'survival' not available"))
             }
             
             # Create survival object
@@ -581,7 +613,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Validate survival object
             if (any(is.na(y))) {
-                stop(.("Invalid survival object. Check time and status variables."))
+                jmvcore::reject(.("Invalid survival object. Check time and status variables."))
             }
 
             # Set up cross-validation parameters
@@ -632,11 +664,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Check if cross-validation succeeded
                 if (is.null(cv_fit$lambda.min) || is.na(cv_fit$lambda.min)) {
-                    stop(.("Cross-validation failed. Check data quality and sample size."))
+                    jmvcore::reject(.("Cross-validation failed. Check data quality and sample size."))
                 }
                 
             }, error = function(e) {
-                stop(jmvcore::format(.('Error in cross-validation: {msg}'), list(msg = e$message)))
+                jmvcore::reject(jmvcore::format(.('Error in cross-validation: {msg}'), list(msg = e$message)))
             })
             
             # Get optimal lambda based on user selection
@@ -658,7 +690,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 
             }, error = function(e) {
-                stop(jmvcore::format(.('Error fitting final model: {msg}'), list(msg = e$message)))
+                jmvcore::reject(jmvcore::format(.('Error fitting final model: {msg}'), list(msg = e$message)))
             })
             
             # Extract coefficients and selected variables
@@ -725,7 +757,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 risk_groups <- private$.makeBinaryRiskGroups(risk_scores)
                 if (is.null(risk_groups)) {
-                    stop(.("Unable to form two risk groups from risk scores."))
+                    jmvcore::reject(.("Unable to form two risk groups from risk scores."))
                 }
                 
                 # Log-rank test
@@ -835,9 +867,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 refit_df$.status <- results$data$status
                 # Only refit if p < n (standard Cox requires this)
                 if (ncol(selected_X) < nrow(selected_X)) {
-                    refit_formula <- as.formula(paste0(
-                        "survival::Surv(.time, .status) ~ ",
-                        paste0("`", colnames(selected_X), "`", collapse = " + ")
+                    # Backtick-escape user-controlled predictor names via composeTerms,
+                    # and parse via jmvcore::asFormula() to block code-injection. Surv is
+                    # globally allow-listed; drop the survival:: prefix (the validator's
+                    # name regex doesn't permit `::`-namespaced calls).
+                    refit_formula <- jmvcore::asFormula(paste0(
+                        "Surv(.time, .status) ~ ",
+                        jmvcore::composeTerms(as.list(colnames(selected_X)))
                     ))
                     refit_cox <- survival::coxph(refit_formula, data = refit_df)
                     refit_summary <- summary(refit_cox)
@@ -1094,7 +1130,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 risk_groups <- private$.makeBinaryRiskGroups(state$risk_scores)
                 if (is.null(risk_groups)) {
-                    stop(.("Unable to create two risk groups from risk scores."))
+                    jmvcore::reject(.("Unable to create two risk groups from risk scores."))
                 }
 
                 # Check if we have valid data
@@ -1782,7 +1818,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         idx <- which(abs(cor_matrix) >= cor_vals[min(3, length(cor_vals))] & upper.tri(cor_matrix), arr.ind = TRUE)
                         for (k in seq_len(min(3, nrow(idx)))) {
                             top_pairs <- c(top_pairs,
-                                sprintf("%s & %s (r=%.2f)", col_names[idx[k, 1]], col_names[idx[k, 2]],
+                                sprintf("%s & %s (r=%.2f)",
+                                        htmltools::htmlEscape(col_names[idx[k, 1]]),
+                                        htmltools::htmlEscape(col_names[idx[k, 2]]),
                                         cor_matrix[idx[k, 1], idx[k, 2]]))
                         }
                     }
@@ -1873,9 +1911,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 check_df <- as.data.frame(data$X[, top_cols, drop = FALSE])
                 check_df$.time <- data$time
                 check_df$.status <- data$status
-                check_formula <- as.formula(paste0(
-                    "survival::Surv(.time, .status) ~ ",
-                    paste0("`", colnames(data$X)[top_cols], "`", collapse = " + ")
+                # Backtick-escape user-controlled predictor names via composeTerms,
+                # and parse via jmvcore::asFormula(). Surv is globally allow-listed;
+                # drop the survival:: prefix.
+                check_formula <- jmvcore::asFormula(paste0(
+                    "Surv(.time, .status) ~ ",
+                    jmvcore::composeTerms(as.list(colnames(data$X)[top_cols]))
                 ))
                 check_cox <- survival::coxph(check_formula, data = check_df)
                 ph_test <- survival::cox.zph(check_cox)
@@ -2082,7 +2123,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Build selected variable list
             if (n_selected > 0) {
                 var_names <- results$data$variable_names[results$selected_vars]
-                var_list <- paste(var_names, collapse = ", ")
+                var_list <- paste(htmltools::htmlEscape(var_names), collapse = ", ")
             } else {
                 var_list <- .("none")
             }

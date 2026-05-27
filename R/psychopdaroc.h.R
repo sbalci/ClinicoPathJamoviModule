@@ -6,6 +6,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            manualRun = FALSE,
+            run = FALSE,
             clinicalMode = "basic",
             dependentVars = NULL,
             classVar = NULL,
@@ -89,6 +91,13 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 requiresData=TRUE,
                 ...)
 
+            private$..manualRun <- jmvcore::OptionBool$new(
+                "manualRun",
+                manualRun,
+                default=FALSE)
+            private$..run <- jmvcore::OptionAction$new(
+                "run",
+                run)
             private$..clinicalMode <- jmvcore::OptionList$new(
                 "clinicalMode",
                 clinicalMode,
@@ -514,6 +523,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 overrideMetaAnalysisWarning,
                 default=FALSE)
 
+            self$.addOption(private$..manualRun)
+            self$.addOption(private$..run)
             self$.addOption(private$..clinicalMode)
             self$.addOption(private$..dependentVars)
             self$.addOption(private$..classVar)
@@ -592,6 +603,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..overrideMetaAnalysisWarning)
         }),
     active = list(
+        manualRun = function() private$..manualRun$value,
+        run = function() private$..run$value,
         clinicalMode = function() private$..clinicalMode$value,
         dependentVars = function() private$..dependentVars$value,
         classVar = function() private$..classVar$value,
@@ -669,6 +682,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         forestPlot = function() private$..forestPlot$value,
         overrideMetaAnalysisWarning = function() private$..overrideMetaAnalysisWarning$value),
     private = list(
+        ..manualRun = NA,
+        ..run = NA,
         ..clinicalMode = NA,
         ..dependentVars = NA,
         ..classVar = NA,
@@ -1909,7 +1924,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaROC",
-                version = c(0,0,37),
+                version = c(0,0,38),
                 options = options,
                 results = psychopdaROCResults$new(options=options),
                 data = data,
@@ -1927,6 +1942,10 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Receiver Operating Characteristic (ROC) curve analysis with optimal 
 #' cutpoint determination.
 #' 
+#' @param manualRun When TRUE, results are only computed after clicking the
+#'   Run button. Useful for skipping intermediate recomputes while adjusting
+#'   options on slow bootstrap or cutpoint analyses.
+#' @param run .
 #' @param clinicalMode Select the complexity level of analysis: Basic -
 #'   Essential ROC metrics for clinical decision making Advanced - Additional
 #'   statistical comparisons and metrics Comprehensive - Full research-grade
@@ -2149,6 +2168,8 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @export
 psychopdaROC <- function(
+    manualRun = FALSE,
+    run = FALSE,
     clinicalMode = "basic",
     data,
     dependentVars,
@@ -2244,6 +2265,8 @@ psychopdaROC <- function(
     for (v in subGroup) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- psychopdaROCOptions$new(
+        manualRun = manualRun,
+        run = run,
         clinicalMode = clinicalMode,
         dependentVars = dependentVars,
         classVar = classVar,

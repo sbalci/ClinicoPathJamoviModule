@@ -24,6 +24,15 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$performance$setVisible(FALSE)
         },
         
+        # TODO (correctness): the hash methods below are fragile:
+        # (1) `.calculateDataHash` uses `paste(nrow, ncol, var_names, range(...))` —
+        #     mutations within the min/max range (row shuffling, value changes that
+        #     preserve extremes) won't invalidate the cache → stale results possible.
+        # (2) `.calculateOptionsHash` uses `paste(options_list, collapse = "_")` —
+        #     option values with colliding string representations would yield same hash.
+        # Recommend content-based invalidation matching jjpiestats/jjtreemap pattern:
+        #   digest::digest(list(var_names, self$data[, var_names, drop = FALSE]), algo = "md5")
+        #   digest::digest(options_list, algo = "md5")
         # Performance optimization methods
         .calculateDataHash = function() {
             if (is.null(self$data) || nrow(self$data) == 0) {
@@ -158,7 +167,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Check if scattermore package is available
             if (!requireNamespace('scattermore', quietly = TRUE)) {
-                stop('The scattermore package is required but not installed. Please install it using install.packages("scattermore")')
+                jmvcore::reject(.('The scattermore package is required but not installed. Please install it using install.packages("scattermore")'))
             }
             
             # Performance optimization: check if we can use cached results
@@ -307,8 +316,9 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             tryCatch({
                 
-                # Create base ggplot
-                p <- ggplot2::ggplot(data, ggplot2::aes_string(x = x_var, y = y_var))
+                # Create base ggplot (aes_string is deprecated and uses parse(text=)
+                # internally — RCE risk for user-controlled column names; use .data pronoun)
+                p <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]]))
                 
                 # Add scattermore layer based on plot type
                 if (options$plot_type == 'ggplot2_opt') {
@@ -329,20 +339,20 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     )
                 }
                 
-                # Add color mapping if specified
+                # Add color mapping if specified (use .data pronoun, NOT aes_string)
                 if (!is.null(options$color_var)) {
                     if (is.numeric(data[[options$color_var]])) {
-                        p <- p + ggplot2::aes_string(color = options$color_var)
+                        p <- p + ggplot2::aes(color = .data[[options$color_var]])
                         p <- p + ggplot2::scale_color_viridis_c(option = options$color_palette)
                     } else {
-                        p <- p + ggplot2::aes_string(color = options$color_var)
+                        p <- p + ggplot2::aes(color = .data[[options$color_var]])
                         p <- p + ggplot2::scale_color_viridis_d(option = options$color_palette)
                     }
                 }
-                
-                # Add size mapping if specified
+
+                # Add size mapping if specified (use .data pronoun, NOT aes_string)
                 if (!is.null(options$size_var)) {
-                    p <- p + ggplot2::aes_string(size = options$size_var)
+                    p <- p + ggplot2::aes(size = .data[[options$size_var]])
                 }
                 
                 # Add smooth line if requested
@@ -360,9 +370,10 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     p <- p + ggplot2::stat_density_2d(alpha = 0.5)
                 }
                 
-                # Add faceting if specified
+                # Add faceting if specified (composeTerm backtick-escapes user column
+                # name; asFormula allowlist-validates against parser injection)
                 if (!is.null(options$facet_var)) {
-                    p <- p + ggplot2::facet_wrap(~ get(options$facet_var))
+                    p <- p + ggplot2::facet_wrap(jmvcore::asFormula(paste0("~", jmvcore::composeTerm(options$facet_var))))
                 }
                 
                 # Apply theme
@@ -441,13 +452,17 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .generateSummary = function(data, x_var, y_var, render_time) {
-            
+
             # Calculate summary statistics
             n_points <- nrow(data)
             x_stats <- summary(data[[x_var]])
             y_stats <- summary(data[[y_var]])
             correlation <- cor(data[[x_var]], data[[y_var]], use = "complete.obs")
-            
+
+            # htmlEscape user column names before HTML table interpolation
+            x_var_safe <- htmltools::htmlEscape(x_var)
+            y_var_safe <- htmltools::htmlEscape(y_var)
+
             # Generate HTML summary
             summary_html <- paste(
                 "<h3>High-Performance Scatter Plot Summary</h3>",
@@ -457,7 +472,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 paste0("<li>Rendering time: ", round(render_time, 4), " seconds</li>"),
                 paste0("<li>Performance: ", round(n_points / render_time, 0), " points/second</li>"),
                 "</ul>",
-                
+
                 "<p><strong>Variable Statistics:</strong></p>",
                 "<table style='border-collapse: collapse; width: 100%;'>",
                 "<tr style='background-color: #f2f2f2;'>",
@@ -467,12 +482,12 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<th style='border: 1px solid #ddd; padding: 8px;'>Mean</th>",
                 "<th style='border: 1px solid #ddd; padding: 8px;'>Max</th>",
                 "</tr>",
-                paste0("<tr><td style='border: 1px solid #ddd; padding: 8px;'>", x_var, "</td>",
+                paste0("<tr><td style='border: 1px solid #ddd; padding: 8px;'>", x_var_safe, "</td>",
                       "<td style='border: 1px solid #ddd; padding: 8px;'>", round(x_stats["Min."], 3), "</td>",
                       "<td style='border: 1px solid #ddd; padding: 8px;'>", round(x_stats["Median"], 3), "</td>",
                       "<td style='border: 1px solid #ddd; padding: 8px;'>", round(x_stats["Mean"], 3), "</td>",
                       "<td style='border: 1px solid #ddd; padding: 8px;'>", round(x_stats["Max."], 3), "</td></tr>"),
-                paste0("<tr><td style='border: 1px solid #ddd; padding: 8px;'>", y_var, "</td>",
+                paste0("<tr><td style='border: 1px solid #ddd; padding: 8px;'>", y_var_safe, "</td>",
                       "<td style='border: 1px solid #ddd; padding: 8px;'>", round(y_stats["Min."], 3), "</td>",
                       "<td style='border: 1px solid #ddd; padding: 8px;'>", round(y_stats["Median"], 3), "</td>",
                       "<td style='border: 1px solid #ddd; padding: 8px;'>", round(y_stats["Mean"], 3), "</td>",

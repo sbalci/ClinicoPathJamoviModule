@@ -4,7 +4,6 @@
 #' @import survival
 #' @import survminer
 #' @import ggplot2
-#' @import dplyr
 #'
 
 mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
@@ -71,12 +70,21 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 analysis_data$group <- data[[explanatory_name]]
             }
             
-            # Handle outcome coding
+            # Handle outcome coding — honor jamovi values attribute on labelled factors
             outcome_level <- self$options$outcomeLevel
-            if (is.character(analysis_data$event)) {
-                analysis_data$event <- ifelse(analysis_data$event == outcome_level, 1, 0)
+            if (is.factor(analysis_data$event)) {
+                event_numeric <- jmvcore::toNumeric(analysis_data$event)
+                level_value <- suppressWarnings(as.numeric(outcome_level))
+                if (!is.na(level_value)) {
+                    analysis_data$event <- as.integer(event_numeric == level_value)
+                } else {
+                    analysis_data$event <- as.integer(as.character(analysis_data$event) == outcome_level)
+                }
+            } else if (is.character(analysis_data$event)) {
+                analysis_data$event <- as.integer(analysis_data$event == outcome_level)
             } else {
-                analysis_data$event <- ifelse(analysis_data$event == as.numeric(outcome_level), 1, 0)
+                level_value <- suppressWarnings(as.numeric(outcome_level))
+                analysis_data$event <- as.integer(analysis_data$event == level_value)
             }
             
             # Remove missing values
@@ -137,8 +145,13 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             # Handle different confidence interval methods
             if (conf_method != "brookmeyer_crowley") {
-                # Refit with specified method if different from default
-                km_fit_method <- survfit(Surv(km_fit$time, km_fit$n.event > 0) ~ 1, 
+                # TODO (correctness): the refit below uses `km_fit$time` and `km_fit$n.event > 0`
+                # from the *fitted* survfit object as if they were original data. That's not
+                # equivalent to refitting on the original data with a different conf.type — it
+                # collapses ties/censoring into unique event timepoints with synthetic 0/1 events
+                # and recomputes CIs on a different dataset. Pass the original `data$time`/`data$event`
+                # (or build survfit with the desired `conf.type` in `.performSingleGroup` directly).
+                km_fit_method <- survfit(Surv(km_fit$time, km_fit$n.event > 0) ~ 1,
                                        conf.type = private$.mapConfMethod(conf_method),
                                        conf.int = conf_level)
                 quantiles_method <- quantile(km_fit_method, probs = 0.5)
@@ -162,6 +175,9 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             quantiles <- quantile(km_fit, probs = 0.5)
             
             group_names <- names(km_fit$strata)
+            # TODO (correctness): `gsub("group=", "", x)` is fragile — a factor level that itself
+            # contains "group=" or "=" (e.g. "sex=M") is silently mangled. Prefer `sub("^[^=]+=", "", x)`
+            # or use `survminer::surv_summary()` / the structured strata names from `km_fit$strata`.
             group_names <- gsub("group=", "", group_names)
             
             results <- data.frame(
@@ -195,11 +211,17 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 results$logrank <- private$.extractTestResults(logrank_test, "Log-rank")
             }
             
+            # TODO (correctness): the `wilcoxon` and `petopeto` branches below both call
+            # `survdiff(... rho = 1)` — that's the *same* test (Gehan-Breslow weights) under two
+            # different UI labels. With `test_method = "all"` the user sees identical χ² and p
+            # in two rows. Either (a) implement true Peto-Peto via `coin::logrank_test(... type = "Peto-Peto")`
+            # or `survminer::pairwise_survdiff(..., p.adjust.method = ...)` with the appropriate
+            # weight family, or (b) collapse the UI to one option.
             if (test_method == "wilcoxon" || test_method == "all") {
                 wilcoxon_test <- survdiff(surv_obj ~ group, data = data, rho = 1)
                 results$wilcoxon <- private$.extractTestResults(wilcoxon_test, "Wilcoxon")
             }
-            
+
             if (test_method == "petopeto" || test_method == "all") {
                 petopeto_test <- survdiff(surv_obj ~ group, data = data, rho = 1)
                 results$petopeto <- private$.extractTestResults(petopeto_test, "Peto-Peto")
@@ -398,8 +420,8 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             for (i in seq_len(nrow(median_data))) {
                 row <- median_data[i, ]
                 summary_html <- paste0(summary_html,
-                    "<li>Group '", row$group, "': Median survival = ", 
-                    round(row$median, 2), 
+                    "<li>Group '", htmltools::htmlEscape(as.character(row$group)), "': Median survival = ",
+                    round(row$median, 2),
                     " (95% CI: ", round(row$lower_ci, 2), " - ", round(row$upper_ci, 2), ")",
                     " with ", row$n_events, " events out of ", row$n_total, " subjects</li>")
             }

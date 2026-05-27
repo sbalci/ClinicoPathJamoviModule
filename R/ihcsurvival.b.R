@@ -437,8 +437,8 @@ ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Fit multivariate model
             tryCatch({
-                formula_str <- paste("surv_complete ~", paste(names(model_data), collapse = " + "))
-                multivar_model <- survival::coxph(as.formula(formula_str), data = model_data)
+                formula_str <- paste("surv_complete ~", paste(jmvcore::composeTerms(as.list(names(model_data))), collapse = " + "))
+                multivar_model <- survival::coxph(jmvcore::asFormula(formula_str), data = model_data)
 
                 # Extract results
                 coeffs <- summary(multivar_model)$coefficients
@@ -919,7 +919,7 @@ ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                            "IHC-based risk stratification using %s identified %d prognostic groups with %s ",
                            "different survival outcomes (log-rank p = %.3f). %s"),
                     n_samples, n_events, 100*n_events/n_samples, median_followup,
-                    paste(self$options$markers, collapse = ", "),
+                    htmltools::htmlEscape(paste(self$options$markers, collapse = ", ")),
                     length(levels(private$.risk_groups)),
                     if (p_val < 0.05) "significantly" else "non-significantly",
                     p_val,
@@ -1070,7 +1070,7 @@ ihcsurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (length(missing_markers) > 0) {
                 self$results$instructions$setContent(sprintf(
                     "<p style='color: red;'><b>Multi-region Analysis Error:</b> Missing marker data: %s. Expected naming: 'marker_central' and 'marker_invasive' or exact marker names.</p>",
-                    paste(missing_markers, collapse = ", ")
+                    htmltools::htmlEscape(paste(missing_markers, collapse = ", "))
                 ))
             }
         }
