@@ -79,20 +79,41 @@ modelvalClass <- if (requireNamespace('jmvcore'))
                 # Convert outcome to binary 0/1
                 mydata[[outcome]] <- as.factor(mydata[[outcome]])
                 if (nlevels(mydata[[outcome]]) != 2) {
-                    stop("Outcome must have exactly 2 levels")
+                    jmvcore::reject("Outcome must have exactly 2 levels")
                 }
 
-                outcome_binary <- as.numeric(mydata[[outcome]]) - 1
+                positive_level <- self$options$outcomePositive
+                if (is.null(positive_level) || ! positive_level %in% levels(mydata[[outcome]])) {
+                    jmvcore::reject(
+                        "Select the positive outcome level (the factor level that represents the event)."
+                    )
+                }
+
+                outcome_binary <- as.numeric(mydata[[outcome]] == positive_level)
 
                 # Validate predicted probabilities
                 pred_values <- mydata[[predicted]]
                 if (any(pred_values < 0 | pred_values > 1, na.rm = TRUE)) {
-                    stop("Predicted probabilities must be between 0 and 1")
+                    jmvcore::reject("Predicted probabilities must be between 0 and 1")
                 }
 
                 private$.data <- mydata
                 private$.outcome_binary <- outcome_binary
                 private$.predicted <- pred_values
+            },
+
+            # Parse and validate threshold range (Finding 1) ----
+            .parseThresholdRange = function() {
+                raw <- self$options$thresholdRange
+                if (is.null(raw) || nchar(raw) == 0) raw <- "0.01, 0.99"
+                parts <- suppressWarnings(as.numeric(strsplit(raw, ",")[[1]]))
+                if (length(parts) != 2 || any(is.na(parts)) ||
+                    parts[1] < 0 || parts[2] > 1 || parts[1] >= parts[2]) {
+                    jmvcore::reject(
+                        "Threshold range must be two comma-separated values in [0,1] with start < end (e.g. '0.05, 0.5')"
+                    )
+                }
+                parts
             },
 
             # Populate summary ----
@@ -250,8 +271,7 @@ modelvalClass <- if (requireNamespace('jmvcore'))
                 p <- private$.predicted
 
                 # Parse threshold range
-                threshold_str <- self$options$thresholdRange
-                threshold_range <- as.numeric(strsplit(threshold_str, ",")[[1]])
+                threshold_range <- private$.parseThresholdRange()
                 thresholds <- seq(threshold_range[1], threshold_range[2], by = 0.05)
 
                 # Calculate net benefit at key thresholds
@@ -445,8 +465,7 @@ modelvalClass <- if (requireNamespace('jmvcore'))
                 p <- private$.predicted
 
                 # Parse threshold range
-                threshold_str <- self$options$thresholdRange
-                threshold_range <- as.numeric(strsplit(threshold_str, ",")[[1]])
+                threshold_range <- private$.parseThresholdRange()
                 thresholds <- seq(threshold_range[1], threshold_range[2], by = 0.01)
 
                 # Calculate net benefit across thresholds

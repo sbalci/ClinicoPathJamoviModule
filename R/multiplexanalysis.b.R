@@ -1,4 +1,11 @@
-# This file is a generated template, your changes will not be overwritten
+# Multiplex Immunofluorescence Analysis
+# Backend implementation (.b.R) — hand-written.
+# (Only the matching .h.R is auto-generated; this header was misleading.)
+# TODO (cleanup): same misleading "automatically generated" header was found and
+# fixed in multiclassdiagnostics.b.R earlier in the session. The line was clearly
+# scaffolded from a .h.R template. Several other files in the project may carry
+# the same incorrect comment — sweep with `grep -nE "automatically generated"
+# R/*.b.R` and correct in bulk during a hygiene pass.
 
 multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "multiplexanalysisClass",
@@ -78,6 +85,13 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             if (nrow(data) == 0) return()
 
             # Enhanced input validation
+            # TODO (UX): file-wide pattern — `.validateInputs()` returns
+            # `list(valid=FALSE, message=<html>)` and the caller renders it via
+            # setContent + early return (sites: this block, L96 "Insufficient data",
+            # L104 "At least 2 marker variables", plus L562-568 spatial-analysis
+            # error). Same pattern as missingdata/mlpathology/modelval audits.
+            # Migrating to `jmvcore::reject()` would surface a structured UI error
+            # instead of inline HTML — defer to a dedicated UX/error-flow pass.
             validation_result <- private$.validateInputs()
             if (!validation_result$valid) {
                 self$results$interpretation$setContent(validation_result$message)
@@ -142,7 +156,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     return(list(
                         valid = FALSE,
                         message = paste0("<p style='color: red;'><strong>Validation Error:</strong> Marker variable '",
-                                       names(marker_data)[i], "' must be numeric.</p>")
+                                       htmltools::htmlEscape(names(marker_data)[i]), "' must be numeric.</p>")
                     ))
                 }
 
@@ -151,7 +165,7 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     return(list(
                         valid = FALSE,
                         message = paste0("<p style='color: orange;'><strong>Warning:</strong> Marker variable '",
-                                       names(marker_data)[i], "' contains negative values. Expression data should typically be non-negative.</p>")
+                                       htmltools::htmlEscape(names(marker_data)[i]), "' contains negative values. Expression data should typically be non-negative.</p>")
                     ))
                 }
             }
@@ -368,6 +382,14 @@ multiplexanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
             
             # Perform k-means clustering
+            # TODO (correctness/hygiene): set.seed(42) is hardcoded — users can't
+            # vary or fully reproduce results (the `n_clusters` option exists but
+            # no `random_seed` option). Two issues: (a) mutates global .Random.seed
+            # for the rest of the user's session (same Category H concern fixed in
+            # multiclassroc audit via on.exit save+restore — see L199-212 there);
+            # (b) hardcoded vs option — add a `random_seed` OptionNumber and use
+            # it here. Until fixed, wrap with the .Random.seed save/restore idiom
+            # to at least protect the global RNG stream.
             tryCatch({
                 set.seed(42)  # For reproducibility
                 km_result <- kmeans(scaled_data, centers = n_clusters, nstart = 25)

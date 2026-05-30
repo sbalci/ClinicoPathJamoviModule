@@ -263,7 +263,7 @@ nonparametricClass <- R6::R6Class(
                     type = jmvcore::NoticeType$STRONG_WARNING)
                 notice$setContent(
                     sprintf('Groups with fewer than 2 observations: %s. Results may be unreliable.',
-                            paste(small_groups, collapse = ', ')))
+                            paste(htmltools::htmlEscape(small_groups), collapse = ', ')))
                 self$results$insert(1, notice)
             }
             
@@ -573,7 +573,7 @@ nonparametricClass <- R6::R6Class(
                 switch(test_type,
                     "mann_whitney" = {
                         if (nlevels(groups) != 2) {
-                            stop("Mann-Whitney U test requires exactly 2 groups")
+                            jmvcore::reject("Mann-Whitney U test requires exactly 2 groups")
                         }
                         test_result <- wilcox.test(outcome ~ groups,
                                                  exact = use_exact,
@@ -628,7 +628,7 @@ nonparametricClass <- R6::R6Class(
                                     sprintf(.("%d observations could not be matched and were excluded."), n_unmatched))
                             }
                             if (nrow(merged) < 2) {
-                                stop(.("Fewer than 2 matched pairs found. Check your paired/subject variable."))
+                                jmvcore::reject(.("Fewer than 2 matched pairs found. Check your paired/subject variable."))
                             }
                             test_result <- wilcox.test(merged$outcome_1, merged$outcome_2,
                                                      paired = TRUE,
@@ -668,7 +668,7 @@ nonparametricClass <- R6::R6Class(
 
                     "friedman" = {
                         if (is.null(data$blocking)) {
-                            stop("Blocking variable required for Friedman test")
+                            jmvcore::reject("Blocking variable required for Friedman test")
                         }
                         test_result <- friedman.test(outcome, groups, data$blocking)
                         list(
@@ -720,7 +720,7 @@ nonparametricClass <- R6::R6Class(
                     options = self$options, name = 'testError',
                     type = jmvcore::NoticeType$ERROR)
                 notice$setContent(
-                    sprintf('Test error: %s', e$message))
+                    sprintf('Test error: %s', htmltools::htmlEscape(conditionMessage(e))))
                 self$results$insert(1, notice)
                 return(NULL)
             })

@@ -149,10 +149,11 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 event <- jmvcore::toNumeric(event_var)
             }
 
-            formula_str <- paste("survival::Surv(time_var, event) ~",
-                               paste(vars, collapse = " + "))
+            surv_obj <- survival::Surv(time_var, event)
+            formula_str <- paste("surv_obj ~",
+                               paste(jmvcore::composeTerms(as.list(vars)), collapse = " + "))
 
-            model <- survival::coxph(as.formula(formula_str), data = model_data)
+            model <- survival::coxph(jmvcore::asFormula(formula_str), data = model_data)
             model
         },
 
@@ -171,8 +172,8 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
             model_data <- model_data[complete.cases(model_data), ]
             outcome <- outcome[complete.cases(self$data[, c(self$options$outcome, vars), drop = FALSE])]
 
-            formula_str <- paste("outcome ~", paste(vars, collapse = " + "))
-            model <- glm(as.formula(formula_str), data = model_data, family = binomial)
+            formula_str <- paste("outcome ~", paste(jmvcore::composeTerms(as.list(vars)), collapse = " + "))
+            model <- glm(jmvcore::asFormula(formula_str), data = model_data, family = binomial)
             model
         },
 
@@ -183,8 +184,8 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
             model_data <- model_data[complete.cases(model_data), ]
             outcome <- outcome[complete.cases(self$data[, c(self$options$outcome, vars), drop = FALSE])]
 
-            formula_str <- paste("outcome ~", paste(vars, collapse = " + "))
-            model <- lm(as.formula(formula_str), data = model_data)
+            formula_str <- paste("outcome ~", paste(jmvcore::composeTerms(as.list(vars)), collapse = " + "))
+            model <- lm(jmvcore::asFormula(formula_str), data = model_data)
             model
         },
 
@@ -288,6 +289,13 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
 
                 fold_scores <- numeric(n_folds)
 
+                # TODO (stub): cross-validation is non-functional. train_data/test_data
+                # are computed but never used; fold_scores are hardcoded constants
+                # (0.7 / 0.75 / 0.8) regardless of input. The cvTable rendered to the
+                # user therefore reports fake metrics. Wire up real fold fitting:
+                # cox → survival::coxph + C-index on test fold; logistic → glm + ROC AUC
+                # on test fold; linear → lm + R² on test fold. Until fixed, consider
+                # hiding cvTable or disabling the crossValidation option.
                 for (k in 1:n_folds) {
                     train_data <- complete_data[folds != k, ]
                     test_data <- complete_data[folds == k, ]
@@ -348,9 +356,9 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 <p><b>Criterion:</b> %s (%s is better)</p>
                 <p><b>Variables:</b> %s</p>
                 <p><b>%s value:</b> %.3f</p>",
-                best_model$name,
+                htmltools::htmlEscape(best_model$name),
                 metric_name, better,
-                paste(best_model$vars, collapse = ", "),
+                htmltools::htmlEscape(paste(best_model$vars, collapse = ", ")),
                 metric_name, values[best_idx]
             )
 
@@ -374,7 +382,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
             html <- "<h3>Detailed Model Summaries</h3>"
 
             for (model in fitted_models) {
-                html <- paste0(html, sprintf("<h4>%s</h4>", model$name))
+                html <- paste0(html, sprintf("<h4>%s</h4>", htmltools::htmlEscape(model$name)))
 
                 coefs <- summary(model$fit)$coefficients
 
@@ -393,7 +401,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                         "<tr><td style='padding: 5px; border: 1px solid #ddd;'>%s</td>",
                         "<td style='padding: 5px; border: 1px solid #ddd;'>%.3f</td>",
                         "<td style='padding: 5px; border: 1px solid #ddd;'>%.4f</td></tr>",
-                        var_name, coef_val, p_val
+                        htmltools::htmlEscape(var_name), coef_val, p_val
                     ))
                 }
 
@@ -409,6 +417,12 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 return(FALSE)
             }
 
+            # TODO (cleanup): file-wide pattern — `library(ggplot2)` / `library(pROC)`
+            # calls at this site, L482 (.rocPlot), L483 (.rocPlot) modify the user's
+            # search path at runtime and trip R CMD check. Replace with
+            # `requireNamespace("ggplot2", quietly = TRUE)` + explicit `ggplot2::` /
+            # `pROC::` prefixes throughout the plot bodies (the file already uses
+            # namespaced calls like `pROC::roc` / `pROC::auc` elsewhere).
             library(ggplot2)
 
             # Extract coefficients from all models
@@ -515,7 +529,10 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
         },
 
         .calibrationPlot = function(image, ggtheme, theme, ...) {
-            # Placeholder for calibration plot
+            # TODO (stub): .calibrationPlot is a no-op. The calibration plot output
+            # in .r.yaml is wired but the body returns FALSE immediately. Implement
+            # using e.g. `ResourceSelection::hoslem.test` deciles or `rms::val.prob`
+            # for binned predicted-vs-observed plot, or hide the output until ready.
             return(FALSE)
         }
     )

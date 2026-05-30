@@ -7,6 +7,22 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
     private = list(
         .run = function() {
 
+            # TODO (stub): Large gap between .a.yaml option surface and what .run() actually uses.
+            # Currently exercised: outcome, predictors, grouping_variable (read but unused),
+            #   regression_type (only loess + univariate spline), loess_span, loess_degree, spline_df.
+            # Defined but never wired: kernel_type, bandwidth_method, manual_bandwidth, loess_iterations,
+            #   spline_type, spline_lambda, quantile_tau/method, gam_smoother/basis_dim,
+            #   cv_folds/repeats, model_selection_criterion, robust_regression/method,
+            #   outlier_threshold, confidence_level, bootstrap_*, prediction_intervals,
+            #   residual_diagnostics, influence_diagnostics, goodness_of_fit,
+            #   show_* visualization toggles, show_* output toggles, multivariate_method,
+            #   missing_data_handling, clinical_context, set_seed/seed_value, parallel_processing/n_cores.
+            # Either implement the wired-but-missing branches (kernel/quantile/GAM/local_linear/nadaraya_watson),
+            # or hide the unused options from the UI until the backend supports them.
+            # Security caveat when implementing: any time a non-loess branch builds a formula or selects
+            # smoother bases, route through jmvcore::asFormula (with explicit additional_allowed_functions
+            # for survival/mgcv helpers like s(), te(), ti(), rcs()) — see vignettes/jamovi_formula_guide.md.
+
             # 1. Provide instructions if inputs are missing
             if (is.null(self$options$outcome) || is.null(self$options$predictors)) {
                 
@@ -29,8 +45,12 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
             mydata <- self$data
             outcomeVar <- self$options$outcome
             predVars <- self$options$predictors
+            # TODO (correctness): grouping_variable is read and kept in `vars` but never used in
+            # any model branch — stratified analysis is documented in the welcome HTML but unimplemented.
+            # Either implement per-group models (loop over levels, build a results group per stratum)
+            # or stop reading the option until stratification is wired up.
             groupVar <- self$options$grouping_variable
-            
+
             vars <- c(outcomeVar, predVars, groupVar)
             mydata <- jmvcore::naOmit(mydata[vars])
             
@@ -51,7 +71,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
             # Simple implementation for LOESS (supports multiple predictors)
             if (regType == "loess") {
                 
-                formula <- as.formula(paste(jmvcore::composeTerm(outcomeVar), "~", paste(jmvcore::composeTerms(predVars), collapse = " + ")))
+                formula <- jmvcore::asFormula(paste(jmvcore::composeTerm(outcomeVar), "~", paste(jmvcore::composeTerms(predVars), collapse = " + ")))
                 
                 model <- try(loess(formula, data = mydata, span = self$options$loess_span, degree = if(self$options$loess_degree == "linear") 1 else 2), silent = TRUE)
                 
@@ -68,7 +88,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
                     tableFit$addRow(rowKey=3, values=list(statistic="Effective df", value=model$enp, interpretation="Complexity of the smooth"))
                     
                 } else {
-                    self$results$methodsExplanation$setContent(paste("LOESS Error:", attr(model, "condition")$message))
+                    self$results$methodsExplanation$setContent(jmvcore::format("LOESS Error: {}", htmltools::htmlEscape(conditionMessage(model))))
                 }
             } else if (regType == "spline" && length(predVars) == 1) {
                 
@@ -90,7 +110,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
                     ))
                 }
             } else {
-                 self$results$methodsExplanation$setContent(paste("Method", regType, "with", length(predVars), "predictors is not yet fully implemented in this preview. Try LOESS or univariate Spline."))
+                 self$results$methodsExplanation$setContent(jmvcore::format("Method {} with {} predictors is not yet fully implemented in this preview. Try LOESS or univariate Spline.", regType, length(predVars)))
             }
 
             # 6. Methods Explanation

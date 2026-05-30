@@ -48,7 +48,7 @@ ncvregcoxClass <- R6::R6Class(
                     analysis_ok <<- FALSE
                     private$.insertNotice(
                         'analysisError', jmvcore::NoticeType$ERROR,
-                        e$message, position = 1
+                        htmltools::htmlEscape(conditionMessage(e)), position = 1
                     )
                 }
             )
@@ -153,7 +153,7 @@ ncvregcoxClass <- R6::R6Class(
 
             observed_levels <- sort(unique(event_chr[!is.na(event_chr)]))
             if (length(observed_levels) < 2) {
-                stop("Event variable must have at least 2 observed levels.")
+                jmvcore::reject("Event variable must have at least 2 observed levels.")
             }
 
             # Resolve event level
@@ -162,9 +162,10 @@ ncvregcoxClass <- R6::R6Class(
             } else {
                 event_level <- as.character(outcome_level_opt)
                 if (!(event_level %in% observed_levels)) {
-                    stop(paste0("Selected event level ('", event_level,
-                                "') is not present in observed data. Available levels: ",
-                                paste(observed_levels, collapse = ", ")))
+                    jmvcore::reject(
+                        "Selected event level ('{}') is not present in observed data. Available levels: {}",
+                        event_level, paste(observed_levels, collapse = ", ")
+                    )
                 }
             }
 
@@ -175,14 +176,15 @@ ncvregcoxClass <- R6::R6Class(
             } else {
                 censor_level <- as.character(censor_level_opt)
                 if (!(censor_level %in% observed_levels)) {
-                    stop(paste0("Selected censored level ('", censor_level,
-                                "') is not present in observed data. Available levels: ",
-                                paste(observed_levels, collapse = ", ")))
+                    jmvcore::reject(
+                        "Selected censored level ('{}') is not present in observed data. Available levels: {}",
+                        censor_level, paste(observed_levels, collapse = ", ")
+                    )
                 }
             }
 
             if (event_level == censor_level) {
-                stop("Event level and censored level must be different.")
+                jmvcore::reject("Event level and censored level must be different.")
             }
 
             # Strict two-level encoding
@@ -191,7 +193,7 @@ ncvregcoxClass <- R6::R6Class(
             event_numeric[event_chr == censor_level] <- 0
 
             analysis_data <- data.frame(
-                time = as.numeric(data[[time_var]]),
+                time = jmvcore::toNumeric(data[[time_var]]),
                 event = event_numeric
             )
 
@@ -200,10 +202,10 @@ ncvregcoxClass <- R6::R6Class(
             }
 
             # Complete-case filter BEFORE model.matrix (critical for factors)
-            analysis_data <- na.omit(analysis_data)
+            analysis_data <- jmvcore::naOmit(analysis_data)
 
             if (nrow(analysis_data) == 0) {
-                stop("No complete cases available for analysis")
+                jmvcore::reject("No complete cases available for analysis")
             }
 
             private$.analysis_data <- analysis_data
@@ -212,11 +214,11 @@ ncvregcoxClass <- R6::R6Class(
 
         .fit_ncvreg_cox = function() {
             if (!requireNamespace("ncvreg", quietly = TRUE)) {
-                stop("Package 'ncvreg' is required for SCAD/MCP Cox regression")
+                jmvcore::reject("Package 'ncvreg' is required for SCAD/MCP Cox regression")
             }
 
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("Package 'survival' is required for Cox regression")
+                jmvcore::reject("Package 'survival' is required for Cox regression")
             }
 
             tryCatch({
@@ -228,8 +230,8 @@ ncvregcoxClass <- R6::R6Class(
                 has_factors <- any(sapply(cov_data, is.factor))
                 if (has_factors) {
                     # Backtick-escape variable names for safe formula construction
-                    escaped_covs <- paste0("`", covariates, "`")
-                    mm_formula <- as.formula(paste("~", paste(escaped_covs, collapse = " + ")))
+                    escaped_covs <- jmvcore::composeTerms(as.list(covariates))
+                    mm_formula <- jmvcore::asFormula(paste("~", paste(escaped_covs, collapse = " + ")))
                     X <- model.matrix(mm_formula, data = cov_data)[, -1, drop = FALSE]
                 } else {
                     X <- as.matrix(cov_data)
@@ -283,7 +285,7 @@ ncvregcoxClass <- R6::R6Class(
                 private$.Y <- Y
 
             }, error = function(e) {
-                stop(paste("Error in", self$options$penalty, "Cox regression:", e$message))
+                jmvcore::reject("Error in {} Cox regression: {}", self$options$penalty, conditionMessage(e))
             })
         },
 
@@ -919,7 +921,7 @@ ncvregcoxClass <- R6::R6Class(
                 "%s Cox regression (n=%d, %d events) selected %d of %d variables (lambda=%.4f%s). The strongest predictor was %s (HR=%.2f).",
                 penalty_full, n_obs, n_events, n_selected, n_total,
                 as.numeric(private$.lambda_opt), cindex_str,
-                top_name, top_hr
+                htmltools::htmlEscape(top_name), top_hr
             )
         },
 

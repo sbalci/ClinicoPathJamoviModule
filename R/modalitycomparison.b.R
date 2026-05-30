@@ -65,7 +65,7 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             if (nrow(self$data) == 0) {
-                stop('Data contains no (complete) rows')
+                jmvcore::reject('Data contains no (complete) rows')
             }
 
             # Prepare data
@@ -117,7 +117,7 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             complete_cases <- complete.cases(private$.modality1_data, private$.modality2_data)
             
             if (sum(complete_cases) == 0) {
-                stop('No complete cases found. Please check for missing values.')
+                jmvcore::reject('No complete cases found. Please check for missing values.')
             }
 
             private$.modality1_data <- private$.modality1_data[complete_cases]

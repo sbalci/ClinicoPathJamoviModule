@@ -61,6 +61,12 @@
 #' @noRd
 NULL
 
+# TODO (cleanup): this helper duplicates `jmvcore::composeTerms()` (vector form),
+# which handles backtick-escaping for non-syntactic jamovi names. Consider retiring
+# this helper and switching call-sites (L1569, L1604, L1639, L1674) to:
+#   predictor_string <- paste(jmvcore::composeTerms(as.list(basic_predictors)),
+#                             collapse = " + ")
+# or build the whole formula via `jmvcore::constructFormula(outcome_var, predictors)`.
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
     # Check if variable names contain special characters that need escaping
@@ -182,10 +188,18 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         # Enhanced error handling and validation
+        # TODO (UX): file-wide pattern — 21 stop() calls (sites in .validateInputs/
+        # .checkPackageDependencies/.splitData/.buildLogisticModel/.calculatePerformance
+        # etc., e.g. L199, L204, L208, L218, L228, L234, L242, L246, L342, L516, L663,
+        # L750, L757, L762, L816, L837, L845, L1505) all surface through .run()'s outer
+        # tryCatch at L1360 which converts them to a custom HTML troubleshooting report
+        # rendered to `instructions`. Migrating to `jmvcore::reject()` is drop-in for the
+        # error path itself but would bypass the bespoke error-report UI. Defer to a
+        # dedicated UX/error-flow pass that consolidates the two pathways.
         .validateInputs = function() {
             data <- self$data
             outcome_var <- self$options$outcome
-            
+
             # Check data availability
             if (is.null(data) || nrow(data) == 0) {
                 stop("No data available for analysis")
@@ -552,7 +566,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             if (method == "complete_cases") {
-                result <- na.omit(data)
+                result <- jmvcore::naOmit(data)
                 n_removed <- nrow(data) - nrow(result)
                 if (n_removed > 0) {
                     warning(paste("Removed", n_removed, "observations with missing data"))
@@ -1474,11 +1488,11 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     "<html><body>",
                     "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;'>",
                     "<h4 style='color: #856404; margin-top: 0;'> Analysis Error</h4>",
-                    "<p><strong>Error Message:</strong> ", e$message, "</p>",
-                    "<p><strong>Location:</strong> ", deparse(e$call)[1], "</p>",
+                    "<p><strong>Error Message:</strong> ", htmltools::htmlEscape(conditionMessage(e)), "</p>",
+                    "<p><strong>Location:</strong> ", htmltools::htmlEscape(deparse(e$call)[1]), "</p>",
                     if (length(private$.warnings) > 0) {
                         paste0("<p><strong>Warnings:</strong></p><ul>",
-                               paste0("<li>", private$.warnings, "</li>", collapse = ""),
+                               paste0("<li>", htmltools::htmlEscape(private$.warnings), "</li>", collapse = ""),
                                "</ul>")
                     } else "",
                     "<p><strong>Troubleshooting:</strong></p>",
@@ -1519,8 +1533,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 missing_warnings <- private$.warnings[grep("missing|imputation", private$.warnings, ignore.case = TRUE)]
                 if (length(missing_warnings) > 0) {
                     missing_summary <- paste0(
-                        "<p><strong>Missing Data:</strong> ", 
-                        paste(missing_warnings, collapse = "; "), "</p>"
+                        "<p><strong>Missing Data:</strong> ",
+                        paste(htmltools::htmlEscape(missing_warnings), collapse = "; "), "</p>"
                     )
                 }
             }
@@ -1532,7 +1546,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<p><strong>", "Total Sample Size:", "</strong> ", n_total, "</p>",
                 "<p><strong>", "Training Set:", "</strong> ", n_training, " (", round(n_training/n_total*100, 1), "%)</p>",
                 if (n_validation > 0) paste0("<p><strong>", "Validation Set:", "</strong> ", n_validation, " (", round(n_validation/n_total*100, 1), "%)</p>") else "",
-                "<p><strong>", "Event Rate:", "</strong> ", round(event_rate, 1), "% (", outcome_positive, ")</p>",
+                "<p><strong>", "Event Rate:", "</strong> ", round(event_rate, 1), "% (", htmltools::htmlEscape(outcome_positive), ")</p>",
                 "<p><strong>", "Events in Training:", "</strong> ", n_events_training, "</p>",
                 if (n_validation > 0) paste0("<p><strong>", "Events in Validation:", "</strong> ", n_events_validation, "</p>") else "",
                 missing_summary,
@@ -1566,9 +1580,16 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 modeling_data <- private$.createInteractions(modeling_data, basic_predictors)
                 
                 # Build formula
+                # TODO (security): outcome_var (self$options$outcome — column name)
+                # is NOT routed through .escapeVariableNames / jmvcore::composeTerm
+                # here or at sister sites L1606/L1641/L1676. jmvcore::asFormula now
+                # provides allow-list defense against function-call injection in the
+                # outcome name, but layered Defense 1 (backtick-escape) is still missing.
+                # When refactoring, wrap with jmvcore::composeTerm(outcome_var) or build
+                # the whole formula via jmvcore::constructFormula(outcome_var, predictors).
                 escaped_predictors <- .escapeVariableNames(basic_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_basic <- as.formula(paste(outcome_var, "~", predictor_string))
+                formula_basic <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -1603,7 +1624,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Build formula
                 escaped_predictors <- .escapeVariableNames(enhanced_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_enhanced <- as.formula(paste(outcome_var, "~", predictor_string))
+                formula_enhanced <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -1638,7 +1659,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Build formula
                 escaped_predictors <- .escapeVariableNames(biomarker_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_biomarker <- as.formula(paste(outcome_var, "~", predictor_string))
+                formula_biomarker <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -1673,7 +1694,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Build formula
                 escaped_predictors <- .escapeVariableNames(custom_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_custom <- as.formula(paste(outcome_var, "~", predictor_string))
+                formula_custom <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -2188,7 +2209,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 for (model_name in model_names) {
                     pred_col_name <- paste0(self$options[[paste0(model_name, "ModelName")]], "_prob")
                     dca_message <- paste0(dca_message,
-                                          "<li><strong>", model_name, " Model</strong>: Use column '", pred_col_name, "'</li>")
+                                          "<li><strong>", model_name, " Model</strong>: Use column '", htmltools::htmlEscape(pred_col_name), "'</li>")
                 }
 
                 dca_message <- paste0(
@@ -2197,8 +2218,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     "<p><strong>Next Steps:</strong></p>",
                     "<ol>",
                     "<li>Go to meddecide → Decision → Decision Curve Analysis</li>",
-                    "<li>Set Outcome Variable: ", self$options$outcome, "</li>",
-                    "<li>Set Positive Outcome: ", self$options$outcomePositive, "</li>",
+                    "<li>Set Outcome Variable: ", htmltools::htmlEscape(self$options$outcome), "</li>",
+                    "<li>Set Positive Outcome: ", htmltools::htmlEscape(self$options$outcomePositive), "</li>",
                     "<li>Add the prediction model columns listed above</li>",
                     "<li>Configure threshold range and run DCA</li>",
                     "</ol>",

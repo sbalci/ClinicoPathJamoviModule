@@ -419,6 +419,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html$setContent(todo)
 
 
+                # TODO (correctness): `private$.formatErrorMessage` is NOT defined in this
+                # file — it lives in R/multisurvival.b.R:561 and is not shared via inheritance.
+                # The two call sites here (this line and L452 below) will crash with
+                # "attempt to apply non-function" before reaching jmvcore::reject, so the
+                # empty-data and validation-failure error paths never display the intended
+                # structured message. Either (a) port the helper into this file (or a shared
+                # R/utils.R), (b) inline a plain string and pass it directly to jmvcore::reject,
+                # or (c) factor the helper into a private S3/R6 mixin both functions use.
                 if (nrow(self$data) == 0) {
                     error_msg <- private$.formatErrorMessage(
                         "data_error",
@@ -704,16 +712,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-                text2 <- glue::glue("
-                                <br>
-                                <b>Model Metrics:</b>
-                                  ",
-                                unlist(
-                                    tOdds[[2]]
-                                ),
-                                "
-                                <br>
-                                ")
+                text2 <- paste0(
+                    "<br><b>Model Metrics:</b> ",
+                    paste(htmltools::htmlEscape(unlist(tOdds[[2]])), collapse = " "),
+                    "<br>"
+                )
 
 
                 # Note: text2 will be updated with diagnostic metrics if nomogram is enabled
@@ -867,20 +870,20 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
                         "<b> Important: Please Verify These Interpretations</b><br>",
                         "<small>",
-                        "<b>Positive outcome level:</b> '", lr_results$positive_outcome_used, "' ",
-                        "<span style='color: #666;'>(", lr_results$outcome_determination_method, ")</span><br>",
-                        "<b>Positive predictor level:</b> '", lr_results$positive_predictor_used, "' ",
-                        "<span style='color: #666;'>(", lr_results$predictor_determination_method, ")</span><br><br>",
+                        "<b>Positive outcome level:</b> '", htmltools::htmlEscape(lr_results$positive_outcome_used), "' ",
+                        "<span style='color: #666;'>(", htmltools::htmlEscape(lr_results$outcome_determination_method), ")</span><br>",
+                        "<b>Positive predictor level:</b> '", htmltools::htmlEscape(lr_results$positive_predictor_used), "' ",
+                        "<span style='color: #666;'>(", htmltools::htmlEscape(lr_results$predictor_determination_method), ")</span><br><br>",
 
                         "<b> Contingency Table:</b><br>",
                         "<table style='border-collapse: collapse; margin: 5px 0;'>",
                         "<tr><th style='border: 1px solid #ddd; padding: 5px;'></th>",
-                        "<th style='border: 1px solid #ddd; padding: 5px;'>", outcome_levels[1], "</th>",
-                        "<th style='border: 1px solid #ddd; padding: 5px;'>", outcome_levels[2], "</th></tr>",
-                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", predictor_levels[1], "</b></td>",
+                        "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[1]), "</th>",
+                        "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[2]), "</th></tr>",
+                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[1]), "</b></td>",
                         "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,1], "</td>",
                         "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,2], "</td></tr>",
-                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", predictor_levels[2], "</b></td>",
+                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[2]), "</b></td>",
                         "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,1], "</td>",
                         "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,2], "</td></tr>",
                         "</table>",
@@ -996,16 +999,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  predictor_level_warning <- paste0(
                     "<div style='background-color: #d1ecf1; border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px;'>",
                     "<b>Predictor Level Modeling:</b><br>",
-                    "The level '", positive_predictor_level, "' is used as the positive/exposure category as specified.",
+                    "The level '", htmltools::htmlEscape(positive_predictor_level), "' is used as the positive/exposure category as specified.",
                     "</div>"
                 )
             } else {
                 predictor_level_warning <- paste0(
                     "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px;'>",
                     "<h4 style='margin-top: 0; color: #856404;'> Automatic Predictor Level Detection</h4>",
-                    "<p><strong>The positive predictor level was automatically detected as: '", positive_predictor_level, "'</strong></p>",
-                    "<p>Method: ", predictor_determination_method, "</p>",
-                    "<p style='color: #856404;'><strong>Important:</strong> Please verify that '", positive_predictor_level, "' is the correct positive level. ",
+                    "<p><strong>The positive predictor level was automatically detected as: '", htmltools::htmlEscape(positive_predictor_level), "'</strong></p>",
+                    "<p>Method: ", htmltools::htmlEscape(predictor_determination_method), "</p>",
+                    "<p style='color: #856404;'><strong>Important:</strong> Please verify that '", htmltools::htmlEscape(positive_predictor_level), "' is the correct positive level. ",
                     "If this is wrong, diagnostic metrics will be inverted.</p>",
                     "<p>Use the 'Predictor Positive Level' option to set this manually.</p>",
                     "</div>"
@@ -1109,6 +1112,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Prepares data and fits logistic regression model for nomogram creation
         # Uses rms package to create datadist object and fit lrm model
+        # TODO (correctness): API inconsistency with sibling .fitFirthModel (L1714).
+        # .prepareRmsNomogram takes RAW variable names and escapes internally
+        # (composeTerm/composeTerms at L1119); .fitFirthModel takes PRE-ESCAPED strings
+        # produced upstream by jmvcore::constructFormula + composeTerms (L626/L629/L650-654).
+        # Future maintainers can easily get this wrong — pick one convention
+        # (preferably: always pass raw names + escape inside each helper) and update both
+        # sites so the formula construction is uniform.
         .prepareRmsNomogram = function(data, dependent, explanatory) {
             tryCatch({
                 # First create datadist object
@@ -1116,7 +1126,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options(datadist = dd)
 
                 # Create formula for model
-                formula_str <- paste(dependent, "~", paste(explanatory, collapse = " + "))
+                formula_str <- paste(jmvcore::composeTerm(dependent), "~", paste(jmvcore::composeTerms(as.list(explanatory)), collapse = " + "))
 
                 # Fit logistic regression model
                 private$.checkpoint()
@@ -1207,6 +1217,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
                     if (nrow(self$data) == 0)
                 jmvcore::reject('Data contains no (complete) rows')
+            # TODO (cleanup): the dead commented block immediately below (early
+            # outcome-validation drafts and pre-jmvcore formula builders) was superseded
+            # by the .validateInputs path at L176 and the constructFormula/composeTerms
+            # upstream — safe to delete on a future cleanup pass.
             # Check if outcome variable is suitable or stop
             # myoutcome2 <- self$options$outcome
             # myoutcome2 <- self$data[[myoutcome2]]
@@ -1722,7 +1736,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fit <- tryCatch({
                 logistf::logistf(f, data = .data)
             }, error = function(e) {
-                jmvcore::reject(paste("Error fitting Firth model:", e$message))
+                jmvcore::reject("Error fitting Firth model: {}", e$message)
             })
             
             # Extract coefficients and CIs

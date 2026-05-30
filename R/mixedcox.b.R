@@ -222,7 +222,10 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           if (self$options$nested_clustering && !is.null(self$options$nested_cluster_var)) {
             all_vars <- c(all_vars, self$options$nested_cluster_var)
           }
-          
+
+          # TODO (jamovify): consider `jmvcore::naOmit(data[all_vars])` instead of `complete.cases` +
+          # boolean indexing — preserves jamovi column attributes (measureType, values, labels) that
+          # downstream coxme/survival modeling may rely on for labelled-factor handling.
           complete_rows <- complete.cases(data[all_vars])
           
           if (sum(complete_rows) < 50) {  # Minimum for mixed-effects models
@@ -247,13 +250,21 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           ))
           
         }, error = function(e) {
+          # TODO (UX): file-wide pattern — `.prepareData` / `.calculateTimeFromDates` / `.fitMixedCox`
+          # surface validation + runtime errors by writing raw HTML into `self$results$todo`. This
+          # mixes the "instructions" surface with the "error" surface and bypasses jamovi's structured
+          # error UI. Prefer `jmvcore::reject(...)` for user-facing failures so the analysis is marked
+          # errored (consistent icon, log path, syntax-mode behavior). Sites: lines ~208, ~216, ~229,
+          # ~261, ~286, ~308, ~333, ~341, ~388. Keep the todo surface for the initial "fill in these
+          # variables" guidance only. (Security note: `e$message` interpolations at lines 261, 308,
+          # 388 already go through `htmltools::htmlEscape` so XSS is closed; the migration is UX-only.)
           self$results$todo$setContent(paste0(
-            "<h3>Data Preparation Error</h3><p>", e$message, "</p>"
+            "<h3>Data Preparation Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
           return(NULL)
         })
       },
-      
+
       # Calculate time from dates
       .calculateTimeFromDates = function() {
         tryCatch({
@@ -295,7 +306,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Date Calculation Error</h3><p>", e$message, "</p>"
+            "<h3>Date Calculation Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
           return(NULL)
         })
@@ -304,19 +315,19 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       # Fit mixed-effects Cox model
       .fitMixedCox = function(prepared_data) {
         tryCatch({
-          # Build formula for fixed effects
+          # Build formula for fixed effects (backtick-quote names via jmvcore::composeTerms)
           if (length(prepared_data$fixed_vars) > 0) {
-            fixed_formula <- paste(prepared_data$fixed_vars, collapse = " + ")
+            fixed_formula <- paste(jmvcore::composeTerms(as.list(prepared_data$fixed_vars)), collapse = " + ")
           } else {
             fixed_formula <- "1"
           }
-          
-          # Build random effects specification
+
+          # Build random effects specification (backtick-quote names via jmvcore::composeTerm)
           if (self$options$random_effects == "intercept") {
             if (self$options$nested_clustering && !is.null(self$options$nested_cluster_var)) {
-              random_spec <- paste0("(1|", self$options$nested_cluster_var, "/", self$options$cluster_var, ")")
+              random_spec <- paste0("(1|", jmvcore::composeTerm(self$options$nested_cluster_var), "/", jmvcore::composeTerm(self$options$cluster_var), ")")
             } else {
-              random_spec <- paste0("(1|", self$options$cluster_var, ")")
+              random_spec <- paste0("(1|", jmvcore::composeTerm(self$options$cluster_var), ")")
             }
           } else if (self$options$random_effects == "slope") {
             if (is.null(self$options$random_slope_var)) {
@@ -325,7 +336,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
               )
               return(NULL)
             }
-            random_spec <- paste0("(", self$options$random_slope_var, "|", self$options$cluster_var, ")")
+            random_spec <- paste0("(", jmvcore::composeTerm(self$options$random_slope_var), "|", jmvcore::composeTerm(self$options$cluster_var), ")")
           } else {  # both
             if (is.null(self$options$random_slope_var)) {
               self$results$todo$setContent(
@@ -333,11 +344,12 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
               )
               return(NULL)
             }
-            random_spec <- paste0("(1 + ", self$options$random_slope_var, "|", self$options$cluster_var, ")")
+            random_spec <- paste0("(1 + ", jmvcore::composeTerm(self$options$random_slope_var), "|", jmvcore::composeTerm(self$options$cluster_var), ")")
           }
-          
-          # Complete formula
-          full_formula <- as.formula(paste("prepared_data$surv ~", fixed_formula, "+", random_spec))
+
+          # Complete formula (allowlist-validated parse; "|" allowed for coxme random effects)
+          surv_obj <- prepared_data$surv
+          full_formula <- jmvcore::asFormula(paste("surv_obj ~", fixed_formula, "+", random_spec), additional_allowed_functions = c("|"))
           
           # Fit model
           coxme_fit <- coxme::coxme(
@@ -374,7 +386,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Model Fitting Error</h3><p>", e$message, "</p>"
+            "<h3>Model Fitting Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
           return(NULL)
         })
@@ -383,14 +395,15 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       # Fit standard Cox model for comparison
       .fitStandardCox = function(prepared_data) {
         tryCatch({
-          # Build formula for fixed effects only
+          # Build formula for fixed effects only (backtick-quote names via jmvcore::composeTerms)
           if (length(prepared_data$fixed_vars) > 0) {
-            fixed_formula <- paste(prepared_data$fixed_vars, collapse = " + ")
+            fixed_formula <- paste(jmvcore::composeTerms(as.list(prepared_data$fixed_vars)), collapse = " + ")
           } else {
             fixed_formula <- "1"
           }
-          
-          cox_formula <- as.formula(paste("prepared_data$surv ~", fixed_formula))
+
+          surv_obj <- prepared_data$surv
+          cox_formula <- jmvcore::asFormula(paste("surv_obj ~", fixed_formula))
           
           # Fit standard Cox model
           cox_fit <- survival::coxph(cox_formula, data = prepared_data$data)
@@ -431,7 +444,8 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           # Model summary
           model_text <- paste0(
             "<h3>Mixed-Effects Cox Regression Results</h3>",
-            "<p><b>Model:</b> ", deparse(model_results$formula), "</p>",
+            # deparse(formula) embeds user column names (backtick-quoted); HTML-escape before render.
+            "<p><b>Model:</b> ", htmltools::htmlEscape(deparse(model_results$formula)), "</p>",
             "<p><b>Observations:</b> ", model_results$n_obs, "</p>",
             "<p><b>Clusters:</b> ", model_results$n_clusters, "</p>",
             "<p><b>Log-likelihood:</b> ", round(model_results$loglik[2], 4), "</p>"
@@ -473,8 +487,9 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
             random_text <- "<h3>Random Effects Variance Components</h3>"
             for (i in 1:length(model_results$variance_components)) {
               var_comp <- model_results$variance_components[[i]]
-              comp_name <- names(model_results$variance_components)[i]
-              
+              # Escape cluster variable name (from user data) before HTML interpolation.
+              comp_name <- htmltools::htmlEscape(names(model_results$variance_components)[i])
+
               if (is.matrix(var_comp)) {
                 random_text <- paste0(random_text, 
                   "<p><b>", comp_name, " (Intercept):</b> ", round(var_comp[1,1], 6), "</p>"
@@ -516,6 +531,15 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       
       # Plot fixed effects
       .plotFixedEffects = function() {
+        # TODO (stub): all three plot methods (`.plotFixedEffects`, `.plotRandomEffects` at ~L545,
+        # `.plotClusterSurvival` at ~L556) only call `setState(NULL)` and do nothing else. The
+        # corresponding image renderers in `.r.yaml` (fixedEffectsPlot, randomEffectsPlot,
+        # clusterSurvivalPlot) currently show empty placeholders to the user despite the option
+        # toggles being enabled. Either implement them (forest plot of fixed effects with HRs/95%CI;
+        # caterpillar/dotplot of BLUPs from `coxme::ranef()`; cluster-stratified KM via
+        # `survival::survfit(prepared_data$surv ~ cluster, data = ...)`) or remove the corresponding
+        # `*_plot` options from `.a.yaml`/`.u.yaml`/`.r.yaml` so the UI does not advertise features
+        # that don't exist.
         if (!is.null(private$.coxme_model)) {
           # This would create fixed effects forest plot
           # Implementation depends on plotting infrastructure
@@ -580,6 +604,13 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       
       # Add output variables to dataset
       .addOutputVariables = function(prepared_data) {
+        # TODO (stub): `addClusterEffects` and `addFittedValues` options are advertised in the UI
+        # but this method is a no-op. Wire to `self$results$<outputVarName>$setValues(...)` with the
+        # cluster random effects from `coxme::ranef(private$.coxme_model)` (BLUPs by cluster, joined
+        # back to row order via `prepared_data$data[[cluster_var]]`) and linear predictors from
+        # `predict(private$.coxme_model, type = "lp")`. Also ensure the matching `Output` entries
+        # exist in `.r.yaml`. Until implemented, hide the toggles from `.u.yaml` to avoid silent
+        # no-op for users.
         if (!is.null(private$.coxme_model)) {
           # Add cluster effects and fitted values as output variables
           # Implementation depends on jamovi output variable system

@@ -1279,7 +1279,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         mystratvar_labelled <- names(all_labels)[match(labels_stratvar, all_labels)]
 
         # Set stratification explanation
-        strat_vars_display <- paste(self$options$stratvar, collapse = ", ")
+        strat_vars_display <- htmltools::htmlEscape(paste(self$options$stratvar, collapse = ", "))
         self$results$stratificationExplanation$setContent(paste0(
           "<p><strong>Stratification Variables:</strong> ", strat_vars_display, "</p>",
           "<p>The Cox model is stratified by these variables, allowing for different baseline hazards ",
@@ -1962,7 +1962,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # notice <- jmvcore::Notice$new(...)
           
           self$results$todo$setContent(paste0(
-            "<b>Survival Analysis Error:</b> ", e$message, "<br><br>",
+            "<b>Survival Analysis Error:</b> ", htmltools::htmlEscape(conditionMessage(e)), "<br><br>",
             "Recommendations: (1) Check data for missing/invalid values in time and outcome variables, (2) Ensure time variable contains positive numeric values, (3) Verify outcome is binary (0/1 or FALSE/TRUE), (4) Check sufficient events (≥10), (5) Ensure explanatory variables have appropriate types, (6) Try fewer variables, or (7) Check for outliers."
           ))
           self$results$todo$setVisible(TRUE)
@@ -2991,7 +2991,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             time_points <- time_points[time_points <= max_time]
 
             if (length(time_points) > 0) {
-              brier_result <- tryCatch({
+              brier_result <- jmvcore::tryNaN({
                 # Note: SurvMetrics::Brier may have different API
                 # Fallback to pec package if available
                 if (requireNamespace('pec', quietly = TRUE)) {
@@ -3006,7 +3006,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 } else {
                   NA
                 }
-              }, error = function(e) NA)
+              })
 
               if (!is.na(brier_result)) {
                 self$results$survMetricsTable$addRow(rowKey = "brier", values = list(
@@ -3032,7 +3032,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           ibs_points <- self$options$survmetrics_ibs_points
           ibs_times <- seq(0, max(actual_time, na.rm = TRUE), length.out = ibs_points)
 
-          ibs_result <- tryCatch({
+          ibs_result <- jmvcore::tryNaN({
             if (requireNamespace('pec', quietly = TRUE)) {
               pec_result <- pec::pec(
                 object = list(model = cox_model),
@@ -3045,7 +3045,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             } else {
               NA
             }
-          }, error = function(e) NA)
+          })
 
           if (!is.na(ibs_result)) {
             self$results$survMetricsTable$addRow(rowKey = "ibs", values = list(
@@ -3651,12 +3651,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (inherits(zph, "multisurvival_ph_error")) {
           self$results$cox_ph$setContent(paste0(
             "Unable to compute proportional hazards diagnostics (cox.zph):\n",
-            zph$error
+            htmltools::htmlEscape(zph$error)
           ))
         } else {
           zph_table <- zph$table
 
-          ph_text <- paste(utils::capture.output(print(zph_table)), collapse = "\n")
+          ph_text <- htmltools::htmlEscape(paste(utils::capture.output(print(zph_table)), collapse = "\n"))
 
           suggestion <- ""
           if (!is.null(zph_table) && nrow(zph_table) > 0 && "p" %in% colnames(zph_table)) {
@@ -3665,7 +3665,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             if (length(violating) > 0) {
               suggestion <- paste0(
                 "\n\nNote: The proportional hazards assumption appears to be violated for: ",
-                paste(violating, collapse = ", "),
+                paste(htmltools::htmlEscape(violating), collapse = ", "),
                 ". Consider using these as stratification variables instead of covariates."
               )
             }

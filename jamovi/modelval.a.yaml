@@ -41,6 +41,16 @@ options:
       description: >
         Binary outcome variable (observed events: yes/no).
 
+    - name: outcomePositive
+      title: Positive Outcome Level
+      type: Level
+      variable: (outcome)
+      description: >
+        The factor level of the outcome variable that represents the
+        positive case (event = 1). Required to avoid relying on
+        alphabetic level order, which can silently invert calibration
+        and AUC interpretation.
+
     - name: predicted
       title: Predicted Probability
       type: Variable

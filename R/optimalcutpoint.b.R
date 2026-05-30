@@ -114,7 +114,7 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # Create analysis dataset
             analysisData <- data[, vars_to_check, drop = FALSE]
-            analysisData <- na.omit(analysisData)
+            analysisData <- jmvcore::naOmit(analysisData)
 
             if (nrow(analysisData) < 20) {
                 self$results$instructions$setContent("Insufficient data for cutpoint analysis. Need at least 20 complete observations.")
@@ -123,6 +123,14 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # Ensure outcome is properly formatted for binary analysis
             if (self$options$analysis_type == "binary" && !is.null(outcome)) {
+                # TODO (correctness, ⚠ behavior risk): the `as.factor(...); as.numeric(...) - 1`
+                # idiom converts a 2-level factor to level-indices then shifts to 0/1. For a
+                # factor with levels c("0","1") it yields c(0,1) (correct), but for c("No","Yes")
+                # it yields c(0,1) keyed to alphabetic ordering (so "No"→0, "Yes"→1 happens to
+                # be right). For c("Yes","No") it would silently invert: "No"→1, "Yes"→0.
+                # Consider `jmvcore::toNumeric()` which honors the jamovi values attribute, or
+                # require the user to pre-code outcome as 0/1. Needs manual review of expected
+                # semantics before swapping (could shift results in production).
                 # Convert to factor and then to numeric (0/1)
                 if (!is.numeric(analysisData[[outcome]])) {
                     analysisData[[outcome]] <- as.factor(analysisData[[outcome]])
@@ -181,7 +189,7 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }
 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Binary cutpoint analysis failed:", e$message))
+                self$results$instructions$setContent(paste("Binary cutpoint analysis failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
 
@@ -196,7 +204,7 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
                 if (method == "maxstat") {
                     # Maximally selected rank statistics (Miller-Halpern-style cut-point)
-                    formula_str <- paste("Surv(", time_var, ",", status_var, ") ~", biomarker)
+                    formula_str <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(status_var), ") ~ ", jmvcore::composeTerm(biomarker))
 
                     correction <- self$options$multiple_testing
                     pmethod <- switch(correction,
@@ -207,7 +215,7 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                                       "HL")
 
                     maxstat_result <- maxstat::maxstat.test(
-                        formula = as.formula(formula_str),
+                        formula = .asSurvivalFormula(formula_str),
                         data = data,
                         smethod = "LogRank",
                         pmethod = pmethod
@@ -273,8 +281,8 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # Test significance with log-rank test
                     data$biomarker_group <- ifelse(data[[biomarker]] <= cutpoint, "Low", "High")
 
-                    formula_str <- paste("Surv(", time_var, ",", status_var, ") ~ biomarker_group")
-                    survdiff_result <- survival::survdiff(as.formula(formula_str), data = data)
+                    formula_str <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(status_var), ") ~ biomarker_group")
+                    survdiff_result <- survival::survdiff(.asSurvivalFormula(formula_str), data = data)
                     p_value <- 1 - pchisq(survdiff_result$chisq, df = 1)
 
                     private$.populateSurvivalCutpointTable(
@@ -289,7 +297,7 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }
 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Survival cutpoint analysis failed:", e$message))
+                self$results$instructions$setContent(paste("Survival cutpoint analysis failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
 
@@ -354,7 +362,7 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 )
 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Continuous cutpoint analysis failed:", e$message))
+                self$results$instructions$setContent(paste("Continuous cutpoint analysis failed:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
 
@@ -465,8 +473,8 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             data$group <- ifelse(data[[biomarker]] <= cutpoint, "Low", "High")
 
             # Fit survival curves
-            formula_str <- paste("Surv(", time_var, ",", status_var, ") ~ group")
-            survfit_result <- survival::survfit(as.formula(formula_str), data = data)
+            formula_str <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(status_var), ") ~ group")
+            survfit_result <- survival::survfit(.asSurvivalFormula(formula_str), data = data)
 
             # Calculate median survival times
             median_surv <- summary(survfit_result)$table[, "median"]
@@ -479,8 +487,8 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
 
             # Calculate hazard ratio
-            formula_str_cox <- paste("Surv(", time_var, ",", status_var, ") ~ group")
-            cox_result <- survival::coxph(as.formula(formula_str_cox), data = data)
+            formula_str_cox <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(status_var), ") ~ group")
+            cox_result <- survival::coxph(.asSurvivalFormula(formula_str_cox), data = data)
             hr <- exp(coef(cox_result))
             hr_ci <- exp(confint(cox_result))
 
@@ -672,14 +680,14 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             html <- paste0(html, "<h3>Optimal Cutpoint Analysis Interpretation</h3>")
 
             html <- paste0(html, "<h4>Analysis Overview</h4>")
-            html <- paste0(html, "<p>This analysis determines the optimal cutpoint for <strong>", biomarker, "</strong> using ")
+            html <- paste0(html, "<p>This analysis determines the optimal cutpoint for <strong>", htmltools::htmlEscape(biomarker), "</strong> using ")
 
             if (analysis_type == "binary") {
-                html <- paste0(html, "binary outcome optimization with the <strong>", method, "</strong> method.")
+                html <- paste0(html, "binary outcome optimization with the <strong>", htmltools::htmlEscape(method), "</strong> method.")
             } else if (analysis_type == "survival") {
-                html <- paste0(html, "survival analysis optimization with the <strong>", method, "</strong> method.")
+                html <- paste0(html, "survival analysis optimization with the <strong>", htmltools::htmlEscape(method), "</strong> method.")
             } else {
-                html <- paste0(html, "continuous outcome optimization with the <strong>", method, "</strong> method.")
+                html <- paste0(html, "continuous outcome optimization with the <strong>", htmltools::htmlEscape(method), "</strong> method.")
             }
 
             html <- paste0(html, "</p>")
@@ -757,8 +765,8 @@ optimalcutpointClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             null_stats <- numeric(nperm)
             successes <- 0L
             failures  <- 0L
-            formula_str <- paste("Surv(", time_var, ",", status_var, ") ~", biomarker)
-            f <- as.formula(formula_str)
+            formula_str <- paste0("Surv(", jmvcore::composeTerm(time_var), ", ", jmvcore::composeTerm(status_var), ") ~ ", jmvcore::composeTerm(biomarker))
+            f <- .asSurvivalFormula(formula_str)
 
             # Use a project-stable seed so re-runs of the same data give the
             # same corrected p; users can override by setting .Random.seed.

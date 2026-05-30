@@ -25,7 +25,7 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!requireNamespace('survival', quietly = TRUE)) {
-                stop("The survival package is required")
+                jmvcore::reject("The survival package is required")
             }
         },
 
@@ -58,6 +58,14 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
+            # TODO (stub): 6 options declared in .a.yaml / .h.R but never read in .b.R:
+            # `absorbing_states` (OptionString HIGH — if wired into HTML rendering of
+            # the transition matrix, wrap with htmltools::htmlEscape at the sink),
+            # `competing_risks` (OptionBool), `time_varying` (OptionBool),
+            # `bootstrap_ci` (OptionBool), `plot_individual` (OptionBool),
+            # `stratified` (OptionVariable — column ref, MEDIUM). UI shows these
+            # controls but they have no effect. Either wire them into the analysis
+            # or remove from the YAMLs to avoid misleading users.
             # Get data and prepare for analysis
             prepared_data <- private$.prepareData()
             if (is.null(prepared_data)) return()
@@ -163,7 +171,7 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 self$results$errors$setContent(
-                    paste("Data preparation failed:", e$message)
+                    paste("Data preparation failed:", htmltools::htmlEscape(conditionMessage(e)))
                 )
                 return(NULL)
             })
@@ -188,6 +196,18 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_states <- length(all_states)
 
                 # Check for custom transition matrix
+                # TODO (stub): file-wide pattern — 5 helper methods are CALLED but
+                # not DEFINED in this .b.R: `.parseTransitionMatrix` (this site),
+                # `.displayTransitionProbabilities` (L356), `.displayStateProbabilities`
+                # (L405), `.displaySojournTimes` (L442), `.interpretHazardRatios` (L473).
+                # Each call will throw "could not find function" at runtime; the four
+                # display/interpret helpers are caught by their outer tryCatch and
+                # silently `message(...)`'d (no UI feedback); .parseTransitionMatrix
+                # propagates to the L237 setContent error path. SECURITY NOTE: when
+                # .parseTransitionMatrix is implemented, treat `self$options$transition_matrix`
+                # (OptionString HIGH free-text) as fully user-controlled — parse
+                # structurally (strsplit + validate), never eval(parse(...)) or coerce
+                # to a formula. Same caution for `absorbing_states` (HIGH) below if wired.
                 if (self$options$transition_matrix != "auto") {
                     trans_matrix <- private$.parseTransitionMatrix(
                         self$options$transition_matrix,
@@ -235,7 +255,7 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 self$results$errors$setContent(
-                    paste("Transition matrix definition failed:", e$message)
+                    paste("Transition matrix definition failed:", htmltools::htmlEscape(conditionMessage(e)))
                 )
                 return(NULL)
             })
@@ -285,13 +305,13 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add covariates to formula
                 if (!is.null(vars$covariates)) {
-                    covar_terms <- paste(vars$covariates, collapse = " + ")
+                    covar_terms <- paste(jmvcore::composeTerms(as.list(vars$covariates)), collapse = " + ")
                     cox_formula <- paste(cox_formula, "+", covar_terms)
                 }
 
                 # Fit the model
                 ms_model <- survival::coxph(
-                    as.formula(cox_formula),
+                    jmvcore::asFormula(cox_formula),
                     data = ms_data,
                     method = "breslow"
                 )
@@ -307,7 +327,7 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 self$results$errors$setContent(
-                    paste("Model fitting failed:", e$message)
+                    paste("Model fitting failed:", htmltools::htmlEscape(conditionMessage(e)))
                 )
                 return(NULL)
             })
@@ -484,13 +504,13 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Column headers
             for (col_name in colnames(trans_matrix)) {
-                matrix_html <- paste0(matrix_html, "<th>", col_name, "</th>")
+                matrix_html <- paste0(matrix_html, "<th>", htmltools::htmlEscape(col_name), "</th>")
             }
             matrix_html <- paste0(matrix_html, "</tr>")
 
             # Matrix cells
             for (i in 1:nrow(trans_matrix)) {
-                matrix_html <- paste0(matrix_html, "<tr><th>", rownames(trans_matrix)[i], "</th>")
+                matrix_html <- paste0(matrix_html, "<tr><th>", htmltools::htmlEscape(rownames(trans_matrix)[i]), "</th>")
                 for (j in 1:ncol(trans_matrix)) {
                     cell_value <- if (is.na(trans_matrix[i, j])) "-" else trans_matrix[i, j]
                     matrix_html <- paste0(matrix_html, "<td style='text-align: center;'>", cell_value, "</td>")

@@ -147,12 +147,18 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop("Error: The provided dataset contains no rows. Please check your data and try again.")
+                jmvcore::reject("The provided dataset contains no rows. Please check your data and try again.")
             }
 
             # Enhanced package dependency checking
             package_status <- private$.check_package_dependencies()
             if (!package_status$all_available) {
+                # TODO (UX): three validation paths in .run() use the `setContent("<error html>") + return()` pattern
+                # instead of `jmvcore::reject()` — here (L156), L163 (validate_and_prepare_data error), and L434
+                # (imputation tryCatch). Converting to jmvcore::reject() would surface a structured red banner instead
+                # of replacing one result panel with HTML. Behavior-risk: jmvcore::reject() stops the whole .run(),
+                # so any side-output the user expects (e.g. interpretation guide still rendering) would disappear.
+                # Defer to a dedicated UX review.
                 self$results$interpretation$setContent(package_status$error_message)
                 return()
             }
@@ -422,7 +428,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
                     "<h4> Imputation Error</h4>",
-                    "<p><strong>Error message:</strong> ", e$message, "</p>",
+                    "<p><strong>Error message:</strong> ", htmltools::htmlEscape(e$message), "</p>",
                     "<p><strong>Possible solutions:</strong></p>",
                     "<ul>",
                     "<li>Try different imputation methods</li>",
@@ -485,7 +491,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                     
                     pattern_html <- paste0(pattern_html,
                         "<tr style='background-color: ", row_bg, ";'>",
-                        "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>", var_name, "</strong></td>",
+                        "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(var_name), "</strong></td>",
                         "<td style='padding: 8px; border: 1px solid #dee2e6;'>", missing_count, "</td>",
                         "<td style='padding: 8px; border: 1px solid #dee2e6;'>", missing_pct, "%</td>",
                         "<td style='padding: 8px; border: 1px solid #dee2e6;'>", complete_count, "</td>",
@@ -555,9 +561,9 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                     
                     summary_html <- paste0(summary_html,
                         "<tr>",
-                        "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>", var_name, "</strong></td>",
-                        "<td style='padding: 8px; border: 1px solid #dee2e6;'>", method, "</td>",
-                        "<td style='padding: 8px; border: 1px solid #dee2e6;'>", description, "</td>",
+                        "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(var_name), "</strong></td>",
+                        "<td style='padding: 8px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(method), "</td>",
+                        "<td style='padding: 8px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(description), "</td>",
                         "</tr>"
                     )
                 }
@@ -723,7 +729,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
                     "<h4> Variables Not Found</h4>",
                     "<p>The following variables were not found in the dataset: ",
-                    paste(missing_vars, collapse = ", "), "</p>",
+                    paste(htmltools::htmlEscape(missing_vars), collapse = ", "), "</p>",
                     "<p>Please check variable names and try again.</p>",
                     "</div>"
                 )
@@ -740,7 +746,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
                     "<h4> Empty Variables Detected</h4>",
                     "<p>The following variables contain only missing values: ",
-                    paste(empty_vars, collapse = ", "), "</p>",
+                    paste(htmltools::htmlEscape(empty_vars), collapse = ", "), "</p>",
                     "<p>Please select variables with at least some observed values.</p>",
                     "</div>"
                 )
@@ -768,11 +774,15 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             high_missing_vars <- names(missing_percentages)[missing_percentages > 90]
             
             if (length(high_missing_vars) > 0) {
+                # TODO (correctness): `warning_msg` is built here but never reaches any setContent call —
+                # the comment below ("Add warning but continue analysis") describes intended behavior that
+                # was never implemented. Either prepend warning_msg to the pattern_table HTML before returning
+                # valid=TRUE, or drop this dead branch. htmlEscape already applied defensively for future wiring.
                 warning_msg <- paste0(
                     "<div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;'>",
                     "<h4 style='color: #856404;'> High Missing Data Warning</h4>",
                     "<p>The following variables have >90% missing data: ",
-                    paste(high_missing_vars, collapse = ", "), "</p>",
+                    paste(htmltools::htmlEscape(high_missing_vars), collapse = ", "), "</p>",
                     "<p>Consider removing these variables or interpreting results cautiously.</p>",
                     "</div>"
                 )

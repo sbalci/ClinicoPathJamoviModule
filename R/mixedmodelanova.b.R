@@ -432,6 +432,12 @@ mixedmodelanova <- function(
     analysis$results
 }
 
+# TODO (cleanup): Lines 1-433 of this .b.R duplicate the generated content of
+# R/mixedmodelanova.h.R (Options/Results/Base classes + the public constructor).
+# Both are regenerated together today, but the duplication doubles the surface
+# area for accidental edits. Consider trimming the .b.R down to just the Class
+# definition below, matching the convention used by most other functions in R/.
+
 mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "mixedmodelanovaClass",
     inherit = mixedmodelanovaBase,
@@ -440,10 +446,10 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             # Check if required packages are available
             if (!requireNamespace("lme4", quietly = TRUE)) {
-                stop("Package 'lme4' is required but not installed. Please install it.")
+                jmvcore::reject("Package 'lme4' is required but not installed. Please install it.")
             }
             if (!requireNamespace("lmerTest", quietly = TRUE)) {
-                stop("Package 'lmerTest' is required but not installed. Please install it.")
+                jmvcore::reject("Package 'lmerTest' is required but not installed. Please install it.")
             }
 
             # Get variables
@@ -479,11 +485,16 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             }
 
             # Fit model
+            # TODO (correctness): this tryCatch swallows any jmvcore::reject()
+            # raised from inside lmer/lmerTest and rewraps it as "Model fitting
+            # failed: <msg>", which loses the original notice category. Consider
+            # rethrowing jmvcore-classed errors unchanged and only reformatting
+            # generic R errors.
             model <- tryCatch({
                 reml <- self$options$estimation_method == "reml"
-                lmerTest::lmer(as.formula(formula_str), data = data, REML = reml)
+                lmerTest::lmer(jmvcore::asFormula(formula_str), data = data, REML = reml)
             }, error = function(e) {
-                stop(paste("Model fitting failed:", e$message))
+                jmvcore::reject("Model fitting failed: {}", e$message)
             })
 
             # Store model for use by other methods
@@ -521,31 +532,31 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             if (length(fixed_terms) == 0) {
                 fixed_part <- "1"
             } else if (interaction_terms && length(fixed_fac) > 1) {
-                fixed_part <- paste(fixed_fac, collapse = " * ")
+                fixed_part <- paste(vapply(fixed_fac, jmvcore::composeTerm, character(1)), collapse = " * ")
                 if (length(covars) > 0) {
-                    fixed_part <- paste(c(fixed_part, covars), collapse = " + ")
+                    fixed_part <- paste(c(fixed_part, vapply(covars, jmvcore::composeTerm, character(1))), collapse = " + ")
                 }
             } else {
-                fixed_part <- paste(fixed_terms, collapse = " + ")
+                fixed_part <- paste(vapply(fixed_terms, jmvcore::composeTerm, character(1)), collapse = " + ")
             }
 
             # Build random effects part
             if (model_type == "random_intercept") {
-                random_part <- paste0("(1 | ", random_fac[1], ")")
+                random_part <- paste0("(1 | ", jmvcore::composeTerm(random_fac[1]), ")")
             } else if (model_type == "random_slope") {
                 if (length(fixed_fac) == 0) {
-                    stop("Random slope model requires at least one fixed factor")
+                    jmvcore::reject("Random slope model requires at least one fixed factor")
                 }
-                random_part <- paste0("(", fixed_fac[1], " | ", random_fac[1], ")")
+                random_part <- paste0("(", jmvcore::composeTerm(fixed_fac[1]), " | ", jmvcore::composeTerm(random_fac[1]), ")")
             } else if (model_type == "nested") {
                 if (length(random_fac) < 2) {
-                    stop("Nested design requires at least two random factors")
+                    jmvcore::reject("Nested design requires at least two random factors")
                 }
-                random_part <- paste0("(1 | ", random_fac[1], "/", random_fac[2], ")")
+                random_part <- paste0("(1 | ", jmvcore::composeTerm(random_fac[1]), "/", jmvcore::composeTerm(random_fac[2]), ")")
             }
 
             # Combine
-            formula_str <- paste(dep, "~", fixed_part, "+", random_part)
+            formula_str <- paste(jmvcore::composeTerm(dep), "~", fixed_part, "+", random_part)
             return(formula_str)
         },
 
@@ -609,6 +620,8 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             for (i in 1:nrow(vc)) {
                 if (!is.na(vc$grp[i])) {
+                    # TODO (cleanup): when var1 is NA this paste() leaves a
+                    # trailing space ("Subject "). Use paste0 or trimws to clean it.
                     group_name <- paste(vc$grp[i], if (!is.na(vc$var1[i])) paste0(" (", vc$var1[i], ")") else "")
                     table$addRow(rowKey = i, values = list(
                         group = group_name,
@@ -637,6 +650,10 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             table <- self$results$icc_table
 
             # Calculate ICC
+            # TODO (correctness): if VarCorr() does not return a "Residual" row
+            # (some fits, e.g. GLMM families, omit it) then var_residual is
+            # numeric(0) and the ICC becomes numeric(0)/NaN. Guard with a
+            # length check and surface a notice instead of populating NaN.
             vc <- as.data.frame(lme4::VarCorr(model))
             var_random <- sum(vc$vcov[!is.na(vc$grp) & vc$grp != "Residual"])
             var_residual <- vc$vcov[vc$grp == "Residual"]
@@ -747,6 +764,10 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             model <- private$.model
 
+            # TODO (UX): the ggtheme/theme arguments jamovi passes in are ignored
+            # because we render via base graphics. Migrate to a ggplot2-based
+            # diagnostic panel (e.g. four panels via patchwork/cowplot applying
+            # ggtheme + theme) so the plot honors the user's chosen jamovi theme.
             # Create 2x2 diagnostic plot
             par(mfrow = c(2, 2))
             plot(model)

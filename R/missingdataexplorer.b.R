@@ -14,7 +14,7 @@ missingdataexplorerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # 2. Data preparation
             data <- self$data
-            data_subset <- data[, analysis_vars, drop = FALSE]
+            data_subset <- jmvcore::select(data, analysis_vars)
 
             # 3. Perform Analysis
             tryCatch({
@@ -40,7 +40,7 @@ missingdataexplorerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 private$.data_subset <- data_subset
                 
             }, error = function(e) {
-                jmvcore::reject(paste("Analysis error: ", e$message))
+                jmvcore::reject("Analysis error: {}", e$message)
             })
         },
 

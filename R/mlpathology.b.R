@@ -54,8 +54,21 @@ mlpathologyClass <- R6::R6Class(
             actual_var <- self$options$actual_labels
             predicted_var <- self$options$predicted_labels
             probabilities_var <- self$options$predicted_probabilities
-            
+            # TODO (stub): bootstrap_validation and bootstrap_runs options are declared
+            # in jamovi/mlpathology.a.yaml + .u.yaml but never read in this .b.R. Either
+            # wire them into .performROCAnalysis/.performClassificationMetrics (e.g.,
+            # pROC::ci.auc(..., method = "bootstrap", boot.n = bootstrap_runs)) or remove
+            # them from the YAMLs to avoid misleading the user that the toggle does anything.
+
             # Validate variables
+            # TODO (UX): file-wide pattern — 9 validation guards use
+            # self$results$instructions$setContent("<error html>") + return() instead of
+            # jmvcore::reject(). Sites: L60 (this one), L116, L147, plus the 5 tryCatch
+            # error branches at L80/L91/L131/L163/L175 (those also write to instructions).
+            # jmvcore::reject() surfaces a structured error in the jamovi UI and is the
+            # idiomatic guard; setContent overwrites the welcome/instruction pane and can
+            # mask later analysis output. Defer to a dedicated UX pass — same pattern
+            # observation as missingdata/modalitycomparison audits.
             if (is.null(actual_var) || is.null(predicted_var)) {
                 self$results$instructions$setContent(
                     "<p><strong>Variable Selection Required:</strong> Please select both actual and predicted labels for classification analysis.</p>"
@@ -78,18 +91,20 @@ mlpathologyClass <- R6::R6Class(
                 private$.performClassificationMetrics(actual, predicted)
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste0("<p><strong>Classification Analysis Error:</strong> ", e$message, "</p>")
+                    paste0("<p><strong>Classification Analysis Error:</strong> ",
+                           htmltools::htmlEscape(conditionMessage(e)), "</p>")
                 )
             })
             
             # ROC analysis if probabilities provided
             if (!is.null(probabilities_var) && self$options$roc_analysis) {
-                probabilities <- as.numeric(data[[probabilities_var]])
+                probabilities <- jmvcore::toNumeric(data[[probabilities_var]])
                 tryCatch({
                     private$.performROCAnalysis(actual, probabilities)
                 }, error = function(e) {
                     self$results$instructions$setContent(
-                        paste0("<p><strong>ROC Analysis Error:</strong> ", e$message, "</p>")
+                        paste0("<p><strong>ROC Analysis Error:</strong> ",
+                               htmltools::htmlEscape(conditionMessage(e)), "</p>")
                     )
                 })
             }
@@ -101,7 +116,7 @@ mlpathologyClass <- R6::R6Class(
             
             # Generate ROC plot
             if (self$options$roc_plot && !is.null(probabilities_var)) {
-                probabilities <- as.numeric(data[[probabilities_var]])
+                probabilities <- jmvcore::toNumeric(data[[probabilities_var]])
                 private$.populateROCPlot(actual, probabilities)
             }
         },
@@ -129,7 +144,8 @@ mlpathologyClass <- R6::R6Class(
                 private$.performSegmentationMetrics(reference, predicted)
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste0("<p><strong>Segmentation Analysis Error:</strong> ", e$message, "</p>")
+                    paste0("<p><strong>Segmentation Analysis Error:</strong> ",
+                           htmltools::htmlEscape(conditionMessage(e)), "</p>")
                 )
             })
         },
@@ -161,19 +177,21 @@ mlpathologyClass <- R6::R6Class(
                 private$.performModelComparison(actual, model1_pred, model2_pred)
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste0("<p><strong>Model Comparison Error:</strong> ", e$message, "</p>")
+                    paste0("<p><strong>Model Comparison Error:</strong> ",
+                           htmltools::htmlEscape(conditionMessage(e)), "</p>")
                 )
             })
             
             # ROC comparison if probabilities provided
             if (!is.null(prob1_var) && !is.null(prob2_var) && self$options$roc_comparison) {
-                prob1 <- as.numeric(data[[prob1_var]])
-                prob2 <- as.numeric(data[[prob2_var]])
+                prob1 <- jmvcore::toNumeric(data[[prob1_var]])
+                prob2 <- jmvcore::toNumeric(data[[prob2_var]])
                 tryCatch({
                     private$.performROCComparison(actual, prob1, prob2)
                 }, error = function(e) {
                     self$results$instructions$setContent(
-                        paste0("<p><strong>ROC Comparison Error:</strong> ", e$message, "</p>")
+                        paste0("<p><strong>ROC Comparison Error:</strong> ",
+                               htmltools::htmlEscape(conditionMessage(e)), "</p>")
                     )
                 })
             }

@@ -106,7 +106,7 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             tryCatch({
                 private$.prepareData()
             }, error = function(e) {
-                stop(paste("Data preparation error:", e$message))
+                jmvcore::reject("Data preparation error: {}", e$message)
             })
 
             if (is.null(private$.data_prepared)) {
@@ -115,7 +115,7 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
             # Check minimum classes
             if (private$.n_classes < 3) {
-                stop("Outcome variable must have at least 3 classes for multi-class ROC analysis")
+                jmvcore::reject("Outcome variable must have at least 3 classes for multi-class ROC analysis")
             }
 
             # Calculate ROC based on method
@@ -130,7 +130,7 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     private$.calculateMultinomial()
                 }
             }, error = function(e) {
-                stop(paste("ROC calculation error:", e$message))
+                jmvcore::reject("ROC calculation error: {}", e$message)
             })
 
             # Populate results
@@ -168,7 +168,7 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             X <- data[, predictor_vars, drop = FALSE]
 
             # Convert to numeric matrix
-            X_numeric <- sapply(X, as.numeric)
+            X_numeric <- sapply(X, jmvcore::toNumeric)
 
             # Check for missing values
             if (any(is.na(y))) {
@@ -196,6 +196,19 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             classes <- private$.class_levels
             n_classes <- private$.n_classes
 
+            # Scope set.seed to this function: save+restore global RNG state on exit.
+            # Preserves sequential-RNG behavior across classes within the call while
+            # leaving the user's global .Random.seed untouched outside this analysis.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv)
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
             set.seed(self$options$random_seed)
 
             # Store results for each class
@@ -243,6 +256,17 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             classes <- private$.class_levels
             n_classes <- private$.n_classes
 
+            # Scope set.seed to this function (see .calculateOvR L199-208 for rationale).
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv)
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
             set.seed(self$options$random_seed)
 
             # Store pairwise results

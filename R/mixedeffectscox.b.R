@@ -11,7 +11,12 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
     inherit = mixedeffectscoxBase,
     private = list(
         .init = function() {
-            
+
+            # TODO (UX): switch hard validation errors from setNote() to jmvcore::reject().
+            # setNote() surfaces a small note on a single result table the user may have hidden;
+            # reject() halts analysis and shows the message at the top of the results pane.
+            # Applies to this site AND lines ~45, ~52, ~62 (the "info"/"error" setNote calls in .run()
+            # that propagate prepareData/fit errors via result$error -> setNote("error", ...)).
             if (is.null(self$options$elapsedtime) || is.null(self$options$outcome)) {
                 self$results$modelSummary$setNote("info",
                     "Please specify both time and event variables to proceed with the analysis.")
@@ -98,6 +103,12 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             outcome <- data[[outcomeVar]]
             
             # Convert outcome to numeric
+            # TODO (data hygiene): outcomeLevel is a free-text String option (.a.yaml). When the
+            # outcome column is numeric and the user types a non-numeric value, as.numeric(outcomeLevel)
+            # returns NA with a warning, every row becomes outcome == NA = NA, and the user later sees
+            # a misleading "No complete cases" error. Validate outcomeLevel here against the actual
+            # values of `outcome` and surface a targeted "outcomeLevel did not match any value of the
+            # outcome variable" error instead of silently zeroing the event column.
             if (is.factor(outcome)) {
                 outcome <- as.numeric(outcome == outcomeLevel)
             } else if (is.character(outcome)) {
@@ -139,6 +150,11 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             hierarchicalInfo <- list()
             for (var in randomEffects) {
                 modelData[[var]] <- data[[var]]
+                # TODO (data hygiene): as.factor() on a numeric ID produces lexicographic levels
+                # (e.g. as.factor(c(1, 10, 2)) -> levels c("1","10","2")). Irrelevant for the Cox
+                # frailty fit itself, but the hierarchical-structure / random-effects tables then
+                # display groups in lexicographic order. Use factor(as.character(x),
+                # levels = as.character(sort(unique(x)))) for a numeric-sorted level order.
                 if (is.numeric(modelData[[var]])) {
                     modelData[[var]] <- as.factor(modelData[[var]])
                 }
@@ -195,11 +211,11 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             fixed_formula_part <- if (is.null(fixedEffects) || length(fixedEffects) == 0) {
                 "1"
             } else {
-                paste(fixedEffects, collapse = " + ")
+                jmvcore::composeTerms(as.list(fixedEffects))
             }
-            
+
             # Convert to frailty formula for survival package
-            frailty_terms <- paste(sapply(randomEffects, function(x) paste0("frailty(", x, ")")), collapse = " + ")
+            frailty_terms <- paste(sapply(randomEffects, function(x) paste0("frailty(", jmvcore::composeTerm(x), ")")), collapse = " + ")
             
             if (fixed_formula_part == "1") {
                 formula_str <- paste("Surv(time, status) ~", frailty_terms)
@@ -210,7 +226,7 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             tryCatch({
                 # Use survival package with frailty terms
                 model <- survival::coxph(
-                    as.formula(formula_str),
+                    jmvcore::asFormula(formula_str, additional_allowed_functions = c("frailty")),
                     data = data,
                     method = tiesMethod,
                     model = TRUE,
@@ -228,7 +244,7 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 
                 return(list(model = model, random_effects_info = randomEffectsInfo, error = NULL))
             }, error = function(e) {
-                return(list(error = paste("Mixed-effects Cox model fitting failed:", e$message)))
+                return(list(error = paste("Mixed-effects Cox model fitting failed:", jmvcore::extractErrorMessage(e))))
             })
         },
         
@@ -237,10 +253,16 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             randomEffectsInfo <- list()
             
             # Extract frailty variance information (simplified)
+            # TODO (stub): frailty_var is hardcoded to 1 — the random-effects table reports a fake
+            # variance (1), std_dev (1), proportion-of-total, and ICC for every random effect
+            # regardless of what the model actually estimated. Extract the real value from the
+            # fitted coxph model via model$frail (per-group BLUPs, var = var(model$frail[[var_name]]))
+            # or model$history[[<frailty term>]]$theta (REML variance). Until this is fixed the
+            # "Random Effects and Variance Components" / "ICC Analysis" tables are misleading.
             for (var_name in randomEffects) {
                 # Simplified variance estimation
                 frailty_var <- 1  # Default variance
-                
+
                 randomEffectsInfo[[var_name]] <- list(
                     variance = frailty_var,
                     std_dev = sqrt(frailty_var),

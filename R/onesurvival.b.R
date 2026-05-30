@@ -79,13 +79,13 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # 1. Check if variables exist in data
             if (!is.null(time_var) && !time_var %in% names(data)) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Time variable '", time_var, "' not found in dataset.", sep=""))
+                    paste("Time variable '", htmltools::htmlEscape(time_var), "' not found in dataset.", sep=""))
                 validation_results$should_stop <- TRUE
             }
-            
+
             if (!is.null(status_var) && !status_var %in% names(data)) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Status variable '", status_var, "' not found in dataset.", sep=""))
+                    paste("Status variable '", htmltools::htmlEscape(status_var), "' not found in dataset.", sep=""))
                 validation_results$should_stop <- TRUE
             }
             
@@ -162,7 +162,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         }
                     } else if (length(unique_status) > 2) {
                         validation_results$warnings <- c(validation_results$warnings,
-                            paste("Status variable has ", length(unique_status), " unique values: ", paste(unique_status, collapse=", "), ". Expected binary (0/1). Will convert to binary.", sep=""))
+                            paste("Status variable has ", length(unique_status), " unique values: ", paste(htmltools::htmlEscape(as.character(unique_status)), collapse=", "), ". Expected binary (0/1). Will convert to binary.", sep=""))
                     }
                     
                     # Check if status can be converted to binary
@@ -224,6 +224,15 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             non_missing_data <- status_data[!is.na(status_data)]
             unique_vals <- unique(non_missing_data)
             
+            # TODO (correctness): L230/L233 `as.numeric(status_data)` returns LEVEL INDICES
+            # (1, 2, ...) when status_data is a jamovi factor, but the branch logic above
+            # (`unique_vals %in% c(0,1)` / `c(FALSE,TRUE)`) implies the caller expects
+            # 0/1-coded values, not indices. If a factor with levels c("0","1") arrives,
+            # `as.numeric()` returns c(1,2) — silently wrong by 1. The right call is
+            # `jmvcore::toNumeric(status_data)` which honors the factor's `values` attribute
+            # set by jamovi (returning the underlying 0/1 coding the user sees in the UI).
+            # Flagged as ⚠ behavior risk during jamovify pass — needs manual review to confirm
+            # the values attribute matches the expected 0/1 semantics before swapping.
             # Standard binary conversions
             if (all(unique_vals %in% c(0, 1))) {
                 # Already 0/1 - convert to numeric if needed
@@ -249,7 +258,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     warning(paste("Status variable '", original_var_name, "' converted: 0 → censored, >0 → event", sep=""))
                     return(result)
                 } else {
-                    stop(paste("Cannot convert status variable '", original_var_name, "' to binary format. Please ensure it contains binary values (0/1, TRUE/FALSE) or contact support.", sep=""))
+                    jmvcore::reject("Cannot convert status variable '{}' to binary format. Please ensure it contains binary values (0/1, TRUE/FALSE) or contact support.", original_var_name)
                 }
             }
         },
@@ -287,6 +296,14 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
+            # TODO (UX): three error paths in this function build HTML error blocks
+            # (L292-306 empty-data, L320-330 validation-failure, L389-404 survival-fit-error)
+            # and surface them via `stop(html)`. jamovi renders stop() messages as PLAIN TEXT —
+            # the HTML markup shows literally as `<div ...>...</div>` to the user. Replace each
+            # with the project idiom: `self$results$text$setContent(html); return()`, or
+            # accumulate via the .addNotice / .addHtmlMessage HTML-pane pattern used elsewhere
+            # in the module (see waterfall.b.R / oddsratio.b.R for reference). Same fix applies
+            # to all three sites — sweep together.
             # Check for empty data
             if (nrow(self$data) == 0) {
                 error_msg <- paste(
@@ -357,8 +374,10 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tmpDat <- tmpDat[complete_cases, ]
 
             # Create survival formula
-            form <- paste("survival::Surv(", times, ",", status, ") ~ 1")
-            form <- as.formula(form)
+            # Bare `Surv` (not `survival::Surv`) is globally allow-listed by jmvcore::asFormula;
+            # composeTerm backtick-escapes user-supplied column names; .asSurvivalFormula
+            # is the project wrapper around jmvcore::asFormula with survival helpers allow-listed.
+            form <- .asSurvivalFormula(paste0("Surv(", jmvcore::composeTerm(times), ", ", jmvcore::composeTerm(status), ") ~ 1"))
 
             # Fit survival model with error handling
             tryCatch({
@@ -389,7 +408,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 detailed_error <- paste(
                     "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
                     "<b> Survival Analysis Error:</b><br>",
-                    paste("Technical error:", e$message), "<br><br>",
+                    paste("Technical error:", htmltools::htmlEscape(conditionMessage(e))), "<br><br>",
                     "<b> Common causes and solutions:</b><br>",
                     "• Invalid survival times: Check for negative or non-numeric time values<br>",
                     "• All subjects censored: Ensure some events have occurred<br>",

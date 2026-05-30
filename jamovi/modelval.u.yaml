@@ -17,6 +17,10 @@ children:
             name: outcome
             isTarget: true
             maxItemCount: 1
+          - type: LevelSelector
+            name: outcomePositive
+            label: Positive Outcome Level
+            enable: (outcome)
       - type: TargetLayoutBox
         label: Predicted Probability
         children:

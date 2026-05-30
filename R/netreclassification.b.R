@@ -102,8 +102,9 @@ netreclassificationClass <- R6::R6Class(
                 }
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste0("<html><body><h3>Analysis Error</h3><p>", 
-                           "Error in NRI calculation: ", e$message,
+                    paste0("<html><body><h3>Analysis Error</h3><p>",
+                           "Error in NRI calculation: ",
+                           htmltools::htmlEscape(conditionMessage(e)),
                            "</p><p>Please check data format and model predictions.</p></body></html>")
                 )
             })
@@ -134,9 +135,16 @@ netreclassificationClass <- R6::R6Class(
             
             # Handle missing data based on strategy
             if (self$options$missing_handling == "complete") {
-                analysis_data <- na.omit(analysis_data)
+                analysis_data <- jmvcore::naOmit(analysis_data)
             }
             
+            # TODO (UX): file-wide pattern — validation errors use
+            # `self$results$instructions$setContent("<html>...") + return(NULL)` instead of
+            # `jmvcore::reject()`. Sites here, L151 (invalid outcome), L164 (invalid risk
+            # predictions). Same pattern as missingdata/mlpathology/modelval audits —
+            # migrating to reject() would surface structured UI errors but is a behavior
+            # change (inline HTML guidance → error dialog). Defer to dedicated UX/error-
+            # flow pass.
             if (nrow(analysis_data) < 20) {
                 self$results$instructions$setContent(
                     "<html><body><h3>Insufficient Data</h3>
@@ -146,6 +154,14 @@ netreclassificationClass <- R6::R6Class(
             }
 
             # Validate outcome variable
+            # TODO (correctness): `outcome` is declared `permitted: [factor, numeric]` in
+            # .a.yaml (L46-47), but `as.numeric(factor)` returns level indices (1/2)
+            # which then fails the `%in% c(0,1)` check below — making jamovi-coded binary
+            # factor outcomes silently rejected as invalid. Fix: replace with
+            # `jmvcore::toNumeric(...)` to honor the `values` attribute on jamovi factors,
+            # OR add explicit binary-factor handling (e.g., `as.numeric(factor) - 1` after
+            # confirming nlevels == 2). Deferred from jamovify pass as ⚠ behavior risk
+            # since it changes results for factor-typed outcomes (intended fix vs latent bug).
             outcome_values <- as.numeric(analysis_data[[outcome_var]])
             if (!all(outcome_values %in% c(0, 1), na.rm = TRUE)) {
                 self$results$instructions$setContent(
@@ -156,8 +172,8 @@ netreclassificationClass <- R6::R6Class(
             }
 
             # Validate risk predictions
-            baseline_risks <- as.numeric(analysis_data[[baseline_var]])
-            new_risks <- as.numeric(analysis_data[[new_var]])
+            baseline_risks <- jmvcore::toNumeric(analysis_data[[baseline_var]])
+            new_risks <- jmvcore::toNumeric(analysis_data[[new_var]])
             
             if (any(baseline_risks < 0 | baseline_risks > 1, na.rm = TRUE) ||
                 any(new_risks < 0 | new_risks > 1, na.rm = TRUE)) {
@@ -481,6 +497,16 @@ netreclassificationClass <- R6::R6Class(
         },
 
         .populateReclassification = function(nri_results) {
+            # TODO (stub): 2 OptionString HIGH-source options declared in .a.yaml /
+            # .h.R but never read in this .b.R:
+            #   - `category_labels` (.h.R L109) — likely intended to label the rows/
+            #     columns of this reclassification cross-tab; when wired, any HTML-
+            #     bound flow must wrap with `htmltools::htmlEscape(...)` (HIGH
+            #     free-text user input).
+            #   - `utility_weights` (.h.R L265) — likely numeric-parsed for cost-
+            #     effectiveness analysis (mirror `risk_thresholds` strsplit+as.numeric
+            #     pattern at L188); validate strictly when parsed.
+            # Either wire them up or remove from .a.yaml to avoid misleading users.
             transition_matrix <- nri_results$transition_matrix
             n_cats <- ncol(transition_matrix)
             

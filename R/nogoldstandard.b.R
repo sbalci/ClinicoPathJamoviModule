@@ -5,6 +5,10 @@
 NULL
 
 # Helper function to escape variable names with special characters for formulas
+# TODO (cleanup): this helper is unused. All formula-building paths now go through
+# `jmvcore::composeTerms(as.list(var_names))` (at L659) which handles backticks
+# correctly including names that internally contain backticks (this helper does not).
+# Safe to delete in a follow-up cleanup pass — also noted in audit comment at L71-72.
 .escapeVariableNames <- function(var_names) {
     # Check if variable names contain special characters that need escaping
     need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
@@ -73,8 +77,8 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #   [CLINICAL-SAFETY] add STRONG_WARNING when LCA convergence < ~25% of n_starts in .runLCA
         #   [CLINICAL-SAFETY] add STRONG_WARNING when total cases < 100 (Hui-Walter assumption)
         #   [hygiene/notices] custom private$.addNotice parallels jmvcore::Notice — consolidate
-        #   [hygiene/jmvcore] stop(.("Package 'poLCA' is required...")) at ~L624 → jmvcore::reject
-        #   [hygiene/jmvcore] several na.omit() on jamovi-attributed frames → jmvcore::naOmit
+        #   [hygiene/jmvcore] FIXED 2026-05-29 — 9 stop(.()) → jmvcore::reject(.()) migrations at L359/L364/L382/L387/L400/L405/L414/L638/L718
+        #   [hygiene/jmvcore] FIXED — all na.omit() on jamovi-attributed frames migrated to jmvcore::naOmit (L411)
         #   [statistical-validation] /review-function nogoldstandard — Hui-Walter + Joseph-Gyorkos parity
         #   [i18n] 95 .() wraps but no .po catalog; bootstrap jamovi/i18n/
         #   [testing] no tests/testthat/test-nogoldstandard.R
@@ -356,12 +360,12 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (nrow(self$data) == 0) {
-                stop(.('Data contains no rows'))
+                jmvcore::reject(.('Data contains no rows'))
             }
-            
+
             # Check for required packages early
             if (self$options$method == "latent_class" && !requireNamespace("poLCA", quietly = TRUE)) {
-                stop(.("Package 'poLCA' is required for latent class analysis. Please install it with: install.packages('poLCA')"))
+                jmvcore::reject(.("Package 'poLCA' is required for latent class analysis. Please install it with: install.packages('poLCA')"))
             }
 
             # Get test variables and their positive levels with validation
@@ -379,14 +383,14 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!is.null(pos_level)) {
                         # Validate that the variable is a factor
                         if (!is.factor(self$data[[test_var]])) {
-                            stop(sprintf(.("Variable '%s' must be a factor"), test_var))
+                            jmvcore::reject(.("Variable '{}' must be a factor"), test_var)
                         }
-                        
+
                         # Validate that the positive level exists in the data
                         if (!pos_level %in% levels(self$data[[test_var]])) {
-                            stop(sprintf(.("Level '%s' not found in variable '%s'. Available levels: %s"),
-                                       pos_level, test_var, 
-                                       paste(levels(self$data[[test_var]]), collapse = ", ")))
+                            jmvcore::reject(.("Level '{}' not found in variable '{}'. Available levels: {}"),
+                                            pos_level, test_var,
+                                            paste(levels(self$data[[test_var]]), collapse = ", "))
                         }
                         
                         tests[[length(tests) + 1]] <- test_var
@@ -397,12 +401,12 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Ensure at least 2 tests are provided
             if (length(tests) < 2) {
-                stop(.("At least two tests with positive levels must be specified"))
+                jmvcore::reject(.("At least two tests with positive levels must be specified"))
             }
 
             # Enforce LCA constraint
             if (self$options$method == "latent_class" && length(tests) < 3) {
-                 stop(.("Latent Class Analysis requires at least 3 tests to be statistically identifiable. Please add more tests or select a different method (e.g., Composite Reference)."))
+                 jmvcore::reject(.("Latent Class Analysis requires at least 3 tests to be statistically identifiable. Please add more tests or select a different method (e.g., Composite Reference)."))
             }
 
             # Data preparation
@@ -411,7 +415,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             test_data <- jmvcore::naOmit(test_data)
 
             if (nrow(test_data) == 0) {
-                stop(.('No complete cases available'))
+                jmvcore::reject(.('No complete cases available'))
             }
 
             private$.checkpoint()  # Before data conversion
@@ -635,7 +639,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .runLCA = function(binary_data, tests, test_levels) {
             if (!requireNamespace("poLCA", quietly = TRUE)) {
-                stop(.("Package 'poLCA' is required for latent class analysis"))
+                jmvcore::reject(.("Package 'poLCA' is required for latent class analysis"))
             }
 
             # Convert to LCA format (factors with "no"/"yes" levels)
@@ -715,7 +719,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (is.null(best_model)) {
-                stop(.("LCA model fitting failed after all attempts. Try a different method or check your data."))
+                jmvcore::reject(.("LCA model fitting failed after all attempts. Try a different method or check your data."))
             }
             
             # Add convergence warning if log-likelihood is suspiciously low
@@ -1391,7 +1395,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(test_values < 5)) {
                     private$.addNotice(
                         jmvcore::NoticeType$WARNING,
-                        sprintf(.("Test '%s' has categories with <5 observations. Results may be unstable. Consider combining categories if clinically appropriate."), test_name),
+                        sprintf(.("Test '%s' has categories with <5 observations. Results may be unstable. Consider combining categories if clinically appropriate."), htmltools::htmlEscape(test_name)),
                         paste0('smallCategories_', i)
                     )
                 }
@@ -1401,7 +1405,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (min_prop < 0.05) {
                     private$.addNotice(
                         jmvcore::NoticeType$WARNING,
-                        sprintf(.("Test '%s' shows extreme imbalance (minority category %.1f%%). This may affect parameter estimation."), test_name, min_prop * 100),
+                        sprintf(.("Test '%s' shows extreme imbalance (minority category %.1f%%). This may affect parameter estimation."), htmltools::htmlEscape(test_name), min_prop * 100),
                         paste0('extremeImbalance_', i)
                     )
                 }
@@ -1578,7 +1582,7 @@ nogoldstandardClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<div class='clinical-summary' style='background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
                 "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Clinical Summary"), "</h4>",
                 "<p><strong>", .("Analysis:"), "</strong> ", sprintf(.("No gold standard analysis using %s method"), method), "</p>",
-                "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(tests, collapse = ", "), " (N=", n_tests, ")</p>",
+                "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(htmltools::htmlEscape(unlist(tests)), collapse = ", "), " (N=", n_tests, ")</p>",
                 "<p><strong>", .("Disease prevalence:"), "</strong> ", prev_pct, "</p>",
                 "<p><strong>", .("Test sensitivities:"), "</strong> ", .("Range from"), " ", sens_min, " ", .("to"), " ", sens_max, "</p>",
                 "<p><strong>", .("Clinical interpretation:"), "</strong> ", prev_interp, "</p>",
