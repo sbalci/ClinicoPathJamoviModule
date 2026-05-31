@@ -2718,3 +2718,247 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 ---
 
 ---
+
+# Deferred gaps from Balarajah-2026 review (2026-05-07)
+
+Source: [literature/Balarajah-2026-Duodenal-adenocarcinoma-biomarkers-UK-cohort-citation-review.md](literature/Balarajah-2026-Duodenal-adenocarcinoma-biomarkers-UK-cohort-citation-review.md)
+
+The first wave of fixes (Miller–Halpern + Monte-Carlo in `optimalcutpoint`,
+panel-wide FDR in `ihcsurvival`, EPV warning + default Schoenfeld in
+`multisurvival`) is implemented. The items below remain — each is scoped
+as a focused, testable change.
+
+## 1. Centre / cluster frailty option in `multisurvival`
+
+**Why**: 7-centre cohorts (Balarajah 2026, BALLAD, J-BALLAD) need either a
+random-effect frailty term or stratified Cox; ignoring centre clustering
+underestimates HR standard errors. ClinicoPath has `frailtysurvival` but
+it is a separate analysis card, not an option on the standard
+multivariable Cox.
+
+**How to apply**:
+- `jamovi/multisurvival.a.yaml` — add a new `cluster` Variable option and a
+  `cluster_method` List (`none` / `cluster_robust` / `frailty_gamma` /
+  `frailty_gaussian` / `stratified`).
+- `R/multisurvival.b.R` — extend the `coxformula` builder so the cluster
+  term is appended via `cluster()` / `frailty()` / `strata()` depending on
+  `cluster_method`. Touch carefully — the formula path interacts with
+  Fine-Gray (`survival::finegray`), `finalfit::coxphmulti`, and the
+  survminer/forestplot rendering, which all need the additional term to
+  survive the round trip.
+- Output: surface frailty variance + LR test in a new small table next to
+  the main HR table.
+- Tests: simulate 7-centre data with frailty variance ≈ 0.3; verify naïve
+  Cox vs frailty Cox differ in HR SE and recovered variance ≈ truth.
+
+## 2. Bootstrap-optimism wrapper in `survivalvalidation`
+
+**Why**: The single most effective antidote to univariate-screening +
+optimal-cut-point optimism is a bootstrap that re-runs the *entire*
+pipeline (cut-point search + variable screen + Cox fit) inside each
+resample. Critical for biomarker discovery papers like Balarajah 2026.
+
+**How to apply**:
+- `jamovi/survivalvalidation.a.yaml` — add `validation_strategy`
+  (`bootstrap_apparent` / `bootstrap_optimism` / `cv_kfold`), `B` (default
+  1000), and `include_cutpoint` (Bool, default true).
+- `R/survivalvalidation.b.R` — implement Harrell-style 0.632/0.632+
+  optimism correction. Resample with replacement; refit the full
+  pipeline; compute apparent vs corrected C-index, calibration slope,
+  shrinkage factor.
+- Dependencies: `rms` (Harrell), `pec`, `riskRegression`.
+- Tests: synthetic data with known true C and overfit pipeline; verify
+  apparent C is biased high and optimism-corrected C ≈ truth.
+
+## 3. `advancedimputation` ↔ `multisurvival` MI-pooled Cox bridge
+
+**Why**: Balarajah 2026 discards 38 % of patients on adjuvant chemotherapy
+information via complete-case analysis. Multiple imputation is mandatory
+when missingness is non-trivial and missing-at-random is plausible.
+ClinicoPath has `advancedimputation` but no clean way to feed imputed
+datasets into a multivariable Cox.
+
+**How to apply**:
+- New helper: `R/utils-mi-cox.R` exporting `.miPooledCox(data, formula, m, method)`
+  that runs `mice::mice` → `mice::with(coxph)` → `mice::pool` and returns a
+  finalfit-compatible HR table.
+- `jamovi/multisurvival.a.yaml` — add `useImputation` Bool + `imputationM`
+  Integer (default 5) + `imputationSeed` Integer.
+- `R/multisurvival.b.R` — when `useImputation` is true, route through the
+  helper instead of single-fit Cox. Surface a notice with the fraction of
+  missing information (FMI) per covariate.
+- Tests: simulate MAR missingness; verify pooled HR ≈ HR on full data and
+  pooled SE > complete-case SE.
+
+## 4. RMST / absolute-risk reporting in `survival` / `multisurvival`
+
+**Why**: Clinicians and pathologists prefer "median survival 43 vs 28
+months" or "5-yr survival 38 % vs 22 %" over "HR 0.45". Especially
+important when PH is questionable and HR misleads.
+
+**How to apply**:
+- `jamovi/multisurvival.r.yaml` — add `rmst_table` (columns: stratum,
+  RMST, ΔRMST, 95 % CI). Gate behind a new `report_rmst` Bool option.
+- `jamovi/multisurvival.a.yaml` — `report_rmst` Bool + `rmst_landmarks`
+  String (e.g., `"12, 24, 60"`).
+- `R/multisurvival.b.R` — wrap `survRM2::rmst2` per stratum. Also report
+  KM-derived absolute survival probabilities at each landmark.
+- Repeat the equivalent for the simpler `survival` analysis card.
+- Dependencies: `survRM2` (CRAN, lightweight).
+- Tests: parametric Weibull simulation with known RMST(t); verify within
+  Monte-Carlo error.
+
+## Prioritization (recommended order)
+
+1. **#4 RMST** — smallest, highest clinician value, no architectural risk.
+2. **#1 Cluster/frailty** — high impact for multi-centre studies; medium
+   effort because of the formula-builder churn.
+3. **#3 MI bridge** — high impact; medium effort; needs careful pooling
+   semantics.
+4. **#2 Bootstrap optimism** — highest impact for biomarker papers;
+   largest effort because the pipeline must be reified to a callable.
+
+
+
+## meddecide module audit follow-ups (2026-05-14)
+
+Source: `docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md` (audit ran against the
+standalone `/Users/serdarbalci/Documents/GitHub/meddecide` working copy; the
+three HIGH security findings have already been remediated in
+ClinicoPathJamoviModule — XSS in `decision.b.R:625-633` / `:663-672` via
+`private$.safeHtmlOutput`, XSS in `decisioncompare.b.R:1816,1841` pre-patched,
+and C1 formula-injection in `nogoldstandard.b.R:642` via
+`jmvcore::composeTerms` + `jmvcore::asFormula`). The items below are the
+out-of-scope findings from the same audit, deferred for separate work.
+
+### [clinical-safety] enhancedROC — add AUC threshold notices
+
+- AUC < 0.5 → ERROR ("worse than chance — verify outcome coding / class
+  inversion").
+- AUC < 0.7 → STRONG_WARNING ("poor discrimination — interpret cautiously").
+- `enhancedROC.b.R` already detects inversion via `.detectInverted`; surface
+  the result as a `jmvcore::Notice` banner, not a buried HTML paragraph.
+- Run: `/fix-notices enhancedROC`.
+
+### [clinical-safety] psychopdaROC — add AUC threshold + DeLong sample-size notices
+
+- Same AUC < 0.5 / < 0.7 thresholds.
+- DeLong's test requires reasonable sample size; surface STRONG_WARNING when
+  n_pos × n_neg is small (rough guard: < 50 per class).
+- `psychopdaROC.b.R` currently uses `jmvcore::reject` for fatal errors but no
+  `jmvcore::Notice` at all (0 uses across 5,601 lines).
+- Run: `/fix-notices psychopdaROC`.
+
+### [clinical-safety] nogoldstandard — LCA convergence + small-n notices
+
+- `poLCA` can silently return a degenerate solution when fewer than ~30 starts
+  converge. Surface STRONG_WARNING when `best_model` count of successful starts
+  < 25 % of `n_starts`.
+- STRONG_WARNING when total cases < 100 (Hui-Walter assumption: at least two
+  populations with sufficient observations per pattern).
+- Run: `/fix-notices nogoldstandard`.
+
+### [statistical-validation] reference-implementation parity reviews
+
+- `/review-function agreement` — kappa2 / ICC / kripp.alpha / Gwet AC parity
+  against `irr`/`psych`/`irrCAC`.
+- `/review-function psychopdaROC` — DeLong / IDI / NRI / meta-analysis parity
+  against `pROC` / `cutpointr` / `metafor` references.
+- `/review-function decision` and `/review-function decisioncompare` — Wilson
+  vs Clopper-Pearson CIs, McNemar small-sample exact path.
+- `/review-function nogoldstandard` — Hui-Walter and Joseph-Gyorkos canonical
+  reference parity.
+- `/review-function sequentialtests` — parallel-test combined PPV formula
+  cross-check (this function is otherwise exemplary).
+- `/review-function cotest`, `/review-function decisioncalculator`,
+  `/review-function decisioncombine` — Bayes prior-override math; pattern
+  enumeration coverage.
+
+### [hygiene] jmvcore migration sweep — 8 functions
+
+- 31 bare `stop()` in `.b.R` (only 16 use `jmvcore::reject`); 8 `na.omit()` on
+  jamovi-attributed frames could use `jmvcore::naOmit` to preserve column
+  attributes (`measureType`, `values`).
+- Affected: `agreement`, `decisioncombine`, `decisioncompare`,
+  `kappasizefixedn`, `kappasizepower`, `nogoldstandard`, `psychopdaROC`,
+  `sequentialtests` (minor).
+- Run per function: `/jamovify-function <name> --pattern=error,na --apply`.
+
+### [hygiene] notice-system consolidation
+
+- `decision`, `decisioncompare`, `decisioncombine`, `nogoldstandard` each
+  ship a custom `.addNotice` / `.renderNotices` HTML-rendered notice surface
+  that parallels `jmvcore::Notice`. Pick one — `jmvcore::Notice` integrates
+  with jamovi's native banner UI; the custom system renders only inside a
+  function-private HTML block and won't be picked up by jamovi's
+  serialization fixes.
+- Reference: `decisioncalculator.b.R` (17 `jmvcore::Notice` uses) and
+  `sequentialtests.b.R` (24 uses) — the module's "right" pattern.
+
+### [hygiene] zero-or-stub notice coverage — 10 functions
+
+- `agreement` (0 jmvcore notices; uses `setNote("error", …)` on tables —
+  these are below the result panel and easy to miss).
+- `cotest` (0; validation silent → user sees NaN).
+- `enhancedROC` (0).
+- `kappasizeci`, `kappasizefixedn`, `kappasizepower` (0 each).
+- `psychopdaROC` (0).
+- Plus the four functions with custom notice systems above.
+- Run per function: `/fix-notices <name>`.
+
+### [i18n] module-wide internationalization absent
+
+- No `jamovi/i18n/` directory in either `meddecide/` or
+  `ClinicoPathJamoviModule/` for these analyses, no `.po` / `.pot` catalogs,
+  no `NAMESPACE` `importFrom(jmvcore, .)` (relies on `import(jmvcore)`).
+- Even where `.()` is used (`enhancedROC` 143 wraps, `nogoldstandard` 95,
+  `decision` 91) no extraction catalog exists, so all strings render English.
+- 7 of 13 meddecide functions have zero `.()` wraps: `agreement` (3),
+  `cotest`, `decisioncalculator`, `decisioncombine`, `kappasize*`,
+  `sequentialtests`.
+- Action: bootstrap `jamovi/i18n/{catalog.pot,en.po,tr.po}` once, then
+  `/prepare-translation <name>` per function (start with the ones already
+  wrapped: `enhancedROC`, `nogoldstandard`, `decision`).
+
+### [integration] output-overdeclaration — verify visibility per preset
+
+- 5 functions declare 2× more outputs than they populate; rest is gated by
+  `setVisible(FALSE)` defaults. Users toggling unfamiliar flag combinations
+  may see blank result panels.
+
+  | Function | Outputs | Setters | Ratio |
+  |---|---|---|---|
+  | `agreement` | 396 | 131 | 3.0× |
+  | `enhancedROC` | 173 | 60 | 2.9× |
+  | `psychopdaROC` | 158 | 59 | 2.7× |
+  | `decisioncombine` | 72 | 21 | 3.4× |
+  | `decision` | 68 | 32 | 2.1× |
+
+- Run per function: `/check-function-full <name>` with `check_external=true`
+  to verify each flag toggles the right output.
+
+### [testing] add regression tests for 11 missing analyses
+
+- Only `tests/testthat/test-decision.R` (271 LOC) and `tests/testthat/test-roc.R`
+  (42 LOC) exist (these live in the meddecide submodule, not in
+  ClinicoPathJamoviModule's `tests/`).
+- Missing: `agreement`, `cotest`, `decisioncalculator`, `decisioncombine`,
+  `decisioncompare`, `enhancedROC`, `kappasizeci`, `kappasizefixedn`,
+  `kappasizepower`, `nogoldstandard`, `sequentialtests`.
+- Reference: `test-decision.R` already provides utility-function unit tests +
+  integration tests against the `histopathology` example dataset.
+
+### [architecture] split agreement.b.R (10,559 LOC monolith)
+
+- Single `.b.R` with 146 options, 396 declared outputs, 970-line `.run()`
+  starting at line 9,584. Helpers are extracted but the file is hard to
+  navigate and review.
+- Suggested split: one helper file per analysis family
+  (`agreement_kappa.R`, `agreement_icc.R`, `agreement_kripp.R`,
+  `agreement_gwet.R`, `agreement_bootstrap.R`, …) sourced from `agreement.b.R`,
+  keeping the R6 class definition slim.
+- This is a refactor, not a behaviour change. Defer until after the
+  statistical-parity reviews above.
+
+
+

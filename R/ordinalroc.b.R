@@ -26,20 +26,20 @@ ordinalrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             outcome <- outcome[complete_cases]
 
             if (length(predictor) < 10) {
-                stop("Insufficient data for ordinal ROC analysis. Need at least 10 complete observations.")
+                jmvcore::reject("Insufficient data for ordinal ROC analysis. Need at least 10 complete observations.")
             }
 
             # Validate ordinal outcome has 3+ levels
             outcome_levels <- levels(outcome)
             if (length(outcome_levels) < 3) {
-                stop("Ordinal outcome must have at least 3 levels. For binary outcomes, use standard ROC analysis.")
+                jmvcore::reject("Ordinal outcome must have at least 3 levels. For binary outcomes, use standard ROC analysis.")
             }
 
             # Check minimum observations per category
             category_counts <- table(outcome)
             if (any(category_counts < 3)) {
-                stop(paste0("All outcome categories must have at least 3 observations. ",
-                          "Current counts: ", paste(names(category_counts), "=", category_counts, collapse=", ")))
+                jmvcore::reject("All outcome categories must have at least 3 observations. Current counts: {}",
+                                paste(names(category_counts), "=", category_counts, collapse=", "))
             }
 
             # Perform ordinal ROC analysis
@@ -68,7 +68,7 @@ ordinalrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
             }, error = function(e) {
-                stop(paste0("Error in ordinal ROC analysis: ", e$message))
+                jmvcore::reject("Error in ordinal ROC analysis: {}", e$message)
             })
         },
 
@@ -176,6 +176,15 @@ ordinalrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Calculate standard error using bootstrap if requested
             if (self$options$auc_ci_method == "bootstrap") {
+                # Save and restore global RNG state so subsequent draws elsewhere in
+                # the session are not affected by our seed.
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                                get(".Random.seed", envir = .GlobalEnv)
+                            else NULL
+                on.exit({
+                    if (!is.null(old_seed))
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }, add = TRUE)
                 set.seed(self$options$random_seed)
                 bootstrap_aucs <- replicate(self$options$bootstrap_samples, {
                     boot_idx <- sample(1:n_obs, n_obs, replace = TRUE)
@@ -232,6 +241,16 @@ ordinalrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .populateCategorySpecificAUC = function(predictor, outcome) {
+            # TODO (stub): 6 unimplemented helpers in this file — .populateCategorySpecificAUC
+            # (this line), .testProportionalOdds (L240), .populateModelCoefficients (L245),
+            # .populateOptimalThresholds (L250), .plotOrdinalROC (L255), .plotCumulativeROC (L260),
+            # .plotCategoryDistributions (L264), .plotCumulativeProbabilities (L269). All have
+            # corresponding `.r.yaml` outputs / image entries that are wired to these no-op
+            # methods, so the UI shows empty tables / blank plots whenever the user toggles them.
+            # Either implement (use ordinalROC package or hand-roll cumulative-probability calcs)
+            # or remove the option toggles from `.a.yaml` until backed by working code. The
+            # instructions HTML at L126 already acknowledges "Implementation in development"
+            # but the .a.yaml UI options invite users to enable broken features.
             # TODO: Calculate AUC for each cumulative dichotomization
             # For grades 1/2/3: AUC(1 vs 2+3), AUC(1+2 vs 3)
         },

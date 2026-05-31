@@ -7,6 +7,7 @@
 modelval(
   data,
   outcome,
+  outcomePositive,
   predicted,
   validationType = "general",
   subgroup,
@@ -25,6 +26,11 @@ modelval(
 \item{data}{The data as a data frame.}
 
 \item{outcome}{Binary outcome variable (observed events: yes/no).}
+
+\item{outcomePositive}{The factor level of the outcome variable that
+represents the positive case (event = 1). Required to avoid relying on
+alphabetic level order, which can silently invert calibration and AUC
+interpretation.}
 
 \item{predicted}{Predicted probabilities from the existing model (0-1
 scale).}

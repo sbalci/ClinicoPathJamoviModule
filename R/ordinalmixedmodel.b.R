@@ -142,6 +142,12 @@ ordinalmixedmodelClass <- R6::R6Class(
                 for (rt in self$options$randomTerms) {
                     analysis_data[[rt]] <- as.factor(analysis_data[[rt]])
                 }
+                # TODO (correctness, ⚠ behavior risk): `as.numeric()` on a factor returns
+                # level indices, not the jamovi values-attribute coding. fixedCovs is
+                # permitted:numeric so should not arrive as factor in practice, but if a
+                # user picks a factor that R coerces, downstream estimates would be wrong.
+                # Consider guarding with `is.factor(analysis_data[[cv]])` → reject, or
+                # swap to `jmvcore::toNumeric()`. Needs manual review of expected semantics.
                 # Ensure numeric for covariates
                 for (cv in self$options$fixedCovs) {
                     analysis_data[[cv]] <- as.numeric(analysis_data[[cv]])
@@ -150,7 +156,7 @@ ordinalmixedmodelClass <- R6::R6Class(
                 return(analysis_data)
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste("<p>Error preparing data:", e$message, "</p>")
+                    paste("<p>Error preparing data:", htmltools::htmlEscape(conditionMessage(e)), "</p>")
                 )
                 return(NULL)
             })
@@ -184,7 +190,9 @@ ordinalmixedmodelClass <- R6::R6Class(
                     paste(random_parts, collapse = " + ")
                 )
 
-                formula <- as.formula(formula_str)
+                # `|` allow-listed for lme4-style random-effects bar `(1|group)` (built at L177).
+                # composeTerm has already backtick-quoted all variable names (Defense 1).
+                formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("|"))
 
                 # Fit CLMM
                 model <- ordinal::clmm(
@@ -198,7 +206,7 @@ ordinalmixedmodelClass <- R6::R6Class(
 
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste("<p>Error fitting model:", e$message,
+                    paste("<p>Error fitting model:", htmltools::htmlEscape(conditionMessage(e)),
                           "</p><p>This may occur with sparse data, empty cells, or separation.",
                           "Try simplifying the model or checking data balance.</p>")
                 )
@@ -436,7 +444,7 @@ ordinalmixedmodelClass <- R6::R6Class(
                 self$options$link
             )
 
-            random_desc <- paste(self$options$randomTerms, collapse = ", ")
+            random_desc <- paste(htmltools::htmlEscape(self$options$randomTerms), collapse = ", ")
 
             content <- paste0(
                 "<html><body>",

@@ -7,6 +7,7 @@ modelvalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             outcome = NULL,
+            outcomePositive = NULL,
             predicted = NULL,
             validationType = "general",
             subgroup = NULL,
@@ -33,6 +34,10 @@ modelvalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
+            private$..outcomePositive <- jmvcore::OptionLevel$new(
+                "outcomePositive",
+                outcomePositive,
+                variable="(outcome)")
             private$..predicted <- jmvcore::OptionVariable$new(
                 "predicted",
                 predicted,
@@ -98,6 +103,7 @@ modelvalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 max=0.99)
 
             self$.addOption(private$..outcome)
+            self$.addOption(private$..outcomePositive)
             self$.addOption(private$..predicted)
             self$.addOption(private$..validationType)
             self$.addOption(private$..subgroup)
@@ -113,6 +119,7 @@ modelvalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         }),
     active = list(
         outcome = function() private$..outcome$value,
+        outcomePositive = function() private$..outcomePositive$value,
         predicted = function() private$..predicted$value,
         validationType = function() private$..validationType$value,
         subgroup = function() private$..subgroup$value,
@@ -127,6 +134,7 @@ modelvalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ciLevel = function() private$..ciLevel$value),
     private = list(
         ..outcome = NA,
+        ..outcomePositive = NA,
         ..predicted = NA,
         ..validationType = NA,
         ..subgroup = NA,
@@ -358,6 +366,10 @@ modelvalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (observed events: yes/no).
+#' @param outcomePositive The factor level of the outcome variable that
+#'   represents the positive case (event = 1). Required to avoid relying on
+#'   alphabetic level order, which can silently invert calibration and AUC
+#'   interpretation.
 #' @param predicted Predicted probabilities from the existing model (0-1
 #'   scale).
 #' @param validationType Type of validation being performed.
@@ -401,6 +413,7 @@ modelvalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 modelval <- function(
     data,
     outcome,
+    outcomePositive,
     predicted,
     validationType = "general",
     subgroup,
@@ -432,6 +445,7 @@ modelval <- function(
 
     options <- modelvalOptions$new(
         outcome = outcome,
+        outcomePositive = outcomePositive,
         predicted = predicted,
         validationType = validationType,
         subgroup = subgroup,

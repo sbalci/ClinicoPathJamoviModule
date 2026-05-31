@@ -81,10 +81,29 @@ outbreakanalysisClass <- R6::R6Class(
         },
 
         .processTabularData = function() {
+            # Reset cached private state at the start of every run so a previous run's
+            # results don't bleed through when the current run early-exits or the user
+            # changes variable selections between runs (stale-R6-cache pattern).
+            private$.tabular_data <- NULL
+            private$.case_data <- NULL
+            private$.control_data <- NULL
+            private$.descriptive_results <- NULL
+            private$.risk_factor_results <- NULL
+            private$.temporal_results <- NULL
+            private$.spatial_results <- NULL
+            private$.epidemic_curve_data <- NULL
+            private$.attack_rates <- NULL
+            private$.data_quality_results <- NULL
+
             # Extract and process tabular outbreak data
             data <- self$data
             case_status_var <- self$options$case_status
 
+            # TODO (correctness): `as.factor(data[[case_status_var]])` includes implicit NA values
+            # as a level if any are present, inflating case_levels and tripping the
+            # "exactly 2 levels" check at L107 in normal data with missing case-status values.
+            # Either drop NAs first (`as.factor(data[[case_status_var]][!is.na(...)])`) or
+            # use `addNA = FALSE` explicitly and filter NA rows before the check.
             # Ensure case status is properly coded as factor
             case_status <- as.factor(data[[case_status_var]])
 
@@ -554,6 +573,11 @@ outbreakanalysisClass <- R6::R6Class(
                     exposure_data <- data[[exposure_var]]
 
                     if (is.numeric(exposure_data)) {
+                        # TODO (correctness): if `exposure_data` has many duplicate values
+                        # (e.g. zero-inflated or discrete biomarker scores), the quartile
+                        # breakpoints can collide and `cut()` errors with "breaks not unique".
+                        # Wrap in tryCatch or use `unique(quantile(...))` and skip the dose-
+                        # response branch when fewer than 4 unique breaks are achievable.
                         # Create dose categories (quartiles)
                         dose_quartiles <- cut(exposure_data,
                                             breaks = quantile(exposure_data, c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
@@ -673,6 +697,13 @@ outbreakanalysisClass <- R6::R6Class(
         },
 
         .populateTables = function() {
+            # TODO (stub): two Html outputs declared in jamovi/outbreakanalysis.r.yaml at L409
+            # (comprehensive_report) and L418 (public_health_summary) are never populated
+            # in this .b.R — when users toggle the corresponding .a.yaml options, jamovi
+            # shows empty Html panels with no error. Either populate them here via
+            # `self$results$comprehensive_report$setContent(html)` (using the .descriptive_results,
+            # .risk_factor_results, .epidemic_curve_data cached on `private`) or remove the
+            # outputs + toggles from .r.yaml / .a.yaml until backed by working code.
             # Populate overview table
             overview_data <- data.frame(
                 characteristic = c("Analysis Type", "Outbreak Pattern", "Time Unit",
