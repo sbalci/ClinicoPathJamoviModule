@@ -4,30 +4,6 @@ add other, remaining, out-of-scope observations as TODO items
 
 
 
-
-
-
-/jamovify-function outcomeorganizer --apply
-/security-audit-function outcomeorganizer
-
-/jamovify-function outlierdetection --apply
-/security-audit-function outlierdetection
-
-/jamovify-function pagetrendtest --apply
-/security-audit-function pagetrendtest
-
-/jamovify-function parallelplot --apply
-/security-audit-function parallelplot
-
-/jamovify-function parametricfrailty --apply
-/security-audit-function parametricfrailty
-
-/jamovify-function partialcorrelation --apply
-/security-audit-function partialcorrelation
-
-/jamovify-function pathagreement --apply
-/security-audit-function pathagreement
-
 /jamovify-function pathologyagreement --apply
 /security-audit-function pathologyagreement
 

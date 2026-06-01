@@ -364,7 +364,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                          if (!is.na(skew) && abs(skew) > 2) {
                             private$.accumulateMessage(sprintf(
                                 '<strong>High Skewness:</strong> Variable %s is highly skewed (%.2f). Standard methods may flag valid values. Consider Robust Z-score.',
-                                col, skew
+                                htmltools::htmlEscape(col), skew
                             ))
                          }
                      }
@@ -428,6 +428,12 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 return()
             }
 
+            # TODO (correctness, ⚠ behavior risk): `as.numeric()` on a factor returns
+            # level indices, not the jamovi values-attribute coding. `vars` is permitted:numeric
+            # in .a.yaml but if a user accidentally selects a factor that gets coerced, all
+            # downstream outlier-detection statistics would be wrong by an unpredictable offset.
+            # Consider guarding with `is.factor(...)` → skip or reject, or swap to
+            # `jmvcore::toNumeric()`. Needs manual review before swapping (could shift results).
             # Convert to numeric with safe variable access
             for (var in selected_vars) {
                 analysis_data[[var]] <- as.numeric(analysis_data[[var]])
@@ -445,7 +451,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 error_msg <- paste0("
                 <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
                 <h4> Outlier Detection Error</h4>
-                <p><strong>Error:</strong> ", as.character(e$message), "</p>
+                <p><strong>Error:</strong> ", htmltools::htmlEscape(conditionMessage(e)), "</p>
                 <p><strong>Method:</strong> ", self$options$method_category, "</p>
                 <p><strong>Variables:</strong> ", ncol(analysis_data), " variable(s)</p>
                 <p><strong>Observations:</strong> ", nrow(analysis_data), "</p>
@@ -620,17 +626,17 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             
             # Check data validity before proceeding
             if (is.null(data) || nrow(data) == 0) {
-                stop("No data available for outlier detection")
+                jmvcore::reject("No data available for outlier detection")
             }
 
             if (is.null(data) || ncol(data) == 0) {
-                stop("No variables available for outlier detection")
+                jmvcore::reject("No variables available for outlier detection")
             }
             
             # Check for completely missing variables
             all_na_vars <- sapply(data, function(x) all(is.na(x)))
             if (any(all_na_vars)) {
-                stop(paste("Variables with all missing values:", paste(names(data)[all_na_vars], collapse = ", ")))
+                jmvcore::reject("Variables with all missing values: {}", paste(names(data)[all_na_vars], collapse = ", "))
             }
             
             # Check for constant variables  
@@ -639,7 +645,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 length(unique(non_na_x)) <= 1
             })
             if (any(constant_vars)) {
-                stop(paste("Variables with constant values (no variation):", paste(names(data)[constant_vars], collapse = ", ")))
+                jmvcore::reject("Variables with constant values (no variation): {}", paste(names(data)[constant_vars], collapse = ", "))
             }
             
             # Set up method and threshold based on category
@@ -650,7 +656,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             } else if (method_category == "multivariate") {
                 # Check if multivariate methods are applicable
                 if (ncol(data) == 1) {
-                    stop("Multivariate methods require multiple variables. Please select more variables or use univariate methods.")
+                    jmvcore::reject("Multivariate methods require multiple variables. Please select more variables or use univariate methods.")
                 }
                 
                 method <- self$options$multivariate_methods
@@ -659,13 +665,13 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 # Special checks for specific multivariate methods
                 if (method %in% c("optics", "lof")) {
                     if (!requireNamespace("dbscan", quietly = TRUE)) {
-                        stop(paste("Method", method, "requires the 'dbscan' package. Please install it using: install.packages('dbscan')"))
+                        jmvcore::reject("Method {} requires the 'dbscan' package. Please install it using: install.packages('dbscan')", method)
                     }
                 }
                 
                 if (method == "mcd") {
                     if (!requireNamespace("robustbase", quietly = TRUE)) {
-                        stop("MCD method requires the 'robustbase' package. Please install it using: install.packages('robustbase')")
+                        jmvcore::reject("MCD method requires the 'robustbase' package. Please install it using: install.packages('robustbase')")
                     }
                 }
                 
@@ -692,7 +698,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # Check if result is valid
             if (is.null(outlier_result)) {
-                stop("Outlier detection returned no results")
+                jmvcore::reject("Outlier detection returned no results")
             }
 
             # CRITICAL FIX: Extract detailed data from attributes
@@ -1005,7 +1011,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # Add column headers
             for (col in names(display_df)[names(display_df) != "Row"]) {
                 table_html <- paste0(table_html,
-                    "<th style='padding: 8px; border: 1px solid #dee2e6;'>", col, "</th>"
+                    "<th style='padding: 8px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(col), "</th>"
                 )
             }
             table_html <- paste0(table_html, "</tr></thead><tbody>")
@@ -1467,7 +1473,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 html_content <- paste0(html_content, "<h5 style='color: #721c24; margin-top: 0;'> Errors (Analysis Stopped)</h5>")
                 html_content <- paste0(html_content, "<ul>")
                 for (error in validation_results$errors) {
-                    html_content <- paste0(html_content, "<li style='color: #721c24;'>", error, "</li>")
+                    html_content <- paste0(html_content, "<li style='color: #721c24;'>", htmltools::htmlEscape(error), "</li>")
                 }
                 html_content <- paste0(html_content, "</ul></div>")
             }
@@ -1478,7 +1484,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 html_content <- paste0(html_content, "<h5 style='color: #856404; margin-top: 0;'> Warnings</h5>")
                 html_content <- paste0(html_content, "<ul>")
                 for (warning in validation_results$warnings) {
-                    html_content <- paste0(html_content, "<li style='color: #856404;'>", warning, "</li>")
+                    html_content <- paste0(html_content, "<li style='color: #856404;'>", htmltools::htmlEscape(warning), "</li>")
                 }
                 html_content <- paste0(html_content, "</ul></div>")
             }
@@ -1489,7 +1495,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 html_content <- paste0(html_content, "<h5 style='color: #0c5460; margin-top: 0;'> Information</h5>")
                 html_content <- paste0(html_content, "<ul>")
                 for (info in validation_results$info) {
-                    html_content <- paste0(html_content, "<li style='color: #0c5460;'>", info, "</li>")
+                    html_content <- paste0(html_content, "<li style='color: #0c5460;'>", htmltools::htmlEscape(info), "</li>")
                 }
                 html_content <- paste0(html_content, "</ul></div>")
             }

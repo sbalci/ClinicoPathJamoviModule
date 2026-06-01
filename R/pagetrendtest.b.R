@@ -277,7 +277,7 @@ pagetrendtestClass <- R6::R6Class(
                 return(ordering_table)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Error determining trend ordering:", e$message))
+                self$results$instructions$setContent(paste("Error determining trend ordering:", htmltools::htmlEscape(conditionMessage(e))))
                 return(NULL)
             })
         },
@@ -389,7 +389,7 @@ pagetrendtestClass <- R6::R6Class(
                 return(result)
                 
             }, error = function(e) {
-                self$results$instructions$setContent(paste("Error performing Page's trend test:", e$message))
+                self$results$instructions$setContent(paste("Error performing Page's trend test:", htmltools::htmlEscape(conditionMessage(e))))
                 return(NULL)
             })
         },
@@ -414,7 +414,13 @@ pagetrendtestClass <- R6::R6Class(
         
         # Permutation Page test
         .permutationPageTest = function(data_prepared, trend_ordering, observed_L) {
-            
+
+            # TODO (correctness, reproducibility): `sample()` is called 1000× below without
+            # a user-configurable or session-saved seed → results vary across runs of the
+            # same data. Either expose a `random_seed` option in .a.yaml, or use the
+            # save-and-restore pattern from optimalcutpoint.b.R:765-772 to preserve the
+            # user's session RNG state. Not a security issue but a reproducibility one.
+
             n_permutations <- 1000
             count_extreme <- 0
             
@@ -577,6 +583,14 @@ pagetrendtestClass <- R6::R6Class(
             self$results$methodExplanation$setContent(content)
         },
         
+        # TODO (stub): 6 unimplemented helpers below — .populateDescriptiveStats (this site),
+        # .populateEffectSize, .populateRankAnalysis, .populateFriedmanComparison,
+        # .populateAssumptionAssessment, .populateClinicalInterpretation. Each has a
+        # corresponding `.a.yaml` OptionBool toggle (show_descriptives, effect_size, show_ranks,
+        # friedman_comparison, show_assumptions, clinical_interpretation) that the user can
+        # enable — but the .b.R bodies are empty placeholders, so the result tables / panels
+        # stay blank with no error. Either implement or remove the option toggles from .a.yaml
+        # until backed by working code.
         # Placeholder methods for optional analyses
         .populateDescriptiveStats = function(data_prepared, page_result) {
             # Implementation would show descriptive statistics by condition

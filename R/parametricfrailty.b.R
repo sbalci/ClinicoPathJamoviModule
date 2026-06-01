@@ -79,29 +79,29 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 }
                 
             }, error = function(e) {
-                jmvcore::reject(paste("Error in parametric frailty analysis:", e$message))
+                jmvcore::reject("Error in parametric frailty analysis: {}", e$message)
             })
         },
 
         .validateData = function(data, timeVar, eventVar, frailtyVar, covariates) {
             # Check if variables exist
             if (!timeVar %in% names(data)) {
-                jmvcore::reject(paste("Time variable", timeVar, "not found in data"))
+                jmvcore::reject("Time variable {} not found in data", timeVar)
             }
             
             if (!eventVar %in% names(data)) {
-                jmvcore::reject(paste("Event variable", eventVar, "not found in data"))
+                jmvcore::reject("Event variable {} not found in data", eventVar)
             }
             
             if (!is.null(frailtyVar) && !frailtyVar %in% names(data)) {
-                jmvcore::reject(paste("Frailty variable", frailtyVar, "not found in data"))
+                jmvcore::reject("Frailty variable {} not found in data", frailtyVar)
             }
             
             # Check for missing covariates
             if (!is.null(covariates)) {
                 missing_covs <- setdiff(covariates, names(data))
                 if (length(missing_covs) > 0) {
-                    jmvcore::reject(paste("Covariates not found in data:", paste(missing_covs, collapse = ", ")))
+                    jmvcore::reject("Covariates not found in data: {}", paste(missing_covs, collapse = ", "))
                 }
             }
             
@@ -149,13 +149,15 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
         .fitFragiltySurvModel = function(prepared_data) {
             # Construct formula
+            # composeTerms backtick-escapes user-supplied covariate names (Defense 1);
+            # .asSurvivalFormula wraps jmvcore::asFormula with `frailty` allow-listed (Defense 2).
             if (!is.null(self$options$covariates) && length(self$options$covariates) > 0) {
-                cov_formula <- paste(self$options$covariates, collapse = " + ")
+                cov_formula <- paste(jmvcore::composeTerms(as.list(self$options$covariates)), collapse = " + ")
                 formula_str <- paste("surv ~", cov_formula)
             } else {
                 formula_str <- "surv ~ 1"
             }
-            
+
             # Add frailty term if specified
             if (!is.null(self$options$frailty_variable)) {
                 if (formula_str == "surv ~ 1") {
@@ -164,8 +166,8 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     formula_str <- paste(formula_str, "+ frailty(frailty_group)")
                 }
             }
-            
-            formula_obj <- as.formula(formula_str)
+
+            formula_obj <- .asSurvivalFormula(formula_str)
             
             # Map distribution names
             baseline_dist <- switch(self$options$baseline_distribution,
@@ -200,8 +202,10 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             # Fallback implementation using survival package
             
             # Construct formula for survival package
+            # composeTerms backtick-escapes user-supplied covariate names (Defense 1);
+            # .asSurvivalFormula wraps jmvcore::asFormula with `frailty` allow-listed (Defense 2).
             if (!is.null(self$options$covariates) && length(self$options$covariates) > 0) {
-                cov_formula <- paste(self$options$covariates, collapse = " + ")
+                cov_formula <- paste(jmvcore::composeTerms(as.list(self$options$covariates)), collapse = " + ")
                 if (!is.null(self$options$frailty_variable)) {
                     formula_str <- paste("surv ~", cov_formula, "+ frailty(frailty_group)")
                 } else {
@@ -214,8 +218,8 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     formula_str <- "surv ~ 1"
                 }
             }
-            
-            formula_obj <- as.formula(formula_str)
+
+            formula_obj <- .asSurvivalFormula(formula_str)
             
             # Map to survival package distributions
             dist_map <- list(

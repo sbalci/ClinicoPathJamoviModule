@@ -158,9 +158,11 @@ partialcorrelationClass <- R6::R6Class(
             
             for (var in vars) {
                 # Create formula for regression
-                formula_str <- paste(var, "~", paste(controls, collapse = " + "))
-                formula_obj <- as.formula(formula_str)
-                
+                # composeTerm/composeTerms backtick-escape user column names (Defense 1);
+                # jmvcore::asFormula allow-list validates the RHS (Defense 2).
+                formula_str <- paste(jmvcore::composeTerm(var), "~", paste(jmvcore::composeTerms(as.list(controls)), collapse = " + "))
+                formula_obj <- jmvcore::asFormula(formula_str)
+
                 # Fit regression model
                 model <- lm(formula_obj, data = data)
                 residuals_data[[var]] <- residuals(model)
@@ -275,10 +277,12 @@ partialcorrelationClass <- R6::R6Class(
             diag(partial_corr_matrix) <- 1
             
             # Calculate residuals for plotting
+            # composeTerm/composeTerms backtick-escape user column names (Defense 1);
+            # jmvcore::asFormula allow-list validates the RHS (Defense 2).
             residuals_data <- data.frame(row.names = rownames(data))
             for (var in vars) {
-                formula_str <- paste(var, "~", paste(controls, collapse = " + "))
-                model <- lm(as.formula(formula_str), data = data)
+                formula_str <- paste(jmvcore::composeTerm(var), "~", paste(jmvcore::composeTerms(as.list(controls)), collapse = " + "))
+                model <- lm(jmvcore::asFormula(formula_str), data = data)
                 residuals_data[[var]] <- residuals(model)
             }
             

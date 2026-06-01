@@ -162,11 +162,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     private$.generateWeightedKappaGuide()
                 }
                 self$results$todo$setVisible(TRUE)
-                stop("Agreement analysis requires at least 2 raters.")
+                jmvcore::reject("Agreement analysis requires at least 2 raters.")
             }
 
             if (nrow(self$data) < 2) {
-                stop("Agreement analysis requires at least 2 cases (observations).")
+                jmvcore::reject("Agreement analysis requires at least 2 cases (observations).")
             }
 
             # Enhanced data validation
@@ -337,6 +337,15 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.messages <- c(private$.messages, msg)
         },
         
+        # TODO (data hygiene): only `.messages` is reset at start of each `.run()` via this
+        # helper. The other 4+ persistent private fields (.data_matrix, .categories, .n_cases,
+        # .n_raters, .rater_metadata) are populated in `.prepareData()` but never explicitly
+        # cleared — if a later run's `.validateData()` rejects at L2281 (factor check) BEFORE
+        # `.prepareData()` updates them, the prior run's values linger in private state.
+        # No exploit path to a user-data-controlled HTML sink today (reject bails out before
+        # any setContent reads them), but defense-in-depth would reset all 5 fields here.
+        # See [R/outbreakanalysis.b.R:84-100](R/outbreakanalysis.b.R#L84-L100) for the canonical
+        # 10-field-reset pattern in this codebase.
         .resetMessages = function() {
             private$.messages <- NULL
             # Initialize with empty string to avoid NULL error in checks
@@ -377,7 +386,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             if (nrow(data_subset) == 0) {
-                stop('No complete cases found. Please check for missing values.')
+                jmvcore::reject('No complete cases found. Please check for missing values.')
             }
 
             private$.data_matrix <- data_subset
@@ -2278,9 +2287,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             if (length(non_factors) > 0) {
-                stop(paste0("The following variables are not factors: ", 
-                           paste(non_factors, collapse = ", "), 
-                           ". Please convert them to factors before analysis."))
+                jmvcore::reject("The following variables are not factors: {}. Please convert them to factors before analysis.",
+                                paste(non_factors, collapse = ", "))
             }
             
             # Check for consistent categories across raters
@@ -2322,7 +2330,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             all_data <- unlist(lapply(var_names, function(v) as.character(self$data[[v]])))
             unique_total <- length(unique(na.omit(all_data)))
             if (unique_total < 2) {
-                stop("Agreement analysis requires at least 2 categories across all raters.")
+                jmvcore::reject("Agreement analysis requires at least 2 categories across all raters.")
             }
             
             # Warn if individual raters have single category
@@ -2347,9 +2355,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             if (length(missing_packages) > 0) {
-                stop(paste0("The following required packages are missing: ", 
-                           paste(missing_packages, collapse = ", "), 
-                           ". Please install them using install.packages()"))
+                jmvcore::reject("The following required packages are missing: {}. Please install them using install.packages()",
+                                paste(missing_packages, collapse = ", "))
             }
         },
 
@@ -3296,7 +3303,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # For PABAK, we need pairwise agreements
             # This is a simplified implementation for the first pair of raters
             if (ncol(data_matrix) < 2) {
-                stop("PABAK requires at least 2 raters")
+                jmvcore::reject("PABAK requires at least 2 raters")
             }
             
             rater1 <- data_matrix[, 1]
@@ -5319,16 +5326,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (is.null(vars) || length(vars) == 0)
                 return('')
 
-            # Escape variable names that contain spaces or special characters
-            vars_escaped <- sapply(vars, function(v) {
-                if (!is.null(v) && !identical(make.names(v), v))
-                    paste0('`', v, '`')
-                else
-                    v
-            })
-
-            # Build vars argument
-            vars_arg <- paste0('vars = c(', paste(sapply(vars_escaped, function(v) paste0('"', v, '"')), collapse = ', '), ')')
+            # Build vars argument — jmvcore::format(..., context = "R") produces a valid R
+            # string literal that handles embedded quotes/backslashes correctly. This is the
+            # idiomatic G-category codegen escape (replaces a manual paste0('"', v, '"') wrap
+            # that corrupted the syntax pane when column names contained " or \).
+            vars_arg <- paste0('vars = c(', paste(sapply(vars, function(v) jmvcore::format("{}", v, context = "R")), collapse = ', '), ')')
 
             # Get other arguments using base helper (if available)
             args <- ''

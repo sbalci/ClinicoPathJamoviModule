@@ -837,16 +837,26 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Generate appropriate summary text based on analysis type
             summary_text <- ""
 
+            # Pre-escape OptionLevel factor labels (user-supplied via dropdown bound to a
+            # column's factor levels) before HTML interpolation in the glue::glue blocks
+            # below. glue does NOT HTML-escape interpolations.
+            esc_dod <- htmltools::htmlEscape(self$options$dod)
+            esc_dooc <- htmltools::htmlEscape(self$options$dooc)
+            esc_awd <- htmltools::htmlEscape(self$options$awd)
+            esc_awod <- htmltools::htmlEscape(self$options$awod)
+            esc_outcomeLevel <- htmltools::htmlEscape(self$options$outcomeLevel)
+            esc_recurrenceLevel <- htmltools::htmlEscape(self$options$recurrenceLevel)
+
             if (self$options$multievent) {
                 if (analysistype == 'os') {
                     summary_text <- glue::glue(
                         "
                         <br><b>Overall Survival Analysis</b><br>
                         Recoded outcome:<br>
-                        - Dead of disease ({self$options$dod}): coded as 1<br>
-                        - Dead of other causes ({self$options$dooc}): coded as 1<br>
-                        - Alive with disease ({self$options$awd}): coded as 0<br>
-                        - Alive without disease ({self$options$awod}): coded as 0<br>
+                        - Dead of disease ({esc_dod}): coded as 1<br>
+                        - Dead of other causes ({esc_dooc}): coded as 1<br>
+                        - Alive with disease ({esc_awd}): coded as 0<br>
+                        - Alive without disease ({esc_awod}): coded as 0<br>
                         <br>
                         <i>This coding compares all deaths vs. alive status for standard Kaplan-Meier or Cox regression.</i>
                         "
@@ -856,10 +866,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "
                         <br><b>Cause-Specific Survival Analysis</b><br>
                         Recoded outcome:<br>
-                        - Dead of disease ({self$options$dod}): coded as 1<br>
-                        - Dead of other causes ({self$options$dooc}): coded as 0<br>
-                        - Alive with disease ({self$options$awd}): coded as 0<br>
-                        - Alive without disease ({self$options$awod}): coded as 0<br>
+                        - Dead of disease ({esc_dod}): coded as 1<br>
+                        - Dead of other causes ({esc_dooc}): coded as 0<br>
+                        - Alive with disease ({esc_awd}): coded as 0<br>
+                        - Alive without disease ({esc_awod}): coded as 0<br>
                         <br>
                         <i>This coding compares disease-specific deaths vs. other outcomes for cause-specific analyses.</i>
                         "
@@ -869,10 +879,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "
                         <br><b>Competing Risks Survival Analysis</b><br>
                         Recoded outcome:<br>
-                        - Dead of disease ({self$options$dod}): coded as 1<br>
-                        - Dead of other causes ({self$options$dooc}): coded as 2<br>
-                        - Alive with disease ({self$options$awd}): coded as 0<br>
-                        - Alive without disease ({self$options$awod}): coded as 0<br>
+                        - Dead of disease ({esc_dod}): coded as 1<br>
+                        - Dead of other causes ({esc_dooc}): coded as 2<br>
+                        - Alive with disease ({esc_awd}): coded as 0<br>
+                        - Alive without disease ({esc_awod}): coded as 0<br>
                         <br>
                         <i>This coding enables competing risk analysis between disease-specific deaths and other causes using cmprsk or other packages.</i>
                         "
@@ -882,10 +892,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "
                         <br><b>Multistate Model Analysis</b><br>
                         Recoded outcome:<br>
-                        - Alive without disease ({self$options$awod}): coded as 0<br>
-                        - Alive with disease ({self$options$awd}): coded as 1<br>
-                        - Dead of disease ({self$options$dod}): coded as 2<br>
-                        - Dead of other causes ({self$options$dooc}): coded as 3<br>
+                        - Alive without disease ({esc_awod}): coded as 0<br>
+                        - Alive with disease ({esc_awd}): coded as 1<br>
+                        - Dead of disease ({esc_dod}): coded as 2<br>
+                        - Dead of other causes ({esc_dooc}): coded as 3<br>
                         <br>
                         <i>This coding allows for multistate modeling with transitions between health states.</i>
                         "
@@ -897,7 +907,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "
                         <br><b>Overall Survival (OS) Analysis</b><br>
                         Recoded outcome:<br>
-                        - Death ({self$options$outcomeLevel}): coded as 1<br>
+                        - Death ({esc_outcomeLevel}): coded as 1<br>
                         - Alive (other levels): coded as 0<br>
                         <br>
                         <i>This is standard coding for overall survival using Cox regression or Kaplan-Meier analysis.</i>
@@ -908,8 +918,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "
                         <br><b>{toupper(analysistype)} Analysis</b><br>
                         Recoded outcome:<br>
-                        - Death ({self$options$outcomeLevel}): coded as 1<br>
-                        - Recurrence/Progression ({self$options$recurrenceLevel}): coded as 1<br>
+                        - Death ({esc_outcomeLevel}): coded as 1<br>
+                        - Recurrence/Progression ({esc_recurrenceLevel}): coded as 1<br>
                         - Event-free (other): coded as 0<br>
                         <br>
                         <i>This coding treats both disease events and death as events for {toupper(analysistype)} analysis.</i>
@@ -920,7 +930,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "
                         <br><b>Time to Progression (TTP) Analysis</b><br>
                         Recoded outcome:<br>
-                        - Progression ({self$options$recurrenceLevel}): coded as 1<br>
+                        - Progression ({esc_recurrenceLevel}): coded as 1<br>
                         - No progression (including deaths): coded as 0<br>
                         <br>
                         <i>This coding only treats disease progression as events; deaths without progression are censored.</i>
@@ -931,7 +941,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "
                         <br><b>Binary Outcome Coding</b><br>
                         Recoded outcome:<br>
-                        - Event ({self$options$outcomeLevel}): coded as 1<br>
+                        - Event ({esc_outcomeLevel}): coded as 1<br>
                         - Non-event (other levels): coded as 0<br>
                         <br>
                         <i>This is standard coding for Cox regression and Kaplan-Meier analysis.</i>
@@ -1069,7 +1079,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     Non-events (coded as 0) represent %s.
                     The recoded variable '<b>myoutcome</b>' contains <b>%d events (%.1f%%)</b> and <b>%d non-events (%.1f%%)</b>.
                     </div>",
-                    self$options$outcome,
+                    htmltools::htmlEscape(self$options$outcome),
                     analysis_type_labels[[analysistype]],
                     event_desc,
                     censor_desc,
