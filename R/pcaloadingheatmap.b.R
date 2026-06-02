@@ -24,7 +24,10 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Variable name handling utilities ----
         .escapeVar = function(x) {
             if (is.null(x) || length(x) == 0) return(NULL)
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+            # make.unique() guards against collisions when two distinct column
+            # names map to the same safe form (e.g. "var-1" and "var_1" both
+            # collapse to "var_1" under the gsub).
+            make.unique(gsub("[^A-Za-z0-9_]+", "_", make.names(x)), sep = "_")
         },
 
         .cleanVarNames = function(df, vars) {
@@ -62,6 +65,12 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
+        # TODO (forward-looking): self$results$insert(position, jmvcore::Notice)
+        # is on the project's known-serialization-issues list. Migrate to the
+        # HTML output-item pattern (see R/waterfall.b.R and
+        # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md). When that migration lands,
+        # the htmltools::htmlEscape() calls at the two sprintf sites in this
+        # file's .run() become strictly required, not defense-in-depth.
         .insertNotices = function() {
             if (length(private$.notices) == 0) return()
 
@@ -98,6 +107,15 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # run ----
 
         .run = function() {
+
+            # Reset cached state so early-return error paths don't show
+            # stale plots / tables from a previous valid run.
+            private$.pcaResults       <- NULL
+            private$.pcaData          <- NULL
+            private$.rowInfo          <- NULL
+            private$.varianceInfo     <- NULL
+            private$.originalVarNames <- NULL
+            private$.notices          <- list()
 
             # Initial Message ----
             vars <- self$options$vars
@@ -144,7 +162,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.addNotice(
                         name = "missing_vars",
                         message = sprintf("The following variables are not in the dataset: %s. Please check variable selection and ensure all selected variables exist.",
-                                        paste(missing_vars, collapse = ', ')),
+                                        paste(htmltools::htmlEscape(missing_vars), collapse = ', ')),
                         severity = "ERROR"
                     )
                     private$.insertNotices()
@@ -158,7 +176,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.addNotice(
                         name = "non_numeric",
                         message = sprintf("PCA requires numeric variables. Non-numeric variables detected: %s. Please select only continuous numeric variables.",
-                                        paste(non_numeric, collapse = ', ')),
+                                        paste(htmltools::htmlEscape(non_numeric), collapse = ', ')),
                         severity = "ERROR"
                     )
                     private$.insertNotices()
@@ -281,7 +299,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Remove missing values
             n_rows_before <- nrow(pca_data)
-            pca_data <- na.omit(pca_data)
+            pca_data <- jmvcore::naOmit(pca_data)
             rows_used <- nrow(pca_data)
             private$.rowInfo <- list(
                 rows_total = n_rows_before,
@@ -556,7 +574,7 @@ pcaloadingheatmap_normalized_loadings <- function(pca, pca_data, scaled) {
     if (!scaled) {
         var_sds <- apply(pca_data, 2, stats::sd)
         if (any(is.na(var_sds) | var_sds == 0)) {
-            stop('Unable to compute loadings because one or more variables have zero variance.')
+            jmvcore::reject('Unable to compute loadings because one or more variables have zero variance.')
         }
         loadings <- sweep(loadings, 1, var_sds, `/`)
     }

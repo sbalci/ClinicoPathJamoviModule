@@ -9,6 +9,11 @@ items:
       type: Html
       visible: true
 
+    - name: naturalSummary
+      title: Summary
+      type: Html
+      visible: true
+
     - name: summary
       title: Data Summary
       type: Table

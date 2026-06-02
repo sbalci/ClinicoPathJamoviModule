@@ -26,13 +26,13 @@ praucClass <- R6::R6Class(
             predictor <- predictor[complete_cases]
 
             if (length(outcome) < 10) {
-                stop("Insufficient data for PR analysis. Need at least 10 complete observations.")
+                jmvcore::reject("Insufficient data for PR analysis. Need at least 10 complete observations.")
             }
 
             # Validate binary outcome
             outcome_levels <- levels(outcome)
             if (length(outcome_levels) != 2) {
-                stop("Outcome variable must have exactly 2 levels for binary classification.")
+                jmvcore::reject("Outcome variable must have exactly 2 levels for binary classification.")
             }
 
             # Determine positive level
@@ -41,14 +41,27 @@ praucClass <- R6::R6Class(
             } else {
                 positive_level <- self$options$positive_level
                 if (!(positive_level %in% outcome_levels)) {
-                    stop(paste0("Positive level '", positive_level, "' not found in outcome variable."))
+                    jmvcore::reject("Positive level '{}' not found in outcome variable.", positive_level)
                 }
             }
 
             # Convert to binary (1 = positive, 0 = negative)
             y_true <- as.integer(outcome == positive_level)
 
-            # Set random seed
+            # Set random seed — save & restore RNG state so the bootstrap
+            # loop in .bootstrapPRAUC (sample() called n_boot times per CI
+            # request) doesn't leak the post-loop `.Random.seed` into the
+            # user's session RNG. Mirrors optimalcutpoint.b.R:765-772.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                get(".Random.seed", envir = .GlobalEnv)
+            } else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
             set.seed(self$options$random_seed)
 
             # Perform PR analysis
@@ -71,7 +84,7 @@ praucClass <- R6::R6Class(
                 private$.populateInterpretation(y_true, predictor, pr_results)
 
             }, error = function(e) {
-                stop(paste0("Error in PR analysis: ", e$message))
+                jmvcore::reject("Error in PR analysis: {}", htmltools::htmlEscape(conditionMessage(e)))
             })
         },
 

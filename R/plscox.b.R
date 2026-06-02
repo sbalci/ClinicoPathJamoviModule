@@ -130,13 +130,20 @@ plscoxClass <- R6::R6Class(
             # Dummy-encode factor columns for PLS (which requires numeric matrix)
             has_factors <- any(sapply(pred_data, is.factor))
             if (has_factors) {
-                # Build model matrix (dummy encoding), removing intercept
-                mm_formula <- as.formula(paste("~", paste(
-                    sapply(predictors, function(v) {
-                        if (is.factor(pred_data[[v]])) paste0("as.factor(`", v, "`)") else paste0("`", v, "`")
-                    }),
-                    collapse = " + "
-                )))
+                # Build model matrix (dummy encoding), removing intercept.
+                # Defense 1 — composeTerm backtick-escapes user column names safely
+                # (handles names containing backticks/special chars).
+                # Defense 2 — asFormula allow-list-validates the parsed formula
+                # against jamovi 2.7.27+'s hardened as.formula; as.factor() must
+                # be explicitly allow-listed since it's not in the default set.
+                rhs_terms <- sapply(predictors, function(v) {
+                    term <- jmvcore::composeTerm(v)
+                    if (is.factor(pred_data[[v]])) paste0("as.factor(", term, ")") else term
+                })
+                mm_formula <- jmvcore::asFormula(
+                    paste("~", paste(rhs_terms, collapse = " + ")),
+                    additional_allowed_functions = c("as.factor")
+                )
                 pred_matrix <- model.matrix(mm_formula, data = pred_data)[, -1, drop = FALSE]
             } else {
                 pred_matrix <- as.matrix(pred_data)
@@ -225,6 +232,25 @@ plscoxClass <- R6::R6Class(
 
             # Perform PLS Cox regression using plsRcox
             tryCatch({
+
+                # Save & restore RNG state so the bootstrap/permutation sample()
+                # loops below (L747/L861) don't leak `.Random.seed` mutations
+                # into the user's session. Until a seed_value option is added
+                # to .a.yaml (see TODO below), the results themselves remain
+                # random across runs by design.
+                if (isTRUE(self$options$bootstrap_validation) ||
+                    isTRUE(self$options$permutation_test)) {
+                    old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                        get(".Random.seed", envir = .GlobalEnv)
+                    } else NULL
+                    on.exit({
+                        if (is.null(old_seed)) {
+                            suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                        } else {
+                            assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                        }
+                    }, add = TRUE)
+                }
 
                 # Cross-validation setup
                 cv_method <- self$options$cross_validation
@@ -330,8 +356,8 @@ plscoxClass <- R6::R6Class(
                             tmp_scores <- tmp_model$tt
                             colnames(tmp_scores) <- paste0("PLS_", seq_len(ncol(tmp_scores)))
                             tmp_cox_data <- data.frame(time = time_var, status = status_var, tmp_scores)
-                            tmp_formula <- as.formula(paste(
-                                "survival::Surv(time, status) ~",
+                            tmp_formula <- .asSurvivalFormula(paste0(
+                                "Surv(time, status) ~ ",
                                 paste(colnames(tmp_scores), collapse = " + ")
                             ))
                             tmp_cox <- survival::coxph(tmp_formula, data = tmp_cox_data, method = tie_method)
@@ -424,8 +450,10 @@ plscoxClass <- R6::R6Class(
                     pls_scores
                 )
 
-                cox_formula <- as.formula(paste("survival::Surv(time, status) ~",
-                                               paste(colnames(pls_scores), collapse = " + ")))
+                cox_formula <- .asSurvivalFormula(paste0(
+                    "Surv(time, status) ~ ",
+                    paste(colnames(pls_scores), collapse = " + ")
+                ))
 
                 cox_model <- survival::coxph(cox_formula, data = cox_data, method = tie_method)
 
@@ -731,6 +759,14 @@ plscoxClass <- R6::R6Class(
 
                 self$results$technicalNotes$setContent(technical_text)
 
+                # TODO (forward-looking / UX reproducibility): add a `seed_value`
+                # OptionInteger to jamovi/plscox.a.yaml (mirror pcaloadingtest's
+                # `seed` option). Pair with `set.seed(self$options$seed_value)`
+                # here and at the permutation loop (L861) to make bootstrap and
+                # permutation results reproducible across runs. The save/restore
+                # wrapper at the top of the tryCatch body (~L227) already prevents
+                # RNG state leakage; this would close the remaining reproducibility
+                # gap. UI-visible change → defer to a feature pass.
                 # Bootstrap validation (Harrell's optimism-corrected)
                 if (self$options$bootstrap_validation) {
                     n_bootstrap <- self$options$n_bootstrap
@@ -775,8 +811,10 @@ plscoxClass <- R6::R6Class(
                                         boot_scores
                                     )
                                     colnames(boot_cox_data)[3:ncol(boot_cox_data)] <- paste0("Comp", seq_len(ncol(boot_scores)))
-                                    boot_formula <- as.formula(paste("survival::Surv(time, status) ~",
-                                        paste(colnames(boot_cox_data)[3:ncol(boot_cox_data)], collapse = " + ")))
+                                    boot_formula <- .asSurvivalFormula(paste0(
+                                        "Surv(time, status) ~ ",
+                                        paste(colnames(boot_cox_data)[3:ncol(boot_cox_data)], collapse = " + ")
+                                    ))
                                     boot_cox <- survival::coxph(boot_formula, data = boot_cox_data, method = tie_method)
 
                                     # Apparent C-index on bootstrap sample
@@ -886,8 +924,10 @@ plscoxClass <- R6::R6Class(
                                 )
                                 colnames(perm_cox_data)[3:ncol(perm_cox_data)] <- paste0("Comp", seq_len(ncol(perm_scores)))
 
-                                perm_formula <- as.formula(paste("survival::Surv(time, status) ~",
-                                                               paste(colnames(perm_cox_data)[3:ncol(perm_cox_data)], collapse = " + ")))
+                                perm_formula <- .asSurvivalFormula(paste0(
+                                    "Surv(time, status) ~ ",
+                                    paste(colnames(perm_cox_data)[3:ncol(perm_cox_data)], collapse = " + ")
+                                ))
 
                                 perm_c <- survival::concordance(perm_formula, data = perm_cox_data, reverse = TRUE)$concordance
                                 valid_perms <- valid_perms + 1
@@ -921,7 +961,7 @@ plscoxClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                error_msg <- glue::glue("<h3>Error in PLS Cox Analysis</h3><p>An error occurred during analysis: {e$message}</p><p>Please check your data and parameter settings.</p>")
+                error_msg <- glue::glue("<h3>Error in PLS Cox Analysis</h3><p>An error occurred during analysis: {htmltools::htmlEscape(conditionMessage(e))}</p><p>Please check your data and parameter settings.</p>")
                 self$results$modelSummary$setContent(error_msg)
                 return()
             })

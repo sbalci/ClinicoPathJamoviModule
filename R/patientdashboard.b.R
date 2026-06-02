@@ -590,18 +590,32 @@ patientdashboardClass <- R6::R6Class(
             
             summary_html <- paste0(summary_html, "<div class='clinical-title'> Clinical Summary Report</div>")
             
+            # TODO (correctness): this dashboard is functionally single-patient — `patientData[1]`
+            # below takes only the FIRST row's patient ID even though `data[[patientID[1]]]` is
+            # the full column. If multi-patient summaries are intended, iterate over unique IDs
+            # or add a patient selector. If single-patient is intentional, document that the
+            # selected `patientID` column should already be pre-filtered to one patient.
             # Current status
             patientData <- data[[patientID[1]]]
             currentPatient <- if (!is.null(patientData)) as.character(patientData[1]) else "Unknown"
             
-            summary_html <- paste0(summary_html, 
+            summary_html <- paste0(summary_html,
                 "<div class='summary-section'>",
-                "<b>Patient:</b> ", currentPatient, "<br>",
+                "<b>Patient:</b> ", htmltools::htmlEscape(currentPatient), "<br>",
                 "<b>Report Generated:</b> ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "<br>",
                 "<b>Monitoring Period:</b> ", self$options$time_window, " hours",
                 "</div>"
             )
             
+            # TODO (stub): 8+ sites in this function (L619/L620/L651/L652/L653/L688/L689/L690/
+            # L691/L700/L701/L702) use `sample()` and `runif()` to generate placeholder dashboard
+            # metrics (patient status, deterioration risk, length-of-stay, satisfaction scores,
+            # quality metrics). These appear to be UI scaffolding — every "Clinical Outcomes",
+            # "Quality Indicators", and "Predictive Recommendations" panel displays randomly
+            # sampled fake numbers, NOT real computations from vitals/labValues. Either implement
+            # real metrics from the user's selected vitals/labValues columns or document the
+            # function as a UI demo. Once real, also wire RNG hygiene (save/restore .Random.seed
+            # via on.exit) — currently moot because the stubbed values aren't reproducible by design.
             # Key findings
             vitalCount <- if (!is.null(vitals)) length(vitals) else 0
             labCount <- if (!is.null(labValues)) length(labValues) else 0

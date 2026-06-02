@@ -1,10 +1,62 @@
 # This file is a generated template, your changes will not be overwritten
 
+#' @importFrom ggplot2 ggplot aes geom_col geom_text geom_line geom_point
+#'   geom_smooth geom_ribbon geom_vline geom_hline geom_bar coord_polar
+#'   scale_fill_manual scale_color_gradient2 scale_size_continuous
+#'   scale_fill_brewer labs theme_minimal theme_void theme element_text
+#'   facet_wrap annotate
+#' @importFrom reshape2 melt
+#' @importFrom gridExtra grid.arrange
+#' @importFrom stats rnorm runif quantile median sd
+NULL
+
 populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "populationhealthClass",
     inherit = populationhealthBase,
     private = list(
         .run = function() {
+
+            # Save & restore RNG state — several helper functions in this file
+            # currently call runif/rnorm to produce placeholder values (see the
+            # stub TODO below). The save/restore prevents demo RNG draws from
+            # leaking into the user's session RNG.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                get(".Random.seed", envir = .GlobalEnv)
+            } else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
+
+            # TODO (stub): MOST analytical helpers in this file return hardcoded
+            # literals or runif()-generated random numbers instead of analyzing
+            # the user's data:
+            #   - L<helpers>: .assessGroupHealthStatus / .assessGroupRiskLevel /
+            #     .assessAgeGroupHealthStatus / .assessQuartileRiskLevel /
+            #     .assessPopulationHealthStatus / .identifyRiskFactors /
+            #     .getHealthIndicators / .getInterventionPriority /
+            #     .projectOutcomes / .identifyRegionalConcerns /
+            #     .assessResourceAvailability all return string literals.
+            #   - .calculateRegionalHealthScore returns runif(1, 60, 90)  <-- random
+            #   - .calculateDisparityIndex      returns runif(1, 0.1, 0.5) <-- random
+            #   - .calculateQualityMetric       returns runif(1, 60, 85)   <-- random
+            #   - .createTimePeriods returns rep("Period 1", ...) — single hardcoded
+            #   - .calculateTrendStatistics / .calculateHealthDisparity /
+            #     .createPredictiveModel / .createSurveillanceIndicator /
+            #     .calculateQualityMetric all return hardcoded list literals.
+            #   - .performInterventionAnalysis and .performResourceAllocationAnalysis
+            #     are 100% fabricated demonstration data.
+            #   - All 7 plot functions build their own data.frame(...) with
+            #     rnorm/runif/sin/cos — the user's `data` argument is never used.
+            # This function presents glossy, gradient-styled HTML and Table outputs
+            # to clinicians as if they were real analysis, but the numbers and
+            # categorizations are fabricated. menuGroup is `ClinicoPathD`
+            # (dev-routed) — DO NOT promote to production menu until every helper
+            # actually consumes the user's data.
+
             # Basic data validation
             if (is.null(self$options$patientID) || length(self$options$patientID) == 0) {
                 self$results$todo$setContent("<p>Please specify a Patient Identifier variable to begin population health analysis.</p>")
@@ -816,7 +868,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!self$options$population_visualization) return()
             
             # Create population overview plot
-            library(ggplot2)
             
             # Sample data for visualization
             overview_data <- data.frame(
@@ -851,7 +902,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!self$options$geographic_mapping) return()
             
             # Create geographic health map (simplified)
-            library(ggplot2)
             
             # Sample geographic data
             geo_data <- data.frame(
@@ -885,7 +935,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!self$options$trend_visualization) return()
             
             # Create temporal trends plot
-            library(ggplot2)
             
             # Sample temporal data
             trend_data <- data.frame(
@@ -922,7 +971,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!self$options$risk_stratification) return()
             
             # Create risk stratification plot
-            library(ggplot2)
             
             # Sample risk data
             risk_data <- data.frame(
@@ -960,7 +1008,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!self$options$disparity_plots) return()
             
             # Create health disparity plot
-            library(ggplot2)
             
             # Sample disparity data
             disparity_data <- data.frame(
@@ -971,7 +1018,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             )
             
             # Reshape for plotting
-            library(reshape2)
             plot_data <- melt(disparity_data, id.vars = "Group", 
                             variable.name = "Outcome", value.name = "Score")
             
@@ -999,7 +1045,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!self$options$predictive_modeling) return()
             
             # Create predictive modeling plot
-            library(ggplot2)
             
             # Sample prediction data
             pred_data <- data.frame(
@@ -1034,8 +1079,6 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!self$options$interactive_dashboard) return()
             
             # Create interactive dashboard overview
-            library(ggplot2)
-            library(gridExtra)
             
             # Create multiple small plots for dashboard
             

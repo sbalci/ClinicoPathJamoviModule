@@ -388,6 +388,15 @@ qtwistClass <- R6::R6Class(
         # ========================================
         .run = function() {
 
+            # Reset cached state so the 15 jmvcore::reject early-rejects in
+            # .run() / .processQTWISTData / .calculateStatePartitions /
+            # .calculateToxicityDuration / .calculateTreatmentDifference don't
+            # leave stale plots and tables from a previous valid run.
+            private$.state_partition_results <- NULL
+            private$.qtwist_results          <- NULL
+            private$.bootstrap_results       <- NULL
+            private$.sensitivity_results     <- NULL
+
             # Check if required variables are selected
             if (is.null(self$options$time_os) ||
                 is.null(self$options$event_os) ||
@@ -405,8 +414,10 @@ qtwistClass <- R6::R6Class(
 
             # Validate treatment has exactly 2 levels
             if (length(unique(data$treatment)) != 2) {
-                stop("Treatment variable must have exactly 2 groups for comparison. ",
-                     "Current number of groups: ", length(unique(data$treatment)))
+                jmvcore::reject(
+                    "Treatment variable must have exactly 2 groups for comparison. Current number of groups: {}",
+                    length(unique(data$treatment))
+                )
             }
 
             # Get tau (time horizon)
@@ -484,7 +495,7 @@ qtwistClass <- R6::R6Class(
                     if (!is.null(self$options$event_os_level)) {
                         event_os_binary <- as.numeric(event_os == self$options$event_os_level)
                     } else {
-                        stop("Please specify the death event level for the OS event variable")
+                        jmvcore::reject("Please specify the death event level for the OS event variable")
                     }
                 } else {
                     event_os_binary <- as.numeric(event_os)
@@ -494,7 +505,7 @@ qtwistClass <- R6::R6Class(
                     if (!is.null(self$options$event_pfs_level)) {
                         event_pfs_binary <- as.numeric(event_pfs == self$options$event_pfs_level)
                     } else {
-                        stop("Please specify the progression/death event level for the PFS event variable")
+                        jmvcore::reject("Please specify the progression/death event level for the PFS event variable")
                     }
                 } else {
                     event_pfs_binary <- as.numeric(event_pfs)
@@ -515,7 +526,7 @@ qtwistClass <- R6::R6Class(
 
                 # Validate data
                 if (nrow(clean_data) < 10) {
-                    stop("Insufficient data after removing missing values. At least 10 complete cases required.")
+                    jmvcore::reject("Insufficient data after removing missing values. At least 10 complete cases required.")
                 }
 
                 # Validate PFS <= OS
@@ -529,13 +540,13 @@ qtwistClass <- R6::R6Class(
 
                 # Validate all times are positive
                 if (any(clean_data$time_os <= 0, na.rm = TRUE) || any(clean_data$time_pfs <= 0, na.rm = TRUE)) {
-                    stop("All survival times must be positive (> 0)")
+                    jmvcore::reject("All survival times must be positive (> 0)")
                 }
 
                 return(clean_data)
 
             }, error = function(e) {
-                stop(paste("Error preparing data:", e$message))
+                jmvcore::reject("Error preparing data: {}", htmltools::htmlEscape(conditionMessage(e)))
             })
         },
 
@@ -560,7 +571,7 @@ qtwistClass <- R6::R6Class(
 
             # Validate tau
             if (tau <= 0) {
-                stop("Time horizon (tau) must be positive")
+                jmvcore::reject("Time horizon (tau) must be positive")
             }
 
             if (tau > max(data$time_os, na.rm = TRUE)) {
@@ -641,7 +652,7 @@ qtwistClass <- R6::R6Class(
                 ))
 
             }, error = function(e) {
-                stop(paste("Error calculating RMST:", e$message))
+                jmvcore::reject("Error calculating RMST: {}", htmltools::htmlEscape(conditionMessage(e)))
             })
         },
 
@@ -668,7 +679,7 @@ qtwistClass <- R6::R6Class(
             } else if (tox_method == "individual_duration") {
                 # Method 2: Individual patient-specific durations
                 if (is.null(self$options$toxicity_duration_var)) {
-                    stop("Toxicity duration variable must be specified for individual duration method")
+                    jmvcore::reject("Toxicity duration variable must be specified for individual duration method")
                 }
 
                 tox_duration_var <- jmvcore::toNumeric(self$data[[self$options$toxicity_duration_var]])
@@ -685,7 +696,7 @@ qtwistClass <- R6::R6Class(
                         if (!is.null(self$options$toxicity_indicator_level)) {
                             tox_binary <- as.numeric(tox_indicator == self$options$toxicity_indicator_level)
                         } else {
-                            stop("Please specify the toxicity present level")
+                            jmvcore::reject("Please specify the toxicity present level")
                         }
                     } else {
                         tox_binary <- as.numeric(tox_indicator)
@@ -700,7 +711,7 @@ qtwistClass <- R6::R6Class(
             } else if (tox_method == "time_period") {
                 # Method 3: Time periods with start and end times
                 if (is.null(self$options$toxicity_start_var) || is.null(self$options$toxicity_end_var)) {
-                    stop("Toxicity start and end time variables must be specified for time period method")
+                    jmvcore::reject("Toxicity start and end time variables must be specified for time period method")
                 }
 
                 tox_start <- jmvcore::toNumeric(self$data[[self$options$toxicity_start_var]])
@@ -717,12 +728,12 @@ qtwistClass <- R6::R6Class(
                 e_tox <- mean(tox_duration, na.rm = TRUE)
 
             } else {
-                stop("Invalid toxicity method specified")
+                jmvcore::reject("Invalid toxicity method specified")
             }
 
             # Validate E[TOX] is reasonable
             if (e_tox < 0) {
-                stop("Toxicity duration cannot be negative")
+                jmvcore::reject("Toxicity duration cannot be negative")
             }
             if (e_tox > tau) {
                 warning("Mean toxicity duration exceeds tau; capping at tau")
@@ -851,7 +862,7 @@ qtwistClass <- R6::R6Class(
                 return(results)
 
             }, error = function(e) {
-                stop(paste("Error calculating state partitions:", e$message))
+                jmvcore::reject("Error calculating state partitions: {}", htmltools::htmlEscape(conditionMessage(e)))
             })
         },
 
@@ -919,7 +930,7 @@ qtwistClass <- R6::R6Class(
 
             treatment_names <- names(state_results)
             if (length(treatment_names) != 2) {
-                stop("Treatment difference requires exactly 2 treatment groups")
+                jmvcore::reject("Treatment difference requires exactly 2 treatment groups")
             }
 
             # Get treatment groups (first vs. second)
@@ -999,6 +1010,20 @@ qtwistClass <- R6::R6Class(
         .bootstrapQTWIST = function(data, tau) {
 
             n_boot <- self$options$bootstrap_samples
+
+            # Save & restore RNG state so the bootstrap sample() loop below
+            # (n_boot iterations) doesn't leak `.Random.seed` mutations into
+            # the user's session. Mirrors optimalcutpoint.b.R:765-772.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                get(".Random.seed", envir = .GlobalEnv)
+            } else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
             set.seed(self$options$bootstrap_seed)
 
             treatment_names <- levels(data$treatment)

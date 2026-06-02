@@ -77,6 +77,16 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
         .run = function() {
 
+            # Reset cached state so early-return error paths don't show
+            # stale plots / tables from a previous valid run.
+            private$.pcaResults       <- NULL
+            private$.pcaData          <- NULL
+            private$.permResults      <- NULL
+            private$.originalLoadings <- NULL
+            private$.resultsDF        <- NULL
+            private$.rowInfo          <- NULL
+            private$.varianceInfo     <- NULL
+
             # Initial Message ----
             if (length(self$options$vars) < 3) {
 
@@ -119,6 +129,22 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
                 self$results$todo$setContent(todo)
 
+                # TODO (correctness/security): `self$results$appendNotice(...)`
+                # is a non-existent method. jmvcore's Results R6 class exposes
+                # `Notice` and `NoticeType` but no `appendNotice` — all 13 call
+                # sites in this file (L129, L203, L216, L229, L247, L259, L282,
+                # L305, L317, L366, L449) will error at runtime the moment any
+                # validation branch fires. Two viable migrations:
+                #   (a) Standard pattern: `notice <- jmvcore::Notice$new(...)`
+                #       then `self$results$insert(N, notice)` — mirrors
+                #       R/outbreakanalysis.b.R; OR
+                #   (b) HTML-output-item pattern (project's canonical direction)
+                #       — see R/waterfall.b.R + docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md.
+                # The security audit found that user column names interpolated
+                # into these notice messages (e.g. L226 non_numeric_vars,
+                # already pre-escaped with htmltools::htmlEscape) would be a
+                # live XSS path the moment this method is wired up; the escape
+                # is in place defensively.
                 if (nrow(self$data) == 0) {
                     notice <- list(
                         name = "emptyData",
@@ -185,7 +211,7 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
             # Remove missing values
             n_rows_before <- nrow(pca_data)
-            pca_data <- na.omit(pca_data)
+            pca_data <- jmvcore::naOmit(pca_data)
             private$.rowInfo <- list(
                 rows_total = n_rows_before,
                 rows_used = nrow(pca_data),
@@ -223,7 +249,7 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
                 notice <- list(
                     name = "nonNumericVars",
                     title = "Non-Numeric Variables Detected",
-                    content = sprintf('Non-numeric variables detected: %s. PCA Loading Test requires numeric variables only. Factors and character variables cannot be used. Please select only continuous numeric variables.', paste(non_numeric_vars, collapse = ', ')),
+                    content = sprintf('Non-numeric variables detected: %s. PCA Loading Test requires numeric variables only. Factors and character variables cannot be used. Please select only continuous numeric variables.', paste(htmltools::htmlEscape(non_numeric_vars), collapse = ', ')),
                     level = "ERROR"
                 )
                 self$results$appendNotice(notice)
@@ -262,6 +288,19 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
             # Optional seed for reproducibility
             if (!is.null(self$options$seed)) {
+                # Save & restore RNG state so we don't leak `.Random.seed`
+                # mutations into the user's session (the permV loop below
+                # consumes RNG via sample() ~ P x nvars times).
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                    get(".Random.seed", envir = .GlobalEnv)
+                } else NULL
+                on.exit({
+                    if (is.null(old_seed)) {
+                        suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                    } else {
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                    }
+                }, add = TRUE)
                 set.seed(self$options$seed)
             }
 

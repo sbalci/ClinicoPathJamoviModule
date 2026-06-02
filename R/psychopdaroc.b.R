@@ -1952,13 +1952,13 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (self$options$positiveClass == "") {
           procedureNotes <- paste0(
             procedureNotes,
-            "<p> Positive Class: ", as.character(unique(self$data[[private$.escapeVar(self$options$classVar)]])[1]),
+            "<p> Positive Class: ", htmltools::htmlEscape(as.character(unique(self$data[[private$.escapeVar(self$options$classVar)]])[1])),
             " (first level)</p>")
         } else {
           procedureNotes <- paste0(
             procedureNotes,
             "<p> Positive Class: ",
-            self$options$positiveClass,
+            htmltools::htmlEscape(self$options$positiveClass),
             "</p>")
         }
 
@@ -1967,7 +1967,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           procedureNotes <- paste0(
             procedureNotes,
             "<p> Subgroup Variable: ",
-            self$options$subGroup,
+            htmltools::htmlEscape(self$options$subGroup),
             "</p>")
         }
 
@@ -2075,7 +2075,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "<h4>Analysis Status</h4>",
         "<ul>",
         "<li><strong>Seed:</strong> ", self$options$seed, "</li>",
-        "<li><strong>Positive Class:</strong> ", positiveClass, " (Prevalence: ", round(prevalence * 100, 1), "%)</li>", 
+        "<li><strong>Positive Class:</strong> ", htmltools::htmlEscape(positiveClass), " (Prevalence: ", round(prevalence * 100, 1), "%)</li>",
         "<li><strong>Analysis Mode:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>"
       )
       
@@ -2555,7 +2555,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           classVarEscaped <- private$.escapeVar(self$options$classVar)
 
           # Prepare data frames with escaped column names
-          depVarsData <- data.frame(lapply(depVarsEscaped, function(v) as.numeric(data[[v]])))
+          depVarsData <- data.frame(lapply(depVarsEscaped, function(v) jmvcore::toNumeric(data[[v]])))
           names(depVarsData) <- self$options$dependentVars  # Use original names for output
 
           # Prepare classification variable
@@ -4225,6 +4225,12 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
     # Enhanced HTML table formatting for sensitivity/specificity results
     .formatSensSpecTable = function(Title, TP, FP, TN, FN) {
+      # Escape Title once at function entry — callers (e.g. L1385-1390) pass
+      # paste("Confusion Matrix for", var, ...) where `var` is a user column
+      # name from OptionVariables. Without this escape, a column literally
+      # named `<img src=x onerror=alert(1)>` would render as live HTML in the
+      # `<th>` cell at L4240 since sensSpecTable is type:Html in .r.yaml.
+      Title <- htmltools::htmlEscape(Title)
       res <- paste0(
         "<style type='text/css'>
         .tg  {border-collapse:collapse;border-spacing:0;border-width:1px;border-style:solid;border-color:black;}
@@ -4540,8 +4546,8 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           var2 <- vars[j]
           
           # Get predictor values
-          x1 <- as.numeric(data[[var1]])
-          x2 <- as.numeric(data[[var2]])
+          x1 <- jmvcore::toNumeric(data[[var1]])
+          x2 <- jmvcore::toNumeric(data[[var2]])
           
           # Remove missing values
           complete_cases <- complete.cases(x1, x2, y)
@@ -4651,7 +4657,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       analysis_type <- self$options$powerAnalysisType  # post_hoc, prospective, sample_size
 
       for (var in vars) {
-        x <- as.numeric(data[[var]])
+        x <- jmvcore::toNumeric(data[[var]])
         complete_cases <- complete.cases(x, y)
         x_complete <- x[complete_cases]
         y_complete <- y[complete_cases]
@@ -4816,7 +4822,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       mcmc_samples <- 2000  # Fixed number of bootstrap samples for posterior
 
       for (var in vars) {
-        x <- as.numeric(data[[var]])
+        x <- jmvcore::toNumeric(data[[var]])
         complete_cases <- complete.cases(x, y)
         x_complete <- x[complete_cases]
         y_complete <- y[complete_cases]
@@ -4931,7 +4937,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       threshold_prob <- median(threshold_range)
 
       for (var in vars) {
-        x <- as.numeric(data[[var]])
+        x <- jmvcore::toNumeric(data[[var]])
         complete_cases <- complete.cases(x, y)
         x_complete <- x[complete_cases]
         y_complete <- y[complete_cases]
@@ -5098,7 +5104,7 @@ psychopdaROCClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       
       for (i in seq_along(vars)) {
         var <- vars[i]
-        x <- as.numeric(data[[var]])
+        x <- jmvcore::toNumeric(data[[var]])
         complete_cases <- complete.cases(x, y)
         x_complete <- x[complete_cases]
         y_complete <- y[complete_cases]

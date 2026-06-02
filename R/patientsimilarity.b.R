@@ -90,9 +90,25 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 return()
             }
 
-            # Set seed for reproducibility
+            # TODO (data hygiene): `private$.projectionData` set at L108 below is NOT reset
+            # at the top of `.run()`. If `.run()` early-exits before L108 (e.g., the "select
+            # at least 2 variables" notice path at L86-90), `.plot`/`.plot3D`/`.plotSurvival`
+            # at L658/L717/L757 still see the prior run's projection cache. No security path,
+            # but renders stale projections alongside fresh notice text. Defense-in-depth:
+            # `private$.projectionData <- NULL` at the very top of `.run()`.
+
+            # Set seed for reproducibility — save and restore global RNG state so subsequent
+            # random draws elsewhere in the user's session are not affected by our seed.
+            # Rtsne/umap/kmeans/dbscan all consume the RNG, so the seed effectively propagates
+            # downstream without the restore; H4 hygiene fix mirrors optimalcutpoint.b.R:765-772.
             if (!is.null(self$options$seed)) {
-                message(paste("Setting seed to:", self$options$seed))
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                                get(".Random.seed", envir = .GlobalEnv)
+                            else NULL
+                on.exit({
+                    if (!is.null(old_seed))
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }, add = TRUE)
                 set.seed(self$options$seed)
             }
 
@@ -207,7 +223,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     name = 'dataPreparationError',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent(paste('Error preparing data:', e$message, 'Please check that all selected variables contain valid numeric values.'))
+                notice$setContent(paste('Error preparing data:', htmltools::htmlEscape(conditionMessage(e)), 'Please check that all selected variables contain valid numeric values.'))
                 self$results$insert(999, notice)
                 return(NULL)
             })
@@ -252,7 +268,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     name = 'projectionError',
                     type = jmvcore::NoticeType$ERROR
                 )
-                notice$setContent(paste('Error in projection:', e$message, 'This may be due to insufficient data or numerical issues. Try a different method or check your input data.'))
+                notice$setContent(paste('Error in projection:', htmltools::htmlEscape(conditionMessage(e)), 'This may be due to insufficient data or numerical issues. Try a different method or check your input data.'))
                 self$results$insert(999, notice)
                 return(NULL)
             })
@@ -510,7 +526,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     name = 'clusteringError',
                     type = jmvcore::NoticeType$WARNING
                 )
-                notice$setContent(paste('Error in clustering:', e$message, 'Clustering skipped. Try different parameters or method.'))
+                notice$setContent(paste('Error in clustering:', htmltools::htmlEscape(conditionMessage(e)), 'Clustering skipped. Try different parameters or method.'))
                 self$results$insert(21, notice)
             })
 
@@ -778,7 +794,11 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             clusters <- private$.projectionData$clusters
 
             # Create survival object
-            surv_formula <- as.formula("survival::Surv(survtime, event) ~ clusters")
+            # Bare `Surv` (not `survival::Surv`) is globally allow-listed by jmvcore::asFormula.
+            # `.asSurvivalFormula` is the project wrapper around jmvcore::asFormula with the
+            # survival helper allow-list applied. `survtime`/`event`/`clusters` are internal
+            # local variables, not user column names — composeTerm not needed.
+            surv_formula <- .asSurvivalFormula("Surv(survtime, event) ~ clusters")
             fit <- survival::survfit(surv_formula)
 
             # Plot

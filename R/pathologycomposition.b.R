@@ -64,7 +64,7 @@ pathologycompositionClass <- R6::R6Class(
                 private$.performComponentAnalysis(data, outcome_var, component_vars)
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste0("<p><strong>Component Analysis Error:</strong> ", e$message, "</p>")
+                    paste0("<p><strong>Component Analysis Error:</strong> ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
                 )
             })
             
@@ -74,7 +74,7 @@ pathologycompositionClass <- R6::R6Class(
                     private$.performCompositionRiskAnalysis(data, outcome_var, component_vars)
                 }, error = function(e) {
                     self$results$instructions$setContent(
-                        paste0("<p><strong>Composition Risk Analysis Error:</strong> ", e$message, "</p>")
+                        paste0("<p><strong>Composition Risk Analysis Error:</strong> ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
                     )
                 })
             }
@@ -85,7 +85,7 @@ pathologycompositionClass <- R6::R6Class(
                     private$.identifyOptimalCompositions(data, outcome_var, component_vars)
                 }, error = function(e) {
                     self$results$instructions$setContent(
-                        paste0("<p><strong>Optimal Composition Analysis Error:</strong> ", e$message, "</p>")
+                        paste0("<p><strong>Optimal Composition Analysis Error:</strong> ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
                     )
                 })
             }

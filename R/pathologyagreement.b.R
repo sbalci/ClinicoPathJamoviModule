@@ -60,11 +60,13 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 "NOTICE"
             )
 
+            # htmlEscape `message` so every .addWarning(...) call site is safe by construction —
+            # defense-in-depth even though current callers pass only literals/numerics.
             html <- sprintf(
                 "<div style='padding: 12px; margin: 8px 0; border-radius: 4px; %s'>
                 <strong>%s %s:</strong> %s
                 </div>",
-                style, icon, label, message
+                style, icon, label, htmltools::htmlEscape(message)
             )
 
             private$.warnings[[length(private$.warnings) + 1]] <- list(
@@ -1008,7 +1010,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             summary_text <- sprintf(
                 "Agreement analysis between %s and %s was performed using %d paired observations. The methods showed %s (ICC = %.2f, Spearman r = %.2f) with %s. These results suggest that the methods are %s for clinical use in this context.",
-                self$options$dep1, self$options$dep2, n,
+                htmltools::htmlEscape(self$options$dep1), htmltools::htmlEscape(self$options$dep2), n,
                 agreement_level,
                 if (!is.na(icc_value)) icc_value else 0,
                 spearman_r,
@@ -1143,7 +1145,7 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # Generate report sentences
             methods_sentence <- sprintf(
                 "Agreement analysis between %s and %s was performed using %s.",
-                self$options$dep1, self$options$dep2, preset_context
+                htmltools::htmlEscape(self$options$dep1), htmltools::htmlEscape(self$options$dep2), preset_context
             )
 
             correlation_sentence <- sprintf(
@@ -1313,23 +1315,12 @@ pathologyagreementClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             if (is.null(dep1) || is.null(dep2))
                 return('')
 
-            # Escape dep1 variable
-            dep1_escaped <- if (!is.null(dep1) && !identical(make.names(dep1), dep1)) {
-                paste0('`', dep1, '`')
-            } else {
-                dep1
-            }
-
-            # Escape dep2 variable
-            dep2_escaped <- if (!is.null(dep2) && !identical(make.names(dep2), dep2)) {
-                paste0('`', dep2, '`')
-            } else {
-                dep2
-            }
-
-            # Build arguments
-            dep1_arg <- paste0('dep1 = "', dep1_escaped, '"')
-            dep2_arg <- paste0('dep2 = "', dep2_escaped, '"')
+            # Build arguments — jmvcore::format(..., context = "R") produces valid R string
+            # literals handling embedded quotes/backslashes (G-category codegen hygiene).
+            # Replaces a manual paste0('"', escaped, '"') wrap that corrupted the syntax pane
+            # for column names containing " or \.
+            dep1_arg <- paste0('dep1 = ', jmvcore::format("{}", dep1, context = "R"))
+            dep2_arg <- paste0('dep2 = ', jmvcore::format("{}", dep2, context = "R"))
 
             # Get other arguments using base helper (if available)
             args <- ''

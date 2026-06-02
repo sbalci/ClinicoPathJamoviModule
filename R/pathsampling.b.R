@@ -48,6 +48,16 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             paste(..., collapse = " ")
         },
 
+        # TODO (correctness): `.escapeVar` corrupts column references for unusual column names.
+        # `gsub("[^A-Za-z0-9_]+", "_", make.names(x))` produces an identifier that does NOT
+        # match the original column. For a column named "weight (g)", .escapeVar returns
+        # "weight__g__" → `data[["weight__g__"]]` looks up a column that doesn't exist →
+        # NULL → downstream analysis silently fails or errors with a confusing message.
+        # The fix is to use `jmvcore::composeTerm(x)` for formula contexts (which produces
+        # `\`weight (g)\`` — valid R syntax) and `data[[self$options$X]]` directly for indexing.
+        # Substantial refactor across all .escapeVar call sites (L445/L446/L459/L464/L2792/L2793/L3018/L3019/etc.).
+        # Accidentally provides defense-in-depth against D-category XSS (broken lookups never
+        # reach setContent), but breaks the analysis for legitimate non-identifier column names.
         # Utility function to escape variable names with special characters
         .escapeVar = function(x) {
             if (is.null(x) || length(x) == 0) return(NULL)
@@ -715,8 +725,16 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 interpretText$setContent(warningHtml)
             }
 
-            # Set seed if requested
+            # Set seed if requested — save and restore global RNG state so subsequent
+            # random draws elsewhere in the user's session are not affected by our seed.
             if (self$options$setSeed) {
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                                get(".Random.seed", envir = .GlobalEnv)
+                            else NULL
+                on.exit({
+                    if (!is.null(old_seed))
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }, add = TRUE)
                 set.seed(self$options$seedValue)
             }
 
@@ -3155,7 +3173,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                             }, error = function(e) {
                                 betaBinomNotes <- c(betaBinomNotes,
-                                    sprintf(" VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", e$message))
+                                    sprintf(" VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", htmltools::htmlEscape(conditionMessage(e))))
                                 modelRejected <- TRUE
                             })
                         }
@@ -4378,6 +4396,15 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Note: In a full Jamovi implementation, this would need to be mapped back to original rows
                 # or output via a specific Output object. Here we execute the logic to ensure correctness.
                 
+                # TODO (stub + security future-proof): `enhanced_data` is computed here but
+                # never returned, stored on private fields, or written to any result output —
+                # dead/stub feature. `self$options$appendPrefix` is an OptionString (HIGH
+                # attacker-controlled free text) flowing into column-name construction via
+                # `paste0(prefix, "cumulative_prob_", i)` etc. inside .appendCalculatedVariables.
+                # If a future maintainer wires this up to a result pane, user-supplied
+                # `appendPrefix = "<script>alert(1)</script>"` would land in column-name strings
+                # that flow into HTML. Either remove this dead block or htmlEscape the prefix
+                # at the .appendCalculatedVariables boundary before column-name construction.
                 enhanced_data <- private$.appendCalculatedVariables(
                     data = data.frame(row_id = 1:length(firstDetectionData)), # Dummy df for context
                     q_estimate = pEstimate,

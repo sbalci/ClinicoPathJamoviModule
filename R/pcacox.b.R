@@ -170,6 +170,21 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
+            # TODO (data hygiene): 17 private fields declared at L11-29 (clean_data, time_var,
+            # status_var, predictors, clinical_vars, X_matrix, pca_result, pc_scores, loadings,
+            # eigenvalues, prop_variance, cumul_variance, selected_components, cox_model,
+            # cox_data, risk_scores, risk_groups, cv_scores, ...) persist across .run() calls.
+            # If .run() early-returns at L143 (nonPositiveTime), L150 (noEvents), or L162
+            # (insufficientData) BEFORE reaching these assignments, prior run's data lingers.
+            # Defense-in-depth: reset all 17 fields to NULL at the very top of .run() (mirrors
+            # outbreakanalysis.b.R:84-100 10-field-reset pattern). No security exploit path
+            # (all downstream consumers re-check state or write to type:text Tables).
+            # TODO (correctness/reproducibility): no set.seed anywhere in this file even though
+            # the analysis uses cv_folds, bootstrap_validation, and permutation_test (all consume
+            # RNG via sample()). Results are non-deterministic across runs of same data. Add
+            # a user-configurable `seed` option to .a.yaml and wrap with on.exit({restore})
+            # save-restore pattern from optimalcutpoint.b.R:765-772.
+
             # Store for use in other methods
             private$clean_data <- clean_data
             private$time_var <- time_var
@@ -288,8 +303,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 
                 # Extract predictor matrix using model.matrix to handle factors
-                formula_str <- paste("~ -1 +", paste(private$predictors, collapse = " + "))
-                X <- model.matrix(as.formula(formula_str), data = private$clean_data)
+                # composeTerms backtick-escapes user-supplied predictor names (Defense 1);
+                # jmvcore::asFormula allow-list validates the RHS (Defense 2 — closes C1 RCE).
+                formula_str <- paste("~ -1 +", paste(jmvcore::composeTerms(as.list(private$predictors)), collapse = " + "))
+                X <- model.matrix(jmvcore::asFormula(formula_str), data = private$clean_data)
                 
                 # Handle missing values
                 if (any(is.na(X))) {
@@ -333,7 +350,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'pcaError', jmvcore::NoticeType$ERROR,
-                    sprintf("PCA analysis failed: %s", e$message),
+                    sprintf("PCA analysis failed: %s", htmltools::htmlEscape(conditionMessage(e))),
                     position = 1
                 )
             })
@@ -501,7 +518,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'superpcFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("Supervised PCA failed: %s. Using standard PCA.", e$message)
+                    sprintf("Supervised PCA failed: %s. Using standard PCA.", htmltools::htmlEscape(conditionMessage(e)))
                 )
                 private$.performStandardPCA()
             })
@@ -546,7 +563,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }, error = function(e) {
                     private$.insertNotice(
                         'sparsePCAFailed', jmvcore::NoticeType$WARNING,
-                        sprintf("Sparse PCA failed: %s. Using standard PCA instead.", e$message)
+                        sprintf("Sparse PCA failed: %s. Using standard PCA instead.", htmltools::htmlEscape(conditionMessage(e)))
                     )
                     private$.performStandardPCA()
                 })
@@ -593,7 +610,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }, error = function(e) {
                     private$.insertNotice(
                         'kernelPCAFailed', jmvcore::NoticeType$WARNING,
-                        sprintf("Kernel PCA failed: %s. Using standard PCA instead.", e$message)
+                        sprintf("Kernel PCA failed: %s. Using standard PCA instead.", htmltools::htmlEscape(conditionMessage(e)))
                     )
                     private$.performStandardPCA()
                 })
@@ -697,9 +714,11 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             train_pcs
                         )
                         
-                        cox_formula <- as.formula(paste("Surv(time, status) ~", 
-                                                      paste(colnames(train_pcs), collapse = " + ")))
-                        
+                        # PC names are internal ("PC1"/"PC2"/...); no composeTerms needed.
+                        # .asSurvivalFormula provides Defense 2 (Surv allow-list for jamovi 2.7.27+).
+                        cox_formula <- .asSurvivalFormula(paste("Surv(time, status) ~",
+                                                              paste(colnames(train_pcs), collapse = " + ")))
+
                         cox_model <- survival::coxph(cox_formula, data = cox_data)
                         
                         # Predict on test data
@@ -735,7 +754,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'cvSelectionFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("CV component selection failed: %s. Using default %d components.", e$message, min(5, ncol(private$pc_scores)))
+                    sprintf("CV component selection failed: %s. Using default %d components.", htmltools::htmlEscape(conditionMessage(e)), min(5, ncol(private$pc_scores)))
                 )
                 return(min(5, ncol(private$pc_scores)))
             })
@@ -781,11 +800,14 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 # Create formula
+                # PC names ("PC1"/"PC2"/...) are internal — no escape needed.
+                # composeTerms backtick-escapes user-supplied clinical_vars (Defense 1).
+                # .asSurvivalFormula provides Defense 2 (Surv allow-list).
                 pc_vars <- colnames(selected_pcs)
-                all_vars <- c(pc_vars, private$clinical_vars)
-                
-                cox_formula <- as.formula(paste("Surv(time, status) ~", 
-                                              paste(all_vars, collapse = " + ")))
+                all_vars_escaped <- c(pc_vars, jmvcore::composeTerms(as.list(private$clinical_vars)))
+
+                cox_formula <- .asSurvivalFormula(paste("Surv(time, status) ~",
+                                              paste(all_vars_escaped, collapse = " + ")))
                 
                 # Fit Cox model
                 cox_model <- survival::coxph(cox_formula, data = cox_data)
@@ -803,7 +825,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'coxFitError', jmvcore::NoticeType$ERROR,
-                    sprintf("Cox model fitting failed: %s", e$message),
+                    sprintf("Cox model fitting failed: %s", htmltools::htmlEscape(conditionMessage(e))),
                     position = 1
                 )
             })
@@ -894,7 +916,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'perfCalcFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("Performance calculation failed: %s", e$message)
+                    sprintf("Performance calculation failed: %s", htmltools::htmlEscape(conditionMessage(e)))
                 )
             })
         },
@@ -953,7 +975,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'featureImportanceError', jmvcore::NoticeType$WARNING,
-                    sprintf("Feature importance calculation failed: %s", e$message)
+                    sprintf("Feature importance calculation failed: %s", htmltools::htmlEscape(conditionMessage(e)))
                 )
             })
         },
@@ -1047,7 +1069,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'riskScoreFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("Risk score calculation failed: %s", e$message)
+                    sprintf("Risk score calculation failed: %s", htmltools::htmlEscape(conditionMessage(e)))
                 )
             })
         },
@@ -1117,8 +1139,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         pcs_k
                     )
                     pc_names_k <- colnames(pcs_k)
-                    all_vars_k <- c(pc_names_k, private$clinical_vars)
-                    fml_k <- as.formula(paste("Surv(time, status) ~", paste(all_vars_k, collapse = " + ")))
+                    # PC names internal; composeTerms on user clinical_vars (Defense 1).
+                    # .asSurvivalFormula provides Defense 2 (Surv allow-list).
+                    all_vars_k_escaped <- c(pc_names_k, jmvcore::composeTerms(as.list(private$clinical_vars)))
+                    fml_k <- .asSurvivalFormula(paste("Surv(time, status) ~", paste(all_vars_k_escaped, collapse = " + ")))
 
                     if (length(private$clinical_vars) > 0) {
                         clin_data <- private$clean_data[, private$clinical_vars, drop = FALSE]
@@ -1305,7 +1329,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'pathwayError', jmvcore::NoticeType$WARNING,
-                    sprintf("Feature cluster analysis could not be completed: %s", e$message)
+                    sprintf("Feature cluster analysis could not be completed: %s", htmltools::htmlEscape(conditionMessage(e)))
                 )
             })
         },

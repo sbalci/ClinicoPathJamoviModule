@@ -103,8 +103,17 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint
             private$.checkpoint()
 
-            # Set Seed for Reproducibility
+            # Set Seed for Reproducibility — save and restore global RNG state so the
+            # permutation test's seed doesn't propagate to subsequent random draws elsewhere
+            # in the user's session. H4 hygiene fix mirrors optimalcutpoint.b.R:765-772.
             if (!is.null(self$options$seed)) {
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                                get(".Random.seed", envir = .GlobalEnv)
+                            else NULL
+                on.exit({
+                    if (!is.null(old_seed))
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }, add = TRUE)
                 set.seed(self$options$seed)
             }
 
@@ -140,8 +149,9 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
             pca_data <- mydata[, vars, drop = FALSE]
 
-            # Remove missing values
-            pca_data <- na.omit(pca_data)
+            # Remove missing values — jmvcore::naOmit preserves jamovi column attributes
+            # (measureType / values / labels) that base na.omit drops.
+            pca_data <- jmvcore::naOmit(pca_data)
 
             # CRITICAL FIX: Validate numeric inputs (prevent silent factor coercion)
             non_numeric <- sapply(pca_data, function(x) !is.numeric(x))
@@ -153,7 +163,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('Non-numeric variables detected: %s. PCA requires numeric variables only. Factors and character variables cannot be used.',
-                    paste(non_numeric_vars, collapse = ', ')))
+                    paste(htmltools::htmlEscape(non_numeric_vars), collapse = ', ')))
                 self$results$insert(999, notice)
                 return()
             }
@@ -215,7 +225,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = jmvcore::NoticeType$ERROR
                 )
                 notice$setContent(sprintf('Variables with zero variance detected: %s. Please remove constant variables.',
-                    paste(zero_var_names, collapse = ', ')))
+                    paste(htmltools::htmlEscape(zero_var_names), collapse = ', ')))
                 self$results$insert(999, notice)
                 return()
             }

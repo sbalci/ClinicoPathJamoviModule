@@ -68,6 +68,23 @@ ppvClass <- R6::R6Class(
                 warning("High p-hacking rate (>50%) detected. This represents a severely compromised research environment.")
             }
 
+            # Save & restore RNG state — the cell-distribution sample() call
+            # inside suppressWarnings() below consumes RNG to allocate fractional
+            # leftover counts across the 4 confusion-matrix cells. Without this
+            # wrapper, the user's `.Random.seed` would shift on every ppv
+            # invocation, breaking reproducibility of any subsequent jamovi
+            # analysis that uses RNG. Mirrors optimalcutpoint.b.R:765-772.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                get(".Random.seed", envir = .GlobalEnv)
+            } else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
+
             suppressWarnings({
 
                 c <- 500		# number of studies in plots

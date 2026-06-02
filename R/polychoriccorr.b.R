@@ -49,7 +49,11 @@ polychoriccorrClass <- R6::R6Class(
                 frequencies <- self$results$frequencies
                 for (i in 1:(n_vars - 1)) {
                     for (j in (i + 1):n_vars) {
-                        pair_name <- paste(vars[i], "×", vars[j])
+                        # htmlEscape both names — pair_name becomes the Array
+                        # item key and the .r.yaml `title: $key` substitution
+                        # renders it as live HTML in the panel heading.
+                        pair_name <- paste(htmltools::htmlEscape(vars[i]), "×",
+                                           htmltools::htmlEscape(vars[j]))
                         frequencies$addItem(key = pair_name)
                     }
                 }
@@ -250,18 +254,25 @@ polychoriccorrClass <- R6::R6Class(
                 for (j in (i + 1):length(vars)) {
                     var1 <- vars[i]
                     var2 <- vars[j]
-                    pair_name <- paste(var1, "×", var2)
-                    
+                    # Same shape as the producer in .init() so frequencies$get()
+                    # matches the key written there.
+                    pair_name <- paste(htmltools::htmlEscape(var1), "×",
+                                       htmltools::htmlEscape(var2))
+
                     # Create frequency table
                     ct <- table(data[[var1]], data[[var2]])
                     
                     # Get the frequency table object
                     freq_table <- frequencies$get(key = pair_name)
                     
-                    # Add columns for each level of var2
+                    # Add columns for each level of var2.
+                    # title is rendered as HTML; name is a programmatic key used
+                    # at the values-list lookup below — leave it unwrapped.
                     col_names <- colnames(ct)
                     for (col_name in col_names) {
-                        freq_table$addColumn(name = col_name, title = col_name, type = 'integer')
+                        freq_table$addColumn(name = col_name,
+                                             title = htmltools::htmlEscape(col_name),
+                                             type = 'integer')
                     }
                     freq_table$addColumn(name = 'total', title = 'Total', type = 'integer')
                     

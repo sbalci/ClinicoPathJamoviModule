@@ -95,14 +95,16 @@ patientreportedClass <- R6::R6Class(
                 required_packages <- c(required_packages, "mice")
             }
             
-            for (pkg in required_packages) {
-                if (!requireNamespace(pkg, quietly = TRUE)) {
-                    tryCatch({
-                        install.packages(pkg, repos = "https://cran.rstudio.com/")
-                    }, error = function(e) {
-                        self$results$scale_overview$setNote("error", paste("Failed to install package:", pkg))
-                    })
-                }
+            # Surface missing dependencies to the user without modifying their library at
+            # analysis time. Silent `install.packages()` makes an unconsented network call,
+            # triggers .onLoad/.onAttach hooks (potential code-execution surface via supply
+            # chain), and changes system state during what should be a read-only analysis.
+            missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
+            if (length(missing_packages) > 0) {
+                jmvcore::reject(
+                    "The following required packages are missing: {}. Please install them via install.packages() before running this analysis.",
+                    paste(missing_packages, collapse = ", ")
+                )
             }
         },
         

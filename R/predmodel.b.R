@@ -26,6 +26,13 @@ predmodelClass <- if (requireNamespace('jmvcore'))
 
             # run ----
             .run = function() {
+
+                # Reset cached state so early-return error paths (e.g. L73
+                # reject for non-binary outcome) don't leave stale plots /
+                # coefficients from a previous valid run.
+                private$.model <- NULL
+                private$.data  <- NULL
+
                 if (is.null(self$options$outcome) || is.null(self$options$predictors) ||
                     length(self$options$predictors) == 0) {
                     return()
@@ -70,7 +77,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 # Ensure outcome is binary factor
                 mydata[[outcome]] <- as.factor(mydata[[outcome]])
                 if (nlevels(mydata[[outcome]]) != 2) {
-                    stop("Outcome must have exactly 2 levels")
+                    jmvcore::reject("Outcome must have exactly 2 levels")
                 }
 
                 private$.data <- mydata
@@ -81,9 +88,22 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 outcome <- self$options$outcome
                 predictors <- self$options$predictors
 
-                # Build formula
-                formula_str <- paste(outcome, "~", paste(predictors, collapse = " + "))
-                formula <- as.formula(formula_str)
+                # Build formula — Defense 1: composeTerm/Terms backtick-escapes
+                # user column names safely (handles names containing backticks
+                # or special chars). Defense 2: jmvcore::asFormula allow-list-
+                # validates the parsed formula against jamovi 2.7.27+'s
+                # hardened as.formula, blocking RHS code injection via crafted
+                # column names like `stop(system("ls"))`.
+                formula <- jmvcore::asFormula(paste0(
+                    jmvcore::composeTerm(outcome), " ~ ",
+                    jmvcore::composeTerms(as.list(predictors))
+                ))
+                # deparse1 emits user column names verbatim inside backticks.
+                # Backticks are R-syntax armor but NOT HTML armor — wrap with
+                # htmltools::htmlEscape so a predictor named `<img src=x
+                # onerror=alert(1)>` doesn't render as live HTML when
+                # formula_str lands inside the <pre> block below.
+                formula_str <- htmltools::htmlEscape(deparse1(formula))
 
                 # Fit logistic regression
                 model <- glm(formula, data = private$.data, family = binomial(link = "logit"))
@@ -276,8 +296,27 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 outcome <- self$options$outcome
                 predictors <- self$options$predictors
 
-                formula_str <- paste(outcome, "~", paste(predictors, collapse = " + "))
-                formula <- as.formula(formula_str)
+                # Save & restore RNG state so the bootstrap sample() loop below
+                # doesn't leak `.Random.seed` mutations into the user's session.
+                # No set.seed in this file — without this wrapper, every call
+                # to .bootstrapValidation shifts the user's RNG by
+                # min(n_boot, 50) draws. Mirrors optimalcutpoint.b.R:765-772.
+                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                    get(".Random.seed", envir = .GlobalEnv)
+                } else NULL
+                on.exit({
+                    if (is.null(old_seed)) {
+                        suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                    } else {
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                    }
+                }, add = TRUE)
+
+                # Same Defense 1 + Defense 2 shape as .fitModel().
+                formula <- jmvcore::asFormula(paste0(
+                    jmvcore::composeTerm(outcome), " ~ ",
+                    jmvcore::composeTerms(as.list(predictors))
+                ))
 
                 y_actual <- as.numeric(private$.data[[outcome]]) - 1
 

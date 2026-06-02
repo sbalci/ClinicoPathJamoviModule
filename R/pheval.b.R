@@ -214,7 +214,7 @@ phevalClass <- R6::R6Class(
             covariate_cols <- setdiff(names(data), c("time", "event"))
             for (col in covariate_cols) {
                 if (length(unique(data[[col]])) < 2) {
-                    jmvcore::reject(paste("Covariate", col, "must have at least 2 unique values"))
+                    jmvcore::reject("Covariate {} must have at least 2 unique values", col)
                     return(FALSE)
                 }
             }
@@ -228,15 +228,20 @@ phevalClass <- R6::R6Class(
                 
                 # Identify covariate columns
                 covariate_cols <- setdiff(names(data), c("time", "event"))
-                
-                # Fit Cox model
-                cox_formula <- as.formula(paste("survival::Surv(time, event) ~", paste(covariate_cols, collapse = " + ")))
+
+                # Fit Cox model — Defense 1: composeTerms backtick-escapes user
+                # column names; Defense 2: .asSurvivalFormula allow-list-validates
+                # the result against jamovi 2.7.27+'s hardened as.formula.
+                cox_formula <- .asSurvivalFormula(paste0(
+                    "Surv(time, event) ~ ",
+                    jmvcore::composeTerms(as.list(covariate_cols))
+                ))
                 cox_model <- survival::coxph(cox_formula, data = data)
                 
                 return(cox_model)
                 
             }, error = function(e) {
-                jmvcore::reject(paste("Error fitting Cox model:", e$message))
+                jmvcore::reject("Error fitting Cox model: {}", e$message)
                 return(NULL)
             })
         },
@@ -319,7 +324,7 @@ phevalClass <- R6::R6Class(
                 return(results)
                 
             }, error = function(e) {
-                jmvcore::reject(paste("Error in proportional hazards testing:", e$message))
+                jmvcore::reject("Error in proportional hazards testing: {}", e$message)
                 return(NULL)
             })
         },
@@ -621,7 +626,7 @@ phevalClass <- R6::R6Class(
             html <- paste0(html, "<tr><th>Covariate</th><th>β</th><th>SE(β)</th><th>HR</th><th>95% CI</th><th>p-value</th></tr>")
             
             for (i in 1:nrow(coef_table)) {
-                covariate <- rownames(coef_table)[i]
+                covariate <- htmltools::htmlEscape(rownames(coef_table)[i])
                 beta <- sprintf("%.4f", coef_table[i, "coef"])
                 se <- sprintf("%.4f", coef_table[i, "se(coef)"])
                 hr <- sprintf("%.3f", coef_table[i, "exp(coef)"])

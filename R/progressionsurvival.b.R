@@ -64,7 +64,24 @@ progressionsurvivalClass <- R6::R6Class(
         },
         
         .run = function() {
-            
+
+            # Reset cached state so early-return error paths (e.g.
+            # .validatePFSData jmvcore::reject for NAs / negative times /
+            # bad encoding / small N at L199/L203/L208/L214/L219) don't
+            # leave stale plots, tables, and clinical interpretation from
+            # a previous valid run. Placed BEFORE the option-missing guard
+            # so cache is wiped even on the no-option early-return path.
+            private$.pfs_data                <- NULL
+            private$.survival_fits           <- NULL
+            private$.treatment_effects       <- NULL
+            private$.competing_risks_results <- NULL
+            private$.landmark_results        <- NULL
+            private$.subgroup_results        <- NULL
+            private$.sensitivity_results     <- NULL
+            private$.biomarker_results       <- NULL
+            private$.progression_patterns    <- NULL
+            private$.clinical_assessment     <- NULL
+
             if (is.null(self$options$time_var) || is.null(self$options$progression_var)) {
                 return()
             }
@@ -196,27 +213,27 @@ progressionsurvivalClass <- R6::R6Class(
             
             # Check for missing values
             if (any(is.na(data$time))) {
-                stop("Missing values found in time variable")
+                jmvcore::reject("Missing values found in time variable")
             }
             
             if (any(is.na(data$progression))) {
-                stop("Missing values found in progression indicator")
+                jmvcore::reject("Missing values found in progression indicator")
             }
             
             # Check for negative times
             if (any(data$time < 0, na.rm = TRUE)) {
-                stop("Negative time values found. PFS time must be non-negative")
+                jmvcore::reject("Negative time values found. PFS time must be non-negative")
             }
             
             # Check progression indicator coding
             progression_values <- unique(data$progression[!is.na(data$progression)])
             if (!all(progression_values %in% c(0, 1))) {
-                stop("Progression indicator must be coded as 0 (censored) or 1 (progression)")
+                jmvcore::reject("Progression indicator must be coded as 0 (censored) or 1 (progression)")
             }
             
             # Minimum sample size check
             if (nrow(data) < 10) {
-                stop("Insufficient sample size for PFS analysis (minimum 10 patients required)")
+                jmvcore::reject("Insufficient sample size for PFS analysis (minimum 10 patients required)")
             }
             
             # Event rate check
@@ -294,10 +311,30 @@ progressionsurvivalClass <- R6::R6Class(
                 private$.calculateSurvivalEstimates(km_fit, groups)
                 
             }, error = function(e) {
+                # TODO (UX / log-noise): SEVEN tryCatch error handlers in this
+                # file emit `message("... failed: ", e$message)` to stderr/
+                # console — here L324 plus L486 (treatment effect), L541
+                # (competing risks), L640 (landmark), L753 (subgroup), L871
+                # (PFS curves plot), and one more at .plot_pfs_curves tryCatch.
+                # FOUR additional placeholder stubs at L760 (biomarker), L766
+                # (progression patterns), L772 (sensitivity), L778 (interim)
+                # plus FOUR plot stubs at L878/L884/L890/L896 also emit
+                # message("X placeholder") with no real implementation.
+                # Together these (a) silently swallow failures so the user
+                # sees empty tables with no explanation, and (b) leak user
+                # column-name fragments to logs when underlying coxph /
+                # cuminc / crr / survminer errors echo them.
+                # Convert error handlers to a `.addNotice` pattern (mirror
+                # R/waterfall.b.R, which is the canonical reference — note
+                # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md does not currently
+                # exist in the repo despite CLAUDE.md citing it) with
+                # `htmltools::htmlEscape(conditionMessage(e))` when this file
+                # gets a UX pass. Replace placeholder stubs with real
+                # implementations or remove the toggles from .a.yaml entirely.
                 message("Survival estimation failed: ", e$message)
             })
         },
-        
+
         .calculateSurvivalEstimates = function(km_fit, groups) {
             
             survival_table <- self$results$survival_estimates
@@ -683,8 +720,16 @@ progressionsurvivalClass <- R6::R6Class(
                     
                     subgroup_levels <- levels(data[[var]])
                     
-                    # Test for interaction
-                    interaction_formula <- as.formula(paste("surv_obj ~ treatment *", var))
+                    # Test for interaction — Defense 1: composeTerm backtick-
+                    # escapes `var` (user column name from stratification_vars).
+                    # Defense 2: jmvcore::asFormula allow-list-validates against
+                    # jamovi 2.7.27+'s hardened as.formula. `surv_obj` is an
+                    # in-scope local; `treatment` is the safe internal name
+                    # pfs_data$treatment (assigned at L154 from the user's
+                    # treatment_var, not the user's column name).
+                    interaction_formula <- jmvcore::asFormula(paste0(
+                        "surv_obj ~ treatment * ", jmvcore::composeTerm(var)
+                    ))
                     interaction_cox <- coxph(interaction_formula, data = data)
                     p_interaction <- summary(interaction_cox)$coefficients[paste0("treatment", levels(data$treatment)[2], ":", var, subgroup_levels[-1]), "Pr(>|z|)"]
                     
@@ -744,8 +789,27 @@ progressionsurvivalClass <- R6::R6Class(
         },
         
         .assessClinicalSignificance = function() {
-            
-            # Assess clinical significance of findings
+
+            # Assess clinical significance of findings.
+            #
+            # This function depends on `private$.treatment_effects` which is
+            # populated by `.analyzeTreatmentEffects()` at L478 — itself gated
+            # on `self$options$treatment_effect_estimation` (see L101). After
+            # the L72-83 cache reset, `.treatment_effects` is NULL at start of
+            # every .run(); if the user enables `clinical_significance` but
+            # NOT `treatment_effect_estimation`, this function silently
+            # short-circuits leaving the clinical_significance_table empty.
+            #
+            # TODO (UX): enforce this option dependency via .a.yaml `enable:
+            # (treatment_effect_estimation)` on the clinical_significance
+            # option, OR populate a placeholder row explaining the
+            # prerequisite. For now the silent early-return is preserved to
+            # avoid surfacing stale-cache data from a prior run (the
+            # regression the cache-reset fix intentionally closed).
+            if (!isTRUE(self$options$treatment_effect_estimation) ||
+                is.null(self$options$treatment_var)) {
+                return()
+            }
             treatment_effects <- private$.treatment_effects
             if (is.null(treatment_effects)) return()
             

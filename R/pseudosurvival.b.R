@@ -44,8 +44,8 @@ pseudosurvivalClass <- R6::R6Class(
 
             self$results$instructions$setContent(
                 paste0("<h3>Pseudo-Observations Survival Analysis Ready</h3>
-                <p><b>Time Variable:</b> ", time_var, "</p>
-                <p><b>Status Variable:</b> ", status_var, "</p>
+                <p><b>Time Variable:</b> ", htmltools::htmlEscape(time_var), "</p>
+                <p><b>Status Variable:</b> ", htmltools::htmlEscape(status_var), "</p>
                 <p><b>Analysis Type:</b> ", stringr::str_to_title(gsub("_", " ", analysis_type)), "</p>
                 <p><b>Regression Method:</b> ", stringr::str_to_title(gsub("_", " ", self$options$regression_method)), "</p>
                 <p>Click <b>Results</b> below to view the analysis results.</p>")
@@ -71,7 +71,7 @@ pseudosurvivalClass <- R6::R6Class(
             if (length(missing_vars) > 0) {
                 self$results$pseudo_summary$setContent(
                     paste("Error: The following required variables were not found:",
-                          paste(missing_vars, collapse = ", "))
+                          paste(htmltools::htmlEscape(missing_vars), collapse = ", "))
                 )
                 return()
             }
@@ -89,7 +89,7 @@ pseudosurvivalClass <- R6::R6Class(
                     if (length(missing_covs) > 0) {
                         self$results$pseudo_summary$setContent(
                             paste("Error: The following covariates were not found:",
-                                  paste(missing_covs, collapse = ", "))
+                                  paste(htmltools::htmlEscape(missing_covs), collapse = ", "))
                         )
                         return()
                     }
@@ -121,7 +121,7 @@ pseudosurvivalClass <- R6::R6Class(
                 private$.performPseudoAnalysis(analysis_data, time_var, status_var, covariates)
 
             }, error = function(e) {
-                self$results$pseudo_summary$setContent(paste("Analysis error:", e$message))
+                self$results$pseudo_summary$setContent(paste("Analysis error:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
 
@@ -163,7 +163,7 @@ pseudosurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                self$results$pseudo_summary$setContent(paste("Pseudo-observation analysis error:", e$message))
+                self$results$pseudo_summary$setContent(paste("Pseudo-observation analysis error:", htmltools::htmlEscape(conditionMessage(e))))
             })
         },
 
@@ -215,7 +215,7 @@ pseudosurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Survival probability analysis error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Survival probability analysis error: ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
             })
 
             self$results$survival_probability_results$setContent(html)
@@ -286,7 +286,7 @@ pseudosurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>RMST analysis error: ", e$message, "</p>")
+                html <- paste0(html, "<p>RMST analysis error: ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
             })
 
             self$results$rmst_analysis$setContent(html)
@@ -300,9 +300,17 @@ pseudosurvivalClass <- R6::R6Class(
 
             tryCatch({
 
-                # Create design matrix
+                # Create design matrix — Defense 1: composeTerms backtick-
+                # escapes user column names safely. Defense 2: asFormula
+                # allow-list-validates against jamovi 2.7.27+'s hardened
+                # as.formula, blocking C1 RCE via crafted column names.
                 if (length(covariates) > 0) {
-                    X <- model.matrix(as.formula(paste("~", paste(covariates, collapse = " + "))), data = analysis_data)
+                    X <- model.matrix(
+                        jmvcore::asFormula(paste0(
+                            "~ ", jmvcore::composeTerms(as.list(covariates))
+                        )),
+                        data = analysis_data
+                    )
                 } else {
                     X <- matrix(1, nrow = nrow(analysis_data), ncol = 1)
                 }
@@ -362,7 +370,11 @@ pseudosurvivalClass <- R6::R6Class(
                         if (regression_method == "ols") {
                             # Ordinary Least Squares
                             if (length(covariates) > 0) {
-                                reg_formula <- as.formula(paste("pseudo_surv ~", paste(covariates, collapse = " + ")))
+                                # Same Defense 1 + Defense 2 shape as L305.
+                                reg_formula <- jmvcore::asFormula(paste0(
+                                    "pseudo_surv ~ ",
+                                    jmvcore::composeTerms(as.list(covariates))
+                                ))
                                 model <- lm(reg_formula, data = regression_data)
                             } else {
                                 model <- lm(pseudo_surv ~ 1, data = regression_data)
@@ -391,7 +403,10 @@ pseudosurvivalClass <- R6::R6Class(
                             html <- paste0(html, "<tr><th>Variable</th><th>Coefficient</th><th>SE</th><th>t-value</th><th>p-value</th><th>95% CI</th><th>Clinical Interpretation</th></tr>")
                             
                             for (i in 1:nrow(coef_table)) {
-                                var_name <- rownames(coef_table)[i]
+                                # htmlEscape at assignment — var_name reaches `<td>` HTML at L428.
+                                # The L418 == "(Intercept)" string-equality check still works since
+                                # htmlEscape is identity on plain ASCII.
+                                var_name <- htmltools::htmlEscape(rownames(coef_table)[i])
                                 estimate <- coef_table[i, "Estimate"]
                                 se <- coef_table[i, "Std. Error"]
                                 t_val <- coef_table[i, "t value"]
@@ -443,8 +458,12 @@ pseudosurvivalClass <- R6::R6Class(
                                 regression_data$id <- seq_len(nrow(regression_data))
                                 
                                 if (length(covariates) > 0) {
-                                    gee_formula <- as.formula(paste("pseudo_surv ~", paste(covariates, collapse = " + ")))
-                                    gee_model <- geepack::geeglm(gee_formula, data = regression_data, 
+                                    # Same Defense 1 + Defense 2 shape as L305.
+                                    gee_formula <- jmvcore::asFormula(paste0(
+                                        "pseudo_surv ~ ",
+                                        jmvcore::composeTerms(as.list(covariates))
+                                    ))
+                                    gee_model <- geepack::geeglm(gee_formula, data = regression_data,
                                                                id = id, family = gaussian(), corstr = "independence")
                                 } else {
                                     gee_model <- geepack::geeglm(pseudo_surv ~ 1, data = regression_data, 
@@ -466,7 +485,8 @@ pseudosurvivalClass <- R6::R6Class(
                                 html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>Robust SE</th><th>Wald Z</th><th>p-value</th></tr>")
                                 
                                 for (i in 1:nrow(gee_coef)) {
-                                    var_name <- rownames(gee_coef)[i]
+                                    # htmlEscape at assignment — reaches `<td>` HTML below.
+                                    var_name <- htmltools::htmlEscape(rownames(gee_coef)[i])
                                     estimate <- round(gee_coef[i, "Estimate"], 4)
                                     se <- round(gee_coef[i, "Std.err"], 4)
                                     z_val <- round(gee_coef[i, "Wald"], 3)
@@ -508,7 +528,7 @@ pseudosurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Direct regression error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Direct regression error: ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
             })
 
             self$results$regression_results$setContent(html)
@@ -545,7 +565,11 @@ pseudosurvivalClass <- R6::R6Class(
 
                 # Fit regression model
                 if (length(covariates) > 0) {
-                    reg_formula <- as.formula(paste("individual_rmst ~", paste(covariates, collapse = " + ")))
+                    # Same Defense 1 + Defense 2 shape as L305.
+                    reg_formula <- jmvcore::asFormula(paste0(
+                        "individual_rmst ~ ",
+                        jmvcore::composeTerms(as.list(covariates))
+                    ))
                     rmst_model <- lm(reg_formula, data = data.frame(individual_rmst = individual_rmst, analysis_data))
 
                     model_summary <- summary(rmst_model)
@@ -565,7 +589,10 @@ pseudosurvivalClass <- R6::R6Class(
                     html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>SE</th><th>t value</th><th>Pr(&gt;|t|)</th><th>Interpretation</th></tr>")
 
                     for (i in 1:nrow(coef_table)) {
-                        var_name <- rownames(coef_table)[i]
+                        # htmlEscape at assignment — reaches `<td>` HTML below.
+                        # The == "(Intercept)" check still works since htmlEscape
+                        # is identity on plain ASCII identifiers.
+                        var_name <- htmltools::htmlEscape(rownames(coef_table)[i])
                         estimate <- round(coef_table[i, "Estimate"], 4)
                         se <- round(coef_table[i, "Std. Error"], 4)
                         t_val <- round(coef_table[i, "t value"], 3)
@@ -596,7 +623,7 @@ pseudosurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>RMST regression error: ", e$message, "</p>")
+                html <- paste0(html, "<p>RMST regression error: ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
             })
 
             self$results$covariate_effects$setContent(html)
@@ -615,7 +642,13 @@ pseudosurvivalClass <- R6::R6Class(
                     group_var <- covariates[cat_covariates][1]
                     groups <- unique(analysis_data[[group_var]])
 
-                    html <- paste0(html, "<h4>RMST by ", group_var, "</h4>")
+                    # group_var (user column name) and `groups` (user factor labels)
+                    # reach the HTML builder below; escape once at the top so
+                    # both the heading and all per-row interpolations are safe.
+                    group_var_esc <- htmltools::htmlEscape(group_var)
+                    groups_esc <- htmltools::htmlEscape(as.character(groups))
+
+                    html <- paste0(html, "<h4>RMST by ", group_var_esc, "</h4>")
                     html <- paste0(html, "<table class='jamovi-table'>")
                     html <- paste0(html, "<tr><th>Group</th><th>N</th><th>Events</th><th>RMST</th><th>Difference from Reference</th></tr>")
 
@@ -661,7 +694,7 @@ pseudosurvivalClass <- R6::R6Class(
                         diff_from_ref <- if (i == 1) "Reference" else round(group_rmst - rmst_values[1], 3)
 
                         html <- paste0(html, "<tr>")
-                        html <- paste0(html, "<td>", group, "</td>")
+                        html <- paste0(html, "<td>", groups_esc[i], "</td>")
                         html <- paste0(html, "<td>", nrow(group_data), "</td>")
                         html <- paste0(html, "<td>", sum(group_data$status), "</td>")
                         html <- paste0(html, "<td>", round(group_rmst, 3), "</td>")
@@ -675,19 +708,19 @@ pseudosurvivalClass <- R6::R6Class(
                     if (length(groups) == 2) {
                         diff <- rmst_values[2] - rmst_values[1]
                         html <- paste0(html, "<h4>Statistical Comparison</h4>")
-                        html <- paste0(html, "<p><b>RMST Difference:</b> ", round(diff, 3), " (", groups[2], " - ", groups[1], ")</p>")
+                        html <- paste0(html, "<p><b>RMST Difference:</b> ", round(diff, 3), " (", groups_esc[2], " - ", groups_esc[1], ")</p>")
 
                         if (diff > 0) {
-                            interpretation <- paste(groups[2], "has longer restricted mean survival time than", groups[1])
+                            interpretation <- paste(groups_esc[2], "has longer restricted mean survival time than", groups_esc[1])
                         } else {
-                            interpretation <- paste(groups[1], "has longer restricted mean survival time than", groups[2])
+                            interpretation <- paste(groups_esc[1], "has longer restricted mean survival time than", groups_esc[2])
                         }
                         html <- paste0(html, "<p><b>Interpretation:</b> ", interpretation, "</p>")
                     }
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>RMST group comparison error: ", e$message, "</p>")
+                html <- paste0(html, "<p>RMST group comparison error: ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
             })
 
             self$results$group_comparisons$setContent(html)
@@ -753,7 +786,7 @@ pseudosurvivalClass <- R6::R6Class(
                 html <- paste0(html, "</table>")
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Summary generation error: ", e$message, "</p>")
+                html <- paste0(html, "<p>Summary generation error: ", htmltools::htmlEscape(conditionMessage(e)), "</p>")
             })
 
             self$results$pseudo_summary$setContent(html)

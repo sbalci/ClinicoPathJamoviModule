@@ -55,7 +55,7 @@ qualitycontrolClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .run = function() {
             # Check for required packages
             if (!requireNamespace("qcc", quietly = TRUE)) {
-                stop("Package 'qcc' is required for quality control charts but is not installed.")
+                jmvcore::reject("Package 'qcc' is required for quality control charts but is not installed.")
             }
             
             if (!requireNamespace("qualityTools", quietly = TRUE)) {

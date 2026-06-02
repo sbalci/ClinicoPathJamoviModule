@@ -44,7 +44,19 @@ permutationsurvivalClass <- R6::R6Class(
             prepared_data <- private$.prepareData()
             if (is.null(prepared_data)) return()
             
-            # Set seed for reproducibility
+            # Set seed for reproducibility — save & restore RNG state so we
+            # don't leak `.Random.seed` mutations into the user's session
+            # (the permutation loops below call sample() `n_permutations` times).
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                get(".Random.seed", envir = .GlobalEnv)
+            } else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
             set.seed(self$options$seed_value)
             
             # Perform permutation tests
@@ -558,7 +570,7 @@ permutationsurvivalClass <- R6::R6Class(
                 <b>Data Summary:</b>
                 <br>• Total Subjects: {n_total}
                 <br>• Total Events: {n_events} ({round(n_events/n_total*100, 1)}%)
-                <br>• Groups Compared: {paste(groups, collapse = ', ')}
+                <br>• Groups Compared: {paste(htmltools::htmlEscape(groups), collapse = ', ')}
                 <br><br>
                 <b>Test Results:</b>
                 <br>• Observed Statistic: {round(results$observed_statistic, 4)}
